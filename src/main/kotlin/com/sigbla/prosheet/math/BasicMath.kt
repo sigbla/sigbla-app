@@ -931,3 +931,5 @@ operator fun Number.rem(that: BigDecimal): Number {
         else -> throw UnsupportedOperationException()
     }
 }
+
+// TODO Number compare with same promotion rules

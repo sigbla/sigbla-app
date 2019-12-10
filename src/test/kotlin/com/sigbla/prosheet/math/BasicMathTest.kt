@@ -2,7 +2,10 @@ package com.sigbla.prosheet.math
 
 import com.sigbla.prosheet.internals.Registry
 import com.sigbla.prosheet.table.Table.Companion.newTable
-import com.sigbla.prosheet.math.*
+import com.sigbla.prosheet.table.BigDecimalCell
+import com.sigbla.prosheet.table.BigIntegerCell
+import com.sigbla.prosheet.table.DoubleCell
+import com.sigbla.prosheet.table.LongCell
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Test
@@ -18,6 +21,7 @@ class BasicMathTest {
 
     @Test
     fun basicTableMath() {
+        // Testing math between number and cell
         val t = newTable("basicTableMath")
 
         fun typeValue(clazz: KClass<*>): Int {
@@ -106,6 +110,66 @@ class BasicMathTest {
                 assertEquals(typePref(val1::class, t["Val2"][i].value!!::class), (val1 / t["Val2"][i])::class)
                 assertEquals(typePref(val1::class, t["Val2"][i].value!!::class), (val1 % t["Val2"][i])::class)
             }
+        }
+
+        listOf(1, 2L, 3F, 3.0, BigInteger.TWO, BigDecimal.TEN)
+
+        for (valAny in values) {
+            val val1: Number = valAny as Number
+
+            var idx = 0
+
+            assertEquals(LongCell::class, t["Val2"][idx]::class)
+            assertEquals(val1 + t["Val2"][idx].toLong(), val1 + t["Val2"][idx])
+            assertEquals(val1 - t["Val2"][idx].toLong(), val1 - t["Val2"][idx])
+            assertEquals(val1 * t["Val2"][idx].toLong(), val1 * t["Val2"][idx])
+            assertEquals(val1 / t["Val2"][idx].toLong(), val1 / t["Val2"][idx])
+            assertEquals(val1 % t["Val2"][idx].toLong(), val1 % t["Val2"][idx])
+
+            idx = 1
+
+            assertEquals(LongCell::class, t["Val2"][idx]::class)
+            assertEquals(val1 + t["Val2"][idx].toLong(), val1 + t["Val2"][idx])
+            assertEquals(val1 - t["Val2"][idx].toLong(), val1 - t["Val2"][idx])
+            assertEquals(val1 * t["Val2"][idx].toLong(), val1 * t["Val2"][idx])
+            assertEquals(val1 / t["Val2"][idx].toLong(), val1 / t["Val2"][idx])
+            assertEquals(val1 % t["Val2"][idx].toLong(), val1 % t["Val2"][idx])
+
+            idx = 2
+
+            assertEquals(DoubleCell::class, t["Val2"][idx]::class)
+            assertEquals(val1 + t["Val2"][idx].toDouble(), val1 + t["Val2"][idx])
+            assertEquals(val1 - t["Val2"][idx].toDouble(), val1 - t["Val2"][idx])
+            assertEquals(val1 * t["Val2"][idx].toDouble(), val1 * t["Val2"][idx])
+            assertEquals(val1 / t["Val2"][idx].toDouble(), val1 / t["Val2"][idx])
+            assertEquals(val1 % t["Val2"][idx].toDouble(), val1 % t["Val2"][idx])
+
+            idx = 3
+
+            assertEquals(DoubleCell::class, t["Val2"][idx]::class)
+            assertEquals(val1 + t["Val2"][idx].toDouble(), val1 + t["Val2"][idx])
+            assertEquals(val1 - t["Val2"][idx].toDouble(), val1 - t["Val2"][idx])
+            assertEquals(val1 * t["Val2"][idx].toDouble(), val1 * t["Val2"][idx])
+            assertEquals(val1 / t["Val2"][idx].toDouble(), val1 / t["Val2"][idx])
+            assertEquals(val1 % t["Val2"][idx].toDouble(), val1 % t["Val2"][idx])
+
+            idx = 4
+
+            assertEquals(BigIntegerCell::class, t["Val2"][idx]::class)
+            assertEquals(val1 + t["Val2"][idx].toBigInteger(), val1 + t["Val2"][idx])
+            assertEquals(val1 - t["Val2"][idx].toBigInteger(), val1 - t["Val2"][idx])
+            assertEquals(val1 * t["Val2"][idx].toBigInteger(), val1 * t["Val2"][idx])
+            assertEquals(val1 / t["Val2"][idx].toBigInteger(), val1 / t["Val2"][idx])
+            assertEquals(val1 % t["Val2"][idx].toBigInteger(), val1 % t["Val2"][idx])
+
+            idx = 5
+
+            assertEquals(BigDecimalCell::class, t["Val2"][idx]::class)
+            assertEquals(val1 + t["Val2"][idx].toBigDecimal(), val1 + t["Val2"][idx])
+            assertEquals(val1 - t["Val2"][idx].toBigDecimal(), val1 - t["Val2"][idx])
+            assertEquals(val1 * t["Val2"][idx].toBigDecimal(), val1 * t["Val2"][idx])
+            assertEquals(val1 / t["Val2"][idx].toBigDecimal(), val1 / t["Val2"][idx])
+            assertEquals(val1 % t["Val2"][idx].toBigDecimal(), val1 % t["Val2"][idx])
         }
     }
 }
