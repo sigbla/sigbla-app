@@ -1,15 +1,12 @@
 package com.sigbla.prosheet.internals
 
-import com.sigbla.prosheet.internals.bohmap.Binary;
 import com.sigbla.prosheet.internals.serialization.SerializationUtils
 import com.sigbla.prosheet.table.BaseTable
 import com.sigbla.prosheet.table.Cell
-import com.sigbla.prosheet.table.toCell
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
-import java.lang.UnsupportedOperationException
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -29,7 +26,7 @@ private const val LONG_CELL_TYPE = 3
 private const val BIGINTEGER_CELL_TYPE = 4
 private const val BIGDECIMAL_CELL_TYPE = 5
 
-internal fun Cell<*>.toBinary() : Binary {
+internal fun Cell<*>.toBinary() : ByteArray {
     // TODO: Format should be:
     // 1 byte: Type of cell
     // X bytes (optional): length of value
@@ -101,48 +98,7 @@ internal fun Cell<*>.toBinary() : Binary {
             else -> throw UnsupportedOperationException("Not supported: ${this.javaClass}")
         }
 
-        return Binary(baos.toByteArray())
-    }
-}
-
-internal fun Binary.toCell(index: Long) : Cell<*> {
-    ByteArrayInputStream(this.value).use {
-        bais ->
-        return when (val type = bais.read()) {
-            STRING_CELL_TYPE -> {
-                val length = readLength(bais)
-                val bytes = ByteArray(length)
-                bais.read(bytes)
-                bytes.toString(Charsets.UTF_8).toCell(index)
-            }
-            DOUBLE_CELL_TYPE -> {
-                val bytes = ByteArray(SerializationUtils.LONG_SIZE)
-                bais.read(bytes)
-                Double.fromBits(SerializationUtils.toLong(bytes)).toCell(index)
-            }
-            LONG_CELL_TYPE -> {
-                val bytes = ByteArray(SerializationUtils.LONG_SIZE)
-                bais.read(bytes)
-                SerializationUtils.toLong(bytes).toCell(index)
-            }
-            BIGINTEGER_CELL_TYPE -> {
-                val length = readLength(bais)
-                val bytes = ByteArray(length)
-                bais.read(bytes)
-                BigInteger(bytes).toCell(index)
-            }
-            BIGDECIMAL_CELL_TYPE -> {
-                val length = readLength(bais)
-                val b1 = ByteArray(length)
-                val b2 = ByteArray(SerializationUtils.INT_SIZE)
-
-                bais.read(b1)
-                bais.read(b2)
-
-                BigDecimal(BigInteger(b1), SerializationUtils.toInt(b2)).toCell(index)
-            }
-            else -> throw UnsupportedOperationException("Unknown type: $type")
-        }
+        return baos.toByteArray()
     }
 }
 

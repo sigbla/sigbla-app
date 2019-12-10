@@ -127,7 +127,7 @@ class BaseTable internal constructor(
         if (closed)
             throw InvalidTableException("Table is closed")
 
-        BaseColumnOnHeap(this, header, indices)
+        BaseColumn(this, header, indices)
     }
 
     override fun contains(header: ColumnHeader): Boolean = columns.containsKey(header)

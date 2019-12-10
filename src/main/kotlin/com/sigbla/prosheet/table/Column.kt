@@ -1,20 +1,13 @@
 package com.sigbla.prosheet.table
 
-import com.sigbla.prosheet.exceptions.AbortedException
 import com.sigbla.prosheet.exceptions.InvalidTableException
 import com.sigbla.prosheet.exceptions.ReadOnlyColumnException
-import com.sigbla.prosheet.internals.bohmap.BOHMap
-import com.sigbla.prosheet.internals.bohmap.BOHMapUtils
-import com.sigbla.prosheet.internals.bohmap.Binary
-import com.sigbla.prosheet.internals.toBinary
-import com.sigbla.prosheet.internals.toCell
 import com.sigbla.prosheet.table.IndexRelation.*
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentNavigableMap
-import java.util.concurrent.Semaphore
 import java.util.function.Consumer
 import kotlin.math.max
 
@@ -187,149 +180,7 @@ abstract class Column(val table: Table, val columnHeader: ColumnHeader) : Iterab
     // TODO Spliterator for decending order as well? Parallel?
 }
 
-class BaseColumnOffHeap internal constructor(table: Table, columnHeader: ColumnHeader, private val indices: ConcurrentNavigableMap<Long, Int>) : Column(table, columnHeader) {
-    internal val values = BOHMap(BOHMapUtils.tableSizeFor(10_000_000))
-
-    // TODO: Adjust permits to match max concurrent threads
-    private val permits = 100
-    private val semaphore = Semaphore(permits, true)
-
-    override fun get(indexRelation: IndexRelation, index: Long): Cell<*> {
-        blockOne()
-        try {
-            return getCellRaw(index, indexRelation)?.toCell(index) ?: UnitCell(index)
-        } finally {
-            releaseOne()
-        }
-    }
-
-    override fun set(index: Long, cell: Cell<*>) {
-        if (cell is UnitCell) {
-            remove(index)
-            return
-        }
-
-        blockAll()
-        try {
-            setCellRaw(index, cell.toBinary()) ?: UnitCell(index)
-        } finally {
-            releaseAll()
-        }
-    }
-
-    override fun remove(index: Long): Cell<*> {
-        blockAll()
-        try {
-            val old = values.remove(BOHMapUtils.fromLong(index))?.toCell(index) ?: UnitCell(index)
-
-            if (old !is UnitCell) {
-                indices.compute(index) { _, v ->
-                    when {
-                        v == null -> null
-                        v - 1 == 0 -> null
-                        else -> v - 1
-                    }
-                }
-            }
-
-            return old
-        } finally {
-            releaseAll()
-        }
-    }
-
-    override fun clear() {
-        blockAll()
-        try {
-            val it = values.keys.iterator()
-            while (it.hasNext()) {
-                val k = BOHMapUtils.toLong(it.next())
-                indices.compute(k) { _, v ->
-                    when {
-                        v == null -> null
-                        v - 1 == 0 -> null
-                        else -> v - 1
-                    }
-                }
-            }
-            values.clear()
-        } finally {
-            releaseAll()
-        }
-    }
-
-    private fun getCellRaw(index: Long, indexRelation: IndexRelation): Binary? {
-        fun firstBefore(): Binary? {
-            for (i in indices.headMap(index).keys.descendingIterator()) {
-                val k = BOHMapUtils.fromLong(i)
-                if (values.containsKey(k)) {
-                    return values[k]
-                }
-            }
-            return null
-        }
-
-        fun firstAfter(): Binary? {
-            for (i in indices.tailMap(index + 1L).keys.iterator()) {
-                val k = BOHMapUtils.fromLong(i)
-                if (values.containsKey(k)) {
-                    return values[k]
-                }
-            }
-            return null
-        }
-
-        val k = BOHMapUtils.fromLong(index)
-
-        return when (indexRelation) {
-            AT -> values[k]
-            BEFORE -> firstBefore()
-            AFTER -> firstAfter()
-            AT_OR_BEFORE -> values.getOrElse(k) { getCellRaw(index, BEFORE) }
-            AT_OR_AFTER -> values.getOrElse(k) { getCellRaw(index, AFTER) }
-        }
-    }
-
-    private fun setCellRaw(index: Long, cellValue: Binary): Binary? {
-        if (table.closed)
-            throw InvalidTableException("Table is closed")
-
-        val old = values.put(BOHMapUtils.fromLong(index), cellValue)
-
-        if (old == null)
-            indices.compute(index) { _, v -> if (v == null) 1 else v + 1 }
-
-        return old
-    }
-
-    private fun blockOne() {
-        try {
-            semaphore.acquire()
-        } catch (e: InterruptedException) {
-            throw AbortedException(e)
-        }
-
-    }
-
-    private fun blockAll() {
-        try {
-            semaphore.acquire(permits)
-        } catch (e: InterruptedException) {
-            throw AbortedException(e)
-        }
-
-    }
-
-    private fun releaseOne() {
-        semaphore.release()
-    }
-
-    private fun releaseAll() {
-        semaphore.release(permits)
-    }
-}
-
-class BaseColumnOnHeap internal constructor(table: Table, columnHeader: ColumnHeader, private val indices: ConcurrentNavigableMap<Long, Int>) : Column(table, columnHeader) {
+class BaseColumn internal constructor(table: Table, columnHeader: ColumnHeader, private val indices: ConcurrentNavigableMap<Long, Int>) : Column(table, columnHeader) {
     internal val values = ConcurrentHashMap<Long, CellValue<*>>()
 
     override fun get(indexRelation: IndexRelation, index: Long): Cell<*> {
