@@ -1,6 +1,7 @@
 package com.sigbla.prosheet.table
 
 import com.sigbla.prosheet.exceptions.InvalidCellException
+import com.sigbla.prosheet.exceptions.InvalidValueException
 import com.sigbla.prosheet.math.DefaultBigDecimalPrecision
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -40,9 +41,8 @@ sealed class Cell<T>(internal val index: Long) {
     open fun toLong(): Long = throw InvalidCellException("Cell not numeric at $index")
     open fun toDouble(): Double = throw InvalidCellException("Cell not numeric at $index")
     open fun toBigInteger(): BigInteger = throw InvalidCellException("Cell not numeric at $index")
+    open fun toBigDecimal(): BigDecimal = toBigDecimal(DefaultBigDecimalPrecision.mathContext)
     open fun toBigDecimal(mathContext: MathContext): BigDecimal = throw InvalidCellException("Cell not numeric at $index")
-
-    fun toBigDecimal(): BigDecimal = toBigDecimal(DefaultBigDecimalPrecision.mathContext)
 
     operator fun plus(that: Cell<*>): Number {
         return when (that.value) {
@@ -51,6 +51,18 @@ sealed class Cell<T>(internal val index: Long) {
             is BigInteger -> plus(that.toBigInteger())
             is BigDecimal -> plus(that.toBigDecimal())
             else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        }
+    }
+
+    operator fun plus(that: Number): Number {
+        return when (that) {
+            is Int -> plus(that.toLong())
+            is Long -> plus(that)
+            is Float -> plus(that.toDouble())
+            is Double -> plus(that)
+            is BigInteger -> plus(that)
+            is BigDecimal -> plus(that)
+            else -> throw InvalidValueException("Unsupported type: ${that::class}")
         }
     }
 
@@ -71,6 +83,18 @@ sealed class Cell<T>(internal val index: Long) {
         }
     }
 
+    operator fun minus(that: Number): Number {
+        return when (that) {
+            is Int -> minus(that.toLong())
+            is Long -> minus(that)
+            is Float -> minus(that.toDouble())
+            is Double -> minus(that)
+            is BigInteger -> minus(that)
+            is BigDecimal -> minus(that)
+            else -> throw InvalidValueException("Unsupported type: ${that::class}")
+        }
+    }
+
     open operator fun minus(that: Int): Number = throw InvalidCellException("Cell not numeric at $index")
     open operator fun minus(that: Long): Number = throw InvalidCellException("Cell not numeric at $index")
     open operator fun minus(that: Float): Number = throw InvalidCellException("Cell not numeric at $index")
@@ -85,6 +109,18 @@ sealed class Cell<T>(internal val index: Long) {
             is BigInteger -> times(that.toBigInteger())
             is BigDecimal -> times(that.toBigDecimal())
             else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        }
+    }
+
+    operator fun times(that: Number): Number {
+        return when (that) {
+            is Int -> times(that.toLong())
+            is Long -> times(that)
+            is Float -> times(that.toDouble())
+            is Double -> times(that)
+            is BigInteger -> times(that)
+            is BigDecimal -> times(that)
+            else -> throw InvalidValueException("Unsupported type: ${that::class}")
         }
     }
 
@@ -105,6 +141,18 @@ sealed class Cell<T>(internal val index: Long) {
         }
     }
 
+    operator fun div(that: Number): Number {
+        return when (that) {
+            is Int -> div(that.toLong())
+            is Long -> div(that)
+            is Float -> div(that.toDouble())
+            is Double -> div(that)
+            is BigInteger -> div(that)
+            is BigDecimal -> div(that)
+            else -> throw InvalidValueException("Unsupported type: ${that::class}")
+        }
+    }
+
     open operator fun div(that: Int): Number = throw InvalidCellException("Cell not numeric at $index")
     open operator fun div(that: Long): Number = throw InvalidCellException("Cell not numeric at $index")
     open operator fun div(that: Float): Number = throw InvalidCellException("Cell not numeric at $index")
@@ -119,6 +167,18 @@ sealed class Cell<T>(internal val index: Long) {
             is BigInteger -> rem(that.toBigInteger())
             is BigDecimal -> rem(that.toBigDecimal())
             else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        }
+    }
+
+    operator fun rem(that: Number): Number {
+        return when (that) {
+            is Int -> rem(that.toLong())
+            is Long -> rem(that)
+            is Float -> rem(that.toDouble())
+            is Double -> rem(that)
+            is BigInteger -> rem(that)
+            is BigDecimal -> rem(that)
+            else -> throw InvalidValueException("Unsupported type: ${that::class}")
         }
     }
 
@@ -389,7 +449,9 @@ class BigDecimalCell(index: Long, override val value: BigDecimal) : Cell<BigDeci
 
     override fun toBigInteger(): BigInteger = value.toBigInteger()
 
-    override fun toBigDecimal(mathContext: MathContext) = value
+    override fun toBigDecimal() = value
+
+    override fun toBigDecimal(mathContext: MathContext) = value.round(mathContext)!!
 
     override fun plus(that: Int) = plus(that.toLong())
 
