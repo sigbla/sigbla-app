@@ -13,6 +13,8 @@ import java.util.concurrent.atomic.AtomicInteger
 
 // Look at this wrt Table, Column, Row: https://kotlinlang.org/docs/reference/operator-overloading.html
 
+// TODO: Meta data / meta cells: Cells that are always in scope? Need something for the view, to load libs and stuff
+
 abstract class Table(val name: String) {
     @Volatile
     var closed: Boolean = false
