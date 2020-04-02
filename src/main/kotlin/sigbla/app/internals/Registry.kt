@@ -27,6 +27,8 @@ internal object Registry {
 
         if (table !is BaseTable) throw InvalidTableException()
 
+        table.eventProcessor.shutdown()
+
         val columns = ArrayList<Column>()
 
         while (!table.columns.isEmpty()) {

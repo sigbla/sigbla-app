@@ -62,7 +62,7 @@ abstract class Column(val table: Table, val columnHeader: ColumnHeader) { //: It
 
     abstract operator fun get(indexRelation: IndexRelation, index: Long): Cell<*>
 
-    abstract operator fun set(index: Long, value: Cell<*>)
+    abstract operator fun set(index: Long, value: Cell<*>?)
 
     // TODO Not sure I like these yet.. maybe move this and other infix to special place?
     infix fun at(index: Long) = get(AT, index)
@@ -116,7 +116,7 @@ abstract class Column(val table: Table, val columnHeader: ColumnHeader) { //: It
         }
     }
 
-    operator fun set(index: Int, cell: Cell<*>) = set(index.toLong(), cell)
+    operator fun set(index: Int, cell: Cell<*>?) = set(index.toLong(), cell)
 
     operator fun set(index: Int, value: String) = set(index.toLong(), value)
 
@@ -152,7 +152,7 @@ abstract class Column(val table: Table, val columnHeader: ColumnHeader) { //: It
 
     infix fun before(other: Column): ColumnAction {
         if (this == other)
-            throw InvalidColumnException("Can not move column before itself: $this")
+            throw InvalidColumnException("Cannot move column before itself: $this")
 
         return ColumnAction(
             this,
@@ -163,7 +163,7 @@ abstract class Column(val table: Table, val columnHeader: ColumnHeader) { //: It
 
     infix fun after(other: Column): ColumnAction {
         if (this == other)
-            throw InvalidColumnException("Can not move column after itself: $this")
+            throw InvalidColumnException("Cannot move column after itself: $this")
 
         return ColumnAction(
             this,
@@ -171,9 +171,27 @@ abstract class Column(val table: Table, val columnHeader: ColumnHeader) { //: It
             ColumnActionOrder.AFTER
         )
     }
+
+    /*
+    inline fun <reified T> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<Column, T>) -> Unit): ListenerReference {
+        return subscribeAny {
+            val events = it.events.filterIsInstance<ListenerEvent<T>>()
+            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, events))
+        }
+    }
+
+    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<Column, *>) -> Unit): ListenerReference {
+        return table.eventProcessor.subscribe(this) {
+            if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
+        }
+    }
+     */
 }
 
-class BaseColumn internal constructor(table: Table, columnHeader: ColumnHeader, private val indices: ConcurrentNavigableMap<Long, Int>) : Column(table, columnHeader) {
+class BaseColumn internal constructor(
+    table: Table, columnHeader: ColumnHeader,
+    private val indices: ConcurrentNavigableMap<Long, Int>
+) : Column(table, columnHeader) {
     internal val values = ConcurrentHashMap<Long, CellValue<*>>()
 
     override fun get(indexRelation: IndexRelation, index: Long): Cell<*> {
@@ -183,13 +201,15 @@ class BaseColumn internal constructor(table: Table, columnHeader: ColumnHeader, 
         )
     }
 
-    override fun set(index: Long, value: Cell<*>) {
-        if (value is UnitCell) {
+    override fun set(index: Long, value: Cell<*>?) {
+        if (value is UnitCell || value == null) {
             remove(index)
             return
         }
 
-        setCellRaw(index, value.toCellValue()) ?: UnitCell(this, index)
+        val old = setCellRaw(index, value.toCellValue())?.toCell(this, index) ?: UnitCell(this, index)
+        val new = value.toCell(this, index)
+        table.eventProcessor.publish(listOf(ListenerEvent(old, new)) as List<ListenerEvent<Cell<*>, Cell<*>>>)
     }
 
     override fun remove(index: Long): Cell<*> {
@@ -204,6 +224,9 @@ class BaseColumn internal constructor(table: Table, columnHeader: ColumnHeader, 
                 }
             }
         }
+
+        val new: Cell<*> = UnitCell(this, index)
+        table.eventProcessor.publish(listOf(ListenerEvent(old, new)) as List<ListenerEvent<Cell<*>, Cell<*>>>)
 
         return old
     }
@@ -270,7 +293,7 @@ class ReadOnlyRowColumn internal constructor(private val column: Column, private
         return column.get(indexRelation, index)
     }
 
-    override fun set(index: Long, value: Cell<*>) {
+    override fun set(index: Long, value: Cell<*>?) {
         throw ReadOnlyColumnException()
     }
 

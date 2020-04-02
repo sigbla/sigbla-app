@@ -1,6 +1,7 @@
 package sigbla.app
 
 import sigbla.app.exceptions.InvalidCellException
+import sigbla.app.exceptions.InvalidTableException
 import sigbla.app.exceptions.InvalidValueException
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -31,12 +32,33 @@ internal class CellValue<T>(private val value: T) {
     }
 }
 
-sealed class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>) : ClosedRange<Cell<*>>, Iterable<Cell<*>> {
+sealed class CellRange(final override val start: Cell<*>, final override val endInclusive: Cell<*>) : ClosedRange<Cell<*>>, Iterable<Cell<*>> {
+    init {
+        if (start.column.table.name != endInclusive.column.table.name) {
+            throw InvalidTableException("Cell range much be within same table")
+        }
+    }
+
     override fun iterator(): Iterator<Cell<*>> = TODO()
 
     operator fun contains(value: Any): Boolean = TODO()
 
     override fun isEmpty(): Boolean = TODO()
+
+    /*
+    inline fun <reified T> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<CellRange, T>) -> Unit): ListenerReference {
+        return subscribeAny {
+            val events = it.events.filterIsInstance<ListenerEvent<T>>()
+            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, events))
+        }
+    }
+
+    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<CellRange, *>) -> Unit): ListenerReference {
+        return start.column.table.eventProcessor.subscribe(this) {
+            if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
+        }
+    }
+     */
 }
 
 sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any> {
@@ -214,6 +236,21 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any> {
     operator fun contains(that: Any): Boolean {
         TODO()
     }
+
+    /*
+    inline fun <reified T> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<Cell<*>, T>) -> Unit): ListenerReference {
+        return subscribeAny {
+            val events = it.events.filterIsInstance<ListenerEvent<T>>()
+            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, events))
+        }
+    }
+
+    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<Cell<*>, *>) -> Unit): ListenerReference {
+        return column.table.eventProcessor.subscribe(this) {
+            if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
+        }
+    }
+     */
 
     override fun equals(other: Any?): Boolean {
         // TODO Also handle numbers like in compare..

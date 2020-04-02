@@ -3,7 +3,7 @@ package sigbla.tmp
 import sigbla.app.IndexRelation.*
 import sigbla.app.timeseries.*
 import sigbla.app.Table.Companion.move
-import sigbla.app.Table.Companion.subscribe
+//import sigbla.app.Table.Companion.subscribe
 import sigbla.app.*
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -30,7 +30,7 @@ fun main() {
 
     table["A"][AT, LocalDate.now(), LocalTime.MAX, ZoneId.systemDefault()]
 
-    val size = 10_000_000L
+    val size = 10_000L
 
     val start1 = System.currentTimeMillis()
     for (i in 1.toLong()..size) {
@@ -107,37 +107,72 @@ fun main() {
     val math6e = BigDecimal.ONE % table["B", 10]
     val math7e = table["B", 10] % 1 % table["B", 10] % 1
 
-    val compare1 = table["A"][1] > 5
-    val compare2 = table["A"][1] < table["A"][2]
-    val compare3 = table["A"][1] == table["A", 3]
+    // TODO
+    //val compare1 = table["A"][1] > 5
+    //val compare2 = table["A"][1] < table["A"][2]
+    //val compare3 = table["A"][1] == table["A", 3]
 
+    // TODO
+    /*
     for (c in table["A"][1]..table["A"][2]) {
 
     }
+     */
 
-    (table["A"][1]..table["A"][2]).contains(10)
-    val range = (table["A"][1]..table["A"][2])
-    range.forEach { println(it) }
-    range.map { it.value }.filterIsInstance<BigInteger>().size
+    // TODO
+    //(table["A"][1]..table["A"][2]).contains(10)
+    //val range = (table["A"][1]..table["A"][2])
+    //range.forEach { println(it) }
+    //range.map { it.value }.filterIsInstance<BigInteger>().size
+    //val inVal = 5 in table["A"][1]
 
-    val inVal = 5 in table["A"][1]
-
-    Table.move(table["A"] before table["B"])
-    Table.move(table["A"] after table["B"])
-    Table.copy(table["A"] before table["B"], "C")
-
-    Table.move(table["A"],
-        ColumnActionOrder.AFTER, table["B"])
+    // TODO
+    //Table.move(table["A"] before table["B"])
+    //Table.move(table["A"] after table["B"])
+    //Table.copy(table["A"] before table["B"], "C")
+    //Table.move(table["A"], ColumnActionOrder.AFTER, table["B"])
+    //move(table["A"] before table["B"])
 
     val value = table["A"] at 1
 
-    Table.subscribe(table) { it.cells }
+    /*
+    Table.subscribe<Cell<BigInteger>>(table) {
 
-    move(table["A"] before table["B"])
+    }
 
-    subscribe(table) {}
-    table subscribe {}
+    subscribe<Cell<*>>(table["A", 1]) {
+    }
+     */
 
-    subscribe(table["A"]) {}
+
+    //subscribe<Any>(table) { it.events }
+    //subscribe<Cell<String>>(table["A"]) { }
+
+    table.subscribe<Any, Any> { receiver ->
+        println("Subscribe 1: ${receiver.events}")
+        receiver.events.forEach {
+            if (it.newValue.index == 1L) table["A"][2] = "UPDATE"
+        }
+    }
+    table.subscribe<Any, Number> {
+        println("Subscribe 2: ${it.events}")
+    }
+    table.subscribe<Any, String> {
+        println("Subscribe 3: ${it.events}")
+    }
+    table.subscribe<String, Number> {
+        println("Subscribe 4: ${it.events}")
+    }
+    table.subscribeAny {
+        println("Subscribe any: ${it.events}")
+    }
+
+    table["A"][1] = "Hello subscription"
+    table["A"][1] = null
+    table["A"][1] = 1000
+
+    //subscribe(table["A"]) {}
     // TODO table["A"] subscribe {}
+
+    println("END")
 }

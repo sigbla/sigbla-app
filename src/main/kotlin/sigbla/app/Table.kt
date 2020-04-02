@@ -24,6 +24,8 @@ abstract class Table(val name: String) {
 
     abstract val headers: Collection<ColumnHeader>
 
+    internal abstract val eventProcessor: TableEventProcessor
+
     abstract operator fun get(header: ColumnHeader): Column
 
     operator fun get(vararg header: String): Column = get(
@@ -82,23 +84,23 @@ abstract class Table(val name: String) {
 
     operator fun get(header1: String, header2: String, header3: String, header4: String, header5: String, indexRelation: IndexRelation, index: Int): Cell<*> = this[header1, header2, header3, header4, header5][indexRelation, index]
 
-    operator fun set(header1: String, index: Long, value: Cell<*>) {
+    operator fun set(header1: String, index: Long, value: Cell<*>?) {
         this[header1][index] = value
     }
 
-    operator fun set(header1: String, header2: String, index: Long, value: Cell<*>) {
+    operator fun set(header1: String, header2: String, index: Long, value: Cell<*>?) {
         this[header1, header2][index] = value
     }
 
-    operator fun set(header1: String, header2: String, header3: String, index: Long, value: Cell<*>) {
+    operator fun set(header1: String, header2: String, header3: String, index: Long, value: Cell<*>?) {
         this[header1, header2, header3][index] = value
     }
 
-    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, value: Cell<*>) {
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, value: Cell<*>?) {
         this[header1, header2, header3, header4][index] = value
     }
 
-    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, value: Cell<*>) {
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, value: Cell<*>?) {
         this[header1, header2, header3, header4, header5][index] = value
     }
 
@@ -362,8 +364,20 @@ abstract class Table(val name: String) {
 
     fun remove(index: Long) = this.headers.forEach { c -> this[c].remove(index) }
 
-    infix fun subscribe(listener: (event: ListenerEvent<Table>) -> Unit) =
-        subscribe(this, listener)
+    inline fun <reified O, reified N> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<Table, O, N>) -> Unit): ListenerReference {
+        return subscribeAny { receiver ->
+            val events = receiver.events.filter {
+                it.oldValue.value is O && it.newValue.value is N
+            } as List<ListenerEvent<out O, out N>>
+            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
+        }
+    }
+
+    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<Table, *, *>) -> Unit): ListenerReference {
+        return eventProcessor.subscribe(this) {
+            if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
+        }
+    }
 
     companion object {
         fun newTable(name: String): Table =
@@ -415,25 +429,55 @@ abstract class Table(val name: String) {
 
         fun copy(left: Column, actionOrder: ColumnActionOrder, right: Column, vararg withName: String): Unit = TODO()
 
-        fun subscribe(table: Table, listener: (event: ListenerEvent<Table>) -> Unit): ListenerReference = TODO()
+        /*
+        inline fun <reified T> subscribe(table: Table, crossinline listener: (eventReceiver: ListenerEventReceiver<Table, T>) -> Unit): ListenerReference {
+            return table.subscribe(listener)
+        }
 
-        // TODO infix subscribe on the below types
-        fun subscribe(column: Column, listener: (event: ListenerEvent<Column>) -> Unit): ListenerReference = TODO()
+        fun subscribeAny(table: Table, listener: (eventReceiver: ListenerEventReceiver<Table, *>) -> Unit): ListenerReference {
+            return table.subscribeAny(listener)
+        }
 
-        fun subscribe(row: Row, listener: (event: ListenerEvent<Row>) -> Unit): ListenerReference = TODO()
+        inline fun <reified T> subscribe(column: Column, crossinline listener: (eventReceiver: ListenerEventReceiver<Column, T>) -> Unit): ListenerReference {
+            return column.subscribe(listener)
+        }
 
-        fun subscribe(columnHeader: ColumnHeader, listener: (event: ListenerEvent<Column>) -> Unit): ListenerReference = TODO()
+        fun subscribeAny(column: Column, listener: (eventReceiver: ListenerEventReceiver<Column, *>) -> Unit): ListenerReference {
+            return column.subscribeAny(listener)
+        }
 
-        fun subscribe(cell: Cell<*>, listener: (event: ListenerEvent<Cell<*>>) -> Unit): ListenerReference = TODO()
+        inline fun <reified T> subscribe(row: Row, crossinline listener: (eventReceiver: ListenerEventReceiver<Row, T>) -> Unit): ListenerReference {
+            return row.subscribe(listener)
+        }
 
-        fun subscribe(cellRange: CellRange, listener: (event: ListenerEvent<CellRange>) -> Unit): ListenerReference = TODO()
+        fun subscribeAny(row: Row, listener: (eventReceiver: ListenerEventReceiver<Row, *>) -> Unit): ListenerReference {
+            return row.subscribeAny(listener)
+        }
+
+        inline fun <reified T> subscribe(cellRange: CellRange, crossinline listener: (eventReceiver: ListenerEventReceiver<CellRange, T>) -> Unit): ListenerReference {
+            return cellRange.subscribe(listener)
+        }
+
+        fun subscribeAny(cellRange: CellRange, listener: (eventReceiver: ListenerEventReceiver<CellRange, *>) -> Unit): ListenerReference {
+            return cellRange.subscribeAny(listener)
+        }
+
+        inline fun <reified T> subscribe(cell: Cell<*>, crossinline listener: (eventReceiver: ListenerEventReceiver<Cell<*>, T>) -> Unit): ListenerReference {
+            return cell.subscribe(listener)
+        }
+
+        fun subscribeAny(cell: Cell<*>, listener: (eventReceiver: ListenerEventReceiver<Cell<*>, *>) -> Unit): ListenerReference {
+            return cell.subscribeAny(listener)
+        }
+         */
     }
 }
 
 class BaseTable internal constructor(
     name: String,
     internal val columns: ConcurrentMap<ColumnHeader, Column> = ConcurrentHashMap(),
-    internal val indices: ConcurrentNavigableMap<Long, Int> = ConcurrentSkipListMap()
+    internal val indices: ConcurrentNavigableMap<Long, Int> = ConcurrentSkipListMap(),
+    override val eventProcessor: TableEventProcessor = TableEventProcessor()
 ) : Table(name) {
     init {
         Registry.setTable(name, this)

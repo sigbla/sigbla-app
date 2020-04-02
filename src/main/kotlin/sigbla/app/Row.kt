@@ -28,7 +28,7 @@ abstract class Row {
     fun remove(vararg header: String) = remove(ColumnHeader(*header))
 
     // TODO Float and Int
-    operator fun set(header: ColumnHeader, value: Cell<*>) = table[header].set(index, value)
+    operator fun set(header: ColumnHeader, value: Cell<*>?) = table[header].set(index, value)
     operator fun set(header: ColumnHeader, value: String) = table[header].set(index, value)
     operator fun set(header: ColumnHeader, value: Double) = table[header].set(index, value)
     operator fun set(header: ColumnHeader, value: Long) = table[header].set(index, value)
@@ -37,15 +37,28 @@ abstract class Row {
     operator fun set(header: ColumnHeader, value: Number) = table[header].set(index, value)
 
     // TODO Float and Int
-    operator fun set(vararg header: String, value: Cell<*>) = table[ColumnHeader(
-        *header
-    )].set(index, value)
+    operator fun set(vararg header: String, value: Cell<*>?) = table[ColumnHeader(*header)].set(index, value)
     operator fun set(vararg header: String, value: String) = table[ColumnHeader(*header)].set(index, value)
     operator fun set(vararg header: String, value: Double) = table[ColumnHeader(*header)].set(index, value)
     operator fun set(vararg header: String, value: Long) = table[ColumnHeader(*header)].set(index, value)
     operator fun set(vararg header: String, value: BigInteger) = table[ColumnHeader(*header)].set(index, value)
     operator fun set(vararg header: String, value: BigDecimal) = table[ColumnHeader(*header)].set(index, value)
     operator fun set(vararg header: String, value: Number) = table[ColumnHeader(*header)].set(index, value)
+
+    /*
+    inline fun <reified T> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<Row, T>) -> Unit): ListenerReference {
+        return subscribeAny {
+            val events = it.events.filterIsInstance<ListenerEvent<T>>()
+            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, events))
+        }
+    }
+
+    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<Row, *>) -> Unit): ListenerReference {
+        return table.eventProcessor.subscribe(this) {
+            if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
+        }
+    }
+     */
 }
 
 class BaseRow internal constructor(override val table: Table, override val indexRelation: IndexRelation, override val index: Long) : Row()

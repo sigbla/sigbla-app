@@ -22,6 +22,7 @@ operator fun Column.get(indexRelation: IndexRelation, zonedDateTime: ZonedDateTi
 
 // TODO Setters..
 
+/*
 // TODO This should probably not be here..
 class RowLockColumn internal constructor(private val column: Column, private val index: Long) : Column(column.table, column.columnHeader) {
     @Volatile
@@ -89,3 +90,4 @@ class RowLockColumn internal constructor(private val column: Column, private val
         }
     }
 }
+*/

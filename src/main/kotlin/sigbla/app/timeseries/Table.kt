@@ -33,6 +33,7 @@ fun Table.Companion.fromStorageRangeAs(storage: Storage, name: String, fromZoned
 }
 
 // TODO This should probably not be here
+/*
 class RowLockTable internal constructor(private val table: Table, private val index: Long) : Table(table.name) {
     override val headers: Collection<ColumnHeader>
         get() = table.headers
@@ -45,3 +46,4 @@ class RowLockTable internal constructor(private val table: Table, private val in
 
     override fun rename(existing: ColumnHeader, newName: ColumnHeader) = table.rename(existing, newName)
 }
+*/
