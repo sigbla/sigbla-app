@@ -57,7 +57,7 @@ class ColumnHeader(vararg header: String) : Comparable<ColumnHeader> {
     operator fun component5() = this[5]
 }
 
-abstract class Column(val table: Table, val columnHeader: ColumnHeader) { //: Iterable<Cell<*>> {
+abstract class Column(val table: Table, val columnHeader: ColumnHeader) : Comparable<Column> {
     internal val columnOrder = table.columnCounter.getAndIncrement()
 
     abstract operator fun get(indexRelation: IndexRelation, index: Long): Cell<*>
@@ -172,20 +172,35 @@ abstract class Column(val table: Table, val columnHeader: ColumnHeader) { //: It
         )
     }
 
-    /*
-    inline fun <reified T> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<Column, T>) -> Unit): ListenerReference {
-        return subscribeAny {
-            val events = it.events.filterIsInstance<ListenerEvent<T>>()
-            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, events))
+    operator fun rangeTo(other: Column): ColumnRange {
+        return ColumnRange(this, other)
+    }
+
+    inline fun <reified O, reified N> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<Column, O, N>) -> Unit): ListenerReference {
+        return subscribeAny { receiver ->
+            val events = receiver.events.filter {
+                it.oldValue.value is O && it.newValue.value is N
+            } as List<ListenerEvent<out O, out N>>
+            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
         }
     }
 
-    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<Column, *>) -> Unit): ListenerReference {
+    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<Column, *, *>) -> Unit): ListenerReference {
         return table.eventProcessor.subscribe(this) {
             if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
         }
     }
-     */
+
+    override fun compareTo(other: Column): Int {
+        if (table != other.table)
+            throw InvalidColumnException("Both columns must belong to same table")
+
+        return columnOrder.compareTo(other.columnOrder)
+    }
+
+    override fun toString(): String {
+        return columnHeader.toString()
+    }
 }
 
 class BaseColumn internal constructor(
@@ -283,6 +298,43 @@ class BaseColumn internal constructor(
 
         return old
     }
+}
+
+class ColumnRange(override val start: Column, override val endInclusive: Column) : ClosedRange<Column>, Iterable<Column> {
+    override fun iterator(): Iterator<Column> {
+        return if (start.columnOrder <= endInclusive.columnOrder) {
+            start
+                .table
+                .columns
+                .dropWhile { it != start }
+                .reversed()
+                .dropWhile { it != endInclusive }
+                .reversed()
+                .iterator()
+        } else {
+            start
+                .table
+                .columns
+                .dropWhile { it != endInclusive }
+                .reversed()
+                .dropWhile { it != start }
+                .iterator()
+        }
+    }
+
+    override fun contains(value: Column): Boolean {
+        if (start.table != value.table) {
+            return false
+        }
+
+        if (value.columnOrder < kotlin.math.min(start.columnOrder, endInclusive.columnOrder) || value.columnOrder > max(start.columnOrder, endInclusive.columnOrder)) {
+            return false
+        }
+
+        return true
+    }
+
+    override fun isEmpty() = false
 }
 
 class ReadOnlyRowColumn internal constructor(private val column: Column, private val index: Long) : Column(column.table, column.columnHeader) {

@@ -45,20 +45,22 @@ abstract class Row {
     operator fun set(vararg header: String, value: BigDecimal) = table[ColumnHeader(*header)].set(index, value)
     operator fun set(vararg header: String, value: Number) = table[ColumnHeader(*header)].set(index, value)
 
-    /*
-    inline fun <reified T> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<Row, T>) -> Unit): ListenerReference {
-        return subscribeAny {
-            val events = it.events.filterIsInstance<ListenerEvent<T>>()
-            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, events))
+    inline fun <reified O, reified N> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<Row, O, N>) -> Unit): ListenerReference {
+        return subscribeAny { receiver ->
+            val events = receiver.events.filter {
+                it.oldValue.value is O && it.newValue.value is N
+            } as List<ListenerEvent<out O, out N>>
+            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
         }
     }
 
-    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<Row, *>) -> Unit): ListenerReference {
+    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<Row, *, *>) -> Unit): ListenerReference {
         return table.eventProcessor.subscribe(this) {
             if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
         }
     }
-     */
+
+    // TODO: Row range
 }
 
 class BaseRow internal constructor(override val table: Table, override val indexRelation: IndexRelation, override val index: Long) : Row()

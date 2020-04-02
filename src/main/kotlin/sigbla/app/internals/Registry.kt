@@ -31,13 +31,13 @@ internal object Registry {
 
         val columns = ArrayList<Column>()
 
-        while (!table.columns.isEmpty()) {
-            val (columnHeader, column) = table.columns.entries.firstOrNull() ?: continue
-            if (table.columns.remove(columnHeader, column))
+        while (!table.columnsMap.isEmpty()) {
+            val (columnHeader, column) = table.columnsMap.entries.firstOrNull() ?: continue
+            if (table.columnsMap.remove(columnHeader, column))
                 columns.add(column)
         }
 
-        table.indices.clear()
+        table.indicesMap.clear()
 
         columns.forEach(Column::clear)
     }

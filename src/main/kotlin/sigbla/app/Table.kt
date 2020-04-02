@@ -24,6 +24,8 @@ abstract class Table(val name: String) {
 
     abstract val headers: Collection<ColumnHeader>
 
+    abstract val columns: Collection<Column>
+
     internal abstract val eventProcessor: TableEventProcessor
 
     abstract operator fun get(header: ColumnHeader): Column
@@ -429,54 +431,52 @@ abstract class Table(val name: String) {
 
         fun copy(left: Column, actionOrder: ColumnActionOrder, right: Column, vararg withName: String): Unit = TODO()
 
-        /*
-        inline fun <reified T> subscribe(table: Table, crossinline listener: (eventReceiver: ListenerEventReceiver<Table, T>) -> Unit): ListenerReference {
+        inline fun <reified O, reified N> subscribe(table: Table, crossinline listener: (eventReceiver: ListenerEventReceiver<Table, O, N>) -> Unit): ListenerReference {
             return table.subscribe(listener)
         }
 
-        fun subscribeAny(table: Table, listener: (eventReceiver: ListenerEventReceiver<Table, *>) -> Unit): ListenerReference {
+        fun subscribeAny(table: Table, listener: (eventReceiver: ListenerEventReceiver<Table, *, *>) -> Unit): ListenerReference {
             return table.subscribeAny(listener)
         }
 
-        inline fun <reified T> subscribe(column: Column, crossinline listener: (eventReceiver: ListenerEventReceiver<Column, T>) -> Unit): ListenerReference {
+        inline fun <reified O, reified N> subscribe(column: Column, crossinline listener: (eventReceiver: ListenerEventReceiver<Column, O, N>) -> Unit): ListenerReference {
             return column.subscribe(listener)
         }
 
-        fun subscribeAny(column: Column, listener: (eventReceiver: ListenerEventReceiver<Column, *>) -> Unit): ListenerReference {
+        fun subscribeAny(column: Column, listener: (eventReceiver: ListenerEventReceiver<Column, *, *>) -> Unit): ListenerReference {
             return column.subscribeAny(listener)
         }
 
-        inline fun <reified T> subscribe(row: Row, crossinline listener: (eventReceiver: ListenerEventReceiver<Row, T>) -> Unit): ListenerReference {
+        inline fun <reified O, reified N> subscribe(row: Row, crossinline listener: (eventReceiver: ListenerEventReceiver<Row, O, N>) -> Unit): ListenerReference {
             return row.subscribe(listener)
         }
 
-        fun subscribeAny(row: Row, listener: (eventReceiver: ListenerEventReceiver<Row, *>) -> Unit): ListenerReference {
+        fun subscribeAny(row: Row, listener: (eventReceiver: ListenerEventReceiver<Row, *, *>) -> Unit): ListenerReference {
             return row.subscribeAny(listener)
         }
 
-        inline fun <reified T> subscribe(cellRange: CellRange, crossinline listener: (eventReceiver: ListenerEventReceiver<CellRange, T>) -> Unit): ListenerReference {
+        inline fun <reified O, reified N> subscribe(cellRange: CellRange, crossinline listener: (eventReceiver: ListenerEventReceiver<CellRange, O, N>) -> Unit): ListenerReference {
             return cellRange.subscribe(listener)
         }
 
-        fun subscribeAny(cellRange: CellRange, listener: (eventReceiver: ListenerEventReceiver<CellRange, *>) -> Unit): ListenerReference {
+        fun subscribeAny(cellRange: CellRange, listener: (eventReceiver: ListenerEventReceiver<CellRange, *, *>) -> Unit): ListenerReference {
             return cellRange.subscribeAny(listener)
         }
 
-        inline fun <reified T> subscribe(cell: Cell<*>, crossinline listener: (eventReceiver: ListenerEventReceiver<Cell<*>, T>) -> Unit): ListenerReference {
+        inline fun <reified O, reified N> subscribe(cell: Cell<*>, crossinline listener: (eventReceiver: ListenerEventReceiver<Cell<*>, O, N>) -> Unit): ListenerReference {
             return cell.subscribe(listener)
         }
 
-        fun subscribeAny(cell: Cell<*>, listener: (eventReceiver: ListenerEventReceiver<Cell<*>, *>) -> Unit): ListenerReference {
+        fun subscribeAny(cell: Cell<*>, listener: (eventReceiver: ListenerEventReceiver<Cell<*>, *, *>) -> Unit): ListenerReference {
             return cell.subscribeAny(listener)
         }
-         */
     }
 }
 
 class BaseTable internal constructor(
     name: String,
-    internal val columns: ConcurrentMap<ColumnHeader, Column> = ConcurrentHashMap(),
-    internal val indices: ConcurrentNavigableMap<Long, Int> = ConcurrentSkipListMap(),
+    internal val columnsMap: ConcurrentMap<ColumnHeader, Column> = ConcurrentHashMap(),
+    internal val indicesMap: ConcurrentNavigableMap<Long, Int> = ConcurrentSkipListMap(),
     override val eventProcessor: TableEventProcessor = TableEventProcessor()
 ) : Table(name) {
     init {
@@ -484,30 +484,37 @@ class BaseTable internal constructor(
     }
 
     override val headers: Collection<ColumnHeader>
-        get() = columns
+        get() = columnsMap
             .entries
             .sortedBy { it.value.columnOrder }
             .map { it.key }
             .toList()
 
-    override fun get(header: ColumnHeader): Column = columns.computeIfAbsent(header) {
+    override val columns: Collection<Column>
+        get() = columnsMap
+            .entries
+            .sortedBy { it.value.columnOrder }
+            .map { it.value }
+            .toList()
+
+    override fun get(header: ColumnHeader): Column = columnsMap.computeIfAbsent(header) {
         if (closed)
             throw InvalidTableException("Table is closed")
 
-        BaseColumn(this, header, indices)
+        BaseColumn(this, header, indicesMap)
     }
 
-    override fun contains(header: ColumnHeader): Boolean = columns.containsKey(header)
+    override fun contains(header: ColumnHeader): Boolean = columnsMap.containsKey(header)
 
     override fun remove(header: ColumnHeader) {
-        columns.remove(header)?.clear()
+        columnsMap.remove(header)?.clear()
     }
 
     override fun rename(existing: ColumnHeader, newName: ColumnHeader) {
-        val column = columns[existing] ?: return
+        val column = columnsMap[existing] ?: return
 
-        columns.put(newName, column)?.clear()
-        columns.remove(existing, column)
+        columnsMap.put(newName, column)?.clear()
+        columnsMap.remove(existing, column)
     }
 
     companion object

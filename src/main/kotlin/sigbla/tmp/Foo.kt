@@ -3,7 +3,7 @@ package sigbla.tmp
 import sigbla.app.IndexRelation.*
 import sigbla.app.timeseries.*
 import sigbla.app.Table.Companion.move
-//import sigbla.app.Table.Companion.subscribe
+import sigbla.app.Table.Companion.subscribe
 import sigbla.app.*
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -133,25 +133,46 @@ fun main() {
     //Table.move(table["A"], ColumnActionOrder.AFTER, table["B"])
     //move(table["A"] before table["B"])
 
+    (table.columns.first()..table.columns.last()).forEach {
+        println("Column range first to last: " + it.columnHeader)
+    }
+
+    println()
+    println("-----------")
+    println()
+
+    (table.columns.last()..table.columns.first()).forEach {
+        println("Column range last to first: " + it.columnHeader)
+    }
+
+    println()
+    println("-----------")
+    println()
+
+    for (x in listOf("C", "D")) {
+        for (y in listOf(10L, 11L)) {
+            table[x][y] = "$x:$y"
+        }
+    }
+
+    (table["C"][10]..table["D"][11]).forEach { println(it) }
+
+    println()
+    println("-----------")
+    println()
+
+    (table["D"][11]..table["C"][10]).forEach { println(it) }
+
+    println()
+    println("-----------")
+    println()
+
     val value = table["A"] at 1
 
-    /*
-    Table.subscribe<Cell<BigInteger>>(table) {
-
-    }
-
-    subscribe<Cell<*>>(table["A", 1]) {
-    }
-     */
-
-
-    //subscribe<Any>(table) { it.events }
-    //subscribe<Cell<String>>(table["A"]) { }
-
-    table.subscribe<Any, Any> { receiver ->
+    subscribe<Any, Any>(table) { receiver ->
         println("Subscribe 1: ${receiver.events}")
         receiver.events.forEach {
-            if (it.newValue.index == 1L) table["A"][2] = "UPDATE"
+            if (it.newValue.index == 1L) receiver.source["A"][2] = "UPDATE"
         }
     }
     table.subscribe<Any, Number> {
@@ -171,8 +192,9 @@ fun main() {
     table["A"][1] = null
     table["A"][1] = 1000
 
-    //subscribe(table["A"]) {}
-    // TODO table["A"] subscribe {}
+    subscribe<Any, Any>(table["A"]) {}
+    subscribe<Any, Any>(table["A"][1]..table["A"][2]) {}
+    subscribe<Any, Any>(table["A"][1]) {}
 
     println("END")
 }

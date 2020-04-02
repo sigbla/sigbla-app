@@ -7,6 +7,8 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.MathContext
 import java.util.*
+import kotlin.math.min
+import kotlin.math.max
 
 internal fun String.toCell(column: Column, index: Long) =
     StringCell(column, index, this)
@@ -32,33 +34,84 @@ internal class CellValue<T>(private val value: T) {
     }
 }
 
-sealed class CellRange(final override val start: Cell<*>, final override val endInclusive: Cell<*>) : ClosedRange<Cell<*>>, Iterable<Cell<*>> {
+enum class CellRangeOrder { COLUMN, ROW }
+
+// TODO change order input so it can be t[][]..t[][] by ORDER
+class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>, val order: CellRangeOrder = CellRangeOrder.COLUMN) : ClosedRange<Cell<*>>, Iterable<Cell<*>> {
     init {
-        if (start.column.table.name != endInclusive.column.table.name) {
+        if (start.column.table != endInclusive.column.table) {
             throw InvalidTableException("Cell range much be within same table")
         }
     }
 
-    override fun iterator(): Iterator<Cell<*>> = TODO()
+    override fun iterator(): Iterator<Cell<*>> {
+        // TODO: This iterator implementation, as with the ColumnRange one could be more efficient!
 
-    operator fun contains(value: Any): Boolean = TODO()
+        val columns = (start.column..endInclusive.column).toList()
+        val rows = if (start.index <= endInclusive.index) {
+            (start.index..endInclusive.index).toList()
+        } else {
+            (start.index downTo endInclusive.index).toList()
+        }
 
-    override fun isEmpty(): Boolean = TODO()
+        val output = mutableListOf<Cell<*>>()
 
-    /*
-    inline fun <reified T> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<CellRange, T>) -> Unit): ListenerReference {
-        return subscribeAny {
-            val events = it.events.filterIsInstance<ListenerEvent<T>>()
-            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, events))
+        if (order == CellRangeOrder.COLUMN) {
+            rows.forEach { row ->
+                columns.forEach { column ->
+                    output.add(column[row])
+                }
+            }
+        } else {
+            columns.forEach { column ->
+                rows.forEach { row ->
+                    output.add(column[row])
+                }
+            }
+        }
+
+        return output.iterator()
+    }
+
+    operator fun contains(value: Any): Boolean {
+        iterator().forEach {
+            return it.value == value
+        }
+
+        return false
+    }
+
+    override fun contains(value: Cell<*>): Boolean {
+        if (start.column.table != value.column.table) {
+            return false
+        }
+
+        if (value.index < min(start.index, endInclusive.index) || value.index > max(start.index, endInclusive.index)) {
+            return false
+        }
+
+        return if (start.column.columnOrder <= endInclusive.column.columnOrder)
+            (start.column..endInclusive.column).contains(value.column)
+        else
+            (endInclusive.column..start.column).contains(value.column)
+    }
+
+    override fun isEmpty(): Boolean = false
+
+    inline fun <reified O, reified N> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<CellRange, O, N>) -> Unit): ListenerReference {
+        return subscribeAny { receiver ->
+            val events = receiver.events.filter {
+                it.oldValue.value is O && it.newValue.value is N
+            } as List<ListenerEvent<out O, out N>>
+            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
         }
     }
 
-    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<CellRange, *>) -> Unit): ListenerReference {
+    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<CellRange, *, *>) -> Unit): ListenerReference {
         return start.column.table.eventProcessor.subscribe(this) {
             if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
         }
     }
-     */
 }
 
 sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any> {
@@ -229,28 +282,27 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any> {
     }
 
     operator fun rangeTo(that: Cell<*>): CellRange {
-        // The contains of the ClosedRange will be based on the range of cells..
-        TODO()
+        return CellRange(this, that)
     }
 
     operator fun contains(that: Any): Boolean {
         TODO()
     }
 
-    /*
-    inline fun <reified T> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<Cell<*>, T>) -> Unit): ListenerReference {
-        return subscribeAny {
-            val events = it.events.filterIsInstance<ListenerEvent<T>>()
-            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, events))
+    inline fun <reified O, reified N> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<Cell<*>, O, N>) -> Unit): ListenerReference {
+        return subscribeAny { receiver ->
+            val events = receiver.events.filter {
+                it.oldValue.value is O && it.newValue.value is N
+            } as List<ListenerEvent<out O, out N>>
+            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
         }
     }
 
-    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<Cell<*>, *>) -> Unit): ListenerReference {
+    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<Cell<*>, *, *>) -> Unit): ListenerReference {
         return column.table.eventProcessor.subscribe(this) {
             if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
         }
     }
-     */
 
     override fun equals(other: Any?): Boolean {
         // TODO Also handle numbers like in compare..
