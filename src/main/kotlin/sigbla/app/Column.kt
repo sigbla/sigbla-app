@@ -57,7 +57,7 @@ class ColumnHeader(vararg header: String) : Comparable<ColumnHeader> {
     operator fun component5() = this[5]
 }
 
-abstract class Column(val table: Table, val columnHeader: ColumnHeader) : Comparable<Column> {
+abstract class Column(val table: Table, val columnHeader: ColumnHeader) : Comparable<Column>, Iterable<Cell<*>> {
     internal val columnOrder = table.columnCounter.getAndIncrement()
 
     abstract operator fun get(indexRelation: IndexRelation, index: Long): Cell<*>
@@ -176,18 +176,20 @@ abstract class Column(val table: Table, val columnHeader: ColumnHeader) : Compar
         return ColumnRange(this, other)
     }
 
-    inline fun <reified O, reified N> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<Column, O, N>) -> Unit): ListenerReference {
-        return subscribeAny { receiver ->
+    inline fun <reified O, reified N> on(crossinline listener: (eventReceiver: ListenerEventReceiver<Column, O, N>) -> Unit): ListenerReference {
+        return onAny { receiver ->
             val events = receiver.events.filter {
                 it.oldValue.value is O && it.newValue.value is N
-            } as List<ListenerEvent<out O, out N>>
-            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
+            } as Sequence<ListenerEvent<out O, out N>>
+            //if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
+            listener.invoke(ListenerEventReceiver(receiver.listenerReference, this, events))
         }
     }
 
-    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<Column, *, *>) -> Unit): ListenerReference {
+    fun onAny(listener: (eventReceiver: ListenerEventReceiver<Column, *, *>) -> Unit): ListenerReference {
         return table.eventProcessor.subscribe(this) {
-            if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
+            //if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
+            listener.invoke(ListenerEventReceiver(it.listenerReference, this, it.events))
         }
     }
 
@@ -257,6 +259,13 @@ class BaseColumn internal constructor(
             }
         }
         values.clear()
+
+        // TODO Event processor..
+    }
+
+    // TODO We need this (and asSequence?) on CellRange, Table, Row and similar..
+    override fun iterator(): Iterator<Cell<*>> {
+        return values.asSequence().map { it.value.toCell(this, it.key) }.iterator()
     }
 
     private fun getCellRaw(index: Long, indexRelation: IndexRelation): CellValue<*>? {
@@ -337,6 +346,7 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
     override fun isEmpty() = false
 }
 
+// TODO Maybe just remove this, or make it extend BaseColumn to fix iterator access issue?
 class ReadOnlyRowColumn internal constructor(private val column: Column, private val index: Long) : Column(column.table, column.columnHeader) {
     override fun get(indexRelation: IndexRelation, index: Long): Cell<*> {
         if (index > this.index)
@@ -355,6 +365,11 @@ class ReadOnlyRowColumn internal constructor(private val column: Column, private
 
     override fun clear() {
         throw ReadOnlyColumnException()
+    }
+
+    override fun iterator(): Iterator<Cell<*>> {
+        // This needs access to the storage..
+        TODO("Not yet implemented")
     }
 }
 

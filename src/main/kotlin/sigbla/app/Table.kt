@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger
 
 // TODO: Meta data / meta cells: Cells that are always in scope? Need something for the view, to load libs and stuff
 
+// TODO: Need a table clear like we have on columns..
+
 abstract class Table(val name: String) {
     @Volatile
     var closed: Boolean = false
@@ -25,6 +27,10 @@ abstract class Table(val name: String) {
     abstract val headers: Collection<ColumnHeader>
 
     abstract val columns: Collection<Column>
+
+    internal abstract val columnsMap: ConcurrentMap<ColumnHeader, Column>
+
+    internal abstract val indicesMap: ConcurrentNavigableMap<Long, Int>
 
     internal abstract val eventProcessor: TableEventProcessor
 
@@ -218,6 +224,28 @@ abstract class Table(val name: String) {
 
     // -----
 
+    operator fun set(header1: String, index: Long, value: Number) {
+        this[header1][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, index: Long, value: Number) {
+        this[header1, header2][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Long, value: Number) {
+        this[header1, header2, header3][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, value: Number) {
+        this[header1, header2, header3, header4][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, value: Number) {
+        this[header1, header2, header3, header4, header5][index] = value
+    }
+
+    // -----
+
     operator fun set(header1: String, index: Int, value: Cell<*>) {
         this[header1][index] = value
     }
@@ -350,6 +378,28 @@ abstract class Table(val name: String) {
 
     // -----
 
+    operator fun set(header1: String, index: Int, value: Number) {
+        this[header1][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, index: Int, value: Number) {
+        this[header1, header2][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Int, value: Number) {
+        this[header1, header2, header3][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, value: Number) {
+        this[header1, header2, header3, header4][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, value: Number) {
+        this[header1, header2, header3, header4, header5][index] = value
+    }
+
+    // -----
+
     abstract operator fun contains(header: ColumnHeader): Boolean
 
     fun contains(vararg header: String): Boolean = contains(ColumnHeader(*header))
@@ -366,18 +416,20 @@ abstract class Table(val name: String) {
 
     fun remove(index: Long) = this.headers.forEach { c -> this[c].remove(index) }
 
-    inline fun <reified O, reified N> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<Table, O, N>) -> Unit): ListenerReference {
-        return subscribeAny { receiver ->
+    inline fun <reified O, reified N> on(crossinline listener: (eventReceiver: ListenerEventReceiver<Table, O, N>) -> Unit): ListenerReference {
+        return onAny { receiver ->
             val events = receiver.events.filter {
                 it.oldValue.value is O && it.newValue.value is N
-            } as List<ListenerEvent<out O, out N>>
-            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
+            } as Sequence<ListenerEvent<out O, out N>>
+            //if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
+            listener.invoke(ListenerEventReceiver(receiver.listenerReference, this, events))
         }
     }
 
-    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<Table, *, *>) -> Unit): ListenerReference {
+    fun onAny(listener: (eventReceiver: ListenerEventReceiver<Table, *, *>) -> Unit): ListenerReference {
         return eventProcessor.subscribe(this) {
-            if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
+            //if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
+            listener.invoke(ListenerEventReceiver(it.listenerReference, this, it.events))
         }
     }
 
@@ -431,52 +483,57 @@ abstract class Table(val name: String) {
 
         fun copy(left: Column, actionOrder: ColumnActionOrder, right: Column, vararg withName: String): Unit = TODO()
 
-        inline fun <reified O, reified N> subscribe(table: Table, crossinline listener: (eventReceiver: ListenerEventReceiver<Table, O, N>) -> Unit): ListenerReference {
-            return table.subscribe(listener)
+        inline fun <reified O, reified N> on(table: Table, crossinline listener: (eventReceiver: ListenerEventReceiver<Table, O, N>) -> Unit): ListenerReference {
+            return table.on(listener)
         }
 
-        fun subscribeAny(table: Table, listener: (eventReceiver: ListenerEventReceiver<Table, *, *>) -> Unit): ListenerReference {
-            return table.subscribeAny(listener)
+        // TODO Alternative approach, likely better..
+        inline fun <reified O, reified N> onTest(table: Table, crossinline listener: ListenerEventReceiver<Table, O, N>.() -> Unit): ListenerReference {
+            return table.on(listener)
         }
 
-        inline fun <reified O, reified N> subscribe(column: Column, crossinline listener: (eventReceiver: ListenerEventReceiver<Column, O, N>) -> Unit): ListenerReference {
-            return column.subscribe(listener)
+        fun onAny(table: Table, listener: (eventReceiver: ListenerEventReceiver<Table, *, *>) -> Unit): ListenerReference {
+            return table.onAny(listener)
         }
 
-        fun subscribeAny(column: Column, listener: (eventReceiver: ListenerEventReceiver<Column, *, *>) -> Unit): ListenerReference {
-            return column.subscribeAny(listener)
+        inline fun <reified O, reified N> on(column: Column, crossinline listener: (eventReceiver: ListenerEventReceiver<Column, O, N>) -> Unit): ListenerReference {
+            return column.on(listener)
         }
 
-        inline fun <reified O, reified N> subscribe(row: Row, crossinline listener: (eventReceiver: ListenerEventReceiver<Row, O, N>) -> Unit): ListenerReference {
-            return row.subscribe(listener)
+        fun onAny(column: Column, listener: (eventReceiver: ListenerEventReceiver<Column, *, *>) -> Unit): ListenerReference {
+            return column.onAny(listener)
         }
 
-        fun subscribeAny(row: Row, listener: (eventReceiver: ListenerEventReceiver<Row, *, *>) -> Unit): ListenerReference {
-            return row.subscribeAny(listener)
+        inline fun <reified O, reified N> on(row: Row, crossinline listener: (eventReceiver: ListenerEventReceiver<Row, O, N>) -> Unit): ListenerReference {
+            return row.on(listener)
         }
 
-        inline fun <reified O, reified N> subscribe(cellRange: CellRange, crossinline listener: (eventReceiver: ListenerEventReceiver<CellRange, O, N>) -> Unit): ListenerReference {
-            return cellRange.subscribe(listener)
+        fun onAny(row: Row, listener: (eventReceiver: ListenerEventReceiver<Row, *, *>) -> Unit): ListenerReference {
+            return row.onAny(listener)
         }
 
-        fun subscribeAny(cellRange: CellRange, listener: (eventReceiver: ListenerEventReceiver<CellRange, *, *>) -> Unit): ListenerReference {
-            return cellRange.subscribeAny(listener)
+        inline fun <reified O, reified N> on(cellRange: CellRange, crossinline listener: (eventReceiver: ListenerEventReceiver<CellRange, O, N>) -> Unit): ListenerReference {
+            return cellRange.on(listener)
         }
 
-        inline fun <reified O, reified N> subscribe(cell: Cell<*>, crossinline listener: (eventReceiver: ListenerEventReceiver<Cell<*>, O, N>) -> Unit): ListenerReference {
-            return cell.subscribe(listener)
+        fun onAny(cellRange: CellRange, listener: (eventReceiver: ListenerEventReceiver<CellRange, *, *>) -> Unit): ListenerReference {
+            return cellRange.onAny(listener)
         }
 
-        fun subscribeAny(cell: Cell<*>, listener: (eventReceiver: ListenerEventReceiver<Cell<*>, *, *>) -> Unit): ListenerReference {
-            return cell.subscribeAny(listener)
+        inline fun <reified O, reified N> on(cell: Cell<*>, crossinline listener: (eventReceiver: ListenerEventReceiver<Cell<*>, O, N>) -> Unit): ListenerReference {
+            return cell.on(listener)
+        }
+
+        fun onAny(cell: Cell<*>, listener: (eventReceiver: ListenerEventReceiver<Cell<*>, *, *>) -> Unit): ListenerReference {
+            return cell.onAny(listener)
         }
     }
 }
 
 class BaseTable internal constructor(
     name: String,
-    internal val columnsMap: ConcurrentMap<ColumnHeader, Column> = ConcurrentHashMap(),
-    internal val indicesMap: ConcurrentNavigableMap<Long, Int> = ConcurrentSkipListMap(),
+    override val columnsMap: ConcurrentMap<ColumnHeader, Column> = ConcurrentHashMap(),
+    override val indicesMap: ConcurrentNavigableMap<Long, Int> = ConcurrentSkipListMap(),
     override val eventProcessor: TableEventProcessor = TableEventProcessor()
 ) : Table(name) {
     init {
@@ -497,6 +554,7 @@ class BaseTable internal constructor(
             .map { it.value }
             .toList()
 
+    // TODO Column add event
     override fun get(header: ColumnHeader): Column = columnsMap.computeIfAbsent(header) {
         if (closed)
             throw InvalidTableException("Table is closed")
@@ -506,10 +564,12 @@ class BaseTable internal constructor(
 
     override fun contains(header: ColumnHeader): Boolean = columnsMap.containsKey(header)
 
+    // TODO Column remove event
     override fun remove(header: ColumnHeader) {
         columnsMap.remove(header)?.clear()
     }
 
+    // TODO Column rename event
     override fun rename(existing: ColumnHeader, newName: ColumnHeader) {
         val column = columnsMap[existing] ?: return
 

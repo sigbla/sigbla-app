@@ -28,30 +28,41 @@ async function socketOpen(_) {
 }
 
 async function scroll() {
-    let inc = 100;
+    const inc = 100
 
-    let xoffset = window.pageXOffset;
-    let yoffset = window.pageYOffset;
+    const xoffset = window.pageXOffset
+    const yoffset = window.pageYOffset
 
-    let height = window.innerHeight - (window.innerHeight % inc) + inc;
-    let width = window.innerWidth - (window.innerWidth % inc) + inc;
+    const colHeaders = document.getElementsByClassName("ch")
+    for (let i = 0; i < colHeaders.length; i++) {
+        const header = colHeaders.item(i)
+        header.style.marginLeft = "-" + xoffset + "px"
+    }
+    const rowHeaders = document.getElementsByClassName("rh")
+    for (let i = 0; i < rowHeaders.length; i++) {
+        const header = rowHeaders.item(i)
+        header.style.marginTop = "-" + yoffset + "px"
+    }
 
-    let xtile = xoffset - (xoffset % inc);
-    let ytile = yoffset - (yoffset % inc);
+    const height = window.innerHeight - (window.innerHeight % inc) + inc
+    const width = window.innerWidth - (window.innerWidth % inc) + inc
 
-    document.getElementById("pos").innerText = xoffset + ", " + yoffset + " | " + xtile + ", " + ytile;
+    const xtile = xoffset - (xoffset % inc)
+    const ytile = yoffset - (yoffset % inc)
 
-    if (lastTile[0] === xtile && lastTile[1] === ytile && lastTile[2] === height && lastTile[3] === width) return;
+    //document.getElementById("pos").innerText = xoffset + ", " + yoffset + " | " + xtile + ", " + ytile;
 
-    lastTile = [xtile, ytile, height, width];
+    if (lastTile[0] === xtile && lastTile[1] === ytile && lastTile[2] === height && lastTile[3] === width) return
 
-    let scrollEvent = {"type": "scroll", "x": xtile, "y": ytile, "h": height, "w": width};
+    lastTile = [xtile, ytile, height, width]
+
+    const scrollEvent = {"type": "scroll", "x": xtile, "y": ytile, "h": height, "w": width}
 
     if (pendingUpdate) {
-        pendingScrolls.push(scrollEvent);
+        pendingScrolls.push(scrollEvent)
     } else {
-        pendingUpdate = true;
-        socket.send(JSON.stringify(scrollEvent));
+        pendingUpdate = true
+        socket.send(JSON.stringify(scrollEvent))
     }
 }
 
@@ -67,7 +78,8 @@ async function handleMessage(message, index, messages) {
         case "add": {
             let div = document.createElement("div");
             div.id = message.id;
-            div.style.position = "absolute";
+            div.className = message.classes;
+            div.style.zIndex = message.z
             div.style.left = message.x + "px";
             div.style.top = message.y + "px";
             div.style.height = message.h + "px";

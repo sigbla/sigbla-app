@@ -98,20 +98,24 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
 
     override fun isEmpty(): Boolean = false
 
-    inline fun <reified O, reified N> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<CellRange, O, N>) -> Unit): ListenerReference {
-        return subscribeAny { receiver ->
+    inline fun <reified O, reified N> on(crossinline listener: (eventReceiver: ListenerEventReceiver<CellRange, O, N>) -> Unit): ListenerReference {
+        return onAny { receiver ->
             val events = receiver.events.filter {
                 it.oldValue.value is O && it.newValue.value is N
-            } as List<ListenerEvent<out O, out N>>
-            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
+            } as Sequence<ListenerEvent<out O, out N>>
+            //if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
+            listener.invoke(ListenerEventReceiver(receiver.listenerReference, this, events))
         }
     }
 
-    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<CellRange, *, *>) -> Unit): ListenerReference {
+    fun onAny(listener: (eventReceiver: ListenerEventReceiver<CellRange, *, *>) -> Unit): ListenerReference {
         return start.column.table.eventProcessor.subscribe(this) {
-            if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
+            //if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
+            listener.invoke(ListenerEventReceiver(it.listenerReference, this, it.events))
         }
     }
+
+    // TODO: Implement various operations like we have on cells.. like plus, etc, and also assignment and basic math ops like sum, etc
 }
 
 sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any> {
@@ -289,18 +293,20 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any> {
         TODO()
     }
 
-    inline fun <reified O, reified N> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<Cell<*>, O, N>) -> Unit): ListenerReference {
-        return subscribeAny { receiver ->
+    inline fun <reified O, reified N> on(crossinline listener: (eventReceiver: ListenerEventReceiver<Cell<*>, O, N>) -> Unit): ListenerReference {
+        return onAny { receiver ->
             val events = receiver.events.filter {
                 it.oldValue.value is O && it.newValue.value is N
-            } as List<ListenerEvent<out O, out N>>
-            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
+            } as Sequence<ListenerEvent<out O, out N>>
+            //if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
+            listener.invoke(ListenerEventReceiver(receiver.listenerReference, this, events))
         }
     }
 
-    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<Cell<*>, *, *>) -> Unit): ListenerReference {
+    fun onAny(listener: (eventReceiver: ListenerEventReceiver<Cell<*>, *, *>) -> Unit): ListenerReference {
         return column.table.eventProcessor.subscribe(this) {
-            if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
+            //if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
+            listener.invoke(ListenerEventReceiver(it.listenerReference, this, it.events))
         }
     }
 

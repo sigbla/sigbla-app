@@ -45,18 +45,20 @@ abstract class Row {
     operator fun set(vararg header: String, value: BigDecimal) = table[ColumnHeader(*header)].set(index, value)
     operator fun set(vararg header: String, value: Number) = table[ColumnHeader(*header)].set(index, value)
 
-    inline fun <reified O, reified N> subscribe(crossinline listener: (eventReceiver: ListenerEventReceiver<Row, O, N>) -> Unit): ListenerReference {
-        return subscribeAny { receiver ->
+    inline fun <reified O, reified N> on(crossinline listener: (eventReceiver: ListenerEventReceiver<Row, O, N>) -> Unit): ListenerReference {
+        return onAny { receiver ->
             val events = receiver.events.filter {
                 it.oldValue.value is O && it.newValue.value is N
-            } as List<ListenerEvent<out O, out N>>
-            if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
+            } as Sequence<ListenerEvent<out O, out N>>
+            //if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
+            listener.invoke(ListenerEventReceiver(receiver.listenerReference, this, events))
         }
     }
 
-    fun subscribeAny(listener: (eventReceiver: ListenerEventReceiver<Row, *, *>) -> Unit): ListenerReference {
+    fun onAny(listener: (eventReceiver: ListenerEventReceiver<Row, *, *>) -> Unit): ListenerReference {
         return table.eventProcessor.subscribe(this) {
-            if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
+            //if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
+            listener.invoke(ListenerEventReceiver(it.listenerReference, this, it.events))
         }
     }
 

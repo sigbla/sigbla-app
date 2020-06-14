@@ -2,9 +2,9 @@ package sigbla.tmp
 
 import sigbla.app.IndexRelation.*
 import sigbla.app.timeseries.*
-import sigbla.app.Table.Companion.move
-import sigbla.app.Table.Companion.subscribe
+import sigbla.app.Table.Companion.on
 import sigbla.app.*
+import sigbla.app.Table.Companion.onTest
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -13,7 +13,21 @@ import java.time.LocalTime
 import java.time.ZoneId
 
 fun main() {
-    val table = Table.newTable("Table A")
+    //val table = Table.newTable("Table A")
+    val table = Table.newTable("test")
+
+    table["Column A"][0] = "A0"
+
+    table["Column A"][1] = 1000
+    table["Column A", 1] = 1000
+
+    (table["C"][1]..table["D"][10]).onAny {
+        if (table["E"][1].isNumeric())
+            table["E"][1] = table["E"][1] + 1
+    }
+
+    //val view = TableView.newTableView(table)
+    //view.show()
 
     table["A", "B"][1] = "Test"
     val cell1 = table["A", "B"][BEFORE, 1]
@@ -26,11 +40,11 @@ fun main() {
 
     val tickerHeaders = table.headers.filter { it[2] == "Ticker" }
 
-    val prices = tickerHeaders.map { header -> Pair(header, table[header][AT_OR_BEFORE, 1000]) }.toMap()
+    val prices = tickerHeaders.map { header -> header to table[header][AT_OR_BEFORE, 1000] }.toMap()
 
     table["A"][AT, LocalDate.now(), LocalTime.MAX, ZoneId.systemDefault()]
 
-    val size = 10_000L
+    val size = 1_000_000L
 
     val start1 = System.currentTimeMillis()
     for (i in 1.toLong()..size) {
@@ -52,8 +66,8 @@ fun main() {
     val end2 = System.currentTimeMillis()
 
     println()
-    println("Write: " + (end1-start1))
-    println("Read: " + (end2-start2))
+    println("Write: " + (end1 - start1))
+    println("Read: " + (end2 - start2))
 
     //Thread.sleep(Long.MAX_VALUE)
 
@@ -169,22 +183,44 @@ fun main() {
 
     val value = table["A"] at 1
 
-    subscribe<Any, Any>(table) { receiver ->
+    on<Any, Any>(table) { receiver ->
         println("Subscribe 1: ${receiver.events}")
         receiver.events.forEach {
             if (it.newValue.index == 1L) receiver.source["A"][2] = "UPDATE"
         }
     }
-    table.subscribe<Any, Number> {
+    onTest<Any, Number>(table) {
+        configure {
+            name = "Name"
+        }
+
+        //source["Sums", 0] = 0
+
+        events
+            .map {
+                it.newValue
+            }.forEach {
+                // TODO Implement plusAssign and similar: https://kotlinlang.org/docs/reference/operator-overloading.html
+                //source["Sums", 0] += it
+                //source["Sums", 0] = source["Sums", 0] + it
+            }
+    }
+
+    // TODO Introduce an off function as well?
+    // table.off(listenerRef)
+    // table.off("Name")
+    // table.off(table["A"][1])
+
+    table.on<Any, Number> {
         println("Subscribe 2: ${it.events}")
     }
-    table.subscribe<Any, String> {
+    table.on<Any, String> {
         println("Subscribe 3: ${it.events}")
     }
-    table.subscribe<String, Number> {
+    table.on<String, Number> {
         println("Subscribe 4: ${it.events}")
     }
-    table.subscribeAny {
+    table.onAny {
         println("Subscribe any: ${it.events}")
     }
 
@@ -192,9 +228,24 @@ fun main() {
     table["A"][1] = null
     table["A"][1] = 1000
 
-    subscribe<Any, Any>(table["A"]) {}
-    subscribe<Any, Any>(table["A"][1]..table["A"][2]) {}
-    subscribe<Any, Any>(table["A"][1]) {}
+    on<Any, Any>(table["A"]) {}
+    on<Any, Any>(table["A"][1]..table["A"][2]) {}
+    on<Any, Any>(table["A"][1]) {}
+
+    // TODO Maybe a onColumn for when columns are added/moved/copied?
+
+    val tableView = TableView.newTableView(table)
+    // TODO Maybe it is better if we could do tableView["A"] instead of tableView[table["A"]], and similar..
+//    tableView[table["A"]] = columnStyle {
+//        width = 100
+//    }
+//    tableView[table["A", "B"]] = columnStyle {}
+//
+//    tableView[table[1]] = rowStyle {}
+//
+//    tableView[table["A"][1]] = cellStyle {}
+
+    tableView.show()
 
     println("END")
 }
