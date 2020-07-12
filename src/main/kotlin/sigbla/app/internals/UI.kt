@@ -22,6 +22,7 @@ import io.ktor.sessions.get
 import io.ktor.sessions.sessions
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
+import sigbla.app.Dimensions
 import sigbla.app.TableView
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -125,12 +126,31 @@ internal object SigblaBackend {
     private suspend fun handleEvent(socket: WebSocketSession, event: ClientEvent) {
         val client = listeners[socket] ?: return
 
+        if (client.needDims) {
+            handleDims(client)
+            client.needDims = false
+        }
+
         when (event) {
             is ClientEventScroll -> {
                 client.scroll = event
                 handleTiles(client)
             }
         }
+    }
+
+    // TODO Check synchronized and suspend
+    @Synchronized
+    private suspend fun handleDims(client: SigblaClient) {
+        val view = Registry.getView(client.ref) ?: return
+
+        val jsonParser = Klaxon()
+
+        val dims = view.dims()
+        val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.maxX, dims.maxY)
+
+        client.dims = dims
+        client.socket.outgoing.send(Frame.Text(jsonParser.toJsonString(clientEventDims)))
     }
 
     // TODO Check synchronized and suspend
@@ -155,11 +175,11 @@ internal object SigblaBackend {
                 val h = client.tileState.tileSize
                 val w = client.tileState.tileSize
 
-                val cells = view.areaCells(x, y, h, w)
+                val cells = view.areaCells(x, y, h, w, client.dims)
                 cells.forEach { cell ->
                     //val addCell = ClientEventAddCell("c-${cell.x}-${cell.y}", cell.className, cell.x, cell.y, cell.h, cell.w, cell.z, cell.content)
-                    val cellId = client.tileState.addIdFor(cell.x, cell.y)
-                    val addCell = ClientEventAddCell(cellId, cell.className, cell.x, cell.y, cell.h, cell.w, cell.z, cell.content)
+                    val cellId = client.tileState.addIdFor(cell.x ?: cell.ml ?: throw Exception(), cell.y ?: cell.mt ?: throw Exception())
+                    val addCell = ClientEventAddCell(cellId, cell.className, cell.x, cell.y, cell.h, cell.w, cell.z, cell.mt, cell.ml, cell.ch, cell.cw, cell.content)
                     batch.add(addCell)
 
                     if (batch.size > 25) {
@@ -180,9 +200,9 @@ internal object SigblaBackend {
             val h = client.tileState.tileSize
             val w = client.tileState.tileSize
 
-            val cells = view.areaCells(x, y, h, w)
+            val cells = view.areaCells(x, y, h, w, client.dims)
             cells.forEach { cell ->
-                val cellId = client.tileState.withIdFor(cell.x, cell.y)
+                val cellId = client.tileState.withIdFor(cell.x ?: cell.ml ?: throw Exception(), cell.y ?: cell.mt ?: throw Exception())
 
                 if (cellId != null) {
                     val removeCell = ClientEventRemoveCell(cellId)
@@ -227,7 +247,9 @@ internal data class SigblaClient(
     val session: String,
     val ref: String,
     @Volatile var scroll: ClientEventScroll? = null,
-    val tileState: TileState = TileState()
+    val tileState: TileState = TileState(),
+    @Volatile var needDims: Boolean = true,
+    @Volatile var dims: Dimensions = Dimensions(0, 0, 0, 0)
 )
 
 internal data class ClientSession(val id: String)
@@ -235,10 +257,11 @@ internal data class ClientSession(val id: String)
 @TypeFor(field = "type", adapter = ClientEventAdapter::class)
 internal open class ClientEvent(val type: String)
 internal data class ClientEventScroll(val x: Int, val y: Int, val h: Int, val w: Int): ClientEvent("scroll")
-internal data class ClientEventAddCell(val id: String, val classes: String, val x: Long, val y: Long, val h: Long, val w: Long, val z: Long, val content: String): ClientEvent("add")
+internal data class ClientEventAddCell(val id: String, val classes: String, val x: Long?, val y: Long?, val h: Long, val w: Long, val z: Long?, val mt: Long?, val ml: Long?, val ch: Long?, val cw: Long?, val content: String): ClientEvent("add")
 internal data class ClientEventAddCommit(val id: String): ClientEvent("add-commit")
 internal data class ClientEventRemoveCell(val id: String): ClientEvent("rm")
 internal data class ClientEventUpdateEnd(val id: String): ClientEvent("update-end")
+internal data class ClientEventDims(val cornerX: Long, val cornerY: Long, val maxX: Long, val maxY: Long): ClientEvent("dims")
 
 internal class ClientEventAdapter: TypeAdapter<ClientEvent> {
     override fun classFor(type: Any): KClass<out ClientEvent> = when(type as String) {
@@ -260,7 +283,6 @@ internal class TileState(val maxDistance: Int = 2000, val tileSize: Int = 1000) 
     private val coordinateIds: ConcurrentMap<Coordinate, String> = ConcurrentHashMap()
 
     fun updateTiles(scroll: ClientEventScroll): TileUpdate {
-        println(scroll)
         val x1 = scroll.x - (scroll.x % tileSize)
         val y1 = scroll.y - (scroll.y % tileSize)
         val x2 = x1 + scroll.w - (scroll.w % tileSize) + tileSize

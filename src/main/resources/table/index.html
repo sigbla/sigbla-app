@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <style type="text/css">
+        @font-face {
+            font-family: 'Roboto';
+            src: url('Roboto-Regular.ttf') format('truetype');
+        }
+
         html, body, div, span, applet, object, iframe,
         h1, h2, h3, h4, h5, h6, p, blockquote, pre,
         a, abbr, acronym, address, big, cite, code,
@@ -30,6 +35,7 @@
             display: block;
         }
         body {
+            font-family: 'Roboto', sans-serif;
             line-height: 1;
         }
         ol, ul {
@@ -47,9 +53,10 @@
             border-collapse: collapse;
             border-spacing: 0;
         }
-        html, body {
-            width: 1000000px;
-            height: 1000000px;
+        body {
+            /*width: 500000px;*/
+            /*height: 500000px;*/
+            user-select: none;
         }
         #pos {
             position: fixed;
@@ -61,25 +68,58 @@
             top: 30px;
             left: 10px;
         }
+        #tc {
+            position: fixed;
+            top: 0;
+            left: 0;
+            border-right: lightsteelblue solid 1px;
+            border-bottom: lightsteelblue solid 1px;
+            background-color: lightsteelblue;
+            z-index: 3000;
+        }
+        .container {
+            position: absolute;
+            /*height: 1000000px;*/
+            /*width: 1000000px;*/
+            top: 0;
+            left: 0;
+        }
         .c {
-            /*border: lightgray solid 1px;*/
+            border-right: lightsteelblue solid 1px;
+            border-bottom: lightsteelblue solid 1px;
             white-space: nowrap;
             overflow: hidden;
             position: absolute;
+            z-index: 1000;
+        }
+        .c:hover {
+            background-color: lightsteelblue;
         }
         .ch {
-            /*border: lightgray solid 1px;*/
-            background-color: lightgray;
+            border-right: lightsteelblue solid 1px;
+            border-bottom: lightsteelblue solid 1px;
+            background-color: lightsteelblue;
             white-space: nowrap;
             overflow: hidden;
-            position: fixed;
+            position: sticky;
+            /*top: 0;*/
+            z-index: 2000;
+        }
+        .ch:hover {
+            background-color: lightsteelblue;
         }
         .rh {
-            /*border: lightgray solid 1px;*/
-            background-color: lightgray;
+            border-right: lightsteelblue solid 1px;
+            border-bottom: lightsteelblue solid 1px;
+            background-color: lightsteelblue;
             white-space: nowrap;
             overflow: hidden;
-            position: fixed;
+            position: sticky;
+            /*left: 0;*/
+            z-index: 2000;
+        }
+        .rh:hover {
+            background-color: lightsteelblue;
         }
     </style>
 </head>

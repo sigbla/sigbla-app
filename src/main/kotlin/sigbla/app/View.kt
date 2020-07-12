@@ -65,7 +65,9 @@ abstract class TableView(val name: String) {
 
     fun show() = SigblaBackend.openView(this)
 
-    internal abstract fun areaCells(x: Int, y: Int, h: Int, w: Int): List<PositionedCell>
+    internal abstract fun areaCells(x: Int, y: Int, h: Int, w: Int, dims: Dimensions): List<PositionedCell>
+
+    internal abstract fun dims(): Dimensions
 
     companion object {
         fun newTableView(name: String): TableView = BaseTableView(name)
@@ -191,31 +193,46 @@ class BaseTableView internal constructor(
     }
 
     @Synchronized
-    override fun areaCells(x: Int, y: Int, h: Int, w: Int): List<PositionedCell> {
+    override fun areaCells(x: Int, y: Int, h: Int, w: Int, dims: Dimensions): List<PositionedCell> {
         val table = this.table ?: return emptyList()
-
-        val columnHeaderHeight = 25L
 
         val applicableColumns = mutableListOf<Pair<Column, Long>>()
         var runningWidth = 0L
         var maxHeaderOffset = 0L
+        var maxHeaderCells = 0
 
         for (column in table.columns) {
             if (x <= runningWidth && runningWidth <= x + w) applicableColumns.add(Pair(column, runningWidth))
             runningWidth += this[column].width
 
-            val yOffset = column.columnHeader.header.size * columnHeaderHeight
+            val yOffset = column.columnHeader.header.size * defaultRowStyle.height.toLong()
             if (yOffset > maxHeaderOffset) maxHeaderOffset = yOffset
+            if (column.columnHeader.header.size > maxHeaderCells) maxHeaderCells = column.columnHeader.header.size
         }
+
+        val colHeaderZ = Integer.MAX_VALUE.toLong()
+        val rowHeaderZ = Integer.MAX_VALUE.toLong()
 
         val output = mutableListOf<PositionedCell>()
 
+        // This is for the column headers
         for ((applicableColumn, applicableX) in applicableColumns) {
-            for (indexedColumnHeader in applicableColumn.columnHeader.header.withIndex()) {
-                val headerText = indexedColumnHeader.value
-                val yOffset = indexedColumnHeader.index.toLong() * columnHeaderHeight
+            for (idx in 0 until maxHeaderCells) {
+                val headerText = applicableColumn.columnHeader[idx]
+                val yOffset = idx.toLong() * defaultRowStyle.height.toLong()
 
-                output.add(PositionedCell(headerText, applicableX + 100, yOffset, columnHeaderHeight, this[applicableColumn].width.toLong(), Int.MAX_VALUE.toLong(), "ch"))
+                output.add(PositionedCell(
+                    headerText,
+                    null,
+                    yOffset,
+                    defaultRowStyle.height.toLong(),
+                    this[applicableColumn].width.toLong(),
+                    colHeaderZ,
+                    ch = dims.maxY,
+                    cw = dims.maxX,
+                    ml = applicableX + 100,
+                    className = "ch"
+                ))
             }
         }
 
@@ -230,25 +247,62 @@ class BaseTableView internal constructor(
             if (runningHeight > y + h || runningHeight < 0L) break
         }
 
+        // This is for the row headers
         for ((applicableRow, applicableY) in applicableRows) {
-            output.add(PositionedCell(applicableRow.toString(), 0, applicableY, columnHeaderHeight, 100, className = "rh"))
+            output.add(PositionedCell(applicableRow.toString(),
+                0,
+                null,
+                this[applicableRow].height.toLong(),
+                100,
+                rowHeaderZ,
+                ch = dims.maxY,
+                cw = dims.maxX,
+                mt = applicableY,
+                className = "rh"
+            ))
         }
 
+        // This is for the cells
         for ((applicableColumn, applicableX) in applicableColumns) {
             for ((applicableRow, applicableY) in applicableRows) {
                 // TODO Can probably skip empty cells here..
                 // TODO PositionedCell will need it's height and width..
+                //if (applicableColumn[applicableRow] is UnitCell) continue
+
                 output.add(PositionedCell(applicableColumn[applicableRow].toString(), applicableX + 100, applicableY, this[applicableRow].height.toLong(), this[applicableColumn].width.toLong(), className = "c"))
             }
         }
 
         return output
     }
+
+    @Synchronized
+    override fun dims(): Dimensions {
+        val table = this.table ?: return Dimensions(0, 0, 0, 0)
+
+        var runningWidth = defaultColumnStyle.width.toLong()
+        var maxHeaderOffset = 0L
+
+        for (column in table.columns) {
+            runningWidth += this[column].width
+
+            val yOffset = column.columnHeader.header.size * defaultRowStyle.height.toLong()
+            if (yOffset > maxHeaderOffset) maxHeaderOffset = yOffset
+        }
+
+        var runningHeight = maxHeaderOffset
+
+        for (row in 0..(table.indicesMap.lastKey())) {
+            runningHeight += this[row].height
+        }
+
+        return Dimensions(defaultColumnStyle.width.toLong(), maxHeaderOffset, runningWidth, runningHeight)
+    }
 }
 
 class ColumnStyle internal constructor(val width: Int)
 
-class ColumnStyleBuilder(var width: Int = 65)
+class ColumnStyleBuilder(var width: Int = 100)
 
 fun columnStyle(init: ColumnStyleBuilder.() -> Unit): ColumnStyle {
     val builder = ColumnStyleBuilder()
@@ -258,7 +312,7 @@ fun columnStyle(init: ColumnStyleBuilder.() -> Unit): ColumnStyle {
 
 class RowStyle internal constructor(val height: Int)
 
-class RowStyleBuilder(var height: Int = 16)
+class RowStyleBuilder(var height: Int = 20)
 
 fun rowStyle(init: RowStyleBuilder.() -> Unit): RowStyle {
     val builder = RowStyleBuilder()
@@ -276,4 +330,18 @@ fun cellStyle(init: CellStyleBuilder.() -> Unit): CellStyle {
     return CellStyle(height = builder.height, width = builder.width)
 }
 
-internal class PositionedCell(val content: String, val x: Long, val y: Long, val h: Long, val w: Long, val z: Long = 0L, val className: String = "")
+internal class PositionedCell(
+    val content: String,
+    val x: Long?,
+    val y: Long?,
+    val h: Long,
+    val w: Long,
+    val z: Long? = null,
+    val mt: Long? = null, // Margin top
+    val ml: Long? = null, // Margin left
+    val cw: Long? = null, // Container width
+    val ch: Long? = null, // Container height
+    val className: String = ""
+)
+
+internal class Dimensions(val cornerX: Long, val cornerY: Long, val maxX: Long, val maxY: Long)
