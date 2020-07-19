@@ -65,7 +65,7 @@ abstract class TableView(val name: String) {
 
     fun show() = SigblaBackend.openView(this)
 
-    internal abstract fun areaCells(x: Int, y: Int, h: Int, w: Int, dims: Dimensions): List<PositionedCell>
+    internal abstract fun areaContent(x: Int, y: Int, h: Int, w: Int, dims: Dimensions): List<PositionedContent>
 
     internal abstract fun dims(): Dimensions
 
@@ -193,7 +193,7 @@ class BaseTableView internal constructor(
     }
 
     @Synchronized
-    override fun areaCells(x: Int, y: Int, h: Int, w: Int, dims: Dimensions): List<PositionedCell> {
+    override fun areaContent(x: Int, y: Int, h: Int, w: Int, dims: Dimensions): List<PositionedContent> {
         val table = this.table ?: return emptyList()
 
         val applicableColumns = mutableListOf<Pair<Column, Long>>()
@@ -213,7 +213,7 @@ class BaseTableView internal constructor(
         val colHeaderZ = Integer.MAX_VALUE.toLong()
         val rowHeaderZ = Integer.MAX_VALUE.toLong()
 
-        val output = mutableListOf<PositionedCell>()
+        val output = mutableListOf<PositionedContent>()
 
         // This is for the column headers
         for ((applicableColumn, applicableX) in applicableColumns) {
@@ -221,17 +221,19 @@ class BaseTableView internal constructor(
                 val headerText = applicableColumn.columnHeader[idx]
                 val yOffset = idx.toLong() * defaultRowStyle.height.toLong()
 
-                output.add(PositionedCell(
+                output.add(PositionedContent(
+                    applicableColumn.columnHeader,
+                    (-1 - idx).toLong(),
                     headerText,
-                    null,
-                    yOffset,
                     defaultRowStyle.height.toLong(),
                     this[applicableColumn].width.toLong(),
                     colHeaderZ,
-                    ch = dims.maxY,
-                    cw = dims.maxX,
                     ml = applicableX + 100,
-                    className = "ch"
+                    cw = dims.maxX,
+                    ch = dims.maxY,
+                    className = "ch",
+                    x = null,
+                    y = yOffset
                 ))
             }
         }
@@ -249,16 +251,19 @@ class BaseTableView internal constructor(
 
         // This is for the row headers
         for ((applicableRow, applicableY) in applicableRows) {
-            output.add(PositionedCell(applicableRow.toString(),
-                0,
-                null,
+            output.add(PositionedContent(
+                emptyColumnHeader,
+                applicableRow,
+                applicableRow.toString(),
                 this[applicableRow].height.toLong(),
                 100,
                 rowHeaderZ,
-                ch = dims.maxY,
-                cw = dims.maxX,
                 mt = applicableY,
-                className = "rh"
+                cw = dims.maxX,
+                ch = dims.maxY,
+                className = "rh",
+                x = 0,
+                y = null
             ))
         }
 
@@ -269,7 +274,16 @@ class BaseTableView internal constructor(
                 // TODO PositionedCell will need it's height and width..
                 //if (applicableColumn[applicableRow] is UnitCell) continue
 
-                output.add(PositionedCell(applicableColumn[applicableRow].toString(), applicableX + 100, applicableY, this[applicableRow].height.toLong(), this[applicableColumn].width.toLong(), className = "c"))
+                output.add(PositionedContent(
+                    applicableColumn.columnHeader,
+                    applicableRow,
+                    applicableColumn[applicableRow].toString(),
+                    this[applicableRow].height.toLong(),
+                    this[applicableColumn].width.toLong(),
+                    className = "c",
+                    x = applicableX + 100,
+                    y = applicableY
+                ))
             }
         }
 
@@ -300,9 +314,9 @@ class BaseTableView internal constructor(
     }
 }
 
-class ColumnStyle internal constructor(val width: Int)
+data class ColumnStyle internal constructor(val width: Long)
 
-class ColumnStyleBuilder(var width: Int = 100)
+class ColumnStyleBuilder(var width: Long = 100)
 
 fun columnStyle(init: ColumnStyleBuilder.() -> Unit): ColumnStyle {
     val builder = ColumnStyleBuilder()
@@ -310,9 +324,9 @@ fun columnStyle(init: ColumnStyleBuilder.() -> Unit): ColumnStyle {
     return ColumnStyle(width = builder.width)
 }
 
-class RowStyle internal constructor(val height: Int)
+data class RowStyle internal constructor(val height: Long)
 
-class RowStyleBuilder(var height: Int = 20)
+class RowStyleBuilder(var height: Long = 20)
 
 fun rowStyle(init: RowStyleBuilder.() -> Unit): RowStyle {
     val builder = RowStyleBuilder()
@@ -320,9 +334,9 @@ fun rowStyle(init: RowStyleBuilder.() -> Unit): RowStyle {
     return RowStyle(height = builder.height)
 }
 
-class CellStyle(val height: Int?, val width: Int?)
+class CellStyle(val height: Long?, val width: Long?)
 
-class CellStyleBuilder(var height: Int? = null, var width: Int? = null)
+class CellStyleBuilder(var height: Long? = null, var width: Long? = null)
 
 fun cellStyle(init: CellStyleBuilder.() -> Unit): CellStyle {
     val builder = CellStyleBuilder()
@@ -330,10 +344,10 @@ fun cellStyle(init: CellStyleBuilder.() -> Unit): CellStyle {
     return CellStyle(height = builder.height, width = builder.width)
 }
 
-internal class PositionedCell(
+internal class PositionedContent(
+    val contentHeader: ColumnHeader,
+    val contentRow: Long,
     val content: String,
-    val x: Long?,
-    val y: Long?,
     val h: Long,
     val w: Long,
     val z: Long? = null,
@@ -341,7 +355,9 @@ internal class PositionedCell(
     val ml: Long? = null, // Margin left
     val cw: Long? = null, // Container width
     val ch: Long? = null, // Container height
-    val className: String = ""
+    val className: String = "",
+    val x: Long?,
+    val y: Long?
 )
 
 internal class Dimensions(val cornerX: Long, val cornerY: Long, val maxX: Long, val maxY: Long)

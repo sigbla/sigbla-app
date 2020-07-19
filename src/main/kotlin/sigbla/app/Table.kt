@@ -1,5 +1,6 @@
 package sigbla.app
 
+import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.exceptions.InvalidTableException
 import sigbla.app.internals.Registry
 import java.math.BigDecimal
@@ -556,8 +557,8 @@ class BaseTable internal constructor(
 
     // TODO Column add event
     override fun get(header: ColumnHeader): Column = columnsMap.computeIfAbsent(header) {
-        if (closed)
-            throw InvalidTableException("Table is closed")
+        if (closed) throw InvalidTableException("Table is closed")
+        if (header.header.isEmpty()) throw InvalidColumnException("Empty header")
 
         BaseColumn(this, header, indicesMap)
     }

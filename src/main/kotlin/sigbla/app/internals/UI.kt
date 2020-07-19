@@ -3,15 +3,12 @@ package sigbla.app.internals
 import com.beust.klaxon.Klaxon
 import com.beust.klaxon.TypeAdapter
 import com.beust.klaxon.TypeFor
-import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.DefaultHeaders
 import io.ktor.http.cio.websocket.*
 import io.ktor.http.content.defaultResource
 import io.ktor.http.content.resources
 import io.ktor.http.content.static
-import io.ktor.response.respondRedirect
-import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
@@ -23,6 +20,7 @@ import io.ktor.sessions.sessions
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
 import sigbla.app.Dimensions
+import sigbla.app.PositionedContent
 import sigbla.app.TableView
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -69,23 +67,27 @@ internal object SigblaBackend {
                 install(WebSockets)
 
                 routing {
-                    get("/init/$accessToken") {
-                        call.sessions.set("SESSION", ClientSession(UUID.randomUUID().toString()))
-                        call.respondRedirect("/t/test/")
-                    }
+//                    get("/init/$accessToken") {
+//                        call.sessions.set("SESSION", ClientSession(UUID.randomUUID().toString()))
+//                        call.respondRedirect("/t/test/")
+//                    }
                     static("/t/{ref}") {
                         resources("table")
                         defaultResource("index.html", "table")
                     }
                     webSocket("/t/{ref}/socket") {
-                        val session = call.sessions.get<ClientSession>()
+                        val session = call.sessions.get<ClientSession>() ?: call.sessions.let {
+                            val newSession = ClientSession(UUID.randomUUID().toString())
+                            it.set("SESSION", newSession)
+                            return@let newSession
+                        }
                         val ref = call.parameters["ref"]
 
-                        if (session == null) {
-                            println("Close")
-                            close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No session"))
-                            return@webSocket
-                        }
+//                        if (session == null) {
+//                            println("Close")
+//                            close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No session"))
+//                            return@webSocket
+//                        }
 
                         if (ref == null || ref.isBlank()) {
                             println("Close")
@@ -93,7 +95,9 @@ internal object SigblaBackend {
                             return@webSocket
                         }
 
-                        addListener(this, session.id, ref)
+                        val client = addListener(this, session.id, ref)
+
+                        handleDims(client)
 
                         println("post add listener on ${session.id}:$ref")
 
@@ -126,16 +130,9 @@ internal object SigblaBackend {
     private suspend fun handleEvent(socket: WebSocketSession, event: ClientEvent) {
         val client = listeners[socket] ?: return
 
-        if (client.needDims) {
-            handleDims(client)
-            client.needDims = false
-        }
-
         when (event) {
-            is ClientEventScroll -> {
-                client.scroll = event
-                handleTiles(client)
-            }
+            is ClientEventScroll -> handleTiles(client, event)
+            is ClientEventResize -> handleResize(client, event)
         }
     }
 
@@ -155,9 +152,8 @@ internal object SigblaBackend {
 
     // TODO Check synchronized and suspend
     @Synchronized
-    private suspend fun handleTiles(client: SigblaClient) {
+    private suspend fun handleTiles(client: SigblaClient, scroll: ClientEventScroll) {
         val view = Registry.getView(client.ref) ?: return
-        val scroll = client.scroll ?: return
         val update = client.tileState.updateTiles(scroll)
 
         val jsonParser = Klaxon()
@@ -168,19 +164,17 @@ internal object SigblaBackend {
                 sqrt((scroll.x - tile.x).toFloat().pow(2) + (scroll.y - tile.y).toFloat().pow(2))
             }
             .forEach { tile ->
-                val batch = mutableListOf<ClientEventAddCell>()
+                val batch = mutableListOf<ClientEventAddContent>()
 
                 val x = tile.x
                 val y = tile.y
                 val h = client.tileState.tileSize
                 val w = client.tileState.tileSize
 
-                val cells = view.areaCells(x, y, h, w, client.dims)
-                cells.forEach { cell ->
-                    //val addCell = ClientEventAddCell("c-${cell.x}-${cell.y}", cell.className, cell.x, cell.y, cell.h, cell.w, cell.z, cell.content)
-                    val cellId = client.tileState.addIdFor(cell.x ?: cell.ml ?: throw Exception(), cell.y ?: cell.mt ?: throw Exception())
-                    val addCell = ClientEventAddCell(cellId, cell.className, cell.x, cell.y, cell.h, cell.w, cell.z, cell.mt, cell.ml, cell.ch, cell.cw, cell.content)
-                    batch.add(addCell)
+                view.areaContent(x, y, h, w, client.dims).forEach { content ->
+                    val cellId = client.tileState.addIdFor(content.x ?: content.ml ?: throw Exception(), content.y ?: content.mt ?: throw Exception(), content)
+                    val addContent = ClientEventAddContent(cellId, content.className, content.x, content.y, content.h, content.w, content.z, content.mt, content.ml, content.ch, content.cw, content.content)
+                    batch.add(addContent)
 
                     if (batch.size > 25) {
                         client.socket.outgoing.send(Frame.Text(jsonParser.toJsonString(batch)))
@@ -188,26 +182,24 @@ internal object SigblaBackend {
                     }
                 }
 
-                client.socket.outgoing.send(Frame.Text(jsonParser.toJsonString(batch)))
+                if (batch.isNotEmpty()) client.socket.outgoing.send(Frame.Text(jsonParser.toJsonString(batch)))
                 client.socket.outgoing.send(Frame.Text(jsonParser.toJsonString(ClientEventAddCommit(UUID.randomUUID().toString()))))
             }
 
         update.removedTiles.forEach { tile ->
-            val batch = mutableListOf<ClientEventRemoveCell>()
+            val batch = mutableListOf<ClientEventRemoveContent>()
 
             val x = tile.x
             val y = tile.y
             val h = client.tileState.tileSize
             val w = client.tileState.tileSize
 
-            val cells = view.areaCells(x, y, h, w, client.dims)
-            cells.forEach { cell ->
-                val cellId = client.tileState.withIdFor(cell.x ?: cell.ml ?: throw Exception(), cell.y ?: cell.mt ?: throw Exception())
+            view.areaContent(x, y, h, w, client.dims).forEach { cell ->
+                val contentId = client.tileState.withIdFor(cell.x ?: cell.ml ?: throw Exception(), cell.y ?: cell.mt ?: throw Exception())
 
-                if (cellId != null) {
-                    val removeCell = ClientEventRemoveCell(cellId)
-                    //val removeCell = ClientEventRemoveCell("c-${cell.x}-${cell.y}")
-                    batch.add(removeCell)
+                if (contentId != null) {
+                    val removeContent = ClientEventRemoveContent(contentId)
+                    batch.add(removeContent)
                 }
 
                 if (batch.size > 25) {
@@ -215,24 +207,45 @@ internal object SigblaBackend {
                     batch.clear()
                 }
             }
-            client.socket.outgoing.send(Frame.Text(jsonParser.toJsonString(batch)))
+
+            if (batch.isNotEmpty()) client.socket.outgoing.send(Frame.Text(jsonParser.toJsonString(batch)))
         }
 
         client.socket.outgoing.send(Frame.Text(jsonParser.toJsonString(ClientEventUpdateEnd(UUID.randomUUID().toString()))))
     }
 
+    // TODO Check synchronized and suspend
+    @Synchronized
+    private suspend fun handleResize(client: SigblaClient, resize: ClientEventResize) {
+        val view = Registry.getView(client.ref) ?: return
+        val target = client.tileState.withPCFor(resize.target) ?: return
+
+        if (resize.sizeChangeX != 0L) {
+            val columnStyle = view[target.contentHeader]
+            view[target.contentHeader] = columnStyle.copy(width = 10L.coerceAtLeast(columnStyle.width + resize.sizeChangeX))
+        }
+
+        if (resize.sizeChangeY != 0L) {
+            val rowStyle = view[target.contentRow]
+            view[target.contentRow] = rowStyle.copy(height = 10L.coerceAtLeast(rowStyle.height + resize.sizeChangeY))
+        }
+    }
+
     fun openView(view: TableView) {
         // TODO
-        println("http://127.0.0.1:${SigblaBackend.port}/init/${SigblaBackend.accessToken}")
+        //println("http://127.0.0.1:${SigblaBackend.port}/init/${SigblaBackend.accessToken}")
+        println("http://127.0.0.1:$port/t/${view.name}/")
     }
 
     private fun addListener(
         socket: WebSocketSession,
         session: String,
         ref: String
-    ) {
+    ): SigblaClient {
         println("add listener")
-        listeners[socket] = SigblaClient(socket, session, ref)
+        val client = SigblaClient(socket, session, ref)
+        listeners[socket] = client
+        return client
     }
 
     private fun removeListener(socket: WebSocketSession) {
@@ -246,9 +259,7 @@ internal data class SigblaClient(
     val socket: WebSocketSession,
     val session: String,
     val ref: String,
-    @Volatile var scroll: ClientEventScroll? = null,
     val tileState: TileState = TileState(),
-    @Volatile var needDims: Boolean = true,
     @Volatile var dims: Dimensions = Dimensions(0, 0, 0, 0)
 )
 
@@ -257,15 +268,17 @@ internal data class ClientSession(val id: String)
 @TypeFor(field = "type", adapter = ClientEventAdapter::class)
 internal open class ClientEvent(val type: String)
 internal data class ClientEventScroll(val x: Int, val y: Int, val h: Int, val w: Int): ClientEvent("scroll")
-internal data class ClientEventAddCell(val id: String, val classes: String, val x: Long?, val y: Long?, val h: Long, val w: Long, val z: Long?, val mt: Long?, val ml: Long?, val ch: Long?, val cw: Long?, val content: String): ClientEvent("add")
+internal data class ClientEventAddContent(val id: String, val classes: String, val x: Long?, val y: Long?, val h: Long, val w: Long, val z: Long?, val mt: Long?, val ml: Long?, val ch: Long?, val cw: Long?, val content: String): ClientEvent("add")
 internal data class ClientEventAddCommit(val id: String): ClientEvent("add-commit")
-internal data class ClientEventRemoveCell(val id: String): ClientEvent("rm")
+internal data class ClientEventRemoveContent(val id: String): ClientEvent("rm")
 internal data class ClientEventUpdateEnd(val id: String): ClientEvent("update-end")
 internal data class ClientEventDims(val cornerX: Long, val cornerY: Long, val maxX: Long, val maxY: Long): ClientEvent("dims")
+internal data class ClientEventResize(val target: String, val sizeChangeX: Long, val sizeChangeY: Long): ClientEvent("resize")
 
 internal class ClientEventAdapter: TypeAdapter<ClientEvent> {
     override fun classFor(type: Any): KClass<out ClientEvent> = when(type as String) {
         "scroll" -> ClientEventScroll::class
+        "resize" -> ClientEventResize::class
         else -> throw IllegalArgumentException("Unknown type: $type")
     }
 }
@@ -281,6 +294,7 @@ internal class TileState(val maxDistance: Int = 2000, val tileSize: Int = 1000) 
     var existingTiles = emptySet<Tile>()
 
     private val coordinateIds: ConcurrentMap<Coordinate, String> = ConcurrentHashMap()
+    private val idsContent: ConcurrentMap<String, PositionedContent> = ConcurrentHashMap()
 
     fun updateTiles(scroll: ClientEventScroll): TileUpdate {
         val x1 = scroll.x - (scroll.x % tileSize)
@@ -303,13 +317,17 @@ internal class TileState(val maxDistance: Int = 2000, val tileSize: Int = 1000) 
         return TileUpdate(removedTiles, addedTiles)
     }
 
-    fun addIdFor(x: Long, y: Long): String {
-        return coordinateIds.computeIfAbsent(Coordinate(x, y)) {
+    fun addIdFor(x: Long, y: Long, pc: PositionedContent): String {
+        val id = coordinateIds.computeIfAbsent(Coordinate(x, y)) {
             "c${idGenerator.getAndIncrement()}"
         }
+
+        idsContent[id] = pc
+
+        return id
     }
 
-    fun withIdFor(x: Long, y: Long): String? {
-        return coordinateIds[Coordinate(x, y)]
-    }
+    fun withIdFor(x: Long, y: Long) = coordinateIds[Coordinate(x, y)]
+
+    fun withPCFor(id: String) = idsContent[id]
 }

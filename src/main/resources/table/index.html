@@ -72,8 +72,8 @@
             position: fixed;
             top: 0;
             left: 0;
-            border-right: lightsteelblue solid 1px;
-            border-bottom: lightsteelblue solid 1px;
+            border-right: steelblue solid 1px;
+            border-bottom: steelblue solid 1px;
             background-color: lightsteelblue;
             z-index: 3000;
         }
@@ -96,8 +96,8 @@
             background-color: lightsteelblue;
         }
         .ch {
-            border-right: lightsteelblue solid 1px;
-            border-bottom: lightsteelblue solid 1px;
+            /*border-right: lightsteelblue solid 1px;*/
+            /*border-bottom: lightsteelblue solid 1px;*/
             background-color: lightsteelblue;
             white-space: nowrap;
             overflow: hidden;
@@ -109,8 +109,8 @@
             background-color: lightsteelblue;
         }
         .rh {
-            border-right: lightsteelblue solid 1px;
-            border-bottom: lightsteelblue solid 1px;
+            /*border-right: lightsteelblue solid 1px;*/
+            /*border-bottom: lightsteelblue solid 1px;*/
             background-color: lightsteelblue;
             white-space: nowrap;
             overflow: hidden;
@@ -121,11 +121,64 @@
         .rh:hover {
             background-color: lightsteelblue;
         }
+        .rb {
+            position: absolute;
+            display: inline-block;
+            right: 0;
+            width: 5px;
+            height: calc(100% - 1px);
+            background-color: lightsteelblue;
+            cursor: ew-resize;
+            border-right: steelblue solid 1px;
+            border-bottom: steelblue solid 1px;
+        }
+        .bb {
+            position: absolute;
+            display: inline-block;
+            left: 0;
+            bottom: 0;
+            width: calc(100% - 1px);
+            height: 5px;
+            background-color: lightsteelblue;
+            cursor: ns-resize;
+            border-right: steelblue solid 1px;
+            border-bottom: steelblue solid 1px;
+        }
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background-color: rgba(255, 255, 255, 0.5);
+            z-index: 10000;
+        }
+        #ovl {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 1px;
+            border-right: lightsteelblue solid 1px;
+        }
+        #ohl {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            border-bottom: lightsteelblue solid 1px;
+        }
     </style>
 </head>
 <body id="body">
 <div id="pos"></div>
 <div id="message"></div>
+<div id="overlay" onmouseup="overlayMouseup.apply(this, arguments)" onmousemove="overlayMousemove.apply(this, arguments)">
+    <div id="ovl"></div>
+    <div id="ohl"></div>
+</div>
 <script type="text/javascript" src="index.js"></script>
 </body>
 </html>

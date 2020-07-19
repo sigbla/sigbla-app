@@ -381,3 +381,5 @@ enum class IndexRelation {
 class ColumnAction internal constructor(val left: Column, val right: Column, val order: ColumnActionOrder)
 
 enum class ColumnActionOrder { BEFORE, AFTER }
+
+internal val emptyColumnHeader = ColumnHeader()

@@ -3,14 +3,15 @@ let lastTile = [-1, -1, -1, -1]
 let pendingContent = null
 let pendingUpdate = false
 let pendingScrolls = []
+let pendingResize = []
 
-if (document.readyState !== "loading") {
-    init()
-} else {
-    document.addEventListener("DOMContentLoaded", init)
-}
+let resizeTarget
+let resizeStartX
+let resizeStartY
+let enableVerticalOverlay = false
+let enableHorizontalOverlay = false
 
-async function init() {
+function init() {
     let pathname = location.pathname.endsWith("/") ? location.pathname : location.pathname + "/"
     let url = new URL(pathname + "socket", window.location.href)
     url.protocol = url.protocol.replace('https', 'wss')
@@ -21,8 +22,81 @@ async function init() {
     socket.addEventListener("message", socketMessage)
 }
 
+const rbMousedown = (e) => {
+    if (e.buttons === 1) {
+        resizeTarget = e.target.parentElement.parentElement.id
+
+        enableVerticalOverlay = true
+        enableHorizontalOverlay = false
+
+        resizeStartX = e.clientX
+        resizeStartY = e.clientY
+
+        document.getElementById("overlay").style.display = "block"
+        document.getElementById("ovl").style.display = "block"
+        document.getElementById("ohl").style.display = "none"
+        document.getElementById("ovl").style.left = e.clientX + "px"
+    }
+}
+
+const bbMousedown = (e) => {
+    if (e.buttons === 1) {
+        resizeTarget = e.target.parentElement.parentElement.id
+
+        enableVerticalOverlay = false
+        enableHorizontalOverlay = true
+
+        resizeStartX = e.clientX
+        resizeStartY = e.clientY
+
+        document.getElementById("overlay").style.display = "block"
+        document.getElementById("ovl").style.display = "none"
+        document.getElementById("ohl").style.display = "block"
+        document.getElementById("ohl").style.top = e.clientY + "px"
+    }
+}
+
+const submitResize = (target, sizeChangeX, sizeChangeY) => {
+    const targetElement = document.getElementById(target)
+
+    console.log(targetElement)
+
+    const resizeEvent = {"type": "resize", "target": target, "sizeChangeX": sizeChangeX, "sizeChangeY": sizeChangeY}
+
+    if (pendingUpdate) {
+        pendingResize.push(resizeEvent)
+    } else {
+        pendingUpdate = true
+        socket.send(JSON.stringify(resizeEvent))
+    }
+}
+
+const overlayMouseup = (e) => {
+    if (enableVerticalOverlay) {
+        const resizeX = e.clientX - resizeStartX
+        submitResize(resizeTarget, resizeX, 0)
+        console.log("Resize target: " + resizeTarget)
+        console.log("Resize X: " + resizeX)
+    } else if (enableHorizontalOverlay) {
+        const resizeY = e.clientY - resizeStartY
+        submitResize(resizeTarget, 0, resizeY)
+        console.log("Resize target: " + resizeTarget)
+        console.log("Resize Y: " + resizeY)
+    }
+
+    document.getElementById("overlay").style.display = "none"
+
+    enableVerticalOverlay = false
+    enableHorizontalOverlay = false
+}
+
+const overlayMousemove = (e) => {
+    if (enableVerticalOverlay) document.getElementById("ovl").style.left = e.clientX + "px"
+    if (enableHorizontalOverlay) document.getElementById("ohl").style.top = e.clientY + "px"
+}
+
 async function socketOpen(_) {
-    scroll()
+    await scroll()
     window.addEventListener("scroll", scroll)
     window.addEventListener("resize", scroll)
 }
@@ -90,9 +164,22 @@ async function handleMessage(message) {
                 if (message.y !== undefined) child.style.top = message.y + "px"
                 if (message.mt !== undefined) child.style.marginTop = message.mt + "px"
                 if (message.ml !== undefined) child.style.marginLeft = message.ml + "px"
-                child.style.height = (message.h-1) + "px"
-                child.style.width = (message.w-1) + "px"
+                // TODO Maybe include a border width somewhere?
+                child.style.height = (message.h-0) + "px"
+                child.style.width = (message.w-0) + "px"
                 child.innerText = message.content
+
+                const bb = document.createElement("div")
+                bb.className = "bb"
+                bb.onmousedown = bbMousedown
+
+                const rb = document.createElement("div")
+                rb.className = "rb"
+                rb.onmousedown = rbMousedown
+
+                child.appendChild(bb)
+                child.appendChild(rb)
+
                 div.appendChild(child)
             } else {
                 div.className = message.classes
@@ -125,13 +212,26 @@ async function handleMessage(message) {
             break
         }
         case "update-end": {
+            let havePendingResize = false
+            let havePendingScroll = false
+
+            if (pendingResize.length > 0) {
+                for (let i = 0; i < pendingResize.length; i++) {
+                    socket.send(JSON.stringify(pendingResize[i]))
+                }
+                pendingResize.length = 0
+                havePendingResize = true
+            }
+
             if (pendingScrolls.length > 0) {
                 let pendingScroll = pendingScrolls.pop()
                 pendingScrolls.length = 0
                 socket.send(JSON.stringify(pendingScroll))
-            } else {
-                pendingUpdate = false
+                havePendingScroll = true
             }
+
+            pendingUpdate = havePendingResize || havePendingScroll
+
             break
         }
         case "dims": {
@@ -163,4 +263,10 @@ async function handleMessage(message) {
             end.style.left = message.maxX + "px"
         }
     }
+}
+
+if (document.readyState !== "loading") {
+    init()
+} else {
+    document.addEventListener("DOMContentLoaded", init)
 }
