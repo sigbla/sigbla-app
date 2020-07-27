@@ -10,6 +10,7 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentNavigableMap
 import kotlin.math.max
+import kotlin.reflect.KClass
 
 class ColumnHeader(vararg header: String) : Comparable<ColumnHeader> {
     val header: List<String> = Collections.unmodifiableList(header.asList())
@@ -176,21 +177,22 @@ abstract class Column(val table: Table, val columnHeader: ColumnHeader) : Compar
         return ColumnRange(this, other)
     }
 
-    inline fun <reified O, reified N> on(crossinline listener: (eventReceiver: ListenerEventReceiver<Column, O, N>) -> Unit): ListenerReference {
-        return onAny { receiver ->
-            val events = receiver.events.filter {
-                it.oldValue.value is O && it.newValue.value is N
-            } as Sequence<ListenerEvent<out O, out N>>
-            //if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
-            listener.invoke(ListenerEventReceiver(receiver.listenerReference, this, events))
-        }
+    inline fun <reified O, reified N> on(noinline init: EventReceiver<Column, O, N>.() -> Unit): ListenerReference {
+        return on(O::class, N::class, init as EventReceiver<Column, Any, Any>.() -> Unit)
     }
 
-    fun onAny(listener: (eventReceiver: ListenerEventReceiver<Column, *, *>) -> Unit): ListenerReference {
-        return table.eventProcessor.subscribe(this) {
-            //if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
-            listener.invoke(ListenerEventReceiver(it.listenerReference, this, it.events))
+    fun onAny(init: EventReceiver<Column, Any, Any>.() -> Unit): ListenerReference {
+        return on(Any::class, Any::class, init)
+    }
+
+    fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<Column, Any, Any>.() -> Unit): ListenerReference {
+        val eventReceiver = when {
+            old == Any::class && new == Any::class -> EventReceiver<Column, Any, Any>(this) { this }
+            old == Any::class -> EventReceiver(this) { this.filter { new.isInstance(it.newValue.value) } }
+            new == Any::class -> EventReceiver(this) { this.filter { old.isInstance(it.oldValue.value) } }
+            else -> EventReceiver(this) { this.filter { old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value) } }
         }
+        return table.eventProcessor.subscribe(this, eventReceiver, init)
     }
 
     override fun compareTo(other: Column): Int {
@@ -226,7 +228,7 @@ class BaseColumn internal constructor(
 
         val old = setCellRaw(index, value.toCellValue())?.toCell(this, index) ?: UnitCell(this, index)
         val new = value.toCell(this, index)
-        table.eventProcessor.publish(listOf(ListenerEvent(old, new)) as List<ListenerEvent<Cell<*>, Cell<*>>>)
+        table.eventProcessor.publish(listOf(ListenerEvent(old, new)) as List<ListenerEvent<Any, Any>>)
     }
 
     override fun remove(index: Long): Cell<*> {
@@ -243,7 +245,7 @@ class BaseColumn internal constructor(
         }
 
         val new: Cell<*> = UnitCell(this, index)
-        table.eventProcessor.publish(listOf(ListenerEvent(old, new)) as List<ListenerEvent<Cell<*>, Cell<*>>>)
+        table.eventProcessor.publish(listOf(ListenerEvent(old, new)) as List<ListenerEvent<Any, Any>>)
 
         return old
     }

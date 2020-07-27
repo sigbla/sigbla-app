@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.ConcurrentNavigableMap
 import java.util.concurrent.ConcurrentSkipListMap
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.reflect.KClass
 
 // Look at this wrt Table, Column, Row: https://kotlinlang.org/docs/reference/operator-overloading.html
 
@@ -417,21 +418,22 @@ abstract class Table(val name: String) {
 
     fun remove(index: Long) = this.headers.forEach { c -> this[c].remove(index) }
 
-    inline fun <reified O, reified N> on(crossinline listener: (eventReceiver: ListenerEventReceiver<Table, O, N>) -> Unit): ListenerReference {
-        return onAny { receiver ->
-            val events = receiver.events.filter {
-                it.oldValue.value is O && it.newValue.value is N
-            } as Sequence<ListenerEvent<out O, out N>>
-            //if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
-            listener.invoke(ListenerEventReceiver(receiver.listenerReference, this, events))
-        }
+    inline fun <reified O, reified N> on(noinline init: EventReceiver<Table, O, N>.() -> Unit): ListenerReference {
+        return on(O::class, N::class, init as EventReceiver<Table, Any, Any>.() -> Unit)
     }
 
-    fun onAny(listener: (eventReceiver: ListenerEventReceiver<Table, *, *>) -> Unit): ListenerReference {
-        return eventProcessor.subscribe(this) {
-            //if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
-            listener.invoke(ListenerEventReceiver(it.listenerReference, this, it.events))
+    fun onAny(init: EventReceiver<Table, Any, Any>.() -> Unit): ListenerReference {
+        return on(Any::class, Any::class, init)
+    }
+
+    fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<Table, Any, Any>.() -> Unit): ListenerReference {
+        val eventReceiver = when {
+            old == Any::class && new == Any::class -> EventReceiver<Table, Any, Any>(this) { this }
+            old == Any::class -> EventReceiver(this) { this.filter { new.isInstance(it.newValue.value) } }
+            new == Any::class -> EventReceiver(this) { this.filter { old.isInstance(it.oldValue.value) } }
+            else -> EventReceiver(this) { this.filter { old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value) } }
         }
+        return eventProcessor.subscribe(this, eventReceiver, init)
     }
 
     companion object {
@@ -484,49 +486,72 @@ abstract class Table(val name: String) {
 
         fun copy(left: Column, actionOrder: ColumnActionOrder, right: Column, vararg withName: String): Unit = TODO()
 
-        inline fun <reified O, reified N> on(table: Table, crossinline listener: (eventReceiver: ListenerEventReceiver<Table, O, N>) -> Unit): ListenerReference {
-            return table.on(listener)
+        inline fun <reified O, reified N> on(table: Table, noinline init: EventReceiver<Table, O, N>.() -> Unit): ListenerReference {
+            return table.on(init)
         }
 
-        // TODO Alternative approach, likely better..
-        inline fun <reified O, reified N> onTest(table: Table, crossinline listener: ListenerEventReceiver<Table, O, N>.() -> Unit): ListenerReference {
-            return table.on(listener)
+        fun onAny(table: Table, init: EventReceiver<Table, Any, Any>.() -> Unit): ListenerReference {
+            return table.onAny(init)
         }
 
-        fun onAny(table: Table, listener: (eventReceiver: ListenerEventReceiver<Table, *, *>) -> Unit): ListenerReference {
-            return table.onAny(listener)
+        fun on(table: Table, old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<Table, Any, Any>.() -> Unit): ListenerReference {
+            return table.on(old, new, init)
         }
 
-        inline fun <reified O, reified N> on(column: Column, crossinline listener: (eventReceiver: ListenerEventReceiver<Column, O, N>) -> Unit): ListenerReference {
-            return column.on(listener)
+        // ---
+
+        inline fun <reified O, reified N> on(column: Column, noinline init: EventReceiver<Column, O, N>.() -> Unit): ListenerReference {
+            return column.on(init)
         }
 
-        fun onAny(column: Column, listener: (eventReceiver: ListenerEventReceiver<Column, *, *>) -> Unit): ListenerReference {
-            return column.onAny(listener)
+        fun onAny(column: Column, init: EventReceiver<Column, Any, Any>.() -> Unit): ListenerReference {
+            return column.onAny(init)
         }
 
-        inline fun <reified O, reified N> on(row: Row, crossinline listener: (eventReceiver: ListenerEventReceiver<Row, O, N>) -> Unit): ListenerReference {
-            return row.on(listener)
+        fun on(column: Column, old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<Column, Any, Any>.() -> Unit): ListenerReference {
+            return column.on(old, new, init)
         }
 
-        fun onAny(row: Row, listener: (eventReceiver: ListenerEventReceiver<Row, *, *>) -> Unit): ListenerReference {
-            return row.onAny(listener)
+        // ---
+
+        inline fun <reified O, reified N> on(row: Row, noinline init: EventReceiver<Row, O, N>.() -> Unit): ListenerReference {
+            return row.on(init)
         }
 
-        inline fun <reified O, reified N> on(cellRange: CellRange, crossinline listener: (eventReceiver: ListenerEventReceiver<CellRange, O, N>) -> Unit): ListenerReference {
-            return cellRange.on(listener)
+        fun onAny(row: Row, init: EventReceiver<Row, Any, Any>.() -> Unit): ListenerReference {
+            return row.onAny(init)
         }
 
-        fun onAny(cellRange: CellRange, listener: (eventReceiver: ListenerEventReceiver<CellRange, *, *>) -> Unit): ListenerReference {
-            return cellRange.onAny(listener)
+        fun on(row: Row, old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<Row, Any, Any>.() -> Unit): ListenerReference {
+            return row.on(old, new, init)
         }
 
-        inline fun <reified O, reified N> on(cell: Cell<*>, crossinline listener: (eventReceiver: ListenerEventReceiver<Cell<*>, O, N>) -> Unit): ListenerReference {
-            return cell.on(listener)
+        // ---
+
+        inline fun <reified O, reified N> on(cellRange: CellRange, noinline init: EventReceiver<CellRange, O, N>.() -> Unit): ListenerReference {
+            return cellRange.on(init)
         }
 
-        fun onAny(cell: Cell<*>, listener: (eventReceiver: ListenerEventReceiver<Cell<*>, *, *>) -> Unit): ListenerReference {
-            return cell.onAny(listener)
+        fun onAny(cellRange: CellRange, init: EventReceiver<CellRange, Any, Any>.() -> Unit): ListenerReference {
+            return cellRange.onAny(init)
+        }
+
+        fun on(cellRange: CellRange, old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<CellRange, Any, Any>.() -> Unit): ListenerReference {
+            return cellRange.on(old, new, init)
+        }
+
+        // ---
+
+        inline fun <reified O, reified N> on(cell: Cell<*>, noinline init: EventReceiver<Cell<*>, O, N>.() -> Unit): ListenerReference {
+            return cell.on(init)
+        }
+
+        fun onAny(cell: Cell<*>, init: EventReceiver<Cell<*>, Any, Any>.() -> Unit): ListenerReference {
+            return cell.onAny(init)
+        }
+
+        fun on(cell: Cell<*>, old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<Cell<*>, Any, Any>.() -> Unit): ListenerReference {
+            return cell.on(old, new, init)
         }
     }
 }

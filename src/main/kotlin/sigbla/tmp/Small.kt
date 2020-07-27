@@ -1,16 +1,7 @@
 package sigbla.tmp
 
-import sigbla.app.IndexRelation.*
-import sigbla.app.timeseries.*
-import sigbla.app.Table.Companion.on
-import sigbla.app.*
-import sigbla.app.Table.Companion.onTest
-import java.math.BigDecimal
-import java.math.BigInteger
-
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.ZoneId
+import sigbla.app.Table
+import sigbla.app.TableView
 import java.util.concurrent.ThreadLocalRandom
 
 fun main() {

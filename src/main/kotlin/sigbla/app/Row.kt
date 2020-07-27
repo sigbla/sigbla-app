@@ -2,6 +2,7 @@ package sigbla.app
 
 import java.math.BigDecimal
 import java.math.BigInteger
+import kotlin.reflect.KClass
 
 abstract class Row {
     abstract val table: Table
@@ -45,21 +46,22 @@ abstract class Row {
     operator fun set(vararg header: String, value: BigDecimal) = table[ColumnHeader(*header)].set(index, value)
     operator fun set(vararg header: String, value: Number) = table[ColumnHeader(*header)].set(index, value)
 
-    inline fun <reified O, reified N> on(crossinline listener: (eventReceiver: ListenerEventReceiver<Row, O, N>) -> Unit): ListenerReference {
-        return onAny { receiver ->
-            val events = receiver.events.filter {
-                it.oldValue.value is O && it.newValue.value is N
-            } as Sequence<ListenerEvent<out O, out N>>
-            //if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
-            listener.invoke(ListenerEventReceiver(receiver.listenerReference, this, events))
-        }
+    inline fun <reified O, reified N> on(noinline init: EventReceiver<Row, O, N>.() -> Unit): ListenerReference {
+        return on(O::class, N::class, init as EventReceiver<Row, Any, Any>.() -> Unit)
     }
 
-    fun onAny(listener: (eventReceiver: ListenerEventReceiver<Row, *, *>) -> Unit): ListenerReference {
-        return table.eventProcessor.subscribe(this) {
-            //if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
-            listener.invoke(ListenerEventReceiver(it.listenerReference, this, it.events))
+    fun onAny(init: EventReceiver<Row, Any, Any>.() -> Unit): ListenerReference {
+        return on(Any::class, Any::class, init)
+    }
+
+    fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<Row, Any, Any>.() -> Unit): ListenerReference {
+        val eventReceiver = when {
+            old == Any::class && new == Any::class -> EventReceiver<Row, Any, Any>(this) { this }
+            old == Any::class -> EventReceiver(this) { this.filter { new.isInstance(it.newValue.value) } }
+            new == Any::class -> EventReceiver(this) { this.filter { old.isInstance(it.oldValue.value) } }
+            else -> EventReceiver(this) { this.filter { old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value) } }
         }
+        return table.eventProcessor.subscribe(this, eventReceiver, init)
     }
 
     // TODO: Row range

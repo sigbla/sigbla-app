@@ -4,7 +4,7 @@ import sigbla.app.IndexRelation.*
 import sigbla.app.timeseries.*
 import sigbla.app.Table.Companion.on
 import sigbla.app.*
-import sigbla.app.Table.Companion.onTest
+import sigbla.app.Table.Companion.onAny
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -183,27 +183,51 @@ fun main() {
 
     val value = table["A"] at 1
 
-    on<Any, Any>(table) { receiver ->
-        println("Subscribe 1: ${receiver.events}")
-        receiver.events.forEach {
-            if (it.newValue.index == 1L) receiver.source["A"][2] = "UPDATE"
+    on<Any, Any>(table) {
+        println("Subscribe 1")
+        events {
+            forEach {
+                if (it.newValue.index == 1L) this@on.source["A"][2] = "UPDATE"
+            }
         }
     }
-    onTest<Any, Number>(table) {
+
+    on<Any, Number>(table) {
         configure {
             name = "Name"
         }
 
-        //source["Sums", 0] = 0
+        source["Sums", 0] = 0
 
-        events
-            .map {
+        events {
+            map {
                 it.newValue
             }.forEach {
+                if (it.column.columnHeader[0] == "Sums") return@forEach
                 // TODO Implement plusAssign and similar: https://kotlinlang.org/docs/reference/operator-overloading.html
                 //source["Sums", 0] += it
-                //source["Sums", 0] = source["Sums", 0] + it
+                source["Sums", 0] = source["Sums", 0] + it
+                println("Sum: ${source["Sums", 0]}")
             }
+        }
+    }
+
+    table["Sums", 0].on<Any, Number> {
+        events {
+            forEach {
+                println("New sum: ${it.newValue}")
+            }
+        }
+    }
+
+    table["A", 1] = null
+
+    onAny(table) {
+        events {
+            forEach {
+                it.newValue.value
+            }
+        }
     }
 
     // TODO Introduce an off function as well?
@@ -212,21 +236,33 @@ fun main() {
     // table.off(table["A"][1])
 
     table.on<Any, Number> {
-        println("Subscribe 2: ${it.events}")
+        events {
+            println("Subscribe 2: ${count()}")
+        }
     }
     table.on<Any, String> {
-        println("Subscribe 3: ${it.events}")
+        events {
+            println("Subscribe 3: ${count()}")
+        }
     }
     table.on<String, Number> {
-        println("Subscribe 4: ${it.events}")
+        events {
+            println("Subscribe 4: ${count()}")
+        }
     }
     table.onAny {
-        println("Subscribe any: ${it.events}")
+        events {
+            println("Subscribe 5: ${count()}")
+        }
     }
 
     table["A"][1] = "Hello subscription"
     table["A"][1] = null
     table["A"][1] = 1000
+
+    for (i in 10..10000) {
+        table["A"][1] = i
+    }
 
     on<Any, Any>(table["A"]) {}
     on<Any, Any>(table["A"][1]..table["A"][2]) {}

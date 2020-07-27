@@ -9,6 +9,7 @@ import java.math.MathContext
 import java.util.*
 import kotlin.math.min
 import kotlin.math.max
+import kotlin.reflect.KClass
 
 internal fun String.toCell(column: Column, index: Long) =
     StringCell(column, index, this)
@@ -98,21 +99,22 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
 
     override fun isEmpty(): Boolean = false
 
-    inline fun <reified O, reified N> on(crossinline listener: (eventReceiver: ListenerEventReceiver<CellRange, O, N>) -> Unit): ListenerReference {
-        return onAny { receiver ->
-            val events = receiver.events.filter {
-                it.oldValue.value is O && it.newValue.value is N
-            } as Sequence<ListenerEvent<out O, out N>>
-            //if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
-            listener.invoke(ListenerEventReceiver(receiver.listenerReference, this, events))
-        }
+    inline fun <reified O, reified N> on(noinline init: EventReceiver<CellRange, O, N>.() -> Unit): ListenerReference {
+        return on(O::class, N::class, init as EventReceiver<CellRange, Any, Any>.() -> Unit)
     }
 
-    fun onAny(listener: (eventReceiver: ListenerEventReceiver<CellRange, *, *>) -> Unit): ListenerReference {
-        return start.column.table.eventProcessor.subscribe(this) {
-            //if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
-            listener.invoke(ListenerEventReceiver(it.listenerReference, this, it.events))
+    fun onAny(init: EventReceiver<CellRange, Any, Any>.() -> Unit): ListenerReference {
+        return on(Any::class, Any::class, init)
+    }
+
+    fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<CellRange, Any, Any>.() -> Unit): ListenerReference {
+        val eventReceiver = when {
+            old == Any::class && new == Any::class -> EventReceiver<CellRange, Any, Any>(this) { this }
+            old == Any::class -> EventReceiver(this) { this.filter { new.isInstance(it.newValue.value) } }
+            new == Any::class -> EventReceiver(this) { this.filter { old.isInstance(it.oldValue.value) } }
+            else -> EventReceiver(this) { this.filter { old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value) } }
         }
+        return start.column.table.eventProcessor.subscribe(this, eventReceiver, init)
     }
 
     // TODO: Implement various operations like we have on cells.. like plus, etc, and also assignment and basic math ops like sum, etc
@@ -293,21 +295,22 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any> {
         TODO()
     }
 
-    inline fun <reified O, reified N> on(crossinline listener: (eventReceiver: ListenerEventReceiver<Cell<*>, O, N>) -> Unit): ListenerReference {
-        return onAny { receiver ->
-            val events = receiver.events.filter {
-                it.oldValue.value is O && it.newValue.value is N
-            } as Sequence<ListenerEvent<out O, out N>>
-            //if (events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, receiver.listenerReference, events))
-            listener.invoke(ListenerEventReceiver(receiver.listenerReference, this, events))
-        }
+    inline fun <reified O, reified N> on(noinline init: EventReceiver<Cell<*>, O, N>.() -> Unit): ListenerReference {
+        return on(O::class, N::class, init as EventReceiver<Cell<*>, Any, Any>.() -> Unit)
     }
 
-    fun onAny(listener: (eventReceiver: ListenerEventReceiver<Cell<*>, *, *>) -> Unit): ListenerReference {
-        return column.table.eventProcessor.subscribe(this) {
-            //if (it.events.isNotEmpty()) listener.invoke(ListenerEventReceiver(this, it.listenerReference, it.events))
-            listener.invoke(ListenerEventReceiver(it.listenerReference, this, it.events))
+    fun onAny(init: EventReceiver<Cell<*>, Any, Any>.() -> Unit): ListenerReference {
+        return on(Any::class, Any::class, init)
+    }
+
+    fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<Cell<*>, Any, Any>.() -> Unit): ListenerReference {
+        val eventReceiver = when {
+            old == Any::class && new == Any::class -> EventReceiver<Cell<*>, Any, Any>(this) { this }
+            old == Any::class -> EventReceiver<Cell<*>, Any, Any>(this) { this.filter { new.isInstance(it.newValue.value) } }
+            new == Any::class -> EventReceiver<Cell<*>, Any, Any>(this) { this.filter { old.isInstance(it.oldValue.value) } }
+            else -> EventReceiver<Cell<*>, Any, Any>(this) { this.filter { old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value) } }
         }
+        return column.table.eventProcessor.subscribe(this, eventReceiver, init)
     }
 
     override fun equals(other: Any?): Boolean {

@@ -9,31 +9,40 @@ interface ListenerReference {
     fun unsubscribe()
 }
 
-class ListenerConfiguration(var name: String? = null, var priority: Int = 0)
+// TODO Change to builder, and use priority..
+data class ListenerConfiguration(var name: String? = null, var priority: Int = 0)
 data class ListenerEvent<O, N>(val oldValue: Cell<O>, val newValue: Cell<N>)
-class ListenerEventReceiver<F, O, N>(
-    val listenerReference: ListenerReference,
+
+class EventReceiver<F, O, N>(
     val source: F,
-    val events: Sequence<ListenerEvent<out O, out N>>
+    private val typeFilter: Sequence<ListenerEvent<Any, Any>>.() -> Sequence<ListenerEvent<Any, Any>>
 ) {
+    lateinit var reference: ListenerReference
+        internal set
+
+    var configuration: ListenerConfiguration = ListenerConfiguration()
+        private set
+
+    private var process: (Sequence<ListenerEvent<O, N>>.() -> Unit) = {}
+
     // TODO Below is just code for playing around, see use in Foo..
     fun configure(init: ListenerConfiguration.() -> Unit) {
-        // Only do this when it's not yet configured
-        val configuration = ListenerConfiguration()
-        configuration.init()
-        // TODO Likely need to be set somewhere
-        //return configuration
+        configuration = ListenerConfiguration().apply(init)
     }
 
-//    fun events(processor: Sequence<ListenerEvent<out O, out N>>.() -> Unit) {
-//        events.processor()
-//    }
+    fun events(process: Sequence<ListenerEvent<out O, out N>>.() -> Unit) {
+        this.process = process
+    }
+
+    internal operator fun invoke(events: Sequence<ListenerEvent<Any, Any>>) {
+        (events.typeFilter() as Sequence<ListenerEvent<O, N>>).process()
+    }
 }
 
 internal class TableEventProcessor {
     private class ListenerReferenceEvent<R>(
         val listenerReference: R,
-        val listenerEvent: (event: Sequence<ListenerEvent<*, *>>) -> Unit
+        val listenerEvent: (event: Sequence<ListenerEvent<Any, Any>>) -> Unit
     )
 
     private val tableListeners: ConcurrentMap<Long, ListenerReferenceEvent<ListenerTableRef>> = ConcurrentSkipListMap()
@@ -102,11 +111,16 @@ internal class TableEventProcessor {
 
     fun subscribe(
         table: Table,
-        listener: (eventReceiver: ListenerEventReceiver<Table, *, *>) -> Unit
+        eventReceiver: EventReceiver<Table, Any, Any>,
+        init: EventReceiver<Table, Any, Any>.() -> Unit
     ): ListenerReference {
         val listenerRef = ListenerTableRef(idGenerator.getAndIncrement(), tableListeners, table)
+
+        eventReceiver.reference = listenerRef
+        eventReceiver.init()
+
         val listenerRefEvent = ListenerReferenceEvent(listenerRef) {
-            listener.invoke(ListenerEventReceiver(listenerRef, table, it))
+            eventReceiver(it)
         }
         synchronized(listenerRefEvent) {
             // TODO Tables, cellrange, and others, will need a asSequence that returns all their cells
@@ -118,46 +132,81 @@ internal class TableEventProcessor {
 
     fun subscribe(
         column: Column,
-        listener: (eventReceiver: ListenerEventReceiver<Column, *, *>) -> Unit
+        eventReceiver: EventReceiver<Column, Any, Any>,
+        init: EventReceiver<Column, Any, Any>.() -> Unit
     ): ListenerReference {
         val listenerRef = ListenerColumnRef(idGenerator.getAndIncrement(), columnListeners, column)
-        columnListeners[listenerRef.id] = ListenerReferenceEvent(listenerRef) {
-            listener.invoke(ListenerEventReceiver(listenerRef, column, it))
+
+        eventReceiver.reference = listenerRef
+        eventReceiver.init()
+
+        val listenerRefEvent = ListenerReferenceEvent(listenerRef) {
+            eventReceiver(it)
+        }
+        synchronized(listenerRefEvent) {
+            columnListeners[listenerRef.id] = listenerRefEvent
         }
         return listenerRef
     }
 
-    fun subscribe(row: Row, listener: (eventReceiver: ListenerEventReceiver<Row, *, *>) -> Unit): ListenerReference {
+    fun subscribe(
+        row: Row,
+        eventReceiver: EventReceiver<Row, Any, Any>,
+        init: EventReceiver<Row, Any, Any>.() -> Unit
+    ): ListenerReference {
         val listenerRef = ListenerRowRef(idGenerator.getAndIncrement(), rowListeners, row)
-        rowListeners[listenerRef.id] = ListenerReferenceEvent(listenerRef) {
-            listener.invoke(ListenerEventReceiver(listenerRef, row, it))
+
+        eventReceiver.reference = listenerRef
+        eventReceiver.init()
+
+        val listenerRefEvent = ListenerReferenceEvent(listenerRef) {
+            eventReceiver(it)
+        }
+        synchronized(listenerRefEvent) {
+            rowListeners[listenerRef.id] = listenerRefEvent
         }
         return listenerRef
     }
 
     fun subscribe(
         cellRange: CellRange,
-        listener: (eventReceiver: ListenerEventReceiver<CellRange, *, *>) -> Unit
+        eventReceiver: EventReceiver<CellRange, Any, Any>,
+        init: EventReceiver<CellRange, Any, Any>.() -> Unit
     ): ListenerReference {
         val listenerRef = ListenerCellRangeRef(idGenerator.getAndIncrement(), cellRangeListeners, cellRange)
-        cellRangeListeners[listenerRef.id] = ListenerReferenceEvent(listenerRef) {
-            listener.invoke(ListenerEventReceiver(listenerRef, cellRange, it))
+
+        eventReceiver.reference = listenerRef
+        eventReceiver.init()
+
+        val listenerRefEvent = ListenerReferenceEvent(listenerRef) {
+            eventReceiver(it)
+        }
+        synchronized(listenerRefEvent) {
+            cellRangeListeners[listenerRef.id] = listenerRefEvent
         }
         return listenerRef
     }
 
     fun subscribe(
         cell: Cell<*>,
-        listener: (eventReceiver: ListenerEventReceiver<Cell<*>, *, *>) -> Unit
+        eventReceiver: EventReceiver<Cell<*>, Any, Any>,
+        init: EventReceiver<Cell<*>, Any, Any>.() -> Unit
     ): ListenerReference {
         val listenerRef = ListenerCellRef(idGenerator.getAndIncrement(), cellListeners, cell)
-        cellListeners[listenerRef.id] = ListenerReferenceEvent(listenerRef) {
-            listener.invoke(ListenerEventReceiver(listenerRef, cell, it))
+
+        eventReceiver.reference = listenerRef
+        eventReceiver.init()
+
+        val listenerRefEvent = ListenerReferenceEvent(listenerRef) {
+            eventReceiver(it)
+        }
+        synchronized(listenerRefEvent) {
+            cellListeners[listenerRef.id] = listenerRefEvent
         }
         return listenerRef
     }
 
-    fun publish(cells: List<ListenerEvent<Cell<*>, Cell<*>>>) {
+    internal fun publish(cells: List<ListenerEvent<Any, Any>>) {
         val buffer = eventBuffer.get()
 
         if (buffer != null) {
@@ -178,6 +227,7 @@ internal class TableEventProcessor {
                     .values
                     .forEach { listenerRef ->
                         synchronized(listenerRef) {
+                            // TODO Remove .invoke ? Same below..
                             listenerRef.listenerEvent.invoke(batch.asSequence())
                         }
                     }
@@ -253,7 +303,7 @@ internal class TableEventProcessor {
         }
     }
 
-    fun shutdown() {
+    internal fun shutdown() {
         tableListeners.clear()
         columnListeners.clear()
         rowListeners.clear()
@@ -263,6 +313,6 @@ internal class TableEventProcessor {
 
     companion object {
         private val idGenerator = AtomicLong()
-        private val eventBuffer = ThreadLocal<MutableList<ListenerEvent<Cell<*>, Cell<*>>>?>()
+        private val eventBuffer = ThreadLocal<MutableList<ListenerEvent<Any, Any>>?>()
     }
 }
