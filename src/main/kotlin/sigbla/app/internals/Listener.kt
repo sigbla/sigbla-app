@@ -1,5 +1,6 @@
-package sigbla.app
+package sigbla.app.internals
 
+import sigbla.app.*
 import java.util.*
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.ConcurrentSkipListMap
@@ -20,7 +21,8 @@ class EventReceiver<F, O, N>(
     lateinit var reference: ListenerReference
         internal set
 
-    var configuration: ListenerConfiguration = ListenerConfiguration()
+    var configuration: ListenerConfiguration =
+        ListenerConfiguration()
         private set
 
     private var process: (Sequence<ListenerEvent<O, N>>.() -> Unit) = {}
@@ -114,14 +116,19 @@ internal class TableEventProcessor {
         eventReceiver: EventReceiver<Table, Any, Any>,
         init: EventReceiver<Table, Any, Any>.() -> Unit
     ): ListenerReference {
-        val listenerRef = ListenerTableRef(idGenerator.getAndIncrement(), tableListeners, table)
+        val listenerRef = ListenerTableRef(
+            idGenerator.getAndIncrement(),
+            tableListeners,
+            table
+        )
 
         eventReceiver.reference = listenerRef
         eventReceiver.init()
 
-        val listenerRefEvent = ListenerReferenceEvent(listenerRef) {
-            eventReceiver(it)
-        }
+        val listenerRefEvent =
+            ListenerReferenceEvent(listenerRef) {
+                eventReceiver(it)
+            }
         synchronized(listenerRefEvent) {
             // TODO Tables, cellrange, and others, will need a asSequence that returns all their cells
             //listener.invoke(ListenerEventReceiver(table, listenerRef, table.asSequence().map to event..))
@@ -135,14 +142,19 @@ internal class TableEventProcessor {
         eventReceiver: EventReceiver<Column, Any, Any>,
         init: EventReceiver<Column, Any, Any>.() -> Unit
     ): ListenerReference {
-        val listenerRef = ListenerColumnRef(idGenerator.getAndIncrement(), columnListeners, column)
+        val listenerRef = ListenerColumnRef(
+            idGenerator.getAndIncrement(),
+            columnListeners,
+            column
+        )
 
         eventReceiver.reference = listenerRef
         eventReceiver.init()
 
-        val listenerRefEvent = ListenerReferenceEvent(listenerRef) {
-            eventReceiver(it)
-        }
+        val listenerRefEvent =
+            ListenerReferenceEvent(listenerRef) {
+                eventReceiver(it)
+            }
         synchronized(listenerRefEvent) {
             columnListeners[listenerRef.id] = listenerRefEvent
         }
@@ -154,14 +166,19 @@ internal class TableEventProcessor {
         eventReceiver: EventReceiver<Row, Any, Any>,
         init: EventReceiver<Row, Any, Any>.() -> Unit
     ): ListenerReference {
-        val listenerRef = ListenerRowRef(idGenerator.getAndIncrement(), rowListeners, row)
+        val listenerRef = ListenerRowRef(
+            idGenerator.getAndIncrement(),
+            rowListeners,
+            row
+        )
 
         eventReceiver.reference = listenerRef
         eventReceiver.init()
 
-        val listenerRefEvent = ListenerReferenceEvent(listenerRef) {
-            eventReceiver(it)
-        }
+        val listenerRefEvent =
+            ListenerReferenceEvent(listenerRef) {
+                eventReceiver(it)
+            }
         synchronized(listenerRefEvent) {
             rowListeners[listenerRef.id] = listenerRefEvent
         }
@@ -173,14 +190,19 @@ internal class TableEventProcessor {
         eventReceiver: EventReceiver<CellRange, Any, Any>,
         init: EventReceiver<CellRange, Any, Any>.() -> Unit
     ): ListenerReference {
-        val listenerRef = ListenerCellRangeRef(idGenerator.getAndIncrement(), cellRangeListeners, cellRange)
+        val listenerRef = ListenerCellRangeRef(
+            idGenerator.getAndIncrement(),
+            cellRangeListeners,
+            cellRange
+        )
 
         eventReceiver.reference = listenerRef
         eventReceiver.init()
 
-        val listenerRefEvent = ListenerReferenceEvent(listenerRef) {
-            eventReceiver(it)
-        }
+        val listenerRefEvent =
+            ListenerReferenceEvent(listenerRef) {
+                eventReceiver(it)
+            }
         synchronized(listenerRefEvent) {
             cellRangeListeners[listenerRef.id] = listenerRefEvent
         }
@@ -192,14 +214,19 @@ internal class TableEventProcessor {
         eventReceiver: EventReceiver<Cell<*>, Any, Any>,
         init: EventReceiver<Cell<*>, Any, Any>.() -> Unit
     ): ListenerReference {
-        val listenerRef = ListenerCellRef(idGenerator.getAndIncrement(), cellListeners, cell)
+        val listenerRef = ListenerCellRef(
+            idGenerator.getAndIncrement(),
+            cellListeners,
+            cell
+        )
 
         eventReceiver.reference = listenerRef
         eventReceiver.init()
 
-        val listenerRefEvent = ListenerReferenceEvent(listenerRef) {
-            eventReceiver(it)
-        }
+        val listenerRefEvent =
+            ListenerReferenceEvent(listenerRef) {
+                eventReceiver(it)
+            }
         synchronized(listenerRefEvent) {
             cellListeners[listenerRef.id] = listenerRefEvent
         }

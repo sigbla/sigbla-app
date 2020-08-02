@@ -4,6 +4,9 @@ import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.exceptions.InvalidTableException
 import sigbla.app.exceptions.ReadOnlyColumnException
 import sigbla.app.IndexRelation.*
+import sigbla.app.internals.EventReceiver
+import sigbla.app.internals.ListenerEvent
+import sigbla.app.internals.ListenerReference
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -187,10 +190,30 @@ abstract class Column(val table: Table, val columnHeader: ColumnHeader) : Compar
 
     fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<Column, Any, Any>.() -> Unit): ListenerReference {
         val eventReceiver = when {
-            old == Any::class && new == Any::class -> EventReceiver<Column, Any, Any>(this) { this }
-            old == Any::class -> EventReceiver(this) { this.filter { new.isInstance(it.newValue.value) } }
-            new == Any::class -> EventReceiver(this) { this.filter { old.isInstance(it.oldValue.value) } }
-            else -> EventReceiver(this) { this.filter { old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value) } }
+            old == Any::class && new == Any::class -> EventReceiver<Column, Any, Any>(
+                this
+            ) { this }
+            old == Any::class -> EventReceiver(this) {
+                this.filter {
+                    new.isInstance(
+                        it.newValue.value
+                    )
+                }
+            }
+            new == Any::class -> EventReceiver(this) {
+                this.filter {
+                    old.isInstance(
+                        it.oldValue.value
+                    )
+                }
+            }
+            else -> EventReceiver(this) {
+                this.filter {
+                    old.isInstance(it.oldValue.value) && new.isInstance(
+                        it.newValue.value
+                    )
+                }
+            }
         }
         return table.eventProcessor.subscribe(this, eventReceiver, init)
     }
@@ -228,7 +251,12 @@ class BaseColumn internal constructor(
 
         val old = setCellRaw(index, value.toCellValue())?.toCell(this, index) ?: UnitCell(this, index)
         val new = value.toCell(this, index)
-        table.eventProcessor.publish(listOf(ListenerEvent(old, new)) as List<ListenerEvent<Any, Any>>)
+        table.eventProcessor.publish(listOf(
+            ListenerEvent(
+                old,
+                new
+            )
+        ) as List<ListenerEvent<Any, Any>>)
     }
 
     override fun remove(index: Long): Cell<*> {
@@ -245,7 +273,12 @@ class BaseColumn internal constructor(
         }
 
         val new: Cell<*> = UnitCell(this, index)
-        table.eventProcessor.publish(listOf(ListenerEvent(old, new)) as List<ListenerEvent<Any, Any>>)
+        table.eventProcessor.publish(listOf(
+            ListenerEvent(
+                old,
+                new
+            )
+        ) as List<ListenerEvent<Any, Any>>)
 
         return old
     }
@@ -352,7 +385,7 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
 class ReadOnlyRowColumn internal constructor(private val column: Column, private val index: Long) : Column(column.table, column.columnHeader) {
     override fun get(indexRelation: IndexRelation, index: Long): Cell<*> {
         if (index > this.index)
-            return UnitCell(this, index);
+            return UnitCell(this, index)
 
         return column.get(indexRelation, index)
     }

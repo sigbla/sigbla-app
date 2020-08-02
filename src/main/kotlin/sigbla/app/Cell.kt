@@ -3,6 +3,8 @@ package sigbla.app
 import sigbla.app.exceptions.InvalidCellException
 import sigbla.app.exceptions.InvalidTableException
 import sigbla.app.exceptions.InvalidValueException
+import sigbla.app.internals.EventReceiver
+import sigbla.app.internals.ListenerReference
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.MathContext
@@ -109,10 +111,30 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
 
     fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<CellRange, Any, Any>.() -> Unit): ListenerReference {
         val eventReceiver = when {
-            old == Any::class && new == Any::class -> EventReceiver<CellRange, Any, Any>(this) { this }
-            old == Any::class -> EventReceiver(this) { this.filter { new.isInstance(it.newValue.value) } }
-            new == Any::class -> EventReceiver(this) { this.filter { old.isInstance(it.oldValue.value) } }
-            else -> EventReceiver(this) { this.filter { old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value) } }
+            old == Any::class && new == Any::class -> EventReceiver<CellRange, Any, Any>(
+                this
+            ) { this }
+            old == Any::class -> EventReceiver(this) {
+                this.filter {
+                    new.isInstance(
+                        it.newValue.value
+                    )
+                }
+            }
+            new == Any::class -> EventReceiver(this) {
+                this.filter {
+                    old.isInstance(
+                        it.oldValue.value
+                    )
+                }
+            }
+            else -> EventReceiver(this) {
+                this.filter {
+                    old.isInstance(it.oldValue.value) && new.isInstance(
+                        it.newValue.value
+                    )
+                }
+            }
         }
         return start.column.table.eventProcessor.subscribe(this, eventReceiver, init)
     }
@@ -305,10 +327,30 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any> {
 
     fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<Cell<*>, Any, Any>.() -> Unit): ListenerReference {
         val eventReceiver = when {
-            old == Any::class && new == Any::class -> EventReceiver<Cell<*>, Any, Any>(this) { this }
-            old == Any::class -> EventReceiver<Cell<*>, Any, Any>(this) { this.filter { new.isInstance(it.newValue.value) } }
-            new == Any::class -> EventReceiver<Cell<*>, Any, Any>(this) { this.filter { old.isInstance(it.oldValue.value) } }
-            else -> EventReceiver<Cell<*>, Any, Any>(this) { this.filter { old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value) } }
+            old == Any::class && new == Any::class -> EventReceiver<Cell<*>, Any, Any>(
+                this
+            ) { this }
+            old == Any::class -> EventReceiver<Cell<*>, Any, Any>(this) {
+                this.filter {
+                    new.isInstance(
+                        it.newValue.value
+                    )
+                }
+            }
+            new == Any::class -> EventReceiver<Cell<*>, Any, Any>(this) {
+                this.filter {
+                    old.isInstance(
+                        it.oldValue.value
+                    )
+                }
+            }
+            else -> EventReceiver<Cell<*>, Any, Any>(this) {
+                this.filter {
+                    old.isInstance(
+                        it.oldValue.value
+                    ) && new.isInstance(it.newValue.value)
+                }
+            }
         }
         return column.table.eventProcessor.subscribe(this, eventReceiver, init)
     }

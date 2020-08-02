@@ -1,5 +1,7 @@
 package sigbla.app
 
+import sigbla.app.internals.EventReceiver
+import sigbla.app.internals.ListenerReference
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.reflect.KClass
@@ -56,10 +58,30 @@ abstract class Row {
 
     fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<Row, Any, Any>.() -> Unit): ListenerReference {
         val eventReceiver = when {
-            old == Any::class && new == Any::class -> EventReceiver<Row, Any, Any>(this) { this }
-            old == Any::class -> EventReceiver(this) { this.filter { new.isInstance(it.newValue.value) } }
-            new == Any::class -> EventReceiver(this) { this.filter { old.isInstance(it.oldValue.value) } }
-            else -> EventReceiver(this) { this.filter { old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value) } }
+            old == Any::class && new == Any::class -> EventReceiver<Row, Any, Any>(
+                this
+            ) { this }
+            old == Any::class -> EventReceiver(this) {
+                this.filter {
+                    new.isInstance(
+                        it.newValue.value
+                    )
+                }
+            }
+            new == Any::class -> EventReceiver(this) {
+                this.filter {
+                    old.isInstance(
+                        it.oldValue.value
+                    )
+                }
+            }
+            else -> EventReceiver(this) {
+                this.filter {
+                    old.isInstance(it.oldValue.value) && new.isInstance(
+                        it.newValue.value
+                    )
+                }
+            }
         }
         return table.eventProcessor.subscribe(this, eventReceiver, init)
     }

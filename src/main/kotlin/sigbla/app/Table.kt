@@ -2,7 +2,10 @@ package sigbla.app
 
 import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.exceptions.InvalidTableException
+import sigbla.app.internals.EventReceiver
+import sigbla.app.internals.ListenerReference
 import sigbla.app.internals.Registry
+import sigbla.app.internals.TableEventProcessor
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -428,10 +431,30 @@ abstract class Table(val name: String) {
 
     fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<Table, Any, Any>.() -> Unit): ListenerReference {
         val eventReceiver = when {
-            old == Any::class && new == Any::class -> EventReceiver<Table, Any, Any>(this) { this }
-            old == Any::class -> EventReceiver(this) { this.filter { new.isInstance(it.newValue.value) } }
-            new == Any::class -> EventReceiver(this) { this.filter { old.isInstance(it.oldValue.value) } }
-            else -> EventReceiver(this) { this.filter { old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value) } }
+            old == Any::class && new == Any::class -> EventReceiver<Table, Any, Any>(
+                this
+            ) { this }
+            old == Any::class -> EventReceiver(this) {
+                this.filter {
+                    new.isInstance(
+                        it.newValue.value
+                    )
+                }
+            }
+            new == Any::class -> EventReceiver(this) {
+                this.filter {
+                    old.isInstance(
+                        it.oldValue.value
+                    )
+                }
+            }
+            else -> EventReceiver(this) {
+                this.filter {
+                    old.isInstance(it.oldValue.value) && new.isInstance(
+                        it.newValue.value
+                    )
+                }
+            }
         }
         return eventProcessor.subscribe(this, eventReceiver, init)
     }
