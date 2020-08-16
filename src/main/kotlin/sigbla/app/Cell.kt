@@ -3,8 +3,6 @@ package sigbla.app
 import sigbla.app.exceptions.InvalidCellException
 import sigbla.app.exceptions.InvalidTableException
 import sigbla.app.exceptions.InvalidValueException
-import sigbla.app.internals.EventReceiver
-import sigbla.app.internals.ListenerReference
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.MathContext
@@ -46,6 +44,9 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
             throw InvalidTableException("Cell range much be within same table")
         }
     }
+
+    val table: Table
+        get() = start.table
 
     override fun iterator(): Iterator<Cell<*>> {
         // TODO: This iterator implementation, as with the ColumnRange one could be more efficient!
@@ -144,6 +145,9 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
 
 sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any> {
     abstract val value: T
+
+    val table: Table
+        get() = column.table
 
     internal abstract fun toCell(column: Column, index: Long): Cell<T>
 
@@ -354,6 +358,8 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any> {
         }
         return column.table.eventProcessor.subscribe(this, eventReceiver, init)
     }
+
+    fun asSequence(): Sequence<Cell<*>> = sequenceOf(this)
 
     override fun equals(other: Any?): Boolean {
         // TODO Also handle numbers like in compare..

@@ -1,10 +1,8 @@
 package sigbla.app.internals
 
+import sigbla.app.*
+import sigbla.app.TableRef
 import sigbla.app.exceptions.InvalidTableException
-import sigbla.app.BaseTable
-import sigbla.app.Column
-import sigbla.app.Table
-import sigbla.app.TableView
 import java.util.*
 import java.util.concurrent.ConcurrentSkipListMap
 
@@ -31,13 +29,14 @@ internal object Registry {
 
         val columns = ArrayList<Column>()
 
-        while (!table.columnsMap.isEmpty()) {
-            val (columnHeader, column) = table.columnsMap.entries.firstOrNull() ?: continue
-            if (table.columnsMap.remove(columnHeader, column))
-                columns.add(column)
-        }
-
-        table.indicesMap.clear()
+//        while (!table.columnsMap.isEmpty()) {
+//            val (columnHeader, column) = table.columnsMap.entries.firstOrNull() ?: continue
+//            if (table.columnsMap.remove(columnHeader, column))
+//                columns.add(column)
+//        }
+//
+//        table.indicesMap.clear()
+        table.tableRef.set(TableRef())
 
         columns.forEach(Column::clear)
 

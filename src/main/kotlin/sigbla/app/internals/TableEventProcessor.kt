@@ -6,41 +6,6 @@ import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.ConcurrentSkipListMap
 import java.util.concurrent.atomic.AtomicLong
 
-interface ListenerReference {
-    fun unsubscribe()
-}
-
-// TODO Change to builder, and use priority..
-data class ListenerConfiguration(var name: String? = null, var priority: Int = 0)
-data class ListenerEvent<O, N>(val oldValue: Cell<O>, val newValue: Cell<N>)
-
-class EventReceiver<F, O, N>(
-    val source: F,
-    private val typeFilter: Sequence<ListenerEvent<Any, Any>>.() -> Sequence<ListenerEvent<Any, Any>>
-) {
-    lateinit var reference: ListenerReference
-        internal set
-
-    var configuration: ListenerConfiguration =
-        ListenerConfiguration()
-        private set
-
-    private var process: (Sequence<ListenerEvent<O, N>>.() -> Unit) = {}
-
-    // TODO Below is just code for playing around, see use in Foo..
-    fun configure(init: ListenerConfiguration.() -> Unit) {
-        configuration = ListenerConfiguration().apply(init)
-    }
-
-    fun events(process: Sequence<ListenerEvent<out O, out N>>.() -> Unit) {
-        this.process = process
-    }
-
-    internal operator fun invoke(events: Sequence<ListenerEvent<Any, Any>>) {
-        (events.typeFilter() as Sequence<ListenerEvent<O, N>>).process()
-    }
-}
-
 internal class TableEventProcessor {
     private class ListenerReferenceEvent<R>(
         val listenerReference: R,
@@ -233,6 +198,18 @@ internal class TableEventProcessor {
         return listenerRef
     }
 
+    // TODO Not sure if this is worth having?
+    internal fun haveListeners(): Boolean {
+        return tableListeners.size > 0 ||
+                columnListeners.size > 0 ||
+                rowListeners.size > 0 ||
+                cellRangeListeners.size > 0 ||
+                cellListeners.size > 0
+    }
+
+    // TODO: Whenever something is published, the old and new cells provided should,
+    //       if we navigate up to their column/table provide the old/new column or table
+    //       as they existed at the point of the old/new value being created
     internal fun publish(cells: List<ListenerEvent<Any, Any>>) {
         val buffer = eventBuffer.get()
 

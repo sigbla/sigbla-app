@@ -241,7 +241,8 @@ class BaseTableView internal constructor(
         val applicableRows = mutableListOf<Pair<Long, Long>>()
         var runningHeight = maxHeaderOffset
 
-        for (row in 0..(table.indicesMap.lastKey())) {
+        val lastKey = table.tableRef.get().indicesMap.last()?.component1() ?: -1
+        for (row in 0..lastKey) {
             if (y <= runningHeight && runningHeight <= y + h) applicableRows.add(Pair(row, runningHeight))
 
             runningHeight += this[row].height
@@ -306,7 +307,8 @@ class BaseTableView internal constructor(
 
         var runningHeight = maxHeaderOffset
 
-        for (row in 0..(table.indicesMap.lastKey())) {
+        val lastKey = table.tableRef.get().indicesMap.last()?.component1() ?: -1
+        for (row in 0..lastKey) {
             runningHeight += this[row].height
         }
 

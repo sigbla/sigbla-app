@@ -1,18 +1,16 @@
 package sigbla.app
 
+import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
 import sigbla.app.exceptions.InvalidColumnException
-import sigbla.app.exceptions.InvalidTableException
 import sigbla.app.exceptions.ReadOnlyColumnException
 import sigbla.app.IndexRelation.*
-import sigbla.app.internals.EventReceiver
-import sigbla.app.internals.ListenerEvent
-import sigbla.app.internals.ListenerReference
+import sigbla.app.internals.refAction
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentNavigableMap
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.reflect.KClass
 
 class ColumnHeader(vararg header: String) : Comparable<ColumnHeader> {
@@ -144,6 +142,9 @@ abstract class Column(val table: Table, val columnHeader: ColumnHeader) : Compar
         }
     }
 
+    // TODO: Look at adding a add(..) function and asSequence() function.
+    //       Add would just insert a cell at first available location.
+
     abstract fun remove(index: Long): Cell<*>
 
     fun remove(index: Int) = remove(index.toLong())
@@ -231,11 +232,10 @@ abstract class Column(val table: Table, val columnHeader: ColumnHeader) : Compar
 }
 
 class BaseColumn internal constructor(
-    table: Table, columnHeader: ColumnHeader,
-    private val indices: ConcurrentNavigableMap<Long, Int>
+    table: Table,
+    columnHeader: ColumnHeader,
+    private val tableRef: AtomicReference<TableRef>
 ) : Column(table, columnHeader) {
-    internal val values = ConcurrentHashMap<Long, CellValue<*>>()
-
     override fun get(indexRelation: IndexRelation, index: Long): Cell<*> {
         return getCellRaw(index, indexRelation)?.toCell(this, index) ?: UnitCell(
             this,
@@ -249,8 +249,30 @@ class BaseColumn internal constructor(
             return
         }
 
-        val old = setCellRaw(index, value.toCellValue())?.toCell(this, index) ?: UnitCell(this, index)
-        val new = value.toCell(this, index)
+        val cellValue = value.toCellValue()
+
+        val (oldRef, newRef) = tableRef.refAction {
+            val values = it.columnCellMap[this] ?: throw InvalidColumnException()
+
+            it.copy(
+                columnCellMap = it.columnCellMap.put(this, values.put(index, cellValue)),
+                indicesMap = if (values[index] != null) it.indicesMap else it.indicesMap.put(index, it.indicesMap[index].let { v ->
+                    when (v) {
+                        null -> 1
+                        else -> v + 1
+                    }
+                })
+            )
+        }
+
+        if (!table.eventProcessor.haveListeners()) return
+
+        val oldTable = this.table.makeClone(ref = oldRef)
+        val newTable = this.table.makeClone(ref = newRef)
+
+        val old = oldTable[this.columnHeader][index]
+        val new = newTable[this.columnHeader][index]
+
         table.eventProcessor.publish(listOf(
             ListenerEvent(
                 old,
@@ -260,19 +282,29 @@ class BaseColumn internal constructor(
     }
 
     override fun remove(index: Long): Cell<*> {
-        val old = values.remove(index)?.toCell(this, index) ?: UnitCell(this, index)
+        val (oldRef, newRef) = tableRef.refAction {
+            val values = it.columnCellMap[this] ?: throw InvalidColumnException()
 
-        if (old !is UnitCell) {
-            indices.compute(index) { _, v ->
-                when {
-                    v == null -> null
-                    v - 1 == 0 -> null
-                    else -> v - 1
-                }
-            }
+            it.copy(
+                columnCellMap = it.columnCellMap.put(this, values.remove(index)),
+                indicesMap = it.indicesMap.put(index, it.indicesMap[index].let { v ->
+                    when {
+                        v == null -> null
+                        v - 1 == 0 -> null
+                        else -> v - 1
+                    }
+                })
+            )
         }
 
-        val new: Cell<*> = UnitCell(this, index)
+        val oldTable = this.table.makeClone(ref = oldRef)
+        val newTable = this.table.makeClone(ref = newRef)
+
+        val old = oldTable[this.columnHeader][index]
+        val new = newTable[this.columnHeader][index] // This will be a unit cell
+
+        if (!table.eventProcessor.haveListeners()) return old
+
         table.eventProcessor.publish(listOf(
             ListenerEvent(
                 old,
@@ -284,28 +316,40 @@ class BaseColumn internal constructor(
     }
 
     override fun clear() {
-        for (k in values.keys) {
-            indices.compute(k) { _, v ->
-                when {
-                    v == null -> null
-                    v - 1 == 0 -> null
-                    else -> v - 1
-                }
+        tableRef.updateAndGet {
+            val values = it.columnCellMap[this] ?: throw InvalidColumnException()
+            val indices = values.keys().fold(it.indicesMap) { acc, index ->
+                acc.put(index, acc[index].let { v ->
+                    when {
+                        v == null -> null
+                        v - 1 == 0 -> null
+                        else -> v - 1
+                    }
+                })
             }
+
+            it.copy(
+                indicesMap = indices,
+                columnCellMap = it.columnCellMap.put(this, PTreeMap())
+            )
         }
-        values.clear()
 
         // TODO Event processor..
     }
 
-    // TODO We need this (and asSequence?) on CellRange, Table, Row and similar..
+    // TODO We need this on CellRange, Table, Row and similar.. (done?)
     override fun iterator(): Iterator<Cell<*>> {
-        return values.asSequence().map { it.value.toCell(this, it.key) }.iterator()
+        val values = tableRef.get().columnCellMap[this] ?: throw InvalidColumnException()
+        return values.asSequence().map { it.component2().toCell(this, it.component1()) }.iterator()
     }
 
     private fun getCellRaw(index: Long, indexRelation: IndexRelation): CellValue<*>? {
+        val ref = tableRef.get()
+        val indices = ref.indicesMap.asSortedMap()
+        val values = ref.columnCellMap[this] ?: throw InvalidColumnException()
+
         fun firstBefore(): CellValue<*>? {
-            for (i in indices.headMap(index).keys.descendingIterator()) {
+            for (i in indices.headMap(index).keys.sortedDescending()) {
                 if (values.containsKey(i)) {
                     return values[i]
                 }
@@ -314,7 +358,7 @@ class BaseColumn internal constructor(
         }
 
         fun firstAfter(): CellValue<*>? {
-            for (i in indices.tailMap(index + 1L).keys.iterator()) {
+            for (i in indices.tailMap(index + 1L).keys) {
                 if (values.containsKey(i)) {
                     return values[i]
                 }
@@ -326,25 +370,16 @@ class BaseColumn internal constructor(
             AT -> values[index]
             BEFORE -> firstBefore()
             AFTER -> firstAfter()
-            AT_OR_BEFORE -> values.getOrElse(index) { getCellRaw(index, BEFORE) }
-            AT_OR_AFTER -> values.getOrElse(index) { getCellRaw(index, AFTER) }
+            AT_OR_BEFORE -> values[index] ?: run { getCellRaw(index, BEFORE) }
+            AT_OR_AFTER -> values[index] ?: run { getCellRaw(index, AFTER) }
         }
-    }
-
-    private fun setCellRaw(index: Long, cellValue: CellValue<*>): CellValue<*>? {
-        if (table.closed)
-            throw InvalidTableException("Table is closed")
-
-        val old = values.put(index, cellValue)
-
-        if (old == null)
-            indices.compute(index) { _, v -> if (v == null) 1 else v + 1 }
-
-        return old
     }
 }
 
 class ColumnRange(override val start: Column, override val endInclusive: Column) : ClosedRange<Column>, Iterable<Column> {
+    val table: Table
+        get() = start.table
+
     override fun iterator(): Iterator<Column> {
         return if (start.columnOrder <= endInclusive.columnOrder) {
             start
@@ -371,7 +406,7 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
             return false
         }
 
-        if (value.columnOrder < kotlin.math.min(start.columnOrder, endInclusive.columnOrder) || value.columnOrder > max(start.columnOrder, endInclusive.columnOrder)) {
+        if (value.columnOrder < min(start.columnOrder, endInclusive.columnOrder) || value.columnOrder > max(start.columnOrder, endInclusive.columnOrder)) {
             return false
         }
 

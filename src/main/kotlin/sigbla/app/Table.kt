@@ -1,19 +1,18 @@
 package sigbla.app
 
+import com.github.andrewoma.dexx.collection.Map as PMap
+import com.github.andrewoma.dexx.collection.HashMap as PHashMap
+import com.github.andrewoma.dexx.collection.SortedMap as PSortedMap
+import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
 import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.exceptions.InvalidTableException
-import sigbla.app.internals.EventReceiver
-import sigbla.app.internals.ListenerReference
 import sigbla.app.internals.Registry
 import sigbla.app.internals.TableEventProcessor
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentMap
-import java.util.concurrent.ConcurrentNavigableMap
-import java.util.concurrent.ConcurrentSkipListMap
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.reflect.KClass
 
 // Look at this wrt Table, Column, Row: https://kotlinlang.org/docs/reference/operator-overloading.html
@@ -22,10 +21,13 @@ import kotlin.reflect.KClass
 
 // TODO: Need a table clear like we have on columns..
 
-abstract class Table(val name: String) {
+abstract class Table(val name: String) : Iterable<Cell<*>> {
     @Volatile
     var closed: Boolean = false
         internal set
+
+    val table: Table
+        get() = this
 
     internal val columnCounter = AtomicInteger()
 
@@ -33,9 +35,7 @@ abstract class Table(val name: String) {
 
     abstract val columns: Collection<Column>
 
-    internal abstract val columnsMap: ConcurrentMap<ColumnHeader, Column>
-
-    internal abstract val indicesMap: ConcurrentNavigableMap<Long, Int>
+    internal abstract val tableRef: AtomicReference<TableRef>
 
     internal abstract val eventProcessor: TableEventProcessor
 
@@ -96,6 +96,58 @@ abstract class Table(val name: String) {
     operator fun get(header1: String, header2: String, header3: String, header4: String, indexRelation: IndexRelation, index: Int): Cell<*> = this[header1, header2, header3, header4][indexRelation, index]
 
     operator fun get(header1: String, header2: String, header3: String, header4: String, header5: String, indexRelation: IndexRelation, index: Int): Cell<*> = this[header1, header2, header3, header4, header5][indexRelation, index]
+
+    // -----
+
+    operator fun get(cell: Cell<*>): Cell<*> {
+        return this[cell.column.columnHeader][cell.index]
+    }
+
+    operator fun get(column: Column): Column {
+        return this[column.columnHeader]
+    }
+
+    operator fun get(cellRange: CellRange): CellRange {
+        return CellRange(this[cellRange.start], this[cellRange.endInclusive], cellRange.order)
+    }
+
+    // TODO Row related
+
+    operator fun get(table: Table): Table {
+        return this
+    }
+
+    // -----
+
+    operator fun set(cell: Cell<*>, value: Cell<*>?) {
+        this[cell.column][cell.index] = value
+    }
+
+    operator fun set(cell: Cell<*>, value: String) {
+        this[cell.column][cell.index] = value
+    }
+
+    operator fun set(cell: Cell<*>, value: Long) {
+        this[cell.column][cell.index] = value
+    }
+
+    operator fun set(cell: Cell<*>, value: Double) {
+        this[cell.column][cell.index] = value
+    }
+
+    operator fun set(cell: Cell<*>, value: BigInteger) {
+        this[cell.column][cell.index] = value
+    }
+
+    operator fun set(cell: Cell<*>, value: BigDecimal) {
+        this[cell.column][cell.index] = value
+    }
+
+    operator fun set(cell: Cell<*>, value: Number) {
+        this[cell.column][cell.index] = value
+    }
+
+    // -----
 
     operator fun set(header1: String, index: Long, value: Cell<*>?) {
         this[header1][index] = value
@@ -459,6 +511,36 @@ abstract class Table(val name: String) {
         return eventProcessor.subscribe(this, eventReceiver, init)
     }
 
+    override fun iterator(): Iterator<Cell<*>> {
+        return object : Iterator<Cell<*>> {
+            private val columnIterator = columns.iterator()
+            private var cellIterator = nextCellIterator()
+
+            private fun nextCellIterator(): Iterator<Cell<*>> {
+                while (columnIterator.hasNext()) {
+                    val itr = columnIterator.next().iterator()
+                    if (itr.hasNext()) return itr
+                }
+
+                return emptyList<Cell<*>>().iterator()
+            }
+
+            override fun hasNext(): Boolean {
+                if (cellIterator.hasNext()) return true
+                cellIterator = nextCellIterator()
+                return cellIterator.hasNext()
+            }
+
+            override fun next(): Cell<*> = cellIterator.next()
+        }
+    }
+
+    abstract fun clone(): Table
+
+    abstract fun clone(name: String): Table
+
+    internal abstract fun makeClone(name: String = table.name, onRegistry: Boolean = false, ref: TableRef = tableRef.get()!!): Table
+
     companion object {
         fun newTable(name: String): Table =
             BaseTable(name)
@@ -579,51 +661,105 @@ abstract class Table(val name: String) {
     }
 }
 
+internal data class TableRef(
+    val columnsMap: PMap<ColumnHeader, Column> = PHashMap(),
+    val columnCellMap: PMap<Column, PSortedMap<Long, CellValue<*>>> = PHashMap(),
+    val indicesMap: PSortedMap<Long, Int> = PTreeMap()
+)
+
 class BaseTable internal constructor(
     name: String,
-    override val columnsMap: ConcurrentMap<ColumnHeader, Column> = ConcurrentHashMap(),
-    override val indicesMap: ConcurrentNavigableMap<Long, Int> = ConcurrentSkipListMap(),
+    onRegistry: Boolean = true,
+    override val tableRef: AtomicReference<TableRef> = AtomicReference(TableRef()),
     override val eventProcessor: TableEventProcessor = TableEventProcessor()
 ) : Table(name) {
     init {
-        Registry.setTable(name, this)
+        if (onRegistry) Registry.setTable(name, this)
     }
 
     override val headers: Collection<ColumnHeader>
-        get() = columnsMap
-            .entries
-            .sortedBy { it.value.columnOrder }
-            .map { it.key }
+        get() = tableRef.get().columnsMap.asSequence()
+            .sortedBy { it.component2().columnOrder }
+            .map { it.component1() }
             .toList()
 
     override val columns: Collection<Column>
-        get() = columnsMap
-            .entries
-            .sortedBy { it.value.columnOrder }
-            .map { it.value }
+        get() = tableRef.get().columnsMap.values().asSequence()
+            .sortedBy { it.columnOrder }
             .toList()
 
     // TODO Column add event
-    override fun get(header: ColumnHeader): Column = columnsMap.computeIfAbsent(header) {
+    override fun get(header: ColumnHeader): Column {
         if (closed) throw InvalidTableException("Table is closed")
         if (header.header.isEmpty()) throw InvalidColumnException("Empty header")
 
-        BaseColumn(this, header, indicesMap)
+        return tableRef.get().columnsMap[header] ?: tableRef.updateAndGet {
+            if (it.columnsMap.containsKey(header)) return@updateAndGet it
+
+            val column = BaseColumn(this, header, tableRef)
+
+            it.copy(
+                columnsMap = it.columnsMap.put(header, column),
+                columnCellMap = it.columnCellMap.put(column, PTreeMap())
+            )
+        }.columnsMap[header] ?: throw InvalidColumnException()
     }
 
-    override fun contains(header: ColumnHeader): Boolean = columnsMap.containsKey(header)
+    override fun contains(header: ColumnHeader): Boolean = tableRef.get().columnsMap.containsKey(header)
 
     // TODO Column remove event
     override fun remove(header: ColumnHeader) {
-        columnsMap.remove(header)?.clear()
+        tableRef.updateAndGet {
+            val column = it.columnsMap[header] ?: return@updateAndGet it
+
+            // TODO A clear here will update the tableRef, consider if needed..
+            //column.clear()
+
+            it.copy(
+                columnsMap = it.columnsMap.remove(header),
+                columnCellMap = it.columnCellMap.remove(column)
+            )
+        }
     }
 
     // TODO Column rename event
     override fun rename(existing: ColumnHeader, newName: ColumnHeader) {
-        val column = columnsMap[existing] ?: return
+        tableRef.updateAndGet {
+            val c = it.columnsMap[existing] ?: return@updateAndGet it
 
-        columnsMap.put(newName, column)?.clear()
-        columnsMap.remove(existing, column)
+            it.copy(
+                columnsMap = it.columnsMap.remove(existing).put(newName, c)
+            )
+        }
+    }
+
+    override fun clone(): Table {
+        return makeClone()
+    }
+
+    override fun clone(name: String): Table {
+        return makeClone(name, true)
+    }
+
+    override fun makeClone(name: String, onRegistry: Boolean, ref: TableRef): Table {
+        val newTableRef = AtomicReference<TableRef>(ref)
+        val tableClone = BaseTable(name, onRegistry, newTableRef)
+
+        val newColumnsMap = ref.columnsMap.fold(PHashMap<ColumnHeader, Column>()) { acc, chc ->
+            acc.put(chc.component1(), BaseColumn(tableClone, chc.component1(), newTableRef))
+        }
+
+        val newColumnCellMap = ref.columnCellMap.fold(PHashMap<Column, PSortedMap<Long, CellValue<*>>>()) { acc, ccm ->
+            acc.put(newColumnsMap[ccm.component1().columnHeader] ?: throw InvalidColumnException(), ccm.component2())
+        }
+
+        newTableRef.set(TableRef(
+            newColumnsMap,
+            newColumnCellMap,
+            ref.indicesMap
+        ))
+
+        return tableClone
     }
 
     companion object

@@ -67,27 +67,12 @@ internal object SigblaBackend {
                 install(WebSockets)
 
                 routing {
-//                    get("/init/$accessToken") {
-//                        call.sessions.set("SESSION", ClientSession(UUID.randomUUID().toString()))
-//                        call.respondRedirect("/t/test/")
-//                    }
                     static("/t/{ref}") {
                         resources("table")
                         defaultResource("index.html", "table")
                     }
                     webSocket("/t/{ref}/socket") {
-                        val session = call.sessions.get<ClientSession>() ?: call.sessions.let {
-                            val newSession = ClientSession(UUID.randomUUID().toString())
-                            it.set("SESSION", newSession)
-                            return@let newSession
-                        }
                         val ref = call.parameters["ref"]
-
-//                        if (session == null) {
-//                            println("Close")
-//                            close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No session"))
-//                            return@webSocket
-//                        }
 
                         if (ref == null || ref.isBlank()) {
                             println("Close")
@@ -95,11 +80,11 @@ internal object SigblaBackend {
                             return@webSocket
                         }
 
-                        val client = addListener(this, session.id, ref)
+                        val client = addListener(this, ref)
 
                         handleDims(client)
 
-                        println("post add listener on ${session.id}:$ref")
+                        println("post add listener on $ref")
 
                         try {
                             val jsonParser = Klaxon()
@@ -239,11 +224,9 @@ internal object SigblaBackend {
 
     private fun addListener(
         socket: WebSocketSession,
-        session: String,
         ref: String
     ): SigblaClient {
-        println("add listener")
-        val client = SigblaClient(socket, session, ref)
+        val client = SigblaClient(socket, ref)
         listeners[socket] = client
         return client
     }
@@ -257,7 +240,6 @@ internal object SigblaBackend {
 
 internal data class SigblaClient(
     val socket: WebSocketSession,
-    val session: String,
     val ref: String,
     val tileState: TileState = TileState(),
     @Volatile var dims: Dimensions = Dimensions(0, 0, 0, 0)

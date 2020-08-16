@@ -19,6 +19,7 @@ ext.ktor_version = '1.3.2'
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "com.beust:klaxon:5.2"
+    implementation "com.github.andrewoma.dexx:kollection:0.7"
 
     compile "io.ktor:ktor-server-core:$ktor_version"
     compile "io.ktor:ktor-server-netty:$ktor_version"

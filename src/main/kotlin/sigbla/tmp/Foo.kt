@@ -126,18 +126,30 @@ fun main() {
     //val compare2 = table["A"][1] < table["A"][2]
     //val compare3 = table["A"][1] == table["A", 3]
 
-    // TODO
-    /*
     for (c in table["A"][1]..table["A"][2]) {
-
+        println("for c: $c")
     }
-     */
+
+    table["A"][2] = "Table cell at A2"
+
+    (table["A"][1]..table["A"][2]).asSequence()
+    (table["A"][1]..table["A"][2]).contains(10)
+    val range = (table["A"][1]..table["A"][2])
+    range.forEach { println(it) }
+    range.map { it.value }.filterIsInstance<BigInteger>().size
+
+    table["A"].asSequence().forEach {
+        println("table[\"A\"].asSequence().forEach $it")
+    }
+
+    table.iterator().forEach {
+        println("table iterator forEach: ${it.column} ${it.index} $it")
+    }
+    table.asSequence().forEach {
+        println("table asSequence forEach: ${it.column} ${it.index} $it")
+    }
 
     // TODO
-    //(table["A"][1]..table["A"][2]).contains(10)
-    //val range = (table["A"][1]..table["A"][2])
-    //range.forEach { println(it) }
-    //range.map { it.value }.filterIsInstance<BigInteger>().size
     //val inVal = 5 in table["A"][1]
 
     // TODO
@@ -184,15 +196,71 @@ fun main() {
     val value = table["A"] at 1
 
     on<Any, Any>(table) {
-        println("Subscribe 1")
+        println("Subscribe 1a")
         events {
+            newTable[source] //.forEach {
+//                it.value
+//            }
+            oldTable[source] //.forEach {
+//                it.value
+//            }
             forEach {
                 if (it.newValue.index == 1L) this@on.source["A"][2] = "UPDATE"
             }
         }
     }
 
+    on<Any, Any>(table["A"]) {
+        println("Subscribe 1b")
+        events {
+            newTable[source] //.forEach {
+//                it.value
+//            }
+            oldTable[source] //.forEach {
+//                it.value
+//            }
+            forEach {
+                //source.table[it.newValue] = it.newValue * 2
+                //if (it.newValue.index == 1L) source.table["A"][2] = "UPDATE"
+            }
+        }
+    }
+
+    on<Any, Any>(table["A", 0]..table["B", 100]) {
+        println("Subscribe 1c")
+        events {
+            newTable[source] //.forEach {
+//                it.value
+//            }
+            oldTable[source] //.forEach {
+//                it.value
+//            }
+            forEach {
+                //if (it.newValue.index == 1L) source.table["A"][2] = "UPDATE"
+            }
+        }
+    }
+
+    // TODO
+//    val columnRange = table["A"]..table["B"]
+//    on<Any, Any>(r) {
+//        println("Subscribe 1d")
+//        events {
+//            newTable[source].forEach {
+//                it.value
+//            }
+//            oldTable[source].forEach {
+//                it.value
+//            }
+//            forEach {
+//                if (it.newValue.index == 1L) source.table["A"][2] = "UPDATE"
+//            }
+//        }
+//    }
+
     on<Any, Number>(table) {
+        // TODO Consider the approach on config..
+        configuration.name = "Name"
         configure {
             name = "Name"
         }
