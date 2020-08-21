@@ -147,6 +147,17 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
         this[cell.column][cell.index] = value
     }
 
+    // TODO Testing idea of having the ability to do something like:
+    // table["A", 1] = {
+    //    name = ".."
+    //    order = 123
+    //
+    //    events {
+    //       return count()
+    //    }
+    // }
+    //inline operator fun <reified O, reified N> set(cell: Cell<*>, actionListener: ()..)
+
     // -----
 
     operator fun set(header1: String, index: Long, value: Cell<*>?) {
@@ -510,6 +521,9 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
         }
         return eventProcessor.subscribe(this, eventReceiver, init)
     }
+
+    // TODO Maybe add an off function as well, that can unsubscribe a listener? By name?
+    // TODO Need a function to get a listener reference by name
 
     override fun iterator(): Iterator<Cell<*>> {
         return object : Iterator<Cell<*>> {

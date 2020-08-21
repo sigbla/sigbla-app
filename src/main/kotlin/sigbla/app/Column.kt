@@ -301,7 +301,7 @@ class BaseColumn internal constructor(
         val newTable = this.table.makeClone(ref = newRef)
 
         val old = oldTable[this.columnHeader][index]
-        val new = newTable[this.columnHeader][index] // This will be a unit cell
+        val new = newTable[this.columnHeader][index] // This will be a unit cell, but with new table and column refs
 
         if (!table.eventProcessor.haveListeners()) return old
 

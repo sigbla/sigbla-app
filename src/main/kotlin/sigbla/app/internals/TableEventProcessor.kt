@@ -12,59 +12,74 @@ internal class TableEventProcessor {
         val listenerEvent: (event: Sequence<ListenerEvent<Any, Any>>) -> Unit
     )
 
-    private val tableListeners: ConcurrentMap<Long, ListenerReferenceEvent<ListenerTableRef>> = ConcurrentSkipListMap()
-    private val columnListeners: ConcurrentMap<Long, ListenerReferenceEvent<ListenerColumnRef>> = ConcurrentSkipListMap()
-    private val rowListeners: ConcurrentMap<Long, ListenerReferenceEvent<ListenerRowRef>> = ConcurrentSkipListMap()
-    private val cellRangeListeners: ConcurrentMap<Long, ListenerReferenceEvent<ListenerCellRangeRef>> = ConcurrentSkipListMap()
-    private val cellListeners: ConcurrentMap<Long, ListenerReferenceEvent<ListenerCellRef>> = ConcurrentSkipListMap()
+    private class ListenerId(val order: Long) : Comparable<ListenerId> {
+        val id: Long = idGenerator.getAndIncrement()
+
+        override fun compareTo(that: ListenerId): Int {
+            val cmp = this.order.compareTo(that.order)
+            if (cmp == 0) return this.id.compareTo(that.id)
+            return cmp
+        }
+    }
+
+    private val tableListeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerTableRef>> = ConcurrentSkipListMap()
+    private val columnListeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerColumnRef>> = ConcurrentSkipListMap()
+    private val rowListeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerRowRef>> = ConcurrentSkipListMap()
+    private val cellRangeListeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerCellRangeRef>> = ConcurrentSkipListMap()
+    private val cellListeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerCellRef>> = ConcurrentSkipListMap()
 
     private data class ListenerTableRef(
-        val id: Long,
-        val listeners: ConcurrentMap<Long, ListenerReferenceEvent<ListenerTableRef>>,
+        private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerTableRef>>,
         val table: Table
     ) : ListenerReference {
+        lateinit var key: ListenerId
+
         override fun unsubscribe() {
-            listeners.remove(id)
+            listeners.remove(key)
         }
     }
 
     private data class ListenerColumnRef(
-        val id: Long,
-        val listeners: ConcurrentMap<Long, ListenerReferenceEvent<ListenerColumnRef>>,
+        private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerColumnRef>>,
         val column: Column
     ) : ListenerReference {
+        lateinit var key: ListenerId
+
         override fun unsubscribe() {
-            listeners.remove(id)
+            listeners.remove(key)
         }
     }
 
     private data class ListenerRowRef(
-        val id: Long,
-        val listeners: ConcurrentMap<Long, ListenerReferenceEvent<ListenerRowRef>>,
+        private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerRowRef>>,
         val row: Row
     ) : ListenerReference {
+        lateinit var key: ListenerId
+
         override fun unsubscribe() {
-            listeners.remove(id)
+            listeners.remove(key)
         }
     }
 
     private data class ListenerCellRangeRef(
-        val id: Long,
-        val listeners: ConcurrentMap<Long, ListenerReferenceEvent<ListenerCellRangeRef>>,
+        private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerCellRangeRef>>,
         val cellRange: CellRange
     ) : ListenerReference {
+        lateinit var key: ListenerId
+
         override fun unsubscribe() {
-            listeners.remove(id)
+            listeners.remove(key)
         }
     }
 
     private data class ListenerCellRef(
-        val id: Long,
-        val listeners: ConcurrentMap<Long, ListenerReferenceEvent<ListenerCellRef>>,
+        private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerCellRef>>,
         val cell: Cell<*>
     ) : ListenerReference {
+        lateinit var key: ListenerId
+
         override fun unsubscribe() {
-            listeners.remove(id)
+            listeners.remove(key)
         }
     }
 
@@ -82,7 +97,6 @@ internal class TableEventProcessor {
         init: EventReceiver<Table, Any, Any>.() -> Unit
     ): ListenerReference {
         val listenerRef = ListenerTableRef(
-            idGenerator.getAndIncrement(),
             tableListeners,
             table
         )
@@ -97,7 +111,7 @@ internal class TableEventProcessor {
         synchronized(listenerRefEvent) {
             // TODO Tables, cellrange, and others, will need a asSequence that returns all their cells
             //listener.invoke(ListenerEventReceiver(table, listenerRef, table.asSequence().map to event..))
-            tableListeners[listenerRef.id] = listenerRefEvent
+            tableListeners[ListenerId(eventReceiver.order)] = listenerRefEvent
         }
         return listenerRef
     }
@@ -108,7 +122,6 @@ internal class TableEventProcessor {
         init: EventReceiver<Column, Any, Any>.() -> Unit
     ): ListenerReference {
         val listenerRef = ListenerColumnRef(
-            idGenerator.getAndIncrement(),
             columnListeners,
             column
         )
@@ -121,7 +134,7 @@ internal class TableEventProcessor {
                 eventReceiver(it)
             }
         synchronized(listenerRefEvent) {
-            columnListeners[listenerRef.id] = listenerRefEvent
+            columnListeners[ListenerId(eventReceiver.order)] = listenerRefEvent
         }
         return listenerRef
     }
@@ -132,7 +145,6 @@ internal class TableEventProcessor {
         init: EventReceiver<Row, Any, Any>.() -> Unit
     ): ListenerReference {
         val listenerRef = ListenerRowRef(
-            idGenerator.getAndIncrement(),
             rowListeners,
             row
         )
@@ -145,7 +157,7 @@ internal class TableEventProcessor {
                 eventReceiver(it)
             }
         synchronized(listenerRefEvent) {
-            rowListeners[listenerRef.id] = listenerRefEvent
+            rowListeners[ListenerId(eventReceiver.order)] = listenerRefEvent
         }
         return listenerRef
     }
@@ -156,7 +168,6 @@ internal class TableEventProcessor {
         init: EventReceiver<CellRange, Any, Any>.() -> Unit
     ): ListenerReference {
         val listenerRef = ListenerCellRangeRef(
-            idGenerator.getAndIncrement(),
             cellRangeListeners,
             cellRange
         )
@@ -169,7 +180,7 @@ internal class TableEventProcessor {
                 eventReceiver(it)
             }
         synchronized(listenerRefEvent) {
-            cellRangeListeners[listenerRef.id] = listenerRefEvent
+            cellRangeListeners[ListenerId(eventReceiver.order)] = listenerRefEvent
         }
         return listenerRef
     }
@@ -180,7 +191,6 @@ internal class TableEventProcessor {
         init: EventReceiver<Cell<*>, Any, Any>.() -> Unit
     ): ListenerReference {
         val listenerRef = ListenerCellRef(
-            idGenerator.getAndIncrement(),
             cellListeners,
             cell
         )
@@ -193,7 +203,7 @@ internal class TableEventProcessor {
                 eventReceiver(it)
             }
         synchronized(listenerRefEvent) {
-            cellListeners[listenerRef.id] = listenerRefEvent
+            cellListeners[ListenerId(eventReceiver.order)] = listenerRefEvent
         }
         return listenerRef
     }

@@ -259,11 +259,8 @@ fun main() {
 //    }
 
     on<Any, Number>(table) {
-        // TODO Consider the approach on config..
-        configuration.name = "Name"
-        configure {
-            name = "Name"
-        }
+        name = "Name"
+        order = 10
 
         source["Sums", 0] = 0
 

@@ -342,4 +342,128 @@ class TableTest {
         assertEquals(BigDecimal.TEN / BigDecimal.valueOf(2), t["Div"][idxMapping[Pair(5, 1)]!!].value)
         assertEquals(BigDecimal.TEN % BigDecimal.valueOf(2), t["Rem"][idxMapping[Pair(5, 1)]!!].value)
     }
+
+    @Test
+    fun tableCloneValues() {
+        val t1 = newTable("tableClone1")
+
+        for (c in listOf("A", "B", "C", "D")) {
+            for (r in 1..100) {
+                t1[c][r] = "$c$r A1"
+            }
+        }
+
+        val t2 = t1.clone("tableClone2")
+
+        for (c in listOf("A", "B", "C")) {
+            for (r in 1..100) {
+                t2[c][r] = "$c$r B1"
+            }
+        }
+
+        for (c in listOf("D")) {
+            for (r in 1..100) {
+                t1[c][r] = "$c$r A2"
+            }
+        }
+
+        for (c in listOf("A", "B", "C")) {
+            for (r in 1..100) {
+                assertEquals("$c$r A1", t1[c][r].value)
+            }
+        }
+
+        for (c in listOf("A", "B", "C")) {
+            for (r in 1..100) {
+                assertEquals("$c$r B1", t2[c][r].value)
+            }
+        }
+
+        for (c in listOf("D")) {
+            for (r in 1..100) {
+                assertEquals("$c$r A2", t1[c][r].value)
+            }
+        }
+
+        for (c in listOf("D")) {
+            for (r in 1..100) {
+                assertEquals("$c$r A1", t2[c][r].value)
+            }
+        }
+    }
+
+    @Test
+    fun tableCloneEvents() {
+        val t1 = newTable("tableCloneEvents")
+
+        var t1EventCount = 0
+        var t2EventCount = 0
+
+        t1.onAny {
+            events {
+                t1EventCount += count()
+            }
+        }
+
+        var expectedT1EventCount = 0
+
+        for (c in listOf("A", "B", "C", "D")) {
+            for (r in 1..100) {
+                t1[c][r] = "$c$r A1"
+                expectedT1EventCount++
+            }
+        }
+
+        val t2 = t1.clone("tableClone2")
+
+        t2.onAny {
+            events {
+                t2EventCount += count()
+            }
+        }
+
+        for (c in listOf("A", "B", "C", "D")) {
+            for (r in 1..100) {
+                t1[c][r] = "$c$r A2"
+                expectedT1EventCount++
+            }
+        }
+
+        var expectedT2EventCount = 0
+
+        for (c in listOf("A", "B", "C", "D")) {
+            for (r in 1..100) {
+                t2[c][r] = "$c$r B1"
+                expectedT2EventCount++
+            }
+        }
+
+        assertEquals(expectedT1EventCount, t1EventCount)
+        assertEquals(expectedT2EventCount, t2EventCount)
+        assertTrue(expectedT1EventCount > expectedT2EventCount)
+        assertTrue(expectedT2EventCount > 0)
+    }
+
+    @Test
+    fun tableEventSnapshots() {
+        val t = newTable("tableEventSnapshots")
+
+        t["A", 1] = 1
+
+        var change: Number = 0
+
+        t.onAny {
+            events {
+                change = newTable["A", 1] - oldTable["A", 1]
+            }
+        }
+
+        t["A", 1] = 2
+        assertEquals(1L, change)
+
+        t["A", 1] = 4
+        assertEquals(2L, change)
+    }
+
+    // TODO: Listener ordering
 }
