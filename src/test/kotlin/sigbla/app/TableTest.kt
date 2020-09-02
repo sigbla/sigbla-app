@@ -414,7 +414,18 @@ class TableTest {
             }
         }
 
+        for (c in listOf("A", "B", "C", "D")) {
+            for (r in 1..100) {
+                t1[c][r] = "$c$r A1"
+                expectedT1EventCount++
+            }
+        }
+
         val t2 = t1.clone("tableClone2")
+
+        // We divide by 2 because we overwrite cells above,
+        // but when adding a listener we only reply current values
+        var expectedT2EventCount = expectedT1EventCount / 2
 
         t2.onAny {
             events {
@@ -428,8 +439,6 @@ class TableTest {
                 expectedT1EventCount++
             }
         }
-
-        var expectedT2EventCount = 0
 
         for (c in listOf("A", "B", "C", "D")) {
             for (r in 1..100) {

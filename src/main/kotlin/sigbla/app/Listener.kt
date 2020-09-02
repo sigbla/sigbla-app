@@ -2,17 +2,16 @@ package sigbla.app
 
 import sigbla.app.exceptions.InvalidSequenceException
 
-// TODO Probably want to expose name and order here
 interface ListenerReference {
+    val name: String?
+    val order: Long
     fun unsubscribe()
 }
 
-// TODO Change to builder, and use priority..
-//data class ListenerConfiguration(var name: String? = null, var priority: Int = 0)
 data class ListenerEvent<O, N>(val oldValue: Cell<O>, val newValue: Cell<N>)
 
-class EventReceiver<F, O, N>(
-    val source: F,
+class EventReceiver<S, O, N>(
+    val source: S,
     private val typeFilter: Sequence<ListenerEvent<Any, Any>>.() -> Sequence<ListenerEvent<Any, Any>>
 ) {
     lateinit var reference: ListenerReference
@@ -20,6 +19,7 @@ class EventReceiver<F, O, N>(
 
     var name: String? = null
     var order: Long = 0
+    var skipHistory: Boolean = false
 
     private var process: (Sequence<ListenerEvent<O, N>>.() -> Unit) = {}
 

@@ -147,16 +147,8 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
         this[cell.column][cell.index] = value
     }
 
-    // TODO Testing idea of having the ability to do something like:
-    // table["A", 1] = {
-    //    name = ".."
-    //    order = 123
-    //
-    //    events {
-    //       return count()
-    //    }
-    // }
-    //inline operator fun <reified O, reified N> set(cell: Cell<*>, actionListener: ()..)
+    // TODO Other set operators below and elsewhere (cell range, column, etc)
+    operator fun set(cell: Cell<*>, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(cell).init()
 
     // -----
 
@@ -778,3 +770,7 @@ class BaseTable internal constructor(
 
     companion object
 }
+
+class DestinationOsmosis<D>(
+    val destination: D
+)

@@ -1,6 +1,7 @@
 package sigbla.app.internals
 
 import sigbla.app.*
+import sigbla.app.exceptions.InvalidListenerException
 import java.util.*
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.ConcurrentSkipListMap
@@ -28,58 +29,92 @@ internal class TableEventProcessor {
     private val cellRangeListeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerCellRangeRef>> = ConcurrentSkipListMap()
     private val cellListeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerCellRef>> = ConcurrentSkipListMap()
 
+    private abstract class ListenerUnsubscribeRef : ListenerReference {
+        protected var haveUnsubscribed = false
+        var key: ListenerId? = null
+            set(value) {
+                field = value
+                if (haveUnsubscribed) unsubscribe()
+            }
+    }
+
     private data class ListenerTableRef(
         private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerTableRef>>,
         val table: Table
-    ) : ListenerReference {
-        lateinit var key: ListenerId
+    ) : ListenerUnsubscribeRef() {
+        var lazyName: String? = null
+        var lazyOrder: Long? = null
+
+        override val name: String? by lazy { lazyName }
+        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
 
         override fun unsubscribe() {
-            listeners.remove(key)
+            haveUnsubscribed = true
+            listeners.remove(key ?: return)
         }
     }
 
     private data class ListenerColumnRef(
         private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerColumnRef>>,
         val column: Column
-    ) : ListenerReference {
-        lateinit var key: ListenerId
+    ) : ListenerUnsubscribeRef() {
+        var lazyName: String? = null
+        var lazyOrder: Long? = null
+
+        override val name: String? by lazy { lazyName }
+        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
 
         override fun unsubscribe() {
-            listeners.remove(key)
+            haveUnsubscribed = true
+            listeners.remove(key ?: return)
         }
     }
 
     private data class ListenerRowRef(
         private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerRowRef>>,
         val row: Row
-    ) : ListenerReference {
-        lateinit var key: ListenerId
+    ) : ListenerUnsubscribeRef() {
+        var lazyName: String? = null
+        var lazyOrder: Long? = null
+
+        override val name: String? by lazy { lazyName }
+        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
 
         override fun unsubscribe() {
-            listeners.remove(key)
+            haveUnsubscribed = true
+            listeners.remove(key ?: return)
         }
     }
 
     private data class ListenerCellRangeRef(
         private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerCellRangeRef>>,
         val cellRange: CellRange
-    ) : ListenerReference {
-        lateinit var key: ListenerId
+    ) : ListenerUnsubscribeRef() {
+        var lazyName: String? = null
+        var lazyOrder: Long? = null
+
+        override val name: String? by lazy { lazyName }
+        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
 
         override fun unsubscribe() {
-            listeners.remove(key)
+            haveUnsubscribed = true
+            listeners.remove(key ?: return)
         }
     }
 
     private data class ListenerCellRef(
         private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerCellRef>>,
         val cell: Cell<*>
-    ) : ListenerReference {
-        lateinit var key: ListenerId
+    ) : ListenerUnsubscribeRef() {
+        var lazyName: String? = null
+        var lazyOrder: Long? = null
+
+        override val name: String? by lazy { lazyName }
+        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
 
         override fun unsubscribe() {
-            listeners.remove(key)
+            haveUnsubscribed = true
+            listeners.remove(key ?: return)
         }
     }
 
@@ -104,14 +139,26 @@ internal class TableEventProcessor {
         eventReceiver.reference = listenerRef
         eventReceiver.init()
 
+        listenerRef.lazyName = eventReceiver.name
+        listenerRef.lazyOrder = eventReceiver.order
+
         val listenerRefEvent =
             ListenerReferenceEvent(listenerRef) {
                 eventReceiver(it)
             }
         synchronized(listenerRefEvent) {
-            // TODO Tables, cellrange, and others, will need a asSequence that returns all their cells
-            //listener.invoke(ListenerEventReceiver(table, listenerRef, table.asSequence().map to event..))
-            tableListeners[ListenerId(eventReceiver.order)] = listenerRefEvent
+            val key = ListenerId(eventReceiver.order)
+            tableListeners[key] = listenerRefEvent
+            listenerRef.key = key
+
+            // TODO Don't like the potential overlap between when we call clone and that the table might have
+            //      been altered just before, but after we added to the tableListeners..
+            //      It might the listener gets duplicates..
+            if (!eventReceiver.skipHistory) {
+                listenerRefEvent.listenerEvent(table.clone().asSequence().map {
+                    ListenerEvent(UnitCell(it.column, it.index), it) as ListenerEvent<Any, Any>
+                })
+            }
         }
         return listenerRef
     }
@@ -129,12 +176,23 @@ internal class TableEventProcessor {
         eventReceiver.reference = listenerRef
         eventReceiver.init()
 
+        listenerRef.lazyName = eventReceiver.name
+        listenerRef.lazyOrder = eventReceiver.order
+
         val listenerRefEvent =
             ListenerReferenceEvent(listenerRef) {
                 eventReceiver(it)
             }
         synchronized(listenerRefEvent) {
-            columnListeners[ListenerId(eventReceiver.order)] = listenerRefEvent
+            val key = ListenerId(eventReceiver.order)
+            columnListeners[key] = listenerRefEvent
+            listenerRef.key = key
+
+            if (!eventReceiver.skipHistory) {
+                listenerRefEvent.listenerEvent(column.table.clone()[column].asSequence().map {
+                    ListenerEvent(UnitCell(it.column, it.index), it) as ListenerEvent<Any, Any>
+                })
+            }
         }
         return listenerRef
     }
@@ -152,12 +210,22 @@ internal class TableEventProcessor {
         eventReceiver.reference = listenerRef
         eventReceiver.init()
 
+        listenerRef.lazyName = eventReceiver.name
+        listenerRef.lazyOrder = eventReceiver.order
+
         val listenerRefEvent =
             ListenerReferenceEvent(listenerRef) {
                 eventReceiver(it)
             }
         synchronized(listenerRefEvent) {
-            rowListeners[ListenerId(eventReceiver.order)] = listenerRefEvent
+            val key = ListenerId(eventReceiver.order)
+            rowListeners[key] = listenerRefEvent
+            listenerRef.key = key
+
+            // TODO + clone + skipHistory
+            //listenerRefEvent.listenerEvent(row.asSequence().map {
+            //    ListenerEvent(UnitCell(it.column, it.index), it) as ListenerEvent<Any, Any>
+            //})
         }
         return listenerRef
     }
@@ -175,12 +243,23 @@ internal class TableEventProcessor {
         eventReceiver.reference = listenerRef
         eventReceiver.init()
 
+        listenerRef.lazyName = eventReceiver.name
+        listenerRef.lazyOrder = eventReceiver.order
+
         val listenerRefEvent =
             ListenerReferenceEvent(listenerRef) {
                 eventReceiver(it)
             }
         synchronized(listenerRefEvent) {
-            cellRangeListeners[ListenerId(eventReceiver.order)] = listenerRefEvent
+            val key = ListenerId(eventReceiver.order)
+            cellRangeListeners[key] = listenerRefEvent
+            listenerRef.key = key
+
+            if (!eventReceiver.skipHistory) {
+                listenerRefEvent.listenerEvent(cellRange.table.clone()[cellRange].asSequence().map {
+                    ListenerEvent(UnitCell(it.column, it.index), it) as ListenerEvent<Any, Any>
+                })
+            }
         }
         return listenerRef
     }
@@ -198,12 +277,23 @@ internal class TableEventProcessor {
         eventReceiver.reference = listenerRef
         eventReceiver.init()
 
+        listenerRef.lazyName = eventReceiver.name
+        listenerRef.lazyOrder = eventReceiver.order
+
         val listenerRefEvent =
             ListenerReferenceEvent(listenerRef) {
                 eventReceiver(it)
             }
         synchronized(listenerRefEvent) {
-            cellListeners[ListenerId(eventReceiver.order)] = listenerRefEvent
+            val key = ListenerId(eventReceiver.order)
+            cellListeners[key] = listenerRefEvent
+            listenerRef.key = key
+
+            if (!eventReceiver.skipHistory) {
+                listenerRefEvent.listenerEvent(cell.table.clone()[cell].asSequence().map {
+                    ListenerEvent(UnitCell(it.column, it.index), it) as ListenerEvent<Any, Any>
+                })
+            }
         }
         return listenerRef
     }
@@ -241,8 +331,7 @@ internal class TableEventProcessor {
                     .values
                     .forEach { listenerRef ->
                         synchronized(listenerRef) {
-                            // TODO Remove .invoke ? Same below..
-                            listenerRef.listenerEvent.invoke(batch.asSequence())
+                            listenerRef.listenerEvent(batch.asSequence())
                         }
                     }
 
@@ -258,7 +347,7 @@ internal class TableEventProcessor {
 
                         if (columnBatch.isNotEmpty()) {
                             synchronized(listenerRef) {
-                                listenerRef.listenerEvent.invoke(columnBatch.asSequence())
+                                listenerRef.listenerEvent(columnBatch.asSequence())
                             }
                         }
                     }
@@ -273,7 +362,7 @@ internal class TableEventProcessor {
 
                         if (rowBatch.isNotEmpty()) {
                             synchronized(listenerRef) {
-                                listenerRef.listenerEvent.invoke(rowBatch.asSequence())
+                                listenerRef.listenerEvent(rowBatch.asSequence())
                             }
                         }
                     }
@@ -288,7 +377,7 @@ internal class TableEventProcessor {
 
                         if (cellRangeBatch.isNotEmpty()) {
                             synchronized(listenerRef) {
-                                listenerRef.listenerEvent.invoke(cellRangeBatch.asSequence())
+                                listenerRef.listenerEvent(cellRangeBatch.asSequence())
                             }
                         }
                     }
@@ -307,7 +396,7 @@ internal class TableEventProcessor {
 
                         if (cellBatch.isNotEmpty()) {
                             synchronized(listenerRef) {
-                                listenerRef.listenerEvent.invoke(cellBatch.asSequence())
+                                listenerRef.listenerEvent(cellBatch.asSequence())
                             }
                         }
                     }

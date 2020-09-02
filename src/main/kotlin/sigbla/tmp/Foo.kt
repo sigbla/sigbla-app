@@ -346,6 +346,25 @@ fun main() {
 //
 //    tableView[table["A"][1]] = cellStyle {}
 
+    // WIP
+    val cell = table["DST", 0]
+    table[cell] = {
+        table.on<Any, Number> {
+            skipHistory = true
+            destination.table[destination] = "Init"
+
+            events {
+                val c = count {
+                    it.newValue.column.columnHeader != destination.column.columnHeader && it.newValue.index != destination.index
+                }
+
+                if (c > 0) destination.table[destination] = c
+            }
+        }
+    }
+
+    //table[cell] = sum(table["A", 1]..table["A", 10])
+
     tableView.show()
 
     println("END")
