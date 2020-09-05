@@ -147,8 +147,31 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
         this[cell.column][cell.index] = value
     }
 
-    // TODO Other set operators below and elsewhere (cell range, column, etc)
     operator fun set(cell: Cell<*>, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(cell).init()
+
+    // -----
+
+    operator fun set(header1: String, index: Long, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[header1][index]).init()
+
+    operator fun set(header1: String, header2: String, index: Long, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[header1, header2][index]).init()
+
+    operator fun set(header1: String, header2: String, header3: String, index: Long, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[header1, header2, header3][index]).init()
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[header1, header2, header3, header4][index]).init()
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[header1, header2, header3, header4, header5][index]).init()
+
+    // -----
+
+    operator fun set(header1: String, index: Int, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[header1][index]).init()
+
+    operator fun set(header1: String, header2: String, index: Int, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[header1, header2][index]).init()
+
+    operator fun set(header1: String, header2: String, header3: String, index: Int, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[header1, header2, header3][index]).init()
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[header1, header2, header3, header4][index]).init()
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[header1, header2, header3, header4, header5][index]).init()
 
     // -----
 

@@ -46,6 +46,9 @@ abstract class Row {
     operator fun set(vararg header: String, value: BigDecimal) = table[ColumnHeader(*header)].set(index, value)
     operator fun set(vararg header: String, value: Number) = table[ColumnHeader(*header)].set(index, value)
 
+    operator fun set(header: ColumnHeader, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(table[header][index]).init()
+    operator fun set(vararg header: String, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(table[ColumnHeader(*header)][index]).init()
+
     inline fun <reified O, reified N> on(noinline init: EventReceiver<Row, O, N>.() -> Unit): ListenerReference {
         return on(O::class, N::class, init as EventReceiver<Row, Any, Any>.() -> Unit)
     }

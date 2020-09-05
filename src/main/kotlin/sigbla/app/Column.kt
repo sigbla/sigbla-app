@@ -142,6 +142,10 @@ abstract class Column(val table: Table, val columnHeader: ColumnHeader) : Compar
         }
     }
 
+    operator fun set(index: Long, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[index]).init()
+
+    operator fun set(index: Int, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[index]).init()
+
     // TODO: Look at adding a add(..) function and asSequence() function.
     //       Add would just insert a cell at first available location.
 

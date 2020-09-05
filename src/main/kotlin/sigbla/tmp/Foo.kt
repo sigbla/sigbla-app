@@ -347,8 +347,7 @@ fun main() {
 //    tableView[table["A"][1]] = cellStyle {}
 
     // WIP
-    val cell = table["DST", 0]
-    table[cell] = {
+    table["DST", 0] = {
         table.on<Any, Number> {
             skipHistory = true
             destination.table[destination] = "Init"
@@ -363,7 +362,7 @@ fun main() {
         }
     }
 
-    //table[cell] = sum(table["A", 1]..table["A", 10])
+    //table["DST", 0] = sum(table["A", 1]..table["A", 10])
 
     tableView.show()
 
