@@ -1,5 +1,10 @@
 package sigbla.app
 
+import kotlinx.html.DIV
+import kotlinx.html.consumers.delayed
+import kotlinx.html.consumers.onFinalizeMap
+import kotlinx.html.div
+import kotlinx.html.stream.HTMLStreamBuilder
 import com.github.andrewoma.dexx.collection.Map as PMap
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 import com.github.andrewoma.dexx.collection.SortedMap as PSortedMap
@@ -794,6 +799,18 @@ class BaseTable internal constructor(
     companion object
 }
 
-class DestinationOsmosis<D>(
-    val destination: D
-)
+class DestinationOsmosis<D>(val destination: D)
+
+fun div(
+    classes : String? = null, block : DIV.() -> Unit = {}
+): DestinationOsmosis<Cell<*>>.() -> Unit = {
+    val builder = HTMLStreamBuilder(StringBuilder(256), prettyPrint = false, xhtmlCompatible = false)
+        .onFinalizeMap { sb, _ -> sb.toString() }
+        .delayed()
+
+    destination.table[destination] = WebCell(
+        destination.column,
+        destination.index,
+        builder.div(classes, block).toWebContent()
+    )
+}

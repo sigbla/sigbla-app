@@ -191,7 +191,11 @@ async function handleMessage(message) {
                 if (message.ml !== undefined) div.style.marginLeft = message.ml + "px"
                 div.style.height = (message.h-1) + "px"
                 div.style.width = (message.w-1) + "px"
-                div.innerText = message.content
+
+                if (message.classes.startsWith("chtml "))
+                    div.innerHTML = message.content
+                else
+                    div.innerText = message.content
             }
 
             if (pendingContent === null) {

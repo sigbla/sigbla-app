@@ -20,6 +20,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "com.beust:klaxon:5.2"
     implementation "com.github.andrewoma.dexx:kollection:0.7"
+    implementation "org.jetbrains.kotlinx:kotlinx-html-jvm:0.6.12"
 
     compile "io.ktor:ktor-server-core:$ktor_version"
     compile "io.ktor:ktor-server-netty:$ktor_version"

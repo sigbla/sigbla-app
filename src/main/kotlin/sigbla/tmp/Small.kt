@@ -1,7 +1,9 @@
 package sigbla.tmp
 
+import kotlinx.html.style
 import sigbla.app.Table
 import sigbla.app.TableView
+import sigbla.app.div
 import java.util.concurrent.ThreadLocalRandom
 
 fun main() {
@@ -17,6 +19,13 @@ fun main() {
                 table[col, row] = "$col $row"
         }
     }
+
+    table["G", 0] = div {
+        style = "color: red"
+        +"This is red text"
+    }
+
+    println("G 0 div value: " + table["G", 0])
 
     val tableView = TableView.newTableView(table)
 

@@ -21,6 +21,8 @@ internal fun BigInteger.toCell(column: Column, index: Long): BigIntegerCell =
     BigIntegerCell(column, index, this)
 internal fun BigDecimal.toCell(column: Column, index: Long): BigDecimalCell =
     BigDecimalCell(column, index, this)
+internal fun WebContent.toCell(column: Column, index: Long): WebCell =
+    WebCell(column, index, this)
 
 internal class CellValue<T>(private val value: T) {
     fun toCell(column: Column, index: Long): Cell<*> {
@@ -30,6 +32,7 @@ internal class CellValue<T>(private val value: T) {
             is Double -> value.toCell(column, index)
             is BigInteger -> value.toCell(column, index)
             is BigDecimal -> value.toCell(column, index)
+            is WebContent -> value.toCell(column, index)
             else -> throw UnsupportedOperationException("Unable to convert to cell: $value")
         }
     }
@@ -693,6 +696,17 @@ class BigDecimalCell(column: Column, index: Long, override val value: BigDecimal
     override fun rem(that: BigInteger) = this.value.remainder(that.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext))!!
 
     override fun rem(that: BigDecimal) = this.value.remainder(that)!!
+}
+
+class WebContent(val content: String) {
+    override fun toString() = content
+}
+
+internal fun String.toWebContent() = WebContent(this)
+
+class WebCell(column: Column, index: Long, override val value: WebContent) : Cell<WebContent>(column, index) {
+    override fun toCell(column: Column, index: Long): Cell<WebContent> =
+        WebCell(column, index, this.value)
 }
 
 // TODO Other types of cells:

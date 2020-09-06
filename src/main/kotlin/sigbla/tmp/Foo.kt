@@ -1,5 +1,8 @@
 package sigbla.tmp
 
+import kotlinx.html.div
+import kotlinx.html.span
+import kotlinx.html.style
 import sigbla.app.IndexRelation.*
 import sigbla.app.timeseries.*
 import sigbla.app.Table.Companion.on
@@ -363,6 +366,30 @@ fun main() {
     }
 
     //table["DST", 0] = sum(table["A", 1]..table["A", 10])
+
+    table["DIV", 0] = div {
+        div {
+            span {
+                style = "color: red"
+                +"Some HTML text"
+            }
+        }
+    }
+
+    table["DIV", 1] = {
+        destination.table[destination] = div {
+            +"Pre Event"
+        }
+
+        table.onAny {
+            skipHistory = true
+            events {
+                destination.table[destination] = div {
+                    +"Post Event"
+                }
+            }
+        }
+    }
 
     tableView.show()
 

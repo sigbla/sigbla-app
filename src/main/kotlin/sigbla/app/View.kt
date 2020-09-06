@@ -256,7 +256,7 @@ class BaseTableView internal constructor(
                 emptyColumnHeader,
                 applicableRow,
                 applicableRow.toString(),
-                this[applicableRow].height.toLong(),
+                this[applicableRow].height,
                 100,
                 rowHeaderZ,
                 mt = applicableY,
@@ -275,13 +275,16 @@ class BaseTableView internal constructor(
                 // TODO PositionedCell will need it's height and width..
                 //if (applicableColumn[applicableRow] is UnitCell) continue
 
+                val cell = applicableColumn[applicableRow]
+
                 output.add(PositionedContent(
                     applicableColumn.columnHeader,
                     applicableRow,
-                    applicableColumn[applicableRow].toString(),
-                    this[applicableRow].height.toLong(),
-                    this[applicableColumn].width.toLong(),
-                    className = "c",
+                    cell.toString(),
+                    this[applicableRow].height,
+                    this[applicableColumn].width,
+                    // TODO Add other potential classes past in at top level div
+                    className = if (cell is WebCell) "chtml c" else "c",
                     x = applicableX + 100,
                     y = applicableY
                 ))
