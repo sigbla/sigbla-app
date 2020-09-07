@@ -192,7 +192,7 @@ async function handleMessage(message) {
                 div.style.height = (message.h-1) + "px"
                 div.style.width = (message.w-1) + "px"
 
-                if (message.classes.startsWith("chtml "))
+                if (message.classes.startsWith("hc "))
                     div.innerHTML = message.content
                 else
                     div.innerText = message.content

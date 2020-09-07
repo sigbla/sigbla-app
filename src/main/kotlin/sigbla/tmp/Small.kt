@@ -20,7 +20,7 @@ fun main() {
         }
     }
 
-    table["G", 0] = div {
+    table["G", 0] = div("myCustomClass1 myCustomClass2") {
         style = "color: red"
         +"This is red text"
     }

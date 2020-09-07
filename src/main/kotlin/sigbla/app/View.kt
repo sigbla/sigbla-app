@@ -283,8 +283,7 @@ class BaseTableView internal constructor(
                     cell.toString(),
                     this[applicableRow].height,
                     this[applicableColumn].width,
-                    // TODO Add other potential classes past in at top level div
-                    className = if (cell is WebCell) "chtml c" else "c",
+                    className = if (cell is WebCell) "hc c" else "c",
                     x = applicableX + 100,
                     y = applicableY
                 ))
