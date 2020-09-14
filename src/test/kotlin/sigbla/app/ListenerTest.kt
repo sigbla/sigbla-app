@@ -2,8 +2,10 @@ package sigbla.app
 
 import org.junit.After
 import org.junit.Test
+import sigbla.app.exceptions.ListenerLoopException
 import sigbla.app.internals.Registry
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 
 class ListenerTest {
@@ -146,6 +148,40 @@ class ListenerTest {
         assertEquals(0L, ref.order)
 
         ref.unsubscribe()
+    }
+
+    @Test
+    fun listenerLoop() {
+        val t = Table.newTable("listenerLoop")
+
+        val ref1 = t.onAny {
+            events {
+                t["A", 0] = 1
+            }
+        }
+
+        assertFailsWith(ListenerLoopException::class) {
+            t["A", 0] = 0
+        }
+
+        ref1.unsubscribe()
+
+        val ref2 = t.onAny {
+            allowLoop = true
+
+            events {
+                forEach { _ ->
+                    if (t["A", 1].isNumeric() && (t["A", 1].value as Number).toLong() < 1000)
+                        t["A", 1] = t["A", 1] + 1
+                }
+            }
+        }
+
+        t["A", 1] = 0
+
+        assertEquals(1000L, t["A", 1].value)
+
+        ref2.unsubscribe()
     }
 
     // TODO Test type filters cases like on<A, B> etc..

@@ -25,6 +25,8 @@ fun main() {
     table["Column A", 1] = 1000
 
     (table["C"][1]..table["D"][10]).onAny {
+        name = "A"
+
         if (table["E"][1].isNumeric())
             table["E"][1] = table["E"][1] + 1
     }
@@ -199,6 +201,9 @@ fun main() {
     val value = table["A"] at 1
 
     on<Any, Any>(table) {
+        name = "B"
+        allowLoop = true
+
         println("Subscribe 1a")
         events {
             newTable[source] //.forEach {
@@ -214,6 +219,8 @@ fun main() {
     }
 
     on<Any, Any>(table["A"]) {
+        name = "C"
+
         println("Subscribe 1b")
         events {
             newTable[source] //.forEach {
@@ -230,6 +237,8 @@ fun main() {
     }
 
     on<Any, Any>(table["A", 0]..table["B", 100]) {
+        name = "D"
+
         println("Subscribe 1c")
         events {
             newTable[source] //.forEach {
@@ -247,6 +256,8 @@ fun main() {
     // TODO
 //    val columnRange = table["A"]..table["B"]
 //    on<Any, Any>(r) {
+//        name = "E"
+//
 //        println("Subscribe 1d")
 //        events {
 //            newTable[source].forEach {
@@ -264,6 +275,7 @@ fun main() {
     on<Any, Number>(table) {
         name = "Name"
         order = 10
+        allowLoop = true
 
         source["Sums", 0] = 0
 
@@ -281,6 +293,8 @@ fun main() {
     }
 
     table["Sums", 0].on<Any, Number> {
+        name = "F"
+
         events {
             forEach {
                 println("New sum: ${it.newValue}")
@@ -291,6 +305,8 @@ fun main() {
     table["A", 1] = null
 
     onAny(table) {
+        name = "G"
+
         events {
             forEach {
                 it.newValue.value
@@ -304,21 +320,29 @@ fun main() {
     // table.off(table["A"][1])
 
     table.on<Any, Number> {
+        name = "H"
+
         events {
             println("Subscribe 2: ${count()}")
         }
     }
     table.on<Any, String> {
+        name = "I"
+
         events {
             println("Subscribe 3: ${count()}")
         }
     }
     table.on<String, Number> {
+        name = "J"
+
         events {
             println("Subscribe 4: ${count()}")
         }
     }
     table.onAny {
+        name = "K"
+
         events {
             println("Subscribe 5: ${count()}")
         }
@@ -352,6 +376,8 @@ fun main() {
     // WIP
     table["DST", 0] = {
         table.on<Any, Number> {
+            name = "L"
+
             skipHistory = true
             destination.table[destination] = "Init"
 
@@ -382,6 +408,8 @@ fun main() {
         }
 
         table.onAny {
+            name = "M"
+
             skipHistory = true
             events {
                 destination.table[destination] = div {

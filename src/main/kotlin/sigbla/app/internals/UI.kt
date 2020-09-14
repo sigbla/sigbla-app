@@ -199,9 +199,8 @@ internal object SigblaBackend {
         client.socket.outgoing.send(Frame.Text(jsonParser.toJsonString(ClientEventUpdateEnd(UUID.randomUUID().toString()))))
     }
 
-    // TODO Check synchronized and suspend
     @Synchronized
-    private suspend fun handleResize(client: SigblaClient, resize: ClientEventResize) {
+    private fun handleResize(client: SigblaClient, resize: ClientEventResize) {
         val view = Registry.getView(client.ref) ?: return
         val target = client.tileState.withPCFor(resize.target) ?: return
 

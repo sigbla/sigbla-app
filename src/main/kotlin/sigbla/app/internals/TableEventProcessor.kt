@@ -2,6 +2,7 @@ package sigbla.app.internals
 
 import sigbla.app.*
 import sigbla.app.exceptions.InvalidListenerException
+import sigbla.app.exceptions.ListenerLoopException
 import java.util.*
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.ConcurrentSkipListMap
@@ -29,7 +30,7 @@ internal class TableEventProcessor {
     private val cellRangeListeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerCellRangeRef>> = ConcurrentSkipListMap()
     private val cellListeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerCellRef>> = ConcurrentSkipListMap()
 
-    private abstract class ListenerUnsubscribeRef : ListenerReference {
+    private abstract class ListenerUnsubscribeRef : ListenerReference() {
         protected var haveUnsubscribed = false
         var key: ListenerId? = null
             set(value) {
@@ -38,15 +39,17 @@ internal class TableEventProcessor {
             }
     }
 
-    private data class ListenerTableRef(
+    private class ListenerTableRef(
         private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerTableRef>>,
         val table: Table
     ) : ListenerUnsubscribeRef() {
         var lazyName: String? = null
         var lazyOrder: Long? = null
+        var lazyAllowLoop: Boolean? = null
 
         override val name: String? by lazy { lazyName }
         override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
+        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -54,15 +57,17 @@ internal class TableEventProcessor {
         }
     }
 
-    private data class ListenerColumnRef(
+    private class ListenerColumnRef(
         private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerColumnRef>>,
         val column: Column
     ) : ListenerUnsubscribeRef() {
         var lazyName: String? = null
         var lazyOrder: Long? = null
+        var lazyAllowLoop: Boolean? = null
 
         override val name: String? by lazy { lazyName }
         override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
+        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -70,15 +75,17 @@ internal class TableEventProcessor {
         }
     }
 
-    private data class ListenerRowRef(
+    private class ListenerRowRef(
         private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerRowRef>>,
         val row: Row
     ) : ListenerUnsubscribeRef() {
         var lazyName: String? = null
         var lazyOrder: Long? = null
+        var lazyAllowLoop: Boolean? = null
 
         override val name: String? by lazy { lazyName }
         override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
+        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -86,15 +93,17 @@ internal class TableEventProcessor {
         }
     }
 
-    private data class ListenerCellRangeRef(
+    private class ListenerCellRangeRef(
         private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerCellRangeRef>>,
         val cellRange: CellRange
     ) : ListenerUnsubscribeRef() {
         var lazyName: String? = null
         var lazyOrder: Long? = null
+        var lazyAllowLoop: Boolean? = null
 
         override val name: String? by lazy { lazyName }
         override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
+        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -102,15 +111,17 @@ internal class TableEventProcessor {
         }
     }
 
-    private data class ListenerCellRef(
+    private class ListenerCellRef(
         private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerCellRef>>,
         val cell: Cell<*>
     ) : ListenerUnsubscribeRef() {
         var lazyName: String? = null
         var lazyOrder: Long? = null
+        var lazyAllowLoop: Boolean? = null
 
         override val name: String? by lazy { lazyName }
         override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
+        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -141,6 +152,7 @@ internal class TableEventProcessor {
 
         listenerRef.lazyName = eventReceiver.name
         listenerRef.lazyOrder = eventReceiver.order
+        listenerRef.lazyAllowLoop = eventReceiver.allowLoop
 
         val listenerRefEvent =
             ListenerReferenceEvent(listenerRef) {
@@ -178,6 +190,7 @@ internal class TableEventProcessor {
 
         listenerRef.lazyName = eventReceiver.name
         listenerRef.lazyOrder = eventReceiver.order
+        listenerRef.lazyAllowLoop = eventReceiver.allowLoop
 
         val listenerRefEvent =
             ListenerReferenceEvent(listenerRef) {
@@ -212,6 +225,7 @@ internal class TableEventProcessor {
 
         listenerRef.lazyName = eventReceiver.name
         listenerRef.lazyOrder = eventReceiver.order
+        listenerRef.lazyAllowLoop = eventReceiver.allowLoop
 
         val listenerRefEvent =
             ListenerReferenceEvent(listenerRef) {
@@ -245,6 +259,7 @@ internal class TableEventProcessor {
 
         listenerRef.lazyName = eventReceiver.name
         listenerRef.lazyOrder = eventReceiver.order
+        listenerRef.lazyAllowLoop = eventReceiver.allowLoop
 
         val listenerRefEvent =
             ListenerReferenceEvent(listenerRef) {
@@ -279,6 +294,7 @@ internal class TableEventProcessor {
 
         listenerRef.lazyName = eventReceiver.name
         listenerRef.lazyOrder = eventReceiver.order
+        listenerRef.lazyAllowLoop = eventReceiver.allowLoop
 
         val listenerRefEvent =
             ListenerReferenceEvent(listenerRef) {
@@ -307,14 +323,16 @@ internal class TableEventProcessor {
                 cellListeners.size > 0
     }
 
-    // TODO: Whenever something is published, the old and new cells provided should,
-    //       if we navigate up to their column/table provide the old/new column or table
-    //       as they existed at the point of the old/new value being created
     internal fun publish(cells: List<ListenerEvent<Any, Any>>) {
         val buffer = eventBuffer.get()
 
         if (buffer != null) {
             buffer.addAll(cells)
+
+            activeListener.get()?.let {
+                activeListeners.get()?.add(it) ?: activeListeners.set(mutableSetOf(it))
+            }
+
             return
         }
 
@@ -331,7 +349,9 @@ internal class TableEventProcessor {
                     .values
                     .forEach { listenerRef ->
                         synchronized(listenerRef) {
+                            loopCheck(listenerRef.listenerReference)
                             listenerRef.listenerEvent(batch.asSequence())
+                            if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                         }
                     }
 
@@ -347,7 +367,9 @@ internal class TableEventProcessor {
 
                         if (columnBatch.isNotEmpty()) {
                             synchronized(listenerRef) {
+                                loopCheck(listenerRef.listenerReference)
                                 listenerRef.listenerEvent(columnBatch.asSequence())
+                                if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                             }
                         }
                     }
@@ -362,7 +384,9 @@ internal class TableEventProcessor {
 
                         if (rowBatch.isNotEmpty()) {
                             synchronized(listenerRef) {
+                                loopCheck(listenerRef.listenerReference)
                                 listenerRef.listenerEvent(rowBatch.asSequence())
+                                if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                             }
                         }
                     }
@@ -377,7 +401,9 @@ internal class TableEventProcessor {
 
                         if (cellRangeBatch.isNotEmpty()) {
                             synchronized(listenerRef) {
+                                loopCheck(listenerRef.listenerReference)
                                 listenerRef.listenerEvent(cellRangeBatch.asSequence())
+                                if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                             }
                         }
                     }
@@ -396,14 +422,24 @@ internal class TableEventProcessor {
 
                         if (cellBatch.isNotEmpty()) {
                             synchronized(listenerRef) {
+                                loopCheck(listenerRef.listenerReference)
                                 listenerRef.listenerEvent(cellBatch.asSequence())
+                                if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                             }
                         }
                     }
             }
         } finally {
             eventBuffer.set(null)
+            activeListener.remove()
+            activeListeners.remove()
         }
+    }
+
+    private fun loopCheck(listenerReference: ListenerReference) {
+        if (listenerReference.allowLoop) return
+        if (activeListeners.get()?.contains(listenerReference) == true) throw ListenerLoopException(listenerReference)
+        activeListener.set(listenerReference)
     }
 
     internal fun shutdown() {
@@ -417,5 +453,7 @@ internal class TableEventProcessor {
     companion object {
         private val idGenerator = AtomicLong()
         private val eventBuffer = ThreadLocal<MutableList<ListenerEvent<Any, Any>>?>()
+        private val activeListener = ThreadLocal<ListenerReference?>()
+        private val activeListeners = ThreadLocal<MutableSet<ListenerReference>?>()
     }
 }

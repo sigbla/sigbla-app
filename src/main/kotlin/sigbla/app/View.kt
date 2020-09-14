@@ -7,10 +7,23 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
-// TODO..
-
 // A table view is associated with one table, and holds meta data related on how to view a table.
 // This includes among other things column widths, row heights, individual cell dimensions, styling, etc..
+
+// TODO Introduce a concept of a view transformer. As with styles, this can be on column, row or cell.
+//      Some priority ordering might be needed between these, but the transformer would take a value
+//      and convert this into another value. This only affects the view, and is done on demand (i.e.,
+//      when the cell is being rendered), and is used to perform things like formatting etc..
+//
+//      Look at having this in the form of view["column"] = { .. } where this is given a cell and
+//      expected to return a cell.
+
+// TODO Events on a table view should be much like on a table, with view.onAny or view.on<ColumnStyle>.
+//      Note that we only have one generic type, as we can't have one type of style convert to another.
+//
+//      A listener can, as with table, call back into the view to change the style if wanted. And we
+//      use ordering to fire off listeners in the right order. This allows for the final UI listener
+//      to fire after any earlier modifications. A loop detector is also included.
 
 abstract class TableView(val name: String) {
     abstract var table: Table?
@@ -99,6 +112,8 @@ abstract class TableView(val name: String) {
         fun deleteView(name: String) = Registry.deleteView(name)
     }
 }
+
+// TODO Introduce a ViewRef here like we have TableRef
 
 class BaseTableView internal constructor(
     name: String,
