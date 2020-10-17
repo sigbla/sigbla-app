@@ -334,23 +334,23 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
 
     // -----
 
-    operator fun set(header1: String, index: Int, value: Cell<*>) {
+    operator fun set(header1: String, index: Int, value: Cell<*>?) {
         this[header1][index] = value
     }
 
-    operator fun set(header1: String, header2: String, index: Int, value: Cell<*>) {
+    operator fun set(header1: String, header2: String, index: Int, value: Cell<*>?) {
         this[header1, header2][index] = value
     }
 
-    operator fun set(header1: String, header2: String, header3: String, index: Int, value: Cell<*>) {
+    operator fun set(header1: String, header2: String, header3: String, index: Int, value: Cell<*>?) {
         this[header1, header2, header3][index] = value
     }
 
-    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, value: Cell<*>) {
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, value: Cell<*>?) {
         this[header1, header2, header3, header4][index] = value
     }
 
-    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, value: Cell<*>) {
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, value: Cell<*>?) {
         this[header1, header2, header3, header4, header5][index] = value
     }
 
