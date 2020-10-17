@@ -351,6 +351,7 @@ internal class TableEventProcessor {
                         synchronized(listenerRef) {
                             loopCheck(listenerRef.listenerReference)
                             listenerRef.listenerEvent(batch.asSequence())
+                            // TODO Do we really need to clear this here and below?
                             if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                         }
                     }

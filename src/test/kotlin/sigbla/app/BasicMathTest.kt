@@ -113,7 +113,7 @@ class BasicMathTest {
         for (valAny in values) {
             val val1: Number = valAny as Number
 
-            var idx = 0
+            idx = 0
 
             assertEquals(LongCell::class, t["Val2"][idx]::class)
             assertEquals(val1 + t["Val2"][idx].toLong(), val1 + t["Val2"][idx])
