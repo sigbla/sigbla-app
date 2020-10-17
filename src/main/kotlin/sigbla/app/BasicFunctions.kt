@@ -13,16 +13,16 @@ fun sum(
         this.order = order
 
         if (init != null)
-            destination.table[destination] = init
+            destination `=` init
         else
-            destination.table[destination] = null
+            destination `=` null
 
         var sum: Number? = null
 
         source.table[cellRange]
             .asSequence()
             .filter { it.isNumeric() }
-            .forEach { sum = if (sum == null) it + 0 else it + sum!! }
+            .forEach { sum = it + (sum ?: 0) }
 
         if (sum != null) destination.table[destination] = sum!!
     }

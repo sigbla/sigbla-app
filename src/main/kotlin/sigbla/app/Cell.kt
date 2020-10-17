@@ -364,6 +364,34 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any> {
 
     fun asSequence(): Sequence<Cell<*>> = sequenceOf(this)
 
+    infix fun `=`(value: BigDecimal) {
+        table[this] = value
+    }
+
+    infix fun `=`(value: BigInteger) {
+        table[this] = value
+    }
+
+    infix fun `=`(value: Double) {
+        table[this] = value
+    }
+
+    infix fun `=`(value: Long) {
+        table[this] = value
+    }
+
+    infix fun `=`(value: Number) {
+        table[this] = value
+    }
+
+    infix fun `=`(value: String) {
+        table[this] = value
+    }
+
+    infix fun `=`(value: Cell<*>?) {
+        table[this] = value
+    }
+
     override fun equals(other: Any?): Boolean {
         // TODO Also handle numbers like in compare..
         return if (other is Cell<*>)
