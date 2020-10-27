@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicLong
 internal class TableEventProcessor {
     private class ListenerReferenceEvent<R>(
         val listenerReference: R,
-        val listenerEvent: (event: Sequence<ListenerEvent<Any, Any>>) -> Unit
+        val listenerEvent: (event: Sequence<TableListenerEvent<Any, Any>>) -> Unit
     )
 
     private class ListenerId(val order: Long) : Comparable<ListenerId> {
@@ -30,7 +30,7 @@ internal class TableEventProcessor {
     private val cellRangeListeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerCellRangeRef>> = ConcurrentSkipListMap()
     private val cellListeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerCellRef>> = ConcurrentSkipListMap()
 
-    private abstract class ListenerUnsubscribeRef : ListenerReference() {
+    private abstract class ListenerUnsubscribeRef : TableListenerReference() {
         protected var haveUnsubscribed = false
         var key: ListenerId? = null
             set(value) {
@@ -139,9 +139,9 @@ internal class TableEventProcessor {
 
     fun subscribe(
         table: Table,
-        eventReceiver: EventReceiver<Table, Any, Any>,
-        init: EventReceiver<Table, Any, Any>.() -> Unit
-    ): ListenerReference {
+        eventReceiver: TableEventReceiver<Table, Any, Any>,
+        init: TableEventReceiver<Table, Any, Any>.() -> Unit
+    ): TableListenerReference {
         val listenerRef = ListenerTableRef(
             tableListeners,
             table
@@ -168,7 +168,7 @@ internal class TableEventProcessor {
             //      It might the listener gets duplicates..
             if (!eventReceiver.skipHistory) {
                 listenerRefEvent.listenerEvent(table.clone().asSequence().map {
-                    ListenerEvent(UnitCell(it.column, it.index), it) as ListenerEvent<Any, Any>
+                    TableListenerEvent(UnitCell(it.column, it.index), it) as TableListenerEvent<Any, Any>
                 })
             }
         }
@@ -177,9 +177,9 @@ internal class TableEventProcessor {
 
     fun subscribe(
         column: Column,
-        eventReceiver: EventReceiver<Column, Any, Any>,
-        init: EventReceiver<Column, Any, Any>.() -> Unit
-    ): ListenerReference {
+        eventReceiver: TableEventReceiver<Column, Any, Any>,
+        init: TableEventReceiver<Column, Any, Any>.() -> Unit
+    ): TableListenerReference {
         val listenerRef = ListenerColumnRef(
             columnListeners,
             column
@@ -203,7 +203,7 @@ internal class TableEventProcessor {
 
             if (!eventReceiver.skipHistory) {
                 listenerRefEvent.listenerEvent(column.table.clone()[column].asSequence().map {
-                    ListenerEvent(UnitCell(it.column, it.index), it) as ListenerEvent<Any, Any>
+                    TableListenerEvent(UnitCell(it.column, it.index), it) as TableListenerEvent<Any, Any>
                 })
             }
         }
@@ -212,9 +212,9 @@ internal class TableEventProcessor {
 
     fun subscribe(
         row: Row,
-        eventReceiver: EventReceiver<Row, Any, Any>,
-        init: EventReceiver<Row, Any, Any>.() -> Unit
-    ): ListenerReference {
+        eventReceiver: TableEventReceiver<Row, Any, Any>,
+        init: TableEventReceiver<Row, Any, Any>.() -> Unit
+    ): TableListenerReference {
         val listenerRef = ListenerRowRef(
             rowListeners,
             row
@@ -246,9 +246,9 @@ internal class TableEventProcessor {
 
     fun subscribe(
         cellRange: CellRange,
-        eventReceiver: EventReceiver<CellRange, Any, Any>,
-        init: EventReceiver<CellRange, Any, Any>.() -> Unit
-    ): ListenerReference {
+        eventReceiver: TableEventReceiver<CellRange, Any, Any>,
+        init: TableEventReceiver<CellRange, Any, Any>.() -> Unit
+    ): TableListenerReference {
         val listenerRef = ListenerCellRangeRef(
             cellRangeListeners,
             cellRange
@@ -272,7 +272,7 @@ internal class TableEventProcessor {
 
             if (!eventReceiver.skipHistory) {
                 listenerRefEvent.listenerEvent(cellRange.table.clone()[cellRange].asSequence().map {
-                    ListenerEvent(UnitCell(it.column, it.index), it) as ListenerEvent<Any, Any>
+                    TableListenerEvent(UnitCell(it.column, it.index), it) as TableListenerEvent<Any, Any>
                 })
             }
         }
@@ -281,9 +281,9 @@ internal class TableEventProcessor {
 
     fun subscribe(
         cell: Cell<*>,
-        eventReceiver: EventReceiver<Cell<*>, Any, Any>,
-        init: EventReceiver<Cell<*>, Any, Any>.() -> Unit
-    ): ListenerReference {
+        eventReceiver: TableEventReceiver<Cell<*>, Any, Any>,
+        init: TableEventReceiver<Cell<*>, Any, Any>.() -> Unit
+    ): TableListenerReference {
         val listenerRef = ListenerCellRef(
             cellListeners,
             cell
@@ -307,7 +307,7 @@ internal class TableEventProcessor {
 
             if (!eventReceiver.skipHistory) {
                 listenerRefEvent.listenerEvent(cell.table.clone()[cell].asSequence().map {
-                    ListenerEvent(UnitCell(it.column, it.index), it) as ListenerEvent<Any, Any>
+                    TableListenerEvent(UnitCell(it.column, it.index), it) as TableListenerEvent<Any, Any>
                 })
             }
         }
@@ -323,7 +323,7 @@ internal class TableEventProcessor {
                 cellListeners.size > 0
     }
 
-    internal fun publish(cells: List<ListenerEvent<Any, Any>>) {
+    internal fun publish(cells: List<TableListenerEvent<Any, Any>>) {
         val buffer = eventBuffer.get()
 
         if (buffer != null) {
@@ -437,7 +437,7 @@ internal class TableEventProcessor {
         }
     }
 
-    private fun loopCheck(listenerReference: ListenerReference) {
+    private fun loopCheck(listenerReference: TableListenerReference) {
         if (listenerReference.allowLoop) return
         if (activeListeners.get()?.contains(listenerReference) == true) throw ListenerLoopException(listenerReference)
         activeListener.set(listenerReference)
@@ -453,8 +453,8 @@ internal class TableEventProcessor {
 
     companion object {
         private val idGenerator = AtomicLong()
-        private val eventBuffer = ThreadLocal<MutableList<ListenerEvent<Any, Any>>?>()
-        private val activeListener = ThreadLocal<ListenerReference?>()
-        private val activeListeners = ThreadLocal<MutableSet<ListenerReference>?>()
+        private val eventBuffer = ThreadLocal<MutableList<TableListenerEvent<Any, Any>>?>()
+        private val activeListener = ThreadLocal<TableListenerReference?>()
+        private val activeListeners = ThreadLocal<MutableSet<TableListenerReference>?>()
     }
 }

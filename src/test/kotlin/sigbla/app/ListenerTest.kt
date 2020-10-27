@@ -88,7 +88,7 @@ class ListenerTest {
         var eventCount = 0
 
         t1.onAny {
-            this.reference.unsubscribe()
+            reference.unsubscribe()
 
             events {
                 eventCount += count()
@@ -111,7 +111,7 @@ class ListenerTest {
         t1["A", 1] = "A"
 
         t1.onAny {
-            this.reference.unsubscribe()
+            reference.unsubscribe()
 
             events {
                 eventCount += count()

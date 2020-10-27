@@ -49,34 +49,34 @@ abstract class Row {
     operator fun set(header: ColumnHeader, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(table[header][index]).init()
     operator fun set(vararg header: String, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(table[ColumnHeader(*header)][index]).init()
 
-    inline fun <reified O, reified N> on(noinline init: EventReceiver<Row, O, N>.() -> Unit): ListenerReference {
-        return on(O::class, N::class, init as EventReceiver<Row, Any, Any>.() -> Unit)
+    inline fun <reified O, reified N> on(noinline init: TableEventReceiver<Row, O, N>.() -> Unit): TableListenerReference {
+        return on(O::class, N::class, init as TableEventReceiver<Row, Any, Any>.() -> Unit)
     }
 
-    fun onAny(init: EventReceiver<Row, Any, Any>.() -> Unit): ListenerReference {
+    fun onAny(init: TableEventReceiver<Row, Any, Any>.() -> Unit): TableListenerReference {
         return on(Any::class, Any::class, init)
     }
 
-    fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<Row, Any, Any>.() -> Unit): ListenerReference {
+    fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: TableEventReceiver<Row, Any, Any>.() -> Unit): TableListenerReference {
         val eventReceiver = when {
-            old == Any::class && new == Any::class -> EventReceiver<Row, Any, Any>(
+            old == Any::class && new == Any::class -> TableEventReceiver<Row, Any, Any>(
                 this
             ) { this }
-            old == Any::class -> EventReceiver(this) {
+            old == Any::class -> TableEventReceiver(this) {
                 this.filter {
                     new.isInstance(
                         it.newValue.value
                     )
                 }
             }
-            new == Any::class -> EventReceiver(this) {
+            new == Any::class -> TableEventReceiver(this) {
                 this.filter {
                     old.isInstance(
                         it.oldValue.value
                     )
                 }
             }
-            else -> EventReceiver(this) {
+            else -> TableEventReceiver(this) {
                 this.filter {
                     old.isInstance(it.oldValue.value) && new.isInstance(
                         it.newValue.value

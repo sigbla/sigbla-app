@@ -105,34 +105,34 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
 
     override fun isEmpty(): Boolean = false
 
-    inline fun <reified O, reified N> on(noinline init: EventReceiver<CellRange, O, N>.() -> Unit): ListenerReference {
-        return on(O::class, N::class, init as EventReceiver<CellRange, Any, Any>.() -> Unit)
+    inline fun <reified O, reified N> on(noinline init: TableEventReceiver<CellRange, O, N>.() -> Unit): TableListenerReference {
+        return on(O::class, N::class, init as TableEventReceiver<CellRange, Any, Any>.() -> Unit)
     }
 
-    fun onAny(init: EventReceiver<CellRange, Any, Any>.() -> Unit): ListenerReference {
+    fun onAny(init: TableEventReceiver<CellRange, Any, Any>.() -> Unit): TableListenerReference {
         return on(Any::class, Any::class, init)
     }
 
-    fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<CellRange, Any, Any>.() -> Unit): ListenerReference {
+    fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: TableEventReceiver<CellRange, Any, Any>.() -> Unit): TableListenerReference {
         val eventReceiver = when {
-            old == Any::class && new == Any::class -> EventReceiver<CellRange, Any, Any>(
+            old == Any::class && new == Any::class -> TableEventReceiver<CellRange, Any, Any>(
                 this
             ) { this }
-            old == Any::class -> EventReceiver(this) {
+            old == Any::class -> TableEventReceiver(this) {
                 this.filter {
                     new.isInstance(
                         it.newValue.value
                     )
                 }
             }
-            new == Any::class -> EventReceiver(this) {
+            new == Any::class -> TableEventReceiver(this) {
                 this.filter {
                     old.isInstance(
                         it.oldValue.value
                     )
                 }
             }
-            else -> EventReceiver(this) {
+            else -> TableEventReceiver(this) {
                 this.filter {
                     old.isInstance(it.oldValue.value) && new.isInstance(
                         it.newValue.value
@@ -324,34 +324,34 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any> {
         TODO()
     }
 
-    inline fun <reified O, reified N> on(noinline init: EventReceiver<Cell<*>, O, N>.() -> Unit): ListenerReference {
-        return on(O::class, N::class, init as EventReceiver<Cell<*>, Any, Any>.() -> Unit)
+    inline fun <reified O, reified N> on(noinline init: TableEventReceiver<Cell<*>, O, N>.() -> Unit): TableListenerReference {
+        return on(O::class, N::class, init as TableEventReceiver<Cell<*>, Any, Any>.() -> Unit)
     }
 
-    fun onAny(init: EventReceiver<Cell<*>, Any, Any>.() -> Unit): ListenerReference {
+    fun onAny(init: TableEventReceiver<Cell<*>, Any, Any>.() -> Unit): TableListenerReference {
         return on(Any::class, Any::class, init)
     }
 
-    fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<Cell<*>, Any, Any>.() -> Unit): ListenerReference {
+    fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: TableEventReceiver<Cell<*>, Any, Any>.() -> Unit): TableListenerReference {
         val eventReceiver = when {
-            old == Any::class && new == Any::class -> EventReceiver<Cell<*>, Any, Any>(
+            old == Any::class && new == Any::class -> TableEventReceiver<Cell<*>, Any, Any>(
                 this
             ) { this }
-            old == Any::class -> EventReceiver<Cell<*>, Any, Any>(this) {
+            old == Any::class -> TableEventReceiver<Cell<*>, Any, Any>(this) {
                 this.filter {
                     new.isInstance(
                         it.newValue.value
                     )
                 }
             }
-            new == Any::class -> EventReceiver<Cell<*>, Any, Any>(this) {
+            new == Any::class -> TableEventReceiver<Cell<*>, Any, Any>(this) {
                 this.filter {
                     old.isInstance(
                         it.oldValue.value
                     )
                 }
             }
-            else -> EventReceiver<Cell<*>, Any, Any>(this) {
+            else -> TableEventReceiver<Cell<*>, Any, Any>(this) {
                 this.filter {
                     old.isInstance(
                         it.oldValue.value

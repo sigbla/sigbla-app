@@ -1,11 +1,15 @@
 package sigbla.app
 
+import com.github.andrewoma.dexx.collection.HashMap as PHashMap
+import com.github.andrewoma.dexx.collection.Map as PMap
 import sigbla.app.exceptions.InvalidTableException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.SigblaBackend
+import sigbla.app.internals.refAction
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
+import java.util.concurrent.atomic.AtomicReference
 
 // A table view is associated with one table, and holds meta data related on how to view a table.
 // This includes among other things column widths, row heights, individual cell dimensions, styling, etc..
@@ -27,6 +31,8 @@ import java.util.concurrent.ConcurrentMap
 
 abstract class TableView(val name: String) {
     abstract var table: Table?
+
+    internal abstract val viewRef: AtomicReference<ViewRef>
 
     abstract var defaultColumnStyle: ColumnStyle
 
@@ -114,13 +120,16 @@ abstract class TableView(val name: String) {
 }
 
 // TODO Introduce a ViewRef here like we have TableRef
+internal data class ViewRef(
+    val columnStyles: PMap<ColumnHeader, ColumnStyle> = PHashMap(),
+    val rowStyles: PMap<Long, RowStyle> = PHashMap(),
+    val cellStyles: PMap<Pair<ColumnHeader, Long>, CellStyle> = PHashMap()
+)
 
 class BaseTableView internal constructor(
     name: String,
     table: Table?,
-    private val columnStyles: ConcurrentMap<ColumnHeader, ColumnStyle> = ConcurrentHashMap(),
-    private val rowStyles: ConcurrentMap<Long, RowStyle> = ConcurrentHashMap(),
-    private val cellStyles: ConcurrentMap<Pair<ColumnHeader, Long>, CellStyle> = ConcurrentHashMap()
+    override val viewRef: AtomicReference<ViewRef> = AtomicReference(ViewRef())
 ) : TableView(name) {
     constructor(table: Table) : this(table.name, table)
     constructor(name: String) : this(name, Registry.getTable(name))
@@ -133,38 +142,51 @@ class BaseTableView internal constructor(
         @Synchronized
         set(table) {
             field = table
+
+            // TODO event
         }
 
     override var defaultColumnStyle: ColumnStyle = columnStyle {}
         @Synchronized
         set(columnStyle) {
             field = columnStyle
+
+            // TODO event
         }
 
     override var defaultRowStyle: RowStyle = rowStyle {}
         @Synchronized
         set(rowStyle) {
             field = rowStyle
+
+            // TODO event
         }
 
     override var defaultCellStyle: CellStyle = cellStyle {}
         @Synchronized
         set(cellStyle) {
             field = cellStyle
+
+            // TODO event
         }
 
-    override fun get(columnHeader: ColumnHeader): ColumnStyle = columnStyles[columnHeader] ?: defaultColumnStyle
+    override fun get(columnHeader: ColumnHeader): ColumnStyle = viewRef.get().columnStyles[columnHeader] ?: defaultColumnStyle
 
-    override fun get(row: Long): RowStyle = rowStyles[row] ?: defaultRowStyle
+    override fun get(row: Long): RowStyle = viewRef.get().rowStyles[row] ?: defaultRowStyle
 
-    override fun get(columnHeader: ColumnHeader, row: Long): CellStyle = cellStyles[Pair(columnHeader, row)] ?: defaultCellStyle
+    override fun get(columnHeader: ColumnHeader, row: Long): CellStyle = viewRef.get().cellStyles[Pair(columnHeader, row)] ?: defaultCellStyle
 
     @Synchronized
     override fun set(columnHeader: ColumnHeader, columnStyle: ColumnStyle?) {
         if (columnStyle == null) {
             remove(columnHeader)
         } else {
-            columnStyles[columnHeader] = columnStyle
+            val (oldRef, newRef) = viewRef.refAction {
+                it.copy(
+                    columnStyles = it.columnStyles.put(columnHeader, columnStyle)
+                )
+            }
+
             // TODO event
         }
     }
@@ -174,7 +196,12 @@ class BaseTableView internal constructor(
         if (rowStyle == null) {
             remove(row)
         } else {
-            rowStyles[row] = rowStyle
+            val (oldRef, newRef) = viewRef.refAction {
+                it.copy(
+                    rowStyles = it.rowStyles.put(row, rowStyle)
+                )
+            }
+
             // TODO event
         }
     }
@@ -184,26 +211,46 @@ class BaseTableView internal constructor(
         if (cellStyle == null) {
             remove(columnHeader, row)
         } else {
-            cellStyles[Pair(columnHeader, row)] = cellStyle
+            val (oldRef, newRef) = viewRef.refAction {
+                it.copy(
+                    cellStyles = it.cellStyles.put(Pair(columnHeader, row), cellStyle)
+                )
+            }
+
             // TODO event
         }
     }
 
     @Synchronized
     override fun remove(columnHeader: ColumnHeader) {
-        columnStyles.remove(columnHeader)
+        val (oldRef, newRef) = viewRef.refAction {
+            it.copy(
+                columnStyles = it.columnStyles.remove(columnHeader)
+            )
+        }
+
         // TODO event
     }
 
     @Synchronized
     override fun remove(row: Long) {
-        rowStyles.remove(row)
+        val (oldRef, newRef) = viewRef.refAction {
+            it.copy(
+                rowStyles = it.rowStyles.remove(row)
+            )
+        }
+
         // TODO event
     }
 
     @Synchronized
     override fun remove(columnHeader: ColumnHeader, row: Long) {
-        cellStyles.remove(Pair(columnHeader, row))
+        val (oldRef, newRef) = viewRef.refAction {
+            it.copy(
+                cellStyles = it.cellStyles.remove(Pair(columnHeader, row))
+            )
+        }
+
         // TODO event
     }
 

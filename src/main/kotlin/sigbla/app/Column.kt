@@ -185,34 +185,34 @@ abstract class Column(val table: Table, val columnHeader: ColumnHeader) : Compar
         return ColumnRange(this, other)
     }
 
-    inline fun <reified O, reified N> on(noinline init: EventReceiver<Column, O, N>.() -> Unit): ListenerReference {
-        return on(O::class, N::class, init as EventReceiver<Column, Any, Any>.() -> Unit)
+    inline fun <reified O, reified N> on(noinline init: TableEventReceiver<Column, O, N>.() -> Unit): TableListenerReference {
+        return on(O::class, N::class, init as TableEventReceiver<Column, Any, Any>.() -> Unit)
     }
 
-    fun onAny(init: EventReceiver<Column, Any, Any>.() -> Unit): ListenerReference {
+    fun onAny(init: TableEventReceiver<Column, Any, Any>.() -> Unit): TableListenerReference {
         return on(Any::class, Any::class, init)
     }
 
-    fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: EventReceiver<Column, Any, Any>.() -> Unit): ListenerReference {
+    fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: TableEventReceiver<Column, Any, Any>.() -> Unit): TableListenerReference {
         val eventReceiver = when {
-            old == Any::class && new == Any::class -> EventReceiver<Column, Any, Any>(
+            old == Any::class && new == Any::class -> TableEventReceiver<Column, Any, Any>(
                 this
             ) { this }
-            old == Any::class -> EventReceiver(this) {
+            old == Any::class -> TableEventReceiver(this) {
                 this.filter {
                     new.isInstance(
                         it.newValue.value
                     )
                 }
             }
-            new == Any::class -> EventReceiver(this) {
+            new == Any::class -> TableEventReceiver(this) {
                 this.filter {
                     old.isInstance(
                         it.oldValue.value
                     )
                 }
             }
-            else -> EventReceiver(this) {
+            else -> TableEventReceiver(this) {
                 this.filter {
                     old.isInstance(it.oldValue.value) && new.isInstance(
                         it.newValue.value
@@ -278,11 +278,11 @@ class BaseColumn internal constructor(
         val new = newTable[this.columnHeader][index]
 
         table.eventProcessor.publish(listOf(
-            ListenerEvent(
+            TableListenerEvent(
                 old,
                 new
             )
-        ) as List<ListenerEvent<Any, Any>>)
+        ) as List<TableListenerEvent<Any, Any>>)
     }
 
     override fun remove(index: Long): Cell<*> {
@@ -310,11 +310,11 @@ class BaseColumn internal constructor(
         if (!table.eventProcessor.haveListeners()) return old
 
         table.eventProcessor.publish(listOf(
-            ListenerEvent(
+            TableListenerEvent(
                 old,
                 new
             )
-        ) as List<ListenerEvent<Any, Any>>)
+        ) as List<TableListenerEvent<Any, Any>>)
 
         return old
     }
