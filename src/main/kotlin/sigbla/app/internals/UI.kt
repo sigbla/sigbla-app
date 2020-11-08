@@ -19,9 +19,9 @@ import io.ktor.sessions.get
 import io.ktor.sessions.sessions
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
+import sigbla.app.*
 import sigbla.app.Dimensions
 import sigbla.app.PositionedContent
-import sigbla.app.TableView
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
@@ -206,12 +206,12 @@ internal object SigblaBackend {
 
         if (resize.sizeChangeX != 0L) {
             val columnStyle = view[target.contentHeader]
-            view[target.contentHeader] = columnStyle.copy(width = 10L.coerceAtLeast(columnStyle.width + resize.sizeChangeX))
+            view[target.contentHeader] = ColumnStyle(10L.coerceAtLeast(columnStyle.width + resize.sizeChangeX), view, target.contentHeader)
         }
 
         if (resize.sizeChangeY != 0L) {
             val rowStyle = view[target.contentRow]
-            view[target.contentRow] = rowStyle.copy(height = 10L.coerceAtLeast(rowStyle.height + resize.sizeChangeY))
+            view[target.contentRow] = RowStyle(10L.coerceAtLeast(rowStyle.height + resize.sizeChangeY), view, target.contentRow)
         }
     }
 

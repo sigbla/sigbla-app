@@ -779,10 +779,14 @@ class BaseTable internal constructor(
         val newTableRef = AtomicReference<TableRef>(ref)
         val tableClone = BaseTable(name, onRegistry, newTableRef)
 
+        // TODO Consider if we can optimize this by making it lazy or something else?
+        //      It might be fine doing it like this if we also offer the batch update feature
         val newColumnsMap = ref.columnsMap.fold(PHashMap<ColumnHeader, Column>()) { acc, chc ->
             acc.put(chc.component1(), BaseColumn(tableClone, chc.component1(), newTableRef))
         }
 
+        // TODO Consider if we can optimize this by making it lazy or something else?
+        //      It might be fine doing it like this if we also offer the batch update feature
         val newColumnCellMap = ref.columnCellMap.fold(PHashMap<Column, PSortedMap<Long, CellValue<*>>>()) { acc, ccm ->
             acc.put(newColumnsMap[ccm.component1().columnHeader] ?: throw InvalidColumnException(), ccm.component2())
         }
