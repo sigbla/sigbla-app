@@ -174,12 +174,15 @@
     </style>
 </head>
 <body id="body">
-<div id="pos"></div>
-<div id="message"></div>
-<div id="overlay" onmouseup="overlayMouseup.apply(this, arguments)" onmousemove="overlayMousemove.apply(this, arguments)">
-    <div id="ovl"></div>
-    <div id="ohl"></div>
-</div>
-<script type="text/javascript" src="index.js"></script>
+<script src="index.js"></script>
+<script>
+    const sigbla = new Sigbla(document.getElementById("body"))
+
+    if (document.readyState !== "loading") {
+        sigbla.init()
+    } else {
+        document.addEventListener("DOMContentLoaded", sigbla.init)
+    }
+</script>
 </body>
 </html>
