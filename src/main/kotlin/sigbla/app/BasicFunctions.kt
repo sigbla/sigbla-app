@@ -1,6 +1,6 @@
 package sigbla.app
 
-// TODO Example sum below..
+// TODO Example sum below.. needs test
 
 fun sum(
     cellRange: CellRange,
@@ -12,18 +12,15 @@ fun sum(
         this.name = name
         this.order = order
 
-        if (init != null)
-            destination `=` init
-        else
-            destination `=` null
+        if (init != null) destination `=` init else destination `=` null
 
-        var sum: Number? = null
-
-        source.table[cellRange]
-            .asSequence()
-            .filter { it.isNumeric() }
-            .forEach { sum = it + (sum ?: 0) }
-
-        if (sum != null) destination.table[destination] = sum!!
+        events {
+            if (any()) {
+                destination `=` (source.table[cellRange]
+                    .asSequence()
+                    .filter { it.isNumeric() }
+                    .fold(null as Number?) { sum, num -> num + (sum ?: 0) } ?: return@events)
+            }
+        }
     }
 }
