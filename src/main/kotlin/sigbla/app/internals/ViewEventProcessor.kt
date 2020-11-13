@@ -55,8 +55,8 @@ internal class ViewEventProcessor {
 
     fun subscribe(
         tableView: TableView,
-        eventReceiver: TableViewEventReceiver<TableView, Any>,
-        init: TableViewEventReceiver<TableView, Any>.() -> Unit
+        eventReceiver: TableViewEventReceiver<TableView, Any?>,
+        init: TableViewEventReceiver<TableView, Any?>.() -> Unit
     ): TableViewListenerReference {
         val listenerRef = ListenerTableViewRef(
             tableViewListeners,
@@ -83,12 +83,9 @@ internal class ViewEventProcessor {
             //      been altered just before, but after we added to the tableViewListeners..
             //      It might the listener gets duplicates..
             if (!eventReceiver.skipHistory) {
-                // TODO
-                /*
                 listenerRefEvent.listenerEvent(tableView.clone().asSequence().map {
-                    TableViewListenerEvent(..UnitCell(it.column, it.index), it) as TableViewListenerEvent<Any>
+                    TableViewListenerEvent(null, it)
                 })
-                 */
             }
         }
         return listenerRef

@@ -11,7 +11,7 @@ abstract class TableViewListenerReference {
     }
 }
 
-data class TableViewListenerEvent<T>(val oldValue: T, val newValue: T)
+data class TableViewListenerEvent<T>(val oldValue: T?, val newValue: T?)
 
 class TableViewEventReceiver<S, T>(
     val source: S,

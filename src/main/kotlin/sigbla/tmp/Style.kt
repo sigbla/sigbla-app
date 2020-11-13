@@ -26,7 +26,7 @@ fun main() {
     val tableView = TableView.newTableView(table)
 
     tableView[DEFAULT_COLUMN_STYLE] = {
-        width = 100
+        width = 99
     }
 
     tableView[ColumnHeader("A")] = {
@@ -38,13 +38,21 @@ fun main() {
     tableView.onAny {
         events {
             forEach {
-                println(it)
+                println("onAny: " + it)
+            }
+        }
+    }
+
+    tableView.on<DefaultColumnStyle> {
+        events {
+            forEach {
+                println("on: " + it)
             }
         }
     }
 
     tableView[DEFAULT_COLUMN_STYLE] = {
-        width = 99
+        width = 98
     }
 
     println("END")

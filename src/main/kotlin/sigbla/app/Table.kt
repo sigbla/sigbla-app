@@ -575,6 +575,10 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
 
     internal abstract fun makeClone(name: String = table.name, onRegistry: Boolean = false, ref: TableRef = tableRef.get()!!): Table
 
+    override fun toString(): String {
+        return "Table(name='$name')"
+    }
+
     companion object {
         // TODO Consider option for anonymous tables with no name
         fun newTable(name: String): Table = BaseTable(name)
@@ -776,7 +780,7 @@ class BaseTable internal constructor(
     }
 
     override fun makeClone(name: String, onRegistry: Boolean, ref: TableRef): Table {
-        val newTableRef = AtomicReference<TableRef>(ref)
+        val newTableRef = AtomicReference(ref)
         val tableClone = BaseTable(name, onRegistry, newTableRef)
 
         // TODO Consider if we can optimize this by making it lazy or something else?

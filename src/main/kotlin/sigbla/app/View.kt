@@ -7,6 +7,7 @@ import sigbla.app.internals.ViewEventProcessor
 import sigbla.app.internals.refAction
 import java.util.*
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.NoSuchElementException
 import kotlin.reflect.KClass
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 import com.github.andrewoma.dexx.collection.Map as PMap
@@ -29,7 +30,7 @@ import com.github.andrewoma.dexx.collection.Map as PMap
 //      use ordering to fire off listeners in the right order. This allows for the final UI listener
 //      to fire after any earlier modifications. A loop detector is also included.
 
-abstract class TableView(val name: String) {
+abstract class TableView(val name: String) : Iterable<Any> {
     abstract var table: Table?
 
     internal abstract val viewRef: AtomicReference<ViewRef>
@@ -112,26 +113,52 @@ abstract class TableView(val name: String) {
 
     internal abstract fun dims(): Dimensions
 
-    inline fun <reified T> on(noinline init: TableViewEventReceiver<TableView, T>.() -> Unit): TableViewListenerReference {
-        return on(T::class, init as TableViewEventReceiver<TableView, Any>.() -> Unit)
+    inline fun <reified T> on(noinline init: TableViewEventReceiver<TableView, T?>.() -> Unit): TableViewListenerReference {
+        return on(T::class, init as TableViewEventReceiver<TableView, Any?>.() -> Unit)
     }
 
-    fun onAny(init: TableViewEventReceiver<TableView, Any>.() -> Unit): TableViewListenerReference {
+    fun onAny(init: TableViewEventReceiver<TableView, Any?>.() -> Unit): TableViewListenerReference {
         return on(Any::class, init)
     }
 
-    fun on(type: KClass<*> = Any::class, init: TableViewEventReceiver<TableView, Any>.() -> Unit): TableViewListenerReference {
+    fun on(type: KClass<*> = Any::class, init: TableViewEventReceiver<TableView, Any?>.() -> Unit): TableViewListenerReference {
         val eventReceiver = when {
-            type == Any::class -> TableViewEventReceiver<TableView, Any>(
+            type == Any::class -> TableViewEventReceiver<TableView, Any?>(
                 this
             ) { this }
             else -> TableViewEventReceiver(this) {
                 this.filter {
-                    type.isInstance(it.oldValue) && type.isInstance(it.newValue)
+                    type.isInstance(it.oldValue) || type.isInstance(it.newValue)
                 }
             }
         }
         return eventProcessor.subscribe(this, eventReceiver, init)
+    }
+
+    override fun iterator(): Iterator<Any> {
+        return object : Iterator<Any> {
+            val ref = viewRef.get()
+            val tableIterator = if (ref.table != null) listOf(ref.table).iterator() else emptyList<Table>().iterator()
+            val defaultIterator = listOf(ref.defaultColumnStyle, ref.defaultRowStyle, ref.defaultCellStyle).iterator()
+            val columnStyleIterator = ref.columnStyles.values().iterator()
+            val rowStyleIterator = ref.rowStyles.values().iterator()
+            val cellStyleIterator = ref.cellStyles.values().iterator()
+
+            override fun hasNext(): Boolean {
+                return tableIterator.hasNext() || defaultIterator.hasNext() || columnStyleIterator.hasNext() || rowStyleIterator.hasNext() || cellStyleIterator.hasNext()
+            }
+
+            override fun next(): Any {
+                return when {
+                    tableIterator.hasNext() -> tableIterator.next()
+                    defaultIterator.hasNext() -> defaultIterator.next()
+                    columnStyleIterator.hasNext() -> columnStyleIterator.next()
+                    rowStyleIterator.hasNext() -> rowStyleIterator.next()
+                    cellStyleIterator.hasNext() -> cellStyleIterator.next()
+                    else -> throw NoSuchElementException()
+                }
+            }
+        }
     }
 
     abstract fun clone(): TableView
@@ -173,6 +200,7 @@ abstract class TableView(val name: String) {
 
 // TODO Introduce a ViewRef here like we have TableRef
 internal data class ViewRef(
+    val table: Table? = null,
     val defaultColumnStyle: DefaultColumnStyle,
     val defaultRowStyle: DefaultRowStyle,
     val defaultCellStyle: DefaultCellStyle,
@@ -183,7 +211,7 @@ internal data class ViewRef(
 
 class BaseTableView internal constructor(
     name: String,
-    table: Table?,
+    table: Table?, // TODO Don't like how table is a param here when it's part of viewRef
     onRegistry: Boolean = true,
     viewRef: AtomicReference<ViewRef>? = null,
     override val eventProcessor: ViewEventProcessor = ViewEventProcessor()
@@ -192,6 +220,7 @@ class BaseTableView internal constructor(
     constructor(name: String) : this(name, Registry.getTable(name))
 
     override val viewRef: AtomicReference<ViewRef> = viewRef ?: AtomicReference(ViewRef(
+        table = table,
         DefaultColumnStyle(view = this),
         DefaultRowStyle(view = this),
         DefaultCellStyle(view = this)
@@ -201,18 +230,21 @@ class BaseTableView internal constructor(
         if (onRegistry) Registry.setView(name, this)
     }
 
-    override var table = table
-        @Synchronized
+    override var table
+        get() = viewRef.get().table
         set(table) {
-            val oldTable = field
-            field = table
+            val (oldRef, newRef) = viewRef.refAction {
+                it.copy(
+                    table = table
+                )
+            }
 
             if (!eventProcessor.haveListeners()) return
 
             eventProcessor.publish(listOf(
                 TableViewListenerEvent(
-                    oldTable,
-                    table
+                    oldRef.table,
+                    newRef.table
                 )
             ) as List<TableViewListenerEvent<Any>>)
         }
@@ -629,8 +661,8 @@ class BaseTableView internal constructor(
     }
 
     override fun makeClone(name: String, onRegistry: Boolean, ref: ViewRef): TableView {
-        val newViewRef = AtomicReference<ViewRef>(ref)
-        val tableViewClone = BaseTableView(name, table, onRegistry, newViewRef)
+        val newViewRef = AtomicReference(ref)
+        val tableViewClone = BaseTableView(name, ref.table, onRegistry, newViewRef)
 
         val newDefaultColumnStyle = ref.defaultColumnStyle.ensureStyle(tableViewClone)
         val newDefaultRowStyle = ref.defaultRowStyle.ensureStyle(tableViewClone)
@@ -652,6 +684,7 @@ class BaseTableView internal constructor(
         }
 
         newViewRef.set(ViewRef(
+            ref.table,
             newDefaultColumnStyle,
             newDefaultRowStyle,
             newDefaultCellStyle,
@@ -673,6 +706,7 @@ object DEFAULT_COLUMN_STYLE
 object DEFAULT_ROW_STYLE
 object DEFAULT_CELL_STYLE
 
+// TODO We want to have on and onAny functions on the below style classes, so that we can subscribe to the columns/rows/cell they represent
 class ColumnStyle internal constructor(val width: Long = STANDARD_WIDTH, view: TableView, val columnHeader: ColumnHeader) : Style(view) {
     internal fun ensureStyle(view: TableView, columnHeader: ColumnHeader) = ColumnStyle(width, view, columnHeader)
 
