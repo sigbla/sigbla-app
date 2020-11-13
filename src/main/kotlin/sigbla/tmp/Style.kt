@@ -35,5 +35,17 @@ fun main() {
 
     tableView.show()
 
+    tableView.onAny {
+        events {
+            forEach {
+                println(it)
+            }
+        }
+    }
+
+    tableView[DEFAULT_COLUMN_STYLE] = {
+        width = 99
+    }
+
     println("END")
 }

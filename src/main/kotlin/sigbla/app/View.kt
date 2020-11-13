@@ -1,13 +1,15 @@
 package sigbla.app
 
-import com.github.andrewoma.dexx.collection.HashMap as PHashMap
-import com.github.andrewoma.dexx.collection.Map as PMap
 import sigbla.app.exceptions.InvalidTableException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.SigblaBackend
+import sigbla.app.internals.ViewEventProcessor
 import sigbla.app.internals.refAction
 import java.util.*
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.reflect.KClass
+import com.github.andrewoma.dexx.collection.HashMap as PHashMap
+import com.github.andrewoma.dexx.collection.Map as PMap
 
 // A table view is associated with one table, and holds meta data related on how to view a table.
 // This includes among other things column widths, row heights, individual cell dimensions, styling, etc..
@@ -31,6 +33,8 @@ abstract class TableView(val name: String) {
     abstract var table: Table?
 
     internal abstract val viewRef: AtomicReference<ViewRef>
+
+    internal abstract val eventProcessor: ViewEventProcessor
 
     abstract operator fun get(type: DEFAULT_COLUMN_STYLE): DefaultColumnStyle
 
@@ -108,6 +112,34 @@ abstract class TableView(val name: String) {
 
     internal abstract fun dims(): Dimensions
 
+    inline fun <reified T> on(noinline init: TableViewEventReceiver<TableView, T>.() -> Unit): TableViewListenerReference {
+        return on(T::class, init as TableViewEventReceiver<TableView, Any>.() -> Unit)
+    }
+
+    fun onAny(init: TableViewEventReceiver<TableView, Any>.() -> Unit): TableViewListenerReference {
+        return on(Any::class, init)
+    }
+
+    fun on(type: KClass<*> = Any::class, init: TableViewEventReceiver<TableView, Any>.() -> Unit): TableViewListenerReference {
+        val eventReceiver = when {
+            type == Any::class -> TableViewEventReceiver<TableView, Any>(
+                this
+            ) { this }
+            else -> TableViewEventReceiver(this) {
+                this.filter {
+                    type.isInstance(it.oldValue) && type.isInstance(it.newValue)
+                }
+            }
+        }
+        return eventProcessor.subscribe(this, eventReceiver, init)
+    }
+
+    abstract fun clone(): TableView
+
+    abstract fun clone(name: String): TableView
+
+    internal abstract fun makeClone(name: String = this.name, onRegistry: Boolean = false, ref: ViewRef = viewRef.get()!!): TableView
+
     companion object {
         fun newTableView(name: String): TableView = BaseTableView(name)
 
@@ -151,28 +183,38 @@ internal data class ViewRef(
 
 class BaseTableView internal constructor(
     name: String,
-    _table: Table?,
-    _viewRef: AtomicReference<ViewRef>? = null
+    table: Table?,
+    onRegistry: Boolean = true,
+    viewRef: AtomicReference<ViewRef>? = null,
+    override val eventProcessor: ViewEventProcessor = ViewEventProcessor()
 ) : TableView(name) {
-    constructor(_table: Table) : this(_table.name, _table)
+    constructor(table: Table) : this(table.name, table)
     constructor(name: String) : this(name, Registry.getTable(name))
 
-    override val viewRef: AtomicReference<ViewRef> = _viewRef ?: AtomicReference(ViewRef(
+    override val viewRef: AtomicReference<ViewRef> = viewRef ?: AtomicReference(ViewRef(
         DefaultColumnStyle(view = this),
         DefaultRowStyle(view = this),
         DefaultCellStyle(view = this)
     ))
 
     init {
-        Registry.setView(name, this)
+        if (onRegistry) Registry.setView(name, this)
     }
 
-    override var table = _table
+    override var table = table
         @Synchronized
         set(table) {
+            val oldTable = field
             field = table
 
-            // TODO event
+            if (!eventProcessor.haveListeners()) return
+
+            eventProcessor.publish(listOf(
+                TableViewListenerEvent(
+                    oldTable,
+                    table
+                )
+            ) as List<TableViewListenerEvent<Any>>)
         }
 
     override operator fun get(type: DEFAULT_COLUMN_STYLE): DefaultColumnStyle = viewRef.get().defaultColumnStyle
@@ -190,7 +232,20 @@ class BaseTableView internal constructor(
             )
         }
 
-        // TODO event
+        if (!eventProcessor.haveListeners()) return
+
+        val oldView = makeClone(ref = oldRef)
+        val newView = makeClone(ref = newRef)
+
+        val old = oldView[DEFAULT_COLUMN_STYLE]
+        val new = newView[DEFAULT_COLUMN_STYLE]
+
+        eventProcessor.publish(listOf(
+            TableViewListenerEvent(
+                old,
+                new
+            )
+        ) as List<TableViewListenerEvent<Any>>)
     }
 
     override operator fun get(type: DEFAULT_ROW_STYLE): DefaultRowStyle = viewRef.get().defaultRowStyle
@@ -208,7 +263,20 @@ class BaseTableView internal constructor(
             )
         }
 
-        // TODO event
+        if (!eventProcessor.haveListeners()) return
+
+        val oldView = makeClone(ref = oldRef)
+        val newView = makeClone(ref = newRef)
+
+        val old = oldView[DEFAULT_ROW_STYLE]
+        val new = newView[DEFAULT_ROW_STYLE]
+
+        eventProcessor.publish(listOf(
+            TableViewListenerEvent(
+                old,
+                new
+            )
+        ) as List<TableViewListenerEvent<Any>>)
     }
 
     override operator fun get(type: DEFAULT_CELL_STYLE): DefaultCellStyle = viewRef.get().defaultCellStyle
@@ -226,7 +294,20 @@ class BaseTableView internal constructor(
             )
         }
 
-        // TODO event
+        if (!eventProcessor.haveListeners()) return
+
+        val oldView = makeClone(ref = oldRef)
+        val newView = makeClone(ref = newRef)
+
+        val old = oldView[DEFAULT_CELL_STYLE]
+        val new = newView[DEFAULT_CELL_STYLE]
+
+        eventProcessor.publish(listOf(
+            TableViewListenerEvent(
+                old,
+                new
+            )
+        ) as List<TableViewListenerEvent<Any>>)
     }
 
     override fun get(columnHeader: ColumnHeader): ColumnStyle = viewRef.get().columnStyles[columnHeader] ?: this[DEFAULT_COLUMN_STYLE].toColumnStyle(columnHeader)
@@ -252,7 +333,20 @@ class BaseTableView internal constructor(
                 )
             }
 
-            // TODO event
+            if (!eventProcessor.haveListeners()) return
+
+            val oldView = makeClone(ref = oldRef)
+            val newView = makeClone(ref = newRef)
+
+            val old = oldView[columnHeader]
+            val new = newView[columnHeader]
+
+            eventProcessor.publish(listOf(
+                TableViewListenerEvent(
+                    old,
+                    new
+                )
+            ) as List<TableViewListenerEvent<Any>>)
         }
     }
 
@@ -273,7 +367,20 @@ class BaseTableView internal constructor(
                 )
             }
 
-            // TODO event
+            if (!eventProcessor.haveListeners()) return
+
+            val oldView = makeClone(ref = oldRef)
+            val newView = makeClone(ref = newRef)
+
+            val old = oldView[row]
+            val new = newView[row]
+
+            eventProcessor.publish(listOf(
+                TableViewListenerEvent(
+                    old,
+                    new
+                )
+            ) as List<TableViewListenerEvent<Any>>)
         }
     }
 
@@ -294,7 +401,20 @@ class BaseTableView internal constructor(
                 )
             }
 
-            // TODO event
+            if (!eventProcessor.haveListeners()) return
+
+            val oldView = makeClone(ref = oldRef)
+            val newView = makeClone(ref = newRef)
+
+            val old = oldView[columnHeader, row]
+            val new = newView[columnHeader, row]
+
+            eventProcessor.publish(listOf(
+                TableViewListenerEvent(
+                    old,
+                    new
+                )
+            ) as List<TableViewListenerEvent<Any>>)
         }
     }
 
@@ -306,7 +426,20 @@ class BaseTableView internal constructor(
             )
         }
 
-        // TODO event
+        if (!eventProcessor.haveListeners()) return
+
+        val oldView = makeClone(ref = oldRef)
+        val newView = makeClone(ref = newRef)
+
+        val old = oldView[columnHeader]
+        val new = newView[columnHeader]
+
+        eventProcessor.publish(listOf(
+            TableViewListenerEvent(
+                old,
+                new
+            )
+        ) as List<TableViewListenerEvent<Any>>)
     }
 
     @Synchronized
@@ -317,7 +450,20 @@ class BaseTableView internal constructor(
             )
         }
 
-        // TODO event
+        if (!eventProcessor.haveListeners()) return
+
+        val oldView = makeClone(ref = oldRef)
+        val newView = makeClone(ref = newRef)
+
+        val old = oldView[row]
+        val new = newView[row]
+
+        eventProcessor.publish(listOf(
+            TableViewListenerEvent(
+                old,
+                new
+            )
+        ) as List<TableViewListenerEvent<Any>>)
     }
 
     @Synchronized
@@ -328,7 +474,20 @@ class BaseTableView internal constructor(
             )
         }
 
-        // TODO event
+        if (!eventProcessor.haveListeners()) return
+
+        val oldView = makeClone(ref = oldRef)
+        val newView = makeClone(ref = newRef)
+
+        val old = oldView[columnHeader, row]
+        val new = newView[columnHeader, row]
+
+        eventProcessor.publish(listOf(
+            TableViewListenerEvent(
+                old,
+                new
+            )
+        ) as List<TableViewListenerEvent<Any>>)
     }
 
     @Synchronized
@@ -460,6 +619,49 @@ class BaseTableView internal constructor(
 
         return Dimensions(defaultColumnStyle.width, maxHeaderOffset, runningWidth, runningHeight)
     }
+
+    override fun clone(): TableView {
+        return makeClone()
+    }
+
+    override fun clone(name: String): TableView {
+        return makeClone(name, true)
+    }
+
+    override fun makeClone(name: String, onRegistry: Boolean, ref: ViewRef): TableView {
+        val newViewRef = AtomicReference<ViewRef>(ref)
+        val tableViewClone = BaseTableView(name, table, onRegistry, newViewRef)
+
+        val newDefaultColumnStyle = ref.defaultColumnStyle.ensureStyle(tableViewClone)
+        val newDefaultRowStyle = ref.defaultRowStyle.ensureStyle(tableViewClone)
+        val newDefaultCellStyle = ref.defaultCellStyle.ensureStyle(tableViewClone)
+
+        // TODO: Like with table clone, something more efficient than this would be nice
+        val newColumnsStyles = ref.columnStyles.fold(PHashMap<ColumnHeader, ColumnStyle>()) { acc, chc ->
+            acc.put(chc.component1(), ColumnStyle(chc.component2().width, tableViewClone, chc.component1()))
+        }
+
+        // TODO: Like with table clone, something more efficient than this would be nice
+        val newRowStyles = ref.rowStyles.fold(PHashMap<Long, RowStyle>()) { acc, lrs ->
+            acc.put(lrs.component1(), RowStyle(lrs.component2().height, tableViewClone, lrs.component1()))
+        }
+
+        // TODO: Like with table clone, something more efficient than this would be nice
+        val newCellStyles = ref.cellStyles.fold(PHashMap<Pair<ColumnHeader, Long>, CellStyle>()) { acc, chlcs ->
+            acc.put(chlcs.component1(), CellStyle(chlcs.component2().height, chlcs.component2().width, tableViewClone, chlcs.component1().first, chlcs.component1().second))
+        }
+
+        newViewRef.set(ViewRef(
+            newDefaultColumnStyle,
+            newDefaultRowStyle,
+            newDefaultCellStyle,
+            newColumnsStyles,
+            newRowStyles,
+            newCellStyles
+        ))
+
+        return tableViewClone
+    }
 }
 
 private const val STANDARD_WIDTH = 100L
@@ -473,29 +675,53 @@ object DEFAULT_CELL_STYLE
 
 class ColumnStyle internal constructor(val width: Long = STANDARD_WIDTH, view: TableView, val columnHeader: ColumnHeader) : Style(view) {
     internal fun ensureStyle(view: TableView, columnHeader: ColumnHeader) = ColumnStyle(width, view, columnHeader)
+
+    override fun toString(): String {
+        return "ColumnStyle(width=$width, columnHeader=$columnHeader)"
+    }
 }
 
 class DefaultColumnStyle internal constructor(val width: Long = STANDARD_WIDTH, view: TableView) : Style(view) {
     internal fun toColumnStyle(columnHeader: ColumnHeader) = ColumnStyle(width, view, columnHeader)
     internal fun ensureStyle(view: TableView) = DefaultColumnStyle(width, view)
+
+    override fun toString(): String {
+        return "DefaultColumnStyle(width=$width)"
+    }
 }
 
 class RowStyle internal constructor(val height: Long = STANDARD_HEIGHT, view: TableView, val index: Long) : Style(view) {
     internal fun ensureStyle(view: TableView, index: Long) = RowStyle(height, view, index)
+
+    override fun toString(): String {
+        return "RowStyle(height=$height, index=$index)"
+    }
 }
 
 class DefaultRowStyle internal constructor(val height: Long = STANDARD_HEIGHT, view: TableView) : Style(view) {
     internal fun toRowStyle(index: Long) = RowStyle(height, view, index)
     internal fun ensureStyle(view: TableView) = DefaultRowStyle(height, view)
+
+    override fun toString(): String {
+        return "DefaultRowStyle(height=$height)"
+    }
 }
 
 class CellStyle internal constructor(val height: Long = STANDARD_HEIGHT, val width: Long = STANDARD_WIDTH, view: TableView, val columnHeader: ColumnHeader, val index: Long) : Style(view) {
     internal fun ensureStyle(view: TableView, columnHeader: ColumnHeader, index: Long) = CellStyle(height, width, view, columnHeader, index)
+
+    override fun toString(): String {
+        return "CellStyle(height=$height, width=$width, columnHeader=$columnHeader, index=$index)"
+    }
 }
 
 class DefaultCellStyle internal constructor(val height: Long = STANDARD_HEIGHT, val width: Long = STANDARD_WIDTH, view: TableView) : Style(view) {
     internal fun toCellStyle(columnHeader: ColumnHeader, index: Long) = CellStyle(height, width, view, columnHeader, index)
     internal fun ensureStyle(view: TableView) = DefaultCellStyle(height, width, view)
+
+    override fun toString(): String {
+        return "DefaultCellStyle(height=$height, width=$width)"
+    }
 }
 
 class ColumnStyleBuilder(var width: Long = STANDARD_WIDTH) {

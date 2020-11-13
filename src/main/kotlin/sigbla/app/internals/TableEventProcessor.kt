@@ -17,9 +17,9 @@ internal class TableEventProcessor {
     private class ListenerId(val order: Long) : Comparable<ListenerId> {
         val id: Long = idGenerator.getAndIncrement()
 
-        override fun compareTo(that: ListenerId): Int {
-            val cmp = this.order.compareTo(that.order)
-            if (cmp == 0) return this.id.compareTo(that.id)
+        override fun compareTo(other: ListenerId): Int {
+            val cmp = this.order.compareTo(other.order)
+            if (cmp == 0) return this.id.compareTo(other.id)
             return cmp
         }
     }

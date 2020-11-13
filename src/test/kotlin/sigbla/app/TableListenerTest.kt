@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 
-class ListenerTest {
+class TableListenerTest {
     @After
     fun cleanup() {
         Registry.tableNames().forEach { Registry.deleteTable(it) }

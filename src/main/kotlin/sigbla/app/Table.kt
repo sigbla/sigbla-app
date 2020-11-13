@@ -576,8 +576,8 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
     internal abstract fun makeClone(name: String = table.name, onRegistry: Boolean = false, ref: TableRef = tableRef.get()!!): Table
 
     companion object {
-        fun newTable(name: String): Table =
-            BaseTable(name)
+        // TODO Consider option for anonymous tables with no name
+        fun newTable(name: String): Table = BaseTable(name)
 
         fun fromRegistry(name: String): Table = Registry.getTable(name) ?: throw InvalidTableException("No table by name $name")
 
