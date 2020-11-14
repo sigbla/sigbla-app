@@ -3,7 +3,7 @@ package sigbla.app
 import sigbla.app.exceptions.InvalidTableException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.SigblaBackend
-import sigbla.app.internals.ViewEventProcessor
+import sigbla.app.internals.TableViewEventProcessor
 import sigbla.app.internals.refAction
 import java.util.*
 import java.util.concurrent.atomic.AtomicReference
@@ -15,7 +15,7 @@ import com.github.andrewoma.dexx.collection.Map as PMap
 // A table view is associated with one table, and holds meta data related on how to view a table.
 // This includes among other things column widths, row heights, individual cell dimensions, styling, etc..
 
-// TODO Introduce a concept of a view transformer. As with styles, this can be on column, row or cell.
+// TODO Introduce a concept of a view transformer. As with views, this can be on column, row or cell.
 //      Some priority ordering might be needed between these, but the transformer would take a value
 //      and convert this into another value. This only affects the view, and is done on demand (i.e.,
 //      when the cell is being rendered), and is used to perform things like formatting etc..
@@ -23,75 +23,75 @@ import com.github.andrewoma.dexx.collection.Map as PMap
 //      Look at having this in the form of view["column"] = { .. } where this is given a cell and
 //      expected to return a cell.
 
-// TODO Events on a table view should be much like on a table, with view.onAny or view.on<ColumnStyle>.
-//      Note that we only have one generic type, as we can't have one type of style convert to another.
+// TODO Events on a table view should be much like on a table, with view.onAny or view.on<ColumnView>.
+//      Note that we only have one generic type, as we can't have one type of view convert to another.
 //
-//      A listener can, as with table, call back into the view to change the style if wanted. And we
+//      A listener can, as with table, call back into the table view to change the view if wanted. And we
 //      use ordering to fire off listeners in the right order. This allows for the final UI listener
 //      to fire after any earlier modifications. A loop detector is also included.
 
 abstract class TableView(val name: String) : Iterable<Any> {
     abstract var table: Table?
 
-    internal abstract val viewRef: AtomicReference<ViewRef>
+    internal abstract val tableViewRef: AtomicReference<TableViewRef>
 
-    internal abstract val eventProcessor: ViewEventProcessor
+    internal abstract val eventProcessor: TableViewEventProcessor
 
-    abstract operator fun get(type: DEFAULT_COLUMN_STYLE): DefaultColumnStyle
+    abstract operator fun get(type: DEFAULT_COLUMN_VIEW): DefaultColumnView
 
-    abstract operator fun set(type: DEFAULT_COLUMN_STYLE, init: DefaultColumnStyleBuilder.() -> Unit)
+    abstract operator fun set(type: DEFAULT_COLUMN_VIEW, init: DefaultColumnViewBuilder.() -> Unit)
 
-    abstract operator fun set(type: DEFAULT_COLUMN_STYLE, defaultColumnStyle: DefaultColumnStyle)
+    abstract operator fun set(type: DEFAULT_COLUMN_VIEW, defaultColumnView: DefaultColumnView)
 
-    abstract operator fun get(type: DEFAULT_ROW_STYLE): DefaultRowStyle
+    abstract operator fun get(type: DEFAULT_ROW_VIEW): DefaultRowView
 
-    abstract operator fun set(type: DEFAULT_ROW_STYLE, init: DefaultRowStyleBuilder.() -> Unit)
+    abstract operator fun set(type: DEFAULT_ROW_VIEW, init: DefaultRowViewBuilder.() -> Unit)
 
-    abstract operator fun set(type: DEFAULT_ROW_STYLE, defaultRowStyle: DefaultRowStyle)
+    abstract operator fun set(type: DEFAULT_ROW_VIEW, defaultRowView: DefaultRowView)
 
-    abstract operator fun get(type: DEFAULT_CELL_STYLE): DefaultCellStyle
+    abstract operator fun get(type: DEFAULT_CELL_VIEW): DefaultCellView
 
-    abstract operator fun set(type: DEFAULT_CELL_STYLE, init: DefaultCellStyleBuilder.() -> Unit)
+    abstract operator fun set(type: DEFAULT_CELL_VIEW, init: DefaultCellViewBuilder.() -> Unit)
 
-    abstract operator fun set(type: DEFAULT_CELL_STYLE, defaultCellStyle: DefaultCellStyle)
+    abstract operator fun set(type: DEFAULT_CELL_VIEW, defaultCellView: DefaultCellView)
 
-    abstract operator fun get(columnHeader: ColumnHeader): ColumnStyle
+    abstract operator fun get(columnHeader: ColumnHeader): ColumnView
 
     operator fun get(column: Column) = get(column.columnHeader)
 
-    abstract operator fun get(row: Long): RowStyle
+    abstract operator fun get(row: Long): RowView
 
     operator fun get(row: Row) = get(row.index)
 
-    abstract operator fun get(columnHeader: ColumnHeader, row: Long): CellStyle
+    abstract operator fun get(columnHeader: ColumnHeader, row: Long): CellView
 
     operator fun get(column: Column, row: Long) = get(column.columnHeader, row)
 
     operator fun get(cell: Cell<*>) = get(cell.column, cell.index)
 
-    abstract operator fun set(columnHeader: ColumnHeader, init: ColumnStyleBuilder.() -> Unit)
+    abstract operator fun set(columnHeader: ColumnHeader, init: ColumnViewBuilder.() -> Unit)
 
-    operator fun set(column: Column, init: ColumnStyleBuilder.() -> Unit) = set(column.columnHeader, init)
+    operator fun set(column: Column, init: ColumnViewBuilder.() -> Unit) = set(column.columnHeader, init)
 
-    abstract operator fun set(columnHeader: ColumnHeader, columnStyle: ColumnStyle?)
+    abstract operator fun set(columnHeader: ColumnHeader, columnView: ColumnView?)
 
-    operator fun set(column: Column, columnStyle: ColumnStyle?) = set(column.columnHeader, columnStyle)
+    operator fun set(column: Column, columnView: ColumnView?) = set(column.columnHeader, columnView)
 
-    abstract operator fun set(row: Long, init: RowStyleBuilder.() -> Unit)
+    abstract operator fun set(row: Long, init: RowViewBuilder.() -> Unit)
 
-    abstract operator fun set(row: Long, rowStyle: RowStyle?)
+    abstract operator fun set(row: Long, rowView: RowView?)
 
-    operator fun set(row: Row, rowStyle: RowStyle?) = set(row.index, rowStyle)
+    operator fun set(row: Row, rowView: RowView?) = set(row.index, rowView)
 
-    abstract operator fun set(columnHeader: ColumnHeader, row: Long, init: CellStyleBuilder.() -> Unit)
+    abstract operator fun set(columnHeader: ColumnHeader, row: Long, init: CellViewBuilder.() -> Unit)
 
-    operator fun set(column: Column, row: Long, init: CellStyleBuilder.() -> Unit) = set(column.columnHeader, row, init)
+    operator fun set(column: Column, row: Long, init: CellViewBuilder.() -> Unit) = set(column.columnHeader, row, init)
 
-    abstract operator fun set(columnHeader: ColumnHeader, row: Long, cellStyle: CellStyle?)
+    abstract operator fun set(columnHeader: ColumnHeader, row: Long, cellView: CellView?)
 
-    operator fun set(column: Column, row: Long, cellStyle: CellStyle?) = set(column.columnHeader, row, cellStyle)
+    operator fun set(column: Column, row: Long, cellView: CellView?) = set(column.columnHeader, row, cellView)
 
-    operator fun set(cell: Cell<*>, cellStyle: CellStyle?) = set(cell.column, cell.index, cellStyle)
+    operator fun set(cell: Cell<*>, cellView: CellView?) = set(cell.column, cell.index, cellView)
 
     abstract fun remove(columnHeader: ColumnHeader)
 
@@ -137,24 +137,24 @@ abstract class TableView(val name: String) : Iterable<Any> {
 
     override fun iterator(): Iterator<Any> {
         return object : Iterator<Any> {
-            val ref = viewRef.get()
+            val ref = tableViewRef.get()
             val tableIterator = if (ref.table != null) listOf(ref.table).iterator() else emptyList<Table>().iterator()
-            val defaultIterator = listOf(ref.defaultColumnStyle, ref.defaultRowStyle, ref.defaultCellStyle).iterator()
-            val columnStyleIterator = ref.columnStyles.values().iterator()
-            val rowStyleIterator = ref.rowStyles.values().iterator()
-            val cellStyleIterator = ref.cellStyles.values().iterator()
+            val defaultIterator = listOf(ref.defaultColumnView, ref.defaultRowView, ref.defaultCellView).iterator()
+            val columnViewIterator = ref.columnViews.values().iterator()
+            val rowViewIterator = ref.rowViews.values().iterator()
+            val cellViewIterator = ref.cellViews.values().iterator()
 
             override fun hasNext(): Boolean {
-                return tableIterator.hasNext() || defaultIterator.hasNext() || columnStyleIterator.hasNext() || rowStyleIterator.hasNext() || cellStyleIterator.hasNext()
+                return tableIterator.hasNext() || defaultIterator.hasNext() || columnViewIterator.hasNext() || rowViewIterator.hasNext() || cellViewIterator.hasNext()
             }
 
             override fun next(): Any {
                 return when {
                     tableIterator.hasNext() -> tableIterator.next()
                     defaultIterator.hasNext() -> defaultIterator.next()
-                    columnStyleIterator.hasNext() -> columnStyleIterator.next()
-                    rowStyleIterator.hasNext() -> rowStyleIterator.next()
-                    cellStyleIterator.hasNext() -> cellStyleIterator.next()
+                    columnViewIterator.hasNext() -> columnViewIterator.next()
+                    rowViewIterator.hasNext() -> rowViewIterator.next()
+                    cellViewIterator.hasNext() -> cellViewIterator.next()
                     else -> throw NoSuchElementException()
                 }
             }
@@ -165,7 +165,7 @@ abstract class TableView(val name: String) : Iterable<Any> {
 
     abstract fun clone(name: String): TableView
 
-    internal abstract fun makeClone(name: String = this.name, onRegistry: Boolean = false, ref: ViewRef = viewRef.get()!!): TableView
+    internal abstract fun makeClone(name: String = this.name, onRegistry: Boolean = false, ref: TableViewRef = tableViewRef.get()!!): TableView
 
     companion object {
         fun newTableView(name: String): TableView = BaseTableView(name)
@@ -199,31 +199,31 @@ abstract class TableView(val name: String) : Iterable<Any> {
 }
 
 // TODO Introduce a ViewRef here like we have TableRef
-internal data class ViewRef(
+internal data class TableViewRef(
     val table: Table? = null,
-    val defaultColumnStyle: DefaultColumnStyle,
-    val defaultRowStyle: DefaultRowStyle,
-    val defaultCellStyle: DefaultCellStyle,
-    val columnStyles: PMap<ColumnHeader, ColumnStyle> = PHashMap(),
-    val rowStyles: PMap<Long, RowStyle> = PHashMap(),
-    val cellStyles: PMap<Pair<ColumnHeader, Long>, CellStyle> = PHashMap()
+    val defaultColumnView: DefaultColumnView,
+    val defaultRowView: DefaultRowView,
+    val defaultCellView: DefaultCellView,
+    val columnViews: PMap<ColumnHeader, ColumnView> = PHashMap(),
+    val rowViews: PMap<Long, RowView> = PHashMap(),
+    val cellViews: PMap<Pair<ColumnHeader, Long>, CellView> = PHashMap()
 )
 
 class BaseTableView internal constructor(
     name: String,
     table: Table?, // TODO Don't like how table is a param here when it's part of viewRef
     onRegistry: Boolean = true,
-    viewRef: AtomicReference<ViewRef>? = null,
-    override val eventProcessor: ViewEventProcessor = ViewEventProcessor()
+    tableViewRef: AtomicReference<TableViewRef>? = null,
+    override val eventProcessor: TableViewEventProcessor = TableViewEventProcessor()
 ) : TableView(name) {
     constructor(table: Table) : this(table.name, table)
     constructor(name: String) : this(name, Registry.getTable(name))
 
-    override val viewRef: AtomicReference<ViewRef> = viewRef ?: AtomicReference(ViewRef(
+    override val tableViewRef: AtomicReference<TableViewRef> = tableViewRef ?: AtomicReference(TableViewRef(
         table = table,
-        DefaultColumnStyle(view = this),
-        DefaultRowStyle(view = this),
-        DefaultCellStyle(view = this)
+        DefaultColumnView(view = this),
+        DefaultRowView(view = this),
+        DefaultCellView(view = this)
     ))
 
     init {
@@ -231,9 +231,9 @@ class BaseTableView internal constructor(
     }
 
     override var table
-        get() = viewRef.get().table
+        get() = tableViewRef.get().table
         set(table) {
-            val (oldRef, newRef) = viewRef.refAction {
+            val (oldRef, newRef) = tableViewRef.refAction {
                 it.copy(
                     table = table
                 )
@@ -249,18 +249,18 @@ class BaseTableView internal constructor(
             ) as List<TableViewListenerEvent<Any>>)
         }
 
-    override operator fun get(type: DEFAULT_COLUMN_STYLE): DefaultColumnStyle = viewRef.get().defaultColumnStyle
+    override operator fun get(type: DEFAULT_COLUMN_VIEW): DefaultColumnView = tableViewRef.get().defaultColumnView
 
-    override operator fun set(type: DEFAULT_COLUMN_STYLE, init: DefaultColumnStyleBuilder.() -> Unit) {
-        val defaultColumnStyleBuilder = DefaultColumnStyleBuilder()
-        defaultColumnStyleBuilder.init()
-        set(type, defaultColumnStyleBuilder.build(this))
+    override operator fun set(type: DEFAULT_COLUMN_VIEW, init: DefaultColumnViewBuilder.() -> Unit) {
+        val defaultColumnViewBuilder = DefaultColumnViewBuilder()
+        defaultColumnViewBuilder.init()
+        set(type, defaultColumnViewBuilder.build(this))
     }
 
-    override operator fun set(type: DEFAULT_COLUMN_STYLE, defaultColumnStyle: DefaultColumnStyle) {
-        val (oldRef, newRef) = viewRef.refAction {
+    override operator fun set(type: DEFAULT_COLUMN_VIEW, defaultColumnView: DefaultColumnView) {
+        val (oldRef, newRef) = tableViewRef.refAction {
             it.copy(
-                defaultColumnStyle = defaultColumnStyle.ensureStyle(this)
+                defaultColumnView = defaultColumnView.ensureView(this)
             )
         }
 
@@ -269,8 +269,8 @@ class BaseTableView internal constructor(
         val oldView = makeClone(ref = oldRef)
         val newView = makeClone(ref = newRef)
 
-        val old = oldView[DEFAULT_COLUMN_STYLE]
-        val new = newView[DEFAULT_COLUMN_STYLE]
+        val old = oldView[DEFAULT_COLUMN_VIEW]
+        val new = newView[DEFAULT_COLUMN_VIEW]
 
         eventProcessor.publish(listOf(
             TableViewListenerEvent(
@@ -280,18 +280,18 @@ class BaseTableView internal constructor(
         ) as List<TableViewListenerEvent<Any>>)
     }
 
-    override operator fun get(type: DEFAULT_ROW_STYLE): DefaultRowStyle = viewRef.get().defaultRowStyle
+    override operator fun get(type: DEFAULT_ROW_VIEW): DefaultRowView = tableViewRef.get().defaultRowView
 
-    override operator fun set(type: DEFAULT_ROW_STYLE, init: DefaultRowStyleBuilder.() -> Unit) {
-        val defaultRowStyleBuilder = DefaultRowStyleBuilder()
-        defaultRowStyleBuilder.init()
-        set(type, defaultRowStyleBuilder.build(this))
+    override operator fun set(type: DEFAULT_ROW_VIEW, init: DefaultRowViewBuilder.() -> Unit) {
+        val defaultRowViewBuilder = DefaultRowViewBuilder()
+        defaultRowViewBuilder.init()
+        set(type, defaultRowViewBuilder.build(this))
     }
 
-    override operator fun set(type: DEFAULT_ROW_STYLE, defaultRowStyle: DefaultRowStyle) {
-        val (oldRef, newRef) = viewRef.refAction {
+    override operator fun set(type: DEFAULT_ROW_VIEW, defaultRowView: DefaultRowView) {
+        val (oldRef, newRef) = tableViewRef.refAction {
             it.copy(
-                defaultRowStyle = defaultRowStyle.ensureStyle(this)
+                defaultRowView = defaultRowView.ensureView(this)
             )
         }
 
@@ -300,8 +300,8 @@ class BaseTableView internal constructor(
         val oldView = makeClone(ref = oldRef)
         val newView = makeClone(ref = newRef)
 
-        val old = oldView[DEFAULT_ROW_STYLE]
-        val new = newView[DEFAULT_ROW_STYLE]
+        val old = oldView[DEFAULT_ROW_VIEW]
+        val new = newView[DEFAULT_ROW_VIEW]
 
         eventProcessor.publish(listOf(
             TableViewListenerEvent(
@@ -311,18 +311,18 @@ class BaseTableView internal constructor(
         ) as List<TableViewListenerEvent<Any>>)
     }
 
-    override operator fun get(type: DEFAULT_CELL_STYLE): DefaultCellStyle = viewRef.get().defaultCellStyle
+    override operator fun get(type: DEFAULT_CELL_VIEW): DefaultCellView = tableViewRef.get().defaultCellView
 
-    override operator fun set(type: DEFAULT_CELL_STYLE, init: DefaultCellStyleBuilder.() -> Unit) {
-        val defaultCellStyleBuilder = DefaultCellStyleBuilder()
-        defaultCellStyleBuilder.init()
-        set(type, defaultCellStyleBuilder.build(this))
+    override operator fun set(type: DEFAULT_CELL_VIEW, init: DefaultCellViewBuilder.() -> Unit) {
+        val defaultCellViewBuilder = DefaultCellViewBuilder()
+        defaultCellViewBuilder.init()
+        set(type, defaultCellViewBuilder.build(this))
     }
 
-    override operator fun set(type: DEFAULT_CELL_STYLE, defaultCellStyle: DefaultCellStyle) {
-        val (oldRef, newRef) = viewRef.refAction {
+    override operator fun set(type: DEFAULT_CELL_VIEW, defaultCellView: DefaultCellView) {
+        val (oldRef, newRef) = tableViewRef.refAction {
             it.copy(
-                defaultCellStyle = defaultCellStyle.ensureStyle(this)
+                defaultCellView = defaultCellView.ensureView(this)
             )
         }
 
@@ -331,8 +331,8 @@ class BaseTableView internal constructor(
         val oldView = makeClone(ref = oldRef)
         val newView = makeClone(ref = newRef)
 
-        val old = oldView[DEFAULT_CELL_STYLE]
-        val new = newView[DEFAULT_CELL_STYLE]
+        val old = oldView[DEFAULT_CELL_VIEW]
+        val new = newView[DEFAULT_CELL_VIEW]
 
         eventProcessor.publish(listOf(
             TableViewListenerEvent(
@@ -342,26 +342,26 @@ class BaseTableView internal constructor(
         ) as List<TableViewListenerEvent<Any>>)
     }
 
-    override fun get(columnHeader: ColumnHeader): ColumnStyle = viewRef.get().columnStyles[columnHeader] ?: this[DEFAULT_COLUMN_STYLE].toColumnStyle(columnHeader)
+    override fun get(columnHeader: ColumnHeader): ColumnView = tableViewRef.get().columnViews[columnHeader] ?: this[DEFAULT_COLUMN_VIEW].toColumnView(columnHeader)
 
-    override fun get(row: Long): RowStyle = viewRef.get().rowStyles[row] ?: this[DEFAULT_ROW_STYLE].toRowStyle(row)
+    override fun get(row: Long): RowView = tableViewRef.get().rowViews[row] ?: this[DEFAULT_ROW_VIEW].toRowView(row)
 
-    override fun get(columnHeader: ColumnHeader, row: Long): CellStyle = viewRef.get().cellStyles[Pair(columnHeader, row)] ?: this[DEFAULT_CELL_STYLE].toCellStyle(columnHeader, row)
+    override fun get(columnHeader: ColumnHeader, row: Long): CellView = tableViewRef.get().cellViews[Pair(columnHeader, row)] ?: this[DEFAULT_CELL_VIEW].toCellView(columnHeader, row)
 
-    override fun set(columnHeader: ColumnHeader, init: ColumnStyleBuilder.() -> Unit) {
-        val columnStyleBuilder = ColumnStyleBuilder()
-        columnStyleBuilder.init()
-        set(columnHeader, columnStyleBuilder.build(this, columnHeader))
+    override fun set(columnHeader: ColumnHeader, init: ColumnViewBuilder.() -> Unit) {
+        val columnViewBuilder = ColumnViewBuilder()
+        columnViewBuilder.init()
+        set(columnHeader, columnViewBuilder.build(this, columnHeader))
     }
 
     @Synchronized
-    override fun set(columnHeader: ColumnHeader, columnStyle: ColumnStyle?) {
-        if (columnStyle == null) {
+    override fun set(columnHeader: ColumnHeader, columnView: ColumnView?) {
+        if (columnView == null) {
             remove(columnHeader)
         } else {
-            val (oldRef, newRef) = viewRef.refAction {
+            val (oldRef, newRef) = tableViewRef.refAction {
                 it.copy(
-                    columnStyles = it.columnStyles.put(columnHeader, columnStyle.ensureStyle(this, columnHeader))
+                    columnViews = it.columnViews.put(columnHeader, columnView.ensureView(this, columnHeader))
                 )
             }
 
@@ -382,20 +382,20 @@ class BaseTableView internal constructor(
         }
     }
 
-    override fun set(row: Long, init: RowStyleBuilder.() -> Unit) {
-        val rowStyleBuilder = RowStyleBuilder()
-        rowStyleBuilder.init()
-        set(row, rowStyleBuilder.build(this, row))
+    override fun set(row: Long, init: RowViewBuilder.() -> Unit) {
+        val rowViewBuilder = RowViewBuilder()
+        rowViewBuilder.init()
+        set(row, rowViewBuilder.build(this, row))
     }
 
     @Synchronized
-    override fun set(row: Long, rowStyle: RowStyle?) {
-        if (rowStyle == null) {
+    override fun set(row: Long, rowView: RowView?) {
+        if (rowView == null) {
             remove(row)
         } else {
-            val (oldRef, newRef) = viewRef.refAction {
+            val (oldRef, newRef) = tableViewRef.refAction {
                 it.copy(
-                    rowStyles = it.rowStyles.put(row, rowStyle.ensureStyle(this, row))
+                    rowViews = it.rowViews.put(row, rowView.ensureView(this, row))
                 )
             }
 
@@ -416,20 +416,20 @@ class BaseTableView internal constructor(
         }
     }
 
-    override fun set(columnHeader: ColumnHeader, row: Long, init: CellStyleBuilder.() -> Unit) {
-        val cellStyleBuilder = CellStyleBuilder()
-        cellStyleBuilder.init()
-        set(columnHeader, row, cellStyleBuilder.build(this, columnHeader, row))
+    override fun set(columnHeader: ColumnHeader, row: Long, init: CellViewBuilder.() -> Unit) {
+        val cellViewBuilder = CellViewBuilder()
+        cellViewBuilder.init()
+        set(columnHeader, row, cellViewBuilder.build(this, columnHeader, row))
     }
 
     @Synchronized
-    override fun set(columnHeader: ColumnHeader, row: Long, cellStyle: CellStyle?) {
-        if (cellStyle == null) {
+    override fun set(columnHeader: ColumnHeader, row: Long, cellView: CellView?) {
+        if (cellView == null) {
             remove(columnHeader, row)
         } else {
-            val (oldRef, newRef) = viewRef.refAction {
+            val (oldRef, newRef) = tableViewRef.refAction {
                 it.copy(
-                    cellStyles = it.cellStyles.put(Pair(columnHeader, row), cellStyle.ensureStyle(this, columnHeader, row))
+                    cellViews = it.cellViews.put(Pair(columnHeader, row), cellView.ensureView(this, columnHeader, row))
                 )
             }
 
@@ -452,9 +452,9 @@ class BaseTableView internal constructor(
 
     @Synchronized
     override fun remove(columnHeader: ColumnHeader) {
-        val (oldRef, newRef) = viewRef.refAction {
+        val (oldRef, newRef) = tableViewRef.refAction {
             it.copy(
-                columnStyles = it.columnStyles.remove(columnHeader)
+                columnViews = it.columnViews.remove(columnHeader)
             )
         }
 
@@ -476,9 +476,9 @@ class BaseTableView internal constructor(
 
     @Synchronized
     override fun remove(row: Long) {
-        val (oldRef, newRef) = viewRef.refAction {
+        val (oldRef, newRef) = tableViewRef.refAction {
             it.copy(
-                rowStyles = it.rowStyles.remove(row)
+                rowViews = it.rowViews.remove(row)
             )
         }
 
@@ -500,9 +500,9 @@ class BaseTableView internal constructor(
 
     @Synchronized
     override fun remove(columnHeader: ColumnHeader, row: Long) {
-        val (oldRef, newRef) = viewRef.refAction {
+        val (oldRef, newRef) = tableViewRef.refAction {
             it.copy(
-                cellStyles = it.cellStyles.remove(Pair(columnHeader, row))
+                cellViews = it.cellViews.remove(Pair(columnHeader, row))
             )
         }
 
@@ -531,13 +531,13 @@ class BaseTableView internal constructor(
         var maxHeaderOffset = 0L
         var maxHeaderCells = 0
 
-        val defaultRowStyle = this[DEFAULT_ROW_STYLE]
+        val defaultRowView = this[DEFAULT_ROW_VIEW]
 
         for (column in table.columns) {
             if (x <= runningWidth && runningWidth <= x + w) applicableColumns.add(Pair(column, runningWidth))
             runningWidth += this[column].width
 
-            val yOffset = column.columnHeader.header.size * defaultRowStyle.height
+            val yOffset = column.columnHeader.header.size * defaultRowView.height
             if (yOffset > maxHeaderOffset) maxHeaderOffset = yOffset
             if (column.columnHeader.header.size > maxHeaderCells) maxHeaderCells = column.columnHeader.header.size
         }
@@ -551,13 +551,13 @@ class BaseTableView internal constructor(
         for ((applicableColumn, applicableX) in applicableColumns) {
             for (idx in 0 until maxHeaderCells) {
                 val headerText = applicableColumn.columnHeader[idx]
-                val yOffset = idx.toLong() * defaultRowStyle.height
+                val yOffset = idx.toLong() * defaultRowView.height
 
                 output.add(PositionedContent(
                     applicableColumn.columnHeader,
                     (-1 - idx).toLong(),
                     headerText,
-                    defaultRowStyle.height,
+                    defaultRowView.height,
                     this[applicableColumn].width,
                     colHeaderZ,
                     ml = applicableX + 100,
@@ -629,16 +629,16 @@ class BaseTableView internal constructor(
     override fun dims(): Dimensions {
         val table = this.table ?: return Dimensions(0, 0, 0, 0)
 
-        val defaultColumnStyle = this[DEFAULT_COLUMN_STYLE]
-        val defaultRowStyle = this[DEFAULT_ROW_STYLE]
+        val defaultColumnView = this[DEFAULT_COLUMN_VIEW]
+        val defaultRowView = this[DEFAULT_ROW_VIEW]
 
-        var runningWidth = defaultColumnStyle.width
+        var runningWidth = defaultColumnView.width
         var maxHeaderOffset = 0L
 
         for (column in table.columns) {
             runningWidth += this[column].width
 
-            val yOffset = column.columnHeader.header.size * defaultRowStyle.height
+            val yOffset = column.columnHeader.header.size * defaultRowView.height
             if (yOffset > maxHeaderOffset) maxHeaderOffset = yOffset
         }
 
@@ -649,7 +649,7 @@ class BaseTableView internal constructor(
             runningHeight += this[row].height
         }
 
-        return Dimensions(defaultColumnStyle.width, maxHeaderOffset, runningWidth, runningHeight)
+        return Dimensions(defaultColumnView.width, maxHeaderOffset, runningWidth, runningHeight)
     }
 
     override fun clone(): TableView {
@@ -660,126 +660,127 @@ class BaseTableView internal constructor(
         return makeClone(name, true)
     }
 
-    override fun makeClone(name: String, onRegistry: Boolean, ref: ViewRef): TableView {
+    override fun makeClone(name: String, onRegistry: Boolean, ref: TableViewRef): TableView {
         val newViewRef = AtomicReference(ref)
         val tableViewClone = BaseTableView(name, ref.table, onRegistry, newViewRef)
 
-        val newDefaultColumnStyle = ref.defaultColumnStyle.ensureStyle(tableViewClone)
-        val newDefaultRowStyle = ref.defaultRowStyle.ensureStyle(tableViewClone)
-        val newDefaultCellStyle = ref.defaultCellStyle.ensureStyle(tableViewClone)
+        val newDefaultColumnView = ref.defaultColumnView.ensureView(tableViewClone)
+        val newDefaultRowView = ref.defaultRowView.ensureView(tableViewClone)
+        val newDefaultCellView = ref.defaultCellView.ensureView(tableViewClone)
 
         // TODO: Like with table clone, something more efficient than this would be nice
-        val newColumnsStyles = ref.columnStyles.fold(PHashMap<ColumnHeader, ColumnStyle>()) { acc, chc ->
-            acc.put(chc.component1(), ColumnStyle(chc.component2().width, tableViewClone, chc.component1()))
+        val newColumnsViews = ref.columnViews.fold(PHashMap<ColumnHeader, ColumnView>()) { acc, chc ->
+            acc.put(chc.component1(), ColumnView(chc.component2().width, tableViewClone, chc.component1()))
         }
 
         // TODO: Like with table clone, something more efficient than this would be nice
-        val newRowStyles = ref.rowStyles.fold(PHashMap<Long, RowStyle>()) { acc, lrs ->
-            acc.put(lrs.component1(), RowStyle(lrs.component2().height, tableViewClone, lrs.component1()))
+        val newRowViews = ref.rowViews.fold(PHashMap<Long, RowView>()) { acc, lrs ->
+            acc.put(lrs.component1(), RowView(lrs.component2().height, tableViewClone, lrs.component1()))
         }
 
         // TODO: Like with table clone, something more efficient than this would be nice
-        val newCellStyles = ref.cellStyles.fold(PHashMap<Pair<ColumnHeader, Long>, CellStyle>()) { acc, chlcs ->
-            acc.put(chlcs.component1(), CellStyle(chlcs.component2().height, chlcs.component2().width, tableViewClone, chlcs.component1().first, chlcs.component1().second))
+        val newCellViews = ref.cellViews.fold(PHashMap<Pair<ColumnHeader, Long>, CellView>()) { acc, chlcs ->
+            acc.put(chlcs.component1(), CellView(chlcs.component2().height, chlcs.component2().width, tableViewClone, chlcs.component1().first, chlcs.component1().second))
         }
 
-        newViewRef.set(ViewRef(
+        newViewRef.set(TableViewRef(
             ref.table,
-            newDefaultColumnStyle,
-            newDefaultRowStyle,
-            newDefaultCellStyle,
-            newColumnsStyles,
-            newRowStyles,
-            newCellStyles
+            newDefaultColumnView,
+            newDefaultRowView,
+            newDefaultCellView,
+            newColumnsViews,
+            newRowViews,
+            newCellViews
         ))
 
         return tableViewClone
     }
 }
 
+object DEFAULT_COLUMN_VIEW
+object DEFAULT_ROW_VIEW
+object DEFAULT_CELL_VIEW
+
 private const val STANDARD_WIDTH = 100L
 private const val STANDARD_HEIGHT = 20L
 
-sealed class Style(val view: TableView)
+// TODO Come up with a better name
+sealed class TableViewArea(val view: TableView)
 
-object DEFAULT_COLUMN_STYLE
-object DEFAULT_ROW_STYLE
-object DEFAULT_CELL_STYLE
-
-// TODO We want to have on and onAny functions on the below style classes, so that we can subscribe to the columns/rows/cell they represent
-class ColumnStyle internal constructor(val width: Long = STANDARD_WIDTH, view: TableView, val columnHeader: ColumnHeader) : Style(view) {
-    internal fun ensureStyle(view: TableView, columnHeader: ColumnHeader) = ColumnStyle(width, view, columnHeader)
+// TODO We want to have on and onAny functions on the below view classes, so that we can subscribe to the columns/rows/cell they represent
+class ColumnView internal constructor(val width: Long = STANDARD_WIDTH, view: TableView, val columnHeader: ColumnHeader) : TableViewArea(view) {
+    internal fun ensureView(view: TableView, columnHeader: ColumnHeader) = ColumnView(width, view, columnHeader)
 
     override fun toString(): String {
-        return "ColumnStyle(width=$width, columnHeader=$columnHeader)"
+        return "ColumnView(width=$width, columnHeader=$columnHeader)"
     }
 }
 
-class DefaultColumnStyle internal constructor(val width: Long = STANDARD_WIDTH, view: TableView) : Style(view) {
-    internal fun toColumnStyle(columnHeader: ColumnHeader) = ColumnStyle(width, view, columnHeader)
-    internal fun ensureStyle(view: TableView) = DefaultColumnStyle(width, view)
+class DefaultColumnView internal constructor(val width: Long = STANDARD_WIDTH, view: TableView) : TableViewArea(view) {
+    internal fun toColumnView(columnHeader: ColumnHeader) = ColumnView(width, view, columnHeader)
+    internal fun ensureView(view: TableView) = DefaultColumnView(width, view)
 
     override fun toString(): String {
-        return "DefaultColumnStyle(width=$width)"
+        return "DefaultColumnView(width=$width)"
     }
 }
 
-class RowStyle internal constructor(val height: Long = STANDARD_HEIGHT, view: TableView, val index: Long) : Style(view) {
-    internal fun ensureStyle(view: TableView, index: Long) = RowStyle(height, view, index)
+class RowView internal constructor(val height: Long = STANDARD_HEIGHT, view: TableView, val index: Long) : TableViewArea(view) {
+    internal fun ensureView(view: TableView, index: Long) = RowView(height, view, index)
 
     override fun toString(): String {
-        return "RowStyle(height=$height, index=$index)"
+        return "RowView(height=$height, index=$index)"
     }
 }
 
-class DefaultRowStyle internal constructor(val height: Long = STANDARD_HEIGHT, view: TableView) : Style(view) {
-    internal fun toRowStyle(index: Long) = RowStyle(height, view, index)
-    internal fun ensureStyle(view: TableView) = DefaultRowStyle(height, view)
+class DefaultRowView internal constructor(val height: Long = STANDARD_HEIGHT, view: TableView) : TableViewArea(view) {
+    internal fun toRowView(index: Long) = RowView(height, view, index)
+    internal fun ensureView(view: TableView) = DefaultRowView(height, view)
 
     override fun toString(): String {
-        return "DefaultRowStyle(height=$height)"
+        return "DefaultRowView(height=$height)"
     }
 }
 
-class CellStyle internal constructor(val height: Long = STANDARD_HEIGHT, val width: Long = STANDARD_WIDTH, view: TableView, val columnHeader: ColumnHeader, val index: Long) : Style(view) {
-    internal fun ensureStyle(view: TableView, columnHeader: ColumnHeader, index: Long) = CellStyle(height, width, view, columnHeader, index)
+class CellView internal constructor(val height: Long = STANDARD_HEIGHT, val width: Long = STANDARD_WIDTH, view: TableView, val columnHeader: ColumnHeader, val index: Long) : TableViewArea(view) {
+    internal fun ensureView(view: TableView, columnHeader: ColumnHeader, index: Long) = CellView(height, width, view, columnHeader, index)
 
     override fun toString(): String {
-        return "CellStyle(height=$height, width=$width, columnHeader=$columnHeader, index=$index)"
+        return "CellView(height=$height, width=$width, columnHeader=$columnHeader, index=$index)"
     }
 }
 
-class DefaultCellStyle internal constructor(val height: Long = STANDARD_HEIGHT, val width: Long = STANDARD_WIDTH, view: TableView) : Style(view) {
-    internal fun toCellStyle(columnHeader: ColumnHeader, index: Long) = CellStyle(height, width, view, columnHeader, index)
-    internal fun ensureStyle(view: TableView) = DefaultCellStyle(height, width, view)
+class DefaultCellView internal constructor(val height: Long = STANDARD_HEIGHT, val width: Long = STANDARD_WIDTH, view: TableView) : TableViewArea(view) {
+    internal fun toCellView(columnHeader: ColumnHeader, index: Long) = CellView(height, width, view, columnHeader, index)
+    internal fun ensureView(view: TableView) = DefaultCellView(height, width, view)
 
     override fun toString(): String {
-        return "DefaultCellStyle(height=$height, width=$width)"
+        return "DefaultCellView(height=$height, width=$width)"
     }
 }
 
-class ColumnStyleBuilder(var width: Long = STANDARD_WIDTH) {
-    internal fun build(view: TableView, columnHeader: ColumnHeader): ColumnStyle = ColumnStyle(width, view, columnHeader)
+class ColumnViewBuilder(var width: Long = STANDARD_WIDTH) {
+    internal fun build(view: TableView, columnHeader: ColumnHeader): ColumnView = ColumnView(width, view, columnHeader)
 }
 
-class RowStyleBuilder(var height: Long = STANDARD_HEIGHT) {
-    internal fun build(view: TableView, index: Long): RowStyle = RowStyle(height, view, index)
+class RowViewBuilder(var height: Long = STANDARD_HEIGHT) {
+    internal fun build(view: TableView, index: Long): RowView = RowView(height, view, index)
 }
 
-class CellStyleBuilder(var height: Long = STANDARD_HEIGHT, var width: Long = STANDARD_WIDTH) {
-    internal fun build(view: TableView, columnHeader: ColumnHeader, index: Long): CellStyle = CellStyle(height, width, view, columnHeader, index)
+class CellViewBuilder(var height: Long = STANDARD_HEIGHT, var width: Long = STANDARD_WIDTH) {
+    internal fun build(view: TableView, columnHeader: ColumnHeader, index: Long): CellView = CellView(height, width, view, columnHeader, index)
 }
 
-class DefaultColumnStyleBuilder(var width: Long = STANDARD_WIDTH) {
-    internal fun build(view: TableView): DefaultColumnStyle = DefaultColumnStyle(width, view)
+class DefaultColumnViewBuilder(var width: Long = STANDARD_WIDTH) {
+    internal fun build(view: TableView): DefaultColumnView = DefaultColumnView(width, view)
 }
 
-class DefaultRowStyleBuilder(var height: Long = STANDARD_HEIGHT) {
-    internal fun build(view: TableView): DefaultRowStyle = DefaultRowStyle(height, view)
+class DefaultRowViewBuilder(var height: Long = STANDARD_HEIGHT) {
+    internal fun build(view: TableView): DefaultRowView = DefaultRowView(height, view)
 }
 
-class DefaultCellStyleBuilder(var height: Long = STANDARD_HEIGHT, var width: Long = STANDARD_WIDTH) {
-    internal fun build(view: TableView): DefaultCellStyle = DefaultCellStyle(height, width, view)
+class DefaultCellViewBuilder(var height: Long = STANDARD_HEIGHT, var width: Long = STANDARD_WIDTH) {
+    internal fun build(view: TableView): DefaultCellView = DefaultCellView(height, width, view)
 }
 
 internal class PositionedContent(

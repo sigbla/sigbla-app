@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.ConcurrentSkipListMap
 import java.util.concurrent.atomic.AtomicLong
 
-internal class ViewEventProcessor {
+internal class TableViewEventProcessor {
     private class ListenerReferenceEvent<R>(
         val listenerReference: R,
         val listenerEvent: (event: Sequence<TableViewListenerEvent<Any>>) -> Unit

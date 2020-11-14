@@ -15,8 +15,6 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.sessions.Sessions
 import io.ktor.sessions.cookie
-import io.ktor.sessions.get
-import io.ktor.sessions.sessions
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
 import sigbla.app.*
@@ -205,13 +203,13 @@ internal object SigblaBackend {
         val target = client.tileState.withPCFor(resize.target) ?: return
 
         if (resize.sizeChangeX != 0L) {
-            val columnStyle = view[target.contentHeader]
-            view[target.contentHeader] = ColumnStyle(10L.coerceAtLeast(columnStyle.width + resize.sizeChangeX), view, target.contentHeader)
+            val columnView = view[target.contentHeader]
+            view[target.contentHeader] = ColumnView(10L.coerceAtLeast(columnView.width + resize.sizeChangeX), view, target.contentHeader)
         }
 
         if (resize.sizeChangeY != 0L) {
-            val rowStyle = view[target.contentRow]
-            view[target.contentRow] = RowStyle(10L.coerceAtLeast(rowStyle.height + resize.sizeChangeY), view, target.contentRow)
+            val rowView = view[target.contentRow]
+            view[target.contentRow] = RowView(10L.coerceAtLeast(rowView.height + resize.sizeChangeY), view, target.contentRow)
         }
     }
 
