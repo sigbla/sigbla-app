@@ -204,12 +204,12 @@ internal object SigblaBackend {
 
         if (resize.sizeChangeX != 0L) {
             val columnView = view[target.contentHeader]
-            view[target.contentHeader] = ColumnView(10L.coerceAtLeast(columnView.width + resize.sizeChangeX), view, target.contentHeader)
+            view[target.contentHeader] = ColumnView(10L.coerceAtLeast(columnView.width + resize.sizeChangeX), target.contentHeader)
         }
 
         if (resize.sizeChangeY != 0L) {
             val rowView = view[target.contentRow]
-            view[target.contentRow] = RowView(10L.coerceAtLeast(rowView.height + resize.sizeChangeY), view, target.contentRow)
+            view[target.contentRow] = RowView(10L.coerceAtLeast(rowView.height + resize.sizeChangeY), target.contentRow)
         }
     }
 

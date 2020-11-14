@@ -1,5 +1,7 @@
 package sigbla.app
 
+import sigbla.app.exceptions.InvalidSequenceException
+
 abstract class TableViewListenerReference {
     abstract val name: String?
     abstract val order: Long
@@ -11,7 +13,7 @@ abstract class TableViewListenerReference {
     }
 }
 
-data class TableViewListenerEvent<T>(val oldValue: T?, val newValue: T?)
+data class TableViewListenerEvent<T>(val oldValue: Area<T>, val newValue: Area<T>)
 
 class TableViewEventReceiver<S, T>(
     val source: S,
@@ -37,15 +39,12 @@ class TableViewEventReceiver<S, T>(
     }
 }
 
-// TODO
-/*
-val Sequence<TableListenerEvent<*, *>>.newTable: Table
+val Sequence<TableViewListenerEvent<*>>.newView: TableView
     get() = this.firstOrNull()?.let {
-        return it.newValue.column.table
+        return it.newValue.view
     } ?: throw InvalidSequenceException()
 
-val Sequence<TableListenerEvent<*, *>>.oldTable: Table
+val Sequence<TableViewListenerEvent<*>>.oldView: TableView
     get() = this.firstOrNull()?.let {
-        return it.oldValue.column.table
+        return it.oldValue.view
     } ?: throw InvalidSequenceException()
-*/

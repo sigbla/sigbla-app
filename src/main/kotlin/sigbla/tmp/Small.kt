@@ -1,9 +1,7 @@
 package sigbla.tmp
 
 import kotlinx.html.style
-import sigbla.app.Table
-import sigbla.app.TableView
-import sigbla.app.div
+import sigbla.app.*
 import java.util.concurrent.ThreadLocalRandom
 
 fun main() {
@@ -28,6 +26,20 @@ fun main() {
     println("G 0 div value: " + table["G", 0])
 
     val tableView = TableView.newTableView(table)
+
+    table.onAny {
+        events {
+            newTable
+            oldTable
+        }
+    }
+
+    tableView.onAny {
+        events {
+            newView
+            oldView
+        }
+    }
 
     tableView.show()
 
