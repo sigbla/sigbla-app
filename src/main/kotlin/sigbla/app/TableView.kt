@@ -194,7 +194,6 @@ abstract class TableView(val name: String) : Iterable<Area<*>> {
     }
 }
 
-// TODO Introduce a ViewRef here like we have TableRef
 internal data class TableViewRef(
     val table: Table? = null,
     val defaultColumnView: DefaultColumnView,
@@ -494,13 +493,13 @@ class BaseTableView internal constructor(
         var maxHeaderOffset = 0L
         var maxHeaderCells = 0
 
-        val defaultRowView = this[DEFAULT_ROW_VIEW]
+        val headerWidth = this[ColumnHeader()].width
 
         for (column in table.columns) {
             if (x <= runningWidth && runningWidth <= x + w) applicableColumns.add(Pair(column, runningWidth))
             runningWidth += this[column].width
 
-            val yOffset = column.columnHeader.header.size * defaultRowView.height
+            val yOffset = column.columnHeader.header.mapIndexed { i, _ -> this[(-(column.columnHeader.header.size) + i).toLong()].height }.sum()
             if (yOffset > maxHeaderOffset) maxHeaderOffset = yOffset
             if (column.columnHeader.header.size > maxHeaderCells) maxHeaderCells = column.columnHeader.header.size
         }
@@ -514,16 +513,16 @@ class BaseTableView internal constructor(
         for ((applicableColumn, applicableX) in applicableColumns) {
             for (idx in 0 until maxHeaderCells) {
                 val headerText = applicableColumn.columnHeader[idx]
-                val yOffset = idx.toLong() * defaultRowView.height
+                val yOffset = applicableColumn.columnHeader.header.mapIndexed { i, _ -> if (i < idx) this[(-maxHeaderCells + i).toLong()].height else 0L }.sum()
 
                 output.add(PositionedContent(
                     applicableColumn.columnHeader,
-                    (-1 - idx).toLong(),
+                    (-maxHeaderCells + idx).toLong(),
                     headerText,
-                    defaultRowView.height,
+                    this[(-maxHeaderCells + idx).toLong()].height,
                     this[applicableColumn].width,
                     colHeaderZ,
-                    ml = applicableX + 100,
+                    ml = applicableX + headerWidth,
                     cw = dims.maxX,
                     ch = dims.maxY,
                     className = "ch",
@@ -552,7 +551,7 @@ class BaseTableView internal constructor(
                 applicableRow,
                 applicableRow.toString(),
                 this[applicableRow].height,
-                100,
+                headerWidth,
                 rowHeaderZ,
                 mt = applicableY,
                 cw = dims.maxX,
@@ -579,7 +578,7 @@ class BaseTableView internal constructor(
                     this[applicableRow].height,
                     this[applicableColumn].width,
                     className = if (cell is WebCell) "hc c" else "c",
-                    x = applicableX + 100,
+                    x = applicableX + headerWidth,
                     y = applicableY
                 ))
             }
@@ -592,16 +591,15 @@ class BaseTableView internal constructor(
     override fun dims(): Dimensions {
         val table = this.table ?: return Dimensions(0, 0, 0, 0)
 
-        val defaultColumnView = this[DEFAULT_COLUMN_VIEW]
-        val defaultRowView = this[DEFAULT_ROW_VIEW]
+        val headerWidth = this[ColumnHeader()].width
 
-        var runningWidth = defaultColumnView.width
+        var runningWidth = headerWidth
         var maxHeaderOffset = 0L
 
         for (column in table.columns) {
             runningWidth += this[column].width
 
-            val yOffset = column.columnHeader.header.size * defaultRowView.height
+            val yOffset = column.columnHeader.header.mapIndexed { i, _ -> this[(-(column.columnHeader.header.size) + i).toLong()].height }.sum()
             if (yOffset > maxHeaderOffset) maxHeaderOffset = yOffset
         }
 
@@ -612,9 +610,7 @@ class BaseTableView internal constructor(
             runningHeight += this[row].height
         }
 
-        println("..... " + defaultColumnView.width)
-
-        return Dimensions(defaultColumnView.width, maxHeaderOffset, runningWidth, runningHeight)
+        return Dimensions(headerWidth, maxHeaderOffset, runningWidth, runningHeight)
     }
 
     override fun clone(): TableView {
