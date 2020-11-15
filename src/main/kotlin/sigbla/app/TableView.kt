@@ -49,12 +49,6 @@ abstract class TableView(val name: String) : Iterable<Area<*>> {
 
     abstract operator fun set(type: DEFAULT_ROW_VIEW, defaultRowView: DefaultRowView)
 
-    abstract operator fun get(type: DEFAULT_CELL_VIEW): DefaultCellView
-
-    abstract operator fun set(type: DEFAULT_CELL_VIEW, init: DefaultCellViewBuilder.() -> Unit)
-
-    abstract operator fun set(type: DEFAULT_CELL_VIEW, defaultCellView: DefaultCellView)
-
     abstract operator fun get(columnHeader: ColumnHeader): ColumnView
 
     operator fun get(column: Column) = get(column.columnHeader)
@@ -141,7 +135,7 @@ abstract class TableView(val name: String) : Iterable<Area<*>> {
         return object : Iterator<Area<*>> {
             val ref = tableViewRef.get()
             val tableIterator = if (ref.table != null) listOf(ref.table).iterator() else emptyList<Table>().iterator()
-            val defaultIterator = listOf(ref.defaultColumnView, ref.defaultRowView, ref.defaultCellView).iterator()
+            val defaultIterator = listOf(ref.defaultColumnView, ref.defaultRowView).iterator()
             val columnViewIterator = ref.columnViews.values().iterator()
             val rowViewIterator = ref.rowViews.values().iterator()
             val cellViewIterator = ref.cellViews.values().iterator()
@@ -205,7 +199,6 @@ internal data class TableViewRef(
     val table: Table? = null,
     val defaultColumnView: DefaultColumnView,
     val defaultRowView: DefaultRowView,
-    val defaultCellView: DefaultCellView,
     val columnViews: PMap<ColumnHeader, ColumnView> = PHashMap(),
     val rowViews: PMap<Long, RowView> = PHashMap(),
     val cellViews: PMap<Pair<ColumnHeader, Long>, CellView> = PHashMap()
@@ -225,7 +218,6 @@ class BaseTableView internal constructor(
         table = table,
         DefaultColumnView(),
         DefaultRowView(),
-        DefaultCellView()
     ))
 
     init {
@@ -313,42 +305,11 @@ class BaseTableView internal constructor(
         ) as List<TableViewListenerEvent<Any>>)
     }
 
-    override operator fun get(type: DEFAULT_CELL_VIEW): DefaultCellView = tableViewRef.get().defaultCellView
-
-    override operator fun set(type: DEFAULT_CELL_VIEW, init: DefaultCellViewBuilder.() -> Unit) {
-        val defaultCellViewBuilder = DefaultCellViewBuilder()
-        defaultCellViewBuilder.init()
-        set(type, defaultCellViewBuilder.build())
-    }
-
-    override operator fun set(type: DEFAULT_CELL_VIEW, defaultCellView: DefaultCellView) {
-        val (oldRef, newRef) = tableViewRef.refAction {
-            it.copy(
-                defaultCellView = defaultCellView
-            )
-        }
-
-        if (!eventProcessor.haveListeners()) return
-
-        val oldView = makeClone(ref = oldRef)
-        val newView = makeClone(ref = newRef)
-
-        val old = oldView[DEFAULT_CELL_VIEW]
-        val new = newView[DEFAULT_CELL_VIEW]
-
-        eventProcessor.publish(listOf(
-            TableViewListenerEvent(
-                Area(this, old),
-                Area(this, new)
-            )
-        ) as List<TableViewListenerEvent<Any>>)
-    }
-
     override fun get(columnHeader: ColumnHeader): ColumnView = tableViewRef.get().columnViews[columnHeader] ?: this[DEFAULT_COLUMN_VIEW].toColumnView(columnHeader)
 
     override fun get(row: Long): RowView = tableViewRef.get().rowViews[row] ?: this[DEFAULT_ROW_VIEW].toRowView(row)
 
-    override fun get(columnHeader: ColumnHeader, row: Long): CellView = tableViewRef.get().cellViews[Pair(columnHeader, row)] ?: this[DEFAULT_CELL_VIEW].toCellView(columnHeader, row)
+    override fun get(columnHeader: ColumnHeader, row: Long): CellView = tableViewRef.get().cellViews[Pair(columnHeader, row)] ?: CellView(this[DEFAULT_ROW_VIEW].height, this[DEFAULT_COLUMN_VIEW].width, columnHeader, row)
 
     override fun set(columnHeader: ColumnHeader, init: ColumnViewBuilder.() -> Unit) {
         val columnViewBuilder = ColumnViewBuilder()
@@ -651,6 +612,8 @@ class BaseTableView internal constructor(
             runningHeight += this[row].height
         }
 
+        println("..... " + defaultColumnView.width)
+
         return Dimensions(defaultColumnView.width, maxHeaderOffset, runningWidth, runningHeight)
     }
 
@@ -668,7 +631,6 @@ class BaseTableView internal constructor(
 
         val newDefaultColumnView = ref.defaultColumnView
         val newDefaultRowView = ref.defaultRowView
-        val newDefaultCellView = ref.defaultCellView
 
         // TODO: Like with table clone, something more efficient than this would be nice
         val newColumnsViews = ref.columnViews.fold(PHashMap<ColumnHeader, ColumnView>()) { acc, chc ->
@@ -689,7 +651,6 @@ class BaseTableView internal constructor(
             ref.table,
             newDefaultColumnView,
             newDefaultRowView,
-            newDefaultCellView,
             newColumnsViews,
             newRowViews,
             newCellViews
@@ -701,7 +662,6 @@ class BaseTableView internal constructor(
 
 object DEFAULT_COLUMN_VIEW
 object DEFAULT_ROW_VIEW
-object DEFAULT_CELL_VIEW
 
 private const val STANDARD_WIDTH = 100L
 private const val STANDARD_HEIGHT = 20L
@@ -765,15 +725,6 @@ class CellView internal constructor(val height: Long = STANDARD_HEIGHT, val widt
     }
 }
 
-// TODO Consider the purpose of this.. if we have a default cell view with a height/width, what's the point of other defaults?
-class DefaultCellView internal constructor(val height: Long = STANDARD_HEIGHT, val width: Long = STANDARD_WIDTH) {
-    internal fun toCellView(columnHeader: ColumnHeader, index: Long) = CellView(height, width, columnHeader, index)
-
-    override fun toString(): String {
-        return "DefaultCellView(height=$height, width=$width)"
-    }
-}
-
 class ColumnViewBuilder(var width: Long = STANDARD_WIDTH) {
     internal fun build(columnHeader: ColumnHeader): ColumnView = ColumnView(width, columnHeader)
 }
@@ -792,10 +743,6 @@ class DefaultColumnViewBuilder(var width: Long = STANDARD_WIDTH) {
 
 class DefaultRowViewBuilder(var height: Long = STANDARD_HEIGHT) {
     internal fun build(): DefaultRowView = DefaultRowView(height)
-}
-
-class DefaultCellViewBuilder(var height: Long = STANDARD_HEIGHT, var width: Long = STANDARD_WIDTH) {
-    internal fun build(): DefaultCellView = DefaultCellView(height, width)
 }
 
 internal class PositionedContent(
