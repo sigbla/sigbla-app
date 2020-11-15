@@ -10,7 +10,7 @@ fun main() {
 
     for (col in listOf("A", "B", "C", "D", "E", "F")) {
         val withExtra = ThreadLocalRandom.current().nextBoolean()
-        for (row in 0..100) {
+        for (row in 0..1000) {
             if (withExtra)
                 table[col, "E1", row] = "$col $row"
             else

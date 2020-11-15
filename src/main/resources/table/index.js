@@ -82,6 +82,36 @@ class Sigbla {
         if (this.enableHorizontalOverlay) document.getElementById("ohl").style.top = e.clientY + "px"
     }
 
+    renderInit = () => {
+        this.target.innerHTML = ""
+
+        const overlay = document.createElement("div")
+        overlay.id = "overlay"
+        overlay.onmouseup = this.overlayMouseup
+        overlay.onmousemove = this.overlayMousemove
+
+        const ovl = document.createElement("div")
+        ovl.id = "ovl"
+
+        const ovh = document.createElement("div")
+        ovh.id = "ohl"
+
+        overlay.appendChild(ovl)
+        overlay.appendChild(ovh)
+
+        this.target.appendChild(overlay)
+    }
+
+    stateInit = () => {
+        this.lastTile = [-1, -1, -1, -1]
+        this.pendingContent = null
+        this.pendingUpdate = false
+        this.pendingScrolls = []
+        this.pendingResize = []
+        this.enableVerticalOverlay = false
+        this.enableHorizontalOverlay = false
+    }
+
     scroll = async () => {
         const inc = 100
 
@@ -176,7 +206,7 @@ class Sigbla {
             }
             case "add-commit": {
                 if (this.pendingContent === null) break
-                document.body.appendChild(this.pendingContent)
+                this.target.appendChild(this.pendingContent)
                 this.pendingContent = null
                 break
             }
@@ -211,15 +241,15 @@ class Sigbla {
                 const corner = document.getElementById("tc") || (() => {
                     const newCorner = document.createElement("div")
                     newCorner.id = "tc"
-                    document.body.appendChild(newCorner)
+                    this.target.appendChild(newCorner)
                     return newCorner
                 })()
 
                 corner.style.height = (message.cornerY-1) + "px"
                 corner.style.width = (message.cornerX-1) + "px"
 
-                document.body.style.height = message.maxY + "px"
-                document.body.style.width = message.maxX + "px"
+                this.target.style.height = message.maxY + "px"
+                this.target.style.width = message.maxX + "px"
 
                 const end = document.getElementById("end") || (() => {
                     const newEnd = document.createElement("div")
@@ -228,12 +258,22 @@ class Sigbla {
                     newEnd.style.width = "1px"
                     newEnd.style.height = "1px"
                     newEnd.style.backgroundColor = "black"
-                    document.body.appendChild(newEnd)
+                    this.target.appendChild(newEnd)
                     return newEnd
                 })()
 
                 end.style.top = message.maxY + "px"
                 end.style.left = message.maxX + "px"
+
+                break
+            }
+            case "clear": {
+                this.renderInit()
+                this.stateInit()
+
+                await this.scroll()
+
+                break
             }
         }
     }
@@ -245,21 +285,8 @@ class Sigbla {
     }
 
     init = () => {
-        const overlay = document.createElement("div")
-        overlay.id = "overlay"
-        overlay.onmouseup = this.overlayMouseup
-        overlay.onmousemove = this.overlayMousemove
-
-        const ovl = document.createElement("div")
-        ovl.id = "ovl"
-
-        const ovh = document.createElement("div")
-        ovh.id = "ohl"
-
-        overlay.appendChild(ovl)
-        overlay.appendChild(ovh)
-
-        this.target.appendChild(overlay)
+        this.renderInit()
+        this.stateInit()
 
         let pathname = location.pathname.endsWith("/") ? location.pathname : location.pathname + "/"
         let url = new URL(pathname + "socket", window.location.href)

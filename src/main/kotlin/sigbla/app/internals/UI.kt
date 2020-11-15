@@ -17,6 +17,7 @@ import io.ktor.sessions.Sessions
 import io.ktor.sessions.cookie
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
+import kotlinx.coroutines.runBlocking
 import sigbla.app.*
 import sigbla.app.Dimensions
 import sigbla.app.PositionedContent
@@ -121,16 +122,23 @@ internal object SigblaBackend {
 
     // TODO Check synchronized and suspend
     @Synchronized
+    private suspend fun handleClear(client: SigblaClient) {
+        client.tileState.clear()
+        client.socket.outgoing.send(Frame.Text(Klaxon().toJsonString(ClientEvent("clear"))))
+
+        handleDims(client)
+    }
+
+    // TODO Check synchronized and suspend
+    @Synchronized
     private suspend fun handleDims(client: SigblaClient) {
         val view = Registry.getView(client.ref) ?: return
-
-        val jsonParser = Klaxon()
 
         val dims = view.dims()
         val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.maxX, dims.maxY)
 
         client.dims = dims
-        client.socket.outgoing.send(Frame.Text(jsonParser.toJsonString(clientEventDims)))
+        client.socket.outgoing.send(Frame.Text(Klaxon().toJsonString(clientEventDims)))
     }
 
     // TODO Check synchronized and suspend
@@ -214,8 +222,24 @@ internal object SigblaBackend {
     }
 
     fun openView(view: TableView) {
-        // TODO
-        //println("http://127.0.0.1:${SigblaBackend.port}/init/${SigblaBackend.accessToken}")
+        view.onAny {
+            skipHistory = true
+            order = Long.MAX_VALUE
+            name = "UI"
+
+            events {
+                if (any()) {
+                    listeners.values.forEach { client ->
+                        if (client.ref == source.name) {
+                            runBlocking {
+                                handleClear(client)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         println("http://127.0.0.1:$port/t/${view.name}/")
     }
 
@@ -309,4 +333,10 @@ internal class TileState(val maxDistance: Int = 2000, val tileSize: Int = 1000) 
     fun withIdFor(x: Long, y: Long) = coordinateIds[Coordinate(x, y)]
 
     fun withPCFor(id: String) = idsContent[id]
+
+    fun clear() {
+        existingTiles = emptySet()
+        coordinateIds.clear()
+        idsContent.clear()
+    }
 }
