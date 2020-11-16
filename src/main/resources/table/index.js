@@ -12,6 +12,7 @@ class Sigbla {
     resizeStartY
     enableVerticalOverlay = false
     enableHorizontalOverlay = false
+    resetOverlay = false
 
     constructor(target) {
         this.target = target
@@ -65,16 +66,23 @@ class Sigbla {
     overlayMouseup = (e) => {
         if (this.enableVerticalOverlay) {
             const resizeX = e.clientX - this.resizeStartX
-            this.submitResize(this.resizeTarget, resizeX, 0)
+            if (resizeX !== 0) {
+                this.submitResize(this.resizeTarget, resizeX, 0)
+            } else {
+                document.getElementById("overlay").style.display = "none"
+                this.enableVerticalOverlay = false
+                this.enableHorizontalOverlay = false
+            }
         } else if (this.enableHorizontalOverlay) {
             const resizeY = e.clientY - this.resizeStartY
-            this.submitResize(this.resizeTarget, 0, resizeY)
+            if (resizeY !== 0) {
+                this.submitResize(this.resizeTarget, 0, resizeY)
+            } else {
+                document.getElementById("overlay").style.display = "none"
+                this.enableVerticalOverlay = false
+                this.enableHorizontalOverlay = false
+            }
         }
-
-        document.getElementById("overlay").style.display = "none"
-
-        this.enableVerticalOverlay = false
-        this.enableHorizontalOverlay = false
     }
 
     overlayMousemove = (e) => {
@@ -110,6 +118,7 @@ class Sigbla {
         this.pendingResize = []
         this.enableVerticalOverlay = false
         this.enableHorizontalOverlay = false
+        this.resetOverlay = false
     }
 
     scroll = async () => {
@@ -235,6 +244,11 @@ class Sigbla {
 
                 this.pendingUpdate = havePendingResize || havePendingScroll
 
+                if (this.resetOverlay) {
+                    this.resetOverlay = false
+                    document.getElementById("overlay").style.display = "none"
+                }
+
                 break
             }
             case "dims": {
@@ -270,6 +284,9 @@ class Sigbla {
             case "clear": {
                 this.renderInit()
                 this.stateInit()
+
+                document.getElementById("overlay").style.display = "block"
+                this.resetOverlay = true
 
                 await this.scroll()
 
