@@ -103,7 +103,7 @@ abstract class TableView(val name: String) : Iterable<Area<*>> {
 
     fun show() = SigblaBackend.openView(this)
 
-    internal abstract fun areaContent(x: Int, y: Int, h: Int, w: Int, dims: Dimensions): List<PositionedContent>
+    internal abstract fun areaContent(x: Int, y: Int, h: Int, w: Int, dims: Dimensions, dirtyCells: Set<Cell<*>>? = null): List<PositionedContent>
 
     internal abstract fun dims(): Dimensions
 
@@ -316,7 +316,6 @@ class BaseTableView internal constructor(
         set(columnHeader, columnViewBuilder.build(columnHeader))
     }
 
-    @Synchronized
     override fun set(columnHeader: ColumnHeader, columnView: ColumnView?) {
         if (columnView == null) {
             remove(columnHeader)
@@ -350,7 +349,6 @@ class BaseTableView internal constructor(
         set(row, rowViewBuilder.build(row))
     }
 
-    @Synchronized
     override fun set(row: Long, rowView: RowView?) {
         if (rowView == null) {
             remove(row)
@@ -384,7 +382,6 @@ class BaseTableView internal constructor(
         set(columnHeader, row, cellViewBuilder.build(columnHeader, row))
     }
 
-    @Synchronized
     override fun set(columnHeader: ColumnHeader, row: Long, cellView: CellView?) {
         if (cellView == null) {
             remove(columnHeader, row)
@@ -412,7 +409,6 @@ class BaseTableView internal constructor(
         }
     }
 
-    @Synchronized
     override fun remove(columnHeader: ColumnHeader) {
         val (oldRef, newRef) = tableViewRef.refAction {
             it.copy(
@@ -436,7 +432,6 @@ class BaseTableView internal constructor(
         ) as List<TableViewListenerEvent<Any>>)
     }
 
-    @Synchronized
     override fun remove(row: Long) {
         val (oldRef, newRef) = tableViewRef.refAction {
             it.copy(
@@ -460,7 +455,6 @@ class BaseTableView internal constructor(
         ) as List<TableViewListenerEvent<Any>>)
     }
 
-    @Synchronized
     override fun remove(columnHeader: ColumnHeader, row: Long) {
         val (oldRef, newRef) = tableViewRef.refAction {
             it.copy(
@@ -484,9 +478,13 @@ class BaseTableView internal constructor(
         ) as List<TableViewListenerEvent<Any>>)
     }
 
-    @Synchronized
-    override fun areaContent(x: Int, y: Int, h: Int, w: Int, dims: Dimensions): List<PositionedContent> {
+    override fun areaContent(x: Int, y: Int, h: Int, w: Int, dims: Dimensions, dirtyCells: Set<Cell<*>>?): List<PositionedContent> {
+        // TODO Consider if this function belongs in this class
+        // TODO Consider using a stable snapshot ref of a table
         val table = this.table ?: return emptyList()
+
+        val dirtyColumnHeaders = dirtyCells?.map { it.column.columnHeader }?.toSet()
+        val dirtyRowIndices = dirtyCells?.map { it.index }?.toSet()
 
         val applicableColumns = mutableListOf<Pair<Column, Long>>()
         var runningWidth = 0L
@@ -511,6 +509,8 @@ class BaseTableView internal constructor(
 
         // This is for the column headers
         for ((applicableColumn, applicableX) in applicableColumns) {
+            if (dirtyColumnHeaders != null && !dirtyColumnHeaders.contains(applicableColumn.columnHeader)) continue
+
             for (idx in 0 until maxHeaderCells) {
                 val headerText = applicableColumn.columnHeader[idx]
                 val yOffset = applicableColumn.columnHeader.header.mapIndexed { i, _ -> if (i < idx) this[(-maxHeaderCells + i).toLong()].height else 0L }.sum()
@@ -546,6 +546,8 @@ class BaseTableView internal constructor(
 
         // This is for the row headers
         for ((applicableRow, applicableY) in applicableRows) {
+            if (dirtyRowIndices != null && !dirtyRowIndices.contains(applicableRow)) continue
+
             output.add(PositionedContent(
                 emptyColumnHeader,
                 applicableRow,
@@ -564,7 +566,9 @@ class BaseTableView internal constructor(
 
         // This is for the cells
         for ((applicableColumn, applicableX) in applicableColumns) {
+            if (dirtyColumnHeaders != null && !dirtyColumnHeaders.contains(applicableColumn.columnHeader)) continue
             for ((applicableRow, applicableY) in applicableRows) {
+                if (dirtyRowIndices != null && !dirtyRowIndices.contains(applicableRow)) continue
                 // TODO Can probably skip empty cells here..
                 // TODO PositionedCell will need it's height and width..
                 //if (applicableColumn[applicableRow] is UnitCell) continue
@@ -587,14 +591,16 @@ class BaseTableView internal constructor(
         return output
     }
 
-    @Synchronized
     override fun dims(): Dimensions {
+        // TODO Consider if this function belongs in this class
+        // TODO Consider using a stable snapshot ref of a table
         val table = this.table ?: return Dimensions(0, 0, 0, 0)
 
+        val headerHeight = this[-1].height
         val headerWidth = this[ColumnHeader()].width
 
+        var maxHeaderOffset = headerHeight
         var runningWidth = headerWidth
-        var maxHeaderOffset = 0L
 
         for (column in table.columns) {
             runningWidth += this[column].width

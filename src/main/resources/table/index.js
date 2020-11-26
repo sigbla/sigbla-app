@@ -1,7 +1,14 @@
 class Sigbla {
+    targetParent
+
     target
+    corner
+    end
+
     socket
+
     lastTile = [-1, -1, -1, -1]
+
     pendingContent = null
     pendingUpdate = false
     pendingScrolls = []
@@ -12,10 +19,14 @@ class Sigbla {
     resizeStartY
     enableVerticalOverlay = false
     enableHorizontalOverlay = false
-    resetOverlay = false
 
-    constructor(target) {
-        this.target = target
+    swapBuffer = false
+
+    constructor(targetParent) {
+        this.targetParent = targetParent
+        this.targetParent.innerHTML = ""
+
+        this.target = document.createElement("div")
     }
 
     rbMousedown = (e) => {
@@ -70,8 +81,6 @@ class Sigbla {
                 this.submitResize(this.resizeTarget, resizeX, 0)
             } else {
                 document.getElementById("overlay").style.display = "none"
-                this.enableVerticalOverlay = false
-                this.enableHorizontalOverlay = false
             }
         } else if (this.enableHorizontalOverlay) {
             const resizeY = e.clientY - this.resizeStartY
@@ -79,10 +88,14 @@ class Sigbla {
                 this.submitResize(this.resizeTarget, 0, resizeY)
             } else {
                 document.getElementById("overlay").style.display = "none"
-                this.enableVerticalOverlay = false
-                this.enableHorizontalOverlay = false
             }
         }
+
+        document.getElementById("ovl").style.display = "none"
+        document.getElementById("ohl").style.display = "none"
+
+        this.enableVerticalOverlay = false
+        this.enableHorizontalOverlay = false
     }
 
     overlayMousemove = (e) => {
@@ -107,7 +120,7 @@ class Sigbla {
         overlay.appendChild(ovl)
         overlay.appendChild(ovh)
 
-        this.target.appendChild(overlay)
+        this.targetParent.appendChild(overlay)
     }
 
     stateInit = () => {
@@ -118,7 +131,7 @@ class Sigbla {
         this.pendingResize = []
         this.enableVerticalOverlay = false
         this.enableHorizontalOverlay = false
-        this.resetOverlay = false
+        this.swapBuffer = false
     }
 
     scroll = async () => {
@@ -132,8 +145,6 @@ class Sigbla {
 
         const xtile = xoffset - (xoffset % inc)
         const ytile = yoffset - (yoffset % inc)
-
-        //document.getElementById("pos").innerText = xoffset + ", " + yoffset + " | " + xtile + ", " + ytile;
 
         if (this.lastTile[0] === xtile && this.lastTile[1] === ytile && this.lastTile[2] === height && this.lastTile[3] === width) return
 
@@ -150,7 +161,6 @@ class Sigbla {
     }
 
     socketOpen = async (_) => {
-        await this.scroll()
         window.addEventListener("scroll", this.scroll)
         window.addEventListener("resize", this.scroll)
     }
@@ -158,8 +168,13 @@ class Sigbla {
     handleMessage = async (message) => {
         switch (message.type) {
             case "add": {
+                const old = document.getElementById(message.id)
+                if (old) old.remove()
+
                 const div = document.createElement("div")
+
                 div.id = message.id
+
                 if (message.classes === "ch" || message.classes === "rh") {
                     const child = document.createElement("div")
                     child.className = message.classes
@@ -211,6 +226,7 @@ class Sigbla {
                 }
 
                 this.pendingContent.appendChild(div)
+
                 break
             }
             case "add-commit": {
@@ -220,10 +236,74 @@ class Sigbla {
                 break
             }
             case "rm": {
-                document.getElementById(message.id).remove()
+                const item = document.getElementById(message.id)
+                if (item) item.remove()
                 break
             }
             case "update-end": {
+                if (this.swapBuffer) {
+                    this.swapBuffer = false
+
+                    document.getElementById("target").remove()
+
+                    this.target.id = "target"
+                    this.targetParent.appendChild(this.target)
+
+                    document.getElementById("overlay").style.display = "none"
+                }
+
+                break
+            }
+            case "dims": {
+                const corner = this.corner || (() => {
+                    const newCorner = document.createElement("div")
+                    newCorner.className = "tc"
+                    this.target.appendChild(newCorner)
+                    this.corner = newCorner
+                    return newCorner
+                })()
+
+                corner.style.height = (message.cornerY-1) + "px"
+                corner.style.width = (message.cornerX-1) + "px"
+
+                this.target.style.height = message.maxY + "px"
+                this.target.style.width = message.maxX + "px"
+
+                const end = this.end || (() => {
+                    const newEnd = document.createElement("div")
+                    newEnd.style.position = "absolute"
+                    newEnd.style.width = "1px"
+                    newEnd.style.height = "1px"
+                    newEnd.style.backgroundColor = "black"
+                    this.target.appendChild(newEnd)
+                    this.end = newEnd
+                    return newEnd
+                })()
+
+                end.style.top = message.maxY + "px"
+                end.style.left = message.maxX + "px"
+
+                await this.scroll()
+
+                break
+            }
+            case "clear": {
+                this.target = document.createElement("div")
+                this.corner = null
+                this.end = null
+
+                this.lastTile = [-1, -1, -1, -1]
+                this.swapBuffer = true
+                this.pendingScrolls.length = 0
+                this.pendingResize.length = 0
+                this.pendingUpdate = false
+                this.pendingContent = null
+
+                break
+            }
+            case "package-end": {
+                this.socket.send(JSON.stringify({ type: "package-end", id: message.id }))
+
                 let havePendingResize = false
                 let havePendingScroll = false
 
@@ -244,52 +324,6 @@ class Sigbla {
 
                 this.pendingUpdate = havePendingResize || havePendingScroll
 
-                if (this.resetOverlay) {
-                    this.resetOverlay = false
-                    document.getElementById("overlay").style.display = "none"
-                }
-
-                break
-            }
-            case "dims": {
-                const corner = document.getElementById("tc") || (() => {
-                    const newCorner = document.createElement("div")
-                    newCorner.id = "tc"
-                    this.target.appendChild(newCorner)
-                    return newCorner
-                })()
-
-                corner.style.height = (message.cornerY-1) + "px"
-                corner.style.width = (message.cornerX-1) + "px"
-
-                this.target.style.height = message.maxY + "px"
-                this.target.style.width = message.maxX + "px"
-
-                const end = document.getElementById("end") || (() => {
-                    const newEnd = document.createElement("div")
-                    newEnd.id = "end"
-                    newEnd.style.position = "absolute"
-                    newEnd.style.width = "1px"
-                    newEnd.style.height = "1px"
-                    newEnd.style.backgroundColor = "black"
-                    this.target.appendChild(newEnd)
-                    return newEnd
-                })()
-
-                end.style.top = message.maxY + "px"
-                end.style.left = message.maxX + "px"
-
-                break
-            }
-            case "clear": {
-                this.renderInit()
-                this.stateInit()
-
-                document.getElementById("overlay").style.display = "block"
-                this.resetOverlay = true
-
-                await this.scroll()
-
                 break
             }
         }
@@ -304,6 +338,9 @@ class Sigbla {
     init = () => {
         this.renderInit()
         this.stateInit()
+
+        this.target.id = "target"
+        this.targetParent.appendChild(this.target)
 
         let pathname = location.pathname.endsWith("/") ? location.pathname : location.pathname + "/"
         let url = new URL(pathname + "socket", window.location.href)
