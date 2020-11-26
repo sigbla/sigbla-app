@@ -24,7 +24,6 @@ import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.collections.MutableList
 import kotlin.collections.Set
-import kotlin.collections.emptySet
 import kotlin.collections.filter
 import kotlin.collections.firstOrNull
 import kotlin.collections.forEach
@@ -32,10 +31,7 @@ import kotlin.collections.isNotEmpty
 import kotlin.collections.mutableListOf
 import kotlin.collections.mutableSetOf
 import kotlin.collections.set
-import kotlin.collections.sortedBy
 import kotlin.collections.toSet
-import kotlin.math.pow
-import kotlin.math.sqrt
 import kotlin.reflect.KClass
 
 internal class SigblaApp {
@@ -119,6 +115,145 @@ internal object SigblaBackend {
         }
     }
 
+    private fun areaContent(view: TableView, x: Long, y: Long, h: Long, w: Long, dims: Dimensions, dirtyCells: Set<Cell<*>>? = null): List<PositionedContent> {
+        // TODO Consider using a stable snapshot ref for view/table
+        val table = view.table ?: return emptyList()
+
+        val dirtyColumnHeaders = dirtyCells?.map { it.column.columnHeader }?.toSet()
+        val dirtyRowIndices = dirtyCells?.map { it.index }?.toSet()
+
+        val applicableColumns = mutableListOf<Pair<Column, Long>>()
+        var runningWidth = 0L
+        var maxHeaderOffset = 0L
+        var maxHeaderCells = 0
+
+        val headerWidth = view[ColumnHeader()].width
+
+        for (column in table.columns) {
+            if (x <= runningWidth && runningWidth <= x + w) applicableColumns.add(Pair(column, runningWidth))
+            runningWidth += view[column].width
+
+            val yOffset = column.columnHeader.header.mapIndexed { i, _ -> view[(-(column.columnHeader.header.size) + i).toLong()].height }.sum()
+            if (yOffset > maxHeaderOffset) maxHeaderOffset = yOffset
+            if (column.columnHeader.header.size > maxHeaderCells) maxHeaderCells = column.columnHeader.header.size
+        }
+
+        val colHeaderZ = Integer.MAX_VALUE.toLong()
+        val rowHeaderZ = Integer.MAX_VALUE.toLong()
+
+        val output = mutableListOf<PositionedContent>()
+
+        // This is for the column headers
+        for ((applicableColumn, applicableX) in applicableColumns) {
+            if (dirtyColumnHeaders != null && !dirtyColumnHeaders.contains(applicableColumn.columnHeader)) continue
+
+            for (idx in 0 until maxHeaderCells) {
+                val headerText = applicableColumn.columnHeader[idx]
+                val yOffset = applicableColumn.columnHeader.header.mapIndexed { i, _ -> if (i < idx) view[(-maxHeaderCells + i).toLong()].height else 0L }.sum()
+
+                output.add(PositionedContent(
+                    applicableColumn.columnHeader,
+                    (-maxHeaderCells + idx).toLong(),
+                    headerText,
+                    view[(-maxHeaderCells + idx).toLong()].height,
+                    view[applicableColumn].width,
+                    colHeaderZ,
+                    ml = applicableX + headerWidth,
+                    cw = dims.maxX,
+                    ch = dims.maxY,
+                    className = "ch",
+                    x = null,
+                    y = yOffset
+                ))
+            }
+        }
+
+        val applicableRows = mutableListOf<Pair<Long, Long>>()
+        var runningHeight = maxHeaderOffset
+
+        val lastKey = table.tableRef.get().indicesMap.last()?.component1() ?: -1
+        for (row in 0..lastKey) {
+            if (y <= runningHeight && runningHeight <= y + h) applicableRows.add(Pair(row, runningHeight))
+
+            runningHeight += view[row].height
+
+            if (runningHeight > y + h || runningHeight < 0L) break
+        }
+
+        // This is for the row headers
+        for ((applicableRow, applicableY) in applicableRows) {
+            if (dirtyRowIndices != null && !dirtyRowIndices.contains(applicableRow)) continue
+
+            output.add(PositionedContent(
+                emptyColumnHeader,
+                applicableRow,
+                applicableRow.toString(),
+                view[applicableRow].height,
+                headerWidth,
+                rowHeaderZ,
+                mt = applicableY,
+                cw = dims.maxX,
+                ch = dims.maxY,
+                className = "rh",
+                x = 0,
+                y = null
+            ))
+        }
+
+        // This is for the cells
+        for ((applicableColumn, applicableX) in applicableColumns) {
+            if (dirtyColumnHeaders != null && !dirtyColumnHeaders.contains(applicableColumn.columnHeader)) continue
+            for ((applicableRow, applicableY) in applicableRows) {
+                if (dirtyRowIndices != null && !dirtyRowIndices.contains(applicableRow)) continue
+                // TODO Can probably skip empty cells here..
+                // TODO PositionedCell will need it's height and width..
+                //if (applicableColumn[applicableRow] is UnitCell) continue
+
+                val cell = applicableColumn[applicableRow]
+
+                output.add(PositionedContent(
+                    applicableColumn.columnHeader,
+                    applicableRow,
+                    cell.toString(),
+                    view[applicableRow].height,
+                    view[applicableColumn].width,
+                    className = if (cell is WebCell) "hc c" else "c",
+                    x = applicableX + headerWidth,
+                    y = applicableY
+                ))
+            }
+        }
+
+        return output
+    }
+
+    private fun dims(view:TableView): Dimensions {
+        // TODO Consider using a stable snapshot ref for view/table
+        val table = view.table ?: return Dimensions(0, 0, 0, 0)
+
+        val headerHeight = view[-1].height
+        val headerWidth = view[ColumnHeader()].width
+
+        var maxHeaderOffset = headerHeight
+        var runningWidth = headerWidth
+
+        for (column in table.columns) {
+            runningWidth += view[column].width
+
+            val yOffset = column.columnHeader.header.mapIndexed { i, _ -> view[(-(column.columnHeader.header.size) + i).toLong()].height }.sum()
+            if (yOffset > maxHeaderOffset) maxHeaderOffset = yOffset
+        }
+
+        var runningHeight = maxHeaderOffset
+
+        val lastKey = table.tableRef.get().indicesMap.last()?.component1() ?: -1
+        for (row in 0..lastKey) {
+            runningHeight += view[row].height
+        }
+
+        return Dimensions(headerWidth, maxHeaderOffset, runningWidth, runningHeight)
+    }
+
     private suspend fun handleEvent(socket: WebSocketSession, event: ClientEvent) {
         val client = listeners[socket] ?: return
 
@@ -131,7 +266,7 @@ internal object SigblaBackend {
 
     private suspend fun handleClear(client: SigblaClient) {
         client.mutex.withLock {
-            client.tileState.clear()
+            client.contentState.clear()
 
             val jsonParser = Klaxon()
             val clientPackage = ClientPackage()
@@ -139,7 +274,7 @@ internal object SigblaBackend {
             clientPackage.outgoing.add(jsonParser.toJsonString(ClientEvent("clear")))
 
             Registry.getView(client.ref)?.let { view ->
-                val dims = view.dims()
+                val dims = dims(view)
                 val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.maxX, dims.maxY)
 
                 client.dims = dims
@@ -155,7 +290,7 @@ internal object SigblaBackend {
         client.mutex.withLock {
             val view = Registry.getView(client.ref) ?: return
 
-            val dims = view.dims()
+            val dims = dims(view)
             val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.maxX, dims.maxY)
 
             client.dims = dims
@@ -168,68 +303,82 @@ internal object SigblaBackend {
     private suspend fun handleTiles(client: SigblaClient, scroll: ClientEventScroll) {
         client.mutex.withLock {
             val view = Registry.getView(client.ref) ?: return
-            val update = client.tileState.updateTiles(scroll)
+            val currentRegion = client.contentState.updateTiles(scroll)
 
-            val jsonParser = Klaxon()
             val dims = client.dims
             val clientPackage = ClientPackage()
 
             val addedIds = mutableSetOf<String>()
 
-            update.addedTiles
-                .sortedBy { tile ->
-                    // Sort so that those tiles closest to the current view point are updated first
-                    sqrt((scroll.x - tile.x).toFloat().pow(2) + (scroll.y - tile.y).toFloat().pow(2))
-                }
-                .forEach { tile ->
-                    val batch = mutableListOf<ClientEventAddContent>()
+            val addBatch = mutableListOf<ClientEventAddContent>()
 
-                    val x = tile.x
-                    val y = tile.y
-                    val h = client.tileState.tileSize
-                    val w = client.tileState.tileSize
+            val x = currentRegion.cornerX
+            val y = currentRegion.cornerY
+            val w = currentRegion.maxX - currentRegion.cornerX
+            val h = currentRegion.maxY - currentRegion.cornerY
 
-                    view.areaContent(x, y, h, w, dims).forEach { content ->
-                        val cellId = client.tileState.addIdFor(content.x ?: content.ml ?: throw Exception(), content.y ?: content.mt ?: throw Exception(), content)
-                        val addContent = ClientEventAddContent(cellId, content.className, content.x, content.y, content.h, content.w, content.z, content.mt, content.ml, content.ch, content.cw, content.content)
-                        batch.add(addContent)
+            val jsonParser = Klaxon()
 
-                        if (batch.size > 25) {
-                            clientPackage.outgoing.add(jsonParser.toJsonString(batch))
-                            batch.clear()
-                        }
+            areaContent(view, x, y, h, w, dims).forEach { content ->
+                val existingId = client.contentState.withIdFor(
+                    content.x ?: content.ml ?: throw Exception(),
+                    content.y ?: content.mt ?: throw Exception()
+                )
+                val existingContent = if (existingId == null) null else client.contentState.withPCFor(existingId)
 
-                        addedIds.add(cellId)
+                if (existingContent == null) {
+                    val cellId = client.contentState.addIdFor(
+                        content.x ?: content.ml ?: throw Exception(),
+                        content.y ?: content.mt ?: throw Exception(),
+                        content
+                    )
+
+                    val addContent = ClientEventAddContent(
+                        cellId,
+                        content.className,
+                        content.x,
+                        content.y,
+                        content.h,
+                        content.w,
+                        content.z,
+                        content.mt,
+                        content.ml,
+                        content.ch,
+                        content.cw,
+                        content.content
+                    )
+
+                    addBatch.add(addContent)
+
+                    if (addBatch.size > 25) {
+                        clientPackage.outgoing.add(jsonParser.toJsonString(addBatch))
+                        addBatch.clear()
                     }
 
-                    if (batch.isNotEmpty()) clientPackage.outgoing.add(jsonParser.toJsonString(batch))
-                    clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventAddCommit(UUID.randomUUID().toString())))
+                    addedIds.add(cellId)
+                } else if (existingId != null) {
+                    addedIds.add(existingId)
                 }
-
-            update.removedTiles.forEach { tile ->
-                val batch = mutableListOf<ClientEventRemoveContent>()
-
-                val x = tile.x
-                val y = tile.y
-                val h = client.tileState.tileSize
-                val w = client.tileState.tileSize
-
-                view.areaContent(x, y, h, w, dims).forEach { cell ->
-                    val contentId = client.tileState.withIdFor(cell.x ?: cell.ml ?: throw Exception(), cell.y ?: cell.mt ?: throw Exception())
-
-                    if (contentId != null && !addedIds.contains(contentId)) {
-                        val removeContent = ClientEventRemoveContent(contentId)
-                        batch.add(removeContent)
-                    }
-
-                    if (batch.size > 25) {
-                        clientPackage.outgoing.add(jsonParser.toJsonString(batch))
-                        batch.clear()
-                    }
-                }
-
-                if (batch.isNotEmpty()) clientPackage.outgoing.add(jsonParser.toJsonString(batch))
             }
+
+            if (addBatch.isNotEmpty()) clientPackage.outgoing.add(jsonParser.toJsonString(addBatch))
+            clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventAddCommit(UUID.randomUUID().toString())))
+
+            val removeBatch = mutableListOf<ClientEventRemoveContent>()
+
+            client.contentState.withRemainingIds(addedIds).forEach { contentId ->
+                val removeContent = ClientEventRemoveContent(contentId)
+                removeBatch.add(removeContent)
+
+                if (removeBatch.size > 25) {
+                    clientPackage.outgoing.add(Klaxon().toJsonString(removeBatch))
+                    removeBatch.clear()
+                }
+
+                client.contentState.removeId(contentId)
+            }
+
+            if (removeBatch.isNotEmpty()) clientPackage.outgoing.add(jsonParser.toJsonString(removeBatch))
 
             clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventUpdateEnd(UUID.randomUUID().toString())))
 
@@ -240,21 +389,43 @@ internal object SigblaBackend {
     private suspend fun handleDirty(client: SigblaClient, dirtyCells: Set<Cell<*>>) {
         client.mutex.withLock {
             val view = Registry.getView(client.ref) ?: return
+            val currentDims = client.contentState.existingDims
 
-            val jsonParser = Klaxon()
             val clientPackage = ClientPackage()
 
-            client.tileState.existingTiles.forEach { tile ->
-                val batch = mutableListOf<ClientEventAddContent>()
+            val batch = mutableListOf<ClientEventAddContent>()
 
-                val x = tile.x
-                val y = tile.y
-                val h = client.tileState.tileSize
-                val w = client.tileState.tileSize
+            val x = currentDims.cornerX
+            val y = currentDims.cornerY
+            val w = currentDims.maxX - currentDims.cornerX
+            val h = currentDims.maxY - currentDims.cornerY
 
-                view.areaContent(x, y, h, w, client.dims, dirtyCells).forEach { content ->
-                    val cellId = client.tileState.addIdFor(content.x ?: content.ml ?: throw Exception(), content.y ?: content.mt ?: throw Exception(), content)
-                    val addContent = ClientEventAddContent(cellId, content.className, content.x, content.y, content.h, content.w, content.z, content.mt, content.ml, content.ch, content.cw, content.content)
+            val jsonParser = Klaxon()
+
+            areaContent(view, x, y, h, w, client.dims, dirtyCells).forEach { content ->
+                val existingId = client.contentState.withIdFor(content.x ?: content.ml ?: throw Exception(), content.y ?: content.mt ?: throw Exception())
+                val existingContent = if (existingId == null) null else client.contentState.withPCFor(existingId)
+
+                if (existingContent != content) {
+                    val cellId = client.contentState.addIdFor(
+                        content.x ?: content.ml ?: throw Exception(),
+                        content.y ?: content.mt ?: throw Exception(),
+                        content
+                    )
+                    val addContent = ClientEventAddContent(
+                        cellId,
+                        content.className,
+                        content.x,
+                        content.y,
+                        content.h,
+                        content.w,
+                        content.z,
+                        content.mt,
+                        content.ml,
+                        content.ch,
+                        content.cw,
+                        content.content
+                    )
                     batch.add(addContent)
 
                     if (batch.size > 25) {
@@ -262,11 +433,10 @@ internal object SigblaBackend {
                         batch.clear()
                     }
                 }
-
-                if (batch.isNotEmpty()) clientPackage.outgoing.add(jsonParser.toJsonString(batch))
-                clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventAddCommit(UUID.randomUUID().toString())))
             }
 
+            if (batch.isNotEmpty()) clientPackage.outgoing.add(jsonParser.toJsonString(batch))
+            clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventAddCommit(UUID.randomUUID().toString())))
 
             clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventUpdateEnd(UUID.randomUUID().toString())))
 
@@ -277,7 +447,7 @@ internal object SigblaBackend {
     private fun handleResize(client: SigblaClient, resize: ClientEventResize) {
         // No lock here as we're not sending data
         val view = Registry.getView(client.ref) ?: return
-        val target = client.tileState.withPCFor(resize.target) ?: return
+        val target = client.contentState.withPCFor(resize.target) ?: return
 
         if (resize.sizeChangeX != 0L) {
             val columnView = view[target.contentHeader]
@@ -367,12 +537,11 @@ internal data class ClientPackage(
 internal data class SigblaClient(
     val socket: WebSocketSession,
     val ref: String,
-    val tileState: TileState = TileState(),
+    val contentState: ContentState = ContentState(),
     val mutex: Mutex = Mutex(),
     @Volatile var dims: Dimensions = Dimensions(0, 0, 0, 0)
 ) {
-    val MAX_PACKAGES = 10
-    val outgoingPackages = mutableListOf<ClientPackage>()
+    private val outgoingPackages = mutableListOf<ClientPackage>()
 
     private var clearId: UUID? = null
 
@@ -383,25 +552,20 @@ internal data class SigblaClient(
 
         if (clientPackage != null) outgoingPackages.add(clientPackage)
 
-        val overflow = outgoingPackages.size > MAX_PACKAGES
+        val overflow = outgoingPackages.size > Companion.MAX_PACKAGES
 
         if (overflow) {
             outgoingPackages.clear()
-            tileState.clear()
+            contentState.clear()
 
             val jsonParser = Klaxon()
             val clearClientPackage = ClientPackage()
 
             clearClientPackage.outgoing.add(jsonParser.toJsonString(ClientEvent("clear")))
 
-            Registry.getView(ref)?.let { view ->
-                val dims = view.dims()
-                val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.maxX, dims.maxY)
+            val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.maxX, dims.maxY)
 
-                this.dims = dims
-
-                clearClientPackage.outgoing.add(jsonParser.toJsonString(clientEventDims))
-            }
+            clearClientPackage.outgoing.add(jsonParser.toJsonString(clientEventDims))
 
             outgoingPackages.add(clearClientPackage)
 
@@ -426,13 +590,17 @@ internal data class SigblaClient(
         if (clearId == id) clearId = null
         publish()
     }
+
+    companion object {
+        private const val MAX_PACKAGES = 10
+    }
 }
 
 internal data class ClientSession(val id: String)
 
 @TypeFor(field = "type", adapter = ClientEventAdapter::class)
 internal open class ClientEvent(val type: String)
-internal data class ClientEventScroll(val x: Int, val y: Int, val h: Int, val w: Int): ClientEvent("scroll")
+internal data class ClientEventScroll(val x: Long, val y: Long, val h: Long, val w: Long): ClientEvent("scroll")
 internal data class ClientEventAddContent(val id: String, val classes: String, val x: Long?, val y: Long?, val h: Long, val w: Long, val z: Long?, val mt: Long?, val ml: Long?, val ch: Long?, val cw: Long?, val content: String): ClientEvent("add")
 internal data class ClientEventAddCommit(val id: String): ClientEvent("add-commit")
 internal data class ClientEventRemoveContent(val id: String): ClientEvent("rm")
@@ -450,38 +618,26 @@ internal class ClientEventAdapter: TypeAdapter<ClientEvent> {
     }
 }
 
-internal data class Tile(val x: Int, val y: Int)
-internal data class TileUpdate(val removedTiles: Set<Tile>, val addedTiles: Set<Tile>)
 internal data class Coordinate(val x: Long, val y: Long)
 
 internal val idGenerator = AtomicLong()
 
-internal class TileState(val maxDistance: Int = 2000, val tileSize: Int = 1000) {
+internal class ContentState(val maxDistance: Int = 2000, val tileSize: Int = 1000) {
     @Volatile
-    var existingTiles = emptySet<Tile>()
+    var existingDims: Dimensions = Dimensions(0, 0, 0, 0)
 
     private val coordinateIds: ConcurrentMap<Coordinate, String> = ConcurrentHashMap()
     private val idsContent: ConcurrentMap<String, PositionedContent> = ConcurrentHashMap()
 
-    fun updateTiles(scroll: ClientEventScroll): TileUpdate {
-        val x1 = scroll.x - (scroll.x % tileSize) - tileSize
-        val y1 = scroll.y - (scroll.y % tileSize) - tileSize
+    fun updateTiles(scroll: ClientEventScroll): Dimensions {
+        val x1 = scroll.x - (scroll.x % tileSize)
+        val y1 = scroll.y - (scroll.y % tileSize)
         val x2 = x1 + scroll.w - (scroll.w % tileSize) + tileSize
         val y2 = y1 + scroll.h - (scroll.h % tileSize) + tileSize
 
-        val tiles = mutableSetOf<Tile>()
-        for (x in ((x1-maxDistance))..(x2+maxDistance) step tileSize) {
-            for (y in ((y1-maxDistance))..(y2+maxDistance) step tileSize) {
-                tiles.add(Tile(x, y))
-            }
-        }
+        existingDims = Dimensions(x1 - maxDistance, y1 - maxDistance, x2 + maxDistance, y2 + maxDistance)
 
-        val removedTiles = existingTiles.filter { !tiles.contains(it) }.toSet()
-        val addedTiles = tiles.filter { !existingTiles.contains(it) }.toSet()
-
-        existingTiles = tiles
-
-        return TileUpdate(removedTiles, addedTiles)
+        return existingDims
     }
 
     fun addIdFor(x: Long, y: Long, pc: PositionedContent): String {
@@ -498,8 +654,12 @@ internal class TileState(val maxDistance: Int = 2000, val tileSize: Int = 1000) 
 
     fun withPCFor(id: String) = idsContent[id]
 
+    fun withRemainingIds(ids: Set<String>) = idsContent.keys.filter { !ids.contains(it) }.toSet()
+
+    fun removeId(id: String) = idsContent.remove(id)
+
     fun clear() {
-        existingTiles = emptySet()
+        existingDims = Dimensions(0, 0, 0, 0)
         coordinateIds.clear()
         idsContent.clear()
     }

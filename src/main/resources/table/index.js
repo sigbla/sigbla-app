@@ -168,9 +168,6 @@ class Sigbla {
     handleMessage = async (message) => {
         switch (message.type) {
             case "add": {
-                const old = document.getElementById(message.id)
-                if (old) old.remove()
-
                 const div = document.createElement("div")
 
                 div.id = message.id
@@ -221,11 +218,18 @@ class Sigbla {
                         div.innerText = message.content
                 }
 
-                if (this.pendingContent === null) {
-                    this.pendingContent = document.createDocumentFragment()
-                }
+                const old = document.getElementById(message.id)
 
-                this.pendingContent.appendChild(div)
+                if (old) {
+                    old.remove()
+                    this.target.appendChild(div)
+                } else {
+                    if (this.pendingContent === null) {
+                        this.pendingContent = document.createDocumentFragment()
+                    }
+
+                    this.pendingContent.appendChild(div)
+                }
 
                 break
             }
