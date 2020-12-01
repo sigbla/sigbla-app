@@ -1,9 +1,13 @@
 class Sigbla {
     targetParent
+    haveInit
 
     target
     corner
     end
+    overlay
+    ovl
+    ohl
 
     socket
 
@@ -39,10 +43,10 @@ class Sigbla {
             this.resizeStartX = e.clientX
             this.resizeStartY = e.clientY
 
-            document.getElementById("overlay").style.display = "block"
-            document.getElementById("ovl").style.display = "block"
-            document.getElementById("ohl").style.display = "none"
-            document.getElementById("ovl").style.left = e.clientX + "px"
+            this.overlay.style.display = "block"
+            this.ohl.style.display = "none"
+            this.ovl.style.display = "block"
+            this.ovl.style.left = e.clientX + "px"
         }
     }
 
@@ -56,10 +60,10 @@ class Sigbla {
             this.resizeStartX = e.clientX
             this.resizeStartY = e.clientY
 
-            document.getElementById("overlay").style.display = "block"
-            document.getElementById("ovl").style.display = "none"
-            document.getElementById("ohl").style.display = "block"
-            document.getElementById("ohl").style.top = e.clientY + "px"
+            this.overlay.style.display = "block"
+            this.ovl.style.display = "none"
+            this.ohl.style.display = "block"
+            this.ohl.style.top = e.clientY + "px"
         }
     }
 
@@ -80,47 +84,47 @@ class Sigbla {
             if (resizeX !== 0) {
                 this.submitResize(this.resizeTarget, resizeX, 0)
             } else {
-                document.getElementById("overlay").style.display = "none"
+                this.overlay.style.display = "none"
             }
         } else if (this.enableHorizontalOverlay) {
             const resizeY = e.clientY - this.resizeStartY
             if (resizeY !== 0) {
                 this.submitResize(this.resizeTarget, 0, resizeY)
             } else {
-                document.getElementById("overlay").style.display = "none"
+                this.overlay.style.display = "none"
             }
         }
 
-        document.getElementById("ovl").style.display = "none"
-        document.getElementById("ohl").style.display = "none"
+        this.ovl.style.display = "none"
+        this.ohl.style.display = "none"
 
         this.enableVerticalOverlay = false
         this.enableHorizontalOverlay = false
     }
 
     overlayMousemove = (e) => {
-        if (this.enableVerticalOverlay) document.getElementById("ovl").style.left = e.clientX + "px"
-        if (this.enableHorizontalOverlay) document.getElementById("ohl").style.top = e.clientY + "px"
+        if (this.enableVerticalOverlay) this.ovl.style.left = e.clientX + "px"
+        if (this.enableHorizontalOverlay) this.ohl.style.top = e.clientY + "px"
     }
 
     renderInit = () => {
         this.target.innerHTML = ""
 
-        const overlay = document.createElement("div")
-        overlay.id = "overlay"
-        overlay.onmouseup = this.overlayMouseup
-        overlay.onmousemove = this.overlayMousemove
+        this.overlay = document.createElement("div")
+        this.overlay.className = "overlay"
+        this.overlay.onmouseup = this.overlayMouseup
+        this.overlay.onmousemove = this.overlayMousemove
 
-        const ovl = document.createElement("div")
-        ovl.id = "ovl"
+        this.ovl = document.createElement("div")
+        this.ovl.className = "ovl"
 
-        const ovh = document.createElement("div")
-        ovh.id = "ohl"
+        this.ohl = document.createElement("div")
+        this.ohl.className = "ohl"
 
-        overlay.appendChild(ovl)
-        overlay.appendChild(ovh)
+        this.overlay.appendChild(this.ovl)
+        this.overlay.appendChild(this.ohl)
 
-        this.targetParent.appendChild(overlay)
+        this.targetParent.appendChild(this.overlay)
     }
 
     stateInit = () => {
@@ -253,7 +257,7 @@ class Sigbla {
                     this.target.id = "target"
                     this.targetParent.appendChild(this.target)
 
-                    document.getElementById("overlay").style.display = "none"
+                    this.overlay.style.display = "none"
                 }
 
                 break
@@ -340,6 +344,9 @@ class Sigbla {
     }
 
     init = () => {
+        if (this.haveInit) return
+        this.haveInit = true
+
         this.renderInit()
         this.stateInit()
 
