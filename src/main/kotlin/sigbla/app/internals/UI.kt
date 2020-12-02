@@ -189,11 +189,11 @@ internal object SigblaBackend {
             if (dirtyColumnHeaders != null && !dirtyColumnHeaders.contains(applicableColumn.columnHeader)) continue
             for ((applicableRow, applicableY) in applicableRows) {
                 if (dirtyRowIndices != null && !dirtyRowIndices.contains(applicableRow)) continue
-                // TODO Can probably skip empty cells here..
-                // TODO PositionedCell will need it's height and width..
-                //if (applicableColumn[applicableRow] is UnitCell) continue
 
                 val cell = applicableColumn[applicableRow]
+
+                // TODO Consider option to skip empty cells here..
+                //if (cell is UnitCell) continue
 
                 output.add(PositionedContent(
                     applicableColumn.columnHeader,
@@ -508,7 +508,6 @@ internal object SigblaBackend {
     private fun removeListener(socket: WebSocketSession) {
         println("remove listener")
         listeners.remove(socket)
-        // TODO Close socket?
     }
 }
 
