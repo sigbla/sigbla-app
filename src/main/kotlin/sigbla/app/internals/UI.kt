@@ -63,10 +63,6 @@ internal object SigblaBackend {
             val port = ThreadLocalRandom.current().nextInt(1024, 65535)
             val accessToken = UUID.randomUUID().toString()
             val engine = embeddedServer(Netty, port) {
-                install(DefaultHeaders)
-                install(Sessions) {
-                    cookie<ClientSession>("SESSION")
-                }
                 install(WebSockets)
 
                 routing {
@@ -74,6 +70,7 @@ internal object SigblaBackend {
                         resources("table")
                         defaultResource("index.html", "table")
                     }
+
                     webSocket("/t/{ref}/socket") {
                         val ref = call.parameters["ref"]
 
@@ -92,8 +89,8 @@ internal object SigblaBackend {
                         try {
                             val jsonParser = Klaxon()
 
-                            for (frame in incoming) {
-                                when (frame) {
+                            while (true) {
+                                when (val frame = incoming.receive()) {
                                     is Frame.Text -> {
                                         val text = frame.readText()
                                         val event = jsonParser.parse<ClientEvent>(text)
