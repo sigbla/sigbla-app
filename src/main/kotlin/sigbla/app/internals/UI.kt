@@ -34,34 +34,21 @@ import kotlin.collections.set
 import kotlin.collections.toSet
 import kotlin.reflect.KClass
 
-internal class SigblaApp {
-    fun start() {
-        println("http://127.0.0.1:${SigblaBackend.port}/init/${SigblaBackend.accessToken}")
-    }
-
-    fun stop() {
-        TODO()
-    }
-}
-
 internal object SigblaBackend {
     private val engine: ApplicationEngine
     val port: Int
-    val accessToken: String
 
     private val listeners: ConcurrentMap<WebSocketSession, SigblaClient> = ConcurrentHashMap()
 
     init {
-        val (engine, port, accessToken) = start(10)
+        val (engine, port) = start(10)
         this.engine = engine
         this.port = port
-        this.accessToken = accessToken
     }
 
-    private fun start(n: Int): Triple<ApplicationEngine, Int, String> {
+    private fun start(n: Int): Pair<ApplicationEngine, Int> {
         return try {
             val port = ThreadLocalRandom.current().nextInt(1024, 65535)
-            val accessToken = UUID.randomUUID().toString()
             val engine = embeddedServer(Netty, port) {
                 install(WebSockets)
 
@@ -105,7 +92,7 @@ internal object SigblaBackend {
                 }
             }.start(wait = false)
 
-            return Triple(engine, port, accessToken)
+            return Pair(engine, port)
         } catch (ex: Exception) {
             if (n - 1 > 0) start(n - 1)
             else throw ex
