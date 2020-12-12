@@ -2,11 +2,9 @@ package sigbla.app
 
 // NOTE: It's important that this does not import anything from BasicMath!
 
-import sigbla.app.internals.Registry
-import sigbla.app.Table.Companion.deleteTable
+import sigbla.app.Table.Companion.delete
 import org.junit.Assert.*
 import org.junit.Test
-import sigbla.app.Table.Companion.newTable
 import org.junit.After
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -17,14 +15,14 @@ import kotlin.reflect.KClass
 class TableTest {
     @After
     fun cleanup() {
-        Registry.tableNames().forEach { Registry.deleteTable(it) }
+        Table.names.forEach { Table.delete(it) }
     }
 
     @Test
-    fun basicTableOps1() {
+    fun `basic table ops 1`() {
         val name = "basicTableOps1"
-        val t = newTable(name)
-        assertTrue(Registry.tableNames().contains(name))
+        val t = Table[name]
+        assertTrue(Table.names.contains(name))
 
         t["A"][1] = "String"
         t["B"][2] = 123L
@@ -95,15 +93,15 @@ class TableTest {
         assertEquals(Unit, t["E"][4].value)
         assertEquals(Unit, t["E"][5].value)
 
-        deleteTable(name)
-        assertFalse(Registry.tableNames().contains(name))
+        delete(name)
+        assertFalse(Table.names.contains(name))
     }
 
     @Test
-    fun basicTableOps2() {
+    fun `basic table ops 2`() {
         val name = "basicTableOps2"
-        val t = newTable(name)
-        assertTrue(Registry.tableNames().contains(name))
+        val t = Table[name]
+        assertTrue(Table.names.contains(name))
 
         t["A", 1] = "String"
         t["B", 2] = 123L
@@ -202,9 +200,9 @@ class TableTest {
     }
 
     @Test
-    fun basicTableMath1() {
+    fun `basic table math 1`() {
         // Testing math between cells
-        val t = newTable("basicTableMath1")
+        val t = Table["basicTableMath1"]
 
         val values = listOf(1, 2L, 3F, 3.0, BigInteger.TWO, BigDecimal.TEN)
 
@@ -273,9 +271,9 @@ class TableTest {
     }
 
     @Test
-    fun basicTableMath2() {
+    fun `basic table math 2`() {
         // Testing math between cell and number
-        val t = newTable("basicTableMath1")
+        val t = Table["basicTableMath1"]
 
         val values = listOf(1, 2L, 3F, 3.0, BigInteger.TWO, BigDecimal.TEN)
 
@@ -344,8 +342,8 @@ class TableTest {
     }
 
     @Test
-    fun tableCloneValues() {
-        val t1 = newTable("tableClone1")
+    fun `clone table values`() {
+        val t1 = Table["tableClone1"]
 
         for (c in listOf("A", "B", "C", "D")) {
             for (r in 1..100) {
@@ -391,90 +389,6 @@ class TableTest {
             }
         }
     }
-
-    @Test
-    fun tableCloneEvents() {
-        val t1 = newTable("tableCloneEvents")
-
-        var t1EventCount = 0
-        var t2EventCount = 0
-
-        t1.onAny {
-            events {
-                t1EventCount += count()
-            }
-        }
-
-        var expectedT1EventCount = 0
-
-        for (c in listOf("A", "B", "C", "D")) {
-            for (r in 1..100) {
-                t1[c][r] = "$c$r A1"
-                expectedT1EventCount++
-            }
-        }
-
-        for (c in listOf("A", "B", "C", "D")) {
-            for (r in 1..100) {
-                t1[c][r] = "$c$r A1"
-                expectedT1EventCount++
-            }
-        }
-
-        val t2 = t1.clone("tableClone2")
-
-        // We divide by 2 because we overwrite cells above,
-        // but when adding a listener we only reply current values
-        var expectedT2EventCount = expectedT1EventCount / 2
-
-        t2.onAny {
-            events {
-                t2EventCount += count()
-            }
-        }
-
-        for (c in listOf("A", "B", "C", "D")) {
-            for (r in 1..100) {
-                t1[c][r] = "$c$r A2"
-                expectedT1EventCount++
-            }
-        }
-
-        for (c in listOf("A", "B", "C", "D")) {
-            for (r in 1..100) {
-                t2[c][r] = "$c$r B1"
-                expectedT2EventCount++
-            }
-        }
-
-        assertEquals(expectedT1EventCount, t1EventCount)
-        assertEquals(expectedT2EventCount, t2EventCount)
-        assertTrue(expectedT1EventCount > expectedT2EventCount)
-        assertTrue(expectedT2EventCount > 0)
-    }
-
-    @Test
-    fun tableEventSnapshots() {
-        val t = newTable("tableEventSnapshots")
-
-        t["A", 1] = 1
-
-        var change: Number = 0
-
-        t.onAny {
-            events {
-                change = newTable["A", 1] - oldTable["A", 1]
-            }
-        }
-
-        t["A", 1] = 2
-        assertEquals(1L, change)
-
-        t["A", 1] = 4
-        assertEquals(2L, change)
-    }
-
-    // TODO: Listener ordering
 
     // TODO: Table compareTo/contains
 }

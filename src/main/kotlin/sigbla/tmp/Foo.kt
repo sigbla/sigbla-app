@@ -130,6 +130,10 @@ fun main() {
     val compare2 = table["A"][1] < table["A"][2]
     val compare3 = table["A"][1] == table["A", 3]
 
+    // TODO Can we get this working?
+    //val compare4 = table["A"][1] == 5
+    val compare4 = 5 in table["A"][1]
+
     println("${table["A"][1]} > 5: ${table["A"][1] > 5}")
 
     println("${table["A"][1]} < ${table["A"][2]}: ${table["A"][1] < table["A"][2]}")

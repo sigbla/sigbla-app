@@ -1,7 +1,5 @@
 package sigbla.app
 
-import sigbla.app.internals.Registry
-import sigbla.app.Table.Companion.newTable
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Test
@@ -12,13 +10,13 @@ import kotlin.reflect.KClass
 class BasicMathTest {
     @After
     fun cleanup() {
-        Registry.tableNames().forEach { Registry.deleteTable(it) }
+        Table.names.forEach { Table.delete(it) }
     }
 
     @Test
-    fun basicTableMath() {
+    fun `basic table math`() {
         // Testing math between number and cell
-        val t = newTable("basicTableMath")
+        val t = Table["basicTableMath"]
 
         fun typeValue(clazz: KClass<*>): Int {
             return when (clazz) {
