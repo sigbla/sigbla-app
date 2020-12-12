@@ -327,9 +327,11 @@ class TableListenerTest {
 
         var v1Old: Any? = null
         var v2Old: Any? = null
+        var v3Old: Any? = null
 
         var v1New: Any? = null
         var v2New: Any? = null
+        var v3New: Any? = null
 
         t.onAny {
             order = 2
@@ -337,6 +339,24 @@ class TableListenerTest {
             events {
                 v2Old = oldTable["A", 0].value
                 v2New = newTable["A", 0].value
+
+                assertEquals(t["A", 0], source["A", 0])
+
+                if (newTable["A", 0].isNumeric())
+                    newTable["A", 0] = newTable["A", 0] + 1
+                if (oldTable["A", 0].isNumeric())
+                    oldTable["A", 0] = oldTable["A", 0] - 1
+            }
+        }
+
+        t.onAny {
+            order = 3
+
+            events {
+                v3Old = oldTable["A", 0].value
+                v3New = newTable["A", 0].value
+
+                assertEquals(t["A", 0], source["A", 0])
 
                 if (newTable["A", 0].isNumeric())
                     newTable["A", 0] = newTable["A", 0] + 1
@@ -352,6 +372,8 @@ class TableListenerTest {
                 v1Old = oldTable["A", 0].value
                 v1New = newTable["A", 0].value
 
+                assertEquals(t["A", 0], source["A", 0])
+
                 if (newTable["A", 0].isNumeric())
                     newTable["A", 0] = newTable["A", 0] + 1
                 if (oldTable["A", 0].isNumeric())
@@ -365,13 +387,18 @@ class TableListenerTest {
         assertNull(v2New)
         assertNull(v2Old)
 
+        assertNull(v3New)
+        assertNull(v3Old)
+
         t["A", 0] = 100
 
         assertEquals(Unit, v1Old)
         assertEquals(Unit, v2Old)
+        assertEquals(Unit, v3Old)
 
         assertEquals(100L, v1New)
         assertEquals(101L, v2New)
+        assertEquals(102L, v3New)
 
         assertTrue(100L in t["A", 0])
 
@@ -379,9 +406,11 @@ class TableListenerTest {
 
         assertEquals(100L, v1Old)
         assertEquals(99L, v2Old)
+        assertEquals(98L, v3Old)
 
         assertEquals(200L, v1New)
         assertEquals(201L, v2New)
+        assertEquals(202L, v3New)
 
         assertTrue(200L in t["A", 0])
     }
