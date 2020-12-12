@@ -475,4 +475,6 @@ class TableTest {
     }
 
     // TODO: Listener ordering
+
+    // TODO: Table compareTo/contains
 }

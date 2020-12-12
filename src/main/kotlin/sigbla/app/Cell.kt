@@ -137,7 +137,7 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
     // TODO: Implement various operations like we have on cells.. like plus, etc, and also assignment and basic math ops like sum, etc
 }
 
-sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any> {
+sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
     abstract val value: T
 
     val table: Table
@@ -301,10 +301,31 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any> {
     open operator fun rem(that: BigInteger): Number = throw InvalidCellException("Cell not numeric at $index")
     open operator fun rem(that: BigDecimal): Number = throw InvalidCellException("Cell not numeric at $index")
 
-    override fun compareTo(other: Any): Int {
-        // This will compare based on the value of both cells
-        // Accepting any because it might be a cell, number or string..
-        TODO()
+    override fun compareTo(other: Any?): Int {
+        val value = this.value
+
+        return when {
+            // Cell case
+            other is Cell<*> -> compareTo(other.value)
+
+            // Null cases
+            other == null -> if (value == null) 0 else 1
+            value == null -> -1
+
+            // Number case
+            other is Number -> if (value is Number) {
+                when (val v = this - other) {
+                    is Long -> v.compareTo(0)
+                    is Double -> v.compareTo(0)
+                    is BigDecimal -> v.compareTo(BigDecimal.ZERO)
+                    is BigInteger -> v.compareTo(BigInteger.ZERO)
+                    else -> throw InvalidValueException("Unsupported type: ${v::class}")
+                }
+            } else 1 // If this is not a number, make it greater than other number
+
+            // Compare values as strings
+            else -> value.toString().compareTo(other.toString())
+        }
     }
 
     operator fun rangeTo(that: Cell<*>): CellRange {
@@ -312,7 +333,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any> {
     }
 
     operator fun contains(that: Any): Boolean {
-        TODO()
+        return compareTo(that) == 0
     }
 
     inline fun <reified O, reified N> on(noinline init: TableEventReceiver<Cell<*>, O, N>.() -> Unit): TableListenerReference {

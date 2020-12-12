@@ -126,10 +126,19 @@ fun main() {
     val math6e = BigDecimal.ONE % table["B", 10]
     val math7e = table["B", 10] % 1 % table["B", 10] % 1
 
-    // TODO
-    //val compare1 = table["A"][1] > 5
-    //val compare2 = table["A"][1] < table["A"][2]
-    //val compare3 = table["A"][1] == table["A", 3]
+    val compare1 = table["A"][1] > 5
+    val compare2 = table["A"][1] < table["A"][2]
+    val compare3 = table["A"][1] == table["A", 3]
+
+    println("${table["A"][1]} > 5: ${table["A"][1] > 5}")
+
+    println("${table["A"][1]} < ${table["A"][2]}: ${table["A"][1] < table["A"][2]}")
+    table["A"][2] = "A"
+    println("${table["A"][1]} < ${table["A"][2]}: ${table["A"][1] < table["A"][2]}")
+
+    println("${table["A"][1]} == ${table["A", 3]}: ${table["A"][1] == table["A", 3]}")
+    table["A"][3] = "A"
+    println("${table["A"][1]} == ${table["A", 3]}: ${table["A"][1] == table["A", 3]}")
 
     for (c in table["A"][1]..table["A"][2]) {
         println("for c: $c")
