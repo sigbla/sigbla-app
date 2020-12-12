@@ -211,7 +211,8 @@ class BaseTableView internal constructor(
 
     override val tableViewRef: AtomicReference<TableViewRef> = tableViewRef ?: AtomicReference(TableViewRef(
         DefaultColumnView(),
-        DefaultRowView()
+        DefaultRowView(),
+        table = table
     ))
 
     init {
