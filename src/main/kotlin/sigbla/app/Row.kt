@@ -2,9 +2,11 @@ package sigbla.app
 
 import java.math.BigDecimal
 import java.math.BigInteger
+import kotlin.math.min
+import kotlin.math.max
 import kotlin.reflect.KClass
 
-abstract class Row {
+abstract class Row : Comparable<Row> {
     abstract val table: Table
 
     abstract val indexRelation: IndexRelation
@@ -49,6 +51,10 @@ abstract class Row {
     operator fun set(header: ColumnHeader, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(table[header][index]).init()
     operator fun set(vararg header: String, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(table[ColumnHeader(*header)][index]).init()
 
+    operator fun rangeTo(other: Row): RowRange {
+        return RowRange(this, other)
+    }
+
     inline fun <reified O, reified N> on(noinline init: TableEventReceiver<Row, O, N>.() -> Unit): TableListenerReference {
         return on(O::class, N::class, init as TableEventReceiver<Row, Any, Any>.() -> Unit)
     }
@@ -87,7 +93,61 @@ abstract class Row {
         return table.eventProcessor.subscribe(this, eventReceiver, init)
     }
 
-    // TODO: Row range
+    override fun compareTo(other: Row): Int {
+        return index.compareTo(other.index)
+    }
+
+    override fun toString(): String {
+        return index.toString()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Row
+
+        if (index != other.index) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return index.hashCode()
+    }
 }
 
 class BaseRow internal constructor(override val table: Table, override val indexRelation: IndexRelation, override val index: Long) : Row()
+
+class RowRange(override val start: Row, override val endInclusive: Row) : ClosedRange<Row>, Iterable<Row> {
+    val table: Table
+        get() = start.table
+
+    override fun iterator(): Iterator<Row> {
+        return if (start.index <= endInclusive.index) {
+            ((start.index)..(endInclusive.index))
+                .asSequence()
+                .map { table[it] }
+                .iterator()
+        } else {
+            ((endInclusive.index)..(start.index))
+                .asSequence()
+                .map { table[it] }
+                .iterator()
+        }
+    }
+
+    override fun contains(value: Row): Boolean {
+        if (value.index < min(start.index, endInclusive.index) || value.index > max(start.index, endInclusive.index)) {
+            return false
+        }
+
+        return true
+    }
+
+    override fun isEmpty() = false
+
+    override fun toString(): String {
+        return "$start..$endInclusive"
+    }
+}

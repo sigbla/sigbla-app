@@ -89,18 +89,15 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
     }
 
     override fun contains(value: Cell<*>): Boolean {
-        if (start.column.table != value.column.table) {
-            return false
-        }
-
         if (value.index < min(start.index, endInclusive.index) || value.index > max(start.index, endInclusive.index)) {
             return false
         }
 
-        return if (start.column.columnOrder <= endInclusive.column.columnOrder)
+        return if (start.column.columnOrder <= endInclusive.column.columnOrder) {
             (start.column..endInclusive.column).contains(value.column)
-        else
+        } else {
             (endInclusive.column..start.column).contains(value.column)
+        }
     }
 
     override fun isEmpty(): Boolean = false
@@ -120,23 +117,17 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
             ) { this }
             old == Any::class -> TableEventReceiver(this) {
                 this.filter {
-                    new.isInstance(
-                        it.newValue.value
-                    )
+                    new.isInstance(it.newValue.value)
                 }
             }
             new == Any::class -> TableEventReceiver(this) {
                 this.filter {
-                    old.isInstance(
-                        it.oldValue.value
-                    )
+                    old.isInstance(it.oldValue.value)
                 }
             }
             else -> TableEventReceiver(this) {
                 this.filter {
-                    old.isInstance(it.oldValue.value) && new.isInstance(
-                        it.newValue.value
-                    )
+                    old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value)
                 }
             }
         }

@@ -59,9 +59,11 @@ class ColumnHeader(vararg header: String) : Comparable<ColumnHeader> {
     operator fun component5() = this[5]
 }
 
-abstract class Column(val table: Table, val columnHeader: ColumnHeader) : Comparable<Column>, Iterable<Cell<*>> {
-    internal val columnOrder = table.columnCounter.getAndIncrement()
-
+abstract class Column internal constructor(
+    val table: Table,
+    val columnHeader: ColumnHeader,
+    internal val columnOrder: Int
+) : Comparable<Column>, Iterable<Cell<*>> {
     abstract operator fun get(indexRelation: IndexRelation, index: Long): Cell<*>
 
     abstract operator fun set(index: Long, value: Cell<*>?)
@@ -224,14 +226,26 @@ abstract class Column(val table: Table, val columnHeader: ColumnHeader) : Compar
     }
 
     override fun compareTo(other: Column): Int {
-        if (table != other.table)
-            throw InvalidColumnException("Both columns must belong to same table")
-
         return columnOrder.compareTo(other.columnOrder)
     }
 
     override fun toString(): String {
         return columnHeader.toString()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Column
+
+        if (columnHeader != other.columnHeader) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return columnHeader.hashCode()
     }
 }
 
@@ -239,7 +253,11 @@ class BaseColumn internal constructor(
     table: Table,
     columnHeader: ColumnHeader,
     private val tableRef: AtomicReference<TableRef>
-) : Column(table, columnHeader) {
+) : Column(
+    table,
+    columnHeader,
+    tableRef.get().columnsMap[columnHeader]?.columnOrder ?: table.columnCounter.getAndIncrement()
+) {
     override fun get(indexRelation: IndexRelation, index: Long): Cell<*> {
         return getCellRaw(index, indexRelation)?.toCell(this, index) ?: UnitCell(
             this,
@@ -406,10 +424,6 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
     }
 
     override fun contains(value: Column): Boolean {
-        if (start.table != value.table) {
-            return false
-        }
-
         if (value.columnOrder < min(start.columnOrder, endInclusive.columnOrder) || value.columnOrder > max(start.columnOrder, endInclusive.columnOrder)) {
             return false
         }
@@ -418,32 +432,9 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
     }
 
     override fun isEmpty() = false
-}
 
-// TODO Maybe just remove this, or make it extend BaseColumn to fix iterator access issue?
-class ReadOnlyRowColumn internal constructor(private val column: Column, private val index: Long) : Column(column.table, column.columnHeader) {
-    override fun get(indexRelation: IndexRelation, index: Long): Cell<*> {
-        if (index > this.index)
-            return UnitCell(this, index)
-
-        return column.get(indexRelation, index)
-    }
-
-    override fun set(index: Long, value: Cell<*>?) {
-        throw ReadOnlyColumnException()
-    }
-
-    override fun remove(index: Long): Cell<*> {
-        throw ReadOnlyColumnException()
-    }
-
-    override fun clear() {
-        throw ReadOnlyColumnException()
-    }
-
-    override fun iterator(): Iterator<Cell<*>> {
-        // This needs access to the storage..
-        TODO("Not yet implemented")
+    override fun toString(): String {
+        return "$start..$endInclusive"
     }
 }
 

@@ -1,11 +1,15 @@
 package sigbla.tmp
 
 import sigbla.app.*
+import java.util.concurrent.ThreadLocalRandom
+import kotlin.math.absoluteValue
 
 fun main() {
     val table = Table.newTable("test")
     val tableView = TableView.newTableView(table)
     tableView.show()
+
+    table["B", 0] = sum(table["A", 0]..table["A", 9])
 
     Thread.sleep(15000)
 
@@ -14,6 +18,6 @@ fun main() {
     while (true) {
         Thread.sleep(100)
         println("Update..")
-        table["A", i % 10] = i++
+        table["A", ThreadLocalRandom.current().nextInt().absoluteValue % 10] = i++
     }
 }
