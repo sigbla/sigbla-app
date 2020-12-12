@@ -9,6 +9,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.NoSuchElementException
 import kotlin.reflect.KClass
+import com.github.andrewoma.dexx.collection.Map as PMap
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 
 // A table view is associated with one table, and holds meta data related on how to view a table.
@@ -192,9 +193,9 @@ abstract class TableView(val name: String) : Iterable<Area<*>> {
 internal data class TableViewRef(
     val defaultColumnView: DefaultColumnView,
     val defaultRowView: DefaultRowView,
-    val columnViews: com.github.andrewoma.dexx.collection.Map<ColumnHeader, ColumnView> = PHashMap(),
-    val rowViews: com.github.andrewoma.dexx.collection.Map<Long, RowView> = PHashMap(),
-    val cellViews: com.github.andrewoma.dexx.collection.Map<Pair<ColumnHeader, Long>, CellView> = PHashMap(),
+    val columnViews: PMap<ColumnHeader, ColumnView> = PHashMap(),
+    val rowViews: PMap<Long, RowView> = PHashMap(),
+    val cellViews: PMap<Pair<ColumnHeader, Long>, CellView> = PHashMap(),
     val table: Table? = null
 )
 

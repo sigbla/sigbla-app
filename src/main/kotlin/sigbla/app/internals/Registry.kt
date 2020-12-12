@@ -46,8 +46,7 @@ object Registry {
         view.eventProcessor.shutdown()
         view.tableViewRef.set(TableViewRef(
             DefaultColumnView(),
-            DefaultRowView(),
-            table = null,
+            DefaultRowView()
         ))
     }
 }
