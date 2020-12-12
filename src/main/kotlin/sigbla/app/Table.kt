@@ -601,9 +601,9 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
             TODO()
         }
 
-        fun registryTableNames(): SortedSet<String> = Registry.tableNames()
+        val names: SortedSet<String> get() = Registry.tableNames()
 
-        fun deleteTable(name: String) = Registry.deleteTable(name)
+        fun delete(name: String) = Registry.deleteTable(name)
 
         fun move(columnAction: ColumnAction): Unit = TODO()
 

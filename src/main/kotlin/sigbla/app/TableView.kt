@@ -166,7 +166,6 @@ abstract class TableView(val name: String) : Iterable<Area<*>> {
 
         operator fun get(name: String, table: Table): TableView = BaseTableView(name, table)
 
-        // TODO Maybe just have all these below on the registry..
         fun fromRegistry(name: String): TableView = Registry.getView(name) ?: throw InvalidTableException("No table view by name $name")
 
         fun fromStorage(storage: Storage, name: String): TableView {
@@ -185,9 +184,9 @@ abstract class TableView(val name: String) : Iterable<Area<*>> {
             TODO()
         }
 
-        fun registryTableViewNames(): SortedSet<String> = Registry.viewNames()
+        val names: SortedSet<String> get() = Registry.viewNames()
 
-        fun deleteView(name: String) = Registry.deleteView(name)
+        fun delete(name: String) = Registry.deleteView(name)
     }
 }
 
