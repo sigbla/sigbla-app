@@ -5,7 +5,7 @@ import sigbla.app.TableView
 import sigbla.app.sum
 
 fun main() {
-    val table = Table.newTable("test")
+    val table = Table["test"]
 
     for (col in listOf("A", "B")) {
         for (row in 0..100) {
@@ -21,7 +21,7 @@ fun main() {
     // TODO table[cell] = sum(table["A"]..table["B"])
     table[cell] = sum(table["A", 0]..table["B", 100])
 
-    val tableView = TableView.newTableView(table)
+    val tableView = TableView[table]
 
     tableView.show()
 

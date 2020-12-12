@@ -5,7 +5,7 @@ import sigbla.app.*
 import java.util.concurrent.ThreadLocalRandom
 
 fun main() {
-    val table = Table.newTable("test")
+    val table = Table["test"]
 
     fun cell(x: Int, y: Int, black: Boolean) {
         table[x.toString(), y] = div {
@@ -20,7 +20,7 @@ fun main() {
         }
     }
 
-    val tableView = TableView.newTableView(table)
+    val tableView = TableView[table]
     tableView.show()
 
     tableView[DEFAULT_COLUMN_VIEW] = {

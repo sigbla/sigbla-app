@@ -580,8 +580,8 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
     }
 
     companion object {
-        // TODO Consider option for anonymous tables with no name
-        fun newTable(name: String): Table = BaseTable(name)
+        // TODO Consider option for anonymous tables with no name?
+        operator fun get(name: String): Table = BaseTable(name)
 
         fun fromRegistry(name: String): Table = Registry.getTable(name) ?: throw InvalidTableException("No table by name $name")
 

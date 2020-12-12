@@ -160,12 +160,13 @@ abstract class TableView(val name: String) : Iterable<Area<*>> {
     internal abstract fun makeClone(name: String = this.name, onRegistry: Boolean = false, ref: TableViewRef = tableViewRef.get()!!): TableView
 
     companion object {
-        fun newTableView(name: String): TableView = BaseTableView(name)
+        operator fun get(name: String): TableView = BaseTableView(name)
 
-        fun newTableView(table: Table): TableView = BaseTableView(table)
+        operator fun get(table: Table): TableView = BaseTableView(table)
 
-        fun newTableView(name: String, table: Table): TableView = BaseTableView(name, table)
+        operator fun get(name: String, table: Table): TableView = BaseTableView(name, table)
 
+        // TODO Maybe just have all these below on the registry..
         fun fromRegistry(name: String): TableView = Registry.getView(name) ?: throw InvalidTableException("No table view by name $name")
 
         fun fromStorage(storage: Storage, name: String): TableView {

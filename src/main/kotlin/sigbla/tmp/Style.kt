@@ -5,8 +5,8 @@ import sigbla.app.*
 import java.util.concurrent.ThreadLocalRandom
 
 fun main() {
-    //val table = Table.newTable("Table A")
-    val table = Table.newTable("test")
+    //val table = Table["Table A"]
+    val table = Table["test"]
 
     for (col in listOf("A", "B", "C", "D", "E", "F")) {
         val withExtra = ThreadLocalRandom.current().nextBoolean()
@@ -23,7 +23,7 @@ fun main() {
         +"This is red text"
     }
 
-    val tableView = TableView.newTableView(table)
+    val tableView = TableView[table]
 
     tableView[DEFAULT_COLUMN_VIEW] = {
         width = 99

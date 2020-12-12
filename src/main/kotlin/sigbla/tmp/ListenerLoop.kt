@@ -3,7 +3,7 @@ package sigbla.tmp
 import sigbla.app.Table
 
 fun main() {
-    val table = Table.newTable("listener loop")
+    val table = Table["listener loop"]
 
     val ref = table.onAny {
         allowLoop = true

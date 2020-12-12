@@ -16,8 +16,8 @@ import java.time.LocalTime
 import java.time.ZoneId
 
 fun main() {
-    //val table = Table.newTable("Table A")
-    val table = Table.newTable("test")
+    //val table = Table["Table A"]
+    val table = Table["test"]
 
     table["Column A"][0] = "A0"
 
@@ -31,7 +31,7 @@ fun main() {
             table["E"][1] = table["E"][1] + 1
     }
 
-    //val view = TableView.newTableView(table)
+    //val view = TableView[table]
     //view.show()
 
     table["A", "B"][1] = "Test"
@@ -371,7 +371,7 @@ fun main() {
 
     // TODO Maybe a onColumn for when columns are added/moved/copied?
 
-    val tableView = TableView.newTableView(table)
+    val tableView = TableView[table]
     // TODO Maybe it is better if we could do tableView["A"] instead of tableView[table["A"]], and similar..
 //    tableView[table["A"]] = columnStyle {
 //        width = 100
