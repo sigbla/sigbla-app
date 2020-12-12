@@ -995,7 +995,4 @@ operator fun Number.rem(that: BigDecimal): Number {
     }
 }
 
-// TODO Number compare with same promotion rules
-
-// TODO sum, min, max, etc on CellRange
-// Look at reified stuff, like kotlin.collections.Iterable<kotlin.Int>.sum(): kotlin.Int
+// TODO Number compare with same promotion rules (see Cell compareTo)

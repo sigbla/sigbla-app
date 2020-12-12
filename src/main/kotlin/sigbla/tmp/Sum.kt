@@ -16,10 +16,11 @@ fun main() {
         }
     }
 
-    // TODO: table["Sum", 0] = sum(..)
-    val cell = table["Sum", 0]
-    // TODO table[cell] = sum(table["A"]..table["B"])
-    table[cell] = sum(table["A", 0]..table["B", 100])
+    table["Sum", 0] = sum(table["A", 0]..table["B", 100])
+    table["Sum", 0L] = sum(table["A", 0]..table["B", 100])
+    table["Sum"][0] = sum(table["A", 0]..table["B", 100])
+    table["Sum"][0L] = sum(table["A", 0]..table["B", 100])
+    table[table["Sum", 0]] = sum(table["A", 0]..table["B", 100])
 
     val tableView = TableView[table]
 

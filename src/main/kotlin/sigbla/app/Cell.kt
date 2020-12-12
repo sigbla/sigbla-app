@@ -304,6 +304,12 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
     override fun compareTo(other: Any?): Int {
         val value = this.value
 
+        // Rules:
+        // Null is less than everything else
+        // Numbers are compared to each other
+        // A non-number is greater than a number
+        // Everything else compared as strings
+
         return when {
             // Cell case
             other is Cell<*> -> compareTo(other.value)

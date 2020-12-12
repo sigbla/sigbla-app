@@ -2,7 +2,6 @@ package sigbla.app
 
 // NOTE: It's important that this does not import anything from BasicMath!
 
-import sigbla.app.Table.Companion.delete
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.After
@@ -93,7 +92,7 @@ class TableTest {
         assertEquals(Unit, t["E"][4].value)
         assertEquals(Unit, t["E"][5].value)
 
-        delete(name)
+        Table.delete(name)
         assertFalse(Table.names.contains(name))
     }
 
