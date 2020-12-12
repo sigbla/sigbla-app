@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.NoSuchElementException
 import kotlin.reflect.KClass
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
-import com.github.andrewoma.dexx.collection.Map as PMap
 
 // A table view is associated with one table, and holds meta data related on how to view a table.
 // This includes among other things column widths, row heights, individual cell dimensions, styling, etc..
@@ -191,12 +190,12 @@ abstract class TableView(val name: String) : Iterable<Area<*>> {
 }
 
 internal data class TableViewRef(
-    val table: Table? = null,
     val defaultColumnView: DefaultColumnView,
     val defaultRowView: DefaultRowView,
-    val columnViews: PMap<ColumnHeader, ColumnView> = PHashMap(),
-    val rowViews: PMap<Long, RowView> = PHashMap(),
-    val cellViews: PMap<Pair<ColumnHeader, Long>, CellView> = PHashMap()
+    val columnViews: com.github.andrewoma.dexx.collection.Map<ColumnHeader, ColumnView> = PHashMap(),
+    val rowViews: com.github.andrewoma.dexx.collection.Map<Long, RowView> = PHashMap(),
+    val cellViews: com.github.andrewoma.dexx.collection.Map<Pair<ColumnHeader, Long>, CellView> = PHashMap(),
+    val table: Table? = null
 )
 
 class BaseTableView internal constructor(
@@ -210,9 +209,8 @@ class BaseTableView internal constructor(
     constructor(name: String) : this(name, Registry.getTable(name))
 
     override val tableViewRef: AtomicReference<TableViewRef> = tableViewRef ?: AtomicReference(TableViewRef(
-        table = table,
         DefaultColumnView(),
-        DefaultRowView(),
+        DefaultRowView()
     ))
 
     init {
@@ -505,12 +503,12 @@ class BaseTableView internal constructor(
         }
 
         newViewRef.set(TableViewRef(
-            ref.table,
             newDefaultColumnView,
             newDefaultRowView,
             newColumnsViews,
             newRowViews,
-            newCellViews
+            newCellViews,
+            ref.table
         ))
 
         return tableViewClone

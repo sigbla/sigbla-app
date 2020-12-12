@@ -3,6 +3,7 @@ package sigbla.app.internals
 import sigbla.app.*
 import sigbla.app.TableRef
 import sigbla.app.exceptions.InvalidTableException
+import sigbla.app.exceptions.InvalidTableViewException
 import java.util.*
 import java.util.concurrent.ConcurrentSkipListMap
 
@@ -26,21 +27,7 @@ object Registry {
         if (table !is BaseTable) throw InvalidTableException()
 
         table.eventProcessor.shutdown()
-
-        val columns = ArrayList<Column>()
-
-//        while (!table.columnsMap.isEmpty()) {
-//            val (columnHeader, column) = table.columnsMap.entries.firstOrNull() ?: continue
-//            if (table.columnsMap.remove(columnHeader, column))
-//                columns.add(column)
-//        }
-//
-//        table.indicesMap.clear()
         table.tableRef.set(TableRef())
-
-        columns.forEach(Column::clear)
-
-        views.filter { it.value.table == table }.map { it.key }.forEach { views.remove(it) }
     }
 
     fun setView(name: String, view: TableView) = deleteView(views.put(name, view))
@@ -54,6 +41,13 @@ object Registry {
     private fun deleteView(view: TableView?) {
         if (view == null) return
 
-        // TODO Any cleanups?
+        if (view !is BaseTableView) throw InvalidTableViewException()
+
+        view.eventProcessor.shutdown()
+        view.tableViewRef.set(TableViewRef(
+            DefaultColumnView(),
+            DefaultRowView(),
+            table = null,
+        ))
     }
 }
