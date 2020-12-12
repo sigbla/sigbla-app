@@ -6,7 +6,7 @@ import sigbla.app.exceptions.InvalidTableException
 import java.util.*
 import java.util.concurrent.ConcurrentSkipListMap
 
-internal object Registry {
+object Registry {
     private val tables: SortedMap<String, Table> = ConcurrentSkipListMap()
     private val views: SortedMap<String, TableView> = ConcurrentSkipListMap()
 
