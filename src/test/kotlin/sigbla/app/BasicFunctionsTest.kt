@@ -28,6 +28,14 @@ class BasicFunctionsTest {
         t["B", 10] = 1
 
         assertTrue(501 in t["Sum", 0])
+
+        t["Sum", 0] = null
+
+        assertTrue(t["Sum", 0] is UnitCell)
+
+        t["A", 0] = 200
+
+        assertTrue(t["Sum", 0] is UnitCell)
     }
 
     @Test
@@ -48,6 +56,14 @@ class BasicFunctionsTest {
         t["B", 10] = 1
 
         assertTrue(300 in t["Max", 0])
+
+        t["Max", 0] = null
+
+        assertTrue(t["Max", 0] is UnitCell)
+
+        t["A", 0] = 10000
+
+        assertTrue(t["Max", 0] is UnitCell)
     }
 
     @Test
@@ -68,5 +84,13 @@ class BasicFunctionsTest {
         t["B", 10] = 300
 
         assertTrue(50 in t["Min", 0])
+
+        t["Min", 0] = null
+
+        assertTrue(t["Min", 0] is UnitCell)
+
+        t["A", 0] = 0
+
+        assertTrue(t["Min", 0] is UnitCell)
     }
 }
