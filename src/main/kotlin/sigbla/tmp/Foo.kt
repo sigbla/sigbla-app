@@ -167,8 +167,7 @@ fun main() {
         println("table asSequence forEach: ${it.column} ${it.index} $it")
     }
 
-    // TODO
-    //val inVal = 5 in table["A"][1]
+    val inVal = 5 in table["A"][1]
 
     // TODO
     //Table.move(table["A"] before table["B"])
@@ -212,6 +211,10 @@ fun main() {
     println()
 
     val value = table["A"] at 1
+
+    table["A"].sum()
+    table["A"].max()
+    table["A"].min()
 
     on<Any, Any>(table) {
         name = "B"

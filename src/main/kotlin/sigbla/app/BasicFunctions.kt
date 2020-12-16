@@ -2,105 +2,45 @@ package sigbla.app
 
 import java.util.concurrent.atomic.AtomicInteger
 
-// TODO sum, min, max, etc on CellRange (and similar)
-//      Look at reified stuff, like kotlin.collections.Iterable<kotlin.Int>.sum(): kotlin.Int
-//      We can reuse those below..
+fun Iterable<Cell<*>>.sum(): Number? = asSequence()
+    .filter { it.isNumeric() }
+    .fold(null as Number?) { sum, num -> num + (sum ?: 0) }
 
-// TODO Look at refactoring below functions into a generic helper function..
+fun Iterable<Cell<*>>.max(): Number? = asSequence()
+    .filter { it.isNumeric() }
+    .fold(null as Number?) { max, num -> if (max == null || num > max) num.toNumber() else max }
+
+fun Iterable<Cell<*>>.min(): Number? = asSequence()
+    .filter { it.isNumeric() }
+    .fold(null as Number?) { min, num -> if (min == null || num < min) num.toNumber() else min }
 
 fun sum(
     cellRange: CellRange,
     init: Number? = null,
     name: String? = null,
     order: Long = 0L
-): DestinationOsmosis<Cell<*>>.() -> Unit = {
-    cellRange.on<Any, Number> {
-        this.name = name
-        this.order = order
-
-        if (init != null) destination `=` init else destination `=` null
-
-        val destinationCount = AtomicInteger()
-
-        events {
-            if (any()) {
-                destinationCount.incrementAndGet()
-
-                destination `=` (newTable[cellRange]
-                    .asSequence()
-                    .filter { it.isNumeric() }
-                    .fold(null as Number?) { sum, num -> num + (sum ?: 0) } ?: return@events)
-            }
-        }
-
-        this.let { target ->
-            destination.onAny {
-                this.skipHistory = true
-                this.name = "Unsubscriber for $name"
-                this.order = order
-
-                events {
-                    if (any() && destinationCount.decrementAndGet() < 0) {
-                        // Something else is interactive with destination,
-                        // so let's remove this function.
-                        target.reference.unsubscribe()
-                        reference.unsubscribe()
-                    }
-                }
-            }
-        }
-    }
-}
+): DestinationOsmosis<Cell<*>>.() -> Unit = cellFunction(cellRange, init, name, order) { sum() }
 
 fun max(
     cellRange: CellRange,
     init: Number? = null,
     name: String? = null,
     order: Long = 0L
-): DestinationOsmosis<Cell<*>>.() -> Unit = {
-    cellRange.on<Any, Number> {
-        this.name = name
-        this.order = order
-
-        if (init != null) destination `=` init else destination `=` null
-
-        val destinationCount = AtomicInteger()
-
-        events {
-            if (any()) {
-                destinationCount.incrementAndGet()
-
-                destination `=` (newTable[cellRange]
-                    .asSequence()
-                    .filter { it.isNumeric() }
-                    .fold(null as Number?) { max, num -> if (max == null || num > max) num + 0L else max } ?: return@events)
-            }
-        }
-
-        this.let { target ->
-            destination.onAny {
-                this.skipHistory = true
-                this.name = "Unsubscriber for $name"
-                this.order = order
-
-                events {
-                    if (any() && destinationCount.decrementAndGet() < 0) {
-                        // Something else is interactive with destination,
-                        // so let's remove this function.
-                        target.reference.unsubscribe()
-                        reference.unsubscribe()
-                    }
-                }
-            }
-        }
-    }
-}
+): DestinationOsmosis<Cell<*>>.() -> Unit = cellFunction(cellRange, init, name, order) { max() }
 
 fun min(
     cellRange: CellRange,
     init: Number? = null,
     name: String? = null,
     order: Long = 0L
+): DestinationOsmosis<Cell<*>>.() -> Unit = cellFunction(cellRange, init, name, order) { min() }
+
+private fun cellFunction(
+    cellRange: CellRange,
+    init: Number? = null,
+    name: String? = null,
+    order: Long = 0L,
+    calc: Iterable<Cell<*>>.() -> Number?
 ): DestinationOsmosis<Cell<*>>.() -> Unit = {
     cellRange.on<Any, Number> {
         this.name = name
@@ -114,10 +54,7 @@ fun min(
             if (any()) {
                 destinationCount.incrementAndGet()
 
-                destination `=` (newTable[cellRange]
-                    .asSequence()
-                    .filter { it.isNumeric() }
-                    .fold(null as Number?) { min, num -> if (min == null || num < min) num - 0L else min } ?: return@events)
+                destination `=` (newTable[cellRange].calc() ?: return@events)
             }
         }
 
