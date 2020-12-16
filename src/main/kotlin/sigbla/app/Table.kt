@@ -809,6 +809,8 @@ class BaseTable internal constructor(
 
 class DestinationOsmosis<D>(val destination: D)
 
+// TODO Maybe move this somewhere else?
+
 fun div(
     classes : String? = null, block : DIV.() -> Unit = {}
 ): DestinationOsmosis<Cell<*>>.() -> Unit = {

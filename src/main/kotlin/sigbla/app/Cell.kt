@@ -150,11 +150,12 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
     open fun isNumeric(): Boolean = false
     open fun isText(): Boolean = false
 
-    open fun toLong(): Long = throw InvalidCellException("Cell not numeric at $index")
-    open fun toDouble(): Double = throw InvalidCellException("Cell not numeric at $index")
-    open fun toBigInteger(): BigInteger = throw InvalidCellException("Cell not numeric at $index")
+    open fun toLong(): Long = throw InvalidCellException("Cell not numeric at $column:$index")
+    open fun toDouble(): Double = throw InvalidCellException("Cell not numeric at $column:$index")
+    open fun toBigInteger(): BigInteger = throw InvalidCellException("Cell not numeric at $column:$index")
     open fun toBigDecimal(): BigDecimal = toBigDecimal(DefaultBigDecimalPrecision.mathContext)
-    open fun toBigDecimal(mathContext: MathContext): BigDecimal = throw InvalidCellException("Cell not numeric at $index")
+    open fun toBigDecimal(mathContext: MathContext): BigDecimal = throw InvalidCellException("Cell not numeric at $column:$index")
+    open fun toNumber(): Number = throw InvalidCellException("Cell not numeric at $column:$index")
 
     operator fun plus(that: Cell<*>): Number {
         return when (that.value) {
@@ -162,7 +163,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
             is Double -> plus(that.toDouble())
             is BigInteger -> plus(that.toBigInteger())
             is BigDecimal -> plus(that.toBigDecimal())
-            else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+            else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
         }
     }
 
@@ -178,12 +179,12 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
         }
     }
 
-    open operator fun plus(that: Int): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun plus(that: Long): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun plus(that: Float): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun plus(that: Double): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun plus(that: BigInteger): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun plus(that: BigDecimal): Number = throw InvalidCellException("Cell not numeric at $index")
+    open operator fun plus(that: Int): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun plus(that: Long): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun plus(that: Float): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun plus(that: Double): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun plus(that: BigInteger): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun plus(that: BigDecimal): Number = throw InvalidCellException("Cell not numeric at $column:$index")
 
     operator fun minus(that: Cell<*>): Number {
         return when (that.value) {
@@ -191,7 +192,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
             is Double -> minus(that.toDouble())
             is BigInteger -> minus(that.toBigInteger())
             is BigDecimal -> minus(that.toBigDecimal())
-            else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+            else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
         }
     }
 
@@ -207,12 +208,12 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
         }
     }
 
-    open operator fun minus(that: Int): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun minus(that: Long): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun minus(that: Float): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun minus(that: Double): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun minus(that: BigInteger): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun minus(that: BigDecimal): Number = throw InvalidCellException("Cell not numeric at $index")
+    open operator fun minus(that: Int): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun minus(that: Long): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun minus(that: Float): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun minus(that: Double): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun minus(that: BigInteger): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun minus(that: BigDecimal): Number = throw InvalidCellException("Cell not numeric at $column:$index")
 
     operator fun times(that: Cell<*>): Number {
         return when (that.value) {
@@ -220,7 +221,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
             is Double -> times(that.toDouble())
             is BigInteger -> times(that.toBigInteger())
             is BigDecimal -> times(that.toBigDecimal())
-            else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+            else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
         }
     }
 
@@ -236,12 +237,12 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
         }
     }
 
-    open operator fun times(that: Int): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun times(that: Long): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun times(that: Float): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun times(that: Double): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun times(that: BigInteger): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun times(that: BigDecimal): Number = throw InvalidCellException("Cell not numeric at $index")
+    open operator fun times(that: Int): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun times(that: Long): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun times(that: Float): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun times(that: Double): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun times(that: BigInteger): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun times(that: BigDecimal): Number = throw InvalidCellException("Cell not numeric at $column:$index")
 
     operator fun div(that: Cell<*>): Number {
         return when (that.value) {
@@ -249,7 +250,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
             is Double -> div(that.toDouble())
             is BigInteger -> div(that.toBigInteger())
             is BigDecimal -> div(that.toBigDecimal())
-            else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+            else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
         }
     }
 
@@ -265,12 +266,12 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
         }
     }
 
-    open operator fun div(that: Int): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun div(that: Long): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun div(that: Float): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun div(that: Double): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun div(that: BigInteger): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun div(that: BigDecimal): Number = throw InvalidCellException("Cell not numeric at $index")
+    open operator fun div(that: Int): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun div(that: Long): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun div(that: Float): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun div(that: Double): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun div(that: BigInteger): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun div(that: BigDecimal): Number = throw InvalidCellException("Cell not numeric at $column:$index")
 
     operator fun rem(that: Cell<*>): Number {
         return when (that.value) {
@@ -278,7 +279,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
             is Double -> rem(that.toDouble())
             is BigInteger -> rem(that.toBigInteger())
             is BigDecimal -> rem(that.toBigDecimal())
-            else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+            else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
         }
     }
 
@@ -294,12 +295,12 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
         }
     }
 
-    open operator fun rem(that: Int): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun rem(that: Long): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun rem(that: Float): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun rem(that: Double): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun rem(that: BigInteger): Number = throw InvalidCellException("Cell not numeric at $index")
-    open operator fun rem(that: BigDecimal): Number = throw InvalidCellException("Cell not numeric at $index")
+    open operator fun rem(that: Int): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun rem(that: Long): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun rem(that: Float): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun rem(that: Double): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun rem(that: BigInteger): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open operator fun rem(that: BigDecimal): Number = throw InvalidCellException("Cell not numeric at $column:$index")
 
     override fun compareTo(other: Any?): Int {
         val value = this.value
@@ -456,6 +457,8 @@ class LongCell(column: Column, index: Long, override val value: Long) : Cell<Lon
 
     override fun toBigDecimal(mathContext: MathContext) = value.toBigDecimal(mathContext)
 
+    override fun toNumber(): Number = value
+
     override fun plus(that: Int) = plus(that.toLong())
 
     override fun plus(that: Long) = this.value + that
@@ -531,6 +534,8 @@ class DoubleCell(column: Column, index: Long, override val value: Double) : Cell
 
     override fun toBigDecimal(mathContext: MathContext) = value.toBigDecimal(mathContext)
 
+    override fun toNumber(): Number = value
+
     override fun plus(that: Int) = plus(that.toLong())
 
     override fun plus(that: Long) = this.value + that
@@ -605,6 +610,8 @@ class BigIntegerCell(column: Column, index: Long, override val value: BigInteger
     override fun toBigInteger() = value
 
     override fun toBigDecimal(mathContext: MathContext) = value.toBigDecimal(mathContext = mathContext)
+
+    override fun toNumber(): Number = value
 
     override fun plus(that: Int) = plus(that.toLong())
 
@@ -682,6 +689,8 @@ class BigDecimalCell(column: Column, index: Long, override val value: BigDecimal
     override fun toBigDecimal() = value
 
     override fun toBigDecimal(mathContext: MathContext) = value.round(mathContext)!!
+
+    override fun toNumber(): Number = value
 
     override fun plus(that: Int) = plus(that.toLong())
 
