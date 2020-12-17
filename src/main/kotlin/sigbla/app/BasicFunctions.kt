@@ -53,8 +53,8 @@ private fun cellFunction(
         events {
             if (any()) {
                 destinationCount.incrementAndGet()
-
-                destination `=` (newTable[cellRange].calc() ?: return@events)
+                val newValue = newTable[cellRange].calc()
+                if (newValue != null) destination `=` newValue else destination `=` null
             }
         }
 
