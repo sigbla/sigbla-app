@@ -2,6 +2,8 @@ package sigbla.app
 
 import java.util.concurrent.atomic.AtomicInteger
 
+// TODO Introduce a predicate on all these functions..
+
 fun Iterable<Cell<*>>.sum(): Number? = asSequence()
     .filter { it.isNumeric() }
     .fold(null as Number?) { sum, num -> num + (sum ?: 0) }
@@ -17,32 +19,45 @@ fun Iterable<Cell<*>>.min(): Number? = asSequence()
 fun sum(
     cellRange: CellRange,
     init: Number? = null,
+    empty: Number? = null,
     name: String? = null,
     order: Long = 0L
-): DestinationOsmosis<Cell<*>>.() -> Unit = cellFunction(cellRange, init, name, order) { sum() }
+): DestinationOsmosis<Cell<*>>.() -> Unit = cellFunction<Any, Number>(cellRange, init, empty, name, order) { sum() }
 
 fun max(
     cellRange: CellRange,
     init: Number? = null,
+    empty: Number? = null,
     name: String? = null,
     order: Long = 0L
-): DestinationOsmosis<Cell<*>>.() -> Unit = cellFunction(cellRange, init, name, order) { max() }
+): DestinationOsmosis<Cell<*>>.() -> Unit = cellFunction<Any, Number>(cellRange, init, empty, name, order) { max() }
 
 fun min(
     cellRange: CellRange,
     init: Number? = null,
+    empty: Number? = null,
     name: String? = null,
     order: Long = 0L
-): DestinationOsmosis<Cell<*>>.() -> Unit = cellFunction(cellRange, init, name, order) { min() }
+): DestinationOsmosis<Cell<*>>.() -> Unit = cellFunction<Any, Number>(cellRange, init, empty, name, order) { min() }
 
-private fun cellFunction(
+fun count(
     cellRange: CellRange,
     init: Number? = null,
+    empty: Number? = null,
     name: String? = null,
     order: Long = 0L,
-    calc: Iterable<Cell<*>>.() -> Number?
+    predicate: (Cell<*>) -> Boolean = { it !is UnitCell }
+): DestinationOsmosis<Cell<*>>.() -> Unit = cellFunction<Any, Any>(cellRange, init, empty, name, order) { count(predicate) }
+
+private inline fun <reified O, reified N> cellFunction(
+    cellRange: CellRange,
+    init: Number? = null,
+    empty: Number? = null,
+    name: String? = null,
+    order: Long = 0L,
+    crossinline calc: Iterable<Cell<*>>.() -> Number?
 ): DestinationOsmosis<Cell<*>>.() -> Unit = {
-    cellRange.on<Any, Number> {
+    cellRange.on<O, N> {
         this.name = name
         this.order = order
 
@@ -54,7 +69,12 @@ private fun cellFunction(
             if (any()) {
                 destinationCount.incrementAndGet()
                 val newValue = newTable[cellRange].calc()
-                if (newValue != null) destination `=` newValue else destination `=` null
+
+                when {
+                    newValue != null -> destination `=` newValue
+                    empty != null -> destination `=` empty
+                    else -> destination `=` null
+                }
             }
         }
 

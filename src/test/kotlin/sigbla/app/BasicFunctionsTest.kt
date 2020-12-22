@@ -93,4 +93,60 @@ class BasicFunctionsTest {
 
         assertTrue(t["Min", 0] is UnitCell)
     }
+
+    @Test
+    fun `count with defaults`() {
+        val t = Table["count"]
+
+        t["B", 0] = 200
+        t["A", 1] = 100
+
+        t["Count", 0] = count(t["A", 0]..t["B", 10])
+
+        assertTrue(2 in t["Count", 0])
+
+        t["B", 0] = 50
+
+        assertTrue(2 in t["Count", 0])
+
+        t["B", 10] = 300
+
+        assertTrue(3 in t["Count", 0])
+
+        t["Count", 0] = null
+
+        assertTrue(t["Count", 0] is UnitCell)
+
+        t["A", 0] = 0
+
+        assertTrue(t["Count", 0] is UnitCell)
+    }
+
+    @Test
+    fun `count with predicate`() {
+        val t = Table["count"]
+
+        t["B", 0] = 200
+        t["A", 1] = 100
+
+        t["Count", 0] = count(t["A", 0]..t["B", 10]) { it.isText() }
+
+        assertTrue(0 in t["Count", 0])
+
+        t["B", 0] = "50"
+
+        assertTrue(1 in t["Count", 0])
+
+        t["B", 10] = "300"
+
+        assertTrue(2 in t["Count", 0])
+
+        t["Count", 0] = null
+
+        assertTrue(t["Count", 0] is UnitCell)
+
+        t["A", 0] = 0
+
+        assertTrue(t["Count", 0] is UnitCell)
+    }
 }
