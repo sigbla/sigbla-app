@@ -131,7 +131,10 @@ fun main() {
     val compare3 = table["A"][1] == table["A", 3]
 
     // TODO Can we get this working?
+    //      Don't understand why this wouldn't be fine when c.equals(5) is..??
     //val compare4 = table["A"][1] == 5
+    //val c = table["A"][1]
+    //val compare4 = c.equals("5")
     val compare4 = 5 in table["A"][1]
 
     println("${table["A"][1]} > 5: ${table["A"][1] > 5}")
@@ -216,6 +219,8 @@ fun main() {
     table["A"].max()
     table["A"].min()
 
+    // TODO table[1].iterator().forEach { .. }
+
     on<Any, Any>(table) {
         name = "B"
         allowLoop = true
@@ -271,7 +276,7 @@ fun main() {
 
     // TODO
 //    val columnRange = table["A"]..table["B"]
-//    on<Any, Any>(r) {
+//    on<Any, Any>(columnRange) {
 //        name = "E"
 //
 //        println("Subscribe 1d")

@@ -6,6 +6,7 @@ import kotlin.math.min
 import kotlin.math.max
 import kotlin.reflect.KClass
 
+// TODO Add Iterable<Cell<*>> and other operator functions as we have on Column
 abstract class Row : Comparable<Row> {
     abstract val table: Table
 

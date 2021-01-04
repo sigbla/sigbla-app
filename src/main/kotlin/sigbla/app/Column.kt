@@ -148,7 +148,7 @@ abstract class Column internal constructor(
 
     operator fun set(index: Int, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[index]).init()
 
-    // TODO: Look at adding a add(..) function and asSequence() function.
+    // TODO: Look at adding a add(..) function.
     //       Add would just insert a cell at first available location.
 
     abstract fun remove(index: Long): Cell<*>

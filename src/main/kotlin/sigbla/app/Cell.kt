@@ -773,6 +773,6 @@ class WebCell(column: Column, index: Long, override val value: WebContent) : Cel
 //   - Having looked at options I don't find anything I like in the JVM world..
 //   - Maybe use D3 in a web frame.. https://www.d3-graph-gallery.com/
 
-// Chart cell might just need to be WebCell instead..
+// Chart cell to be done as a WebCell instead..
 
 // Cells also need meta data, for example related to how they are displayed?
