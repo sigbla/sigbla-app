@@ -85,19 +85,17 @@ private inline fun <reified O, reified N> cellFunction(
             }
         }
 
-        this.let { target ->
-            destination.onAny {
-                this.skipHistory = true
-                this.name = "Unsubscriber for $name"
-                this.order = order
+        destination.onAny {
+            this.skipHistory = true
+            this.name = "Unsubscriber for $name"
+            this.order = order
 
-                events {
-                    if (any() && destinationCount.decrementAndGet() < 0) {
-                        // Something else is interactive with destination,
-                        // so let's remove this function.
-                        target.reference.unsubscribe()
-                        reference.unsubscribe()
-                    }
+            events {
+                if (any() && destinationCount.decrementAndGet() < 0) {
+                    // Something else is interactive with destination,
+                    // so let's remove this function.
+                    this@on.reference.unsubscribe()
+                    this@onAny.reference.unsubscribe()
                 }
             }
         }
