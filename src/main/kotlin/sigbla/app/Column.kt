@@ -283,7 +283,8 @@ class BaseColumn internal constructor(
                         null -> 1
                         else -> v + 1
                     }
-                })
+                }),
+                version = it.version + 1L
             )
         }
 
@@ -315,7 +316,8 @@ class BaseColumn internal constructor(
                         v - 1 == 0 -> null
                         else -> v - 1
                     }
-                })
+                }),
+                version = it.version + 1L
             )
         }
 
@@ -352,7 +354,8 @@ class BaseColumn internal constructor(
 
             it.copy(
                 indicesMap = indices,
-                columnCellMap = it.columnCellMap.put(this, PTreeMap())
+                columnCellMap = it.columnCellMap.put(this, PTreeMap()),
+                version = it.version + 1L
             )
         }
 

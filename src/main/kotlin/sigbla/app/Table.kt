@@ -702,7 +702,8 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
 internal data class TableRef(
     val columnsMap: PMap<ColumnHeader, Column> = PHashMap(),
     val columnCellMap: PMap<Column, PSortedMap<Long, CellValue<*>>> = PHashMap(),
-    val indicesMap: PSortedMap<Long, Int> = PTreeMap()
+    val indicesMap: PSortedMap<Long, Int> = PTreeMap(),
+    val version: Long = Long.MIN_VALUE
 )
 
 class BaseTable internal constructor(
@@ -738,7 +739,8 @@ class BaseTable internal constructor(
 
             it.copy(
                 columnsMap = it.columnsMap.put(header, column),
-                columnCellMap = it.columnCellMap.put(column, PTreeMap())
+                columnCellMap = it.columnCellMap.put(column, PTreeMap()),
+                version = it.version + 1L
             )
         }.columnsMap[header] ?: throw InvalidColumnException()
     }
@@ -755,7 +757,8 @@ class BaseTable internal constructor(
 
             it.copy(
                 columnsMap = it.columnsMap.remove(header),
-                columnCellMap = it.columnCellMap.remove(column)
+                columnCellMap = it.columnCellMap.remove(column),
+                version = it.version + 1L
             )
         }
     }
@@ -766,7 +769,8 @@ class BaseTable internal constructor(
             val c = it.columnsMap[existing] ?: return@updateAndGet it
 
             it.copy(
-                columnsMap = it.columnsMap.remove(existing).put(newName, c)
+                columnsMap = it.columnsMap.remove(existing).put(newName, c),
+                version = it.version + 1L
             )
         }
     }
@@ -798,7 +802,8 @@ class BaseTable internal constructor(
         newTableRef.set(TableRef(
             newColumnsMap,
             newColumnCellMap,
-            ref.indicesMap
+            ref.indicesMap,
+            ref.version
         ))
 
         return tableClone

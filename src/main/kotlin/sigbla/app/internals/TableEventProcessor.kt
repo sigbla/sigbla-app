@@ -12,7 +12,9 @@ internal class TableEventProcessor {
     private class ListenerReferenceEvent<R>(
         val listenerReference: R,
         val listenerEvent: (event: Sequence<TableListenerEvent<Any, Any>>) -> Unit
-    )
+    ) {
+        var version = Long.MIN_VALUE
+    }
 
     private class ListenerId(val order: Long) : Comparable<ListenerId> {
         val id: Long = idGenerator.getAndIncrement()
@@ -134,9 +136,6 @@ internal class TableEventProcessor {
     //      but we don't want to fire for each of these updates individually?
     //      Potential example: table { // ops in here }
 
-    // TODO When a subscription is added, we should feed existing cells to the listener
-    //      The idea being that is shouldn't matter what order data or listener is added, listener will always get the feed
-
     fun subscribe(
         table: Table,
         eventReceiver: TableEventReceiver<Table, Any, Any>,
@@ -163,11 +162,10 @@ internal class TableEventProcessor {
             tableListeners[key] = listenerRefEvent
             listenerRef.key = key
 
-            // TODO Don't like the potential overlap between when we call clone and that the table might have
-            //      been altered just before, but after we added to the tableListeners..
-            //      It might the listener gets duplicates..
             if (!eventReceiver.skipHistory) {
-                listenerRefEvent.listenerEvent(table.clone().asSequence().map {
+                val tc = table.clone()
+                listenerRefEvent.version = tc.tableRef.get().version
+                listenerRefEvent.listenerEvent(tc.asSequence().map {
                     TableListenerEvent(UnitCell(it.column, it.index), it) as TableListenerEvent<Any, Any>
                 })
             }
@@ -202,7 +200,9 @@ internal class TableEventProcessor {
             listenerRef.key = key
 
             if (!eventReceiver.skipHistory) {
-                listenerRefEvent.listenerEvent(column.table.clone()[column].asSequence().map {
+                val tc = column.table.clone()
+                listenerRefEvent.version = tc.tableRef.get().version
+                listenerRefEvent.listenerEvent(tc[column].asSequence().map {
                     TableListenerEvent(UnitCell(it.column, it.index), it) as TableListenerEvent<Any, Any>
                 })
             }
@@ -236,7 +236,7 @@ internal class TableEventProcessor {
             rowListeners[key] = listenerRefEvent
             listenerRef.key = key
 
-            // TODO + clone + skipHistory
+            // TODO + clone + skipHistory + version
             //listenerRefEvent.listenerEvent(row.asSequence().map {
             //    ListenerEvent(UnitCell(it.column, it.index), it) as ListenerEvent<Any, Any>
             //})
@@ -271,7 +271,9 @@ internal class TableEventProcessor {
             listenerRef.key = key
 
             if (!eventReceiver.skipHistory) {
-                listenerRefEvent.listenerEvent(cellRange.table.clone()[cellRange].asSequence().map {
+                val tc = cellRange.table.clone()
+                listenerRefEvent.version = tc.tableRef.get().version
+                listenerRefEvent.listenerEvent(tc[cellRange].asSequence().map {
                     TableListenerEvent(UnitCell(it.column, it.index), it) as TableListenerEvent<Any, Any>
                 })
             }
@@ -306,7 +308,9 @@ internal class TableEventProcessor {
             listenerRef.key = key
 
             if (!eventReceiver.skipHistory) {
-                listenerRefEvent.listenerEvent(cell.table.clone()[cell].asSequence().map {
+                val tc = cell.table.clone()
+                listenerRefEvent.version = tc.tableRef.get().version
+                listenerRefEvent.listenerEvent(tc[cell].asSequence().map {
                     TableListenerEvent(UnitCell(it.column, it.index), it) as TableListenerEvent<Any, Any>
                 })
             }
@@ -350,7 +354,7 @@ internal class TableEventProcessor {
                     .forEach { listenerRef ->
                         synchronized(listenerRef) {
                             loopCheck(listenerRef.listenerReference)
-                            listenerRef.listenerEvent(batch.asSequence())
+                            listenerRef.listenerEvent(batch.asSequence().filter { it.newValue.table.tableRef.get().version > listenerRef.version })
                             // TODO Do we really need to clear this here and below?
                             if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                         }
@@ -364,7 +368,7 @@ internal class TableEventProcessor {
                                     || it.newValue.column.columnHeader == listenerRef.listenerReference.column.columnHeader
                                     || it.oldValue.column == listenerRef.listenerReference.column
                                     || it.oldValue.column.columnHeader == listenerRef.listenerReference.column.columnHeader
-                        })
+                        }.filter { it.newValue.table.tableRef.get().version > listenerRef.version })
 
                         if (columnBatch.isNotEmpty()) {
                             synchronized(listenerRef) {
@@ -381,7 +385,7 @@ internal class TableEventProcessor {
                         val rowBatch = Collections.unmodifiableList(batch.filter {
                             return@filter it.newValue.index == listenerRef.listenerReference.row.index
                                     || it.oldValue.index == listenerRef.listenerReference.row.index
-                        })
+                        }.filter { it.newValue.table.tableRef.get().version > listenerRef.version })
 
                         if (rowBatch.isNotEmpty()) {
                             synchronized(listenerRef) {
@@ -398,7 +402,7 @@ internal class TableEventProcessor {
                         val cellRangeBatch = Collections.unmodifiableList(batch.filter {
                             return@filter listenerRef.listenerReference.cellRange.contains(it.newValue)
                                     || listenerRef.listenerReference.cellRange.contains(it.oldValue)
-                        })
+                        }.filter { it.newValue.table.tableRef.get().version > listenerRef.version })
 
                         if (cellRangeBatch.isNotEmpty()) {
                             synchronized(listenerRef) {
@@ -421,7 +425,7 @@ internal class TableEventProcessor {
                                     || (listenerRef.listenerReference.cell.index == it.oldValue.index
                                     && (listenerRef.listenerReference.cell.column == it.oldValue.column
                                     || listenerRef.listenerReference.cell.column.columnHeader == it.oldValue.column.columnHeader))
-                        })
+                        }.filter { it.newValue.table.tableRef.get().version > listenerRef.version })
 
                         if (cellBatch.isNotEmpty()) {
                             synchronized(listenerRef) {

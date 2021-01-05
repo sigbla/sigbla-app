@@ -27,7 +27,7 @@ internal object Registry {
         if (table !is BaseTable) throw InvalidTableException()
 
         table.eventProcessor.shutdown()
-        table.tableRef.set(TableRef())
+        table.tableRef.set(TableRef(version = Long.MAX_VALUE))
     }
 
     fun setView(name: String, view: TableView) = deleteView(views.put(name, view))
