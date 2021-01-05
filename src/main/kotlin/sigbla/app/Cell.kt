@@ -134,7 +134,7 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
         return start.column.table.eventProcessor.subscribe(this, eventReceiver, init)
     }
 
-    // TODO: Implement various operations like we have on cells.. like plus, etc, and also assignment and basic math ops like sum, etc
+    // TODO: Implement assignment ops?
 }
 
 sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
@@ -412,10 +412,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
     }
 
     override fun equals(other: Any?): Boolean {
-        // TODO Also handle numbers like in compare..
-        return if (other is Cell<*>)
-            this.value == other.value
-        else false
+        return this.compareTo(other) == 0
     }
 
     override fun hashCode(): Int {
