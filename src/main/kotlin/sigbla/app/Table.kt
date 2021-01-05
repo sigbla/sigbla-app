@@ -1,14 +1,5 @@
 package sigbla.app
 
-import kotlinx.html.DIV
-import kotlinx.html.consumers.delayed
-import kotlinx.html.consumers.onFinalizeMap
-import kotlinx.html.div
-import kotlinx.html.stream.HTMLStreamBuilder
-import com.github.andrewoma.dexx.collection.Map as PMap
-import com.github.andrewoma.dexx.collection.HashMap as PHashMap
-import com.github.andrewoma.dexx.collection.SortedMap as PSortedMap
-import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
 import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.exceptions.InvalidTableException
 import sigbla.app.internals.Registry
@@ -19,10 +10,10 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.reflect.KClass
-
-// Look at this wrt Table, Column, Row: https://kotlinlang.org/docs/reference/operator-overloading.html
-
-// TODO: Meta data / meta cells: Cells that are always in scope? Need something for the view, to load libs and stuff
+import com.github.andrewoma.dexx.collection.HashMap as PHashMap
+import com.github.andrewoma.dexx.collection.Map as PMap
+import com.github.andrewoma.dexx.collection.SortedMap as PSortedMap
+import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
 
 // TODO: Need a table clear like we have on columns..
 
@@ -810,22 +801,4 @@ class BaseTable internal constructor(
     }
 
     companion object
-}
-
-class DestinationOsmosis<D>(val destination: D)
-
-// TODO Maybe move this somewhere else?
-
-fun div(
-    classes : String? = null, block : DIV.() -> Unit = {}
-): DestinationOsmosis<Cell<*>>.() -> Unit = {
-    val builder = HTMLStreamBuilder(StringBuilder(256), prettyPrint = false, xhtmlCompatible = false)
-        .onFinalizeMap { sb, _ -> sb.toString() }
-        .delayed()
-
-    destination.table[destination] = WebCell(
-        destination.column,
-        destination.index,
-        builder.div(classes, block).toWebContent()
-    )
 }

@@ -1,5 +1,10 @@
 package sigbla.app
 
+import kotlinx.html.DIV
+import kotlinx.html.consumers.delayed
+import kotlinx.html.consumers.onFinalizeMap
+import kotlinx.html.div
+import kotlinx.html.stream.HTMLStreamBuilder
 import sigbla.app.exceptions.InvalidCellException
 import sigbla.app.exceptions.InvalidTableException
 import sigbla.app.exceptions.InvalidValueException
@@ -424,7 +429,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
     }
 }
 
-class UnitCell(column: Column, index: Long) : Cell<Unit>(column, index) {
+class UnitCell internal constructor(column: Column, index: Long) : Cell<Unit>(column, index) {
     override val value = Unit
 
     override fun toCell(column: Column, index: Long): Cell<Unit> =
@@ -433,14 +438,14 @@ class UnitCell(column: Column, index: Long) : Cell<Unit>(column, index) {
     override fun toString() = ""
 }
 
-class StringCell(column: Column, index: Long, override val value: String) : Cell<String>(column, index) {
+class StringCell internal constructor(column: Column, index: Long, override val value: String) : Cell<String>(column, index) {
     override fun toCell(column: Column, index: Long): Cell<String> =
         StringCell(column, index, this.value)
 
     override fun isText() = true
 }
 
-class LongCell(column: Column, index: Long, override val value: Long) : Cell<Long>(column, index) {
+class LongCell internal constructor(column: Column, index: Long, override val value: Long) : Cell<Long>(column, index) {
     override fun toCell(column: Column, index: Long): Cell<Long> =
         LongCell(column, index, this.value)
 
@@ -517,7 +522,7 @@ class LongCell(column: Column, index: Long, override val value: Long) : Cell<Lon
     override fun rem(that: BigDecimal) = this.value.toBigDecimal(DefaultBigDecimalPrecision.mathContext).remainder(that)!!
 }
 
-class DoubleCell(column: Column, index: Long, override val value: Double) : Cell<Double>(column, index) {
+class DoubleCell internal constructor(column: Column, index: Long, override val value: Double) : Cell<Double>(column, index) {
     override fun toCell(column: Column, index: Long): Cell<Double> =
         DoubleCell(column, index, this.value)
 
@@ -594,7 +599,7 @@ class DoubleCell(column: Column, index: Long, override val value: Double) : Cell
     override fun rem(that: BigDecimal) = this.value.toBigDecimal(DefaultBigDecimalPrecision.mathContext).remainder(that)!!
 }
 
-class BigIntegerCell(column: Column, index: Long, override val value: BigInteger) : Cell<BigInteger>(column, index) {
+class BigIntegerCell internal constructor(column: Column, index: Long, override val value: BigInteger) : Cell<BigInteger>(column, index) {
     override fun toCell(column: Column, index: Long): Cell<BigInteger> =
         BigIntegerCell(column, index, this.value)
 
@@ -671,7 +676,7 @@ class BigIntegerCell(column: Column, index: Long, override val value: BigInteger
     override fun rem(that: BigDecimal) = this.value.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).remainder(that)!!
 }
 
-class BigDecimalCell(column: Column, index: Long, override val value: BigDecimal) : Cell<BigDecimal>(column, index) {
+class BigDecimalCell internal constructor(column: Column, index: Long, override val value: BigDecimal) : Cell<BigDecimal>(column, index) {
     override fun toCell(column: Column, index: Long): Cell<BigDecimal> =
         BigDecimalCell(column, index, this.value)
 
@@ -750,13 +755,13 @@ class BigDecimalCell(column: Column, index: Long, override val value: BigDecimal
     override fun rem(that: BigDecimal) = this.value.remainder(that)!!
 }
 
-class WebContent(val content: String) {
+class WebContent internal constructor(val content: String) {
     override fun toString() = content
 }
 
 internal fun String.toWebContent() = WebContent(this)
 
-class WebCell(column: Column, index: Long, override val value: WebContent) : Cell<WebContent>(column, index) {
+class WebCell internal constructor(column: Column, index: Long, override val value: WebContent) : Cell<WebContent>(column, index) {
     override fun toCell(column: Column, index: Long): Cell<WebContent> =
         WebCell(column, index, this.value)
 }
@@ -772,4 +777,18 @@ class WebCell(column: Column, index: Long, override val value: WebContent) : Cel
 
 // Chart cell to be done as a WebCell instead..
 
-// Cells also need meta data, for example related to how they are displayed?
+class DestinationOsmosis<D>(val destination: D)
+
+fun div(
+    classes : String? = null, block : DIV.() -> Unit = {}
+): DestinationOsmosis<Cell<*>>.() -> Unit = {
+    val builder = HTMLStreamBuilder(StringBuilder(256), prettyPrint = false, xhtmlCompatible = false)
+        .onFinalizeMap { sb, _ -> sb.toString() }
+        .delayed()
+
+    destination `=` WebCell(
+        destination.column,
+        destination.index,
+        builder.div(classes, block).toWebContent()
+    )
+}

@@ -37,4 +37,5 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "11"
 }
 
+// TODO main class?
 mainClassName = "sigbla.app.Sigbla"
