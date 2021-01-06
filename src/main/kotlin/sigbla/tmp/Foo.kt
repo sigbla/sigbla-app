@@ -4,7 +4,6 @@ import kotlinx.html.div
 import kotlinx.html.span
 import kotlinx.html.style
 import sigbla.app.IndexRelation.*
-import sigbla.app.timeseries.*
 import sigbla.app.Table.Companion.on
 import sigbla.app.*
 import sigbla.app.Table.Companion.onAny
@@ -47,7 +46,7 @@ fun main() {
 
     val prices = tickerHeaders.map { header -> header to table[header][AT_OR_BEFORE, 1000] }.toMap()
 
-    table["A"][AT, LocalDate.now(), LocalTime.MAX, ZoneId.systemDefault()]
+    // Not a good idea, removed timeseries package table["A"][AT, LocalDate.now(), LocalTime.MAX, ZoneId.systemDefault()]
 
     val size = 1_000_000L
 
