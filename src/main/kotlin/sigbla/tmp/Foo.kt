@@ -125,16 +125,23 @@ fun main() {
     val math6e = BigDecimal.ONE % table["B", 10]
     val math7e = table["B", 10] % 1 % table["B", 10] % 1
 
-    val compare1 = table["A"][1] > 5
-    val compare2 = table["A"][1] < table["A"][2]
-    val compare3 = table["A"][1] == table["A", 3]
+    val compare1a = table["A"][1] > 5
+    val compare2a = table["A"][1] < table["A"][2]
+    val compare3a = table["A"][1] == table["A", 3]
+
+    val compare1b = 5 < table["A"][1]
+    val compare2b = 5 <= table["A"][1]
+    val compare3b = 5 > table["A"][1]
+    val compare4b = 5 >= table["A"][1]
 
     // TODO Can we get this working?
     //      Don't understand why this wouldn't be fine when c.equals(5) is..??
     //val compare4 = table["A"][1] == 5
-    //val c = table["A"][1]
-    //val compare4 = c.equals("5")
-    val compare4 = 5 in table["A"][1]
+    //val compare5b = 5 == table["A"][1]
+    val c = table["A"][1]
+    val compare5 = c.equals(5)
+    val compare5b = c.compareTo(5) == 0
+    val compare6a = 5 in table["A"][1]
 
     println("${table["A"][1]} > 5: ${table["A"][1] > 5}")
 

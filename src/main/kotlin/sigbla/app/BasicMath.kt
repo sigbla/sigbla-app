@@ -995,4 +995,4 @@ operator fun Number.rem(that: BigDecimal): Number {
     }
 }
 
-// TODO Number compare with same promotion rules (see Cell compareTo)
+operator fun Number.compareTo(other: Cell<*>): Int = other.compareTo(this) * -1
