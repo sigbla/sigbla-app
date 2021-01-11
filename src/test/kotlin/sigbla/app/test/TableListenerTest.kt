@@ -1,12 +1,10 @@
 package sigbla.app.test
 
+import sigbla.app.*
+import sigbla.app.exceptions.ListenerLoopException
 import org.junit.After
 import org.junit.Assert
 import org.junit.Test
-import sigbla.app.Table
-import sigbla.app.exceptions.ListenerLoopException
-import sigbla.app.newTable
-import sigbla.app.oldTable
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

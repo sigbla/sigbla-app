@@ -1,18 +1,9 @@
 package sigbla.app.test
 
+import sigbla.app.*
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Test
-import sigbla.app.BigDecimalCell
-import sigbla.app.BigIntegerCell
-import sigbla.app.DoubleCell
-import sigbla.app.LongCell
-import sigbla.app.Table
-import sigbla.app.div
-import sigbla.app.minus
-import sigbla.app.plus
-import sigbla.app.rem
-import sigbla.app.times
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.reflect.KClass
