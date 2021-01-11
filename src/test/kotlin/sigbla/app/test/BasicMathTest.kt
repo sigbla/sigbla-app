@@ -1,8 +1,18 @@
-package sigbla.app
+package sigbla.app.test
 
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Test
+import sigbla.app.BigDecimalCell
+import sigbla.app.BigIntegerCell
+import sigbla.app.DoubleCell
+import sigbla.app.LongCell
+import sigbla.app.Table
+import sigbla.app.div
+import sigbla.app.minus
+import sigbla.app.plus
+import sigbla.app.rem
+import sigbla.app.times
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.reflect.KClass
@@ -105,8 +115,6 @@ class BasicMathTest {
                 assertEquals(typePref(val1::class, t["Val2"][i].value!!::class), (val1 % t["Val2"][i])::class)
             }
         }
-
-        listOf(1, 2L, 3F, 3.0, BigInteger.TWO, BigDecimal.TEN)
 
         for (valAny in values) {
             val val1: Number = valAny as Number

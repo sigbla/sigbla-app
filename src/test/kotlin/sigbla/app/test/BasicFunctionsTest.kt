@@ -1,7 +1,13 @@
-package sigbla.app
+package sigbla.app.test
 
 import org.junit.After
 import org.junit.Test
+import sigbla.app.Table
+import sigbla.app.UnitCell
+import sigbla.app.count
+import sigbla.app.max
+import sigbla.app.min
+import sigbla.app.sum
 import kotlin.test.assertTrue
 
 class BasicFunctionsTest {

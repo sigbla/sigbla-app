@@ -1,4 +1,4 @@
-package sigbla.app
+package sigbla.app.test
 
 class TableViewListenerTest {
     // TODO
