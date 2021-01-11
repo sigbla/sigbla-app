@@ -327,10 +327,10 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
             // Number case
             other is Number -> if (value is Number) {
                 when (val v = this - other) {
-                    is Long -> v.compareTo(0)
-                    is Double -> v.compareTo(0)
-                    is BigDecimal -> v.compareTo(BigDecimal.ZERO)
+                    is Long -> v.compareTo(0L)
+                    is Double -> v.compareTo(0.0)
                     is BigInteger -> v.compareTo(BigInteger.ZERO)
+                    is BigDecimal -> v.compareTo(BigDecimal.ZERO)
                     else -> throw InvalidValueException("Unsupported type: ${v::class}")
                 }
             } else 1 // If this is not a number, make it greater than other number
@@ -633,7 +633,7 @@ class BigIntegerCell internal constructor(column: Column, index: Long, override 
 
     override fun minus(that: Float) = minus(that.toDouble())
 
-    override fun minus(that: Double) = plus(that.toBigDecimal(DefaultBigDecimalPrecision.mathContext))
+    override fun minus(that: Double) = minus(that.toBigDecimal(DefaultBigDecimalPrecision.mathContext))
 
     override fun minus(that: BigInteger) = this.value.subtract(that)!!
 
@@ -712,7 +712,7 @@ class BigDecimalCell internal constructor(column: Column, index: Long, override 
 
     override fun minus(that: Float) = minus(that.toDouble())
 
-    override fun minus(that: Double) = plus(that.toBigDecimal(DefaultBigDecimalPrecision.mathContext))
+    override fun minus(that: Double) = minus(that.toBigDecimal(DefaultBigDecimalPrecision.mathContext))
 
     override fun minus(that: BigInteger) = this.value.subtract(that.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext))!!
 
