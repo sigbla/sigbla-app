@@ -103,6 +103,7 @@ abstract class TableView(val name: String) : Iterable<Area<*>> {
 
     fun show() = SigblaBackend.openView(this)
 
+    // TODO Move this and other table view on functions out..
     inline fun <reified T> on(noinline init: TableViewEventReceiver<TableView, T>.() -> Unit): TableViewListenerReference {
         return on(T::class, init as TableViewEventReceiver<TableView, Any>.() -> Unit)
     }

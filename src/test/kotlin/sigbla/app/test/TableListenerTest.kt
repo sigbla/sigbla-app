@@ -24,7 +24,7 @@ class TableListenerTest {
 
         var eventCount = 0
 
-        val ref = t1.onAny {
+        val ref = on(t1) {
             events {
                 eventCount += count()
             }
@@ -43,7 +43,7 @@ class TableListenerTest {
 
         assertEquals(4, eventCount)
 
-        ref.unsubscribe()
+        off(ref)
 
         t1["B", 3] = "E"
         t1["C", 4] = "F"
@@ -59,7 +59,7 @@ class TableListenerTest {
 
         t1["A", 1] = "A"
 
-        val ref = t1.onAny {
+        val ref = on(t1) {
             events {
                 eventCount += count()
             }
@@ -76,7 +76,7 @@ class TableListenerTest {
 
         assertEquals(4, eventCount)
 
-        ref.unsubscribe()
+        off(ref)
 
         t1["B", 3] = "E"
         t1["C", 4] = "F"
@@ -90,8 +90,8 @@ class TableListenerTest {
 
         var eventCount = 0
 
-        t1.onAny {
-            reference.unsubscribe()
+        on(t1) {
+            off(this)
 
             events {
                 eventCount += count()
@@ -113,8 +113,8 @@ class TableListenerTest {
 
         t1["A", 1] = "A"
 
-        t1.onAny {
-            reference.unsubscribe()
+        on(t1) {
+            off(this)
 
             events {
                 eventCount += count()
@@ -131,7 +131,7 @@ class TableListenerTest {
     @Test
     fun `listener ref with name and order`() {
         val t = Table["listenerRefWithNameOrder"]
-        val ref = t.onAny {
+        val ref = on(t) {
             name = "Name A"
             order = 123
         }
@@ -139,25 +139,25 @@ class TableListenerTest {
         assertEquals("Name A", ref.name)
         assertEquals(123L, ref.order)
 
-        ref.unsubscribe()
+        off(ref)
     }
 
     @Test
     fun `listener ref without name and order`() {
         val t = Table["listenerRefWithoutNameOrder"]
-        val ref = t.onAny {}
+        val ref = on(t) {}
 
         assertNull(ref.name)
         assertEquals(0L, ref.order)
 
-        ref.unsubscribe()
+        off(ref)
     }
 
     @Test
     fun `listener loop support`() {
         val t = Table["listenerLoop"]
 
-        val ref1 = t.onAny {
+        val ref1 = on(t) {
             events {
                 t["A", 0] = 1
             }
@@ -167,9 +167,9 @@ class TableListenerTest {
             t["A", 0] = 0
         }
 
-        ref1.unsubscribe()
+        off(ref1)
 
-        val ref2 = t.onAny {
+        val ref2 = on(t) {
             allowLoop = true
 
             events {
@@ -184,7 +184,7 @@ class TableListenerTest {
 
         assertEquals(1000L, t["A", 1].value)
 
-        ref2.unsubscribe()
+        off(ref2)
     }
 
     @Test
@@ -194,7 +194,7 @@ class TableListenerTest {
         var t1EventCount = 0
         var t2EventCount = 0
 
-        t1.onAny {
+        on(t1) {
             events {
                 t1EventCount += count()
             }
@@ -222,7 +222,7 @@ class TableListenerTest {
         // but when adding a listener we only reply current values
         var expectedT2EventCount = expectedT1EventCount / 2
 
-        t2.onAny {
+        on(t2) {
             events {
                 t2EventCount += count()
             }
@@ -256,7 +256,7 @@ class TableListenerTest {
 
         var change: Number = 0
 
-        t.onAny {
+        on(t) {
             events {
                 change = newTable["A", 1] - oldTable["A", 1]
             }
@@ -279,7 +279,7 @@ class TableListenerTest {
         var id2: Int? = null
         var id3: Int? = null
 
-        t.onAny {
+        on(t) {
             order = 3
             skipHistory = true
 
@@ -290,7 +290,7 @@ class TableListenerTest {
             }
         }
 
-        t.onAny {
+        on(t) {
             order = 2
             skipHistory = true
 
@@ -301,7 +301,7 @@ class TableListenerTest {
             }
         }
 
-        t.onAny {
+        on(t) {
             order = 1
             skipHistory = true
 
@@ -334,7 +334,7 @@ class TableListenerTest {
         var v2New: Any? = null
         var v3New: Any? = null
 
-        t.onAny {
+        on(t) {
             order = 2
 
             events {
@@ -350,7 +350,7 @@ class TableListenerTest {
             }
         }
 
-        t.onAny {
+        on(t) {
             order = 3
 
             events {
@@ -366,7 +366,7 @@ class TableListenerTest {
             }
         }
 
-        t.onAny {
+        on(t) {
             order = 1
 
             events {

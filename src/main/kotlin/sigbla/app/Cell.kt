@@ -107,38 +107,6 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
 
     override fun isEmpty(): Boolean = false
 
-    inline fun <reified O, reified N> on(noinline init: TableEventReceiver<CellRange, O, N>.() -> Unit): TableListenerReference {
-        return on(O::class, N::class, init as TableEventReceiver<CellRange, Any, Any>.() -> Unit)
-    }
-
-    fun onAny(init: TableEventReceiver<CellRange, Any, Any>.() -> Unit): TableListenerReference {
-        return on(Any::class, Any::class, init)
-    }
-
-    fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: TableEventReceiver<CellRange, Any, Any>.() -> Unit): TableListenerReference {
-        val eventReceiver = when {
-            old == Any::class && new == Any::class -> TableEventReceiver<CellRange, Any, Any>(
-                this
-            ) { this }
-            old == Any::class -> TableEventReceiver(this) {
-                this.filter {
-                    new.isInstance(it.newValue.value)
-                }
-            }
-            new == Any::class -> TableEventReceiver(this) {
-                this.filter {
-                    old.isInstance(it.oldValue.value)
-                }
-            }
-            else -> TableEventReceiver(this) {
-                this.filter {
-                    old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value)
-                }
-            }
-        }
-        return start.column.table.eventProcessor.subscribe(this, eventReceiver, init)
-    }
-
     // TODO: Implement assignment ops?
 }
 
@@ -346,44 +314,6 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
 
     operator fun contains(that: Any): Boolean {
         return compareTo(that) == 0
-    }
-
-    inline fun <reified O, reified N> on(noinline init: TableEventReceiver<Cell<*>, O, N>.() -> Unit): TableListenerReference {
-        return on(O::class, N::class, init as TableEventReceiver<Cell<*>, Any, Any>.() -> Unit)
-    }
-
-    fun onAny(init: TableEventReceiver<Cell<*>, Any, Any>.() -> Unit): TableListenerReference {
-        return on(Any::class, Any::class, init)
-    }
-
-    fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: TableEventReceiver<Cell<*>, Any, Any>.() -> Unit): TableListenerReference {
-        val eventReceiver = when {
-            old == Any::class && new == Any::class -> TableEventReceiver<Cell<*>, Any, Any>(
-                this
-            ) { this }
-            old == Any::class -> TableEventReceiver<Cell<*>, Any, Any>(this) {
-                this.filter {
-                    new.isInstance(
-                        it.newValue.value
-                    )
-                }
-            }
-            new == Any::class -> TableEventReceiver<Cell<*>, Any, Any>(this) {
-                this.filter {
-                    old.isInstance(
-                        it.oldValue.value
-                    )
-                }
-            }
-            else -> TableEventReceiver<Cell<*>, Any, Any>(this) {
-                this.filter {
-                    old.isInstance(
-                        it.oldValue.value
-                    ) && new.isInstance(it.newValue.value)
-                }
-            }
-        }
-        return column.table.eventProcessor.subscribe(this, eventReceiver, init)
     }
 
     fun asSequence(): Sequence<Cell<*>> = sequenceOf(this)

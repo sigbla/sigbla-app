@@ -6,7 +6,7 @@ abstract class TableListenerReference {
     abstract val name: String?
     abstract val order: Long
     abstract val allowLoop: Boolean
-    abstract fun unsubscribe()
+    internal abstract fun unsubscribe()
 
     override fun toString(): String {
         return "TableListenerReference(name=${name}, order=${order}, allowLoop=${allowLoop})"

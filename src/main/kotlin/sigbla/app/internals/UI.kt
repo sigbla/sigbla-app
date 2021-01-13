@@ -473,19 +473,21 @@ internal object SigblaBackend {
 
         // TODO As with the view, the underlying table might also change, so we need to remove
         //      and add a new listener when this happens..
-        view.table?.onAny {
-            skipHistory = true
-            order = Long.MAX_VALUE
-            name = "UI"
+        view.table?.apply {
+            on(this) {
+                skipHistory = true
+                order = Long.MAX_VALUE
+                name = "UI"
 
-            events {
-                if (any()) {
-                    val dirtyCells = map { it.newValue }.toSet()
-                    listeners.values.forEach { client ->
-                        if (client.ref == view.name) {
-                            runBlocking {
-                                handleDims(client)
-                                handleDirty(client, dirtyCells)
+                events {
+                    if (any()) {
+                        val dirtyCells = map { it.newValue }.toSet()
+                        listeners.values.forEach { client ->
+                            if (client.ref == view.name) {
+                                runBlocking {
+                                    handleDims(client)
+                                    handleDirty(client, dirtyCells)
+                                }
                             }
                         }
                     }

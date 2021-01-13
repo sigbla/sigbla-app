@@ -37,7 +37,7 @@ internal class TableEventProcessor {
         var key: ListenerId? = null
             set(value) {
                 field = value
-                if (haveUnsubscribed) unsubscribe()
+                if (haveUnsubscribed) off(this)
             }
     }
 

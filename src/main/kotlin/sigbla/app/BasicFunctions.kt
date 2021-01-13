@@ -64,7 +64,9 @@ private inline fun <reified O, reified N> cellFunction(
     order: Long = 0L,
     crossinline calc: Iterable<Cell<*>>.() -> Number?
 ): DestinationOsmosis<Cell<*>>.() -> Unit = {
-    cellRange.on<O, N> {
+    on<O, N>(cellRange) {
+        val unsubscribeOuter = { off(this) }
+
         this.name = name
         this.order = order
 
@@ -85,7 +87,9 @@ private inline fun <reified O, reified N> cellFunction(
             }
         }
 
-        destination.onAny {
+        on(destination) {
+            val unsubscribeInner = { off(this) }
+
             this.skipHistory = true
             this.name = "Unsubscriber for $name"
             this.order = order
@@ -94,8 +98,8 @@ private inline fun <reified O, reified N> cellFunction(
                 if (any() && destinationCount.decrementAndGet() < 0) {
                     // Something else is interactive with destination,
                     // so let's remove this function.
-                    this@on.reference.unsubscribe()
-                    this@onAny.reference.unsubscribe()
+                    unsubscribeOuter()
+                    unsubscribeInner()
                 }
             }
         }

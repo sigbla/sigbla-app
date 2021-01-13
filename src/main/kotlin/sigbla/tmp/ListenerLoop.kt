@@ -1,11 +1,11 @@
 package sigbla.tmp
 
-import sigbla.app.Table
+import sigbla.app.*
 
 fun main() {
     val table = Table["listener loop"]
 
-    val ref = table.onAny {
+    val ref = on(table) {
         allowLoop = true
 
         events {

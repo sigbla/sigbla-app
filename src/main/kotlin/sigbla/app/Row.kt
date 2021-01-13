@@ -56,44 +56,6 @@ abstract class Row : Comparable<Row> {
         return RowRange(this, other)
     }
 
-    inline fun <reified O, reified N> on(noinline init: TableEventReceiver<Row, O, N>.() -> Unit): TableListenerReference {
-        return on(O::class, N::class, init as TableEventReceiver<Row, Any, Any>.() -> Unit)
-    }
-
-    fun onAny(init: TableEventReceiver<Row, Any, Any>.() -> Unit): TableListenerReference {
-        return on(Any::class, Any::class, init)
-    }
-
-    fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: TableEventReceiver<Row, Any, Any>.() -> Unit): TableListenerReference {
-        val eventReceiver = when {
-            old == Any::class && new == Any::class -> TableEventReceiver<Row, Any, Any>(
-                this
-            ) { this }
-            old == Any::class -> TableEventReceiver(this) {
-                this.filter {
-                    new.isInstance(
-                        it.newValue.value
-                    )
-                }
-            }
-            new == Any::class -> TableEventReceiver(this) {
-                this.filter {
-                    old.isInstance(
-                        it.oldValue.value
-                    )
-                }
-            }
-            else -> TableEventReceiver(this) {
-                this.filter {
-                    old.isInstance(it.oldValue.value) && new.isInstance(
-                        it.newValue.value
-                    )
-                }
-            }
-        }
-        return table.eventProcessor.subscribe(this, eventReceiver, init)
-    }
-
     override fun compareTo(other: Row): Int {
         return index.compareTo(other.index)
     }

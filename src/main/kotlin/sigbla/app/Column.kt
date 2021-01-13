@@ -89,9 +89,6 @@ abstract class Column internal constructor(
 
     infix fun after(index: Int) = get(AFTER, index)
 
-    // TODO Look at if this is wanted and possible: table["A"] move|copy before|after table["B"] (withName ..)
-    //infix fun move()
-
     operator fun get(index: Long) = get(AT, index)
 
     operator fun get(index: Int) = get(AT, index.toLong())
@@ -151,16 +148,22 @@ abstract class Column internal constructor(
     // TODO: Look at adding a add(..) function.
     //       Add would just insert a cell at first available location.
 
+    // TODO: Move these out (remove, rename, clear) like with on
     abstract fun remove(index: Long): Cell<*>
 
+    // TODO: Move these out (remove, rename, clear) like with on
     fun remove(index: Int) = remove(index.toLong())
 
+    // TODO: Move these out (remove, rename, clear) like with on
     fun rename(newName: ColumnHeader) = table.rename(columnHeader, newName)
 
+    // TODO: Move these out (remove, rename, clear) like with on
     fun rename(vararg newName: String) = table.rename(columnHeader, *newName)
 
+    // TODO: Move these out (remove, rename, clear) like with on
     abstract fun clear()
 
+    // TODO Before and after functions should maybe be extension functions?
     infix fun before(other: Column): ColumnAction {
         if (this == other)
             throw InvalidColumnException("Cannot move column before itself: $this")
@@ -172,6 +175,7 @@ abstract class Column internal constructor(
         )
     }
 
+    // TODO Before and after functions should maybe be extension functions?
     infix fun after(other: Column): ColumnAction {
         if (this == other)
             throw InvalidColumnException("Cannot move column after itself: $this")
@@ -185,44 +189,6 @@ abstract class Column internal constructor(
 
     operator fun rangeTo(other: Column): ColumnRange {
         return ColumnRange(this, other)
-    }
-
-    inline fun <reified O, reified N> on(noinline init: TableEventReceiver<Column, O, N>.() -> Unit): TableListenerReference {
-        return on(O::class, N::class, init as TableEventReceiver<Column, Any, Any>.() -> Unit)
-    }
-
-    fun onAny(init: TableEventReceiver<Column, Any, Any>.() -> Unit): TableListenerReference {
-        return on(Any::class, Any::class, init)
-    }
-
-    fun on(old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: TableEventReceiver<Column, Any, Any>.() -> Unit): TableListenerReference {
-        val eventReceiver = when {
-            old == Any::class && new == Any::class -> TableEventReceiver<Column, Any, Any>(
-                this
-            ) { this }
-            old == Any::class -> TableEventReceiver(this) {
-                this.filter {
-                    new.isInstance(
-                        it.newValue.value
-                    )
-                }
-            }
-            new == Any::class -> TableEventReceiver(this) {
-                this.filter {
-                    old.isInstance(
-                        it.oldValue.value
-                    )
-                }
-            }
-            else -> TableEventReceiver(this) {
-                this.filter {
-                    old.isInstance(it.oldValue.value) && new.isInstance(
-                        it.newValue.value
-                    )
-                }
-            }
-        }
-        return table.eventProcessor.subscribe(this, eventReceiver, init)
     }
 
     override fun compareTo(other: Column): Int {
@@ -441,7 +407,6 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
     }
 }
 
-// TODO Should we use on rather than at?
 enum class IndexRelation {
     AT, AT_OR_BEFORE, AT_OR_AFTER, BEFORE, AFTER
 }

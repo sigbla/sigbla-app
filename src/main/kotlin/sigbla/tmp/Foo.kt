@@ -4,9 +4,7 @@ import kotlinx.html.div
 import kotlinx.html.span
 import kotlinx.html.style
 import sigbla.app.IndexRelation.*
-import sigbla.app.Table.Companion.on
 import sigbla.app.*
-import sigbla.app.Table.Companion.onAny
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -23,7 +21,7 @@ fun main() {
     table["Column A"][1] = 1000
     table["Column A", 1] = 1000
 
-    (table["C"][1]..table["D"][10]).onAny {
+    on(table["C"][1]..table["D"][10]) {
         name = "A"
 
         if (table["E"][1].isNumeric())
@@ -179,11 +177,12 @@ fun main() {
     val inVal = 5 in table["A"][1]
 
     // TODO
-    //Table.move(table["A"] before table["B"])
-    //Table.move(table["A"] after table["B"])
-    //Table.copy(table["A"] before table["B"], "C")
-    //Table.move(table["A"], ColumnActionOrder.AFTER, table["B"])
     //move(table["A"] before table["B"])
+    //move(table["A"] after table["B"])
+    //copy(table["A"] before table["B"], "C")
+    //move(table["A"], ColumnActionOrder.AFTER, table["B"])
+    //table.rename(table["A"], "A")
+    //table["A"].rename("A")
 
     (table.columns.first()..table.columns.last()).forEach {
         println("Column range first to last: " + it.columnHeader)
@@ -227,7 +226,7 @@ fun main() {
 
     // TODO table[1].iterator().forEach { .. }
 
-    on<Any, Any>(table) {
+    on(table) {
         name = "B"
         allowLoop = true
 
@@ -319,7 +318,7 @@ fun main() {
         }
     }
 
-    table["Sums", 0].on<Any, Number> {
+    on<Any, Number>(table["Sums", 0]) {
         name = "F"
 
         events {
@@ -331,7 +330,7 @@ fun main() {
 
     table["A", 1] = null
 
-    onAny(table) {
+    on(table) {
         name = "G"
 
         events {
@@ -346,28 +345,28 @@ fun main() {
     // table.off("Name")
     // table.off(table["A"][1])
 
-    table.on<Any, Number> {
+    on<Any, Number>(table) {
         name = "H"
 
         events {
             println("Subscribe 2: ${count()}")
         }
     }
-    table.on<Any, String> {
+    on<Any, String>(table) {
         name = "I"
 
         events {
             println("Subscribe 3: ${count()}")
         }
     }
-    table.on<String, Number> {
+    on<String, Number>(table) {
         name = "J"
 
         events {
             println("Subscribe 4: ${count()}")
         }
     }
-    table.onAny {
+    on(table) {
         name = "K"
 
         events {
@@ -402,7 +401,7 @@ fun main() {
 
     // WIP
     table["DST", 0] = {
-        table.on<Any, Number> {
+        on<Any, Number>(table) {
             name = "L"
 
             skipHistory = true
@@ -434,7 +433,7 @@ fun main() {
             +"Pre Event"
         }
 
-        table.onAny {
+        on(table) {
             name = "M"
 
             skipHistory = true

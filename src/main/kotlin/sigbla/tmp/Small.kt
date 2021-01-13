@@ -27,7 +27,7 @@ fun main() {
 
     val tableView = TableView[table]
 
-    table.onAny {
+    on(table) {
         events {
             newTable
             oldTable
