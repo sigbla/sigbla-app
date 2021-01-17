@@ -244,12 +244,6 @@ class BaseColumn internal constructor(
 
             it.copy(
                 columnCellMap = it.columnCellMap.put(this, values.put(index, cellValue)),
-                indicesMap = if (values[index] != null) it.indicesMap else it.indicesMap.put(index, it.indicesMap[index].let { v ->
-                    when (v) {
-                        null -> 1
-                        else -> v + 1
-                    }
-                }),
                 version = it.version + 1L
             )
         }
@@ -276,13 +270,6 @@ class BaseColumn internal constructor(
 
             it.copy(
                 columnCellMap = it.columnCellMap.put(this, values.remove(index)),
-                indicesMap = it.indicesMap.put(index, it.indicesMap[index].let { v ->
-                    when {
-                        v == null -> null
-                        v - 1 == 0 -> null
-                        else -> v - 1
-                    }
-                }),
                 version = it.version + 1L
             )
         }
@@ -307,19 +294,7 @@ class BaseColumn internal constructor(
 
     override fun clear() {
         tableRef.updateAndGet {
-            val values = it.columnCellMap[this] ?: throw InvalidColumnException()
-            val indices = values.keys().fold(it.indicesMap) { acc, index ->
-                acc.put(index, acc[index].let { v ->
-                    when {
-                        v == null -> null
-                        v - 1 == 0 -> null
-                        else -> v - 1
-                    }
-                })
-            }
-
             it.copy(
-                indicesMap = indices,
                 columnCellMap = it.columnCellMap.put(this, PTreeMap()),
                 version = it.version + 1L
             )
@@ -336,25 +311,18 @@ class BaseColumn internal constructor(
 
     private fun getCellRaw(index: Long, indexRelation: IndexRelation): CellValue<*>? {
         val ref = tableRef.get()
-        val indices = ref.indicesMap.asSortedMap()
         val values = ref.columnCellMap[this] ?: throw InvalidColumnException()
 
         fun firstBefore(): CellValue<*>? {
-            for (i in indices.headMap(index).keys.sortedDescending()) {
-                if (values.containsKey(i)) {
-                    return values[i]
-                }
-            }
-            return null
+            val keys = values.asSortedMap().headMap(index).keys
+            if (keys.isEmpty()) return null
+            return values[keys.last()]
         }
 
         fun firstAfter(): CellValue<*>? {
-            for (i in indices.tailMap(index + 1L).keys) {
-                if (values.containsKey(i)) {
-                    return values[i]
-                }
-            }
-            return null
+            val keys = values.asSortedMap().tailMap(index + 1L).keys
+            if (keys.isEmpty()) return null
+            return values[keys.first()]
         }
 
         return when (indexRelation) {

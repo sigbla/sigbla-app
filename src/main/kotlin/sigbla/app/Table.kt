@@ -9,7 +9,6 @@ import java.math.BigInteger
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.reflect.KClass
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 import com.github.andrewoma.dexx.collection.Map as PMap
 import com.github.andrewoma.dexx.collection.SortedMap as PSortedMap
@@ -559,7 +558,6 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
 internal data class TableRef(
     val columnsMap: PMap<ColumnHeader, Column> = PHashMap(),
     val columnCellMap: PMap<Column, PSortedMap<Long, CellValue<*>>> = PHashMap(),
-    val indicesMap: PSortedMap<Long, Int> = PTreeMap(),
     val version: Long = Long.MIN_VALUE
 )
 
@@ -659,7 +657,6 @@ class BaseTable internal constructor(
         newTableRef.set(TableRef(
             newColumnsMap,
             newColumnCellMap,
-            ref.indicesMap,
             ref.version
         ))
 

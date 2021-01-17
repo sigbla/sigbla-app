@@ -8,6 +8,7 @@ import org.junit.Assert.*
 import org.junit.Test
 import org.junit.After
 import sigbla.app.DefaultBigDecimalPrecision
+import sigbla.app.IndexRelation
 import sigbla.app.Table
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -725,5 +726,35 @@ class BasicTableTest {
         assertEquals(BigDecimal.TEN * BigDecimal.TEN, t["Times"][idxMapping[Pair(5, 5)]!!].value)
         assertEquals(BigDecimal.TEN / BigDecimal.TEN, t["Div"][idxMapping[Pair(5, 5)]!!].value)
         assertEquals(BigDecimal.TEN % BigDecimal.TEN, t["Rem"][idxMapping[Pair(5, 5)]!!].value)
+    }
+
+    @Test
+    fun `basic cell fetch`() {
+        val t = Table["basicCellFetch"]
+        t["A", 11] = "A 11"
+        t["A", 12] = "A 12"
+        t["A", 13] = "A 13"
+
+        t["B", 11] = "B 11"
+        t["B", 13] = "B 13"
+
+        assertEquals("A 11", (t["A", 11]).value)
+        assertEquals("A 11", (t["A"] at 11).value)
+        assertEquals("A 11", t["A", IndexRelation.AT, 11].value)
+
+        assertEquals("A 12", (t["A", 12]).value)
+        assertEquals("A 12", (t["A"] atOrAfter 12).value)
+        assertEquals("A 12", (t["A"] atOrBefore 12).value)
+        assertEquals("A 12", (t["A"] after 11).value)
+        assertEquals("A 12", (t["A"] before 13).value)
+        assertEquals("A 12", t["A", IndexRelation.AT_OR_AFTER, 12].value)
+        assertEquals("A 12", t["A", IndexRelation.AT_OR_BEFORE, 12].value)
+        assertEquals("A 12", t["A", IndexRelation.AFTER, 11].value)
+        assertEquals("A 12", t["A", IndexRelation.BEFORE, 13].value)
+
+        assertEquals("B 11", (t["B"] before 12).value)
+        assertEquals("B 11", (t["B", IndexRelation.BEFORE, 12]).value)
+        assertEquals("B 13", (t["B"] after 12).value)
+        assertEquals("B 13", (t["B", IndexRelation.AFTER, 12]).value)
     }
 }
