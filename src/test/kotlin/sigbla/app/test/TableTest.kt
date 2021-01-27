@@ -15,7 +15,7 @@ class TableTest {
 
     @Test
     fun `clone table values`() {
-        val t1 = Table["tableClone1"]
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
 
         for (c in listOf("A", "B", "C", "D")) {
             for (r in 1..100) {
@@ -64,7 +64,7 @@ class TableTest {
 
     @Test
     fun `compare cell to values`() {
-        val t = Table["tableCompare"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
         t["Long", 0] = 100L
         t["Double", 0] = 100.0
         t["BigInteger", 0] = BigInteger("100")
@@ -271,5 +271,41 @@ class TableTest {
 
         assertTrue(t["BigDecimal", 0] < BigDecimal("200.0"))
         assertTrue(BigDecimal("200.0") > t["BigDecimal", 0])
+    }
+
+    @Test
+    fun `column iterator`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "A0"
+        t["A", 1] = "A1"
+        t["A", 2] = "A2"
+        t["A", 3] = "A3"
+
+        t["B", 0] = "B0"
+        t["B", 1] = "B1"
+        t["B", 2] = "B2"
+        t["B", 3] = "B3"
+
+        assertEquals(listOf("A0", "A1", "A2", "A3"), t["A"].map { it.value })
+        assertEquals(listOf("B0", "B1", "B2", "B3"), t["B"].iterator().asSequence().map { it.value }.toList())
+    }
+
+    @Test
+    fun `row iterator`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "A0"
+        t["B", 0] = "B0"
+        t["C", 0] = "C0"
+        t["D", 0] = "D0"
+
+        t["A", 1] = "A1"
+        t["B", 1] = "B1"
+        t["C", 1] = "C1"
+        t["D", 1] = "D1"
+
+        assertEquals(listOf("A0", "B0", "C0", "D0"), t[0].map { it.value })
+        assertEquals(listOf("A1", "B1", "C1", "D1"), t[1].iterator().asSequence().map { it.value }.toList())
     }
 }
