@@ -68,7 +68,6 @@ abstract class Column internal constructor(
 
     abstract operator fun set(index: Long, value: Cell<*>?)
 
-    // TODO Not sure I like these yet.. maybe move this and other infix to special place?
     infix fun at(index: Long) = get(AT, index)
 
     infix fun atOrBefore(index: Long) = get(AT_OR_BEFORE, index)
@@ -129,17 +128,7 @@ abstract class Column internal constructor(
 
     operator fun set(index: Int, value: BigDecimal) = set(index.toLong(), value)
 
-    operator fun set(index: Int, value: Number) {
-        when (value) {
-            is Int -> set(index, value.toLong())
-            is Long -> set(index, value)
-            is Float -> set(index, value.toDouble())
-            is Double -> set(index, value)
-            is BigInteger -> set(index, value)
-            is BigDecimal -> set(index, value)
-            else -> set(index, value.toLong())
-        }
-    }
+    operator fun set(index: Int, value: Number) = set(index.toLong(), value)
 
     operator fun set(index: Long, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[index]).init()
 
@@ -218,11 +207,12 @@ abstract class Column internal constructor(
 class BaseColumn internal constructor(
     table: Table,
     columnHeader: ColumnHeader,
-    private val tableRef: AtomicReference<TableRef>
+    private val tableRef: AtomicReference<TableRef>,
+    columnOrder: Int = tableRef.get().columnsMap[columnHeader]?.columnOrder ?: table.columnCounter.getAndIncrement()
 ) : Column(
     table,
     columnHeader,
-    tableRef.get().columnsMap[columnHeader]?.columnOrder ?: table.columnCounter.getAndIncrement()
+    columnOrder
 ) {
     override fun get(indexRelation: IndexRelation, index: Long): Cell<*> {
         return getCellRaw(index, indexRelation)?.toCell(this, index) ?: UnitCell(
@@ -303,7 +293,6 @@ class BaseColumn internal constructor(
         // TODO Event processor..
     }
 
-    // TODO We need this on CellRange, Table, Row and similar.. (done?)
     override fun iterator(): Iterator<Cell<*>> {
         val values = tableRef.get().columnCellMap[this] ?: throw InvalidColumnException()
         return values.asSequence().map { it.component2().toCell(this, it.component1()) }.iterator()
@@ -329,8 +318,8 @@ class BaseColumn internal constructor(
             AT -> values[index]
             BEFORE -> firstBefore()
             AFTER -> firstAfter()
-            AT_OR_BEFORE -> values[index] ?: run { getCellRaw(index, BEFORE) }
-            AT_OR_AFTER -> values[index] ?: run { getCellRaw(index, AFTER) }
+            AT_OR_BEFORE -> values[index] ?: getCellRaw(index, BEFORE)
+            AT_OR_AFTER -> values[index] ?: getCellRaw(index, AFTER)
         }
     }
 }
@@ -340,6 +329,7 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
         get() = start.table
 
     override fun iterator(): Iterator<Column> {
+        // TODO This needs to use ref snapshot
         return if (start.columnOrder <= endInclusive.columnOrder) {
             start
                 .table

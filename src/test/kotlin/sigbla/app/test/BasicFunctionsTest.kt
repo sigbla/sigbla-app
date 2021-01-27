@@ -13,7 +13,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `sum with defaults`() {
-        val t = Table["sum"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
 
         t["A", 0] = 100
         t["A", 1] = 200
@@ -41,7 +41,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `sum with predicate`() {
-        val t = Table["sum"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
 
         t["A", 0] = 100
         t["A", 1] = 200
@@ -69,7 +69,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `max with defaults`() {
-        val t = Table["max"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
 
         t["B", 0] = 100
         t["A", 1] = 200
@@ -97,7 +97,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `max with predicate`() {
-        val t = Table["max"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
 
         t["B", 0] = 100
         t["A", 1] = 200
@@ -125,7 +125,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `min with defaults`() {
-        val t = Table["min"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
 
         t["B", 0] = 200
         t["A", 1] = 100
@@ -153,7 +153,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `min with predicate`() {
-        val t = Table["min"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
 
         t["B", 0] = 200
         t["A", 1] = 100
@@ -181,7 +181,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `count with defaults`() {
-        val t = Table["count"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
 
         t["B", 0] = 200
         t["A", 1] = 100
@@ -209,7 +209,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `count with predicate`() {
-        val t = Table["count"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
 
         t["B", 0] = 200
         t["A", 1] = 100

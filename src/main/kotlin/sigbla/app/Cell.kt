@@ -57,6 +57,7 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
         get() = start.table
 
     override fun iterator(): Iterator<Cell<*>> {
+        // TODO: This needs to use ref snapshot
         // TODO: This iterator implementation, as with the ColumnRange one could be more efficient!
 
         val columns = (start.column..endInclusive.column).toList()

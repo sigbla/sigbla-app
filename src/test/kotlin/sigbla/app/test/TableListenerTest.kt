@@ -20,7 +20,7 @@ class TableListenerTest {
     // TODO Ensure we test this subscribe and unsubscribe test below on all onAny functions
     @Test
     fun `subscribe and unsubscribe`() {
-        val t1 = Table["subscribeAndUnsubscribe"]
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
 
         var eventCount = 0
 
@@ -53,7 +53,7 @@ class TableListenerTest {
 
     @Test
     fun `subscribe to filled table and unsubscribe`() {
-        val t1 = Table["subscribeAndUnsubscribe"]
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
 
         var eventCount = 0
 
@@ -86,7 +86,7 @@ class TableListenerTest {
 
     @Test
     fun `subscribe and instant unsubscribe`() {
-        val t1 = Table["subscribeAndInstantUnsubscribe"]
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
 
         var eventCount = 0
 
@@ -107,7 +107,7 @@ class TableListenerTest {
 
     @Test
     fun `subscribe to filled table and instant unsubscribe`() {
-        val t1 = Table["subscribeFilledTableAndInstantUnsubscribe"]
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
 
         var eventCount = 0
 
@@ -130,7 +130,7 @@ class TableListenerTest {
 
     @Test
     fun `listener ref with name and order`() {
-        val t = Table["listenerRefWithNameOrder"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
         val ref = on(t) {
             name = "Name A"
             order = 123
@@ -144,7 +144,7 @@ class TableListenerTest {
 
     @Test
     fun `listener ref without name and order`() {
-        val t = Table["listenerRefWithoutNameOrder"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
         val ref = on(t) {}
 
         assertNull(ref.name)
@@ -155,7 +155,7 @@ class TableListenerTest {
 
     @Test
     fun `listener loop support`() {
-        val t = Table["listenerLoop"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
 
         val ref1 = on(t) {
             events {
@@ -189,7 +189,7 @@ class TableListenerTest {
 
     @Test
     fun `table clone and events`() {
-        val t1 = Table["tableCloneEvents"]
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
 
         var t1EventCount = 0
         var t2EventCount = 0
@@ -250,7 +250,7 @@ class TableListenerTest {
 
     @Test
     fun `table events with old and new snapshots`() {
-        val t = Table["tableEventSnapshots"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
 
         t["A", 1] = 1
 
@@ -271,7 +271,7 @@ class TableListenerTest {
 
     @Test
     fun `listener ordering`() {
-        val t = Table["listenerOrdering"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
 
         val generator = AtomicInteger()
 
@@ -324,7 +324,7 @@ class TableListenerTest {
 
     @Test
     fun `listener order difference propagation`() {
-        val t = Table["listerOrderDiffPropagation"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
 
         var v1Old: Any? = null
         var v2Old: Any? = null

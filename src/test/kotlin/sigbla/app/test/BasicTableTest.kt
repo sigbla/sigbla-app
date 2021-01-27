@@ -26,7 +26,7 @@ class BasicTableTest {
 
     @Test
     fun `basic table ops 1`() {
-        val name = "basicTableOps1"
+        val name = object {}.javaClass.enclosingMethod.name
         val t = Table[name]
         assertTrue(Table.names.contains(name))
 
@@ -105,7 +105,7 @@ class BasicTableTest {
 
     @Test
     fun `basic table ops 2`() {
-        val name = "basicTableOps2"
+        val name = object {}.javaClass.enclosingMethod.name
         val t = Table[name]
         assertTrue(Table.names.contains(name))
 
@@ -208,7 +208,7 @@ class BasicTableTest {
     @Test
     fun `basic table math 1`() {
         // Testing math between cells
-        val t = Table["basicTableMath1"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
 
         val values = listOf(1, 2L, 3F, 3.0, BigInteger.TWO, BigDecimal.TEN)
 
@@ -469,7 +469,7 @@ class BasicTableTest {
     @Test
     fun `basic table math 2`() {
         // Testing math between cell and number
-        val t = Table["basicTableMath1"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
 
         val values = listOf(1, 2L, 3F, 3.0, BigInteger.TWO, BigDecimal.TEN)
 
@@ -730,7 +730,7 @@ class BasicTableTest {
 
     @Test
     fun `basic cell fetch`() {
-        val t = Table["basicCellFetch"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
         t["A", 11] = "A 11"
         t["A", 12] = "A 12"
         t["A", 13] = "A 13"

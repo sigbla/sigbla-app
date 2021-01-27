@@ -17,7 +17,7 @@ class BasicMathTest {
     @Test
     fun `basic table math`() {
         // Testing math between number and cell
-        val t = Table["basicTableMath"]
+        val t = Table[object {}.javaClass.enclosingMethod.name]
 
         fun typeValue(clazz: KClass<*>): Int {
             return when (clazz) {

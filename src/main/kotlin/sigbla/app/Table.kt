@@ -494,6 +494,7 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
     fun remove(index: Long) = this.headers.forEach { c -> this[c].remove(index) }
 
     override fun iterator(): Iterator<Cell<*>> {
+        // TODO This needs to work with the ref snapshot
         return object : Iterator<Cell<*>> {
             private val columnIterator = columns.iterator()
             private var cellIterator = nextCellIterator()
