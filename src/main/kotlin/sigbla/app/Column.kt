@@ -150,7 +150,7 @@ abstract class Column internal constructor(
     // TODO: Move these out (remove, rename, clear) like with on
     abstract fun clear()
 
-    // TODO Before and after functions should maybe be extension functions?
+    // TODO Before, after, and to functions should maybe be extension functions?
     infix fun before(other: Column): ColumnToColumnAction {
         if (this == other)
             throw InvalidColumnException("Cannot move column before itself: $this")
@@ -162,7 +162,7 @@ abstract class Column internal constructor(
         )
     }
 
-    // TODO Before and after functions should maybe be extension functions?
+    // TODO Before, after, and to functions should maybe be extension functions?
     infix fun after(other: Column): ColumnToColumnAction {
         if (this == other)
             throw InvalidColumnException("Cannot move column after itself: $this")
@@ -171,6 +171,17 @@ abstract class Column internal constructor(
             this,
             other,
             ColumnActionOrder.AFTER
+        )
+    }
+
+    // TODO Before, after, and to functions should maybe be extension functions?
+    infix fun to(other: Table): ColumnToTableAction {
+        if (this.table == other)
+            throw InvalidColumnException("Cannot move column to same table: $this")
+
+        return ColumnToTableAction(
+            this,
+            other
         )
     }
 
@@ -366,6 +377,8 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
 enum class IndexRelation {
     AT, AT_OR_BEFORE, AT_OR_AFTER, BEFORE, AFTER
 }
+
+class ColumnToTableAction internal constructor(val left: Column, val right: Table)
 
 class ColumnToColumnAction internal constructor(val left: Column, val right: Column, val order: ColumnActionOrder)
 

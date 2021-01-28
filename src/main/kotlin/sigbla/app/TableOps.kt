@@ -81,6 +81,18 @@ fun move(left: Column, actionOrder: ColumnActionOrder, right: Column, withName: 
 
 fun move(left: Column, actionOrder: ColumnActionOrder, right: Column, vararg withName: String): Unit = TODO()
 
+fun move(columnToTableAction: ColumnToTableAction): Unit = TODO()
+
+fun move(columnToTableAction: ColumnToTableAction, withName: ColumnHeader): Unit = TODO()
+
+fun move(columnToTableAction: ColumnToTableAction, vararg withName: String): Unit = TODO()
+
+fun move(left: Column, right: Table): Unit = TODO()
+
+fun move(left: Column, right: Table, withName: ColumnHeader): Unit = TODO()
+
+fun move(left: Column, right: Table, vararg withName: String): Unit = TODO()
+
 //fun copy(columnAction: ColumnAction): Unit = TODO()
 
 fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader): Unit = TODO()
@@ -92,6 +104,18 @@ fun copy(columnToColumnAction: ColumnToColumnAction, vararg withName: String): U
 fun copy(left: Column, actionOrder: ColumnActionOrder, right: Column, withName: ColumnHeader): Unit = TODO()
 
 fun copy(left: Column, actionOrder: ColumnActionOrder, right: Column, vararg withName: String): Unit = TODO()
+
+fun copy(columnToTableAction: ColumnToTableAction): Unit = TODO()
+
+fun copy(columnToTableAction: ColumnToTableAction, withName: ColumnHeader): Unit = TODO()
+
+fun copy(columnToTableAction: ColumnToTableAction, vararg withName: String): Unit = TODO()
+
+fun copy(left: Column, right: Table): Unit = TODO()
+
+fun copy(left: Column, right: Table, withName: ColumnHeader): Unit = TODO()
+
+fun copy(left: Column, right: Table, vararg withName: String): Unit = TODO()
 
 //fun rename(column: Column, withName: ColumnHeader): Unit = column.rename(withName)
 
