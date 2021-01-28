@@ -308,4 +308,76 @@ class TableTest {
         assertEquals(listOf("A0", "B0", "C0", "D0"), t[0].map { it.value })
         assertEquals(listOf("A1", "B1", "C1", "D1"), t[1].iterator().asSequence().map { it.value }.toList())
     }
+
+    @Test
+    fun `move columns within same table`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "First"
+        t["B", 0] = "Middle"
+        t["C", 0] = "Last"
+
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), t.headers.map { it.header })
+        assertEquals(listOf("First", "Middle", "Last"), t[0].map { it.value })
+
+        // Move to in between
+        move(t["A"] after t["B"])
+
+        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), t.headers.map { it.header })
+        assertEquals(listOf("Middle", "First", "Last"), t[0].map { it.value })
+
+        // Move to last
+        move(t["B"] after t["C"])
+
+        assertEquals(listOf(listOf("A"), listOf("C"), listOf("B")), t.headers.map { it.header })
+        assertEquals(listOf("First", "Last", "Middle"), t[0].map { it.value })
+
+        // Move to first
+        move(t["C"] before t["A"])
+
+        assertEquals(listOf(listOf("C"), listOf("A"), listOf("B")), t.headers.map { it.header })
+        assertEquals(listOf("Last", "First", "Middle"), t[0].map { it.value })
+    }
+
+    @Test
+    fun `move columns between tables with columns`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
+        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+
+        t1["A", 0] = "First"
+        t1["B", 0] = "Middle"
+        t1["C", 0] = "Last"
+
+        t2["T2", 0] = "T2 cell"
+
+        assertEquals(listOf("First", "Middle", "Last"), t1[0].map { it.value })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), t1.headers.map { it.header })
+
+        // Move to after T2
+        move(t1["A"] after t2["T2"])
+
+        assertEquals(listOf(listOf("B"), listOf("C")), t1.headers.map { it.header })
+        assertEquals(listOf("Middle", "Last"), t1[0].map { it.value })
+
+        assertEquals(listOf(listOf("T2"), listOf("A")), t2.headers.map { it.header })
+        assertEquals(listOf("T2 cell", "First"), t2[0].map { it.value })
+
+        // Move to before T2
+        move(t1["B"] before t2["T2"])
+
+        assertEquals(listOf(listOf("C")), t1.headers.map { it.header })
+        assertEquals(listOf("Last"), t1[0].map { it.value })
+
+        assertEquals(listOf(listOf("B"), listOf("T2"), listOf("A")), t2.headers.map { it.header })
+        assertEquals(listOf("Middle", "T2 cell", "First"), t2[0].map { it.value })
+
+        // Move to in between
+        move(t1["C"] after t2["B"])
+
+        assertEquals(emptyList<List<String>>(), t1.headers.map { it.header })
+        assertEquals(emptyList<List<String>>(), t1[0].map { it.value })
+
+        assertEquals(listOf(listOf("B"), listOf("C"), listOf("T2"), listOf("A")), t2.headers.map { it.header })
+        assertEquals(listOf("Middle", "Last", "T2 cell", "First"), t2[0].map { it.value })
+    }
 }

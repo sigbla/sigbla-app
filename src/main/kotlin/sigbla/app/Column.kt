@@ -2,7 +2,6 @@ package sigbla.app
 
 import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
 import sigbla.app.exceptions.InvalidColumnException
-import sigbla.app.exceptions.ReadOnlyColumnException
 import sigbla.app.IndexRelation.*
 import sigbla.app.internals.refAction
 import java.math.BigDecimal
@@ -11,7 +10,6 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.reflect.KClass
 
 class ColumnHeader(vararg header: String) : Comparable<ColumnHeader> {
     val header: List<String> = Collections.unmodifiableList(header.asList())
@@ -153,11 +151,11 @@ abstract class Column internal constructor(
     abstract fun clear()
 
     // TODO Before and after functions should maybe be extension functions?
-    infix fun before(other: Column): ColumnAction {
+    infix fun before(other: Column): ColumnToColumnAction {
         if (this == other)
             throw InvalidColumnException("Cannot move column before itself: $this")
 
-        return ColumnAction(
+        return ColumnToColumnAction(
             this,
             other,
             ColumnActionOrder.BEFORE
@@ -165,11 +163,11 @@ abstract class Column internal constructor(
     }
 
     // TODO Before and after functions should maybe be extension functions?
-    infix fun after(other: Column): ColumnAction {
+    infix fun after(other: Column): ColumnToColumnAction {
         if (this == other)
             throw InvalidColumnException("Cannot move column after itself: $this")
 
-        return ColumnAction(
+        return ColumnToColumnAction(
             this,
             other,
             ColumnActionOrder.AFTER
@@ -369,7 +367,7 @@ enum class IndexRelation {
     AT, AT_OR_BEFORE, AT_OR_AFTER, BEFORE, AFTER
 }
 
-class ColumnAction internal constructor(val left: Column, val right: Column, val order: ColumnActionOrder)
+class ColumnToColumnAction internal constructor(val left: Column, val right: Column, val order: ColumnActionOrder)
 
 enum class ColumnActionOrder { BEFORE, AFTER }
 

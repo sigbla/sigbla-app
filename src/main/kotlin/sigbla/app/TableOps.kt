@@ -1,21 +1,79 @@
 package sigbla.app
 
+import sigbla.app.internals.refAction
+import com.github.andrewoma.dexx.collection.HashMap as PHashMap
+import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
 import kotlin.reflect.KClass
 
-fun move(columnAction: ColumnAction) {
-    val left = columnAction.left
-    val right = columnAction.right
+fun move(columnToColumnAction: ColumnToColumnAction) {
+    fun columnMove(left: Column, right: Column): (ref: TableRef) -> TableRef = { ref ->
+        val changedColumns = ref
+            .columnsMap
+            .values()
+            .filter { it != left }
+            .sortedBy { it.columnOrder }
+            .dropWhile { it != right }
+            .let {
+                if (columnToColumnAction.order == ColumnActionOrder.AFTER) it.drop(1) else it
+            }
+
+        val unchangedColumns = ref
+            .columnsMap
+            .values()
+            .filter { it != left }
+            .sortedBy { it.columnOrder }
+            .takeWhile { changedColumns.isEmpty() || it != changedColumns.first() }
+
+        val columnOrders = ref
+            .columnsMap
+            .map { it.component2().columnOrder }
+            .sorted() zip listOf(unchangedColumns, listOf(left), changedColumns).flatten()
+
+        // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
+        val newColumnMap = columnOrders.fold(PHashMap<ColumnHeader, Column>()) { acc, (columnOrder, column) ->
+            acc.put(column.columnHeader, BaseColumn(column.table, column.columnHeader, left.table.tableRef, columnOrder))
+        }
+
+        ref.copy(
+            columnsMap = newColumnMap,
+            version = ref.version + 1L
+        )
+    }
+
+    val left = columnToColumnAction.left
+    val right = columnToColumnAction.right
 
     if (left.table === right.table) {
-        // TODO Internal move
+        // Internal move
+        val (oldRef, newRef) = left.table.tableRef.refAction((::columnMove)(left, right))
+
+        // TODO Events
     } else {
-        // TODO Move between tables
+        // Move between tables
+        val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
+            ref.copy(
+                columnsMap = ref.columnsMap.remove(left.columnHeader),
+                columnCellMap = ref.columnCellMap.remove(left),
+                version = ref.version + 1L
+            )
+        }
+
+        val (oldRef2, newRef2) = right.table.tableRef.refAction { ref ->
+            val newLeft = BaseColumn(right.table, left.columnHeader, right.table.tableRef)
+            columnMove(newLeft, right)(ref.copy(
+                columnsMap = ref.columnsMap.put(left.columnHeader, newLeft),
+                columnCellMap = ref.columnCellMap.put(newLeft, oldRef1.columnCellMap[left] ?: PTreeMap()),
+                version = ref.version + 1L
+            ))
+        }
+
+        // TODO Events
     }
 }
 
-fun move(columnAction: ColumnAction, withName: ColumnHeader): Unit = TODO()
+fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader): Unit = TODO()
 
-fun move(columnAction: ColumnAction, vararg withName: String): Unit = TODO()
+fun move(columnToColumnAction: ColumnToColumnAction, vararg withName: String): Unit = TODO()
 
 fun move(left: Column, actionOrder: ColumnActionOrder, right: Column): Unit = TODO()
 
@@ -25,9 +83,9 @@ fun move(left: Column, actionOrder: ColumnActionOrder, right: Column, vararg wit
 
 //fun copy(columnAction: ColumnAction): Unit = TODO()
 
-fun copy(columnAction: ColumnAction, withName: ColumnHeader): Unit = TODO()
+fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader): Unit = TODO()
 
-fun copy(columnAction: ColumnAction, vararg withName: String): Unit = TODO()
+fun copy(columnToColumnAction: ColumnToColumnAction, vararg withName: String): Unit = TODO()
 
 //fun copy(left: Column, actionOrder: ColumnActionOrder, right: Column): Unit = TODO()
 
@@ -38,6 +96,8 @@ fun copy(left: Column, actionOrder: ColumnActionOrder, right: Column, vararg wit
 //fun rename(column: Column, withName: ColumnHeader): Unit = column.rename(withName)
 
 //fun rename(column: Column, vararg withName: String): Unit = TODO()
+
+// TODO Delete, clear
 
 inline fun <reified O, reified N> on(table: Table, noinline init: TableEventReceiver<Table, O, N>.() -> Unit): TableListenerReference {
     return on(table, O::class, N::class, init as TableEventReceiver<Table, Any, Any>.() -> Unit)
