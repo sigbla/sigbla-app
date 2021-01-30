@@ -61,6 +61,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
     }
 
     override fun iterator(): Iterator<Cell<*>> {
+        // TODO Should probably use a cloned table for all iterators, like with events
         val ref = table.tableRef.get()
         val columnCellMap = ref.columnCellMap
 

@@ -176,9 +176,6 @@ abstract class Column internal constructor(
 
     // TODO Before, after, and to functions should maybe be extension functions?
     infix fun to(other: Table): ColumnToTableAction {
-        if (this.table == other)
-            throw InvalidColumnException("Cannot move column to same table: $this")
-
         return ColumnToTableAction(
             this,
             other
@@ -378,7 +375,7 @@ enum class IndexRelation {
     AT, AT_OR_BEFORE, AT_OR_AFTER, BEFORE, AFTER
 }
 
-class ColumnToTableAction internal constructor(val left: Column, val right: Table)
+class ColumnToTableAction internal constructor(val left: Column, val table: Table)
 
 class ColumnToColumnAction internal constructor(val left: Column, val right: Column, val order: ColumnActionOrder)
 
