@@ -66,19 +66,19 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
         val columnCellMap = ref.columnCellMap
 
         fun at(column: Column): CellValue<*>? {
-            val values = columnCellMap[column] ?: throw InvalidColumnException()
+            val values = columnCellMap[column] ?: throw InvalidColumnException(column)
             return values[index]
         }
 
         fun firstBefore(column: Column): CellValue<*>? {
-            val values = columnCellMap[column] ?: throw InvalidColumnException()
+            val values = columnCellMap[column] ?: throw InvalidColumnException(column)
             val keys = values.asSortedMap().headMap(index).keys
             if (keys.isEmpty()) return null
             return values[keys.last()]
         }
 
         fun firstAfter(column: Column): CellValue<*>? {
-            val values = columnCellMap[column] ?: throw InvalidColumnException()
+            val values = columnCellMap[column] ?: throw InvalidColumnException(column)
             val keys = values.asSortedMap().tailMap(index + 1L).keys
             if (keys.isEmpty()) return null
             return values[keys.first()]

@@ -153,7 +153,7 @@ abstract class Column internal constructor(
     // TODO Before, after, and to functions should maybe be extension functions?
     infix fun before(other: Column): ColumnToColumnAction {
         if (this == other)
-            throw InvalidColumnException("Cannot move column before itself: $this")
+            throw InvalidColumnException("Cannot move/copy column before itself: $this")
 
         return ColumnToColumnAction(
             this,
@@ -165,12 +165,21 @@ abstract class Column internal constructor(
     // TODO Before, after, and to functions should maybe be extension functions?
     infix fun after(other: Column): ColumnToColumnAction {
         if (this == other)
-            throw InvalidColumnException("Cannot move column after itself: $this")
+            throw InvalidColumnException("Cannot move/copy column after itself: $this")
 
         return ColumnToColumnAction(
             this,
             other,
             ColumnActionOrder.AFTER
+        )
+    }
+
+    // TODO Before, after, and to functions should maybe be extension functions?
+    infix fun to(other: Column): ColumnToColumnAction {
+        return ColumnToColumnAction(
+            this,
+            other,
+            ColumnActionOrder.TO
         )
     }
 
@@ -236,7 +245,7 @@ class BaseColumn internal constructor(
         val cellValue = value.toCellValue()
 
         val (oldRef, newRef) = tableRef.refAction {
-            val values = it.columnCellMap[this] ?: throw InvalidColumnException()
+            val values = it.columnCellMap[this] ?: throw InvalidColumnException(this)
 
             it.copy(
                 columnCellMap = it.columnCellMap.put(this, values.put(index, cellValue)),
@@ -262,7 +271,7 @@ class BaseColumn internal constructor(
 
     override fun remove(index: Long): Cell<*> {
         val (oldRef, newRef) = tableRef.refAction {
-            val values = it.columnCellMap[this] ?: throw InvalidColumnException()
+            val values = it.columnCellMap[this] ?: throw InvalidColumnException(this)
 
             it.copy(
                 columnCellMap = it.columnCellMap.put(this, values.remove(index)),
@@ -300,13 +309,13 @@ class BaseColumn internal constructor(
     }
 
     override fun iterator(): Iterator<Cell<*>> {
-        val values = tableRef.get().columnCellMap[this] ?: throw InvalidColumnException()
+        val values = tableRef.get().columnCellMap[this] ?: throw InvalidColumnException(this)
         return values.asSequence().map { it.component2().toCell(this, it.component1()) }.iterator()
     }
 
     private fun getCellRaw(index: Long, indexRelation: IndexRelation): CellValue<*>? {
         val ref = tableRef.get()
-        val values = ref.columnCellMap[this] ?: throw InvalidColumnException()
+        val values = ref.columnCellMap[this] ?: throw InvalidColumnException(this)
 
         fun firstBefore(): CellValue<*>? {
             val keys = values.asSortedMap().headMap(index).keys
@@ -379,6 +388,6 @@ class ColumnToTableAction internal constructor(val left: Column, val table: Tabl
 
 class ColumnToColumnAction internal constructor(val left: Column, val right: Column, val order: ColumnActionOrder)
 
-enum class ColumnActionOrder { BEFORE, AFTER }
+enum class ColumnActionOrder { BEFORE, AFTER, TO }
 
 internal val emptyColumnHeader = ColumnHeader()

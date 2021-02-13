@@ -14,8 +14,6 @@ import com.github.andrewoma.dexx.collection.Map as PMap
 import com.github.andrewoma.dexx.collection.SortedMap as PSortedMap
 import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
 
-// TODO: Need a table clear like we have on columns..
-
 abstract class Table(val name: String) : Iterable<Cell<*>> {
     @Volatile
     var closed: Boolean = false
@@ -598,7 +596,7 @@ class BaseTable internal constructor(
                 columnCellMap = it.columnCellMap.put(column, PTreeMap()),
                 version = it.version + 1L
             )
-        }.columnsMap[header] ?: throw InvalidColumnException()
+        }.columnsMap[header] ?: throw InvalidColumnException(header)
     }
 
     override fun contains(header: ColumnHeader): Boolean = tableRef.get().columnsMap.containsKey(header)
@@ -652,7 +650,7 @@ class BaseTable internal constructor(
         // TODO Consider if we can optimize this by making it lazy or something else?
         //      It might be fine doing it like this if we also offer the batch update feature
         val newColumnCellMap = ref.columnCellMap.fold(PHashMap<Column, PSortedMap<Long, CellValue<*>>>()) { acc, ccm ->
-            acc.put(newColumnsMap[ccm.component1().columnHeader] ?: throw InvalidColumnException(), ccm.component2())
+            acc.put(newColumnsMap[ccm.component1().columnHeader] ?: throw InvalidColumnException(ccm.component1()), ccm.component2())
         }
 
         newTableRef.set(TableRef(

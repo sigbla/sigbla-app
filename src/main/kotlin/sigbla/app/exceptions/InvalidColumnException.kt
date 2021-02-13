@@ -1,18 +1,11 @@
 package sigbla.app.exceptions
 
+import sigbla.app.Column
+import sigbla.app.ColumnHeader
+
+// TODO Look at other exceptions and change to below format?
 class InvalidColumnException : SigblaAppException {
-    constructor() : super()
-
-    constructor(message: String) : super(message)
-
-    constructor(message: String, cause: Throwable) : super(message, cause)
-
-    constructor(cause: Throwable) : super(cause)
-
-    protected constructor(
-        message: String,
-        cause: Throwable,
-        enableSuppression: Boolean,
-        writableStackTrace: Boolean
-    ) : super(message, cause, enableSuppression, writableStackTrace)
+    internal constructor(message: String) : super(message)
+    internal constructor(column: Column) : super(column.toString())
+    internal constructor(columnHeader: ColumnHeader) : super(columnHeader.toString())
 }
