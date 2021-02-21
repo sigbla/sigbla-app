@@ -365,12 +365,12 @@ class TableColumnCopyMove {
         assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D2")), t.headers.map { it.header })
         assertEquals(listOf("First", "Middle 1", "First", "Middle 1"), t[0].map { it.value })
 
-        // Copy to first
+        // Copy to C, replace first
         t["E", 0] = "New First"
         copy(t["E"] to t["C"], "A")
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("D2")), t.headers.map { it.header })
-        assertEquals(listOf("New First", "Middle 1", "Middle 1"), t[0].map { it.value })
+        assertEquals(listOf(listOf("B"), listOf("A"), listOf("D2"), listOf("E")), t.headers.map { it.header })
+        assertEquals(listOf("Middle 1", "New First", "Middle 1", "New First"), t[0].map { it.value })
     }
 
     @Test

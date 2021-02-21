@@ -5,6 +5,8 @@ import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
 import kotlin.reflect.KClass
 
+// TODO Refactor TableOps.kt into various files, like for column ops, rows ops, events, etc..?
+
 // TODO Implement move/copy(t["A"] to t["B"]) and move/copy(t["A"] to t["B"], "C")
 // TODO Implement something similar for moving/copying rows around, like move(t[1] after t[2]), etc
 // TODO Implement something for moving rows around within a column, like move(t["A", 1] after t["A", 2]), etc
@@ -193,32 +195,45 @@ fun move(left: Column, table: Table, vararg withName: String) = move(ColumnToTab
 fun move(left: Column, table: Table) = move(ColumnToTableAction(left, table), left.columnHeader)
 
 fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
-    fun columnCopy(left: Column, right: Column): (ref: TableRef) -> TableRef = { ref ->
+    fun columnCopy(left: Column, right: Column, order: ColumnActionOrder, withName: ColumnHeader, refUpdate: TableRef.() -> TableRef): (ref: TableRef) -> TableRef = { inRef ->
+        val ref = inRef.refUpdate()
+
         val changedColumns = ref
             .columnsMap
             .values()
-            .filter { it.columnHeader != withName }
+            .asSequence()
             .sortedBy { it.columnOrder }
             .dropWhile { it != right }
+            .filter { left.columnHeader != withName || it != left }
             .let {
-                if (columnToColumnAction.order == ColumnActionOrder.AFTER) it.drop(1) else it
+                if (order == ColumnActionOrder.AFTER) it.drop(1)
+                else it
             }
+
+        val firstChangedColumn = changedColumns.firstOrNull()
 
         val unchangedColumns = ref
             .columnsMap
             .values()
-            .filter { it.columnHeader != withName }
+            .asSequence()
+            .filter { left.columnHeader != withName || it != left }
             .sortedBy { it.columnOrder }
-            .takeWhile { changedColumns.isEmpty() || it != changedColumns.first() }
+            .takeWhile { firstChangedColumn == null || firstChangedColumn != it }
+
+        val newColumn = sequenceOf(BaseColumn(left.table, withName, left.table.tableRef, left.columnOrder))
+
+        val remainingColumns = changedColumns.filter { it.columnHeader != withName }.let { columns ->
+            if (order == ColumnActionOrder.TO) columns.filter { it.columnHeader != right.columnHeader }
+            else columns
+        }
+
+        val allColumns = unchangedColumns + newColumn + remainingColumns
 
         val columnOrders = ref
             .columnsMap
+            .asSequence()
             .map { it.component2().columnOrder }
-            .sorted() zip listOf(
-            unchangedColumns,
-            listOf(BaseColumn(left.table, withName, left.table.tableRef, left.columnOrder)),
-            changedColumns
-        ).flatten()
+            .sorted() zip allColumns
 
         // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
         val newColumnMap = columnOrders.fold(PHashMap<ColumnHeader, Column>()) { acc, (columnOrder, column) ->
@@ -233,29 +248,32 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
 
     val left = columnToColumnAction.left
     val right = columnToColumnAction.right
+    val order = columnToColumnAction.order
 
     if (left.table === right.table) {
         // Internal copy
-        val (oldRef, newRef) = right.table.tableRef.refAction { ref ->
-            val newLeft = BaseColumn(left.table, withName, left.table.tableRef)
-            columnCopy(left, right)(ref.copy(
-                columnsMap = ref.columnsMap.put(withName, newLeft),
-                columnCellMap = ref.columnCellMap.put(newLeft, ref.columnCellMap[left] ?: PTreeMap()),
-                //version = ref.version + 1L
-            ))
-        }
+        val newLeft = BaseColumn(left.table, withName, left.table.tableRef)
+        val (oldRef, newRef) = left.table.tableRef.refAction(
+            (::columnCopy)(left, right, order, withName) {
+                copy(
+                    columnsMap = this.columnsMap.put(withName, newLeft),
+                    columnCellMap = this.columnCellMap.put(newLeft, this.columnCellMap[left] ?: PTreeMap())
+                )
+            }
+        )
 
         // TODO Events
     } else {
         // Copy between tables
-        val (oldRef, newRef) = right.table.tableRef.refAction { ref ->
-            val newLeft = BaseColumn(right.table, withName, right.table.tableRef)
-            columnCopy(newLeft, right)(ref.copy(
-                columnsMap = ref.columnsMap.put(withName, newLeft),
-                columnCellMap = ref.columnCellMap.put(newLeft, left.table.tableRef.get().columnCellMap[left] ?: PTreeMap()),
-                //version = ref.version + 1L
-            ))
-        }
+        val newLeft = BaseColumn(right.table, withName, right.table.tableRef)
+        val (oldRef, newRef) = right.table.tableRef.refAction(
+            (::columnCopy)(newLeft, right, order, withName) {
+                copy(
+                    columnsMap = this.columnsMap.put(withName, newLeft),
+                    columnCellMap = this.columnCellMap.put(newLeft, left.table.tableRef.get().columnCellMap[left] ?: PTreeMap())
+                )
+            }
+        )
 
         // TODO Events
     }
@@ -263,7 +281,7 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
 
 fun copy(columnToColumnAction: ColumnToColumnAction, vararg withName: String) = copy(columnToColumnAction, ColumnHeader(*withName))
 
-fun copy(columnToColumnAction: ColumnToColumnAction) = copy(columnToColumnAction, columnToColumnAction.left.columnHeader)
+fun copy(columnToColumnAction: ColumnToColumnAction) = copy(columnToColumnAction, if (columnToColumnAction.order == ColumnActionOrder.TO) columnToColumnAction.right.columnHeader else columnToColumnAction.left.columnHeader)
 
 fun copy(left: Column, actionOrder: ColumnActionOrder, right: Column, withName: ColumnHeader) = copy(ColumnToColumnAction(left, right, actionOrder), withName)
 
