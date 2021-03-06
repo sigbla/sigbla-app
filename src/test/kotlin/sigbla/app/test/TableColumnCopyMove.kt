@@ -488,8 +488,8 @@ class TableColumnCopyMove {
         // Copy middle
         copy(t["B"] to t, "B2")
 
-        assertEquals(listOf(listOf("A"), listOf("C"), listOf("B2")), t.headers.map { it.header })
-        assertEquals(listOf("First", "Last", "Middle"), t[0].map { it.value })
+        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C"), listOf("B2")), t.headers.map { it.header })
+        assertEquals(listOf("Middle", "First", "Last", "Middle"), t[0].map { it.value })
     }
 
     @Test
