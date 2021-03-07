@@ -392,6 +392,12 @@ fun clone(table: Table): Table = table.makeClone()
 
 fun clone(table: Table, withName: String): Table = table.makeClone(withName, true)
 
+inline fun <reified T> valueOf(cell: Cell<*>): T? = valueOf(cell, T::class) as T?
+
+fun valueOf(cell: Cell<*>, typeFilter: KClass<*>): Any? = if (typeFilter.isInstance(cell.value)) cell.value else null
+
+// TODO like this and others (ranges, etc): fun valueOf(source: DestinationOsmosis<Cell<*>>.() -> Unit): Any? = TODO()
+
 inline fun <reified O, reified N> on(table: Table, noinline init: TableEventReceiver<Table, O, N>.() -> Unit): TableListenerReference {
     return on(table, O::class, N::class, init as TableEventReceiver<Table, Any, Any>.() -> Unit)
 }

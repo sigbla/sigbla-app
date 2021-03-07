@@ -112,7 +112,7 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
 }
 
 sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
-    abstract val value: T
+    internal abstract val value: T
 
     val table: Table
         get() = column.table

@@ -11,7 +11,7 @@ fun main() {
         events {
             println(joinToString())
             forEach {
-                if ((table["A", 1].value as Number).toLong() < 1000)
+                if (valueOf<Number>(table["A", 1])?.toLong() ?: 1000 < 1000)
                     table["A", 1] = table["A", 1] + 1
             }
         }

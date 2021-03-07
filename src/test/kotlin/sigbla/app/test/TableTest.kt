@@ -39,25 +39,25 @@ class TableTest {
 
         for (c in listOf("A", "B", "C")) {
             for (r in 1..100) {
-                assertEquals("$c$r A1", t1[c][r].value)
+                assertEquals("$c$r A1", valueOf<Any>(t1[c][r]))
             }
         }
 
         for (c in listOf("A", "B", "C")) {
             for (r in 1..100) {
-                assertEquals("$c$r B1", t2[c][r].value)
+                assertEquals("$c$r B1", valueOf<Any>(t2[c][r]))
             }
         }
 
         for (c in listOf("D")) {
             for (r in 1..100) {
-                assertEquals("$c$r A2", t1[c][r].value)
+                assertEquals("$c$r A2", valueOf<Any>(t1[c][r]))
             }
         }
 
         for (c in listOf("D")) {
             for (r in 1..100) {
-                assertEquals("$c$r A1", t2[c][r].value)
+                assertEquals("$c$r A1", valueOf<Any>(t2[c][r]))
             }
         }
     }
@@ -287,8 +287,8 @@ class TableTest {
         t["B", 2] = "B2"
         t["B", 3] = "B3"
 
-        assertEquals(listOf("A0", "A1", "A2", "A3"), t["A"].map { it.value })
-        assertEquals(listOf("B0", "B1", "B2", "B3"), t["B"].iterator().asSequence().map { it.value }.toList())
+        assertEquals(listOf("A0", "A1", "A2", "A3"), t["A"].map { valueOf<Any>(it) })
+        assertEquals(listOf("B0", "B1", "B2", "B3"), t["B"].iterator().asSequence().map { valueOf<Any>(it) }.toList())
     }
 
     @Test
@@ -305,7 +305,7 @@ class TableTest {
         t["C", 1] = "C1"
         t["D", 1] = "D1"
 
-        assertEquals(listOf("A0", "B0", "C0", "D0"), t[0].map { it.value })
-        assertEquals(listOf("A1", "B1", "C1", "D1"), t[1].iterator().asSequence().map { it.value }.toList())
+        assertEquals(listOf("A0", "B0", "C0", "D0"), t[0].map { valueOf<Any>(it) })
+        assertEquals(listOf("A1", "B1", "C1", "D1"), t[1].iterator().asSequence().map { valueOf<Any>(it) }.toList())
     }
 }

@@ -161,7 +161,7 @@ fun main() {
     (table["A"][1]..table["A"][2]).contains(10)
     val range = (table["A"][1]..table["A"][2])
     range.forEach { println(it) }
-    range.map { it.value }.filterIsInstance<BigInteger>().size
+    range.mapNotNull { valueOf<BigInteger>(it) }.size
 
     table["A"].asSequence().forEach {
         println("table[\"A\"].asSequence().forEach $it")
@@ -335,7 +335,7 @@ fun main() {
 
         events {
             forEach {
-                it.newValue.value
+                valueOf<Any>(it.newValue)
             }
         }
     }

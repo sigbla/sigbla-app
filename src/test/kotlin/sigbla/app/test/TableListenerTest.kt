@@ -174,7 +174,7 @@ class TableListenerTest {
 
             events {
                 forEach { _ ->
-                    if (t["A", 1].isNumeric() && (t["A", 1].value as Number).toLong() < 1000)
+                    if (t["A", 1].isNumeric() && valueOf<Number>(t["A", 1])?.toLong() ?: 1000 < 1000)
                         t["A", 1] = t["A", 1] + 1
                 }
             }
@@ -182,7 +182,7 @@ class TableListenerTest {
 
         t["A", 1] = 0
 
-        assertEquals(1000L, t["A", 1].value)
+        assertEquals(1000L, valueOf<Long>(t["A", 1]))
 
         off(ref2)
     }
@@ -338,8 +338,8 @@ class TableListenerTest {
             order = 2
 
             events {
-                v2Old = oldTable["A", 0].value
-                v2New = newTable["A", 0].value
+                v2Old = valueOf<Any>(oldTable["A", 0])
+                v2New = valueOf<Any>(newTable["A", 0])
 
                 assertEquals(t["A", 0], source["A", 0])
 
@@ -354,8 +354,8 @@ class TableListenerTest {
             order = 3
 
             events {
-                v3Old = oldTable["A", 0].value
-                v3New = newTable["A", 0].value
+                v3Old = valueOf<Any>(oldTable["A", 0])
+                v3New = valueOf<Any>(newTable["A", 0])
 
                 assertEquals(t["A", 0], source["A", 0])
 
@@ -370,8 +370,8 @@ class TableListenerTest {
             order = 1
 
             events {
-                v1Old = oldTable["A", 0].value
-                v1New = newTable["A", 0].value
+                v1Old = valueOf<Any>(oldTable["A", 0])
+                v1New = valueOf<Any>(newTable["A", 0])
 
                 assertEquals(t["A", 0], source["A", 0])
 

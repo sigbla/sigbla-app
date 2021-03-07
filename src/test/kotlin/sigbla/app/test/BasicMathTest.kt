@@ -32,7 +32,7 @@ class BasicMathTest {
         }
 
         fun typePref(class1: KClass<*>, class2: KClass<*>): KClass<*> {
-            val (class3, class4) = listOf(class1, class2).sortedWith(Comparator { o1, o2 -> typeValue(o1).compareTo(typeValue(o2)) })
+            val (class3, class4) = listOf(class1, class2).sortedWith { o1, o2 -> typeValue(o1).compareTo(typeValue(o2)) }
 
             return when (class4) {
                 BigInteger::class -> when (class3) {
@@ -58,52 +58,52 @@ class BasicMathTest {
         }
 
         for (i in 0 until idx) {
-            assertEquals(typePref(1::class, t["Val2"][i].value!!::class), (1 + t["Val2"][i])::class)
-            assertEquals(typePref(1::class, t["Val2"][i].value!!::class), (1 - t["Val2"][i])::class)
-            assertEquals(typePref(1::class, t["Val2"][i].value!!::class), (1 * t["Val2"][i])::class)
-            assertEquals(typePref(1::class, t["Val2"][i].value!!::class), (1 / t["Val2"][i])::class)
-            assertEquals(typePref(1::class, t["Val2"][i].value!!::class), (1 % t["Val2"][i])::class)
+            assertEquals(typePref(1::class, valueOf<Any>(t["Val2"][i])!!::class), (1 + t["Val2"][i])::class)
+            assertEquals(typePref(1::class, valueOf<Any>(t["Val2"][i])!!::class), (1 - t["Val2"][i])::class)
+            assertEquals(typePref(1::class, valueOf<Any>(t["Val2"][i])!!::class), (1 * t["Val2"][i])::class)
+            assertEquals(typePref(1::class, valueOf<Any>(t["Val2"][i])!!::class), (1 / t["Val2"][i])::class)
+            assertEquals(typePref(1::class, valueOf<Any>(t["Val2"][i])!!::class), (1 % t["Val2"][i])::class)
 
-            assertEquals(typePref(2L::class, t["Val2"][i].value!!::class), (2L + t["Val2"][i])::class)
-            assertEquals(typePref(2L::class, t["Val2"][i].value!!::class), (2L - t["Val2"][i])::class)
-            assertEquals(typePref(2L::class, t["Val2"][i].value!!::class), (2L * t["Val2"][i])::class)
-            assertEquals(typePref(2L::class, t["Val2"][i].value!!::class), (2L / t["Val2"][i])::class)
-            assertEquals(typePref(2L::class, t["Val2"][i].value!!::class), (2L % t["Val2"][i])::class)
+            assertEquals(typePref(2L::class, valueOf<Any>(t["Val2"][i])!!::class), (2L + t["Val2"][i])::class)
+            assertEquals(typePref(2L::class, valueOf<Any>(t["Val2"][i])!!::class), (2L - t["Val2"][i])::class)
+            assertEquals(typePref(2L::class, valueOf<Any>(t["Val2"][i])!!::class), (2L * t["Val2"][i])::class)
+            assertEquals(typePref(2L::class, valueOf<Any>(t["Val2"][i])!!::class), (2L / t["Val2"][i])::class)
+            assertEquals(typePref(2L::class, valueOf<Any>(t["Val2"][i])!!::class), (2L % t["Val2"][i])::class)
 
-            assertEquals(typePref(3F::class, t["Val2"][i].value!!::class), (3F + t["Val2"][i])::class)
-            assertEquals(typePref(3F::class, t["Val2"][i].value!!::class), (3F - t["Val2"][i])::class)
-            assertEquals(typePref(3F::class, t["Val2"][i].value!!::class), (3F * t["Val2"][i])::class)
-            assertEquals(typePref(3F::class, t["Val2"][i].value!!::class), (3F / t["Val2"][i])::class)
-            assertEquals(typePref(3F::class, t["Val2"][i].value!!::class), (3F % t["Val2"][i])::class)
+            assertEquals(typePref(3F::class, valueOf<Any>(t["Val2"][i])!!::class), (3F + t["Val2"][i])::class)
+            assertEquals(typePref(3F::class, valueOf<Any>(t["Val2"][i])!!::class), (3F - t["Val2"][i])::class)
+            assertEquals(typePref(3F::class, valueOf<Any>(t["Val2"][i])!!::class), (3F * t["Val2"][i])::class)
+            assertEquals(typePref(3F::class, valueOf<Any>(t["Val2"][i])!!::class), (3F / t["Val2"][i])::class)
+            assertEquals(typePref(3F::class, valueOf<Any>(t["Val2"][i])!!::class), (3F % t["Val2"][i])::class)
 
-            assertEquals(typePref(3.0::class, t["Val2"][i].value!!::class), (3.0 + t["Val2"][i])::class)
-            assertEquals(typePref(3.0::class, t["Val2"][i].value!!::class), (3.0 - t["Val2"][i])::class)
-            assertEquals(typePref(3.0::class, t["Val2"][i].value!!::class), (3.0 * t["Val2"][i])::class)
-            assertEquals(typePref(3.0::class, t["Val2"][i].value!!::class), (3.0 / t["Val2"][i])::class)
-            assertEquals(typePref(3.0::class, t["Val2"][i].value!!::class), (3.0 % t["Val2"][i])::class)
+            assertEquals(typePref(3.0::class, valueOf<Any>(t["Val2"][i])!!::class), (3.0 + t["Val2"][i])::class)
+            assertEquals(typePref(3.0::class, valueOf<Any>(t["Val2"][i])!!::class), (3.0 - t["Val2"][i])::class)
+            assertEquals(typePref(3.0::class, valueOf<Any>(t["Val2"][i])!!::class), (3.0 * t["Val2"][i])::class)
+            assertEquals(typePref(3.0::class, valueOf<Any>(t["Val2"][i])!!::class), (3.0 / t["Val2"][i])::class)
+            assertEquals(typePref(3.0::class, valueOf<Any>(t["Val2"][i])!!::class), (3.0 % t["Val2"][i])::class)
 
-            assertEquals(typePref(BigInteger.TWO::class, t["Val2"][i].value!!::class), (BigInteger.TWO + t["Val2"][i])::class)
-            assertEquals(typePref(BigInteger.TWO::class, t["Val2"][i].value!!::class), (BigInteger.TWO - t["Val2"][i])::class)
-            assertEquals(typePref(BigInteger.TWO::class, t["Val2"][i].value!!::class), (BigInteger.TWO * t["Val2"][i])::class)
-            assertEquals(typePref(BigInteger.TWO::class, t["Val2"][i].value!!::class), (BigInteger.TWO / t["Val2"][i])::class)
-            assertEquals(typePref(BigInteger.TWO::class, t["Val2"][i].value!!::class), (BigInteger.TWO % t["Val2"][i])::class)
+            assertEquals(typePref(BigInteger.TWO::class, valueOf<Any>(t["Val2"][i])!!::class), (BigInteger.TWO + t["Val2"][i])::class)
+            assertEquals(typePref(BigInteger.TWO::class, valueOf<Any>(t["Val2"][i])!!::class), (BigInteger.TWO - t["Val2"][i])::class)
+            assertEquals(typePref(BigInteger.TWO::class, valueOf<Any>(t["Val2"][i])!!::class), (BigInteger.TWO * t["Val2"][i])::class)
+            assertEquals(typePref(BigInteger.TWO::class, valueOf<Any>(t["Val2"][i])!!::class), (BigInteger.TWO / t["Val2"][i])::class)
+            assertEquals(typePref(BigInteger.TWO::class, valueOf<Any>(t["Val2"][i])!!::class), (BigInteger.TWO % t["Val2"][i])::class)
 
-            assertEquals(typePref(BigDecimal.TEN::class, t["Val2"][i].value!!::class), (BigDecimal.TEN + t["Val2"][i])::class)
-            assertEquals(typePref(BigDecimal.TEN::class, t["Val2"][i].value!!::class), (BigDecimal.TEN - t["Val2"][i])::class)
-            assertEquals(typePref(BigDecimal.TEN::class, t["Val2"][i].value!!::class), (BigDecimal.TEN * t["Val2"][i])::class)
-            assertEquals(typePref(BigDecimal.TEN::class, t["Val2"][i].value!!::class), (BigDecimal.TEN / t["Val2"][i])::class)
-            assertEquals(typePref(BigDecimal.TEN::class, t["Val2"][i].value!!::class), (BigDecimal.TEN % t["Val2"][i])::class)
+            assertEquals(typePref(BigDecimal.TEN::class, valueOf<Any>(t["Val2"][i])!!::class), (BigDecimal.TEN + t["Val2"][i])::class)
+            assertEquals(typePref(BigDecimal.TEN::class, valueOf<Any>(t["Val2"][i])!!::class), (BigDecimal.TEN - t["Val2"][i])::class)
+            assertEquals(typePref(BigDecimal.TEN::class, valueOf<Any>(t["Val2"][i])!!::class), (BigDecimal.TEN * t["Val2"][i])::class)
+            assertEquals(typePref(BigDecimal.TEN::class, valueOf<Any>(t["Val2"][i])!!::class), (BigDecimal.TEN / t["Val2"][i])::class)
+            assertEquals(typePref(BigDecimal.TEN::class, valueOf<Any>(t["Val2"][i])!!::class), (BigDecimal.TEN % t["Val2"][i])::class)
         }
 
         for (valAny in values) {
             val val1: Number = valAny as Number
 
             for (i in 0 until idx) {
-                assertEquals(typePref(val1::class, t["Val2"][i].value!!::class), (val1 + t["Val2"][i])::class)
-                assertEquals(typePref(val1::class, t["Val2"][i].value!!::class), (val1 - t["Val2"][i])::class)
-                assertEquals(typePref(val1::class, t["Val2"][i].value!!::class), (val1 * t["Val2"][i])::class)
-                assertEquals(typePref(val1::class, t["Val2"][i].value!!::class), (val1 / t["Val2"][i])::class)
-                assertEquals(typePref(val1::class, t["Val2"][i].value!!::class), (val1 % t["Val2"][i])::class)
+                assertEquals(typePref(val1::class, valueOf<Any>(t["Val2"][i])!!::class), (val1 + t["Val2"][i])::class)
+                assertEquals(typePref(val1::class, valueOf<Any>(t["Val2"][i])!!::class), (val1 - t["Val2"][i])::class)
+                assertEquals(typePref(val1::class, valueOf<Any>(t["Val2"][i])!!::class), (val1 * t["Val2"][i])::class)
+                assertEquals(typePref(val1::class, valueOf<Any>(t["Val2"][i])!!::class), (val1 / t["Val2"][i])::class)
+                assertEquals(typePref(val1::class, valueOf<Any>(t["Val2"][i])!!::class), (val1 % t["Val2"][i])::class)
             }
         }
 
