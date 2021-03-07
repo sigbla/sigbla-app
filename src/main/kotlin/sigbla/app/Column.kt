@@ -135,61 +135,10 @@ abstract class Column internal constructor(
     // TODO: Look at adding a add(..) function.
     //       Add would just insert a cell at first available location.
 
-    // TODO: Move these out (remove, rename, clear) like with on
-    abstract fun remove(index: Long): Cell<*>
-
-    // TODO: Move these out (remove, rename, clear) like with on
-    fun remove(index: Int) = remove(index.toLong())
-
-    // TODO: Move these out (remove, rename, clear) like with on
-    fun rename(newName: ColumnHeader) = table.rename(columnHeader, newName)
-
-    // TODO: Move these out (remove, rename, clear) like with on
-    fun rename(vararg newName: String) = table.rename(columnHeader, *newName)
+    internal abstract fun clear(index: Long): Cell<*>
 
     // TODO: Move these out (remove, rename, clear) like with on
     abstract fun clear()
-
-    // TODO Before, after, and to functions should maybe be extension functions?
-    infix fun before(other: Column): ColumnToColumnAction {
-        if (this == other)
-            throw InvalidColumnException("Cannot move/copy column before itself: $this")
-
-        return ColumnToColumnAction(
-            this,
-            other,
-            ColumnActionOrder.BEFORE
-        )
-    }
-
-    // TODO Before, after, and to functions should maybe be extension functions?
-    infix fun after(other: Column): ColumnToColumnAction {
-        if (this == other)
-            throw InvalidColumnException("Cannot move/copy column after itself: $this")
-
-        return ColumnToColumnAction(
-            this,
-            other,
-            ColumnActionOrder.AFTER
-        )
-    }
-
-    // TODO Before, after, and to functions should maybe be extension functions?
-    infix fun to(other: Column): ColumnToColumnAction {
-        return ColumnToColumnAction(
-            this,
-            other,
-            ColumnActionOrder.TO
-        )
-    }
-
-    // TODO Before, after, and to functions should maybe be extension functions?
-    infix fun to(other: Table): ColumnToTableAction {
-        return ColumnToTableAction(
-            this,
-            other
-        )
-    }
 
     operator fun rangeTo(other: Column): ColumnRange {
         return ColumnRange(this, other)
@@ -238,7 +187,7 @@ class BaseColumn internal constructor(
 
     override fun set(index: Long, value: Cell<*>?) {
         if (value is UnitCell || value == null) {
-            remove(index)
+            clear(index)
             return
         }
 
@@ -269,7 +218,7 @@ class BaseColumn internal constructor(
         ) as List<TableListenerEvent<Any, Any>>)
     }
 
-    override fun remove(index: Long): Cell<*> {
+    override fun clear(index: Long): Cell<*> {
         val (oldRef, newRef) = tableRef.refAction {
             val values = it.columnCellMap[this] ?: throw InvalidColumnException(this)
 
@@ -382,6 +331,43 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
 
 enum class IndexRelation {
     AT, AT_OR_BEFORE, AT_OR_AFTER, BEFORE, AFTER
+}
+
+infix fun Column.before(other: Column): ColumnToColumnAction {
+    if (this == other)
+        throw InvalidColumnException("Cannot move/copy column before itself: $this")
+
+    return ColumnToColumnAction(
+        this,
+        other,
+        ColumnActionOrder.BEFORE
+    )
+}
+
+infix fun Column.after(other: Column): ColumnToColumnAction {
+    if (this == other)
+        throw InvalidColumnException("Cannot move/copy column after itself: $this")
+
+    return ColumnToColumnAction(
+        this,
+        other,
+        ColumnActionOrder.AFTER
+    )
+}
+
+infix fun Column.to(other: Column): ColumnToColumnAction {
+    return ColumnToColumnAction(
+        this,
+        other,
+        ColumnActionOrder.TO
+    )
+}
+
+infix fun Column.to(other: Table): ColumnToTableAction {
+    return ColumnToTableAction(
+        this,
+        other
+    )
 }
 
 class ColumnToTableAction internal constructor(val left: Column, val table: Table)

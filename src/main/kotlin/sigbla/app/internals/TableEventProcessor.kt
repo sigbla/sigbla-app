@@ -163,7 +163,7 @@ internal class TableEventProcessor {
             listenerRef.key = key
 
             if (!eventReceiver.skipHistory) {
-                val tc = table.clone()
+                val tc = clone(table)
                 listenerRefEvent.version = tc.tableRef.get().version
                 listenerRefEvent.listenerEvent(tc.asSequence().map {
                     TableListenerEvent(UnitCell(it.column, it.index), it) as TableListenerEvent<Any, Any>
@@ -200,7 +200,7 @@ internal class TableEventProcessor {
             listenerRef.key = key
 
             if (!eventReceiver.skipHistory) {
-                val tc = column.table.clone()
+                val tc = clone(column.table)
                 listenerRefEvent.version = tc.tableRef.get().version
                 listenerRefEvent.listenerEvent(tc[column].asSequence().map {
                     TableListenerEvent(UnitCell(it.column, it.index), it) as TableListenerEvent<Any, Any>
@@ -271,7 +271,7 @@ internal class TableEventProcessor {
             listenerRef.key = key
 
             if (!eventReceiver.skipHistory) {
-                val tc = cellRange.table.clone()
+                val tc = clone(cellRange.table)
                 listenerRefEvent.version = tc.tableRef.get().version
                 listenerRefEvent.listenerEvent(tc[cellRange].asSequence().map {
                     TableListenerEvent(UnitCell(it.column, it.index), it) as TableListenerEvent<Any, Any>
@@ -308,7 +308,7 @@ internal class TableEventProcessor {
             listenerRef.key = key
 
             if (!eventReceiver.skipHistory) {
-                val tc = cell.table.clone()
+                val tc = clone(cell.table)
                 listenerRefEvent.version = tc.tableRef.get().version
                 listenerRefEvent.listenerEvent(tc[cell].asSequence().map {
                     TableListenerEvent(UnitCell(it.column, it.index), it) as TableListenerEvent<Any, Any>

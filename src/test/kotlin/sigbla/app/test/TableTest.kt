@@ -23,7 +23,7 @@ class TableTest {
             }
         }
 
-        val t2 = t1.clone("tableClone2")
+        val t2 = clone(t1, "tableClone2")
 
         for (c in listOf("A", "B", "C")) {
             for (r in 1..100) {

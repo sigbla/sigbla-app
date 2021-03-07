@@ -26,14 +26,6 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
         )
     )
 
-    // TODO Unsure if it is correct to remove based on indexRelation. Needs to work relative to set below as well..
-    // TODO Compare to column behaviour?
-    // TODO Likely just remove the function, this goes to TalbeOps..
-    fun remove(header: ColumnHeader) = table[header].remove(table[header][indexRelation, index].index)
-
-    // TODO Likely just remove the function, this goes to TalbeOps..
-    fun remove(vararg header: String) = remove(ColumnHeader(*header))
-
     operator fun set(header: ColumnHeader, value: Cell<*>?) = table[header].set(index, value)
     operator fun set(header: ColumnHeader, value: String) = table[header].set(index, value)
     operator fun set(header: ColumnHeader, value: Double) = table[header].set(index, value)
@@ -160,3 +152,7 @@ class RowRange(override val start: Row, override val endInclusive: Row) : Closed
         return "$start..$endInclusive"
     }
 }
+
+class RowToRowAction internal constructor(val left: Row, val right: Row, val order: RowActionOrder)
+
+enum class RowActionOrder { TO }

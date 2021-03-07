@@ -476,20 +476,10 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
 
     // -----
 
+    // TODO Consider if we want this
     abstract operator fun contains(header: ColumnHeader): Boolean
 
     fun contains(vararg header: String): Boolean = contains(ColumnHeader(*header))
-
-    abstract fun remove(header: ColumnHeader)
-
-    fun rename(existing: ColumnHeader, vararg newName: String) = rename(existing, ColumnHeader(*newName))
-
-    abstract fun rename(existing: ColumnHeader, newName: ColumnHeader)
-
-    fun remove(vararg header: String) = remove(ColumnHeader(*header))
-
-    // TODO: Make this do an atomic ref update
-    fun remove(index: Long) = this.headers.forEach { c -> this[c].remove(index) }
 
     override fun iterator(): Iterator<Cell<*>> {
         // TODO This needs to work with the ref snapshot
@@ -515,10 +505,6 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
             override fun next(): Cell<*> = cellIterator.next()
         }
     }
-
-    abstract fun clone(): Table
-
-    abstract fun clone(name: String): Table
 
     internal abstract fun makeClone(name: String = table.name, onRegistry: Boolean = false, ref: TableRef = tableRef.get()!!): Table
 
@@ -600,42 +586,6 @@ class BaseTable internal constructor(
     }
 
     override fun contains(header: ColumnHeader): Boolean = tableRef.get().columnsMap.containsKey(header)
-
-    // TODO Column remove event
-    override fun remove(header: ColumnHeader) {
-        tableRef.updateAndGet {
-            val column = it.columnsMap[header] ?: return@updateAndGet it
-
-            // TODO A clear here will update the tableRef, consider if needed..
-            //column.clear()
-
-            it.copy(
-                columnsMap = it.columnsMap.remove(header),
-                columnCellMap = it.columnCellMap.remove(column),
-                version = it.version + 1L
-            )
-        }
-    }
-
-    // TODO Column rename event
-    override fun rename(existing: ColumnHeader, newName: ColumnHeader) {
-        tableRef.updateAndGet {
-            val c = it.columnsMap[existing] ?: return@updateAndGet it
-
-            it.copy(
-                columnsMap = it.columnsMap.remove(existing).put(newName, c),
-                version = it.version + 1L
-            )
-        }
-    }
-
-    override fun clone(): Table {
-        return makeClone()
-    }
-
-    override fun clone(name: String): Table {
-        return makeClone(name, true)
-    }
 
     override fun makeClone(name: String, onRegistry: Boolean, ref: TableRef): Table {
         val newTableRef = AtomicReference(ref)

@@ -216,7 +216,7 @@ class TableListenerTest {
             }
         }
 
-        val t2 = t1.clone("tableClone2")
+        val t2 = clone(t1, "tableClone2")
 
         // We divide by 2 because we overwrite cells above,
         // but when adding a listener we only reply current values

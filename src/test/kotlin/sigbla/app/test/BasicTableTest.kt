@@ -10,6 +10,7 @@ import org.junit.After
 import sigbla.app.DefaultBigDecimalPrecision
 import sigbla.app.IndexRelation
 import sigbla.app.Table
+import sigbla.app.remove
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.reflect.KClass
@@ -67,7 +68,7 @@ class BasicTableTest {
         assertEquals(Unit, t["E"][3].value)
         assertEquals(Unit, t["E"][4].value)
 
-        t.headers.forEach { t.remove(it) }
+        t.columns.forEach { remove(it) }
 
         assertEquals(Unit, t["A"][1].value)
         assertEquals(Unit, t["A"][2].value)
@@ -146,7 +147,7 @@ class BasicTableTest {
         assertEquals(Unit, t["E"][3].value)
         assertEquals(Unit, t["E"][4].value)
 
-        t.headers.forEach { t.remove(it) }
+        t.columns.forEach { remove(it) }
 
         assertEquals(Unit, t["A"][1].value)
         assertEquals(Unit, t["A"][2].value)

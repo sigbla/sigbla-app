@@ -19,7 +19,7 @@ internal object Registry {
 
     fun deleteTable(name: String) = deleteTable(tables.remove(name))
 
-    private fun deleteTable(table: Table?) {
+    fun deleteTable(table: Table?) {
         if (table == null) return
 
         table.closed = true;

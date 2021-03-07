@@ -1,5 +1,6 @@
 package sigbla.app
 
+import sigbla.app.internals.Registry
 import sigbla.app.internals.refAction
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
@@ -7,7 +8,6 @@ import kotlin.reflect.KClass
 
 // TODO Refactor TableOps.kt into various files, like for column ops, rows ops, events, etc..?
 
-// TODO Implement move/copy(t["A"] to t["B"]) and move/copy(t["A"] to t["B"], "C")
 // TODO Implement something similar for moving/copying rows around, like move(t[1] after t[2]), etc
 // TODO Implement something for moving rows around within a column, like move(t["A", 1] after t["A", 2]), etc
 
@@ -361,13 +361,36 @@ fun copy(left: Column, table: Table, vararg withName: String) = copy(ColumnToTab
 
 fun copy(left: Column, table: Table) = copy(ColumnToTableAction(left, table), left.columnHeader)
 
-//fun rename(column: Column, withName: ColumnHeader): Unit = column.rename(withName)
+fun rename(column: Column, withName: ColumnHeader): Unit = move(column to column, withName)
 
-//fun rename(column: Column, vararg withName: String): Unit = TODO()
+fun rename(column: Column, vararg withName: String): Unit = move(column to column, *withName)
 
-// TODO Delete, clear
+fun remove(table: Table) = Registry.deleteTable(table)
 
-// TODO: Need a table/row clear like we have on columns..
+fun remove(column: Column) {
+    // TODO Column remove event
+    column.table.tableRef.updateAndGet {
+        it.copy(
+            columnsMap = it.columnsMap.remove(column.columnHeader),
+            columnCellMap = it.columnCellMap.remove(column),
+            version = it.version + 1L
+        )
+    }
+}
+
+// Note: We don't have remove(row) because that would imply shifting rows below up, same for cells
+
+fun clear(table: Table): Unit = TODO()
+
+fun clear(column: Column): Unit = TODO()
+
+fun clear(row: Row): Unit = TODO()
+
+fun clear(cell: Cell<*>) = cell `=` null
+
+fun clone(table: Table): Table = table.makeClone()
+
+fun clone(table: Table, withName: String): Table = table.makeClone(withName, true)
 
 inline fun <reified O, reified N> on(table: Table, noinline init: TableEventReceiver<Table, O, N>.() -> Unit): TableListenerReference {
     return on(table, O::class, N::class, init as TableEventReceiver<Table, Any, Any>.() -> Unit)
