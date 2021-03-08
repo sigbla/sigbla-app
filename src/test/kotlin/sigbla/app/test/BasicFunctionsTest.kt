@@ -3,6 +3,7 @@ package sigbla.app.test
 import sigbla.app.*
 import org.junit.After
 import org.junit.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class BasicFunctionsTest {
@@ -68,6 +69,16 @@ class BasicFunctionsTest {
     }
 
     @Test
+    fun `sum with valueOf`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = 100
+        t["A", 1] = 200
+
+        assertEquals(300L, valueOf<Long>(sum(t["A", 0]..t["A", 1])))
+    }
+
+    @Test
     fun `max with defaults`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 
@@ -121,6 +132,16 @@ class BasicFunctionsTest {
         t["A", 0] = 10000
 
         assertTrue(t["Max", 0] is UnitCell)
+    }
+
+    @Test
+    fun `max with valueOf`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = 100
+        t["A", 1] = 200
+
+        assertEquals(200L, valueOf<Long>(max(t["A", 0]..t["A", 1])))
     }
 
     @Test
@@ -180,6 +201,16 @@ class BasicFunctionsTest {
     }
 
     @Test
+    fun `min with valueOf`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = 100
+        t["A", 1] = 200
+
+        assertEquals(100L, valueOf<Long>(min(t["A", 0]..t["A", 1])))
+    }
+
+    @Test
     fun `count with defaults`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 
@@ -233,5 +264,15 @@ class BasicFunctionsTest {
         t["A", 0] = 0
 
         assertTrue(t["Count", 0] is UnitCell)
+    }
+
+    @Test
+    fun `count with valueOf`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = 100
+        t["A", 1] = 200
+
+        assertEquals(2L, valueOf<Long>(count(t["A", 0]..t["A", 1])))
     }
 }

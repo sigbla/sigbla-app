@@ -220,11 +220,11 @@ fun main() {
 
     val value = table["A"] at 1
 
-    table["A"].sum()
-    table["A"].max()
-    table["A"].min()
+    val sumValue = valueOf<Number>(sum(table["A", 1]..table["A", 10]))
+    val maxValue = valueOf<Number>(max(table["A", 1]..table["A", 10]))
+    val minValue = valueOf<Number>(min(table["A", 1]..table["A", 10]))
 
-    // TODO table[1].iterator().forEach { .. }
+    table[1].iterator().forEach {  }
 
     on(table) {
         name = "B"

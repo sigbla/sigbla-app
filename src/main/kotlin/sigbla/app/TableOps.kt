@@ -2,6 +2,8 @@ package sigbla.app
 
 import sigbla.app.internals.Registry
 import sigbla.app.internals.refAction
+import java.util.concurrent.atomic.AtomicReference
+import kotlin.math.absoluteValue
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
 import kotlin.reflect.KClass
@@ -396,7 +398,18 @@ inline fun <reified T> valueOf(cell: Cell<*>): T? = valueOf(cell, T::class) as T
 
 fun valueOf(cell: Cell<*>, typeFilter: KClass<*>): Any? = if (typeFilter.isInstance(cell.value)) cell.value else null
 
-// TODO like this and others (ranges, etc): fun valueOf(source: DestinationOsmosis<Cell<*>>.() -> Unit): Any? = TODO()
+inline fun <reified T> valueOf(noinline source: DestinationOsmosis<Cell<*>>.() -> Unit): T? = valueOf(source, T::class) as T?
+
+fun valueOf(source: DestinationOsmosis<Cell<*>>.() -> Unit, typeFilter: KClass<*>): Any? {
+    val table = BaseTable("", false, AtomicReference(TableRef())) as Table
+    val index = source.hashCode().absoluteValue
+    table["valueOf", index] = source // Subscribe
+    val value = valueOf(table["valueOf", index], typeFilter)
+    table["valueOf", index] = null // Unsubscribe
+    return value
+}
+
+// TODO other valueOfs (ranges, etc):
 
 inline fun <reified O, reified N> on(table: Table, noinline init: TableEventReceiver<Table, O, N>.() -> Unit): TableListenerReference {
     return on(table, O::class, N::class, init as TableEventReceiver<Table, Any, Any>.() -> Unit)

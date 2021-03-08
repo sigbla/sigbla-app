@@ -2,23 +2,7 @@ package sigbla.app
 
 import java.util.concurrent.atomic.AtomicInteger
 
-fun Iterable<Cell<*>>.sum(
-    predicate: (Cell<*>) -> Boolean = { true }
-): Number? = asSequence()
-    .filter { it.isNumeric() && predicate(it) }
-    .fold(null as Number?) { sum, num -> num + (sum ?: 0) }
-
-fun Iterable<Cell<*>>.max(
-    predicate: (Cell<*>) -> Boolean = { true }
-): Number? = asSequence()
-    .filter { it.isNumeric() && predicate(it) }
-    .fold(null as Number?) { max, num -> if (max == null || num > max) num.toNumber() else max }
-
-fun Iterable<Cell<*>>.min(
-    predicate: (Cell<*>) -> Boolean = { true }
-): Number? = asSequence()
-    .filter { it.isNumeric() && predicate(it) }
-    .fold(null as Number?) { min, num -> if (min == null || num < min) num.toNumber() else min }
+// TODO Support more than just CellRange
 
 fun sum(
     cellRange: CellRange,
@@ -27,7 +11,11 @@ fun sum(
     name: String? = null,
     order: Long = 0L,
     predicate: (Cell<*>) -> Boolean = { true }
-): DestinationOsmosis<Cell<*>>.() -> Unit = cellFunction<Any, Number>(cellRange, init, empty, name, order) { sum(predicate) }
+): DestinationOsmosis<Cell<*>>.() -> Unit = cellFunction<Any, Number>(cellRange, init, empty, name, order) {
+    asSequence()
+        .filter { it.isNumeric() && predicate(it) }
+        .fold(null as Number?) { sum, num -> num + (sum ?: 0) }
+}
 
 fun max(
     cellRange: CellRange,
@@ -36,7 +24,11 @@ fun max(
     name: String? = null,
     order: Long = 0L,
     predicate: (Cell<*>) -> Boolean = { true }
-): DestinationOsmosis<Cell<*>>.() -> Unit = cellFunction<Any, Number>(cellRange, init, empty, name, order) { max(predicate) }
+): DestinationOsmosis<Cell<*>>.() -> Unit = cellFunction<Any, Number>(cellRange, init, empty, name, order) {
+    asSequence()
+        .filter { it.isNumeric() && predicate(it) }
+        .fold(null as Number?) { max, num -> if (max == null || num > max) num.toNumber() else max }
+}
 
 fun min(
     cellRange: CellRange,
@@ -45,7 +37,11 @@ fun min(
     name: String? = null,
     order: Long = 0L,
     predicate: (Cell<*>) -> Boolean = { true }
-): DestinationOsmosis<Cell<*>>.() -> Unit = cellFunction<Any, Number>(cellRange, init, empty, name, order) { min(predicate) }
+): DestinationOsmosis<Cell<*>>.() -> Unit = cellFunction<Any, Number>(cellRange, init, empty, name, order) {
+    asSequence()
+        .filter { it.isNumeric() && predicate(it) }
+        .fold(null as Number?) { min, num -> if (min == null || num < min) num.toNumber() else min }
+}
 
 fun count(
     cellRange: CellRange,
