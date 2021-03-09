@@ -308,4 +308,28 @@ class TableTest {
         assertEquals(listOf("A0", "B0", "C0", "D0"), t[0].map { valueOf<Any>(it) })
         assertEquals(listOf("A1", "B1", "C1", "D1"), t[1].iterator().asSequence().map { valueOf<Any>(it) }.toList())
     }
+
+    @Test
+    fun `valueOf iterator`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "A0"
+        t["B", 0] = "B0"
+        t["C", 0] = "C0"
+        t["D", 0] = "D0"
+
+        t["A", 1] = "A1"
+        t["B", 1] = "B1"
+        t["C", 1] = "C1"
+        t["D", 1] = "D1"
+
+        assertEquals(listOf("A0", "B0", "C0", "D0"), valueOf<Any>(t[0]).toList())
+        assertEquals(listOf("A1", "B1", "C1", "D1"), valueOf<Any>(t[1]).toList())
+
+        assertEquals(listOf("A0", "A1"), valueOf<Any>(t["A"]).toList())
+        assertEquals(listOf("B0", "B1"), valueOf<Any>(t["B"]).toList())
+
+        assertEquals(listOf("A0", "A1", "B0", "B1", "C0", "C1", "D0", "D1"), valueOf<Any>(t["A", 0]..t["D", 1]).toList())
+        assertEquals(listOf("A0", "A1", "B0", "B1", "C0", "C1", "D0", "D1"), valueOf<Any>(t).toList())
+    }
 }

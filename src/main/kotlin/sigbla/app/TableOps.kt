@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 // TODO Refactor TableOps.kt into various files, like for column ops, rows ops, events, etc..?
 
 // TODO Implement something similar for moving/copying rows around, like move(t[1] after t[2]), etc
-// TODO Implement something for moving rows around within a column, like move(t["A", 1] after t["A", 2]), etc
+// TODO Implement something for moving rows around within a column, like move(t["A", 1] after t["A", 2]), etc?
 
 fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
     fun columnMove(left: Column, right: Column, order: ColumnActionOrder, withName: ColumnHeader, refUpdate: TableRef.() -> TableRef): (ref: TableRef) -> TableRef = { inRef ->
@@ -406,10 +406,15 @@ fun valueOf(source: DestinationOsmosis<Cell<*>>.() -> Unit, typeFilter: KClass<*
     table["valueOf", index] = source // Subscribe
     val value = valueOf(table["valueOf", index], typeFilter)
     table["valueOf", index] = null // Unsubscribe
+    Registry.deleteTable(table) // Clean up
     return value
 }
 
-// TODO other valueOfs (ranges, etc):
+inline fun <reified T> valueOf(cells: Iterable<Cell<*>>): Sequence<T> = valueOf(cells, T::class) as Sequence<T>
+
+fun valueOf(cells: Iterable<Cell<*>>, typeFilter: KClass<*>): Sequence<Any> {
+    return cells.asSequence().mapNotNull { valueOf(it, typeFilter) }
+}
 
 inline fun <reified O, reified N> on(table: Table, noinline init: TableEventReceiver<Table, O, N>.() -> Unit): TableListenerReference {
     return on(table, O::class, N::class, init as TableEventReceiver<Table, Any, Any>.() -> Unit)
