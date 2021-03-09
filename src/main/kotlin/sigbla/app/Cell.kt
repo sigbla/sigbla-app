@@ -70,14 +70,14 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
         val output = mutableListOf<Cell<*>>()
 
         if (order == CellRangeOrder.COLUMN) {
-            rows.forEach { row ->
-                columns.forEach { column ->
+            columns.forEach { column ->
+                rows.forEach { row ->
                     output.add(column[row])
                 }
             }
         } else {
-            columns.forEach { column ->
-                rows.forEach { row ->
+            rows.forEach { row ->
+                columns.forEach { column ->
                     output.add(column[row])
                 }
             }
