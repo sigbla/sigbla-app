@@ -18,6 +18,11 @@ fun main() {
         }
     }
 
+    move(table["A"] after table["B"])
+    copy(table["F"] to table, "F2")
+
+    println(columnOf(table))
+
     table["G", 0] = div("myCustomClass1 myCustomClass2") {
         style = "color: red"
         +"This is red text"

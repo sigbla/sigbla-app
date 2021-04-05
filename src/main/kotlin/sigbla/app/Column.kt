@@ -58,8 +58,8 @@ class ColumnHeader(vararg header: String) : Comparable<ColumnHeader> {
 }
 
 abstract class Column internal constructor(
-    val table: Table,
-    val columnHeader: ColumnHeader,
+    internal val table: Table,
+    internal val columnHeader: ColumnHeader,
     internal val columnOrder: Int
 ) : Comparable<Column>, Iterable<Cell<*>> {
     abstract operator fun get(indexRelation: IndexRelation, index: Long): Cell<*>

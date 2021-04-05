@@ -332,4 +332,28 @@ class TableTest {
         assertEquals(listOf("A0", "A1", "B0", "B1", "C0", "C1", "D0", "D1"), valueOf<Any>(t["A", 0]..t["D", 1]).toList())
         assertEquals(listOf("A0", "A1", "B0", "B1", "C0", "C1", "D0", "D1"), valueOf<Any>(t).toList())
     }
+
+    @Test
+    fun `valueOf column headers`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "A0"
+        t["B", 0] = "B0"
+        t["C", 0] = "C0"
+        t["D", 0] = "D0"
+
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headerOf(t).map { it.header }.toList())
+    }
+
+    @Test
+    fun `valueOf columns`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "A0"
+        t["B", 0] = "B0"
+        t["C", 0] = "C0"
+        t["D", 0] = "D0"
+
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headerOf(t).map { it.header }.toList())
+    }
 }

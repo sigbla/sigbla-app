@@ -40,7 +40,7 @@ fun main() {
     table[1][ColumnHeader("A")] = "A"
     table[1]["A", "B"] = "A"
 
-    val tickerHeaders = table.headers.filter { it[2] == "Ticker" }
+    val tickerHeaders = headerOf(table).filter { it[2] == "Ticker" }
 
     val prices = tickerHeaders.map { header -> header to table[header][AT_OR_BEFORE, 1000] }.toMap()
 
@@ -176,15 +176,12 @@ fun main() {
 
     val inVal = 5 in table["A"][1]
 
-    // TODO
-    //move(table["A"] before table["B"])
-    //move(table["A"] after table["B"])
-    //copy(table["A"] before table["B"], "C")
-    //move(table["A"], ColumnActionOrder.AFTER, table["B"])
-    //table.rename(table["A"], "A")
-    //table["A"].rename("A")
+    move(table["A"] before table["B"])
+    move(table["A"] after table["B"])
+    copy(table["A"] before table["B"], "C")
+    move(table["A"], ColumnActionOrder.AFTER, table["B"])
 
-    (table.columns.first()..table.columns.last()).forEach {
+    (valueOf<Column>(table).first()..valueOf<Column>(table).last()).forEach {
         println("Column range first to last: " + it.columnHeader)
     }
 
@@ -192,7 +189,7 @@ fun main() {
     println("-----------")
     println()
 
-    (table.columns.last()..table.columns.first()).forEach {
+    (valueOf<Column>(table).last()..valueOf<Column>(table).first()).forEach {
         println("Column range last to first: " + it.columnHeader)
     }
 

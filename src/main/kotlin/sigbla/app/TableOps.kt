@@ -1,5 +1,6 @@
 package sigbla.app
 
+import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.refAction
 import java.util.concurrent.atomic.AtomicReference
@@ -363,6 +364,85 @@ fun copy(left: Column, table: Table, vararg withName: String) = copy(ColumnToTab
 
 fun copy(left: Column, table: Table) = copy(ColumnToTableAction(left, table), left.columnHeader)
 
+// ---
+
+fun move(rowToRowAction: RowToRowAction) {
+    val left = rowToRowAction.left
+    val right = rowToRowAction.right
+
+    if (left.table === right.table) {
+        // Internal move
+        val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
+            ref.copy(
+                columnCellMap = ref.columnCellMap.fold(PHashMap()) { acc, ccm ->
+                    acc.put(ccm.component1(), ccm.component2().remove(left.index).let {
+                        val cell = ccm.component2().get(left.index)
+                        if (cell != null) it.put(right.index, cell) else it
+                    })
+                }
+            )
+        }
+
+        // TODO Events
+    } else {
+        // Move between tables
+        val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
+            ref.copy(
+                columnCellMap = ref.columnCellMap.fold(PHashMap()) { acc, ccm ->
+                    acc.put(ccm.component1(), ccm.component2().remove(left.index))
+                }
+            )
+        }
+
+        val (oldRef2, newRef2) = right.table.tableRef.refAction { ref ->
+            val columnsMap = oldRef1
+                .columnsMap
+                .sortedBy { it.component2().columnOrder }
+                .map { it.component1() }
+                .fold(ref.columnsMap) { acc, c ->
+                    if (acc.containsKey(c)) acc else acc.put(c, BaseColumn(right.table, c, right.table.tableRef))
+                }
+
+            val columnCellMap = oldRef1.columnCellMap.fold(ref.columnCellMap) { acc, ccm ->
+                val cell = ccm.component2().get(left.index)
+                if (cell != null) {
+                    val column = columnsMap.get(ccm.component1().columnHeader) ?: throw InvalidColumnException(ccm.component1())
+                    acc.put(column, (acc.get(column) ?: PTreeMap()).put(right.index, cell))
+                } else acc
+            }
+
+            ref.copy(
+                columnsMap = columnsMap,
+                columnCellMap = columnCellMap
+            )
+        }
+
+        // TODO Events
+    }
+}
+
+fun move(left: Row, actionOrder: RowActionOrder, right: Row) = move(RowToRowAction(left, right, actionOrder))
+
+fun move(rowToTableAction: RowToTableAction) {
+    TODO()
+}
+
+fun move(left: Row, table: Table) = move(RowToTableAction(left, table))
+
+fun copy(rowToRowAction: RowToRowAction) {
+    TODO()
+}
+
+fun copy(left: Row, actionOrder: RowActionOrder, right: Row) = move(RowToRowAction(left, right, actionOrder))
+
+fun copy(rowToTableAction: RowToTableAction) {
+    TODO()
+}
+
+fun copy(left: Row, table: Table) = move(RowToTableAction(left, table))
+
+// ---
+
 fun rename(column: Column, withName: ColumnHeader): Unit = move(column to column, withName)
 
 fun rename(column: Column, vararg withName: String): Unit = move(column to column, *withName)
@@ -394,6 +474,8 @@ fun clone(table: Table): Table = table.makeClone()
 
 fun clone(table: Table, withName: String): Table = table.makeClone(withName, true)
 
+// TODO Any iteration below needs to operate on a clone?
+
 inline fun <reified T> valueOf(cell: Cell<*>): T? = valueOf(cell, T::class) as T?
 
 fun valueOf(cell: Cell<*>, typeFilter: KClass<*>): Any? = if (typeFilter.isInstance(cell.value)) cell.value else null
@@ -412,9 +494,44 @@ fun valueOf(source: DestinationOsmosis<Cell<*>>.() -> Unit, typeFilter: KClass<*
 
 inline fun <reified T> valueOf(cells: Iterable<Cell<*>>): Sequence<T> = valueOf(cells, T::class) as Sequence<T>
 
-fun valueOf(cells: Iterable<Cell<*>>, typeFilter: KClass<*>): Sequence<Any> {
-    return cells.asSequence().mapNotNull { valueOf(it, typeFilter) }
-}
+fun valueOf(cells: Iterable<Cell<*>>, typeFilter: KClass<*>): Sequence<Any> = cells
+    .asSequence()
+    .mapNotNull { valueOf(it, typeFilter) }
+
+fun headerOf(cell: Cell<*>) = cell.column.columnHeader
+
+fun headerOf(column: Column) = column.columnHeader
+
+fun headerOf(row: Row) = row.headers.asSequence()
+
+fun headerOf(cells: Iterable<Cell<*>>) = cells
+    .asSequence()
+    .map { it.column }
+    .toSortedSet()
+    .asSequence()
+    .map { it.columnHeader }
+
+fun columnOf(cell: Cell<*>) = cell.column
+
+fun columnOf(row: Row) = row.headers.asSequence().map { row.table[it] }
+
+fun columnOf(cells: Iterable<Cell<*>>) = cells
+    .asSequence()
+    .map { it.column }
+    .toSortedSet()
+    .asSequence()
+
+fun indexOf(cell: Cell<*>) = cell.index
+
+fun indexOf(cells: Iterable<Cell<*>>) = cells
+    .asSequence()
+    .map { it.index }
+    .toSortedSet()
+    .asSequence()
+
+// TODO We want specifics of header/column/indexOf for column/row/range, for efficiency
+
+// ---
 
 inline fun <reified O, reified N> on(table: Table, noinline init: TableEventReceiver<Table, O, N>.() -> Unit): TableListenerReference {
     return on(table, O::class, N::class, init as TableEventReceiver<Table, Any, Any>.() -> Unit)

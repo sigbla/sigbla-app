@@ -24,9 +24,11 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
 
     internal val columnCounter = AtomicInteger()
 
-    abstract val headers: Collection<ColumnHeader>
+    // TODO Change this to be sequence
+    internal abstract val headers: Collection<ColumnHeader>
 
-    abstract val columns: Collection<Column>
+    // TODO Change this to be sequence
+    internal abstract val columns: Collection<Column>
 
     internal abstract val tableRef: AtomicReference<TableRef>
 

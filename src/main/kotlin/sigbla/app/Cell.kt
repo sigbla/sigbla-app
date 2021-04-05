@@ -111,7 +111,7 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
     // TODO: Implement assignment ops?
 }
 
-sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
+sealed class Cell<T>(internal val column: Column, internal val index: Long) : Comparable<Any?> {
     internal abstract val value: T
 
     val table: Table

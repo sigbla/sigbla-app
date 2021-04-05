@@ -9,13 +9,13 @@ import kotlin.reflect.KClass
 
 // TODO Add Iterable<Cell<*>> and other operator functions as we have on Column
 abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
-    abstract val table: Table
+    internal abstract val table: Table
 
-    abstract val indexRelation: IndexRelation
+    internal abstract val indexRelation: IndexRelation
 
-    abstract val index: Long
+    internal abstract val index: Long
 
-    val headers: Collection<ColumnHeader>
+    internal val headers: Collection<ColumnHeader>
         get() = table.headers
 
     operator fun get(header: ColumnHeader): Cell<*> = table[header][indexRelation, index]
@@ -153,6 +153,27 @@ class RowRange(override val start: Row, override val endInclusive: Row) : Closed
     }
 }
 
+infix fun Row.to(other: Row): RowToRowAction {
+    return RowToRowAction(
+        this,
+        other,
+        RowActionOrder.TO
+    )
+}
+
+infix fun Row.to(other: Table): RowToTableAction {
+    return RowToTableAction(
+        this,
+        other
+    )
+}
+
+class RowToTableAction internal constructor(val left: Row, val table: Table)
+
 class RowToRowAction internal constructor(val left: Row, val right: Row, val order: RowActionOrder)
 
+// TODO We'd like to be able to move/copy rows before/after another row,
+//      which would inject that row and push all other rows down.
+//      Example: move(t[1] before t[3]) would cause t[1] to be located
+//      at t[3] and the old t[3] would now be t[4], t[4] is now t[5], etc..
 enum class RowActionOrder { TO }
