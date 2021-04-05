@@ -161,19 +161,11 @@ infix fun Row.to(other: Row): RowToRowAction {
     )
 }
 
-infix fun Row.to(other: Table): RowToTableAction {
-    return RowToTableAction(
-        this,
-        other
-    )
-}
-
-class RowToTableAction internal constructor(val left: Row, val table: Table)
-
 class RowToRowAction internal constructor(val left: Row, val right: Row, val order: RowActionOrder)
 
 // TODO We'd like to be able to move/copy rows before/after another row,
 //      which would inject that row and push all other rows down.
 //      Example: move(t[1] before t[3]) would cause t[1] to be located
 //      at t[3] and the old t[3] would now be t[4], t[4] is now t[5], etc..
+//      Likely need to fine a more optimised approach to moving rows around
 enum class RowActionOrder { TO }

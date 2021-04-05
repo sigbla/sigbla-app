@@ -423,23 +423,56 @@ fun move(rowToRowAction: RowToRowAction) {
 
 fun move(left: Row, actionOrder: RowActionOrder, right: Row) = move(RowToRowAction(left, right, actionOrder))
 
-fun move(rowToTableAction: RowToTableAction) {
-    TODO()
-}
-
-fun move(left: Row, table: Table) = move(RowToTableAction(left, table))
-
 fun copy(rowToRowAction: RowToRowAction) {
-    TODO()
+    val left = rowToRowAction.left
+    val right = rowToRowAction.right
+
+    if (left.table === right.table) {
+        // Internal move
+        val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
+            ref.copy(
+                columnCellMap = ref.columnCellMap.fold(PHashMap()) { acc, ccm ->
+                    acc.put(ccm.component1(), ccm.component2().let {
+                        val cell = ccm.component2().get(left.index)
+                        if (cell != null) it.put(right.index, cell) else it
+                    })
+                }
+            )
+        }
+
+        // TODO Events
+    } else {
+        // Move between tables
+        val (oldRef, newRef) = right.table.tableRef.refAction { ref ->
+            val leftRef = left.table.tableRef.get()
+
+            val columnsMap = leftRef
+                .columnsMap
+                .sortedBy { it.component2().columnOrder }
+                .map { it.component1() }
+                .fold(ref.columnsMap) { acc, c ->
+                    if (acc.containsKey(c)) acc else acc.put(c, BaseColumn(right.table, c, right.table.tableRef))
+                }
+
+            val columnCellMap = leftRef.columnCellMap.fold(ref.columnCellMap) { acc, ccm ->
+                val cell = ccm.component2().get(left.index)
+                if (cell != null) {
+                    val column = columnsMap.get(ccm.component1().columnHeader) ?: throw InvalidColumnException(ccm.component1())
+                    acc.put(column, (acc.get(column) ?: PTreeMap()).put(right.index, cell))
+                } else acc
+            }
+
+            ref.copy(
+                columnsMap = columnsMap,
+                columnCellMap = columnCellMap
+            )
+        }
+
+        // TODO Events
+    }
 }
 
-fun copy(left: Row, actionOrder: RowActionOrder, right: Row) = move(RowToRowAction(left, right, actionOrder))
-
-fun copy(rowToTableAction: RowToTableAction) {
-    TODO()
-}
-
-fun copy(left: Row, table: Table) = move(RowToTableAction(left, table))
+fun copy(left: Row, actionOrder: RowActionOrder, right: Row) = copy(RowToRowAction(left, right, actionOrder))
 
 // ---
 
@@ -484,10 +517,9 @@ inline fun <reified T> valueOf(noinline source: DestinationOsmosis<Cell<*>>.() -
 
 fun valueOf(source: DestinationOsmosis<Cell<*>>.() -> Unit, typeFilter: KClass<*>): Any? {
     val table = BaseTable("", false, AtomicReference(TableRef())) as Table
-    val index = source.hashCode().absoluteValue
-    table["valueOf", index] = source // Subscribe
-    val value = valueOf(table["valueOf", index], typeFilter)
-    table["valueOf", index] = null // Unsubscribe
+    table["valueOf", 0L] = source // Subscribe
+    val value = valueOf(table["valueOf", 0L], typeFilter)
+    table["valueOf", 0L] = null // Unsubscribe
     Registry.deleteTable(table) // Clean up
     return value
 }
