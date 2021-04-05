@@ -4,7 +4,6 @@ import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.refAction
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.math.absoluteValue
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
 import kotlin.reflect.KClass
@@ -494,6 +493,7 @@ fun remove(column: Column) {
 }
 
 // Note: We don't have remove(row) because that would imply shifting rows below up, same for cells
+// TODO When move(t[1] after|before t[2]) is available, should have remove(row) too
 
 fun clear(table: Table): Unit = TODO()
 

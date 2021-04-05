@@ -181,7 +181,7 @@ fun main() {
     copy(table["A"] before table["B"], "C")
     move(table["A"], ColumnActionOrder.AFTER, table["B"])
 
-    (valueOf<Column>(table).first()..valueOf<Column>(table).last()).forEach {
+    (columnOf(table).first()..columnOf(table).last()).forEach {
         println("Column range first to last: " + it.columnHeader)
     }
 
@@ -189,7 +189,7 @@ fun main() {
     println("-----------")
     println()
 
-    (valueOf<Column>(table).last()..valueOf<Column>(table).first()).forEach {
+    (columnOf(table).last()..columnOf(table).first()).forEach {
         println("Column range last to first: " + it.columnHeader)
     }
 
