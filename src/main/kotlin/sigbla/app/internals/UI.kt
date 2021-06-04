@@ -607,6 +607,24 @@ internal data class Coordinate(val x: Long, val y: Long)
 
 internal val idGenerator = AtomicLong()
 
+internal class PositionedContent(
+    val contentHeader: ColumnHeader,
+    val contentRow: Long,
+    val content: String,
+    val h: Long,
+    val w: Long,
+    val z: Long? = null,
+    val mt: Long? = null, // Margin top
+    val ml: Long? = null, // Margin left
+    val cw: Long? = null, // Container width
+    val ch: Long? = null, // Container height
+    val className: String = "",
+    val x: Long?,
+    val y: Long?
+)
+
+internal class Dimensions(val cornerX: Long, val cornerY: Long, val maxX: Long, val maxY: Long)
+
 internal class ContentState(val maxDistance: Int = 2000, val tileSize: Int = 1000) {
     @Volatile
     var existingDims: Dimensions = Dimensions(0, 0, 0, 0)

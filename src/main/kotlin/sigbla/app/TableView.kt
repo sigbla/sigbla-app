@@ -22,6 +22,11 @@ import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 //
 //      Look at having this in the form of view["column"] = { .. } where this is given a cell and
 //      expected to return a cell.
+//
+//      Should also allow for view[row number] = { .. } and view[headers.., row] = { .. }, and
+//      view[cell] = { .. }, etc..
+//
+//      Also need a way to obtain a transformed cell, maybe with view[cell] returning cell?
 
 // TODO Events on a table view should be much like on a table, with view.onAny or view.on<ColumnView>.
 //      Note that we only have one generic type, as we can't have one type of view convert to another.
@@ -131,6 +136,7 @@ abstract class TableView(val name: String) : Iterable<Area<*>> {
 
         return object : Iterator<Area<*>> {
             val ref = tableViewRef.get()
+            // TODO Should this really be here? Table?
             val tableIterator = if (ref.table != null) listOf(ref.table).iterator() else emptyList<Table>().iterator()
             val defaultIterator = listOf(ref.defaultColumnView, ref.defaultRowView).iterator()
             val columnViewIterator = ref.columnViews.values().iterator()
@@ -602,21 +608,3 @@ class DefaultColumnViewBuilder(var width: Long = STANDARD_WIDTH) {
 class DefaultRowViewBuilder(var height: Long = STANDARD_HEIGHT) {
     internal fun build(): DefaultRowView = DefaultRowView(height)
 }
-
-internal class PositionedContent(
-    val contentHeader: ColumnHeader,
-    val contentRow: Long,
-    val content: String,
-    val h: Long,
-    val w: Long,
-    val z: Long? = null,
-    val mt: Long? = null, // Margin top
-    val ml: Long? = null, // Margin left
-    val cw: Long? = null, // Container width
-    val ch: Long? = null, // Container height
-    val className: String = "",
-    val x: Long?,
-    val y: Long?
-)
-
-internal class Dimensions(val cornerX: Long, val cornerY: Long, val maxX: Long, val maxY: Long)

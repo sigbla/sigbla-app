@@ -134,6 +134,7 @@ abstract class Column internal constructor(
 
     // TODO: Look at adding a add(..) function.
     //       Add would just insert a cell at first available location.
+    //       Maybe that can be a plus operator function?
 
     internal abstract fun clear(index: Long): Cell<*>
 

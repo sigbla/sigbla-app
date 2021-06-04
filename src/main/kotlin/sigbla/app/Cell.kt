@@ -121,9 +121,11 @@ sealed class Cell<T>(internal val column: Column, internal val index: Long) : Co
 
     internal fun toCellValue() = CellValue(value)
 
+    // TODO Look at making these internal and introduce a CellOps
     open fun isNumeric(): Boolean = false
     open fun isText(): Boolean = false
 
+    // TODO Look at making these internal and introduce a CellOps
     open fun toLong(): Long = throw InvalidCellException("Cell not numeric at $column:$index")
     open fun toDouble(): Double = throw InvalidCellException("Cell not numeric at $column:$index")
     open fun toBigInteger(): BigInteger = throw InvalidCellException("Cell not numeric at $column:$index")
