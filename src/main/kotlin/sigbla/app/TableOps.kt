@@ -368,55 +368,61 @@ fun copy(left: Column, table: Table) = copy(ColumnToTableAction(left, table), le
 fun move(rowToRowAction: RowToRowAction) {
     val left = rowToRowAction.left
     val right = rowToRowAction.right
+    val order = rowToRowAction.order
 
-    if (left.table === right.table) {
-        // Internal move
-        val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
-            ref.copy(
-                columnCellMap = ref.columnCellMap.fold(PHashMap()) { acc, ccm ->
-                    acc.put(ccm.component1(), ccm.component2().remove(left.index).let {
-                        val cell = ccm.component2().get(left.index)
-                        if (cell != null) it.put(right.index, cell) else it
-                    })
-                }
-            )
-        }
-
-        // TODO Events
-    } else {
-        // Move between tables
-        val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
-            ref.copy(
-                columnCellMap = ref.columnCellMap.fold(PHashMap()) { acc, ccm ->
-                    acc.put(ccm.component1(), ccm.component2().remove(left.index))
-                }
-            )
-        }
-
-        val (oldRef2, newRef2) = right.table.tableRef.refAction { ref ->
-            val columnsMap = oldRef1
-                .columnsMap
-                .sortedBy { it.component2().columnOrder }
-                .map { it.component1() }
-                .fold(ref.columnsMap) { acc, c ->
-                    if (acc.containsKey(c)) acc else acc.put(c, BaseColumn(right.table, c, right.table.tableRef))
-                }
-
-            val columnCellMap = oldRef1.columnCellMap.fold(ref.columnCellMap) { acc, ccm ->
-                val cell = ccm.component2().get(left.index)
-                if (cell != null) {
-                    val column = columnsMap.get(ccm.component1().columnHeader) ?: throw InvalidColumnException(ccm.component1())
-                    acc.put(column, (acc.get(column) ?: PTreeMap()).put(right.index, cell))
-                } else acc
+    if (order == RowActionOrder.TO) {
+        if (left.table === right.table) {
+            // Internal move
+            val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
+                ref.copy(
+                    columnCellMap = ref.columnCellMap.fold(PHashMap()) { acc, ccm ->
+                        acc.put(ccm.component1(), ccm.component2().remove(left.index).let {
+                            val cell = ccm.component2().get(left.index)
+                            if (cell != null) it.put(right.index, cell) else it
+                        })
+                    }
+                )
             }
 
-            ref.copy(
-                columnsMap = columnsMap,
-                columnCellMap = columnCellMap
-            )
-        }
+            // TODO Events
+        } else {
+            // Move between tables
+            val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
+                ref.copy(
+                    columnCellMap = ref.columnCellMap.fold(PHashMap()) { acc, ccm ->
+                        acc.put(ccm.component1(), ccm.component2().remove(left.index))
+                    }
+                )
+            }
 
-        // TODO Events
+            val (oldRef2, newRef2) = right.table.tableRef.refAction { ref ->
+                val columnsMap = oldRef1
+                    .columnsMap
+                    .sortedBy { it.component2().columnOrder }
+                    .map { it.component1() }
+                    .fold(ref.columnsMap) { acc, c ->
+                        if (acc.containsKey(c)) acc else acc.put(c, BaseColumn(right.table, c, right.table.tableRef))
+                    }
+
+                val columnCellMap = oldRef1.columnCellMap.fold(ref.columnCellMap) { acc, ccm ->
+                    val cell = ccm.component2().get(left.index)
+                    if (cell != null) {
+                        val column = columnsMap.get(ccm.component1().columnHeader)
+                            ?: throw InvalidColumnException(ccm.component1())
+                        acc.put(column, (acc.get(column) ?: PTreeMap()).put(right.index, cell))
+                    } else acc
+                }
+
+                ref.copy(
+                    columnsMap = columnsMap,
+                    columnCellMap = columnCellMap
+                )
+            }
+
+            // TODO Events
+        }
+    } else {
+        TODO()
     }
 }
 
@@ -425,49 +431,135 @@ fun move(left: Row, actionOrder: RowActionOrder, right: Row) = move(RowToRowActi
 fun copy(rowToRowAction: RowToRowAction) {
     val left = rowToRowAction.left
     val right = rowToRowAction.right
+    val order = rowToRowAction.order
 
-    if (left.table === right.table) {
-        // Internal move
-        val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
-            ref.copy(
-                columnCellMap = ref.columnCellMap.fold(PHashMap()) { acc, ccm ->
-                    acc.put(ccm.component1(), ccm.component2().let {
-                        val cell = ccm.component2().get(left.index)
-                        if (cell != null) it.put(right.index, cell) else it
-                    })
-                }
-            )
-        }
-
-        // TODO Events
-    } else {
-        // Move between tables
-        val (oldRef, newRef) = right.table.tableRef.refAction { ref ->
-            val leftRef = left.table.tableRef.get()
-
-            val columnsMap = leftRef
-                .columnsMap
-                .sortedBy { it.component2().columnOrder }
-                .map { it.component1() }
-                .fold(ref.columnsMap) { acc, c ->
-                    if (acc.containsKey(c)) acc else acc.put(c, BaseColumn(right.table, c, right.table.tableRef))
-                }
-
-            val columnCellMap = leftRef.columnCellMap.fold(ref.columnCellMap) { acc, ccm ->
-                val cell = ccm.component2().get(left.index)
-                if (cell != null) {
-                    val column = columnsMap.get(ccm.component1().columnHeader) ?: throw InvalidColumnException(ccm.component1())
-                    acc.put(column, (acc.get(column) ?: PTreeMap()).put(right.index, cell))
-                } else acc
+    if (order == RowActionOrder.TO) {
+        if (left.table === right.table) {
+            // Internal copy
+            val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
+                ref.copy(
+                    columnCellMap = ref.columnCellMap.fold(PHashMap()) { acc, ccm ->
+                        acc.put(ccm.component1(), ccm.component2().let {
+                            val cell = ccm.component2().get(left.index)
+                            if (cell != null) it.put(right.index, cell) else it
+                        })
+                    }
+                )
             }
 
-            ref.copy(
-                columnsMap = columnsMap,
-                columnCellMap = columnCellMap
-            )
-        }
+            // TODO Events
+        } else {
+            // Copy between tables
+            val (oldRef, newRef) = right.table.tableRef.refAction { ref ->
+                val leftRef = left.table.tableRef.get()
 
-        // TODO Events
+                val columnsMap = leftRef
+                    .columnsMap
+                    .sortedBy { it.component2().columnOrder }
+                    .map { it.component1() }
+                    .fold(ref.columnsMap) { acc, c ->
+                        if (acc.containsKey(c)) acc else acc.put(c, BaseColumn(right.table, c, right.table.tableRef))
+                    }
+
+                val columnCellMap = leftRef.columnCellMap.fold(ref.columnCellMap) { acc, ccm ->
+                    val cell = ccm.component2().get(left.index)
+                    if (cell != null) {
+                        val column = columnsMap.get(ccm.component1().columnHeader)
+                            ?: throw InvalidColumnException(ccm.component1())
+                        acc.put(column, (acc.get(column) ?: PTreeMap()).put(right.index, cell))
+                    } else acc
+                }
+
+                ref.copy(
+                    columnsMap = columnsMap,
+                    columnCellMap = columnCellMap
+                )
+            }
+
+            // TODO Events
+        }
+    } else {
+        if (left.table === right.table) {
+            // Internal copy
+            val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
+                ref.copy(
+                    columnCellMap = ref.columnCellMap.fold(PHashMap()) { acc, ccm ->
+                        val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
+
+                        val headCells = ccm.component2().to(newIndex, order != RowActionOrder.AFTER)
+                        val tailCells = ccm.component2().from(newIndex, order == RowActionOrder.AFTER)
+
+                        val cells = if (order == RowActionOrder.AFTER) {
+                            tailCells.fold(headCells) { acc2, cell ->
+                                // Shift down
+                                acc2.put(cell.component1() + 1, cell.component2())
+                            }
+                        } else {
+                            headCells.fold(tailCells) { acc2, cell ->
+                                // Shift up
+                                acc2.put(cell.component1() - 1, cell.component2())
+                            }
+                        }
+
+                        acc.put(ccm.component1(), cells.let {
+                            val cellValue = ccm.component2().get(left.index)
+                            if (cellValue != null) it.put(newIndex, cellValue) else it
+                        })
+                    }
+                )
+            }
+
+            // TODO Events
+        } else {
+            // Copy between tables
+            val (oldRef, newRef) = right.table.tableRef.refAction { ref ->
+                val leftRef = left.table.tableRef.get()
+
+                val columnsMap = leftRef
+                    .columnsMap
+                    .sortedBy { it.component2().columnOrder }
+                    .map { it.component1() }
+                    .fold(ref.columnsMap) { acc, c ->
+                        if (acc.containsKey(c)) acc else acc.put(c, BaseColumn(right.table, c, right.table.tableRef))
+                    }
+
+                val columnCellMap = leftRef.columnCellMap.fold(ref.columnCellMap) { acc, ccm ->
+                    val column = columnsMap.get(ccm.component1().columnHeader)
+                        ?: throw InvalidColumnException(ccm.component1())
+
+                    val cm = acc.get(column) ?: PTreeMap()
+
+                    val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
+
+                    val headCells = cm.to(newIndex, order != RowActionOrder.AFTER)
+                    val tailCells = cm.from(newIndex, order == RowActionOrder.AFTER)
+
+                    val cells = if (order == RowActionOrder.AFTER) {
+                        tailCells.fold(headCells) { acc2, cell ->
+                            // Shift down
+                            acc2.put(cell.component1() + 1, cell.component2())
+                        }
+                    } else {
+                        headCells.fold(tailCells) { acc2, cell ->
+                            // Shift up
+                            acc2.put(cell.component1() - 1, cell.component2())
+                        }
+                    }
+
+                    acc.put(column, cells.let {
+                        val cellValue = ccm.component2().get(left.index)
+                        if (cellValue != null) it.put(newIndex, cellValue) else it
+                    })
+                }
+
+                ref.copy(
+                    columnsMap = columnsMap,
+                    columnCellMap = columnCellMap
+                )
+            }
+
+            // TODO Events
+        }
     }
 }
 

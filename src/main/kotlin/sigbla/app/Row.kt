@@ -153,6 +153,22 @@ class RowRange(override val start: Row, override val endInclusive: Row) : Closed
     }
 }
 
+infix fun Row.before(other: Row): RowToRowAction {
+    return RowToRowAction(
+        this,
+        other,
+        RowActionOrder.BEFORE
+    )
+}
+
+infix fun Row.after(other: Row): RowToRowAction {
+    return RowToRowAction(
+        this,
+        other,
+        RowActionOrder.AFTER
+    )
+}
+
 infix fun Row.to(other: Row): RowToRowAction {
     return RowToRowAction(
         this,
@@ -168,4 +184,4 @@ class RowToRowAction internal constructor(val left: Row, val right: Row, val ord
 //      Example: move(t[1] before t[3]) would cause t[1] to be located
 //      at t[3] and the old t[3] would now be t[4], t[4] is now t[5], etc..
 //      Likely need to fine a more optimised approach to moving rows around
-enum class RowActionOrder { TO }
+enum class RowActionOrder { BEFORE, AFTER, TO }

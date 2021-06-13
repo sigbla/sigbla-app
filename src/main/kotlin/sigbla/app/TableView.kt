@@ -27,6 +27,12 @@ import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 //      view[cell] = { .. }, etc..
 //
 //      Also need a way to obtain a transformed cell, maybe with view[cell] returning cell?
+//      Probably should return a special type of cell associated with the view, as this would
+//      also allow for things like move(view[..] before|after|to view[..]) type ops.. like CellView
+//      But, this should also work for RowView, ColumnView, etc.. maybe have a TableViewOps function
+//      called materialize, which takes these and returns a table/column/row/cell transformed
+//      according to the view transformations, ex: materialize(view) returns table or
+//      materialize(view["column"]) returns a column, etc...
 
 // TODO Events on a table view should be much like on a table, with view.onAny or view.on<ColumnView>.
 //      Note that we only have one generic type, as we can't have one type of view convert to another.
