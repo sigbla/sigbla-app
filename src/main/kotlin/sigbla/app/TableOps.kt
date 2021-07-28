@@ -422,7 +422,94 @@ fun move(rowToRowAction: RowToRowAction) {
             // TODO Events
         }
     } else {
-        TODO()
+        if (left.table === right.table) {
+            // Internal move
+            val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
+                ref.copy(
+                    columnCellMap = ref.columnCellMap.fold(PHashMap()) { acc, ccm ->
+                        val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
+
+                        val withoutMoved = ccm.component2().remove(left.index)
+                        val headCells = withoutMoved.to(newIndex, order != RowActionOrder.AFTER)
+                        val tailCells = withoutMoved.from(newIndex, order == RowActionOrder.AFTER)
+
+                        val cells = if (order == RowActionOrder.AFTER) {
+                            tailCells.fold(headCells) { acc2, cell ->
+                                // Shift down
+                                acc2.put(cell.component1() + 1, cell.component2())
+                            }
+                        } else {
+                            headCells.fold(tailCells) { acc2, cell ->
+                                // Shift up
+                                acc2.put(cell.component1() - 1, cell.component2())
+                            }
+                        }
+
+                        acc.put(ccm.component1(), cells.let {
+                            val cellValue = ccm.component2().get(left.index)
+                            if (cellValue != null) it.put(newIndex, cellValue) else it
+                        })
+                    }
+                )
+            }
+
+            // TODO Events
+        } else {
+            // Move between tables
+            val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
+                ref.copy(
+                    columnCellMap = ref.columnCellMap.fold(PHashMap()) { acc, ccm ->
+                        acc.put(ccm.component1(), ccm.component2().remove(left.index))
+                    }
+                )
+            }
+
+            val (oldRef2, newRef2) = right.table.tableRef.refAction { ref ->
+                val columnsMap = oldRef1
+                    .columnsMap
+                    .sortedBy { it.component2().columnOrder }
+                    .map { it.component1() }
+                    .fold(ref.columnsMap) { acc, c ->
+                        if (acc.containsKey(c)) acc else acc.put(c, BaseColumn(right.table, c, right.table.tableRef))
+                    }
+
+                val columnCellMap = oldRef1.columnCellMap.fold(ref.columnCellMap) { acc, ccm ->
+                    val column = columnsMap.get(ccm.component1().columnHeader)
+                        ?: throw InvalidColumnException(ccm.component1())
+
+                    val cm = acc.get(column) ?: PTreeMap()
+
+                    val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
+
+                    val headCells = cm.to(newIndex, order != RowActionOrder.AFTER)
+                    val tailCells = cm.from(newIndex, order == RowActionOrder.AFTER)
+
+                    val cells = if (order == RowActionOrder.AFTER) {
+                        tailCells.fold(headCells) { acc2, cell ->
+                            // Shift down
+                            acc2.put(cell.component1() + 1, cell.component2())
+                        }
+                    } else {
+                        headCells.fold(tailCells) { acc2, cell ->
+                            // Shift up
+                            acc2.put(cell.component1() - 1, cell.component2())
+                        }
+                    }
+
+                    acc.put(column, cells.let {
+                        val cellValue = ccm.component2().get(left.index)
+                        if (cellValue != null) it.put(newIndex, cellValue) else it
+                    })
+                }
+
+                ref.copy(
+                    columnsMap = columnsMap,
+                    columnCellMap = columnCellMap
+                )
+            }
+
+            // TODO Events
+        }
     }
 }
 
