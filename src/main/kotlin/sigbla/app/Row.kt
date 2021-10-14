@@ -9,13 +9,13 @@ import kotlin.reflect.KClass
 
 // TODO Add Iterable<Cell<*>> and other operator functions as we have on Column
 abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
-    internal abstract val table: Table
+    abstract val table: Table
 
-    internal abstract val indexRelation: IndexRelation
+    abstract val indexRelation: IndexRelation
 
-    internal abstract val index: Long
+    abstract val index: Long
 
-    internal val headers: Collection<ColumnHeader>
+    val headers: Collection<ColumnHeader>
         get() = table.headers
 
     operator fun get(header: ColumnHeader): Cell<*> = table[header][indexRelation, index]

@@ -23,10 +23,10 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
         get() = this
 
     // TODO Change this to be sequence
-    internal abstract val headers: Collection<ColumnHeader>
+    abstract val headers: Collection<ColumnHeader>
 
     // TODO Change this to be sequence
-    internal abstract val columns: Collection<Column>
+    abstract val columns: Collection<Column>
 
     // TODO Add a indexes: Collection<Long>/Sequence<Long> for easy access to all row numbers in use
 

@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.reflect.KClass
 
 // TODO Any iteration below needs to operate on a clone
-// TODO Reconsider all the valueOf, headerOf, etc, functions.. stick to properties on objects?
 
 inline fun <reified T> valueOf(cell: Cell<*>): T? = valueOf(cell, T::class) as T?
 

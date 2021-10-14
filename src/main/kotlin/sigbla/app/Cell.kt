@@ -111,8 +111,8 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
     // TODO: Implement assignment ops?
 }
 
-sealed class Cell<T>(internal val column: Column, internal val index: Long) : Comparable<Any?> {
-    internal abstract val value: T
+sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
+    abstract val value: T
 
     // TODO Shouldn't this be internal with tableOf(..) function available?
     val table: Table
