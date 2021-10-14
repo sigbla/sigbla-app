@@ -327,6 +327,7 @@ internal class TableEventProcessor {
                 cellListeners.size > 0
     }
 
+    // TODO Look at changing cells and buffers to use seqs
     internal fun publish(cells: List<TableListenerEvent<Any, Any>>) {
         val buffer = eventBuffer.get()
 

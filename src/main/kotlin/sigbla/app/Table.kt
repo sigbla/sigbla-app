@@ -22,13 +22,13 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
     val table: Table
         get() = this
 
-    internal val columnCounter = AtomicInteger()
-
     // TODO Change this to be sequence
     internal abstract val headers: Collection<ColumnHeader>
 
     // TODO Change this to be sequence
     internal abstract val columns: Collection<Column>
+
+    // TODO Add a indexes: Collection<Long>/Sequence<Long> for easy access to all row numbers in use
 
     internal abstract val tableRef: AtomicReference<TableRef>
 
@@ -542,10 +542,17 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
     }
 }
 
+// TODO Change this to not store any Columns and instead create these as needed, as this will avoid issues
+//      with columnCellMap being out of date with columnsMap and it will speed up cloning
+//      ...
+//      columnMap: PMap<ColumnHeader, ColumnMeta> = PHashMap() with ColumnMeta being an internal class holding the order
+//      columnCellMap: PMap<ColumnHeader, PSortedMap<Long, CellValue<*>>> = PHashMap
+//      ...
 internal data class TableRef(
     val columnsMap: PMap<ColumnHeader, Column> = PHashMap(),
     val columnCellMap: PMap<Column, PSortedMap<Long, CellValue<*>>> = PHashMap(),
-    val version: Long = Long.MIN_VALUE
+    val version: Long = Long.MIN_VALUE,
+    val columnCounter: AtomicInteger = AtomicInteger()
 )
 
 class BaseTable internal constructor(
@@ -577,7 +584,7 @@ class BaseTable internal constructor(
         return tableRef.get().columnsMap[header] ?: tableRef.updateAndGet {
             if (it.columnsMap.containsKey(header)) return@updateAndGet it
 
-            val column = BaseColumn(this, header, tableRef)
+            val column = BaseColumn(this, header)
 
             it.copy(
                 columnsMap = it.columnsMap.put(header, column),
@@ -596,7 +603,7 @@ class BaseTable internal constructor(
         // TODO Consider if we can optimize this by making it lazy or something else?
         //      It might be fine doing it like this if we also offer the batch update feature
         val newColumnsMap = ref.columnsMap.fold(PHashMap<ColumnHeader, Column>()) { acc, chc ->
-            acc.put(chc.component1(), BaseColumn(tableClone, chc.component1(), newTableRef))
+            acc.put(chc.component1(), BaseColumn(tableClone, chc.component1()))
         }
 
         // TODO Consider if we can optimize this by making it lazy or something else?
@@ -608,7 +615,8 @@ class BaseTable internal constructor(
         newTableRef.set(TableRef(
             newColumnsMap,
             newColumnCellMap,
-            ref.version
+            ref.version,
+            ref.columnCounter
         ))
 
         return tableClone

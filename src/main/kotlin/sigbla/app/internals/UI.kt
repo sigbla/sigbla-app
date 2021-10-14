@@ -211,7 +211,7 @@ internal object SigblaBackend {
         return output
     }
 
-    private fun dims(view:TableView): Dimensions {
+    private fun dims(view: TableView): Dimensions {
         // TODO Consider using a stable snapshot ref for view/table
         val table = view.table ?: return Dimensions(0, 0, 0, 0)
 

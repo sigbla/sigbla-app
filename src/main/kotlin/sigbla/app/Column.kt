@@ -172,8 +172,7 @@ abstract class Column internal constructor(
 class BaseColumn internal constructor(
     table: Table,
     columnHeader: ColumnHeader,
-    private val tableRef: AtomicReference<TableRef>,
-    columnOrder: Int = tableRef.get().columnsMap[columnHeader]?.columnOrder ?: table.columnCounter.getAndIncrement()
+    columnOrder: Int = table.tableRef.get().columnsMap[columnHeader]?.columnOrder ?: table.tableRef.get().columnCounter.getAndIncrement()
 ) : Column(
     table,
     columnHeader,
@@ -194,7 +193,7 @@ class BaseColumn internal constructor(
 
         val cellValue = value.toCellValue()
 
-        val (oldRef, newRef) = tableRef.refAction {
+        val (oldRef, newRef) = table.tableRef.refAction {
             val values = it.columnCellMap[this] ?: throw InvalidColumnException(this)
 
             it.copy(
@@ -220,7 +219,7 @@ class BaseColumn internal constructor(
     }
 
     override fun clear(index: Long): Cell<*> {
-        val (oldRef, newRef) = tableRef.refAction {
+        val (oldRef, newRef) = table.tableRef.refAction {
             val values = it.columnCellMap[this] ?: throw InvalidColumnException(this)
 
             it.copy(
@@ -248,7 +247,7 @@ class BaseColumn internal constructor(
     }
 
     override fun clear() {
-        tableRef.updateAndGet {
+        table.tableRef.updateAndGet {
             it.copy(
                 columnCellMap = it.columnCellMap.put(this, PTreeMap()),
                 version = it.version + 1L
@@ -259,13 +258,13 @@ class BaseColumn internal constructor(
     }
 
     override fun iterator(): Iterator<Cell<*>> {
-        val values = tableRef.get().columnCellMap[this] ?: throw InvalidColumnException(this)
+        val values = table.tableRef.get().columnCellMap[this] ?: throw InvalidColumnException(this)
         return values.asSequence().map { it.component2().toCell(this, it.component1()) }.iterator()
     }
 
     private fun getCellRaw(index: Long, indexRelation: IndexRelation): CellValue<*>? {
-        val ref = tableRef.get()
-        val values = ref.columnCellMap[this] ?: throw InvalidColumnException(this)
+        val ref = table.tableRef.get()
+        val values = ref.columnCellMap[this] ?: return null //throw InvalidColumnException(this)
 
         fun firstBefore(): CellValue<*>? {
             val keys = values.asSortedMap().headMap(index).keys

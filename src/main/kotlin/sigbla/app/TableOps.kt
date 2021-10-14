@@ -3,6 +3,7 @@ package sigbla.app
 import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.refAction
+import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
@@ -12,6 +13,297 @@ import kotlin.reflect.KClass
 
 // TODO Implement something similar for moving/copying rows around, like move(t[1] after t[2]), etc
 // TODO Implement something for moving rows around within a column, like move(t["A", 1] after t["A", 2]), etc?
+
+private fun publishColumnEvents(
+    left: Column,
+    right: Column,
+    newRight: Column,
+    order: ColumnActionOrder,
+    t1OldRef: TableRef,
+    t1NewRef: TableRef,
+    t2OldRef: TableRef,
+    t2NewRef: TableRef
+) {
+    if (!left.table.eventProcessor.haveListeners()
+        && !right.table.eventProcessor.haveListeners()
+        && !newRight.table.eventProcessor.haveListeners()) return
+
+    fun prepareEvents(column: Column, oldRef: TableRef, newRef: TableRef): Pair<Table, MutableList<TableListenerEvent<Any, Any>>> {
+        // We need to do this in order to disconnect the columns from the original table
+        val oldTable = column.table.makeClone(ref = oldRef)
+        val newTable = column.table.makeClone(ref = newRef)
+
+        val oldRef = oldTable.tableRef.get()
+        val newRef = newTable.tableRef.get()
+
+        val indexes1 = oldRef.columnCellMap[column]?.keys() ?: emptySet()
+        val indexes2 = newRef.columnCellMap[column]?.keys() ?: emptySet()
+        val indexes = indexes1 union indexes2
+
+        // Get columns anchored to old and new ref
+        val oldColumn = oldRef.columnsMap[column.columnHeader] ?: BaseColumn(
+            oldTable,
+            column.columnHeader,
+            column.columnOrder
+        )
+        val newColumn = newRef.columnsMap[column.columnHeader] ?: BaseColumn(
+            newTable,
+            column.columnHeader,
+            column.columnOrder
+        )
+
+        val events = indexes.map { TableListenerEvent(oldColumn[it], newColumn[it]) as TableListenerEvent<Any, Any> }
+
+        return column.table to events.toMutableList()
+    }
+
+    fun publishEvents(vararg tableEvents: Pair<Table, MutableList<TableListenerEvent<Any, Any>>>) {
+        val groupedEvents = IdentityHashMap<Table, MutableList<TableListenerEvent<Any, Any>>>()
+
+        tableEvents.forEach {
+            groupedEvents.compute(it.first) { _, v -> v?.apply { v.addAll(it.second) } ?: it.second }
+        }
+
+        groupedEvents.forEach { (t, e) -> t.eventProcessor.publish(e) }
+    }
+
+    // There's a lot of options for moving things around, while also renaming the columns they are moved to.
+    // Depending on the way this is done, events are needed to reflect all the changes. Below the event
+    // model is laid out. In short: We don't want to emit more events than strictly needed, which means
+    // to only emit enough events to allow a listener to recreate the change on their end just from the events.
+
+    // Note: Because the events only concern themselves with the columns being moved, the order change
+    //       might impact the order of other columns. The events in isolation do not reflect the change
+    //       to the order index of other columns, but give access to the updated table as a whole.
+
+    // Cases:
+
+    // TODO: Optimise below when cases..?
+
+    when {
+        // move(T1["A"] to T1["A"], "A")        -> No-op move, will produce events for that column
+        order == ColumnActionOrder.TO && left.table === right.table && left.columnHeader == newRight.columnHeader && right.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+            )
+        }
+
+        // move(T1["A"] to T1["A"], "B")        -> A is renamed to B
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order),
+        //                                                      T1["B"] (B value, B order) -> T1["B"] (A value, A order)
+        order == ColumnActionOrder.TO && left.table === right.table && left.columnHeader == right.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(newRight, t1OldRef, t1NewRef)
+            )
+        }
+
+        // move(T1["A"] to T1["B"], "B")        -> A takes the place of B, named B
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order),
+        //                                                      T1["B"] (B value, B order) -> T1["B"] (A value, B order)
+        order == ColumnActionOrder.TO && left.table === right.table && right.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(right, t1OldRef, t1NewRef)
+            )
+        }
+
+        // move(T1["A"] to T2["B"], "B")        -> A takes the place of B, named B, in T2. A removed from T1
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order),
+        //                                                      T2["B"] (B value, B order) -> T2["B"] (A value, B order)
+        order == ColumnActionOrder.TO && left.table !== right.table && right.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(right, t2OldRef, t2NewRef)
+            )
+        }
+
+        // move(T1["A"] to T1["B"], "A")        -> A takes the place of B, named A
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (A value, B order),
+        //                                                      T1["B"] (B value, B order) -> T1["B"] (unit value, B order)
+        order == ColumnActionOrder.TO && left.table === right.table && left.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(right, t1OldRef, t1NewRef)
+            )
+        }
+
+        // move(T1["A"] to T2["B"], "A")        -> A takes the place of B, named A. A removed from T1
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order),
+        //                                                      T2["B"] (B value, B order) -> T2["B"] (unit value, B order)
+        //                                                      T2["A"] (A value, A order) -> T2["A"] (A value, B order)
+        order == ColumnActionOrder.TO && left.table !== right.table && right.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(right, t2OldRef, t2NewRef),
+                prepareEvents(newRight, t2OldRef, t2NewRef)
+            )
+        }
+
+        // move(T1["A"] to T1["B"], "C")        -> A takes the place of B, named C, removing any existing C
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order),
+        //                                                      T2["B"] (B value, B order) -> T2["B"] (unit value, B order),
+        //                                                      T2["C"] (C value, C order) -> T2["C"] (A value, B order)
+        order == ColumnActionOrder.TO && left.table === right.table && left.columnHeader != right.columnHeader && right.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(right, t1OldRef, t1NewRef),
+                prepareEvents(newRight, t1OldRef, t1NewRef)
+            )
+        }
+
+        // move(T1["A"] to T2["B"], "C")        -> A takes the place of B, named C, removing any existing C. A removed from T1
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order),
+        //                                                      T2["B"] (B value, B order) -> T2["B"] (unit value, B order),
+        //                                                      T2["C"] (C value, C order) -> T2["C"] (A value, B order)
+        order == ColumnActionOrder.TO && left.table !== right.table && right.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(right, t2OldRef, t2NewRef),
+                prepareEvents(newRight, t2OldRef, t2NewRef)
+            )
+        }
+
+        // move(T1["A"] after T1["B"], "A")     -> A moved after B, named A
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (A value, new A order after B)
+        order == ColumnActionOrder.AFTER && left.table === right.table && left.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef)
+            )
+        }
+
+        // move(T1["A"] after T2["B"], "A")     -> A moved after B, named A. A removed from T1
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order)
+        //                                                      T2["A"] (A value, A order) -> T2["A"] (A value, new A order after B)
+        order == ColumnActionOrder.AFTER && left.table !== right.table && right.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(newRight, t2OldRef, t2NewRef)
+            )
+        }
+
+        // move(T1["A"] after T1["B"], "B")     -> A moved after B, named B
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order)
+        //                                                      T1["B"] (B value, B order) -> T1["B"] (A value, B order)
+        order == ColumnActionOrder.AFTER && left.table === right.table && right.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(right, t1OldRef, t1NewRef)
+            )
+        }
+
+        // move(T1["A"] after T2["B"], "B")     -> A moved after B, named B. A removed from T1
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order)
+        //                                                      T2["B"] (B value, B order) -> T2["B"] (A value, B order)
+        order == ColumnActionOrder.AFTER && left.table !== right.table && right.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(right, t2OldRef, t2NewRef)
+            )
+        }
+
+        // move(T1["A"] after T1["B"], "C")     -> A moved after B, named C, removing any existing C
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order)
+        //                                                      T1["C"] (C value, C value) -> T1["C"] (A value, new A order after B)
+        order == ColumnActionOrder.AFTER && left.table === right.table && left.columnHeader != newRight.columnHeader && right.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(newRight, t1OldRef, t1NewRef)
+            )
+        }
+
+        // move(T1["A"] after T2["B"], "C")     -> A moved after B, named C, removing any existing C. A removed from T1
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order)
+        //                                                      T2["C"] (C value, C value) -> T2["C"] (A value, new A order after B)
+        order == ColumnActionOrder.AFTER && left.table !== right.table && left.columnHeader != newRight.columnHeader && right.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(newRight, t2OldRef, t2NewRef)
+            )
+        }
+
+        // move(T1["A"] before T1["B"], "A")    -> A moved before B, named A
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (A value, new A order before B)
+        order == ColumnActionOrder.BEFORE && left.table === right.table && left.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef)
+            )
+        }
+
+        // move(T1["A"] before T2["B"], "A")    -> A moved before B, named A. A removed from T1
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order)
+        //                                                      T2["A"] (A value, A order) -> T2["A"] (T1["A"] value, new A order before B)
+        order == ColumnActionOrder.BEFORE && left.table !== right.table && left.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(newRight, t2OldRef, t2NewRef)
+            )
+        }
+
+        // move(T1["A"] before T1["B"], "B")    -> A moved before B, named B
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order)
+        //                                      ->              T1["B"] (B value, B order) -> T1["B"] (A value, B order)
+        order == ColumnActionOrder.BEFORE && left.table === right.table && right.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(right, t1OldRef, t1NewRef)
+            )
+        }
+
+        // move(T1["A"] before T2["B"], "B")    -> A moved before B, named B. A removed from T1
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order)
+        //                                      ->              T2["B"] (B value, B order) -> T2["B"] (A value, B order)
+        order == ColumnActionOrder.BEFORE && left.table !== right.table && right.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(right, t2OldRef, t2NewRef)
+            )
+        }
+
+        // move(T1["A"] before T1["B"], "C")    -> A moved before B, named C, removing any existing C
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order)
+        //                                                      T1["C"] (C value, C value) -> T1["C"] (A value, new A order before B)
+        order == ColumnActionOrder.BEFORE && left.table === right.table && left.columnHeader != newRight.columnHeader && right.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(newRight, t1OldRef, t1NewRef)
+            )
+        }
+
+        // move(T1["A"] before T2["B"], "C")    -> A moved before B, named C, removing any existing C. A removed from T1
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order)
+        //                                                      T2["C"] (C value, C value) -> T2["C"] (A value, new A order before B)
+        order == ColumnActionOrder.BEFORE && left.table !== right.table && left.columnHeader != newRight.columnHeader && right.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(newRight, t2OldRef, t2NewRef)
+            )
+        }
+
+        // Should never happen
+        else -> throw UnsupportedOperationException()
+    }
+}
 
 fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
     fun columnMove(left: Column, right: Column, order: ColumnActionOrder, withName: ColumnHeader, refUpdate: TableRef.() -> TableRef): (ref: TableRef) -> TableRef = { inRef ->
@@ -39,7 +331,7 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
             .sortedBy { it.columnOrder }
             .takeWhile { firstChangedColumn == null || firstChangedColumn != it }
 
-        val newColumn = sequenceOf(BaseColumn(left.table, withName, left.table.tableRef, left.columnOrder))
+        val newColumn = sequenceOf(BaseColumn(left.table, withName, left.columnOrder))
 
         val remainingColumns = changedColumns.filter { it.columnHeader != withName }.let { columns ->
             if (order == ColumnActionOrder.TO) columns.filter { it.columnHeader != right.columnHeader }
@@ -56,11 +348,15 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
 
         // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
         val newColumnMap = columnOrders.fold(PHashMap<ColumnHeader, Column>()) { acc, (columnOrder, column) ->
-            acc.put(column.columnHeader, BaseColumn(column.table, column.columnHeader, left.table.tableRef, columnOrder))
+            acc.put(column.columnHeader, BaseColumn(column.table, column.columnHeader, columnOrder))
         }
+
+        // TODO Find a more efficient approach
+        val removeColumnCells = ref.columnCellMap.keys().filter { !newColumnMap.containsKey(it.columnHeader) }
 
         ref.copy(
             columnsMap = newColumnMap,
+            columnCellMap = if (removeColumnCells.isEmpty()) ref.columnCellMap else removeColumnCells.fold(ref.columnCellMap) { acc, column -> acc.remove(column) },
             version = ref.version + 1L
         )
     }
@@ -71,17 +367,17 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
 
     if (left.table === right.table) {
         // Internal move
-        val newLeft = BaseColumn(left.table, withName, left.table.tableRef)
+        val newRight = BaseColumn(left.table, withName)
         val (oldRef, newRef) = left.table.tableRef.refAction(
             (::columnMove)(left, right, order, withName) {
                 copy(
-                    columnsMap = this.columnsMap.put(withName, newLeft),
-                    columnCellMap = this.columnCellMap.put(newLeft, this.columnCellMap[left] ?: PTreeMap())
+                    columnsMap = this.columnsMap.put(withName, this.columnsMap[withName] ?: newRight),
+                    columnCellMap = this.columnCellMap.put(newRight, this.columnCellMap[left] ?: PTreeMap())
                 )
             }
         )
 
-        // TODO Events
+        publishColumnEvents(left, right, newRight, order, oldRef, newRef, oldRef, newRef)
     } else {
         // Move between tables
         val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
@@ -92,17 +388,17 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
             )
         }
 
-        val newLeft = BaseColumn(right.table, withName, right.table.tableRef)
+        val newRight = BaseColumn(right.table, withName)
         val (oldRef2, newRef2) = right.table.tableRef.refAction(
-            (::columnMove)(newLeft, right, order, withName) {
+            (::columnMove)(newRight, right, order, withName) {
                 copy(
-                    columnsMap = this.columnsMap.put(withName, newLeft),
-                    columnCellMap = this.columnCellMap.put(newLeft, oldRef1.columnCellMap[left] ?: PTreeMap())
+                    columnsMap = this.columnsMap.put(withName, this.columnsMap[withName] ?: newRight),
+                    columnCellMap = this.columnCellMap.put(newRight, oldRef1.columnCellMap[left] ?: PTreeMap())
                 )
             }
         )
 
-        // TODO Events
+        publishColumnEvents(left, right, newRight, order, oldRef1, newRef1, oldRef2, newRef2)
     }
 }
 
@@ -127,7 +423,7 @@ fun move(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
             .filter { it != left }
             .sortedBy { it.columnOrder }
 
-        val newColumn = sequenceOf(BaseColumn(table, withName, table.tableRef, left.columnOrder))
+        val newColumn = sequenceOf(BaseColumn(table, withName, left.columnOrder))
 
         val allColumns = otherColumns + newColumn
 
@@ -139,7 +435,7 @@ fun move(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
 
         // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
         val newColumnMap = columnOrders.fold(PHashMap<ColumnHeader, Column>()) { acc, (columnOrder, column) ->
-            acc.put(column.columnHeader, BaseColumn(column.table, column.columnHeader, table.tableRef, columnOrder))
+            acc.put(column.columnHeader, BaseColumn(column.table, column.columnHeader, columnOrder))
         }
 
         ref.copy(
@@ -153,7 +449,7 @@ fun move(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
 
     if (left.table === table) {
         // Internal move
-        val newLeft = BaseColumn(table, withName, table.tableRef)
+        val newLeft = BaseColumn(table, withName)
         val (oldRef, newRef) = table.tableRef.refAction(
             (::columnMove)(newLeft, table, withName) {
                 copy(
@@ -173,7 +469,7 @@ fun move(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
             )
         }
 
-        val newLeft = BaseColumn(table, withName, table.tableRef)
+        val newLeft = BaseColumn(table, withName)
         val (oldRef2, newRef2) = table.tableRef.refAction(
             (::columnMove)(newLeft, table, withName) {
                 copy(
@@ -222,7 +518,7 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
             .sortedBy { it.columnOrder }
             .takeWhile { firstChangedColumn == null || firstChangedColumn != it }
 
-        val newColumn = sequenceOf(BaseColumn(left.table, withName, left.table.tableRef, left.columnOrder))
+        val newColumn = sequenceOf(BaseColumn(left.table, withName, left.columnOrder))
 
         val remainingColumns = changedColumns.filter { it.columnHeader != withName }.let { columns ->
             if (order == ColumnActionOrder.TO) columns.filter { it.columnHeader != right.columnHeader }
@@ -239,7 +535,7 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
 
         // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
         val newColumnMap = columnOrders.fold(PHashMap<ColumnHeader, Column>()) { acc, (columnOrder, column) ->
-            acc.put(column.columnHeader, BaseColumn(column.table, column.columnHeader, left.table.tableRef, columnOrder))
+            acc.put(column.columnHeader, BaseColumn(column.table, column.columnHeader, columnOrder))
         }
 
         ref.copy(
@@ -254,7 +550,7 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
 
     if (left.table === right.table) {
         // Internal copy
-        val newLeft = BaseColumn(left.table, withName, left.table.tableRef)
+        val newLeft = BaseColumn(left.table, withName)
         val (oldRef, newRef) = left.table.tableRef.refAction(
             (::columnCopy)(left, right, order, withName) {
                 copy(
@@ -267,7 +563,7 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
         // TODO Events
     } else {
         // Copy between tables
-        val newLeft = BaseColumn(right.table, withName, right.table.tableRef)
+        val newLeft = BaseColumn(right.table, withName)
         val (oldRef, newRef) = right.table.tableRef.refAction(
             (::columnCopy)(newLeft, right, order, withName) {
                 copy(
@@ -302,7 +598,7 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
             .filter { left.columnHeader != withName || it != left }
             .sortedBy { it.columnOrder }
 
-        val newColumn = sequenceOf(BaseColumn(table, withName, table.tableRef, left.columnOrder))
+        val newColumn = sequenceOf(BaseColumn(table, withName, left.columnOrder))
 
         val allColumns = otherColumns + newColumn
 
@@ -314,7 +610,7 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
 
         // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
         val newColumnMap = columnOrders.fold(PHashMap<ColumnHeader, Column>()) { acc, (columnOrder, column) ->
-            acc.put(column.columnHeader, BaseColumn(column.table, column.columnHeader, table.tableRef, columnOrder))
+            acc.put(column.columnHeader, BaseColumn(column.table, column.columnHeader, columnOrder))
         }
 
         ref.copy(
@@ -328,7 +624,7 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
 
     if (left.table === table) {
         // Internal copy
-        val newLeft = BaseColumn(table, withName, table.tableRef)
+        val newLeft = BaseColumn(table, withName)
         val (oldRef, newRef) = table.tableRef.refAction(
             (::columnCopy)(newLeft, table, withName) {
                 copy(
@@ -340,7 +636,7 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
         // TODO Events
     } else {
         // Copy between tables
-        val newLeft = BaseColumn(table, withName, table.tableRef)
+        val newLeft = BaseColumn(table, withName)
         val (oldRef, newRef) = table.tableRef.refAction(
             (::columnCopy)(newLeft, table, withName) {
                 copy(
@@ -401,7 +697,7 @@ fun move(rowToRowAction: RowToRowAction) {
                     .sortedBy { it.component2().columnOrder }
                     .map { it.component1() }
                     .fold(ref.columnsMap) { acc, c ->
-                        if (acc.containsKey(c)) acc else acc.put(c, BaseColumn(right.table, c, right.table.tableRef))
+                        if (acc.containsKey(c)) acc else acc.put(c, BaseColumn(right.table, c))
                     }
 
                 val columnCellMap = oldRef1.columnCellMap.fold(ref.columnCellMap) { acc, ccm ->
@@ -470,7 +766,7 @@ fun move(rowToRowAction: RowToRowAction) {
                     .sortedBy { it.component2().columnOrder }
                     .map { it.component1() }
                     .fold(ref.columnsMap) { acc, c ->
-                        if (acc.containsKey(c)) acc else acc.put(c, BaseColumn(right.table, c, right.table.tableRef))
+                        if (acc.containsKey(c)) acc else acc.put(c, BaseColumn(right.table, c))
                     }
 
                 val columnCellMap = oldRef1.columnCellMap.fold(ref.columnCellMap) { acc, ccm ->
@@ -545,7 +841,7 @@ fun copy(rowToRowAction: RowToRowAction) {
                     .sortedBy { it.component2().columnOrder }
                     .map { it.component1() }
                     .fold(ref.columnsMap) { acc, c ->
-                        if (acc.containsKey(c)) acc else acc.put(c, BaseColumn(right.table, c, right.table.tableRef))
+                        if (acc.containsKey(c)) acc else acc.put(c, BaseColumn(right.table, c))
                     }
 
                 val columnCellMap = leftRef.columnCellMap.fold(ref.columnCellMap) { acc, ccm ->
@@ -607,7 +903,7 @@ fun copy(rowToRowAction: RowToRowAction) {
                     .sortedBy { it.component2().columnOrder }
                     .map { it.component1() }
                     .fold(ref.columnsMap) { acc, c ->
-                        if (acc.containsKey(c)) acc else acc.put(c, BaseColumn(right.table, c, right.table.tableRef))
+                        if (acc.containsKey(c)) acc else acc.put(c, BaseColumn(right.table, c))
                     }
 
                 val columnCellMap = leftRef.columnCellMap.fold(ref.columnCellMap) { acc, ccm ->
@@ -687,6 +983,7 @@ fun clone(table: Table): Table = table.makeClone()
 fun clone(table: Table, withName: String): Table = table.makeClone(withName, true)
 
 // TODO Any iteration below needs to operate on a clone?
+// TODO Reconsider all the valueOf, headerOf, etc, functions.. stick to properties on objects?
 
 inline fun <reified T> valueOf(cell: Cell<*>): T? = valueOf(cell, T::class) as T?
 
@@ -703,6 +1000,7 @@ fun valueOf(source: DestinationOsmosis<Cell<*>>.() -> Unit, typeFilter: KClass<*
     return value
 }
 
+// TODO Consider valuesOf as function name as this returns a different value than the single value case
 inline fun <reified T> valueOf(cells: Iterable<Cell<*>>): Sequence<T> = valueOf(cells, T::class) as Sequence<T>
 
 fun valueOf(cells: Iterable<Cell<*>>, typeFilter: KClass<*>): Sequence<Any> = cells
@@ -713,8 +1011,10 @@ fun headerOf(cell: Cell<*>) = cell.column.columnHeader
 
 fun headerOf(column: Column) = column.columnHeader
 
+// TODO Consider headersOf as function name as this returns a different value than the single value case
 fun headerOf(row: Row) = row.headers.asSequence()
 
+// TODO Consider headersOf as function name as this returns a different value than the single value case
 fun headerOf(cells: Iterable<Cell<*>>) = cells
     .asSequence()
     .map { it.column }
@@ -724,6 +1024,7 @@ fun headerOf(cells: Iterable<Cell<*>>) = cells
 
 fun columnOf(cell: Cell<*>) = cell.column
 
+// TODO Consider columnsOf as function name as this returns a different value than the single value case
 fun columnOf(row: Row) = row.headers.asSequence().map { row.table[it] }
 
 fun columnOf(cells: Iterable<Cell<*>>) = cells
@@ -734,6 +1035,7 @@ fun columnOf(cells: Iterable<Cell<*>>) = cells
 
 fun indexOf(cell: Cell<*>) = cell.index
 
+// TODO Consider indexesOf as function name as this returns a different value than the single value case
 fun indexOf(cells: Iterable<Cell<*>>) = cells
     .asSequence()
     .map { it.index }
@@ -750,28 +1052,20 @@ inline fun <reified O, reified N> on(table: Table, noinline init: TableEventRece
 
 fun on(table: Table, old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: TableEventReceiver<Table, Any, Any>.() -> Unit): TableListenerReference {
     val eventReceiver = when {
-        old == Any::class && new == Any::class -> TableEventReceiver<Table, Any, Any>(
-            table
-        ) { this }
+        old == Any::class && new == Any::class -> TableEventReceiver<Table, Any, Any>(table) { this }
         old == Any::class -> TableEventReceiver(table) {
             this.filter {
-                new.isInstance(
-                    it.newValue.value
-                )
+                new.isInstance(it.newValue.value)
             }
         }
         new == Any::class -> TableEventReceiver(table) {
             this.filter {
-                old.isInstance(
-                    it.oldValue.value
-                )
+                old.isInstance(it.oldValue.value)
             }
         }
         else -> TableEventReceiver(table) {
             this.filter {
-                old.isInstance(it.oldValue.value) && new.isInstance(
-                    it.newValue.value
-                )
+                old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value)
             }
         }
     }
@@ -786,28 +1080,20 @@ inline fun <reified O, reified N> on(column: Column, noinline init: TableEventRe
 
 fun on(column: Column, old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: TableEventReceiver<Column, Any, Any>.() -> Unit): TableListenerReference {
     val eventReceiver = when {
-        old == Any::class && new == Any::class -> TableEventReceiver<Column, Any, Any>(
-            column
-        ) { this }
+        old == Any::class && new == Any::class -> TableEventReceiver<Column, Any, Any>(column) { this }
         old == Any::class -> TableEventReceiver(column) {
             this.filter {
-                new.isInstance(
-                    it.newValue.value
-                )
+                new.isInstance(it.newValue.value)
             }
         }
         new == Any::class -> TableEventReceiver(column) {
             this.filter {
-                old.isInstance(
-                    it.oldValue.value
-                )
+                old.isInstance(it.oldValue.value)
             }
         }
         else -> TableEventReceiver(column) {
             this.filter {
-                old.isInstance(it.oldValue.value) && new.isInstance(
-                    it.newValue.value
-                )
+                old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value)
             }
         }
     }
@@ -822,28 +1108,20 @@ inline fun <reified O, reified N> on(row: Row, noinline init: TableEventReceiver
 
 fun on(row: Row, old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: TableEventReceiver<Row, Any, Any>.() -> Unit): TableListenerReference {
     val eventReceiver = when {
-        old == Any::class && new == Any::class -> TableEventReceiver<Row, Any, Any>(
-            row
-        ) { this }
+        old == Any::class && new == Any::class -> TableEventReceiver<Row, Any, Any>(row) { this }
         old == Any::class -> TableEventReceiver(row) {
             this.filter {
-                new.isInstance(
-                    it.newValue.value
-                )
+                new.isInstance(it.newValue.value)
             }
         }
         new == Any::class -> TableEventReceiver(row) {
             this.filter {
-                old.isInstance(
-                    it.oldValue.value
-                )
+                old.isInstance(it.oldValue.value)
             }
         }
         else -> TableEventReceiver(row) {
             this.filter {
-                old.isInstance(it.oldValue.value) && new.isInstance(
-                    it.newValue.value
-                )
+                old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value)
             }
         }
     }
@@ -858,9 +1136,7 @@ inline fun <reified O, reified N> on(cellRange: CellRange, noinline init: TableE
 
 fun on(cellRange: CellRange, old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: TableEventReceiver<CellRange, Any, Any>.() -> Unit): TableListenerReference {
     val eventReceiver = when {
-        old == Any::class && new == Any::class -> TableEventReceiver<CellRange, Any, Any>(
-            cellRange
-        ) { this }
+        old == Any::class && new == Any::class -> TableEventReceiver<CellRange, Any, Any>(cellRange) { this }
         old == Any::class -> TableEventReceiver(cellRange) {
             this.filter {
                 new.isInstance(it.newValue.value)
@@ -888,28 +1164,20 @@ inline fun <reified O, reified N> on(cell: Cell<*>, noinline init: TableEventRec
 
 fun on(cell: Cell<*>, old: KClass<*> = Any::class, new: KClass<*> = Any::class, init: TableEventReceiver<Cell<*>, Any, Any>.() -> Unit): TableListenerReference {
     val eventReceiver = when {
-        old == Any::class && new == Any::class -> TableEventReceiver<Cell<*>, Any, Any>(
-            cell
-        ) { this }
+        old == Any::class && new == Any::class -> TableEventReceiver<Cell<*>, Any, Any>(cell) { this }
         old == Any::class -> TableEventReceiver(cell) {
             this.filter {
-                new.isInstance(
-                    it.newValue.value
-                )
+                new.isInstance(it.newValue.value)
             }
         }
         new == Any::class -> TableEventReceiver(cell) {
             this.filter {
-                old.isInstance(
-                    it.oldValue.value
-                )
+                old.isInstance(it.oldValue.value)
             }
         }
         else -> TableEventReceiver(cell) {
             this.filter {
-                old.isInstance(
-                    it.oldValue.value
-                ) && new.isInstance(it.newValue.value)
+                old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value)
             }
         }
     }
