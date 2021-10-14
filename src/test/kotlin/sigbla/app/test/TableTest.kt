@@ -323,14 +323,14 @@ class TableTest {
         t["C", 1] = "C1"
         t["D", 1] = "D1"
 
-        assertEquals(listOf("A0", "B0", "C0", "D0"), valueOf<Any>(t[0]).toList())
-        assertEquals(listOf("A1", "B1", "C1", "D1"), valueOf<Any>(t[1]).toList())
+        assertEquals(listOf("A0", "B0", "C0", "D0"), valuesOf<Any>(t[0]).toList())
+        assertEquals(listOf("A1", "B1", "C1", "D1"), valuesOf<Any>(t[1]).toList())
 
-        assertEquals(listOf("A0", "A1"), valueOf<Any>(t["A"]).toList())
-        assertEquals(listOf("B0", "B1"), valueOf<Any>(t["B"]).toList())
+        assertEquals(listOf("A0", "A1"), valuesOf<Any>(t["A"]).toList())
+        assertEquals(listOf("B0", "B1"), valuesOf<Any>(t["B"]).toList())
 
-        assertEquals(listOf("A0", "A1", "B0", "B1", "C0", "C1", "D0", "D1"), valueOf<Any>(t["A", 0]..t["D", 1]).toList())
-        assertEquals(listOf("A0", "A1", "B0", "B1", "C0", "C1", "D0", "D1"), valueOf<Any>(t).toList())
+        assertEquals(listOf("A0", "A1", "B0", "B1", "C0", "C1", "D0", "D1"), valuesOf<Any>(t["A", 0]..t["D", 1]).toList())
+        assertEquals(listOf("A0", "A1", "B0", "B1", "C0", "C1", "D0", "D1"), valuesOf<Any>(t).toList())
     }
 
     @Test
@@ -342,7 +342,7 @@ class TableTest {
         t["C", 0] = "C0"
         t["D", 0] = "D0"
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headerOf(t).map { it.header }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headersOf(t).map { it.header }.toList())
     }
 
     @Test
@@ -354,6 +354,6 @@ class TableTest {
         t["C", 0] = "C0"
         t["D", 0] = "D0"
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headerOf(t).map { it.header }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headersOf(t).map { it.header }.toList())
     }
 }

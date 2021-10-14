@@ -11,7 +11,7 @@ import org.junit.After
 import sigbla.app.DefaultBigDecimalPrecision
 import sigbla.app.IndexRelation
 import sigbla.app.Table
-import sigbla.app.columnOf
+import sigbla.app.columnsOf
 import sigbla.app.remove
 import sigbla.app.valueOf
 import java.math.BigDecimal
@@ -72,7 +72,7 @@ class BasicTableTest {
         assertEquals(Unit, valueOf<Any>(t["E"][3]))
         assertEquals(Unit, valueOf<Any>(t["E"][4]))
 
-        columnOf(t).forEach { remove(it) }
+        columnsOf(t).forEach { remove(it) }
 
         assertEquals(Unit, valueOf<Any>(t["A"][1]))
         assertEquals(Unit, valueOf<Any>(t["A"][2]))
@@ -151,7 +151,7 @@ class BasicTableTest {
         assertEquals(Unit, valueOf<Any>(t["E"][3]))
         assertEquals(Unit, valueOf<Any>(t["E"][4]))
 
-        columnOf(t).forEach { remove(it) }
+        columnsOf(t).forEach { remove(it) }
 
         assertEquals(Unit, valueOf<Any>(t["A"][1]))
         assertEquals(Unit, valueOf<Any>(t["A"][2]))

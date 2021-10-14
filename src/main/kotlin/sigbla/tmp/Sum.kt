@@ -3,7 +3,7 @@ package sigbla.tmp
 import sigbla.app.Table
 import sigbla.app.TableView
 import sigbla.app.sum
-import sigbla.app.valueOf
+import sigbla.app.valuesOf
 
 fun main() {
     val table = Table["test"]
@@ -17,8 +17,8 @@ fun main() {
         }
     }
 
-    val value1 = valueOf<Number>(table["A", 0]..table["B", 100]).toList()
-    val value2 = valueOf<Number>(table["A"]).toList()
+    val value1 = valuesOf<Number>(table["A", 0]..table["B", 100]).toList()
+    val value2 = valuesOf<Number>(table["A"]).toList()
     println("Value1: $value1")
     println("Value2: $value2")
 

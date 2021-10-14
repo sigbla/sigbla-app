@@ -8,10 +8,6 @@ import sigbla.app.*
 import java.math.BigDecimal
 import java.math.BigInteger
 
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.ZoneId
-
 fun main() {
     //val table = Table["Table A"]
     val table = Table["test"]
@@ -40,7 +36,7 @@ fun main() {
     table[1][ColumnHeader("A")] = "A"
     table[1]["A", "B"] = "A"
 
-    val tickerHeaders = headerOf(table).filter { it[2] == "Ticker" }
+    val tickerHeaders = headersOf(table).filter { it[2] == "Ticker" }
 
     val prices = tickerHeaders.map { header -> header to table[header][AT_OR_BEFORE, 1000] }.toMap()
 
@@ -181,7 +177,7 @@ fun main() {
     copy(table["A"] before table["B"], "C")
     move(table["A"], ColumnActionOrder.AFTER, table["B"])
 
-    (columnOf(table).first()..columnOf(table).last()).forEach {
+    (columnsOf(table).first()..columnsOf(table).last()).forEach {
         println("Column range first to last: " + it.columnHeader)
     }
 
@@ -189,7 +185,7 @@ fun main() {
     println("-----------")
     println()
 
-    (columnOf(table).last()..columnOf(table).first()).forEach {
+    (columnsOf(table).last()..columnsOf(table).first()).forEach {
         println("Column range last to first: " + it.columnHeader)
     }
 

@@ -4,7 +4,6 @@ import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.refAction
 import java.util.*
-import java.util.concurrent.atomic.AtomicReference
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
 import kotlin.reflect.KClass
@@ -981,68 +980,6 @@ fun clear(cell: Cell<*>) = cell `=` null
 fun clone(table: Table): Table = table.makeClone()
 
 fun clone(table: Table, withName: String): Table = table.makeClone(withName, true)
-
-// TODO Any iteration below needs to operate on a clone?
-// TODO Reconsider all the valueOf, headerOf, etc, functions.. stick to properties on objects?
-
-inline fun <reified T> valueOf(cell: Cell<*>): T? = valueOf(cell, T::class) as T?
-
-fun valueOf(cell: Cell<*>, typeFilter: KClass<*>): Any? = if (typeFilter.isInstance(cell.value)) cell.value else null
-
-inline fun <reified T> valueOf(noinline source: DestinationOsmosis<Cell<*>>.() -> Unit): T? = valueOf(source, T::class) as T?
-
-fun valueOf(source: DestinationOsmosis<Cell<*>>.() -> Unit, typeFilter: KClass<*>): Any? {
-    val table = BaseTable("", false, AtomicReference(TableRef())) as Table
-    table["valueOf", 0L] = source // Subscribe
-    val value = valueOf(table["valueOf", 0L], typeFilter)
-    table["valueOf", 0L] = null // Unsubscribe
-    Registry.deleteTable(table) // Clean up
-    return value
-}
-
-// TODO Consider valuesOf as function name as this returns a different value than the single value case
-inline fun <reified T> valueOf(cells: Iterable<Cell<*>>): Sequence<T> = valueOf(cells, T::class) as Sequence<T>
-
-fun valueOf(cells: Iterable<Cell<*>>, typeFilter: KClass<*>): Sequence<Any> = cells
-    .asSequence()
-    .mapNotNull { valueOf(it, typeFilter) }
-
-fun headerOf(cell: Cell<*>) = cell.column.columnHeader
-
-fun headerOf(column: Column) = column.columnHeader
-
-// TODO Consider headersOf as function name as this returns a different value than the single value case
-fun headerOf(row: Row) = row.headers.asSequence()
-
-// TODO Consider headersOf as function name as this returns a different value than the single value case
-fun headerOf(cells: Iterable<Cell<*>>) = cells
-    .asSequence()
-    .map { it.column }
-    .toSortedSet()
-    .asSequence()
-    .map { it.columnHeader }
-
-fun columnOf(cell: Cell<*>) = cell.column
-
-// TODO Consider columnsOf as function name as this returns a different value than the single value case
-fun columnOf(row: Row) = row.headers.asSequence().map { row.table[it] }
-
-fun columnOf(cells: Iterable<Cell<*>>) = cells
-    .asSequence()
-    .map { it.column }
-    .toSortedSet()
-    .asSequence()
-
-fun indexOf(cell: Cell<*>) = cell.index
-
-// TODO Consider indexesOf as function name as this returns a different value than the single value case
-fun indexOf(cells: Iterable<Cell<*>>) = cells
-    .asSequence()
-    .map { it.index }
-    .toSortedSet()
-    .asSequence()
-
-// TODO We want specifics of header/column/indexOf for column/row/range, for efficiency
 
 // ---
 
