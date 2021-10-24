@@ -5,7 +5,6 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.math.min
 import kotlin.math.max
-import kotlin.reflect.KClass
 
 // TODO Add Iterable<Cell<*>> and other operator functions as we have on Column
 abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
@@ -57,20 +56,20 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
         val ref = table.tableRef.get()
         val columnCellMap = ref.columnCellMap
 
-        fun at(column: Column): CellValue<*>? {
-            val values = columnCellMap[column] ?: throw InvalidColumnException(column)
+        fun at(columnHeader: ColumnHeader): CellValue<*>? {
+            val values = columnCellMap[columnHeader] ?: throw InvalidColumnException(columnHeader)
             return values[index]
         }
 
-        fun firstBefore(column: Column): CellValue<*>? {
-            val values = columnCellMap[column] ?: throw InvalidColumnException(column)
+        fun firstBefore(columnHeader: ColumnHeader): CellValue<*>? {
+            val values = columnCellMap[columnHeader] ?: throw InvalidColumnException(columnHeader)
             val keys = values.asSortedMap().headMap(index).keys
             if (keys.isEmpty()) return null
             return values[keys.last()]
         }
 
-        fun firstAfter(column: Column): CellValue<*>? {
-            val values = columnCellMap[column] ?: throw InvalidColumnException(column)
+        fun firstAfter(columnHeader: ColumnHeader): CellValue<*>? {
+            val values = columnCellMap[columnHeader] ?: throw InvalidColumnException(columnHeader)
             val keys = values.asSortedMap().tailMap(index + 1L).keys
             if (keys.isEmpty()) return null
             return values[keys.first()]
@@ -78,17 +77,19 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
 
         return ref
             .columnsMap
-            .values()
             .asSequence()
-            .sortedBy { it.columnOrder }
-            .map { column ->
+            .sortedBy { (_, columnMeta) -> columnMeta.columnOrder }
+            .map { (columnHeader, columnMeta) ->
                 when (indexRelation) {
-                    IndexRelation.AT -> at(column)
-                    IndexRelation.BEFORE -> firstBefore(column)
-                    IndexRelation.AFTER -> firstAfter(column)
-                    IndexRelation.AT_OR_BEFORE -> at(column) ?: firstBefore(column)
-                    IndexRelation.AT_OR_AFTER -> at(column) ?: firstAfter(column)
-                }.let { it?.toCell(column, index) ?: UnitCell(column, index) }
+                    IndexRelation.AT -> at(columnHeader)
+                    IndexRelation.BEFORE -> firstBefore(columnHeader)
+                    IndexRelation.AFTER -> firstAfter(columnHeader)
+                    IndexRelation.AT_OR_BEFORE -> at(columnHeader) ?: firstBefore(columnHeader)
+                    IndexRelation.AT_OR_AFTER -> at(columnHeader) ?: firstAfter(columnHeader)
+                }.let {
+                    it?.toCell(BaseColumn(table, columnHeader, columnMeta.columnOrder), index)
+                        ?: UnitCell(BaseColumn(table, columnHeader, columnMeta.columnOrder), index)
+                }
             }
             .iterator()
     }

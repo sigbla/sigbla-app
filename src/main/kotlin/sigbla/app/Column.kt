@@ -59,6 +59,7 @@ class ColumnHeader(vararg header: String) : Comparable<ColumnHeader> {
 
 abstract class Column internal constructor(
     val table: Table,
+    // TODO Rename to header and order?
     val columnHeader: ColumnHeader,
     val columnOrder: Int
 ) : Comparable<Column>, Iterable<Cell<*>> {
@@ -194,10 +195,10 @@ class BaseColumn internal constructor(
         val cellValue = value.toCellValue()
 
         val (oldRef, newRef) = table.tableRef.refAction {
-            val values = it.columnCellMap[this] ?: throw InvalidColumnException(this)
+            val values = it.columnCellMap[this.columnHeader] ?: throw InvalidColumnException(this)
 
             it.copy(
-                columnCellMap = it.columnCellMap.put(this, values.put(index, cellValue)),
+                columnCellMap = it.columnCellMap.put(this.columnHeader, values.put(index, cellValue)),
                 version = it.version + 1L
             )
         }
@@ -207,6 +208,7 @@ class BaseColumn internal constructor(
         val oldTable = this.table.makeClone(ref = oldRef)
         val newTable = this.table.makeClone(ref = newRef)
 
+        // TODO This might create a column if it doesn't exist, which we don't want (see events in table ops)
         val old = oldTable[this.columnHeader][index]
         val new = newTable[this.columnHeader][index]
 
@@ -220,10 +222,10 @@ class BaseColumn internal constructor(
 
     override fun clear(index: Long): Cell<*> {
         val (oldRef, newRef) = table.tableRef.refAction {
-            val values = it.columnCellMap[this] ?: throw InvalidColumnException(this)
+            val values = it.columnCellMap[this.columnHeader] ?: throw InvalidColumnException(this)
 
             it.copy(
-                columnCellMap = it.columnCellMap.put(this, values.remove(index)),
+                columnCellMap = it.columnCellMap.put(this.columnHeader, values.remove(index)),
                 version = it.version + 1L
             )
         }
@@ -232,6 +234,7 @@ class BaseColumn internal constructor(
         val newTable = this.table.makeClone(ref = newRef)
 
         val old = oldTable[this.columnHeader][index]
+        // TODO This will create a column if it doesn't exist, which we don't want (see events in table ops)
         val new = newTable[this.columnHeader][index] // This will be a unit cell, but with new table and column refs
 
         if (!table.eventProcessor.haveListeners()) return old
@@ -249,7 +252,7 @@ class BaseColumn internal constructor(
     override fun clear() {
         table.tableRef.updateAndGet {
             it.copy(
-                columnCellMap = it.columnCellMap.put(this, PTreeMap()),
+                columnCellMap = it.columnCellMap.put(this.columnHeader, PTreeMap()),
                 version = it.version + 1L
             )
         }
@@ -258,13 +261,14 @@ class BaseColumn internal constructor(
     }
 
     override fun iterator(): Iterator<Cell<*>> {
-        val values = table.tableRef.get().columnCellMap[this] ?: throw InvalidColumnException(this)
+        // TODO Operate on clone
+        val values = table.tableRef.get().columnCellMap[this.columnHeader] ?: throw InvalidColumnException(this)
         return values.asSequence().map { it.component2().toCell(this, it.component1()) }.iterator()
     }
 
     private fun getCellRaw(index: Long, indexRelation: IndexRelation): CellValue<*>? {
         val ref = table.tableRef.get()
-        val values = ref.columnCellMap[this] ?: return null //throw InvalidColumnException(this)
+        val values = ref.columnCellMap[this.columnHeader] ?: return null
 
         fun firstBefore(): CellValue<*>? {
             val keys = values.asSortedMap().headMap(index).keys

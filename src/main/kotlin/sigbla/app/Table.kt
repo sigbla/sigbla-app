@@ -542,15 +542,13 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
     }
 }
 
-// TODO Change this to not store any Columns and instead create these as needed, as this will avoid issues
-//      with columnCellMap being out of date with columnsMap and it will speed up cloning
-//      ...
-//      columnMap: PMap<ColumnHeader, ColumnMeta> = PHashMap() with ColumnMeta being an internal class holding the order
-//      columnCellMap: PMap<ColumnHeader, PSortedMap<Long, CellValue<*>>> = PHashMap
-//      ...
+internal data class ColumnMeta(
+    val columnOrder: Int
+)
+
 internal data class TableRef(
-    val columnsMap: PMap<ColumnHeader, Column> = PHashMap(),
-    val columnCellMap: PMap<Column, PSortedMap<Long, CellValue<*>>> = PHashMap(),
+    val columnsMap: PMap<ColumnHeader, ColumnMeta> = PHashMap(),
+    val columnCellMap: PMap<ColumnHeader, PSortedMap<Long, CellValue<*>>> = PHashMap(),
     val version: Long = Long.MIN_VALUE,
     val columnCounter: AtomicInteger = AtomicInteger()
 )
@@ -572,8 +570,9 @@ class BaseTable internal constructor(
             .toList()
 
     override val columns: Collection<Column>
-        get() = tableRef.get().columnsMap.values().asSequence()
-            .sortedBy { it.columnOrder }
+        get() = tableRef.get().columnsMap.asSequence()
+            .sortedBy { it.component2().columnOrder }
+            .map { BaseColumn(this, it.component1(), it.component2().columnOrder) }
             .toList()
 
     // TODO Column add event
@@ -581,46 +580,24 @@ class BaseTable internal constructor(
         if (closed) throw InvalidTableException("Table is closed")
         if (header.header.isEmpty()) throw InvalidColumnException("Empty header")
 
-        return tableRef.get().columnsMap[header] ?: tableRef.updateAndGet {
+        val columnMeta = tableRef.get().columnsMap[header] ?: tableRef.updateAndGet {
             if (it.columnsMap.containsKey(header)) return@updateAndGet it
 
-            val column = BaseColumn(this, header)
+            val columnMeta = ColumnMeta(tableRef.get().columnCounter.getAndIncrement())
 
             it.copy(
-                columnsMap = it.columnsMap.put(header, column),
-                columnCellMap = it.columnCellMap.put(column, PTreeMap()),
+                columnsMap = it.columnsMap.put(header, columnMeta),
+                columnCellMap = it.columnCellMap.put(header, PTreeMap()),
                 version = it.version + 1L
             )
         }.columnsMap[header] ?: throw InvalidColumnException(header)
+
+        return BaseColumn(this, header, columnMeta.columnOrder)
     }
 
     override fun contains(header: ColumnHeader): Boolean = tableRef.get().columnsMap.containsKey(header)
 
-    override fun makeClone(name: String, onRegistry: Boolean, ref: TableRef): Table {
-        val newTableRef = AtomicReference(ref)
-        val tableClone = BaseTable(name, onRegistry, newTableRef)
-
-        // TODO Consider if we can optimize this by making it lazy or something else?
-        //      It might be fine doing it like this if we also offer the batch update feature
-        val newColumnsMap = ref.columnsMap.fold(PHashMap<ColumnHeader, Column>()) { acc, chc ->
-            acc.put(chc.component1(), BaseColumn(tableClone, chc.component1()))
-        }
-
-        // TODO Consider if we can optimize this by making it lazy or something else?
-        //      It might be fine doing it like this if we also offer the batch update feature
-        val newColumnCellMap = ref.columnCellMap.fold(PHashMap<Column, PSortedMap<Long, CellValue<*>>>()) { acc, ccm ->
-            acc.put(newColumnsMap[ccm.component1().columnHeader] ?: throw InvalidColumnException(ccm.component1()), ccm.component2())
-        }
-
-        newTableRef.set(TableRef(
-            newColumnsMap,
-            newColumnCellMap,
-            ref.version,
-            ref.columnCounter
-        ))
-
-        return tableClone
-    }
+    override fun makeClone(name: String, onRegistry: Boolean, ref: TableRef): Table = BaseTable(name, onRegistry, AtomicReference(ref))
 
     companion object
 }
