@@ -12,7 +12,7 @@ import kotlin.reflect.KClass
 // TODO Implement something similar for moving/copying rows around, like move(t[1] after t[2]), etc
 // TODO Implement something for moving rows around within a column, like move(t["A", 1] after t["A", 2]), etc?
 
-private fun publishColumnEvents(
+private fun publishColumnMoveEvents(
     left: Column,
     right: Column,
     newRight: Column,
@@ -146,8 +146,8 @@ private fun publishColumnEvents(
 
         // move(T1["A"] to T1["B"], "C")        -> A takes the place of B, named C, removing any existing C
         //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order),
-        //                                                      T2["B"] (B value, B order) -> T2["B"] (unit value, B order),
-        //                                                      T2["C"] (C value, C order) -> T2["C"] (A value, B order)
+        //                                                      T1["B"] (B value, B order) -> T1["B"] (unit value, B order),
+        //                                                      T1["C"] (C value, C order) -> T1["C"] (A value, B order)
         order == ColumnActionOrder.TO && left.table === right.table && left.columnHeader != right.columnHeader && right.columnHeader != newRight.columnHeader
         -> {
             publishEvents(
@@ -303,6 +303,265 @@ private fun publishColumnEvents(
     }
 }
 
+private fun publishColumnCopyEvents(
+    left: Column,
+    right: Column,
+    newRight: Column,
+    order: ColumnActionOrder,
+    oldRef: TableRef,
+    newRef: TableRef
+) {
+    if (!left.table.eventProcessor.haveListeners()
+        && !right.table.eventProcessor.haveListeners()
+        && !newRight.table.eventProcessor.haveListeners()) return
+
+    fun prepareEvents(column: Column, oldRef: TableRef, newRef: TableRef): Pair<Table, MutableList<TableListenerEvent<Any, Any>>> {
+        // We need to do this in order to disconnect the columns from the original table
+        val oldTable = column.table.makeClone(ref = oldRef)
+        val newTable = column.table.makeClone(ref = newRef)
+
+        val oldRef = oldTable.tableRef.get()
+        val newRef = newTable.tableRef.get()
+
+        val indexes1 = oldRef.columnCellMap[column.columnHeader]?.keys() ?: emptySet()
+        val indexes2 = newRef.columnCellMap[column.columnHeader]?.keys() ?: emptySet()
+        val indexes = indexes1 union indexes2
+
+        // Get columns anchored to old and new ref
+        val oldColumn = BaseColumn(
+            oldTable,
+            column.columnHeader,
+            oldRef.columnsMap[column.columnHeader]?.columnOrder ?: column.columnOrder
+        )
+        val newColumn = BaseColumn(
+            newTable,
+            column.columnHeader,
+            newRef.columnsMap[column.columnHeader]?.columnOrder ?: column.columnOrder
+        )
+
+        val events = indexes.map { TableListenerEvent(oldColumn[it], newColumn[it]) as TableListenerEvent<Any, Any> }
+
+        return column.table to events.toMutableList()
+    }
+
+    fun publishEvents(vararg tableEvents: Pair<Table, MutableList<TableListenerEvent<Any, Any>>>) {
+        val groupedEvents = IdentityHashMap<Table, MutableList<TableListenerEvent<Any, Any>>>()
+
+        tableEvents.forEach {
+            groupedEvents.compute(it.first) { _, v -> v?.apply { v.addAll(it.second) } ?: it.second }
+        }
+
+        groupedEvents.forEach { (t, e) -> t.eventProcessor.publish(e) }
+    }
+
+    // There's a lot of options for copying things around, while also renaming the columns they are moved to.
+    // Depending on the way this is done, events are needed to reflect all the changes. Below the event
+    // model is laid out. In short: We don't want to emit more events than strictly needed, which means
+    // to only emit enough events to allow a listener to recreate the change on their end just from the events.
+
+    // Note: Because the events only concern themselves with the columns being moved, the order change
+    //       might impact the order of other columns. The events in isolation do not reflect the change
+    //       to the order index of other columns, but give access to the updated table as a whole.
+
+    // Cases:
+
+    // TODO: Optimise below when cases..?
+
+    when {
+        // copy(T1["A"] to T1["A"], "A")        -> No-op copy, will produce events for that column
+        order == ColumnActionOrder.TO && left.table === right.table && left.columnHeader == newRight.columnHeader && right.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, oldRef, newRef),
+            )
+        }
+
+        // copy(T1["A"] to T1["A"], "B")        -> A is renamed to B
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order),
+        //                                                      T1["B"] (B value, B order) -> T1["B"] (A value, A order)
+        order == ColumnActionOrder.TO && left.table === right.table && left.columnHeader == right.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, oldRef, newRef),
+                prepareEvents(newRight, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] to T1["B"], "B")        -> A takes the place of B, named B
+        //                                      -> Event model: T1["B"] (B value, B order) -> T1["B"] (A value, B order)
+        order == ColumnActionOrder.TO && left.table === right.table && right.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(right, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] to T2["B"], "B")        -> A takes the place of B, named B, in T2
+        //                                      -> Event model: T2["B"] (B value, B order) -> T2["B"] (A value, B order)
+        order == ColumnActionOrder.TO && left.table !== right.table && right.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(right, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] to T1["B"], "A")        -> A takes the place of B, named A
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (A value, B order),
+        //                                                      T1["B"] (B value, B order) -> T1["B"] (unit value, B order)
+        order == ColumnActionOrder.TO && left.table === right.table && left.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, oldRef, newRef),
+                prepareEvents(right, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] to T2["B"], "A")        -> A takes the place of B, named A
+        //                                      -> Event model: T2["B"] (B value, B order) -> T2["B"] (unit value, B order)
+        //                                                      T2["A"] (A value, A order) -> T2["A"] (A value, B order)
+        order == ColumnActionOrder.TO && left.table !== right.table && right.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(right, oldRef, newRef),
+                prepareEvents(newRight, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] to T1["B"], "C")        -> A takes the place of B, named C, removing any existing C
+        //                                      -> Event model: T1["B"] (B value, B order) -> T1["B"] (unit value, B order),
+        //                                                      T1["C"] (C value, C order) -> T1["C"] (A value, B order)
+        order == ColumnActionOrder.TO && left.table === right.table && left.columnHeader != right.columnHeader && right.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(right, oldRef, newRef),
+                prepareEvents(newRight, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] to T2["B"], "C")        -> A takes the place of B, named C, removing any existing C
+        //                                      -> Event model: T2["B"] (B value, B order) -> T2["B"] (unit value, B order),
+        //                                                      T2["C"] (C value, C order) -> T2["C"] (A value, B order)
+        order == ColumnActionOrder.TO && left.table !== right.table && right.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(right, oldRef, newRef),
+                prepareEvents(newRight, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] after T1["B"], "A")     -> A copied after B, named A
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (A value, new A order after B)
+        order == ColumnActionOrder.AFTER && left.table === right.table && left.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] after T2["B"], "A")     -> A copied after B, named A
+        //                                      -> Event model: T2["A"] (A value, A order) -> T2["A"] (A value, new A order after B)
+        order == ColumnActionOrder.AFTER && left.table !== right.table && right.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(newRight, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] after T1["B"], "B")     -> A copied after B, named B
+        //                                      -> Event model: T1["B"] (B value, B order) -> T1["B"] (A value, B order)
+        order == ColumnActionOrder.AFTER && left.table === right.table && right.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(right, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] after T2["B"], "B")     -> A copied after B, named B
+        //                                      -> Event model: T2["B"] (B value, B order) -> T2["B"] (A value, B order)
+        order == ColumnActionOrder.AFTER && left.table !== right.table && right.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(right, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] after T1["B"], "C")     -> A copied after B, named C, removing any existing C
+        //                                      -> Event model: T1["C"] (C value, C value) -> T1["C"] (A value, new A order after B)
+        order == ColumnActionOrder.AFTER && left.table === right.table && left.columnHeader != newRight.columnHeader && right.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(newRight, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] after T2["B"], "C")     -> A copied after B, named C, removing any existing C
+        //                                      -> Event model: T2["C"] (C value, C value) -> T2["C"] (A value, new A order after B)
+        order == ColumnActionOrder.AFTER && left.table !== right.table && left.columnHeader != newRight.columnHeader && right.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(newRight, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] before T1["B"], "A")    -> A copied before B, named A
+        //                                      -> Event model: T1["A"] (A value, A order) -> T1["A"] (A value, new A order before B)
+        order == ColumnActionOrder.BEFORE && left.table === right.table && left.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] before T2["B"], "A")    -> A copied before B, named A
+        //                                      -> Event model: T2["A"] (A value, A order) -> T2["A"] (T1["A"] value, new A order before B)
+        order == ColumnActionOrder.BEFORE && left.table !== right.table && left.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(newRight, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] before T1["B"], "B")    -> A copied before B, named B
+        //                                      -> Event model: T1["B"] (B value, B order) -> T1["B"] (A value, B order)
+        order == ColumnActionOrder.BEFORE && left.table === right.table && right.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(right, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] before T2["B"], "B")    -> A copied before B, named B
+        //                                      -> Event model: T2["B"] (B value, B order) -> T2["B"] (A value, B order)
+        order == ColumnActionOrder.BEFORE && left.table !== right.table && right.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(right, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] before T1["B"], "C")    -> A copied before B, named C, removing any existing C
+        //                                      -> Event model: T1["C"] (C value, C value) -> T1["C"] (A value, new A order before B)
+        order == ColumnActionOrder.BEFORE && left.table === right.table && left.columnHeader != newRight.columnHeader && right.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(newRight, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] before T2["B"], "C")    -> A copied before B, named C, removing any existing C
+        //                                      -> Event model: T2["C"] (C value, C value) -> T2["C"] (A value, new A order before B)
+        order == ColumnActionOrder.BEFORE && left.table !== right.table && left.columnHeader != newRight.columnHeader && right.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(newRight, oldRef, newRef)
+            )
+        }
+
+        // Should never happen
+        else -> throw UnsupportedOperationException()
+    }
+}
+
 fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
     fun columnMove(left: ColumnHeader, right: ColumnHeader, order: ColumnActionOrder, withName: ColumnHeader, refUpdate: TableRef.() -> TableRef): (ref: TableRef) -> TableRef = { inRef ->
         val ref = inRef.refUpdate()
@@ -375,7 +634,7 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
             }
         )
 
-        publishColumnEvents(left, right, newRight, order, oldRef, newRef, oldRef, newRef)
+        publishColumnMoveEvents(left, right, newRight, order, oldRef, newRef, oldRef, newRef)
     } else {
         // Move between tables
         val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
@@ -396,7 +655,7 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
             }
         )
 
-        publishColumnEvents(left, right, newRight, order, oldRef1, newRef1, oldRef2, newRef2)
+        publishColumnMoveEvents(left, right, newRight, order, oldRef1, newRef1, oldRef2, newRef2)
     }
 }
 
@@ -537,8 +796,12 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
             acc.put(columnHeader, ColumnMeta(columnOrder))
         }
 
+        // TODO Find a more efficient approach
+        val removeColumnCells = ref.columnCellMap.keys().filter { !newColumnMap.containsKey(it) }
+
         ref.copy(
             columnsMap = newColumnMap,
+            columnCellMap = if (removeColumnCells.isEmpty()) ref.columnCellMap else removeColumnCells.fold(ref.columnCellMap) { acc, column -> acc.remove(column) },
             version = ref.version + 1L
         )
     }
@@ -549,30 +812,30 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
 
     if (left.table === right.table) {
         // Internal copy
-        val newLeft = BaseColumn(left.table, withName)
+        val newRight = BaseColumn(left.table, withName)
         val (oldRef, newRef) = left.table.tableRef.refAction(
             (::columnCopy)(left.columnHeader, right.columnHeader, order, withName) {
                 copy(
-                    columnsMap = this.columnsMap.put(withName, ColumnMeta(newLeft.columnOrder)),
+                    columnsMap = this.columnsMap.put(withName, this.columnsMap[withName] ?: ColumnMeta(newRight.columnOrder)),
                     columnCellMap = this.columnCellMap.put(withName, this.columnCellMap[left.columnHeader] ?: PTreeMap())
                 )
             }
         )
 
-        // TODO Events
+        publishColumnCopyEvents(left, right, newRight, order, oldRef, newRef)
     } else {
         // Copy between tables
-        val newLeft = BaseColumn(right.table, withName)
+        val newRight = BaseColumn(right.table, withName)
         val (oldRef, newRef) = right.table.tableRef.refAction(
-            (::columnCopy)(newLeft.columnHeader, right.columnHeader, order, withName) {
+            (::columnCopy)(newRight.columnHeader, right.columnHeader, order, withName) {
                 copy(
-                    columnsMap = this.columnsMap.put(withName, ColumnMeta(newLeft.columnOrder)),
+                    columnsMap = this.columnsMap.put(withName, this.columnsMap[withName] ?: ColumnMeta(newRight.columnOrder)),
                     columnCellMap = this.columnCellMap.put(withName, left.table.tableRef.get().columnCellMap[left.columnHeader] ?: PTreeMap())
                 )
             }
         )
 
-        // TODO Events
+        publishColumnCopyEvents(left, right, newRight, order, oldRef, newRef)
     }
 }
 
