@@ -1,5 +1,6 @@
 package sigbla.app
 
+import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.refAction
 import java.util.*
@@ -605,7 +606,8 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
 
         // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
         val newColumnMap = columnOrders.fold(PHashMap<ColumnHeader, ColumnMeta>()) { acc, (columnHeader, columnOrder) ->
-            acc.put(columnHeader, ColumnMeta(columnOrder))
+            val prenatal = ref.columnsMap[columnHeader]?.prenatal ?: throw InvalidColumnException(columnHeader)
+            acc.put(columnHeader, ColumnMeta(columnOrder, prenatal))
         }
 
         // TODO Find a more efficient approach
@@ -628,7 +630,7 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
         val (oldRef, newRef) = left.table.tableRef.refAction(
             (::columnMove)(left.columnHeader, right.columnHeader, order, withName) {
                 copy(
-                    columnsMap = this.columnsMap.put(withName, this.columnsMap[withName] ?: ColumnMeta(newRight.columnOrder)),
+                    columnsMap = this.columnsMap.put(withName, ColumnMeta(newRight.columnOrder, this.columnsMap[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
                     columnCellMap = this.columnCellMap.put(withName, this.columnCellMap[left.columnHeader] ?: PTreeMap())
                 )
             }
@@ -649,7 +651,7 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
         val (oldRef2, newRef2) = right.table.tableRef.refAction(
             (::columnMove)(newRight.columnHeader, right.columnHeader, order, withName) {
                 copy(
-                    columnsMap = this.columnsMap.put(withName, this.columnsMap[withName] ?: ColumnMeta(newRight.columnOrder)),
+                    columnsMap = this.columnsMap.put(withName, ColumnMeta(newRight.columnOrder, oldRef1.columnsMap[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
                     columnCellMap = this.columnCellMap.put(withName, oldRef1.columnCellMap[left.columnHeader] ?: PTreeMap())
                 )
             }
@@ -693,7 +695,8 @@ fun move(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
 
         // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
         val newColumnMap = columnOrders.fold(PHashMap<ColumnHeader, ColumnMeta>()) { acc, (columnHeader, columnOrder) ->
-            acc.put(columnHeader, ColumnMeta(columnOrder))
+            val prenatal = ref.columnsMap[columnHeader]?.prenatal ?: throw InvalidColumnException(columnHeader)
+            acc.put(columnHeader, ColumnMeta(columnOrder, prenatal))
         }
 
         ref.copy(
@@ -711,7 +714,7 @@ fun move(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
         val (oldRef, newRef) = table.tableRef.refAction(
             (::columnMove)(withName) {
                 copy(
-                    columnsMap = this.columnsMap.remove(left.columnHeader).put(withName, ColumnMeta(newLeft.columnOrder)),
+                    columnsMap = this.columnsMap.remove(left.columnHeader).put(withName, ColumnMeta(newLeft.columnOrder, this.columnsMap[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
                     columnCellMap = this.columnCellMap.remove(left.columnHeader).put(withName, this.columnCellMap[left.columnHeader] ?: PTreeMap()),
                 )
             }
@@ -731,7 +734,7 @@ fun move(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
         val (oldRef2, newRef2) = table.tableRef.refAction(
             (::columnMove)(withName) {
                 copy(
-                    columnsMap = this.columnsMap.put(withName, ColumnMeta(newLeft.columnOrder)),
+                    columnsMap = this.columnsMap.put(withName, ColumnMeta(newLeft.columnOrder, oldRef1.columnsMap[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
                     columnCellMap = this.columnCellMap.put(withName, oldRef1.columnCellMap[left.columnHeader] ?: PTreeMap()),
                 )
             }
@@ -793,7 +796,8 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
 
         // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
         val newColumnMap = columnOrders.fold(PHashMap<ColumnHeader, ColumnMeta>()) { acc, (columnHeader, columnOrder) ->
-            acc.put(columnHeader, ColumnMeta(columnOrder))
+            val prenatal = ref.columnsMap[columnHeader]?.prenatal ?: throw InvalidColumnException(columnHeader)
+            acc.put(columnHeader, ColumnMeta(columnOrder, prenatal))
         }
 
         // TODO Find a more efficient approach
@@ -816,7 +820,7 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
         val (oldRef, newRef) = left.table.tableRef.refAction(
             (::columnCopy)(left.columnHeader, right.columnHeader, order, withName) {
                 copy(
-                    columnsMap = this.columnsMap.put(withName, this.columnsMap[withName] ?: ColumnMeta(newRight.columnOrder)),
+                    columnsMap = this.columnsMap.put(withName, ColumnMeta(newRight.columnOrder, this.columnsMap[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
                     columnCellMap = this.columnCellMap.put(withName, this.columnCellMap[left.columnHeader] ?: PTreeMap())
                 )
             }
@@ -828,9 +832,10 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
         val newRight = BaseColumn(right.table, withName)
         val (oldRef, newRef) = right.table.tableRef.refAction(
             (::columnCopy)(newRight.columnHeader, right.columnHeader, order, withName) {
+                val leftRef = left.table.tableRef.get()
                 copy(
-                    columnsMap = this.columnsMap.put(withName, this.columnsMap[withName] ?: ColumnMeta(newRight.columnOrder)),
-                    columnCellMap = this.columnCellMap.put(withName, left.table.tableRef.get().columnCellMap[left.columnHeader] ?: PTreeMap())
+                    columnsMap = this.columnsMap.put(withName, ColumnMeta(newRight.columnOrder, leftRef.columnsMap[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
+                    columnCellMap = this.columnCellMap.put(withName, leftRef.columnCellMap[left.columnHeader] ?: PTreeMap())
                 )
             }
         )
@@ -873,7 +878,8 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
 
         // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
         val newColumnMap = columnOrders.fold(PHashMap<ColumnHeader, ColumnMeta>()) { acc, (columnHeader, columnOrder) ->
-            acc.put(columnHeader, ColumnMeta(columnOrder))
+            val prenatal = ref.columnsMap[columnHeader]?.prenatal ?: throw InvalidColumnException(columnHeader)
+            acc.put(columnHeader, ColumnMeta(columnOrder, prenatal))
         }
 
         ref.copy(
@@ -891,7 +897,7 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
         val (oldRef, newRef) = table.tableRef.refAction(
             (::columnCopy)(withName) {
                 copy(
-                    columnsMap = this.columnsMap.put(withName, ColumnMeta(newLeft.columnOrder)),
+                    columnsMap = this.columnsMap.put(withName, ColumnMeta(newLeft.columnOrder, this.columnsMap[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
                     columnCellMap = this.columnCellMap.put(withName, this.columnCellMap[left.columnHeader] ?: PTreeMap()),
                 )
             }
@@ -902,8 +908,9 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
         val newLeft = BaseColumn(table, withName)
         val (oldRef, newRef) = table.tableRef.refAction(
             (::columnCopy)(withName) {
+                val leftRef = left.table.tableRef.get()
                 copy(
-                    columnsMap = this.columnsMap.put(withName, ColumnMeta(newLeft.columnOrder)),
+                    columnsMap = this.columnsMap.put(withName, ColumnMeta(newLeft.columnOrder, leftRef.columnsMap[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
                     columnCellMap = this.columnCellMap.put(withName, left.table.tableRef.get().columnCellMap[left.columnHeader] ?: PTreeMap()),
                 )
             }
@@ -958,9 +965,8 @@ fun move(rowToRowAction: RowToRowAction) {
                 val columnsMap = oldRef1
                     .columnsMap
                     .sortedBy { it.component2().columnOrder }
-                    .map { it.component1() }
-                    .fold(ref.columnsMap) { acc, c ->
-                        if (acc.containsKey(c)) acc else acc.put(c, ColumnMeta(BaseColumn(right.table, c).columnOrder))
+                    .fold(ref.columnsMap) { acc, (c, cm) ->
+                        if (acc.containsKey(c)) acc else acc.put(c, ColumnMeta(BaseColumn(right.table, c).columnOrder, cm.prenatal))
                     }
 
                 val columnCellMap = oldRef1.columnCellMap.fold(ref.columnCellMap) { acc, ccm ->
@@ -1026,9 +1032,11 @@ fun move(rowToRowAction: RowToRowAction) {
                 val columnsMap = oldRef1
                     .columnsMap
                     .sortedBy { it.component2().columnOrder }
-                    .map { it.component1() }
-                    .fold(ref.columnsMap) { acc, c ->
-                        if (acc.containsKey(c)) acc else acc.put(c, ColumnMeta(BaseColumn(right.table, c).columnOrder))
+                    .fold(ref.columnsMap) { acc, (c, cm) ->
+                        if (acc.containsKey(c)) {
+                            val existing = acc[c]!!
+                            acc.put(c, existing.copy(prenatal = existing.prenatal && cm.prenatal))
+                        } else acc.put(c, ColumnMeta(BaseColumn(right.table, c).columnOrder, cm.prenatal))
                     }
 
                 val columnCellMap = oldRef1.columnCellMap.fold(ref.columnCellMap) { acc, ccm ->
@@ -1100,9 +1108,8 @@ fun copy(rowToRowAction: RowToRowAction) {
                 val columnsMap = leftRef
                     .columnsMap
                     .sortedBy { it.component2().columnOrder }
-                    .map { it.component1() }
-                    .fold(ref.columnsMap) { acc, c ->
-                        if (acc.containsKey(c)) acc else acc.put(c, ColumnMeta(BaseColumn(right.table, c).columnOrder))
+                    .fold(ref.columnsMap) { acc, (c, cm) ->
+                        if (acc.containsKey(c)) acc else acc.put(c, ColumnMeta(BaseColumn(right.table, c).columnOrder, cm.prenatal))
                     }
 
                 val columnCellMap = leftRef.columnCellMap.fold(ref.columnCellMap) { acc, ccm ->
@@ -1161,9 +1168,11 @@ fun copy(rowToRowAction: RowToRowAction) {
                 val columnsMap = leftRef
                     .columnsMap
                     .sortedBy { it.component2().columnOrder }
-                    .map { it.component1() }
-                    .fold(ref.columnsMap) { acc, c ->
-                        if (acc.containsKey(c)) acc else acc.put(c, ColumnMeta(BaseColumn(right.table, c).columnOrder))
+                    .fold(ref.columnsMap) { acc, (c, cm) ->
+                        if (acc.containsKey(c)) {
+                            val existing = acc[c]!!
+                            acc.put(c, existing.copy(prenatal = existing.prenatal && cm.prenatal))
+                        } else acc.put(c, ColumnMeta(BaseColumn(right.table, c).columnOrder, cm.prenatal))
                     }
 
                 val columnCellMap = leftRef.columnCellMap.fold(ref.columnCellMap) { acc, ccm ->

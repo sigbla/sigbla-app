@@ -78,6 +78,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
         return ref
             .columnsMap
             .asSequence()
+            .filter { (_, columnMeta) -> !columnMeta.prenatal }
             .sortedBy { (_, columnMeta) -> columnMeta.columnOrder }
             .map { (columnHeader, columnMeta) ->
                 when (indexRelation) {

@@ -7,7 +7,6 @@ import sigbla.app.internals.refAction
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
-import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.max
 import kotlin.math.min
 
@@ -195,9 +194,11 @@ class BaseColumn internal constructor(
         val cellValue = value.toCellValue()
 
         val (oldRef, newRef) = table.tableRef.refAction {
+            val meta = it.columnsMap[this.columnHeader] ?: throw InvalidColumnException(this)
             val values = it.columnCellMap[this.columnHeader] ?: throw InvalidColumnException(this)
 
             it.copy(
+                columnsMap = if (meta.prenatal) it.columnsMap.put(this.columnHeader, meta.copy(prenatal = false)) else it.columnsMap,
                 columnCellMap = it.columnCellMap.put(this.columnHeader, values.put(index, cellValue)),
                 version = it.version + 1L
             )
@@ -222,9 +223,11 @@ class BaseColumn internal constructor(
 
     override fun clear(index: Long): Cell<*> {
         val (oldRef, newRef) = table.tableRef.refAction {
+            val meta = it.columnsMap[this.columnHeader] ?: throw InvalidColumnException(this)
             val values = it.columnCellMap[this.columnHeader] ?: throw InvalidColumnException(this)
 
             it.copy(
+                columnsMap = if (meta.prenatal) it.columnsMap.put(this.columnHeader, meta.copy(prenatal = false)) else it.columnsMap,
                 columnCellMap = it.columnCellMap.put(this.columnHeader, values.remove(index)),
                 version = it.version + 1L
             )
@@ -296,6 +299,7 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
     val table: Table
         get() = start.table
 
+    /*
     override fun iterator(): Iterator<Column> {
         // TODO This needs to use ref snapshot
         return if (start.columnOrder <= endInclusive.columnOrder) {
@@ -316,6 +320,17 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
                 .dropWhile { it != start }
                 .iterator()
         }
+    }
+     */
+    override fun iterator(): Iterator<Column> {
+        // TODO This needs to use ref snapshot
+        val minOrder = min(start.columnOrder, endInclusive.columnOrder)
+        val maxOrder = max(start.columnOrder, endInclusive.columnOrder)
+        return start
+            .table
+            .columns
+            .filter { it.columnOrder in minOrder..maxOrder }
+            .iterator()
     }
 
     override fun contains(value: Column): Boolean {

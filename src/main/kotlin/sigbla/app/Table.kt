@@ -543,10 +543,14 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
 }
 
 internal data class ColumnMeta(
-    val columnOrder: Int
+    val columnOrder: Int,
+    val prenatal: Boolean
 )
 
 internal data class TableRef(
+    // TODO Check if we can change columnsMap to be PSortedMap to get columns in column order by default,
+    //      as that would save us a lot of sorting on read. Also rename columnsMap to columns and columnCellMap to
+    //      columnCells.
     val columnsMap: PMap<ColumnHeader, ColumnMeta> = PHashMap(),
     val columnCellMap: PMap<ColumnHeader, PSortedMap<Long, CellValue<*>>> = PHashMap(),
     val version: Long = Long.MIN_VALUE,
@@ -565,17 +569,18 @@ class BaseTable internal constructor(
 
     override val headers: Collection<ColumnHeader>
         get() = tableRef.get().columnsMap.asSequence()
+            .filter { !it.component2().prenatal }
             .sortedBy { it.component2().columnOrder }
             .map { it.component1() }
             .toList()
 
     override val columns: Collection<Column>
         get() = tableRef.get().columnsMap.asSequence()
+            .filter { !it.component2().prenatal }
             .sortedBy { it.component2().columnOrder }
             .map { BaseColumn(this, it.component1(), it.component2().columnOrder) }
             .toList()
 
-    // TODO Column add event
     override fun get(header: ColumnHeader): Column {
         if (closed) throw InvalidTableException("Table is closed")
         if (header.header.isEmpty()) throw InvalidColumnException("Empty header")
@@ -583,7 +588,7 @@ class BaseTable internal constructor(
         val columnMeta = tableRef.get().columnsMap[header] ?: tableRef.updateAndGet {
             if (it.columnsMap.containsKey(header)) return@updateAndGet it
 
-            val columnMeta = ColumnMeta(tableRef.get().columnCounter.getAndIncrement())
+            val columnMeta = ColumnMeta(tableRef.get().columnCounter.getAndIncrement(), true)
 
             it.copy(
                 columnsMap = it.columnsMap.put(header, columnMeta),
@@ -595,7 +600,7 @@ class BaseTable internal constructor(
         return BaseColumn(this, header, columnMeta.columnOrder)
     }
 
-    override fun contains(header: ColumnHeader): Boolean = tableRef.get().columnsMap.containsKey(header)
+    override fun contains(header: ColumnHeader): Boolean = tableRef.get().columnsMap[header]?.prenatal == false
 
     override fun makeClone(name: String, onRegistry: Boolean, ref: TableRef): Table = BaseTable(name, onRegistry, AtomicReference(ref))
 

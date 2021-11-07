@@ -287,7 +287,7 @@ class TableColumnCopyMove {
         assertEquals(0, indexOf(events.first().oldValue))
         assertEquals(0, indexOf(events.first().newValue))
 
-        assertEquals(listOf("First", "Middle 1", Unit), events.first().oldValue.table[0].map { valueOf<Any>(it) })
+        assertEquals(listOf("First", "Middle 1"), events.first().oldValue.table[0].map { valueOf<Any>(it) })
         assertEquals(listOf("First", "Middle 1", "New First"), events.first().newValue.table[0].map { valueOf<Any>(it) })
 
         events = emptyList()
@@ -1061,7 +1061,7 @@ class TableColumnCopyMove {
         assertEquals(0, indexOf(events.first().oldValue))
         assertEquals(0, indexOf(events.first().newValue))
 
-        assertEquals(listOf("First", "Middle 1", "First", "Middle 1", Unit), events.first().oldValue.table[0].map { valueOf<Any>(it) })
+        assertEquals(listOf("First", "Middle 1", "First", "Middle 1"), events.first().oldValue.table[0].map { valueOf<Any>(it) })
         assertEquals(listOf("First", "Middle 1", "First", "Middle 1", "New First"), events.first().newValue.table[0].map { valueOf<Any>(it) })
 
         events = emptyList()
