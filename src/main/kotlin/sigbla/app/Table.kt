@@ -14,7 +14,7 @@ import com.github.andrewoma.dexx.collection.Map as PMap
 import com.github.andrewoma.dexx.collection.SortedMap as PSortedMap
 import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
 
-abstract class Table(val name: String) : Iterable<Cell<*>> {
+abstract class Table(val name: String?) : Iterable<Cell<*>> {
     @Volatile
     var closed: Boolean = false
         internal set
@@ -22,13 +22,11 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
     val table: Table
         get() = this
 
-    // TODO Change this to be sequence
-    abstract val headers: Collection<ColumnHeader>
+    abstract val headers: Sequence<ColumnHeader>
 
-    // TODO Change this to be sequence
-    abstract val columns: Collection<Column>
+    abstract val columns: Sequence<Column>
 
-    // TODO Add a indexes: Collection<Long>/Sequence<Long> for easy access to all row numbers in use
+    abstract val indexes: Sequence<Long>
 
     internal abstract val tableRef: AtomicReference<TableRef>
 
@@ -107,6 +105,10 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
     }
 
     // TODO Row related
+
+    // TODO get(columnHeader/column, index)
+
+    // TODO get(index, columnHeader/column)
 
     operator fun get(table: Table): Table {
         return this
@@ -508,15 +510,14 @@ abstract class Table(val name: String) : Iterable<Cell<*>> {
         }
     }
 
-    internal abstract fun makeClone(name: String = table.name, onRegistry: Boolean = false, ref: TableRef = tableRef.get()!!): Table
+    internal abstract fun makeClone(name: String? = table.name, onRegistry: Boolean = false, ref: TableRef = tableRef.get()!!): Table
 
     override fun toString(): String {
         return "Table[$name]"
     }
 
     companion object {
-        // TODO Consider option for anonymous tables with no name?
-        operator fun get(name: String): Table = BaseTable(name)
+        operator fun get(name: String?): Table = BaseTable(name)
 
         fun fromRegistry(name: String): Table = Registry.getTable(name) ?: throw InvalidTableException("No table by name $name")
 
@@ -548,61 +549,75 @@ internal data class ColumnMeta(
 )
 
 internal data class TableRef(
-    // TODO Check if we can change columnsMap to be PSortedMap to get columns in column order by default,
-    //      as that would save us a lot of sorting on read. Also rename columnsMap to columns and columnCellMap to
-    //      columnCells.
-    val columnsMap: PMap<ColumnHeader, ColumnMeta> = PHashMap(),
-    val columnCellMap: PMap<ColumnHeader, PSortedMap<Long, CellValue<*>>> = PHashMap(),
+    val columns: PMap<ColumnHeader, ColumnMeta> = PHashMap(),
+    val columnCells: PMap<ColumnHeader, PSortedMap<Long, CellValue<*>>> = PHashMap(),
     val version: Long = Long.MIN_VALUE,
     val columnCounter: AtomicInteger = AtomicInteger()
-)
+) {
+    val headers: Sequence<Pair<ColumnHeader, ColumnMeta>> by lazy {
+        columns
+            .asSequence()
+            .filter { !it.component2().prenatal }
+            .sortedBy { it.component2().columnOrder }
+            .map { it.component1() to it.component2() }
+            .toList()
+            .asSequence()
+    }
+
+    val indexes: Sequence<Long> by lazy {
+        columns
+            .asSequence()
+            .filter { !it.component2().prenatal }
+            .map { it.component1() }
+            .fold(TreeSet<Long>()) { acc, column ->
+                acc.addAll(columnCells[column]?.keys() ?: emptyList())
+                acc
+            }
+            .asSequence()
+    }
+}
 
 class BaseTable internal constructor(
-    name: String,
+    name: String?,
     onRegistry: Boolean = true,
     override val tableRef: AtomicReference<TableRef> = AtomicReference(TableRef()),
     override val eventProcessor: TableEventProcessor = TableEventProcessor()
 ) : Table(name) {
     init {
-        if (onRegistry) Registry.setTable(name, this)
+        if (name != null && onRegistry) Registry.setTable(name, this)
     }
 
-    override val headers: Collection<ColumnHeader>
-        get() = tableRef.get().columnsMap.asSequence()
-            .filter { !it.component2().prenatal }
-            .sortedBy { it.component2().columnOrder }
-            .map { it.component1() }
-            .toList()
+    override val headers: Sequence<ColumnHeader>
+        get() = tableRef.get().headers.map { it.first }
 
-    override val columns: Collection<Column>
-        get() = tableRef.get().columnsMap.asSequence()
-            .filter { !it.component2().prenatal }
-            .sortedBy { it.component2().columnOrder }
-            .map { BaseColumn(this, it.component1(), it.component2().columnOrder) }
-            .toList()
+    override val columns: Sequence<Column>
+        get() = tableRef.get().headers.map { BaseColumn(this, it.first, it.second.columnOrder) }
+
+    override val indexes: Sequence<Long>
+        get() = tableRef.get().indexes
 
     override fun get(header: ColumnHeader): Column {
         if (closed) throw InvalidTableException("Table is closed")
         if (header.header.isEmpty()) throw InvalidColumnException("Empty header")
 
-        val columnMeta = tableRef.get().columnsMap[header] ?: tableRef.updateAndGet {
-            if (it.columnsMap.containsKey(header)) return@updateAndGet it
+        val columnMeta = tableRef.get().columns[header] ?: tableRef.updateAndGet {
+            if (it.columns.containsKey(header)) return@updateAndGet it
 
             val columnMeta = ColumnMeta(tableRef.get().columnCounter.getAndIncrement(), true)
 
             it.copy(
-                columnsMap = it.columnsMap.put(header, columnMeta),
-                columnCellMap = it.columnCellMap.put(header, PTreeMap()),
+                columns = it.columns.put(header, columnMeta),
+                columnCells = it.columnCells.put(header, PTreeMap()),
                 version = it.version + 1L
             )
-        }.columnsMap[header] ?: throw InvalidColumnException(header)
+        }.columns[header] ?: throw InvalidColumnException(header)
 
         return BaseColumn(this, header, columnMeta.columnOrder)
     }
 
-    override fun contains(header: ColumnHeader): Boolean = tableRef.get().columnsMap[header]?.prenatal == false
+    override fun contains(header: ColumnHeader): Boolean = tableRef.get().columns[header]?.prenatal == false
 
-    override fun makeClone(name: String, onRegistry: Boolean, ref: TableRef): Table = BaseTable(name, onRegistry, AtomicReference(ref))
+    override fun makeClone(name: String?, onRegistry: Boolean, ref: TableRef): Table = BaseTable(name, onRegistry, AtomicReference(ref))
 
     companion object
 }

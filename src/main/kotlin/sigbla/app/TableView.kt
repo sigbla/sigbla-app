@@ -41,7 +41,7 @@ import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 //      use ordering to fire off listeners in the right order. This allows for the final UI listener
 //      to fire after any earlier modifications. A loop detector is also included.
 
-abstract class TableView(val name: String) : Iterable<Area<*>> {
+abstract class TableView(val name: String?) : Iterable<Area<*>> {
     abstract var table: Table?
 
     internal abstract val tableViewRef: AtomicReference<TableViewRef>
@@ -170,7 +170,7 @@ abstract class TableView(val name: String) : Iterable<Area<*>> {
 
     abstract fun clone(name: String): TableView
 
-    internal abstract fun makeClone(name: String = this.name, onRegistry: Boolean = false, ref: TableViewRef = tableViewRef.get()!!): TableView
+    internal abstract fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableViewRef = tableViewRef.get()!!): TableView
 
     companion object {
         operator fun get(name: String): TableView = BaseTableView(name)
@@ -213,7 +213,7 @@ internal data class TableViewRef(
 )
 
 class BaseTableView internal constructor(
-    name: String,
+    name: String?,
     table: Table?, // TODO Don't like how table is a param here when it's part of viewRef
     onRegistry: Boolean = true,
     tableViewRef: AtomicReference<TableViewRef>? = null,
@@ -229,7 +229,7 @@ class BaseTableView internal constructor(
     ))
 
     init {
-        if (onRegistry) Registry.setView(name, this)
+        if (name != null && onRegistry) Registry.setView(name, this)
     }
 
     override var table
@@ -495,7 +495,7 @@ class BaseTableView internal constructor(
         return makeClone(name, true)
     }
 
-    override fun makeClone(name: String, onRegistry: Boolean, ref: TableViewRef): TableView {
+    override fun makeClone(name: String?, onRegistry: Boolean, ref: TableViewRef): TableView {
         val newViewRef = AtomicReference(ref)
         val tableViewClone = BaseTableView(name, ref.table, onRegistry, newViewRef)
 

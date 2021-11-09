@@ -4,13 +4,11 @@ import com.beust.klaxon.Klaxon
 import com.beust.klaxon.TypeAdapter
 import com.beust.klaxon.TypeFor
 import io.ktor.application.*
-import io.ktor.features.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.http.content.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.sessions.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -155,7 +153,7 @@ internal object SigblaBackend {
         val applicableRows = mutableListOf<Pair<Long, Long>>()
         var runningHeight = maxHeaderOffset
 
-        val lastKey = table.tableRef.get().columnCellMap.values().map { it.last()?.component1() ?: -1 }.maxOrNull() ?: -1
+        val lastKey = table.tableRef.get().columnCells.values().map { it.last()?.component1() ?: -1 }.maxOrNull() ?: -1
         for (row in 0..lastKey) {
             if (y <= runningHeight && runningHeight <= y + h) applicableRows.add(Pair(row, runningHeight))
 
@@ -230,7 +228,7 @@ internal object SigblaBackend {
 
         var runningHeight = maxHeaderOffset
 
-        val lastKey = table.tableRef.get().columnCellMap.values().map { it.last()?.component1() ?: -1 }.maxOrNull() ?: -1
+        val lastKey = table.tableRef.get().columnCells.values().map { it.last()?.component1() ?: -1 }.maxOrNull() ?: -1
         for (row in 0..lastKey) {
             runningHeight += view[row].height
         }

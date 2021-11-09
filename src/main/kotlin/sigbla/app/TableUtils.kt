@@ -59,3 +59,53 @@ fun indexesOf(cells: Iterable<Cell<*>>) = cells
     .asSequence()
 
 // TODO We want specifics of header/column/indexOf for column/row/range, for efficiency
+
+fun print(table: Table) {
+    val table = clone(table)
+
+    val headers = table.headers
+    val indexes = table.indexes
+
+    var maxCellWidth = 0
+    val headerTable = Table[null].let { headerTable ->
+        for ((index, header) in headers.withIndex()) {
+            headerTable[index.toString()].let { headerColumn ->
+                for ((index, headerCell) in header.header.withIndex()) {
+                    headerColumn[index] = headerCell
+                    if (headerCell.length > maxCellWidth) maxCellWidth = headerCell.length
+                }
+            }
+        }
+        headerTable
+    }
+
+    table.indexes.map { it.toString() }.map { it.length }.forEach {
+        if (it > maxCellWidth) maxCellWidth = it
+    }
+
+    table.map { it.value?.toString() ?: "" }.map { it.length }.forEach {
+        if (it > maxCellWidth) maxCellWidth = it
+    }
+
+    fun padding(input: String): String {
+        var output = input
+        while (output.length < maxCellWidth) output += " "
+        return output
+    }
+
+    for (index in headerTable.indexes) {
+        print(padding(""))
+        for (header in headerTable.headers) {
+            print("\t" + padding(headerTable[index][header].toString()))
+        }
+        println()
+    }
+
+    for (index in indexes) {
+        print(padding(index.toString()))
+        for (header in headers) {
+            print("\t" + padding(table[index][header].toString()))
+        }
+        println()
+    }
+}

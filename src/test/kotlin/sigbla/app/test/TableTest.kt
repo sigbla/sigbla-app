@@ -310,7 +310,7 @@ class TableTest {
     }
 
     @Test
-    fun `valueOf iterator`() {
+    fun `valuesOf sequence`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 
         t["A", 0] = "A0"
@@ -323,18 +323,39 @@ class TableTest {
         t["C", 1] = "C1"
         t["D", 1] = "D1"
 
-        assertEquals(listOf("A0", "B0", "C0", "D0"), valuesOf<Any>(t[0]).toList())
-        assertEquals(listOf("A1", "B1", "C1", "D1"), valuesOf<Any>(t[1]).toList())
+        valuesOf<Any>(t[0]).apply {
+            assertEquals(listOf("A0", "B0", "C0", "D0"), toList())
+            assertEquals(listOf("A0", "B0", "C0", "D0"), toList())
+        }
 
-        assertEquals(listOf("A0", "A1"), valuesOf<Any>(t["A"]).toList())
-        assertEquals(listOf("B0", "B1"), valuesOf<Any>(t["B"]).toList())
+        valuesOf<Any>(t[1]).apply {
+            assertEquals(listOf("A1", "B1", "C1", "D1"), toList())
+            assertEquals(listOf("A1", "B1", "C1", "D1"), toList())
+        }
 
-        assertEquals(listOf("A0", "A1", "B0", "B1", "C0", "C1", "D0", "D1"), valuesOf<Any>(t["A", 0]..t["D", 1]).toList())
-        assertEquals(listOf("A0", "A1", "B0", "B1", "C0", "C1", "D0", "D1"), valuesOf<Any>(t).toList())
+        valuesOf<Any>(t["A"]).apply {
+            assertEquals(listOf("A0", "A1"), toList())
+            assertEquals(listOf("A0", "A1"), toList())
+        }
+
+        valuesOf<Any>(t["B"]).apply {
+            assertEquals(listOf("B0", "B1"), toList())
+            assertEquals(listOf("B0", "B1"), toList())
+        }
+
+        valuesOf<Any>(t["A", 0]..t["D", 1]).apply {
+            assertEquals(listOf("A0", "A1", "B0", "B1", "C0", "C1", "D0", "D1"), toList())
+            assertEquals(listOf("A0", "A1", "B0", "B1", "C0", "C1", "D0", "D1"), toList())
+        }
+
+        valuesOf<Any>(t).apply {
+            assertEquals(listOf("A0", "A1", "B0", "B1", "C0", "C1", "D0", "D1"), toList())
+            assertEquals(listOf("A0", "A1", "B0", "B1", "C0", "C1", "D0", "D1"), toList())
+        }
     }
 
     @Test
-    fun `valueOf column headers`() {
+    fun `headersOf sequence`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 
         t["A", 0] = "A0"
@@ -342,18 +363,62 @@ class TableTest {
         t["C", 0] = "C0"
         t["D", 0] = "D0"
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headersOf(t).map { it.header }.toList())
+        headersOf(t).apply {
+            assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), map { it.header }.toList())
+            assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), map { it.header }.toList())
+        }
     }
 
     @Test
-    fun `valueOf columns`() {
+    fun `table headers`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 
         t["A", 0] = "A0"
         t["B", 0] = "B0"
+
+        val headers1 = t.headers
+
+        assertEquals(listOf(listOf("A"), listOf("B")), headers1.map { it.header }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B")), headers1.map { it.header }.toList())
+
         t["C", 0] = "C0"
         t["D", 0] = "D0"
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headersOf(t).map { it.header }.toList())
+        val headers2 = t.headers
+
+        assertEquals(listOf(listOf("A"), listOf("B")), headers1.map { it.header }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B")), headers1.map { it.header }.toList())
+
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headers2.map { it.header }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headers2.map { it.header }.toList())
+    }
+
+    @Test
+    fun `table indexes`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "A0"
+        t["A", 1] = "A1"
+        t["A", 3] = "A3"
+        t["A", 4] = "A4"
+
+        t["B", 0] = "B0"
+        t["B", 2] = "B2"
+        t["B", 4] = "B4"
+
+        val indexes1 = t.indexes
+
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexes1.toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexes1.toList())
+
+        t["C", 5] = "C5"
+
+        val indexes2 = t.indexes
+
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexes1.toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexes1.toList())
+
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L, 5L), indexes2.toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L, 5L), indexes2.toList())
     }
 }

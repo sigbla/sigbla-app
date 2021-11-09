@@ -172,7 +172,7 @@ abstract class Column internal constructor(
 class BaseColumn internal constructor(
     table: Table,
     columnHeader: ColumnHeader,
-    columnOrder: Int = table.tableRef.get().columnsMap[columnHeader]?.columnOrder ?: table.tableRef.get().columnCounter.getAndIncrement()
+    columnOrder: Int = table.tableRef.get().columns[columnHeader]?.columnOrder ?: table.tableRef.get().columnCounter.getAndIncrement()
 ) : Column(
     table,
     columnHeader,
@@ -194,12 +194,12 @@ class BaseColumn internal constructor(
         val cellValue = value.toCellValue()
 
         val (oldRef, newRef) = table.tableRef.refAction {
-            val meta = it.columnsMap[this.columnHeader] ?: throw InvalidColumnException(this)
-            val values = it.columnCellMap[this.columnHeader] ?: throw InvalidColumnException(this)
+            val meta = it.columns[this.columnHeader] ?: throw InvalidColumnException(this)
+            val values = it.columnCells[this.columnHeader] ?: throw InvalidColumnException(this)
 
             it.copy(
-                columnsMap = if (meta.prenatal) it.columnsMap.put(this.columnHeader, meta.copy(prenatal = false)) else it.columnsMap,
-                columnCellMap = it.columnCellMap.put(this.columnHeader, values.put(index, cellValue)),
+                columns = if (meta.prenatal) it.columns.put(this.columnHeader, meta.copy(prenatal = false)) else it.columns,
+                columnCells = it.columnCells.put(this.columnHeader, values.put(index, cellValue)),
                 version = it.version + 1L
             )
         }
@@ -223,12 +223,12 @@ class BaseColumn internal constructor(
 
     override fun clear(index: Long): Cell<*> {
         val (oldRef, newRef) = table.tableRef.refAction {
-            val meta = it.columnsMap[this.columnHeader] ?: throw InvalidColumnException(this)
-            val values = it.columnCellMap[this.columnHeader] ?: throw InvalidColumnException(this)
+            val meta = it.columns[this.columnHeader] ?: throw InvalidColumnException(this)
+            val values = it.columnCells[this.columnHeader] ?: throw InvalidColumnException(this)
 
             it.copy(
-                columnsMap = if (meta.prenatal) it.columnsMap.put(this.columnHeader, meta.copy(prenatal = false)) else it.columnsMap,
-                columnCellMap = it.columnCellMap.put(this.columnHeader, values.remove(index)),
+                columns = if (meta.prenatal) it.columns.put(this.columnHeader, meta.copy(prenatal = false)) else it.columns,
+                columnCells = it.columnCells.put(this.columnHeader, values.remove(index)),
                 version = it.version + 1L
             )
         }
@@ -255,7 +255,7 @@ class BaseColumn internal constructor(
     override fun clear() {
         table.tableRef.updateAndGet {
             it.copy(
-                columnCellMap = it.columnCellMap.put(this.columnHeader, PTreeMap()),
+                columnCells = it.columnCells.put(this.columnHeader, PTreeMap()),
                 version = it.version + 1L
             )
         }
@@ -265,13 +265,13 @@ class BaseColumn internal constructor(
 
     override fun iterator(): Iterator<Cell<*>> {
         // TODO Operate on clone
-        val values = table.tableRef.get().columnCellMap[this.columnHeader] ?: throw InvalidColumnException(this)
+        val values = table.tableRef.get().columnCells[this.columnHeader] ?: throw InvalidColumnException(this)
         return values.asSequence().map { it.component2().toCell(this, it.component1()) }.iterator()
     }
 
     private fun getCellRaw(index: Long, indexRelation: IndexRelation): CellValue<*>? {
         val ref = table.tableRef.get()
-        val values = ref.columnCellMap[this.columnHeader] ?: return null
+        val values = ref.columnCells[this.columnHeader] ?: return null
 
         fun firstBefore(): CellValue<*>? {
             val keys = values.asSortedMap().headMap(index).keys

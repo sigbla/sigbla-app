@@ -14,7 +14,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
 
     abstract val index: Long
 
-    val headers: Collection<ColumnHeader>
+    val headers: Sequence<ColumnHeader>
         get() = table.headers
 
     operator fun get(header: ColumnHeader): Cell<*> = table[header][indexRelation, index]
@@ -54,7 +54,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
     override fun iterator(): Iterator<Cell<*>> {
         // TODO Should probably use a cloned table for all iterators, like with events
         val ref = table.tableRef.get()
-        val columnCellMap = ref.columnCellMap
+        val columnCellMap = ref.columnCells
 
         fun at(columnHeader: ColumnHeader): CellValue<*>? {
             val values = columnCellMap[columnHeader] ?: throw InvalidColumnException(columnHeader)
@@ -76,7 +76,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
         }
 
         return ref
-            .columnsMap
+            .columns
             .asSequence()
             .filter { (_, columnMeta) -> !columnMeta.prenatal }
             .sortedBy { (_, columnMeta) -> columnMeta.columnOrder }
