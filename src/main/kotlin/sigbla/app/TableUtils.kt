@@ -1,6 +1,7 @@
 package sigbla.app
 
 import sigbla.app.internals.Registry
+import java.io.Writer
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.reflect.KClass
 
@@ -61,6 +62,10 @@ fun indexesOf(cells: Iterable<Cell<*>>) = cells
 // TODO We want specifics of header/column/indexOf for column/row/range, for efficiency
 
 fun print(table: Table) {
+    print(table, System.out.writer())
+}
+
+fun print(table: Table, writer: Writer) {
     val table = clone(table)
 
     val headers = table.headers
@@ -87,25 +92,28 @@ fun print(table: Table) {
         if (it > maxCellWidth) maxCellWidth = it
     }
 
-    fun padding(input: String): String {
-        var output = input
-        while (output.length < maxCellWidth) output += " "
-        return output
+    fun write(input: String) {
+        writer.append(input)
+        for (i in input.length until maxCellWidth) {
+            writer.append(" ")
+        }
     }
 
     for (index in headerTable.indexes) {
-        print(padding(""))
+        write("")
         for (header in headerTable.headers) {
-            print("\t" + padding(headerTable[index][header].toString()))
+            write("\t${headerTable[index][header]}")
         }
-        println()
+        writer.append(System.lineSeparator())
     }
 
     for (index in indexes) {
-        print(padding(index.toString()))
+        write(index.toString())
         for (header in headers) {
-            print("\t" + padding(table[index][header].toString()))
+            write("\t${table[index][header]}")
         }
-        println()
+        writer.append(System.lineSeparator())
     }
+
+    writer.flush()
 }
