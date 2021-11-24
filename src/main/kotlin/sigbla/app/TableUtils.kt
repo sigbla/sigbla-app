@@ -61,6 +61,8 @@ fun indexesOf(cells: Iterable<Cell<*>>) = cells
 
 // TODO We want specifics of header/column/indexOf for column/row/range, for efficiency
 
+// TODO Look at adding print methods for column/row ranges too
+
 fun print(table: Table) {
     print(table, System.out.writer())
 }
