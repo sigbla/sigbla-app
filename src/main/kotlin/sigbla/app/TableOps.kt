@@ -304,6 +304,119 @@ private fun publishColumnMoveEvents(
     }
 }
 
+private fun publishTableMoveEvents(
+    left: Column,
+    table: Table,
+    newRight: Column,
+    t1OldRef: TableRef,
+    t1NewRef: TableRef,
+    t2OldRef: TableRef,
+    t2NewRef: TableRef
+) {
+    if (!left.table.eventProcessor.haveListeners()
+        && !table.eventProcessor.haveListeners()
+        && !newRight.table.eventProcessor.haveListeners()) return
+
+    fun prepareEvents(column: Column, oldRef: TableRef, newRef: TableRef): Pair<Table, MutableList<TableListenerEvent<Any, Any>>> {
+        // We need to do this in order to disconnect the columns from the original table
+        val oldTable = column.table.makeClone(ref = oldRef)
+        val newTable = column.table.makeClone(ref = newRef)
+
+        val oldRef = oldTable.tableRef.get()
+        val newRef = newTable.tableRef.get()
+
+        val indexes1 = oldRef.columnCells[column.columnHeader]?.keys() ?: emptySet()
+        val indexes2 = newRef.columnCells[column.columnHeader]?.keys() ?: emptySet()
+        val indexes = indexes1 union indexes2
+
+        // Get columns anchored to old and new ref
+        val oldColumn = BaseColumn(
+            oldTable,
+            column.columnHeader,
+            oldRef.columns[column.columnHeader]?.columnOrder ?: column.columnOrder
+        )
+        val newColumn = BaseColumn(
+            newTable,
+            column.columnHeader,
+            newRef.columns[column.columnHeader]?.columnOrder ?: column.columnOrder
+        )
+
+        val events = indexes.map { TableListenerEvent(oldColumn[it], newColumn[it]) as TableListenerEvent<Any, Any> }
+
+        return column.table to events.toMutableList()
+    }
+
+    fun publishEvents(vararg tableEvents: Pair<Table, MutableList<TableListenerEvent<Any, Any>>>) {
+        val groupedEvents = IdentityHashMap<Table, MutableList<TableListenerEvent<Any, Any>>>()
+
+        tableEvents.forEach {
+            groupedEvents.compute(it.first) { _, v -> v?.apply { v.addAll(it.second) } ?: it.second }
+        }
+
+        groupedEvents.forEach { (t, e) -> t.eventProcessor.publish(e) }
+    }
+
+    // There's a lot of options for moving things around, while also renaming the columns they are moved to.
+    // Depending on the way this is done, events are needed to reflect all the changes. Below the event
+    // model is laid out. In short: We don't want to emit more events than strictly needed, which means
+    // to only emit enough events to allow a listener to recreate the change on their end just from the events.
+
+    // Note: Because the events only concern themselves with the columns being moved, the order change
+    //       might impact the order of other columns. The events in isolation do not reflect the change
+    //       to the order index of other columns, but give access to the updated table as a whole.
+
+    // Cases:
+
+    // TODO: Optimise below when cases..?
+
+    when {
+        // move(T1["A"] to T1, "A")        -> A is moved to end of T1
+        //                                 -> Event model: T1["A"] (A value, A order) -> T1["A"] (A value, new A order)
+        left.table === table && left.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef)
+            )
+        }
+
+        // move(T1["A"] to T1, "B")        -> A is moved to end of T1 and renamed to B
+        //                                 -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order),
+        //                                                 T1["B"] (B value, B order) -> T1["B"] (A value, new B order)
+        left.table === table && left.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(newRight, t1OldRef, t1NewRef)
+            )
+        }
+
+        // move(T1["A"] to T2, "A")        -> A takes the place of B, named A. A removed from T1
+        //                                 -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order),
+        //                                                 T2["A"] (A value, A order) -> T2["A"] (A value, new A order)
+        left.table !== table && left.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(newRight, t2OldRef, t2NewRef)
+            )
+        }
+
+        // move(T1["A"] to T2, "B")        -> A takes the place of B, named B, in T2. A removed from T1
+        //                                 -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order),
+        //                                                 T2["B"] (B value, B order) -> T2["B"] (A value, new B order)
+        left.table !== table && left.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(newRight, t2OldRef, t2NewRef)
+            )
+        }
+
+        // Should never happen
+        else -> throw UnsupportedOperationException()
+    }
+}
+
 private fun publishColumnCopyEvents(
     left: Column,
     right: Column,
@@ -676,6 +789,7 @@ fun move(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
         val ref = inRef.refUpdate()
 
         // TODO Probably don't need any of this logic as just adding a new column at the end is enough..
+        //      But we need to take care of case where we're moving existing column to end
         val otherColumns = ref
             .columns
             .asSequence()
@@ -710,16 +824,17 @@ fun move(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
 
     if (left.table === table) {
         // Internal move
-        val newLeft = BaseColumn(table, withName)
+        val newRight = BaseColumn(table, withName)
         val (oldRef, newRef) = table.tableRef.refAction(
             (::columnMove)(withName) {
                 copy(
-                    columns = this.columns.remove(left.columnHeader).put(withName, ColumnMeta(newLeft.columnOrder, this.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
+                    columns = this.columns.remove(left.columnHeader).put(withName, ColumnMeta(newRight.columnOrder, this.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
                     columnCells = this.columnCells.remove(left.columnHeader).put(withName, this.columnCells[left.columnHeader] ?: PTreeMap()),
                 )
             }
         )
-        // TODO Events
+
+        publishTableMoveEvents(left, table, newRight, oldRef, newRef, oldRef, newRef)
     } else {
         // Move between tables
         val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
@@ -730,16 +845,17 @@ fun move(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
             )
         }
 
-        val newLeft = BaseColumn(table, withName)
+        val newRight = BaseColumn(table, withName)
         val (oldRef2, newRef2) = table.tableRef.refAction(
             (::columnMove)(withName) {
                 copy(
-                    columns = this.columns.put(withName, ColumnMeta(newLeft.columnOrder, oldRef1.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
+                    columns = this.columns.put(withName, ColumnMeta(newRight.columnOrder, oldRef1.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
                     columnCells = this.columnCells.put(withName, oldRef1.columnCells[left.columnHeader] ?: PTreeMap()),
                 )
             }
         )
-        // TODO Events
+
+        publishTableMoveEvents(left, table, newRight, oldRef1, newRef1, oldRef2, newRef2)
     }
 }
 
