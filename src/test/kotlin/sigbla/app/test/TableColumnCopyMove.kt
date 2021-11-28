@@ -1629,11 +1629,37 @@ class TableColumnCopyMove {
         t["B", 0] = "Middle"
         t["C", 0] = "Last"
 
+        var events = emptyList<TableListenerEvent<out Any, out Any>>()
+
+        on(t) {
+            skipHistory = true
+
+            events {
+                events = toList()
+            }
+        }
+
         assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t).toList().map { it.header })
         assertEquals(listOf("First", "Middle", "Last"), t[0].map { valueOf<Any>(it) })
 
         // Copy first
         copy(t["A"] to t)
+
+        assertEquals(1, events.size)
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events.first().oldValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("C"), listOf("A")), headersOf(events.first().newValue.table).toList().map { it.header })
+
+        assertEquals("First", valueOf<Any>(events.first().oldValue))
+        assertEquals("First", valueOf<Any>(events.first().newValue))
+        assertEquals(listOf("A"), headerOf(events.first().oldValue).header)
+        assertEquals(listOf("A"), headerOf(events.first().newValue).header)
+        assertEquals(0, indexOf(events.first().oldValue))
+        assertEquals(0, indexOf(events.first().newValue))
+
+        assertEquals(listOf("First", "Middle", "Last"), events.first().oldValue.table[0].map { valueOf<Any>(it) })
+        assertEquals(listOf("Middle", "Last", "First"), events.first().newValue.table[0].map { valueOf<Any>(it) })
+
+        events = emptyList()
 
         assertEquals(listOf(listOf("B"), listOf("C"), listOf("A")), headersOf(t).toList().map { it.header })
         assertEquals(listOf("Middle", "Last", "First"), t[0].map { valueOf<Any>(it) })
@@ -1641,11 +1667,43 @@ class TableColumnCopyMove {
         // Copy last
         copy(t["C"] to t)
 
+        assertEquals(1, events.size)
+        assertEquals(listOf(listOf("B"), listOf("C"), listOf("A")), headersOf(events.first().oldValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(events.first().newValue.table).toList().map { it.header })
+
+        assertEquals("Last", valueOf<Any>(events.first().oldValue))
+        assertEquals("Last", valueOf<Any>(events.first().newValue))
+        assertEquals(listOf("C"), headerOf(events.first().oldValue).header)
+        assertEquals(listOf("C"), headerOf(events.first().newValue).header)
+        assertEquals(0, indexOf(events.first().oldValue))
+        assertEquals(0, indexOf(events.first().newValue))
+
+        assertEquals(listOf("Middle", "Last", "First"), events.first().oldValue.table[0].map { valueOf<Any>(it) })
+        assertEquals(listOf("Middle", "First", "Last"), events.first().newValue.table[0].map { valueOf<Any>(it) })
+
+        events = emptyList()
+
         assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(t).toList().map { it.header })
         assertEquals(listOf("Middle", "First", "Last"), t[0].map { valueOf<Any>(it) })
 
         // Copy middle
         copy(t["B"] to t, "B2")
+
+        assertEquals(1, events.size)
+        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(events.first().oldValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C"), listOf("B2")), headersOf(events.first().newValue.table).toList().map { it.header })
+
+        assertEquals(Unit, valueOf<Any>(events.first().oldValue))
+        assertEquals("Middle", valueOf<Any>(events.first().newValue))
+        assertEquals(listOf("B2"), headerOf(events.first().oldValue).header)
+        assertEquals(listOf("B2"), headerOf(events.first().newValue).header)
+        assertEquals(0, indexOf(events.first().oldValue))
+        assertEquals(0, indexOf(events.first().newValue))
+
+        assertEquals(listOf("Middle", "First", "Last"), events.first().oldValue.table[0].map { valueOf<Any>(it) })
+        assertEquals(listOf("Middle", "First", "Last", "Middle"), events.first().newValue.table[0].map { valueOf<Any>(it) })
+
+        events = emptyList()
 
         assertEquals(listOf(listOf("B"), listOf("A"), listOf("C"), listOf("B2")), headersOf(t).toList().map { it.header })
         assertEquals(listOf("Middle", "First", "Last", "Middle"), t[0].map { valueOf<Any>(it) })
@@ -1662,11 +1720,50 @@ class TableColumnCopyMove {
 
         t2["T2", 0] = "T2 cell"
 
+        // TODO Not testing copy between tables where column name exists in target below.. (also check other copy/move tests)
+
+        var events1 = emptyList<TableListenerEvent<out Any, out Any>>()
+        var events2 = emptyList<TableListenerEvent<out Any, out Any>>()
+
+        on(t1) {
+            skipHistory = true
+
+            events {
+                events1 = toList()
+            }
+        }
+
+        on(t2) {
+            skipHistory = true
+
+            events {
+                events2 = toList()
+            }
+        }
+
         assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t1).toList().map { it.header })
         assertEquals(listOf("First", "Middle", "Last"), t1[0].map { valueOf<Any>(it) })
 
         // Copy middle to T2
         copy(t1["B"] to t2)
+
+        assertEquals(0, events1.size)
+
+        assertEquals(1, events2.size)
+        assertEquals(listOf(listOf("T2")), headersOf(events2.first().oldValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("T2"), listOf("B")), headersOf(events2.first().newValue.table).toList().map { it.header })
+
+        assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
+        assertEquals("Middle", valueOf<Any>(events2.first().newValue))
+        assertEquals(listOf("B"), headerOf(events2.first().oldValue).header)
+        assertEquals(listOf("B"), headerOf(events2.first().newValue).header)
+        assertEquals(0, indexOf(events2.first().oldValue))
+        assertEquals(0, indexOf(events2.first().newValue))
+
+        assertEquals(listOf("T2 cell"), events2.first().oldValue.table[0].map { valueOf<Any>(it) })
+        assertEquals(listOf("T2 cell", "Middle"), events2.first().newValue.table[0].map { valueOf<Any>(it) })
+
+        events2 = emptyList()
 
         assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t1).toList().map { it.header })
         assertEquals(listOf("First", "Middle", "Last"), t1[0].map { valueOf<Any>(it) })
@@ -1677,6 +1774,24 @@ class TableColumnCopyMove {
         // Copy first to T2
         copy(t1["A"] to t2)
 
+        assertEquals(0, events1.size)
+
+        assertEquals(1, events2.size)
+        assertEquals(listOf(listOf("T2"), listOf("B")), headersOf(events2.first().oldValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("T2"), listOf("B"), listOf("A")), headersOf(events2.first().newValue.table).toList().map { it.header })
+
+        assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
+        assertEquals("First", valueOf<Any>(events2.first().newValue))
+        assertEquals(listOf("A"), headerOf(events2.first().oldValue).header)
+        assertEquals(listOf("A"), headerOf(events2.first().newValue).header)
+        assertEquals(0, indexOf(events2.first().oldValue))
+        assertEquals(0, indexOf(events2.first().newValue))
+
+        assertEquals(listOf("T2 cell", "Middle"), events2.first().oldValue.table[0].map { valueOf<Any>(it) })
+        assertEquals(listOf("T2 cell", "Middle", "First"), events2.first().newValue.table[0].map { valueOf<Any>(it) })
+
+        events2 = emptyList()
+
         assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t1).toList().map { it.header })
         assertEquals(listOf("First", "Middle", "Last"), t1[0].map { valueOf<Any>(it) })
 
@@ -1685,6 +1800,24 @@ class TableColumnCopyMove {
 
         // Copy last to T2
         copy(t1["C"] to t2)
+
+        assertEquals(0, events1.size)
+
+        assertEquals(1, events2.size)
+        assertEquals(listOf(listOf("T2"), listOf("B"), listOf("A")), headersOf(events2.first().oldValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("T2"), listOf("B"), listOf("A"), listOf("C")), headersOf(events2.first().newValue.table).toList().map { it.header })
+
+        assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
+        assertEquals("Last", valueOf<Any>(events2.first().newValue))
+        assertEquals(listOf("C"), headerOf(events2.first().oldValue).header)
+        assertEquals(listOf("C"), headerOf(events2.first().newValue).header)
+        assertEquals(0, indexOf(events2.first().oldValue))
+        assertEquals(0, indexOf(events2.first().newValue))
+
+        assertEquals(listOf("T2 cell", "Middle", "First"), events2.first().oldValue.table[0].map { valueOf<Any>(it) })
+        assertEquals(listOf("T2 cell", "Middle", "First", "Last"), events2.first().newValue.table[0].map { valueOf<Any>(it) })
+
+        events2 = emptyList()
 
         assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t1).toList().map { it.header })
         assertEquals(listOf("First", "Middle", "Last"), t1[0].map { valueOf<Any>(it) })
@@ -1702,11 +1835,48 @@ class TableColumnCopyMove {
         t1["B", 0] = "Middle"
         t1["C", 0] = "Last"
 
+        var events1 = emptyList<TableListenerEvent<out Any, out Any>>()
+        var events2 = emptyList<TableListenerEvent<out Any, out Any>>()
+
+        on(t1) {
+            skipHistory = true
+
+            events {
+                events1 = toList()
+            }
+        }
+
+        on(t2) {
+            skipHistory = true
+
+            events {
+                events2 = toList()
+            }
+        }
+
         assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t1).toList().map { it.header })
         assertEquals(listOf("First", "Middle", "Last"), t1[0].map { valueOf<Any>(it) })
 
         // Copy middle to T2
         copy(t1["B"] to t2)
+
+        assertEquals(0, events1.size)
+
+        assertEquals(1, events2.size)
+        assertEquals(emptyList<List<String>>(), headersOf(events2.first().oldValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B")), headersOf(events2.first().newValue.table).toList().map { it.header })
+
+        assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
+        assertEquals("Middle", valueOf<Any>(events2.first().newValue))
+        assertEquals(listOf("B"), headerOf(events2.first().oldValue).header)
+        assertEquals(listOf("B"), headerOf(events2.first().newValue).header)
+        assertEquals(0, indexOf(events2.first().oldValue))
+        assertEquals(0, indexOf(events2.first().newValue))
+
+        assertEquals(emptyList<String>(), events2.first().oldValue.table[0].map { valueOf<Any>(it) })
+        assertEquals(listOf("Middle"), events2.first().newValue.table[0].map { valueOf<Any>(it) })
+
+        events2 = emptyList()
 
         assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t1).toList().map { it.header })
         assertEquals(listOf("First", "Middle", "Last"), t1[0].map { valueOf<Any>(it) })
@@ -1717,6 +1887,24 @@ class TableColumnCopyMove {
         // Copy first to T2
         copy(t1["A"] to t2)
 
+        assertEquals(0, events1.size)
+
+        assertEquals(1, events2.size)
+        assertEquals(listOf(listOf("B")), headersOf(events2.first().oldValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("A")), headersOf(events2.first().newValue.table).toList().map { it.header })
+
+        assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
+        assertEquals("First", valueOf<Any>(events2.first().newValue))
+        assertEquals(listOf("A"), headerOf(events2.first().oldValue).header)
+        assertEquals(listOf("A"), headerOf(events2.first().newValue).header)
+        assertEquals(0, indexOf(events2.first().oldValue))
+        assertEquals(0, indexOf(events2.first().newValue))
+
+        assertEquals(listOf("Middle"), events2.first().oldValue.table[0].map { valueOf<Any>(it) })
+        assertEquals(listOf("Middle", "First"), events2.first().newValue.table[0].map { valueOf<Any>(it) })
+
+        events2 = emptyList()
+
         assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t1).toList().map { it.header })
         assertEquals(listOf("First", "Middle", "Last"), t1[0].map { valueOf<Any>(it) })
 
@@ -1725,6 +1913,24 @@ class TableColumnCopyMove {
 
         // Copy last to T2
         copy(t1["C"] to t2)
+
+        assertEquals(0, events1.size)
+
+        assertEquals(1, events2.size)
+        assertEquals(listOf(listOf("B"), listOf("A")), headersOf(events2.first().oldValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(events2.first().newValue.table).toList().map { it.header })
+
+        assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
+        assertEquals("Last", valueOf<Any>(events2.first().newValue))
+        assertEquals(listOf("C"), headerOf(events2.first().oldValue).header)
+        assertEquals(listOf("C"), headerOf(events2.first().newValue).header)
+        assertEquals(0, indexOf(events2.first().oldValue))
+        assertEquals(0, indexOf(events2.first().newValue))
+
+        assertEquals(listOf("Middle", "First"), events2.first().oldValue.table[0].map { valueOf<Any>(it) })
+        assertEquals(listOf("Middle", "First", "Last"), events2.first().newValue.table[0].map { valueOf<Any>(it) })
+
+        events2 = emptyList()
 
         assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t1).toList().map { it.header })
         assertEquals(listOf("First", "Middle", "Last"), t1[0].map { valueOf<Any>(it) })

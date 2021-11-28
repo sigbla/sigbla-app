@@ -390,7 +390,7 @@ private fun publishTableMoveEvents(
             )
         }
 
-        // move(T1["A"] to T2, "A")        -> A takes the place of B, named A. A removed from T1
+        // move(T1["A"] to T2, "A")        -> A is moved to end of T2
         //                                 -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order),
         //                                                 T2["A"] (A value, A order) -> T2["A"] (A value, new A order)
         left.table !== table && left.columnHeader == newRight.columnHeader
@@ -401,7 +401,7 @@ private fun publishTableMoveEvents(
             )
         }
 
-        // move(T1["A"] to T2, "B")        -> A takes the place of B, named B, in T2. A removed from T1
+        // move(T1["A"] to T2, "B")        -> A is moved to end of T2 and renamed to B. A removed from T1
         //                                 -> Event model: T1["A"] (A value, A order) -> T1["A"] (unit value, A order),
         //                                                 T2["B"] (B value, B order) -> T2["B"] (A value, new B order)
         left.table !== table && left.columnHeader != newRight.columnHeader
@@ -665,6 +665,111 @@ private fun publishColumnCopyEvents(
         // copy(T1["A"] before T2["B"], "C")    -> A copied before B, named C, removing any existing C
         //                                      -> Event model: T2["C"] (C value, C value) -> T2["C"] (A value, new A order before B)
         order == ColumnActionOrder.BEFORE && left.table !== right.table && left.columnHeader != newRight.columnHeader && right.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(newRight, oldRef, newRef)
+            )
+        }
+
+        // Should never happen
+        else -> throw UnsupportedOperationException()
+    }
+}
+
+private fun publishTableCopyEvents(
+    left: Column,
+    table: Table,
+    newRight: Column,
+    oldRef: TableRef,
+    newRef: TableRef
+) {
+    if (!left.table.eventProcessor.haveListeners()
+        && !table.eventProcessor.haveListeners()
+        && !newRight.table.eventProcessor.haveListeners()) return
+
+    fun prepareEvents(column: Column, oldRef: TableRef, newRef: TableRef): Pair<Table, MutableList<TableListenerEvent<Any, Any>>> {
+        // We need to do this in order to disconnect the columns from the original table
+        val oldTable = column.table.makeClone(ref = oldRef)
+        val newTable = column.table.makeClone(ref = newRef)
+
+        val oldRef = oldTable.tableRef.get()
+        val newRef = newTable.tableRef.get()
+
+        val indexes1 = oldRef.columnCells[column.columnHeader]?.keys() ?: emptySet()
+        val indexes2 = newRef.columnCells[column.columnHeader]?.keys() ?: emptySet()
+        val indexes = indexes1 union indexes2
+
+        // Get columns anchored to old and new ref
+        val oldColumn = BaseColumn(
+            oldTable,
+            column.columnHeader,
+            oldRef.columns[column.columnHeader]?.columnOrder ?: column.columnOrder
+        )
+        val newColumn = BaseColumn(
+            newTable,
+            column.columnHeader,
+            newRef.columns[column.columnHeader]?.columnOrder ?: column.columnOrder
+        )
+
+        val events = indexes.map { TableListenerEvent(oldColumn[it], newColumn[it]) as TableListenerEvent<Any, Any> }
+
+        return column.table to events.toMutableList()
+    }
+
+    fun publishEvents(vararg tableEvents: Pair<Table, MutableList<TableListenerEvent<Any, Any>>>) {
+        val groupedEvents = IdentityHashMap<Table, MutableList<TableListenerEvent<Any, Any>>>()
+
+        tableEvents.forEach {
+            groupedEvents.compute(it.first) { _, v -> v?.apply { v.addAll(it.second) } ?: it.second }
+        }
+
+        groupedEvents.forEach { (t, e) -> t.eventProcessor.publish(e) }
+    }
+
+    // There's a lot of options for moving things around, while also renaming the columns they are moved to.
+    // Depending on the way this is done, events are needed to reflect all the changes. Below the event
+    // model is laid out. In short: We don't want to emit more events than strictly needed, which means
+    // to only emit enough events to allow a listener to recreate the change on their end just from the events.
+
+    // Note: Because the events only concern themselves with the columns being moved, the order change
+    //       might impact the order of other columns. The events in isolation do not reflect the change
+    //       to the order index of other columns, but give access to the updated table as a whole.
+
+    // Cases:
+
+    // TODO: Optimise below when cases..?
+
+    when {
+        // copy(T1["A"] to T1, "A")        -> A is moved to end of T1
+        //                                 -> Event model: T1["A"] (A value, A order) -> T1["A"] (A value, new A order)
+        left.table === table && left.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(left, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] to T1, "B")        -> A is copied to end of T1 and renamed to B
+        //                                 -> Event model: T1["B"] (B value, B order) -> T1["B"] (A value, new B order)
+        left.table === table && left.columnHeader != newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(newRight, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] to T2, "A")        -> A is copied to end of T2
+        //                                 -> Event model: T2["A"] (A value, A order) -> T2["A"] (A value, new A order)
+        left.table !== table && left.columnHeader == newRight.columnHeader
+        -> {
+            publishEvents(
+                prepareEvents(newRight, oldRef, newRef)
+            )
+        }
+
+        // copy(T1["A"] to T2, "B")        -> A is copied to end of T2 and renamed to B
+        //                                 -> Event model: T2["B"] (B value, B order) -> T2["B"] (A value, new B order)
+        left.table !== table && left.columnHeader != newRight.columnHeader
         -> {
             publishEvents(
                 prepareEvents(newRight, oldRef, newRef)
@@ -1009,29 +1114,31 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
 
     if (left.table === table) {
         // Internal copy
-        val newLeft = BaseColumn(table, withName)
+        val newRight = BaseColumn(table, withName)
         val (oldRef, newRef) = table.tableRef.refAction(
             (::columnCopy)(withName) {
                 copy(
-                    columns = this.columns.put(withName, ColumnMeta(newLeft.columnOrder, this.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
+                    columns = this.columns.put(withName, ColumnMeta(newRight.columnOrder, this.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
                     columnCells = this.columnCells.put(withName, this.columnCells[left.columnHeader] ?: PTreeMap()),
                 )
             }
         )
-        // TODO Events
+
+        publishTableCopyEvents(left, table, newRight, oldRef, newRef)
     } else {
         // Copy between tables
-        val newLeft = BaseColumn(table, withName)
+        val newRight = BaseColumn(table, withName)
         val (oldRef, newRef) = table.tableRef.refAction(
             (::columnCopy)(withName) {
                 val leftRef = left.table.tableRef.get()
                 copy(
-                    columns = this.columns.put(withName, ColumnMeta(newLeft.columnOrder, leftRef.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
+                    columns = this.columns.put(withName, ColumnMeta(newRight.columnOrder, leftRef.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
                     columnCells = this.columnCells.put(withName, left.table.tableRef.get().columnCells[left.columnHeader] ?: PTreeMap()),
                 )
             }
         )
-        // TODO Events
+
+        publishTableCopyEvents(left, table, newRight, oldRef, newRef)
     }
 }
 
