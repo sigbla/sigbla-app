@@ -421,4 +421,17 @@ class TableTest {
         assertEquals(listOf(0L, 1L, 2L, 3L, 4L, 5L), indexes2.toList())
         assertEquals(listOf(0L, 1L, 2L, 3L, 4L, 5L), indexes2.toList())
     }
+
+    @Test
+    fun `index relation order`() {
+        val relations = IndexRelation.values().sorted()
+
+        // BEFORE, AT_OR_BEFORE, AT, AT_OR_AFTER, AFTER
+        assertEquals(5, relations.size)
+        assertEquals(IndexRelation.BEFORE, relations[0])
+        assertEquals(IndexRelation.AT_OR_BEFORE, relations[1])
+        assertEquals(IndexRelation.AT, relations[2])
+        assertEquals(IndexRelation.AT_OR_AFTER, relations[3])
+        assertEquals(IndexRelation.AFTER, relations[4])
+    }
 }
