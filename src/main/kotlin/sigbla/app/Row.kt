@@ -95,13 +95,12 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
             .iterator()
     }
 
-    override fun compareTo(other: Row): Int {
-        return index.compareTo(other.index)
+    override fun compareTo(other: Row): Int = when (index.compareTo(other.index)) {
+        0 -> 0
+        else -> indexRelation.compareTo(other.indexRelation)
     }
 
-    override fun toString(): String {
-        return index.toString()
-    }
+    override fun toString(): String = index.toString()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -110,13 +109,12 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
         other as Row
 
         if (index != other.index) return false
+        if (indexRelation != other.indexRelation) return false
 
         return true
     }
 
-    override fun hashCode(): Int {
-        return index.hashCode()
-    }
+    override fun hashCode(): Int = index.hashCode()
 }
 
 class BaseRow internal constructor(override val table: Table, override val indexRelation: IndexRelation, override val index: Long) : Row()
@@ -181,9 +179,4 @@ infix fun Row.to(other: Row): RowToRowAction {
 
 class RowToRowAction internal constructor(val left: Row, val right: Row, val order: RowActionOrder)
 
-// TODO We'd like to be able to move/copy rows before/after another row,
-//      which would inject that row and push all other rows down.
-//      Example: move(t[1] before t[3]) would cause t[1] to be located
-//      at t[3] and the old t[3] would now be t[4], t[4] is now t[5], etc..
-//      Likely need to fine a more optimised approach to moving rows around
 enum class RowActionOrder { BEFORE, AFTER, TO }
