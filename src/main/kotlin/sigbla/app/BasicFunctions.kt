@@ -92,7 +92,7 @@ private inline fun <reified O, reified N> cellFunction(
 
             events {
                 if (any() && destinationCount.decrementAndGet() < 0) {
-                    // Something else is interactive with destination,
+                    // Something else is interacting with destination,
                     // so let's remove this function.
                     unsubscribeOuter()
                     unsubscribeInner()
