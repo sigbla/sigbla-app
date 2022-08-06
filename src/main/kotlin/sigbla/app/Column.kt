@@ -92,6 +92,8 @@ abstract class Column internal constructor(
 
     operator fun get(indexRelation: IndexRelation, index: Int) = get(indexRelation, index.toLong())
 
+    operator fun get(row: Row) = get(row.indexRelation, row.index)
+
     operator fun set(index: Long, value: String) = set(index, value.toCell(this, index))
 
     operator fun set(index: Long, value: Double) = set(index, value.toCell(this, index))
@@ -179,7 +181,7 @@ class BaseColumn internal constructor(
     columnOrder
 ) {
     override fun get(indexRelation: IndexRelation, index: Long): Cell<*> {
-        return getCellRaw(index, indexRelation)?.toCell(this, index) ?: UnitCell(
+        return getCellRaw(table.tableRef.get(), columnHeader, index, indexRelation)?.first?.toCell(this, index) ?: UnitCell(
             this,
             index
         )
@@ -268,30 +270,33 @@ class BaseColumn internal constructor(
         val values = table.tableRef.get().columnCells[this.columnHeader] ?: throw InvalidColumnException(this)
         return values.asSequence().map { it.component2().toCell(this, it.component1()) }.iterator()
     }
+}
 
-    private fun getCellRaw(index: Long, indexRelation: IndexRelation): CellValue<*>? {
-        val ref = table.tableRef.get()
-        val values = ref.columnCells[this.columnHeader] ?: return null
+internal fun getCellRaw(ref: TableRef, columnHeader: ColumnHeader, index: Long, indexRelation: IndexRelation): Pair<CellValue<*>, Long>? {
+    val values = ref.columnCells[columnHeader] ?: return null
 
-        fun firstBefore(): CellValue<*>? {
-            val keys = values.asSortedMap().headMap(index).keys
-            if (keys.isEmpty()) return null
-            return values[keys.last()]
-        }
+    fun firstBefore(): Pair<CellValue<*>, Long>? {
+        val keys = values.asSortedMap().headMap(index).keys
+        if (keys.isEmpty()) return null
+        val index = keys.last()
+        val value = values[index] ?: return null
+        return Pair(value, index)
+    }
 
-        fun firstAfter(): CellValue<*>? {
-            val keys = values.asSortedMap().tailMap(index + 1L).keys
-            if (keys.isEmpty()) return null
-            return values[keys.first()]
-        }
+    fun firstAfter(): Pair<CellValue<*>, Long>? {
+        val keys = values.asSortedMap().tailMap(index + 1L).keys
+        if (keys.isEmpty()) return null
+        val index = keys.first()
+        val value = values[index] ?: return null
+        return Pair(value, index)
+    }
 
-        return when (indexRelation) {
-            AT -> values[index]
-            BEFORE -> firstBefore()
-            AFTER -> firstAfter()
-            AT_OR_BEFORE -> values[index] ?: getCellRaw(index, BEFORE)
-            AT_OR_AFTER -> values[index] ?: getCellRaw(index, AFTER)
-        }
+    return when (indexRelation) {
+        AT -> values[index]?.let { Pair(it, index) }
+        BEFORE -> firstBefore()
+        AFTER -> firstAfter()
+        AT_OR_BEFORE -> values[index]?.let { Pair(it, index) } ?: getCellRaw(ref, columnHeader, index, BEFORE)
+        AT_OR_AFTER -> values[index]?.let { Pair(it, index) } ?: getCellRaw(ref, columnHeader, index, AFTER)
     }
 }
 
@@ -349,7 +354,7 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
 }
 
 enum class IndexRelation {
-    AT, AT_OR_BEFORE, AT_OR_AFTER, BEFORE, AFTER
+    BEFORE, AT_OR_BEFORE, AT, AT_OR_AFTER, AFTER
 }
 
 infix fun Column.before(other: Column): ColumnToColumnAction {
