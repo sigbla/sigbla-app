@@ -25,6 +25,16 @@ class TableRowCopyMove {
         t["B", 2] = "B2"
         t["B", 3] = "B3"
 
+        var events = emptyList<TableListenerEvent<out Any, out Any>>()
+
+        on(t) {
+            skipHistory = true
+
+            events {
+                events = toList()
+            }
+        }
+
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.header })
         Assert.assertEquals(listOf("A0", "A1", "A2", "A3"), valuesOf<Any>(t["A"]).toList())
         Assert.assertEquals(listOf("B0", "B1", "B2", "B3"), valuesOf<Any>(t["B"]).toList())
@@ -32,12 +42,78 @@ class TableRowCopyMove {
         // No-op
         move(t[0] to t[0])
 
+        Assert.assertEquals(2, events.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events.first().newValue.table).toList())
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events.last().newValue.table).toList())
+
+        Assert.assertEquals("A0", valueOf<Any>(events.first().oldValue))
+        Assert.assertEquals("A0", valueOf<Any>(events.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events.first().newValue).header)
+        Assert.assertEquals(0, indexOf(events.first().oldValue))
+        Assert.assertEquals(0, indexOf(events.first().newValue))
+
+        Assert.assertEquals("B0", valueOf<Any>(events.last().oldValue))
+        Assert.assertEquals("B0", valueOf<Any>(events.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events.last().newValue).header)
+        Assert.assertEquals(0, indexOf(events.last().oldValue))
+        Assert.assertEquals(0, indexOf(events.last().newValue))
+
+        events = emptyList()
+
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.header })
         Assert.assertEquals(listOf("A0", "A1", "A2", "A3"), valuesOf<Any>(t["A"]).toList())
         Assert.assertEquals(listOf("B0", "B1", "B2", "B3"), valuesOf<Any>(t["B"]).toList())
 
         // Move to in between
         move(t[0] to t[2])
+
+        Assert.assertEquals(4, events.size)
+        for (i in 0..3) {
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events[i].oldValue.table).toList().map { it.header })
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events[i].newValue.table).toList().map { it.header })
+
+            Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events[i].oldValue.table).toList())
+            Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events[i].newValue.table).toList())
+        }
+
+        Assert.assertEquals("A0", valueOf<Any>(events[0].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events[0].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events[0].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events[0].newValue).header)
+        Assert.assertEquals(0, indexOf(events[0].oldValue))
+        Assert.assertEquals(0, indexOf(events[0].newValue))
+
+        Assert.assertEquals("B0", valueOf<Any>(events[1].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events[1].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events[1].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events[1].newValue).header)
+        Assert.assertEquals(0, indexOf(events[1].oldValue))
+        Assert.assertEquals(0, indexOf(events[1].newValue))
+
+        Assert.assertEquals("A2", valueOf<Any>(events[2].oldValue))
+        Assert.assertEquals("A0", valueOf<Any>(events[2].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events[2].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events[2].newValue).header)
+        Assert.assertEquals(2, indexOf(events[2].oldValue))
+        Assert.assertEquals(2, indexOf(events[2].newValue))
+
+        Assert.assertEquals("B2", valueOf<Any>(events[3].oldValue))
+        Assert.assertEquals("B0", valueOf<Any>(events[3].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events[3].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events[3].newValue).header)
+        Assert.assertEquals(2, indexOf(events[3].oldValue))
+        Assert.assertEquals(2, indexOf(events[3].newValue))
+
+        events = emptyList()
 
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.header })
         Assert.assertEquals(listOf("A1", "A0", "A3"), valuesOf<Any>(t["A"]).toList())
@@ -47,12 +123,90 @@ class TableRowCopyMove {
         // Move to last
         move(t[1] to t[4])
 
+        Assert.assertEquals(4, events.size)
+        for (i in 0..3) {
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events[i].oldValue.table).toList().map { it.header })
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events[i].newValue.table).toList().map { it.header })
+
+            Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events[i].oldValue.table).toList())
+            Assert.assertEquals(listOf(2L, 3L, 4L), indexesOf(events[i].newValue.table).toList())
+        }
+
+        Assert.assertEquals("A1", valueOf<Any>(events[0].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events[0].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events[0].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events[0].newValue).header)
+        Assert.assertEquals(1, indexOf(events[0].oldValue))
+        Assert.assertEquals(1, indexOf(events[0].newValue))
+
+        Assert.assertEquals("B1", valueOf<Any>(events[1].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events[1].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events[1].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events[1].newValue).header)
+        Assert.assertEquals(1, indexOf(events[1].oldValue))
+        Assert.assertEquals(1, indexOf(events[1].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events[2].oldValue))
+        Assert.assertEquals("A1", valueOf<Any>(events[2].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events[2].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events[2].newValue).header)
+        Assert.assertEquals(4, indexOf(events[2].oldValue))
+        Assert.assertEquals(4, indexOf(events[2].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events[3].oldValue))
+        Assert.assertEquals("B1", valueOf<Any>(events[3].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events[3].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events[3].newValue).header)
+        Assert.assertEquals(4, indexOf(events[3].oldValue))
+        Assert.assertEquals(4, indexOf(events[3].newValue))
+
+        events = emptyList()
+
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.header })
         Assert.assertEquals(listOf("A0", "A3", "A1"), valuesOf<Any>(t["A"]).toList())
         Assert.assertEquals(listOf("B0", "B3", "B1"), valuesOf<Any>(t["B"]).toList())
 
         // Move to first
         move(t[3] to t[0])
+
+        Assert.assertEquals(4, events.size)
+        for (i in 0..3) {
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events[i].oldValue.table).toList().map { it.header })
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events[i].newValue.table).toList().map { it.header })
+
+            Assert.assertEquals(listOf(2L, 3L, 4L), indexesOf(events[i].oldValue.table).toList())
+            Assert.assertEquals(listOf(0L, 2L, 4L), indexesOf(events[i].newValue.table).toList())
+        }
+
+        Assert.assertEquals("A3", valueOf<Any>(events[0].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events[0].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events[0].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events[0].newValue).header)
+        Assert.assertEquals(3, indexOf(events[0].oldValue))
+        Assert.assertEquals(3, indexOf(events[0].newValue))
+
+        Assert.assertEquals("B3", valueOf<Any>(events[1].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events[1].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events[1].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events[1].newValue).header)
+        Assert.assertEquals(3, indexOf(events[1].oldValue))
+        Assert.assertEquals(3, indexOf(events[1].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events[2].oldValue))
+        Assert.assertEquals("A3", valueOf<Any>(events[2].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events[2].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events[2].newValue).header)
+        Assert.assertEquals(0, indexOf(events[2].oldValue))
+        Assert.assertEquals(0, indexOf(events[2].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events[3].oldValue))
+        Assert.assertEquals("B3", valueOf<Any>(events[3].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events[3].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events[3].newValue).header)
+        Assert.assertEquals(0, indexOf(events[3].oldValue))
+        Assert.assertEquals(0, indexOf(events[3].newValue))
+
+        events = emptyList()
 
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.header })
         Assert.assertEquals(listOf("A3", "A0", "A1"), valuesOf<Any>(t["A"]).toList())
@@ -84,6 +238,25 @@ class TableRowCopyMove {
         t2["B", 2] = "B2_1"
         t2["B", 3] = "B3_1"
 
+        var events1 = emptyList<TableListenerEvent<out Any, out Any>>()
+        var events2 = emptyList<TableListenerEvent<out Any, out Any>>()
+
+        on(t1) {
+            skipHistory = true
+
+            events {
+                events1 = toList()
+            }
+        }
+
+        on(t2) {
+            skipHistory = true
+
+            events {
+                events2 = toList()
+            }
+        }
+
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         Assert.assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
@@ -94,6 +267,60 @@ class TableRowCopyMove {
 
         // Move to in between
         move(t1[0] to t2[2])
+
+        Assert.assertEquals(2, events1.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events1.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events1.first().newValue.table).toList())
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events1.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events1.last().newValue.table).toList())
+
+        Assert.assertEquals("A0_0", valueOf<Any>(events1.first().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        Assert.assertEquals(0, indexOf(events1.first().oldValue))
+        Assert.assertEquals(0, indexOf(events1.first().newValue))
+
+        Assert.assertEquals("B0_0", valueOf<Any>(events1.last().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().newValue).header)
+        Assert.assertEquals(0, indexOf(events1.last().oldValue))
+        Assert.assertEquals(0, indexOf(events1.last().newValue))
+
+        events1 = emptyList()
+
+        Assert.assertEquals(2, events2.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events2.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events2.first().newValue.table).toList())
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events2.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events2.last().newValue.table).toList())
+
+        Assert.assertEquals("A2_1", valueOf<Any>(events2.first().oldValue))
+        Assert.assertEquals("A0_0", valueOf<Any>(events2.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().newValue).header)
+        Assert.assertEquals(2, indexOf(events2.first().oldValue))
+        Assert.assertEquals(2, indexOf(events2.first().newValue))
+
+        Assert.assertEquals("B2_1", valueOf<Any>(events2.last().oldValue))
+        Assert.assertEquals("B0_0", valueOf<Any>(events2.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().newValue).header)
+        Assert.assertEquals(2, indexOf(events2.last().oldValue))
+        Assert.assertEquals(2, indexOf(events2.last().newValue))
+
+        events2 = emptyList()
 
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(listOf("A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
@@ -107,6 +334,60 @@ class TableRowCopyMove {
         // Move to last
         move(t1[1] to t2[4])
 
+        Assert.assertEquals(2, events1.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events1.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L, 3L), indexesOf(events1.first().newValue.table).toList())
+        Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events1.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L, 3L), indexesOf(events1.last().newValue.table).toList())
+
+        Assert.assertEquals("A1_0", valueOf<Any>(events1.first().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        Assert.assertEquals(1, indexOf(events1.first().oldValue))
+        Assert.assertEquals(1, indexOf(events1.first().newValue))
+
+        Assert.assertEquals("B1_0", valueOf<Any>(events1.last().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().newValue).header)
+        Assert.assertEquals(1, indexOf(events1.last().oldValue))
+        Assert.assertEquals(1, indexOf(events1.last().newValue))
+
+        events1 = emptyList()
+
+        Assert.assertEquals(2, events2.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events2.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(events2.first().newValue.table).toList())
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events2.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(events2.last().newValue.table).toList())
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
+        Assert.assertEquals("A1_0", valueOf<Any>(events2.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().newValue).header)
+        Assert.assertEquals(4, indexOf(events2.first().oldValue))
+        Assert.assertEquals(4, indexOf(events2.first().newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2.last().oldValue))
+        Assert.assertEquals("B1_0", valueOf<Any>(events2.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().newValue).header)
+        Assert.assertEquals(4, indexOf(events2.last().oldValue))
+        Assert.assertEquals(4, indexOf(events2.last().newValue))
+
+        events2 = emptyList()
+
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(listOf("A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         Assert.assertEquals(listOf("B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
@@ -117,6 +398,60 @@ class TableRowCopyMove {
 
         // Move to first
         move(t1[3] to t2[0])
+
+        Assert.assertEquals(2, events1.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(2L, 3L), indexesOf(events1.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L), indexesOf(events1.first().newValue.table).toList())
+        Assert.assertEquals(listOf(2L, 3L), indexesOf(events1.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L), indexesOf(events1.last().newValue.table).toList())
+
+        Assert.assertEquals("A3_0", valueOf<Any>(events1.first().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        Assert.assertEquals(3, indexOf(events1.first().oldValue))
+        Assert.assertEquals(3, indexOf(events1.first().newValue))
+
+        Assert.assertEquals("B3_0", valueOf<Any>(events1.last().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().newValue).header)
+        Assert.assertEquals(3, indexOf(events1.last().oldValue))
+        Assert.assertEquals(3, indexOf(events1.last().newValue))
+
+        events1 = emptyList()
+
+        Assert.assertEquals(2, events2.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(events2.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(events2.first().newValue.table).toList())
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(events2.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(events2.last().newValue.table).toList())
+
+        Assert.assertEquals("A0_1", valueOf<Any>(events2.first().oldValue))
+        Assert.assertEquals("A3_0", valueOf<Any>(events2.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().newValue).header)
+        Assert.assertEquals(0, indexOf(events2.first().oldValue))
+        Assert.assertEquals(0, indexOf(events2.first().newValue))
+
+        Assert.assertEquals("B0_1", valueOf<Any>(events2.last().oldValue))
+        Assert.assertEquals("B3_0", valueOf<Any>(events2.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().newValue).header)
+        Assert.assertEquals(0, indexOf(events2.last().oldValue))
+        Assert.assertEquals(0, indexOf(events2.last().newValue))
+
+        events2 = emptyList()
 
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(listOf("A2_0"), valuesOf<Any>(t1["A"]).toList())
@@ -142,12 +477,85 @@ class TableRowCopyMove {
         t1["B", 2] = "B2_0"
         t1["B", 3] = "B3_0"
 
+        var events1 = emptyList<TableListenerEvent<out Any, out Any>>()
+        var events2 = emptyList<TableListenerEvent<out Any, out Any>>()
+
+        on(t1) {
+            skipHistory = true
+
+            events {
+                events1 = toList()
+            }
+        }
+
+        on(t2) {
+            skipHistory = true
+
+            events {
+                events2 = toList()
+            }
+        }
+
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         Assert.assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
 
         // Move to in between
         move(t1[0] to t2[2])
+
+        Assert.assertEquals(2, events1.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events1.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events1.first().newValue.table).toList())
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events1.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events1.last().newValue.table).toList())
+
+        Assert.assertEquals("A0_0", valueOf<Any>(events1.first().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        Assert.assertEquals(0, indexOf(events1.first().oldValue))
+        Assert.assertEquals(0, indexOf(events1.first().newValue))
+
+        Assert.assertEquals("B0_0", valueOf<Any>(events1.last().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().newValue).header)
+        Assert.assertEquals(0, indexOf(events1.last().oldValue))
+        Assert.assertEquals(0, indexOf(events1.last().newValue))
+
+        events1 = emptyList()
+
+        Assert.assertEquals(2, events2.size)
+        Assert.assertEquals(emptyList<List<Any>>(), headersOf(events2.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(emptyList<List<Any>>(), headersOf(events2.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(emptyList<Long>(), indexesOf(events2.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L), indexesOf(events2.first().newValue.table).toList())
+        Assert.assertEquals(emptyList<Long>(), indexesOf(events2.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L), indexesOf(events2.last().newValue.table).toList())
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
+        Assert.assertEquals("A0_0", valueOf<Any>(events2.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().newValue).header)
+        Assert.assertEquals(2, indexOf(events2.first().oldValue))
+        Assert.assertEquals(2, indexOf(events2.first().newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2.last().oldValue))
+        Assert.assertEquals("B0_0", valueOf<Any>(events2.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().newValue).header)
+        Assert.assertEquals(2, indexOf(events2.last().oldValue))
+        Assert.assertEquals(2, indexOf(events2.last().newValue))
+
+        events2 = emptyList()
 
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(listOf("A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
@@ -161,6 +569,60 @@ class TableRowCopyMove {
         // Move to last
         move(t1[1] to t2[4])
 
+        Assert.assertEquals(2, events1.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events1.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L, 3L), indexesOf(events1.first().newValue.table).toList())
+        Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events1.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L, 3L), indexesOf(events1.last().newValue.table).toList())
+
+        Assert.assertEquals("A1_0", valueOf<Any>(events1.first().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        Assert.assertEquals(1, indexOf(events1.first().oldValue))
+        Assert.assertEquals(1, indexOf(events1.first().newValue))
+
+        Assert.assertEquals("B1_0", valueOf<Any>(events1.last().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().newValue).header)
+        Assert.assertEquals(1, indexOf(events1.last().oldValue))
+        Assert.assertEquals(1, indexOf(events1.last().newValue))
+
+        events1 = emptyList()
+
+        Assert.assertEquals(2, events2.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(2L), indexesOf(events2.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L, 4L), indexesOf(events2.first().newValue.table).toList())
+        Assert.assertEquals(listOf(2L), indexesOf(events2.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L, 4L), indexesOf(events2.last().newValue.table).toList())
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
+        Assert.assertEquals("A1_0", valueOf<Any>(events2.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().newValue).header)
+        Assert.assertEquals(4, indexOf(events2.first().oldValue))
+        Assert.assertEquals(4, indexOf(events2.first().newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2.last().oldValue))
+        Assert.assertEquals("B1_0", valueOf<Any>(events2.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().newValue).header)
+        Assert.assertEquals(4, indexOf(events2.last().oldValue))
+        Assert.assertEquals(4, indexOf(events2.last().newValue))
+
+        events2 = emptyList()
+
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(listOf("A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         Assert.assertEquals(listOf("B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
@@ -172,6 +634,60 @@ class TableRowCopyMove {
         // Move to first
         move(t1[3] to t2[0])
 
+        Assert.assertEquals(2, events1.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(2L, 3L), indexesOf(events1.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L), indexesOf(events1.first().newValue.table).toList())
+        Assert.assertEquals(listOf(2L, 3L), indexesOf(events1.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L), indexesOf(events1.last().newValue.table).toList())
+
+        Assert.assertEquals("A3_0", valueOf<Any>(events1.first().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        Assert.assertEquals(3, indexOf(events1.first().oldValue))
+        Assert.assertEquals(3, indexOf(events1.first().newValue))
+
+        Assert.assertEquals("B3_0", valueOf<Any>(events1.last().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().newValue).header)
+        Assert.assertEquals(3, indexOf(events1.last().oldValue))
+        Assert.assertEquals(3, indexOf(events1.last().newValue))
+
+        events1 = emptyList()
+
+        Assert.assertEquals(2, events2.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(2L, 4L), indexesOf(events2.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(0L, 2L, 4L), indexesOf(events2.first().newValue.table).toList())
+        Assert.assertEquals(listOf(2L, 4L), indexesOf(events2.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(0L, 2L, 4L), indexesOf(events2.last().newValue.table).toList())
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
+        Assert.assertEquals("A3_0", valueOf<Any>(events2.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().newValue).header)
+        Assert.assertEquals(0, indexOf(events2.first().oldValue))
+        Assert.assertEquals(0, indexOf(events2.first().newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2.last().oldValue))
+        Assert.assertEquals("B3_0", valueOf<Any>(events2.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().newValue).header)
+        Assert.assertEquals(0, indexOf(events2.last().oldValue))
+        Assert.assertEquals(0, indexOf(events2.last().newValue))
+
+        events2 = emptyList()
+
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(listOf("A2_0"), valuesOf<Any>(t1["A"]).toList())
         Assert.assertEquals(listOf("B2_0"), valuesOf<Any>(t1["B"]).toList())
@@ -182,6 +698,60 @@ class TableRowCopyMove {
 
         // Move last
         move(t1[2] to t2[5])
+
+        Assert.assertEquals(2, events1.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(emptyList<List<Any>>(), headersOf(events1.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(emptyList<List<Any>>(), headersOf(events1.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(2L), indexesOf(events1.first().oldValue.table).toList())
+        Assert.assertEquals(emptyList<Long>(), indexesOf(events1.first().newValue.table).toList())
+        Assert.assertEquals(listOf(2L), indexesOf(events1.last().oldValue.table).toList())
+        Assert.assertEquals(emptyList<Long>(), indexesOf(events1.last().newValue.table).toList())
+
+        Assert.assertEquals("A2_0", valueOf<Any>(events1.first().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        Assert.assertEquals(2, indexOf(events1.first().oldValue))
+        Assert.assertEquals(2, indexOf(events1.first().newValue))
+
+        Assert.assertEquals("B2_0", valueOf<Any>(events1.last().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().newValue).header)
+        Assert.assertEquals(2, indexOf(events1.last().oldValue))
+        Assert.assertEquals(2, indexOf(events1.last().newValue))
+
+        events1 = emptyList()
+
+        Assert.assertEquals(2, events2.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(0L, 2L, 4L), indexesOf(events2.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(0L, 2L, 4L, 5L), indexesOf(events2.first().newValue.table).toList())
+        Assert.assertEquals(listOf(0L, 2L, 4L), indexesOf(events2.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(0L, 2L, 4L, 5L), indexesOf(events2.last().newValue.table).toList())
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
+        Assert.assertEquals("A2_0", valueOf<Any>(events2.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().newValue).header)
+        Assert.assertEquals(5, indexOf(events2.first().oldValue))
+        Assert.assertEquals(5, indexOf(events2.first().newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2.last().oldValue))
+        Assert.assertEquals("B2_0", valueOf<Any>(events2.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().newValue).header)
+        Assert.assertEquals(5, indexOf(events2.last().oldValue))
+        Assert.assertEquals(5, indexOf(events2.last().newValue))
+
+        events2 = emptyList()
 
         Assert.assertEquals(emptyList<List<String>>(), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(emptyList<String>(), valuesOf<Any>(t1["A"]).toList())
@@ -380,6 +950,8 @@ class TableRowCopyMove {
         Assert.assertEquals(listOf("A0", "A1", "A2", "A3"), valuesOf<Any>(t["A"]).toList())
         Assert.assertEquals(listOf("B0", "B1", "B2", "B3"), valuesOf<Any>(t["B"]).toList())
 
+        // TODO Test copy/move after/before self: copy/move(t[0] after/before t[0])
+
         // Copy to after
         copy(t[0] after t[2])
 
@@ -408,6 +980,9 @@ class TableRowCopyMove {
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.header })
         Assert.assertEquals(listOf("A2", "A0", "A3", "A1", "A2", "A0", "A3", "A1"), valuesOf<Any>(t["A"]).toList())
         Assert.assertEquals(listOf("B2", "B0", "B3", "B1", "B2", "B0", "B3", "B1"), valuesOf<Any>(t["B"]).toList())
+
+        // TODO Also need to check copy|move(t[X] after t[Y]) with X > Y, and copy|move(t[X] before t[Y]) with X < Y
+        //      Similar to `move rows within same table with overlap`
     }
 
     @Test
@@ -579,6 +1154,16 @@ class TableRowCopyMove {
         t["B", 2] = "B2"
         t["B", 3] = "B3"
 
+        var events = emptyList<TableListenerEvent<out Any, out Any>>()
+
+        on(t) {
+            skipHistory = true
+
+            events {
+                events = toList()
+            }
+        }
+
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.header })
         Assert.assertEquals(listOf("A0", "A1", "A2", "A3"), valuesOf<Any>(t["A"]).toList())
         Assert.assertEquals(listOf("B0", "B1", "B2", "B3"), valuesOf<Any>(t["B"]).toList())
@@ -586,33 +1171,275 @@ class TableRowCopyMove {
         // Move to after
         move(t[0] after t[2])
 
+        Assert.assertEquals(6, events.size)
+        for (event in events) {
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.oldValue.table).toList().map { it.header })
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.newValue.table).toList().map { it.header })
+
+            Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(event.oldValue.table).toList())
+            Assert.assertEquals(listOf(1L, 2L, 3L, 4L), indexesOf(event.newValue.table).toList())
+        }
+
+        Assert.assertEquals("A0", valueOf<Any>(events[0].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events[0].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events[0].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events[0].newValue).header)
+        Assert.assertEquals(0, indexOf(events[0].oldValue))
+        Assert.assertEquals(0, indexOf(events[0].newValue))
+
+        Assert.assertEquals("B0", valueOf<Any>(events[1].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events[1].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events[1].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events[1].newValue).header)
+        Assert.assertEquals(0, indexOf(events[1].oldValue))
+        Assert.assertEquals(0, indexOf(events[1].newValue))
+
+        Assert.assertEquals("A3", valueOf<Any>(events[2].oldValue))
+        Assert.assertEquals("A0", valueOf<Any>(events[2].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events[2].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events[2].newValue).header)
+        Assert.assertEquals(3, indexOf(events[2].oldValue))
+        Assert.assertEquals(3, indexOf(events[2].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events[3].oldValue))
+        Assert.assertEquals("A3", valueOf<Any>(events[3].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events[3].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events[3].newValue).header)
+        Assert.assertEquals(4, indexOf(events[3].oldValue))
+        Assert.assertEquals(4, indexOf(events[3].newValue))
+
+        Assert.assertEquals("B3", valueOf<Any>(events[4].oldValue))
+        Assert.assertEquals("B0", valueOf<Any>(events[4].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events[4].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events[4].newValue).header)
+        Assert.assertEquals(3, indexOf(events[4].oldValue))
+        Assert.assertEquals(3, indexOf(events[4].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events[5].oldValue))
+        Assert.assertEquals("B3", valueOf<Any>(events[5].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events[5].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events[5].newValue).header)
+        Assert.assertEquals(4, indexOf(events[5].oldValue))
+        Assert.assertEquals(4, indexOf(events[5].newValue))
+
+        events = emptyList()
+
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.header })
         Assert.assertEquals(listOf("A1", "A2", "A0", "A3"), valuesOf<Any>(t["A"]).toList())
         Assert.assertEquals(listOf("B1", "B2", "B0", "B3"), valuesOf<Any>(t["B"]).toList())
         // TODO indexOf test
 
         // Move to last
-        move(t[1] after t[3])
+        move(t[1] after t[4])
+
+        Assert.assertEquals(4, events.size)
+        for (event in events) {
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.oldValue.table).toList().map { it.header })
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.newValue.table).toList().map { it.header })
+
+            Assert.assertEquals(listOf(1L, 2L, 3L, 4L), indexesOf(event.oldValue.table).toList())
+            Assert.assertEquals(listOf(2L, 3L, 4L, 5L), indexesOf(event.newValue.table).toList())
+        }
+
+        Assert.assertEquals("A1", valueOf<Any>(events[0].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events[0].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events[0].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events[0].newValue).header)
+        Assert.assertEquals(1, indexOf(events[0].oldValue))
+        Assert.assertEquals(1, indexOf(events[0].newValue))
+
+        Assert.assertEquals("B1", valueOf<Any>(events[1].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events[1].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events[1].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events[1].newValue).header)
+        Assert.assertEquals(1, indexOf(events[1].oldValue))
+        Assert.assertEquals(1, indexOf(events[1].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events[2].oldValue))
+        Assert.assertEquals("A1", valueOf<Any>(events[2].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events[2].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events[2].newValue).header)
+        Assert.assertEquals(5, indexOf(events[2].oldValue))
+        Assert.assertEquals(5, indexOf(events[2].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events[3].oldValue))
+        Assert.assertEquals("B1", valueOf<Any>(events[3].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events[3].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events[3].newValue).header)
+        Assert.assertEquals(5, indexOf(events[3].oldValue))
+        Assert.assertEquals(5, indexOf(events[3].newValue))
+
+        events = emptyList()
 
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.header })
-        Assert.assertEquals(listOf("A2", "A0", "A1", "A3"), valuesOf<Any>(t["A"]).toList())
-        Assert.assertEquals(listOf("B2", "B0", "B1", "B3"), valuesOf<Any>(t["B"]).toList())
+        Assert.assertEquals(listOf("A2", "A0", "A3", "A1"), valuesOf<Any>(t["A"]).toList())
+        Assert.assertEquals(listOf("B2", "B0", "B3", "B1"), valuesOf<Any>(t["B"]).toList())
 
         // Move to first
         move(t[4] before t[0])
 
+        Assert.assertEquals(4, events.size)
+        for (event in events) {
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.oldValue.table).toList().map { it.header })
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.newValue.table).toList().map { it.header })
+
+            Assert.assertEquals(listOf(2L, 3L, 4L, 5L), indexesOf(event.oldValue.table).toList())
+            Assert.assertEquals(listOf(-1L, 2L, 3L, 5L), indexesOf(event.newValue.table).toList())
+        }
+
+        Assert.assertEquals("A3", valueOf<Any>(events[0].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events[0].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events[0].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events[0].newValue).header)
+        Assert.assertEquals(4, indexOf(events[0].oldValue))
+        Assert.assertEquals(4, indexOf(events[0].newValue))
+
+        Assert.assertEquals("B3", valueOf<Any>(events[1].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events[1].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events[1].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events[1].newValue).header)
+        Assert.assertEquals(4, indexOf(events[1].oldValue))
+        Assert.assertEquals(4, indexOf(events[1].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events[2].oldValue))
+        Assert.assertEquals("A3", valueOf<Any>(events[2].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events[2].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events[2].newValue).header)
+        Assert.assertEquals(-1, indexOf(events[2].oldValue))
+        Assert.assertEquals(-1, indexOf(events[2].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events[3].oldValue))
+        Assert.assertEquals("B3", valueOf<Any>(events[3].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events[3].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events[3].newValue).header)
+        Assert.assertEquals(-1, indexOf(events[3].oldValue))
+        Assert.assertEquals(-1, indexOf(events[3].newValue))
+
+        events = emptyList()
+
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.header })
-        Assert.assertEquals(listOf("A1", "A2", "A0", "A3"), valuesOf<Any>(t["A"]).toList())
-        Assert.assertEquals(listOf("B1", "B2", "B0", "B3"), valuesOf<Any>(t["B"]).toList())
+        Assert.assertEquals(listOf("A3", "A2", "A0", "A1"), valuesOf<Any>(t["A"]).toList())
+        Assert.assertEquals(listOf("B3", "B2", "B0", "B1"), valuesOf<Any>(t["B"]).toList())
 
         // Move to before
         move(t[3] before t[2])
 
-        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.header })
-        Assert.assertEquals(listOf("A1", "A0", "A2", "A3"), valuesOf<Any>(t["A"]).toList())
-        Assert.assertEquals(listOf("B1", "B0", "B2", "B3"), valuesOf<Any>(t["B"]).toList())
+        Assert.assertEquals(8, events.size)
+        for (event in events) {
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.oldValue.table).toList().map { it.header })
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.newValue.table).toList().map { it.header })
 
-        // TODO Also need to check copy|move(t[X] after t[Y]) with X > Y, and copy|move(t[X] before t[Y]) with X < Y
+            Assert.assertEquals(listOf(-1L, 2L, 3L, 5L), indexesOf(event.oldValue.table).toList())
+            Assert.assertEquals(listOf(-2L, 1L, 2L, 5L), indexesOf(event.newValue.table).toList())
+        }
+
+        Assert.assertEquals("A0", valueOf<Any>(events[0].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events[0].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events[0].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events[0].newValue).header)
+        Assert.assertEquals(3, indexOf(events[0].oldValue))
+        Assert.assertEquals(3, indexOf(events[0].newValue))
+
+        Assert.assertEquals("B0", valueOf<Any>(events[1].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events[1].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events[1].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events[1].newValue).header)
+        Assert.assertEquals(3, indexOf(events[1].oldValue))
+        Assert.assertEquals(3, indexOf(events[1].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events[2].oldValue))
+        Assert.assertEquals("A3", valueOf<Any>(events[2].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events[2].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events[2].newValue).header)
+        Assert.assertEquals(-2, indexOf(events[2].oldValue))
+        Assert.assertEquals(-2, indexOf(events[2].newValue))
+
+        Assert.assertEquals("A3", valueOf<Any>(events[3].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events[3].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events[3].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events[3].newValue).header)
+        Assert.assertEquals(-1, indexOf(events[3].oldValue))
+        Assert.assertEquals(-1, indexOf(events[3].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events[4].oldValue))
+        Assert.assertEquals("A0", valueOf<Any>(events[4].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events[4].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events[4].newValue).header)
+        Assert.assertEquals(1, indexOf(events[4].oldValue))
+        Assert.assertEquals(1, indexOf(events[4].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events[5].oldValue))
+        Assert.assertEquals("B3", valueOf<Any>(events[5].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events[5].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events[5].newValue).header)
+        Assert.assertEquals(-2, indexOf(events[5].oldValue))
+        Assert.assertEquals(-2, indexOf(events[5].newValue))
+
+        Assert.assertEquals("B3", valueOf<Any>(events[6].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events[6].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events[6].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events[6].newValue).header)
+        Assert.assertEquals(-1, indexOf(events[6].oldValue))
+        Assert.assertEquals(-1, indexOf(events[6].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events[7].oldValue))
+        Assert.assertEquals("B0", valueOf<Any>(events[7].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events[7].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events[7].newValue).header)
+        Assert.assertEquals(1, indexOf(events[7].oldValue))
+        Assert.assertEquals(1, indexOf(events[7].newValue))
+
+        events = emptyList()
+
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.header })
+        Assert.assertEquals(listOf("A3", "A0", "A2", "A1"), valuesOf<Any>(t["A"]).toList())
+        Assert.assertEquals(listOf("B3", "B0", "B2", "B1"), valuesOf<Any>(t["B"]).toList())
+    }
+
+    @Test
+    fun `move rows within same table with overlap`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "A0"
+        t["A", 1] = "A1"
+        t["A", 2] = "A2"
+        t["A", 3] = "A3"
+
+        t["B", 0] = "B0"
+        t["B", 1] = "B1"
+        t["B", 2] = "B2"
+        t["B", 3] = "B3"
+
+        var events = emptyList<TableListenerEvent<out Any, out Any>>()
+
+        on(t) {
+            skipHistory = true
+
+            events {
+                events = toList()
+            }
+        }
+
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.header })
+        Assert.assertEquals(listOf("A0", "A1", "A2", "A3"), valuesOf<Any>(t["A"]).toList())
+        Assert.assertEquals(listOf("B0", "B1", "B2", "B3"), valuesOf<Any>(t["B"]).toList())
+
+        // Check copy|move(t[X] after t[Y]) with X > Y, and copy|move(t[X] before t[Y]) with X < Y
+
+        // Move to after
+        move(t[2] after t[0])
+
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.header })
+        Assert.assertEquals(listOf("A0", "A2", "A1", "A3"), valuesOf<Any>(t["A"]).toList())
+        Assert.assertEquals(listOf("B0", "B2", "B1", "B3"), valuesOf<Any>(t["B"]).toList())
+        // TODO indexOf test
+
+        // Move to before
+        move(t[1] before t[3])
+
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.header })
+        Assert.assertEquals(listOf("A0", "A1", "A2", "A3"), valuesOf<Any>(t["A"]).toList())
+        Assert.assertEquals(listOf("B0", "B1", "B2", "B3"), valuesOf<Any>(t["B"]).toList())
     }
 
     @Test
@@ -640,6 +1467,25 @@ class TableRowCopyMove {
         t2["B", 2] = "B2_1"
         t2["B", 3] = "B3_1"
 
+        var events1 = emptyList<TableListenerEvent<out Any, out Any>>()
+        var events2 = emptyList<TableListenerEvent<out Any, out Any>>()
+
+        on(t1) {
+            skipHistory = true
+
+            events {
+                events1 = toList()
+            }
+        }
+
+        on(t2) {
+            skipHistory = true
+
+            events {
+                events2 = toList()
+            }
+        }
+
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         Assert.assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
@@ -650,6 +1496,71 @@ class TableRowCopyMove {
 
         // Move to after
         move(t1[0] after t2[2])
+
+        Assert.assertEquals(2, events1.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events1.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events1.first().newValue.table).toList())
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events1.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events1.last().newValue.table).toList())
+
+        Assert.assertEquals("A0_0", valueOf<Any>(events1.first().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        Assert.assertEquals(0, indexOf(events1.first().oldValue))
+        Assert.assertEquals(0, indexOf(events1.first().newValue))
+
+        Assert.assertEquals("B0_0", valueOf<Any>(events1.last().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().newValue).header)
+        Assert.assertEquals(0, indexOf(events1.last().oldValue))
+        Assert.assertEquals(0, indexOf(events1.last().newValue))
+
+        events1 = emptyList()
+
+        Assert.assertEquals(4, events2.size)
+        for (event in events2) {
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.oldValue.table).toList().map { it.header })
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.newValue.table).toList().map { it.header })
+            Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(event.oldValue.table).toList())
+            Assert.assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(event.newValue.table).toList())
+        }
+
+        Assert.assertEquals("A3_1", valueOf<Any>(events2[0].oldValue))
+        Assert.assertEquals("A0_0", valueOf<Any>(events2[0].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2[0].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2[0].newValue).header)
+        Assert.assertEquals(3, indexOf(events2[0].oldValue))
+        Assert.assertEquals(3, indexOf(events2[0].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2[1].oldValue))
+        Assert.assertEquals("A3_1", valueOf<Any>(events2[1].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2[1].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2[1].newValue).header)
+        Assert.assertEquals(4, indexOf(events2[1].oldValue))
+        Assert.assertEquals(4, indexOf(events2[1].newValue))
+
+        Assert.assertEquals("B3_1", valueOf<Any>(events2[2].oldValue))
+        Assert.assertEquals("B0_0", valueOf<Any>(events2[2].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2[2].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2[2].newValue).header)
+        Assert.assertEquals(3, indexOf(events2[2].oldValue))
+        Assert.assertEquals(3, indexOf(events2[2].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2[3].oldValue))
+        Assert.assertEquals("B3_1", valueOf<Any>(events2[3].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2[3].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2[3].newValue).header)
+        Assert.assertEquals(4, indexOf(events2[3].oldValue))
+        Assert.assertEquals(4, indexOf(events2[3].newValue))
+
+        events2 = emptyList()
 
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(listOf("A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
@@ -663,6 +1574,57 @@ class TableRowCopyMove {
         // Move to last
         move(t1[1] after t2[4])
 
+        Assert.assertEquals(2, events1.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events1.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L, 3L), indexesOf(events1.first().newValue.table).toList())
+        Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events1.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L, 3L), indexesOf(events1.last().newValue.table).toList())
+
+        Assert.assertEquals("A1_0", valueOf<Any>(events1.first().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        Assert.assertEquals(1, indexOf(events1.first().oldValue))
+        Assert.assertEquals(1, indexOf(events1.first().newValue))
+
+        Assert.assertEquals("B1_0", valueOf<Any>(events1.last().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().newValue).header)
+        Assert.assertEquals(1, indexOf(events1.last().oldValue))
+        Assert.assertEquals(1, indexOf(events1.last().newValue))
+
+        events1 = emptyList()
+
+        Assert.assertEquals(2, events2.size)
+        for (event in events2) {
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.oldValue.table).toList().map { it.header })
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.newValue.table).toList().map { it.header })
+            Assert.assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(event.oldValue.table).toList())
+            Assert.assertEquals(listOf(0L, 1L, 2L, 3L, 4L, 5L), indexesOf(event.newValue.table).toList())
+        }
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2[0].oldValue))
+        Assert.assertEquals("A1_0", valueOf<Any>(events2[0].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2[0].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2[0].newValue).header)
+        Assert.assertEquals(5, indexOf(events2[0].oldValue))
+        Assert.assertEquals(5, indexOf(events2[0].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2[1].oldValue))
+        Assert.assertEquals("B1_0", valueOf<Any>(events2[1].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2[1].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2[1].newValue).header)
+        Assert.assertEquals(5, indexOf(events2[1].oldValue))
+        Assert.assertEquals(5, indexOf(events2[1].newValue))
+
+        events2 = emptyList()
+
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(listOf("A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         Assert.assertEquals(listOf("B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
@@ -674,6 +1636,57 @@ class TableRowCopyMove {
         // Move to first
         move(t1[3] before t2[0])
 
+        Assert.assertEquals(2, events1.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(2L, 3L), indexesOf(events1.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L), indexesOf(events1.first().newValue.table).toList())
+        Assert.assertEquals(listOf(2L, 3L), indexesOf(events1.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L), indexesOf(events1.last().newValue.table).toList())
+
+        Assert.assertEquals("A3_0", valueOf<Any>(events1.first().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        Assert.assertEquals(3, indexOf(events1.first().oldValue))
+        Assert.assertEquals(3, indexOf(events1.first().newValue))
+
+        Assert.assertEquals("B3_0", valueOf<Any>(events1.last().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().newValue).header)
+        Assert.assertEquals(3, indexOf(events1.last().oldValue))
+        Assert.assertEquals(3, indexOf(events1.last().newValue))
+
+        events1 = emptyList()
+
+        Assert.assertEquals(2, events2.size)
+        for (event in events2) {
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.oldValue.table).toList().map { it.header })
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.newValue.table).toList().map { it.header })
+            Assert.assertEquals(listOf(0L, 1L, 2L, 3L, 4L, 5L), indexesOf(event.oldValue.table).toList())
+            Assert.assertEquals(listOf(-1L, 0L, 1L, 2L, 3L, 4L, 5L), indexesOf(event.newValue.table).toList())
+        }
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2[0].oldValue))
+        Assert.assertEquals("A3_0", valueOf<Any>(events2[0].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2[0].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2[0].newValue).header)
+        Assert.assertEquals(-1, indexOf(events2[0].oldValue))
+        Assert.assertEquals(-1, indexOf(events2[0].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2[1].oldValue))
+        Assert.assertEquals("B3_0", valueOf<Any>(events2[1].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2[1].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2[1].newValue).header)
+        Assert.assertEquals(-1, indexOf(events2[1].oldValue))
+        Assert.assertEquals(-1, indexOf(events2[1].newValue))
+
+        events2 = emptyList()
+
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(listOf("A2_0"), valuesOf<Any>(t1["A"]).toList())
         Assert.assertEquals(listOf("B2_0"), valuesOf<Any>(t1["B"]).toList())
@@ -684,6 +1697,85 @@ class TableRowCopyMove {
 
         // Move to before
         move(t1[2] before t2[1])
+
+        Assert.assertEquals(2, events1.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(emptyList<List<Any>>(), headersOf(events1.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(emptyList<List<Any>>(), headersOf(events1.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(2L), indexesOf(events1.first().oldValue.table).toList())
+        Assert.assertEquals(emptyList<Long>(), indexesOf(events1.first().newValue.table).toList())
+        Assert.assertEquals(listOf(2L), indexesOf(events1.last().oldValue.table).toList())
+        Assert.assertEquals(emptyList<Long>(), indexesOf(events1.last().newValue.table).toList())
+
+        Assert.assertEquals("A2_0", valueOf<Any>(events1.first().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        Assert.assertEquals(2, indexOf(events1.first().oldValue))
+        Assert.assertEquals(2, indexOf(events1.first().newValue))
+
+        Assert.assertEquals("B2_0", valueOf<Any>(events1.last().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().newValue).header)
+        Assert.assertEquals(2, indexOf(events1.last().oldValue))
+        Assert.assertEquals(2, indexOf(events1.last().newValue))
+
+        events1 = emptyList()
+
+        Assert.assertEquals(6, events2.size)
+        for (event in events2) {
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.oldValue.table).toList().map { it.header })
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.newValue.table).toList().map { it.header })
+            Assert.assertEquals(listOf(-1L, 0L, 1L, 2L, 3L, 4L, 5L), indexesOf(event.oldValue.table).toList())
+            Assert.assertEquals(listOf(-2L, -1L, 0L, 1L, 2L, 3L, 4L, 5L), indexesOf(event.newValue.table).toList())
+        }
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2[0].oldValue))
+        Assert.assertEquals("A3_0", valueOf<Any>(events2[0].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2[0].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2[0].newValue).header)
+        Assert.assertEquals(-2, indexOf(events2[0].oldValue))
+        Assert.assertEquals(-2, indexOf(events2[0].newValue))
+
+        Assert.assertEquals("A3_0", valueOf<Any>(events2[1].oldValue))
+        Assert.assertEquals("A0_1", valueOf<Any>(events2[1].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2[1].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2[1].newValue).header)
+        Assert.assertEquals(-1, indexOf(events2[1].oldValue))
+        Assert.assertEquals(-1, indexOf(events2[1].newValue))
+
+        Assert.assertEquals("A0_1", valueOf<Any>(events2[2].oldValue))
+        Assert.assertEquals("A2_0", valueOf<Any>(events2[2].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2[2].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2[2].newValue).header)
+        Assert.assertEquals(0, indexOf(events2[2].oldValue))
+        Assert.assertEquals(0, indexOf(events2[2].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2[3].oldValue))
+        Assert.assertEquals("B3_0", valueOf<Any>(events2[3].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2[3].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2[3].newValue).header)
+        Assert.assertEquals(-2, indexOf(events2[3].oldValue))
+        Assert.assertEquals(-2, indexOf(events2[3].newValue))
+
+        Assert.assertEquals("B3_0", valueOf<Any>(events2[4].oldValue))
+        Assert.assertEquals("B0_1", valueOf<Any>(events2[4].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2[4].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2[4].newValue).header)
+        Assert.assertEquals(-1, indexOf(events2[4].oldValue))
+        Assert.assertEquals(-1, indexOf(events2[4].newValue))
+
+        Assert.assertEquals("B0_1", valueOf<Any>(events2[5].oldValue))
+        Assert.assertEquals("B2_0", valueOf<Any>(events2[5].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2[5].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2[5].newValue).header)
+        Assert.assertEquals(0, indexOf(events2[5].oldValue))
+        Assert.assertEquals(0, indexOf(events2[5].newValue))
+
+        events2 = emptyList()
 
         Assert.assertEquals(emptyList<List<String>>(), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(emptyList<String>(), valuesOf<Any>(t1["A"]).toList())
@@ -709,6 +1801,25 @@ class TableRowCopyMove {
         t1["B", 2] = "B2_0"
         t1["B", 3] = "B3_0"
 
+        var events1 = emptyList<TableListenerEvent<out Any, out Any>>()
+        var events2 = emptyList<TableListenerEvent<out Any, out Any>>()
+
+        on(t1) {
+            skipHistory = true
+
+            events {
+                events1 = toList()
+            }
+        }
+
+        on(t2) {
+            skipHistory = true
+
+            events {
+                events2 = toList()
+            }
+        }
+
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         Assert.assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
@@ -719,6 +1830,60 @@ class TableRowCopyMove {
 
         // Move to after
         move(t1[0] after t2[2])
+
+        Assert.assertEquals(2, events1.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events1.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events1.first().newValue.table).toList())
+        Assert.assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(events1.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events1.last().newValue.table).toList())
+
+        Assert.assertEquals("A0_0", valueOf<Any>(events1.first().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        Assert.assertEquals(0, indexOf(events1.first().oldValue))
+        Assert.assertEquals(0, indexOf(events1.first().newValue))
+
+        Assert.assertEquals("B0_0", valueOf<Any>(events1.last().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().newValue).header)
+        Assert.assertEquals(0, indexOf(events1.last().oldValue))
+        Assert.assertEquals(0, indexOf(events1.last().newValue))
+
+        events1 = emptyList()
+
+        Assert.assertEquals(2, events2.size)
+        Assert.assertEquals(emptyList<List<Any>>(), headersOf(events2.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(emptyList<List<Any>>(), headersOf(events2.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(emptyList<Long>(), indexesOf(events2.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(3L), indexesOf(events2.first().newValue.table).toList())
+        Assert.assertEquals(emptyList<Long>(), indexesOf(events2.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(3L), indexesOf(events2.last().newValue.table).toList())
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
+        Assert.assertEquals("A0_0", valueOf<Any>(events2.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().newValue).header)
+        Assert.assertEquals(3, indexOf(events2.first().oldValue))
+        Assert.assertEquals(3, indexOf(events2.first().newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2.last().oldValue))
+        Assert.assertEquals("B0_0", valueOf<Any>(events2.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().newValue).header)
+        Assert.assertEquals(3, indexOf(events2.last().oldValue))
+        Assert.assertEquals(3, indexOf(events2.last().newValue))
+
+        events2 = emptyList()
 
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(listOf("A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
@@ -733,6 +1898,60 @@ class TableRowCopyMove {
         // Move to last
         move(t1[1] after t2[4])
 
+        Assert.assertEquals(2, events1.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events1.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L, 3L), indexesOf(events1.first().newValue.table).toList())
+        Assert.assertEquals(listOf(1L, 2L, 3L), indexesOf(events1.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L, 3L), indexesOf(events1.last().newValue.table).toList())
+
+        Assert.assertEquals("A1_0", valueOf<Any>(events1.first().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        Assert.assertEquals(1, indexOf(events1.first().oldValue))
+        Assert.assertEquals(1, indexOf(events1.first().newValue))
+
+        Assert.assertEquals("B1_0", valueOf<Any>(events1.last().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().newValue).header)
+        Assert.assertEquals(1, indexOf(events1.last().oldValue))
+        Assert.assertEquals(1, indexOf(events1.last().newValue))
+
+        events1 = emptyList()
+
+        Assert.assertEquals(2, events2.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(3L), indexesOf(events2.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(3L, 5L), indexesOf(events2.first().newValue.table).toList())
+        Assert.assertEquals(listOf(3L), indexesOf(events2.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(3L, 5L), indexesOf(events2.last().newValue.table).toList())
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
+        Assert.assertEquals("A1_0", valueOf<Any>(events2.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().newValue).header)
+        Assert.assertEquals(5, indexOf(events2.first().oldValue))
+        Assert.assertEquals(5, indexOf(events2.first().newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2.last().oldValue))
+        Assert.assertEquals("B1_0", valueOf<Any>(events2.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().newValue).header)
+        Assert.assertEquals(5, indexOf(events2.last().oldValue))
+        Assert.assertEquals(5, indexOf(events2.last().newValue))
+
+        events2 = emptyList()
+
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(listOf("A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         Assert.assertEquals(listOf("B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
@@ -746,6 +1965,60 @@ class TableRowCopyMove {
         // Move to first
         move(t1[3] before t2[0])
 
+        Assert.assertEquals(2, events1.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(2L, 3L), indexesOf(events1.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L), indexesOf(events1.first().newValue.table).toList())
+        Assert.assertEquals(listOf(2L, 3L), indexesOf(events1.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(2L), indexesOf(events1.last().newValue.table).toList())
+
+        Assert.assertEquals("A3_0", valueOf<Any>(events1.first().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        Assert.assertEquals(3, indexOf(events1.first().oldValue))
+        Assert.assertEquals(3, indexOf(events1.first().newValue))
+
+        Assert.assertEquals("B3_0", valueOf<Any>(events1.last().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().newValue).header)
+        Assert.assertEquals(3, indexOf(events1.last().oldValue))
+        Assert.assertEquals(3, indexOf(events1.last().newValue))
+
+        events1 = emptyList()
+
+        Assert.assertEquals(2, events2.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events2.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(3L, 5L), indexesOf(events2.first().oldValue.table).toList())
+        Assert.assertEquals(listOf(-1L, 3L, 5L), indexesOf(events2.first().newValue.table).toList())
+        Assert.assertEquals(listOf(3L, 5L), indexesOf(events2.last().oldValue.table).toList())
+        Assert.assertEquals(listOf(-1L, 3L, 5L), indexesOf(events2.last().newValue.table).toList())
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
+        Assert.assertEquals("A3_0", valueOf<Any>(events2.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2.first().newValue).header)
+        Assert.assertEquals(-1, indexOf(events2.first().oldValue))
+        Assert.assertEquals(-1, indexOf(events2.first().newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2.last().oldValue))
+        Assert.assertEquals("B3_0", valueOf<Any>(events2.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2.last().newValue).header)
+        Assert.assertEquals(-1, indexOf(events2.last().oldValue))
+        Assert.assertEquals(-1, indexOf(events2.last().newValue))
+
+        events2 = emptyList()
+
         Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(listOf("A2_0"), valuesOf<Any>(t1["A"]).toList())
         Assert.assertEquals(listOf("B2_0"), valuesOf<Any>(t1["B"]).toList())
@@ -758,6 +2031,83 @@ class TableRowCopyMove {
 
         // Move to before
         move(t1[2] before t2[1])
+
+        Assert.assertEquals(2, events1.size)
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.first().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(emptyList<List<Any>>(), headersOf(events1.first().newValue.table).toList().map { it.header })
+        Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(events1.last().oldValue.table).toList().map { it.header })
+        Assert.assertEquals(emptyList<List<Any>>(), headersOf(events1.last().newValue.table).toList().map { it.header })
+
+        Assert.assertEquals(listOf(2L), indexesOf(events1.first().oldValue.table).toList())
+        Assert.assertEquals(emptyList<Long>(), indexesOf(events1.first().newValue.table).toList())
+        Assert.assertEquals(listOf(2L), indexesOf(events1.last().oldValue.table).toList())
+        Assert.assertEquals(emptyList<Long>(), indexesOf(events1.last().newValue.table).toList())
+
+        Assert.assertEquals("A2_0", valueOf<Any>(events1.first().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.first().newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        Assert.assertEquals(2, indexOf(events1.first().oldValue))
+        Assert.assertEquals(2, indexOf(events1.first().newValue))
+
+        Assert.assertEquals("B2_0", valueOf<Any>(events1.last().oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events1.last().newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events1.last().newValue).header)
+        Assert.assertEquals(2, indexOf(events1.last().oldValue))
+        Assert.assertEquals(2, indexOf(events1.last().newValue))
+
+        events1 = emptyList()
+
+        Assert.assertEquals(6, events2.size)
+        for (event in events2) {
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.oldValue.table).toList().map { it.header })
+            Assert.assertEquals(listOf(listOf("A"), listOf("B")), headersOf(event.newValue.table).toList().map { it.header })
+            Assert.assertEquals(listOf(-1L, 3L, 5L), indexesOf(event.oldValue.table).toList())
+            Assert.assertEquals(listOf(-2L, 0L, 3L, 5L), indexesOf(event.newValue.table).toList())
+        }
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2[0].oldValue))
+        Assert.assertEquals("A3_0", valueOf<Any>(events2[0].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2[0].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2[0].newValue).header)
+        Assert.assertEquals(-2, indexOf(events2[0].oldValue))
+        Assert.assertEquals(-2, indexOf(events2[0].newValue))
+
+        Assert.assertEquals("A3_0", valueOf<Any>(events2[1].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events2[1].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2[1].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2[1].newValue).header)
+        Assert.assertEquals(-1, indexOf(events2[1].oldValue))
+        Assert.assertEquals(-1, indexOf(events2[1].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2[2].oldValue))
+        Assert.assertEquals("A2_0", valueOf<Any>(events2[2].newValue))
+        Assert.assertEquals(listOf("A"), headerOf(events2[2].oldValue).header)
+        Assert.assertEquals(listOf("A"), headerOf(events2[2].newValue).header)
+        Assert.assertEquals(0, indexOf(events2[2].oldValue))
+        Assert.assertEquals(0, indexOf(events2[2].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2[3].oldValue))
+        Assert.assertEquals("B3_0", valueOf<Any>(events2[3].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2[3].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2[3].newValue).header)
+        Assert.assertEquals(-2, indexOf(events2[3].oldValue))
+        Assert.assertEquals(-2, indexOf(events2[3].newValue))
+
+        Assert.assertEquals("B3_0", valueOf<Any>(events2[4].oldValue))
+        Assert.assertEquals(Unit, valueOf<Any>(events2[4].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2[4].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2[4].newValue).header)
+        Assert.assertEquals(-1, indexOf(events2[4].oldValue))
+        Assert.assertEquals(-1, indexOf(events2[4].newValue))
+
+        Assert.assertEquals(Unit, valueOf<Any>(events2[5].oldValue))
+        Assert.assertEquals("B2_0", valueOf<Any>(events2[5].newValue))
+        Assert.assertEquals(listOf("B"), headerOf(events2[5].oldValue).header)
+        Assert.assertEquals(listOf("B"), headerOf(events2[5].newValue).header)
+        Assert.assertEquals(0, indexOf(events2[5].oldValue))
+        Assert.assertEquals(0, indexOf(events2[5].newValue))
 
         Assert.assertEquals(emptyList<List<String>>(), headersOf(t1).toList().map { it.header })
         Assert.assertEquals(emptyList<String>(), valuesOf<Any>(t1["A"]).toList())

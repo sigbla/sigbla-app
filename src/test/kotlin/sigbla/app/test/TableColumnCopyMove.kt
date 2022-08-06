@@ -32,6 +32,8 @@ class TableColumnCopyMove {
         assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t).toList().map { it.header })
         assertEquals(listOf("First", "Middle", "Last"), t[0].map { valueOf<Any>(it) })
 
+        // TODO No op test?
+
         // Move to in between
         move(t["A"] after t["B"])
 

@@ -10,7 +10,6 @@ import kotlin.reflect.KClass
 
 // TODO Refactor TableOps.kt into various files, like for column ops, rows ops, events, etc..?
 
-// TODO Implement something similar for moving/copying rows around, like move(t[1] after t[2]), etc
 // TODO Implement something for moving rows around within a column, like move(t["A", 1] after t["A", 2]), etc?
 
 private fun publishColumnMoveEvents(
@@ -781,6 +780,272 @@ private fun publishTableCopyEvents(
     }
 }
 
+private fun publicRowMoveEvents(
+    left: Row,
+    right: Row,
+    order: RowActionOrder,
+    t1OldRef: TableRef,
+    t1NewRef: TableRef,
+    t2OldRef: TableRef,
+    t2NewRef: TableRef
+) {
+    if (!left.table.eventProcessor.haveListeners()
+        && !right.table.eventProcessor.haveListeners()) return
+
+    fun prepareEvents(row: Row, oldRef: TableRef, newRef: TableRef): Pair<Table, MutableList<TableListenerEvent<Any, Any>>> {
+        // We need to do this in order to disconnect the columns from the original table
+        val oldTable = row.table.makeClone(ref = oldRef)
+        val newTable = row.table.makeClone(ref = newRef)
+
+        val oldRef = oldTable.tableRef.get()
+        val newRef = newTable.tableRef.get()
+
+        val columnHeaders = oldRef.headers.fold(LinkedHashMap<ColumnHeader, ColumnMeta>()) { acc, pair ->
+            acc[pair.first] = pair.second
+            acc
+        }.apply {
+            newRef.headers.filter { !this.containsKey(it.first) }.forEach { this[it.first] = it.second }
+        }.entries.sortedWith { a, b ->
+            if (a.value.columnOrder == b.value.columnOrder) a.key.compareTo(b.key)
+            else a.value.columnOrder.compareTo(b.value.columnOrder)
+        }
+
+        // Get columns anchored to old and new ref
+        val columns = columnHeaders.map { (columnHeader, columnMeta) ->
+            val oldColumn = BaseColumn(
+                oldTable,
+                columnHeader,
+                columnMeta.columnOrder
+            )
+            val newColumn = BaseColumn(
+                newTable,
+                columnHeader,
+                columnMeta.columnOrder
+            )
+
+            Pair(oldColumn, newColumn)
+        }
+
+        val events = columns.map {
+            val old = it.first[row]
+            val new = it.second[old.index]
+            TableListenerEvent(old, new) as TableListenerEvent<Any, Any>
+        }
+
+        return row.table to events.toMutableList()
+    }
+
+    fun prepareEventsAfter(right: Row, indexes: SortedSet<Long>, oldRef: TableRef, newRef: TableRef): Pair<Table, MutableList<TableListenerEvent<Any, Any>>> {
+        // We need to do this in order to disconnect the columns from the original table
+        val oldTable = right.table.makeClone(ref = oldRef)
+        val newTable = right.table.makeClone(ref = newRef)
+
+        val oldRef = oldTable.tableRef.get()
+        val newRef = newTable.tableRef.get()
+
+        val columnHeaders = oldRef.headers.fold(LinkedHashMap<ColumnHeader, ColumnMeta>()) { acc, pair ->
+            acc[pair.first] = pair.second
+            acc
+        }.apply {
+            newRef.headers.filter { !this.containsKey(it.first) }.forEach { this[it.first] = it.second }
+        }.entries.sortedWith { a, b ->
+            if (a.value.columnOrder == b.value.columnOrder) a.key.compareTo(b.key)
+            else a.value.columnOrder.compareTo(b.value.columnOrder)
+        }
+
+        // Get columns anchored to old and new ref
+        val columns = columnHeaders.map { (columnHeader, columnMeta) ->
+            val oldColumn = BaseColumn(
+                oldTable,
+                columnHeader,
+                columnMeta.columnOrder
+            )
+            val newColumn = BaseColumn(
+                newTable,
+                columnHeader,
+                columnMeta.columnOrder
+            )
+
+            Pair(oldColumn, newColumn)
+        }
+
+        val events = columns.map { oldNewColumn ->
+            val oldColumn = oldNewColumn.first
+            val newColumn = oldNewColumn.second
+
+            indexes.map { index ->
+                val old = oldColumn[index]
+                val new = newColumn[index]
+                TableListenerEvent(old, new) as TableListenerEvent<Any, Any>
+            }
+        }.flatten()
+
+        return right.table to events.toMutableList()
+    }
+
+    fun prepareEventsBefore(right: Row, indexes: SortedSet<Long>, oldRef: TableRef, newRef: TableRef): Pair<Table, MutableList<TableListenerEvent<Any, Any>>> {
+        // We need to do this in order to disconnect the columns from the original table
+        val oldTable = right.table.makeClone(ref = oldRef)
+        val newTable = right.table.makeClone(ref = newRef)
+
+        val oldRef = oldTable.tableRef.get()
+        val newRef = newTable.tableRef.get()
+
+        val columnHeaders = oldRef.headers.fold(LinkedHashMap<ColumnHeader, ColumnMeta>()) { acc, pair ->
+            acc[pair.first] = pair.second
+            acc
+        }.apply {
+            newRef.headers.filter { !this.containsKey(it.first) }.forEach { this[it.first] = it.second }
+        }.entries.sortedWith { a, b ->
+            if (a.value.columnOrder == b.value.columnOrder) a.key.compareTo(b.key)
+            else a.value.columnOrder.compareTo(b.value.columnOrder)
+        }
+
+        // Get columns anchored to old and new ref
+        val columns = columnHeaders.map { (columnHeader, columnMeta) ->
+            val oldColumn = BaseColumn(
+                oldTable,
+                columnHeader,
+                columnMeta.columnOrder
+            )
+            val newColumn = BaseColumn(
+                newTable,
+                columnHeader,
+                columnMeta.columnOrder
+            )
+
+            Pair(oldColumn, newColumn)
+        }
+
+        val events = columns.map { oldNewColumn ->
+            val oldColumn = oldNewColumn.first
+            val newColumn = oldNewColumn.second
+
+            indexes.map { index ->
+                val old = oldColumn[index]
+                val new = newColumn[index]
+                TableListenerEvent(old, new) as TableListenerEvent<Any, Any>
+            }
+        }.flatten()
+
+        return right.table to events.toMutableList()
+    }
+
+    fun publishEvents(vararg tableEvents: Pair<Table, MutableList<TableListenerEvent<Any, Any>>>) {
+        val groupedEvents = IdentityHashMap<Table, MutableList<TableListenerEvent<Any, Any>>>()
+
+        tableEvents.forEach {
+            groupedEvents.compute(it.first) { _, v -> v?.apply { v.addAll(it.second) } ?: it.second }
+        }
+
+        groupedEvents.forEach { (t, e) -> t.eventProcessor.publish(e) }
+    }
+
+    when {
+        // move(T1[1] to T1[1])        -> No-op move, will produce events for that row
+        order == RowActionOrder.TO && left.table === right.table && left == right
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef)
+            )
+        }
+
+        // move(T1[1] to T1[2])        -> Row 1 replaces row 2
+        //                             -> Event model: T1[1] (1 value, 1 order) -> T1[1] (unit value, A order),
+        //                                             T1[2] (2 value, 2 order) -> T1[2] (1 value, 1 order)
+        order == RowActionOrder.TO && left.table === right.table && left != right
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(right, t1OldRef, t1NewRef)
+            )
+        }
+
+        // move(T1[1] to T2[2])        -> Row 1 replaces row 2, in T2. Row 1 removed from T1
+        //                             -> Event model: T1[1] (1 value, 1 order) -> T1[1] (unit value, 1 order),
+        //                                             T2[2] (2 value, 2 order) -> T2[2] (1 value, 1 order)
+        order == RowActionOrder.TO && left.table !== right.table
+        -> {
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEvents(right, t2OldRef, t2NewRef)
+            )
+        }
+
+        // move(T1[1] after T1[2])     -> Row 1 moved after row 2, named row 3
+        //                             -> Event model: T1[1] (1 value, 1 order) -> T1[1] (unit value, 1 order),
+        //                                             T1[3] (3 value, 3 order) -> T1[3] (1 value, 1 order),
+        //                                             T1[4] (4 value, 4 order) -> T1[4] (3 value, 3 order),
+        //                                             ...,
+        //                                             T1[N] (N value, N order) -> T1[N] (N-1 value, N-1 order)
+        order == RowActionOrder.AFTER && left.table === right.table
+        -> {
+            val t2Indexes = (t2OldRef.indexes.filter { it > right.index }.toSet() union t2NewRef.indexes.filter { it > right.index }.toSet()).toSortedSet()
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef).let { (table, events) ->
+                    // Remove any event overlap
+                    events.removeIf { t2Indexes.contains(it.oldValue.index) }
+                    Pair(table, events)
+                },
+                prepareEventsAfter(right, t2Indexes, t2OldRef, t2NewRef)
+            )
+        }
+
+        // move(T1[1] after T2[2])     -> Row 1 moved after row 2, in T2, named row 3. Row 1 removed from T1
+        //                             -> Event model: T1[1] (1 value, 1 order) -> T1[1] (unit value, 1 order),
+        //                                             T2[3] (3 value, 3 order) -> T2[3] (1 value, 1 order),
+        //                                             T2[4] (4 value, 4 order) -> T2[4] (3 value, 3 order),
+        //                                             ...,
+        //                                             T2[N] (N value, N order) -> T2[N] (N-1 value, N-1 order)
+        order == RowActionOrder.AFTER && left.table !== right.table
+        -> {
+            val t2Indexes = (t2OldRef.indexes.filter { it > right.index }.toSet() union t2NewRef.indexes.filter { it > right.index }.toSet()).toSortedSet()
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEventsAfter(right, t2Indexes, t2OldRef, t2NewRef)
+            )
+        }
+
+        // move(T1[5] before T1[3])    -> Row 5 moved before row 3, named row 2
+        //                             -> Event model: T1[5] (5 value, 5 order) -> T1[5] (unit value, 5 order),
+        //                                             T1[2] (2 value, 2 order) -> T1[2] (5 value, 5 order),
+        //                                             T1[1] (1 value, 1 order) -> T1[1] (2 value, 2 order),
+        //                                             T1[0] (0 value, 0 order) -> T1[0] (1 value, 1 order),
+        //                                             T1[-1] (-1 value, -1 order) -> T1[-1] (N-1 value, N-1 order)
+        //                                             ...,
+        //                                             T1[N] (N value, N order) -> T1[N] (N+1 value, N+1 order)
+        order == RowActionOrder.BEFORE && left.table === right.table
+        -> {
+            val t2Indexes = (t2OldRef.indexes.filter { it < right.index }.toSet() union t2NewRef.indexes.filter { it < right.index }.toSet()).toSortedSet()
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef).let { (table, events) ->
+                    // Remove any event overlap
+                    events.removeIf { t2Indexes.contains(it.oldValue.index) }
+                    Pair(table, events)
+                },
+                prepareEventsBefore(right, t2Indexes, t2OldRef, t2NewRef)
+            )
+        }
+
+        // move(T1[5] before T2[3])    -> Row 5 moved before row 3, in T2, named row 2. Row 1 removed from T1
+        //                             -> Event model: T1[5] (5 value, 5 order) -> T1[5] (unit value, 5 order),
+        //                                             T2[2] (2 value, 2 order) -> T2[2] (5 value, 5 order),
+        //                                             T2[1] (1 value, 1 order) -> T2[1] (2 value, 2 order),
+        //                                             T2[0] (0 value, 0 order) -> T2[0] (1 value, 1 order),
+        //                                             T2[-1] (-1 value, -1 order) -> T2[-1] (N-1 value, N-1 order)
+        //                                             ...,
+        //                                              T2[N] (N value, N order) -> T2[N] (N+1 value, N+1 order)
+        order == RowActionOrder.BEFORE && left.table !== right.table
+        -> {
+            val t2Indexes = (t2OldRef.indexes.filter { it < right.index }.toSet() union t2NewRef.indexes.filter { it < right.index }.toSet()).toSortedSet()
+            publishEvents(
+                prepareEvents(left, t1OldRef, t1NewRef),
+                prepareEventsBefore(right, t2Indexes, t2OldRef, t2NewRef)
+            )
+        }
+    }
+}
+
 fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
     fun columnMove(left: ColumnHeader, right: ColumnHeader, order: ColumnActionOrder, withName: ColumnHeader, refUpdate: TableRef.() -> TableRef): (ref: TableRef) -> TableRef = { inRef ->
         val ref = inRef.refUpdate()
@@ -1159,28 +1424,36 @@ fun move(rowToRowAction: RowToRowAction) {
     val right = rowToRowAction.right
     val order = rowToRowAction.order
 
+    // TODO Handle index relation on right side..?
+    if (right.indexRelation != IndexRelation.AT) throw UnsupportedOperationException("Only supporting IndexRelation.AT on right side")
+
     if (order == RowActionOrder.TO) {
         if (left.table === right.table) {
             // Internal move
             val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
                 ref.copy(
                     columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
-                        acc.put(ccm.component1(), ccm.component2().remove(left.index).let {
-                            val cell = ccm.component2().get(left.index)
-                            if (cell != null) it.put(right.index, cell) else it
-                        })
-                    }
+                        val columnHeader = ccm.component1()
+                        getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (cell, index) ->
+                            acc.put(columnHeader, ccm.component2().remove(index).put(right.index, cell))
+                        } ?: acc
+                    },
+                    version = ref.version + 1L
                 )
             }
 
-            // TODO Events
+            publicRowMoveEvents(left, right, order, oldRef, newRef, oldRef, newRef)
         } else {
             // Move between tables
             val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
                 ref.copy(
                     columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
-                        acc.put(ccm.component1(), ccm.component2().remove(left.index))
-                    }
+                        val columnHeader = ccm.component1()
+                        getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (_, index) ->
+                            acc.put(columnHeader, ccm.component2().remove(index))
+                        } ?: acc
+                    },
+                    version = ref.version + 1L
                 )
             }
 
@@ -1193,20 +1466,20 @@ fun move(rowToRowAction: RowToRowAction) {
                     }
 
                 val columnCellMap = oldRef1.columnCells.fold(ref.columnCells) { acc, ccm ->
-                    val cell = ccm.component2().get(left.index)
-                    if (cell != null) {
-                        val columnHeader = ccm.component1()
+                    val columnHeader = ccm.component1()
+                    getCellRaw(oldRef1, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
                         acc.put(columnHeader, (acc.get(columnHeader) ?: PTreeMap()).put(right.index, cell))
-                    } else acc
+                    } ?: acc
                 }
 
                 ref.copy(
                     columns = columnsMap,
-                    columnCells = columnCellMap
+                    columnCells = columnCellMap,
+                    version = ref.version + 1L
                 )
             }
 
-            // TODO Events
+            publicRowMoveEvents(left, right, order, oldRef1, newRef1, oldRef2, newRef2)
         }
     } else {
         if (left.table === right.table) {
@@ -1214,40 +1487,45 @@ fun move(rowToRowAction: RowToRowAction) {
             val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
                 ref.copy(
                     columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
-                        val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
+                        val columnHeader = ccm.component1()
+                        getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (cell, index) ->
+                            val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
 
-                        val withoutMoved = ccm.component2().remove(left.index)
-                        val headCells = withoutMoved.to(newIndex, order != RowActionOrder.AFTER)
-                        val tailCells = withoutMoved.from(newIndex, order == RowActionOrder.AFTER)
+                            val withoutMoved = ccm.component2().remove(index)
+                            val headCells = withoutMoved.to(newIndex, order != RowActionOrder.AFTER)
+                            val tailCells = withoutMoved.from(newIndex, order == RowActionOrder.AFTER)
 
-                        val cells = if (order == RowActionOrder.AFTER) {
-                            tailCells.fold(headCells) { acc2, cell ->
-                                // Shift down
-                                acc2.put(cell.component1() + 1, cell.component2())
+                            val cells = if (order == RowActionOrder.AFTER) {
+                                tailCells.fold(headCells) { acc2, cell ->
+                                    // Shift down
+                                    acc2.put(cell.component1() + 1, cell.component2())
+                                }
+                            } else {
+                                headCells.fold(tailCells) { acc2, cell ->
+                                    // Shift up
+                                    acc2.put(cell.component1() - 1, cell.component2())
+                                }
                             }
-                        } else {
-                            headCells.fold(tailCells) { acc2, cell ->
-                                // Shift up
-                                acc2.put(cell.component1() - 1, cell.component2())
-                            }
-                        }
 
-                        acc.put(ccm.component1(), cells.let {
-                            val cellValue = ccm.component2().get(left.index)
-                            if (cellValue != null) it.put(newIndex, cellValue) else it
-                        })
-                    }
+                            acc.put(columnHeader, cells.put(newIndex, cell))
+                        } ?: acc
+                    },
+                    version = ref.version + 1L
                 )
             }
 
-            // TODO Events
+            publicRowMoveEvents(left, right, order, oldRef, newRef, oldRef, newRef)
         } else {
             // Move between tables
             val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
                 ref.copy(
                     columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
-                        acc.put(ccm.component1(), ccm.component2().remove(left.index))
-                    }
+                        val columnHeader = ccm.component1()
+                        getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (_, index) ->
+                            acc.put(columnHeader, ccm.component2().remove(index))
+                        } ?: acc
+                    },
+                    version = ref.version + 1L
                 )
             }
 
@@ -1264,39 +1542,38 @@ fun move(rowToRowAction: RowToRowAction) {
 
                 val columnCellMap = oldRef1.columnCells.fold(ref.columnCells) { acc, ccm ->
                     val columnHeader = ccm.component1()
+                    getCellRaw(oldRef1, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
+                        val cm = acc.get(columnHeader) ?: PTreeMap()
 
-                    val cm = acc.get(columnHeader) ?: PTreeMap()
+                        val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
 
-                    val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
+                        val headCells = cm.to(newIndex, order != RowActionOrder.AFTER)
+                        val tailCells = cm.from(newIndex, order == RowActionOrder.AFTER)
 
-                    val headCells = cm.to(newIndex, order != RowActionOrder.AFTER)
-                    val tailCells = cm.from(newIndex, order == RowActionOrder.AFTER)
-
-                    val cells = if (order == RowActionOrder.AFTER) {
-                        tailCells.fold(headCells) { acc2, cell ->
-                            // Shift down
-                            acc2.put(cell.component1() + 1, cell.component2())
+                        val cells = if (order == RowActionOrder.AFTER) {
+                            tailCells.fold(headCells) { acc2, cell ->
+                                // Shift down
+                                acc2.put(cell.component1() + 1, cell.component2())
+                            }
+                        } else {
+                            headCells.fold(tailCells) { acc2, cell ->
+                                // Shift up
+                                acc2.put(cell.component1() - 1, cell.component2())
+                            }
                         }
-                    } else {
-                        headCells.fold(tailCells) { acc2, cell ->
-                            // Shift up
-                            acc2.put(cell.component1() - 1, cell.component2())
-                        }
-                    }
 
-                    acc.put(columnHeader, cells.let {
-                        val cellValue = ccm.component2().get(left.index)
-                        if (cellValue != null) it.put(newIndex, cellValue) else it
-                    })
+                        acc.put(columnHeader, cells.put(newIndex, cell))
+                    } ?: acc
                 }
 
                 ref.copy(
                     columns = columnsMap,
-                    columnCells = columnCellMap
+                    columnCells = columnCellMap,
+                    version = ref.version + 1L
                 )
             }
 
-            // TODO Events
+            publicRowMoveEvents(left, right, order, oldRef1, newRef1, oldRef2, newRef2)
         }
     }
 }
@@ -1308,17 +1585,21 @@ fun copy(rowToRowAction: RowToRowAction) {
     val right = rowToRowAction.right
     val order = rowToRowAction.order
 
+    // TODO Handle index relation on right side..?
+    if (right.indexRelation != IndexRelation.AT) throw UnsupportedOperationException("Only supporting IndexRelation.AT on right side")
+
     if (order == RowActionOrder.TO) {
         if (left.table === right.table) {
             // Internal copy
             val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
                 ref.copy(
                     columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
-                        acc.put(ccm.component1(), ccm.component2().let {
-                            val cell = ccm.component2().get(left.index)
-                            if (cell != null) it.put(right.index, cell) else it
-                        })
-                    }
+                        val columnHeader = ccm.component1()
+                        getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
+                            acc.put(columnHeader, ccm.component2().put(right.index, cell))
+                        } ?: acc
+                    },
+                    version = ref.version + 1L
                 )
             }
 
@@ -1336,16 +1617,16 @@ fun copy(rowToRowAction: RowToRowAction) {
                     }
 
                 val columnCellMap = leftRef.columnCells.fold(ref.columnCells) { acc, ccm ->
-                    val cell = ccm.component2().get(left.index)
-                    if (cell != null) {
-                        val columnHeader = ccm.component1()
+                    val columnHeader = ccm.component1()
+                    getCellRaw(leftRef, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
                         acc.put(columnHeader, (acc.get(columnHeader) ?: PTreeMap()).put(right.index, cell))
-                    } else acc
+                    } ?: acc
                 }
 
                 ref.copy(
                     columns = columnsMap,
-                    columnCells = columnCellMap
+                    columnCells = columnCellMap,
+                    version = ref.version + 1L
                 )
             }
 
@@ -1357,28 +1638,29 @@ fun copy(rowToRowAction: RowToRowAction) {
             val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
                 ref.copy(
                     columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
-                        val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
+                        val columnHeader = ccm.component1()
+                        getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
+                            val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
 
-                        val headCells = ccm.component2().to(newIndex, order != RowActionOrder.AFTER)
-                        val tailCells = ccm.component2().from(newIndex, order == RowActionOrder.AFTER)
+                            val headCells = ccm.component2().to(newIndex, order != RowActionOrder.AFTER)
+                            val tailCells = ccm.component2().from(newIndex, order == RowActionOrder.AFTER)
 
-                        val cells = if (order == RowActionOrder.AFTER) {
-                            tailCells.fold(headCells) { acc2, cell ->
-                                // Shift down
-                                acc2.put(cell.component1() + 1, cell.component2())
+                            val cells = if (order == RowActionOrder.AFTER) {
+                                tailCells.fold(headCells) { acc2, cell ->
+                                    // Shift down
+                                    acc2.put(cell.component1() + 1, cell.component2())
+                                }
+                            } else {
+                                headCells.fold(tailCells) { acc2, cell ->
+                                    // Shift up
+                                    acc2.put(cell.component1() - 1, cell.component2())
+                                }
                             }
-                        } else {
-                            headCells.fold(tailCells) { acc2, cell ->
-                                // Shift up
-                                acc2.put(cell.component1() - 1, cell.component2())
-                            }
-                        }
 
-                        acc.put(ccm.component1(), cells.let {
-                            val cellValue = ccm.component2().get(left.index)
-                            if (cellValue != null) it.put(newIndex, cellValue) else it
-                        })
-                    }
+                            acc.put(columnHeader, cells.put(newIndex, cell))
+                        } ?: acc
+                    },
+                    version = ref.version + 1L
                 )
             }
 
@@ -1400,35 +1682,34 @@ fun copy(rowToRowAction: RowToRowAction) {
 
                 val columnCellMap = leftRef.columnCells.fold(ref.columnCells) { acc, ccm ->
                     val columnHeader = ccm.component1()
+                    getCellRaw(leftRef, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
+                        val cm = acc.get(columnHeader) ?: PTreeMap()
 
-                    val cm = acc.get(columnHeader) ?: PTreeMap()
+                        val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
 
-                    val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
+                        val headCells = cm.to(newIndex, order != RowActionOrder.AFTER)
+                        val tailCells = cm.from(newIndex, order == RowActionOrder.AFTER)
 
-                    val headCells = cm.to(newIndex, order != RowActionOrder.AFTER)
-                    val tailCells = cm.from(newIndex, order == RowActionOrder.AFTER)
-
-                    val cells = if (order == RowActionOrder.AFTER) {
-                        tailCells.fold(headCells) { acc2, cell ->
-                            // Shift down
-                            acc2.put(cell.component1() + 1, cell.component2())
+                        val cells = if (order == RowActionOrder.AFTER) {
+                            tailCells.fold(headCells) { acc2, cell ->
+                                // Shift down
+                                acc2.put(cell.component1() + 1, cell.component2())
+                            }
+                        } else {
+                            headCells.fold(tailCells) { acc2, cell ->
+                                // Shift up
+                                acc2.put(cell.component1() - 1, cell.component2())
+                            }
                         }
-                    } else {
-                        headCells.fold(tailCells) { acc2, cell ->
-                            // Shift up
-                            acc2.put(cell.component1() - 1, cell.component2())
-                        }
-                    }
 
-                    acc.put(columnHeader, cells.let {
-                        val cellValue = ccm.component2().get(left.index)
-                        if (cellValue != null) it.put(newIndex, cellValue) else it
-                    })
+                        acc.put(columnHeader, cells.put(newIndex, cell))
+                    } ?: acc
                 }
 
                 ref.copy(
                     columns = columnsMap,
-                    columnCells = columnCellMap
+                    columnCells = columnCellMap,
+                    version = ref.version + 1L
                 )
             }
 
@@ -1438,6 +1719,12 @@ fun copy(rowToRowAction: RowToRowAction) {
 }
 
 fun copy(left: Row, actionOrder: RowActionOrder, right: Row) = copy(RowToRowAction(left, right, actionOrder))
+
+// TODO move/copy rowToTableAction ?
+
+// ---
+
+// TODO swap(row to row) / swap(column to column) ?
 
 // ---
 
