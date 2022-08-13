@@ -1046,6 +1046,250 @@ private fun publishRowMoveEvents(
     }
 }
 
+private fun publishRowCopyEvents(
+    left: Row,
+    right: Row,
+    order: RowActionOrder,
+    oldRef: TableRef,
+    newRef: TableRef
+) {
+    if (!left.table.eventProcessor.haveListeners()
+        && !right.table.eventProcessor.haveListeners()) return
+
+    fun prepareEvents(row: Row, oldRef: TableRef, newRef: TableRef): Pair<Table, MutableList<TableListenerEvent<Any, Any>>> {
+        // We need to do this in order to disconnect the columns from the original table
+        val oldTable = row.table.makeClone(ref = oldRef)
+        val newTable = row.table.makeClone(ref = newRef)
+
+        val oldRef = oldTable.tableRef.get()
+        val newRef = newTable.tableRef.get()
+
+        val columnHeaders = oldRef.headers.fold(LinkedHashMap<ColumnHeader, ColumnMeta>()) { acc, pair ->
+            acc[pair.first] = pair.second
+            acc
+        }.apply {
+            newRef.headers.filter { !this.containsKey(it.first) }.forEach { this[it.first] = it.second }
+        }.entries.sortedWith { a, b ->
+            if (a.value.columnOrder == b.value.columnOrder) a.key.compareTo(b.key)
+            else a.value.columnOrder.compareTo(b.value.columnOrder)
+        }
+
+        // Get columns anchored to old and new ref
+        val columns = columnHeaders.map { (columnHeader, columnMeta) ->
+            val oldColumn = BaseColumn(
+                oldTable,
+                columnHeader,
+                columnMeta.columnOrder
+            )
+            val newColumn = BaseColumn(
+                newTable,
+                columnHeader,
+                columnMeta.columnOrder
+            )
+
+            Pair(oldColumn, newColumn)
+        }
+
+        val events = columns.map {
+            val old = it.first[row]
+            val new = it.second[old.index]
+            TableListenerEvent(old, new) as TableListenerEvent<Any, Any>
+        }
+
+        return row.table to events.toMutableList()
+    }
+
+    fun prepareEventsAfter(right: Row, indexes: SortedSet<Long>, oldRef: TableRef, newRef: TableRef): Pair<Table, MutableList<TableListenerEvent<Any, Any>>> {
+        // We need to do this in order to disconnect the columns from the original table
+        val oldTable = right.table.makeClone(ref = oldRef)
+        val newTable = right.table.makeClone(ref = newRef)
+
+        val oldRef = oldTable.tableRef.get()
+        val newRef = newTable.tableRef.get()
+
+        val columnHeaders = oldRef.headers.fold(LinkedHashMap<ColumnHeader, ColumnMeta>()) { acc, pair ->
+            acc[pair.first] = pair.second
+            acc
+        }.apply {
+            newRef.headers.filter { !this.containsKey(it.first) }.forEach { this[it.first] = it.second }
+        }.entries.sortedWith { a, b ->
+            if (a.value.columnOrder == b.value.columnOrder) a.key.compareTo(b.key)
+            else a.value.columnOrder.compareTo(b.value.columnOrder)
+        }
+
+        // Get columns anchored to old and new ref
+        val columns = columnHeaders.map { (columnHeader, columnMeta) ->
+            val oldColumn = BaseColumn(
+                oldTable,
+                columnHeader,
+                columnMeta.columnOrder
+            )
+            val newColumn = BaseColumn(
+                newTable,
+                columnHeader,
+                columnMeta.columnOrder
+            )
+
+            Pair(oldColumn, newColumn)
+        }
+
+        val events = columns.map { oldNewColumn ->
+            val oldColumn = oldNewColumn.first
+            val newColumn = oldNewColumn.second
+
+            indexes.map { index ->
+                val old = oldColumn[index]
+                val new = newColumn[index]
+                TableListenerEvent(old, new) as TableListenerEvent<Any, Any>
+            }
+        }.flatten()
+
+        return right.table to events.toMutableList()
+    }
+
+    fun prepareEventsBefore(right: Row, indexes: SortedSet<Long>, oldRef: TableRef, newRef: TableRef): Pair<Table, MutableList<TableListenerEvent<Any, Any>>> {
+        // We need to do this in order to disconnect the columns from the original table
+        val oldTable = right.table.makeClone(ref = oldRef)
+        val newTable = right.table.makeClone(ref = newRef)
+
+        val oldRef = oldTable.tableRef.get()
+        val newRef = newTable.tableRef.get()
+
+        val columnHeaders = oldRef.headers.fold(LinkedHashMap<ColumnHeader, ColumnMeta>()) { acc, pair ->
+            acc[pair.first] = pair.second
+            acc
+        }.apply {
+            newRef.headers.filter { !this.containsKey(it.first) }.forEach { this[it.first] = it.second }
+        }.entries.sortedWith { a, b ->
+            if (a.value.columnOrder == b.value.columnOrder) a.key.compareTo(b.key)
+            else a.value.columnOrder.compareTo(b.value.columnOrder)
+        }
+
+        // Get columns anchored to old and new ref
+        val columns = columnHeaders.map { (columnHeader, columnMeta) ->
+            val oldColumn = BaseColumn(
+                oldTable,
+                columnHeader,
+                columnMeta.columnOrder
+            )
+            val newColumn = BaseColumn(
+                newTable,
+                columnHeader,
+                columnMeta.columnOrder
+            )
+
+            Pair(oldColumn, newColumn)
+        }
+
+        val events = columns.map { oldNewColumn ->
+            val oldColumn = oldNewColumn.first
+            val newColumn = oldNewColumn.second
+
+            indexes.map { index ->
+                val old = oldColumn[index]
+                val new = newColumn[index]
+                TableListenerEvent(old, new) as TableListenerEvent<Any, Any>
+            }
+        }.flatten()
+
+        return right.table to events.toMutableList()
+    }
+
+    fun publishEvents(vararg tableEvents: Pair<Table, MutableList<TableListenerEvent<Any, Any>>>) {
+        val groupedEvents = IdentityHashMap<Table, MutableList<TableListenerEvent<Any, Any>>>()
+
+        tableEvents.forEach {
+            groupedEvents.compute(it.first) { _, v -> v?.apply { v.addAll(it.second) } ?: it.second }
+        }
+
+        groupedEvents.forEach { (t, e) -> t.eventProcessor.publish(e) }
+    }
+
+    when {
+        // copy(T1[1] to T1[1])        -> No-op move, will produce events for that row
+        order == RowActionOrder.TO && left.table === right.table && left == right
+        -> {
+            publishEvents(
+                prepareEvents(left, oldRef, newRef)
+            )
+        }
+
+        // copy(T1[1] to T1[2])        -> Row 1 is copied to row 2
+        //                             -> Event model: T1[2] (2 value, 2 order) -> T1[2] (1 value, 1 order)
+        order == RowActionOrder.TO && left.table === right.table && left != right
+        -> {
+            publishEvents(
+                prepareEvents(right, oldRef, newRef)
+            )
+        }
+
+        // copy(T1[1] to T2[2])        -> Row 1 is copied to row 2, in T2
+        //                             -> Event model: T2[2] (2 value, 2 order) -> T2[2] (1 value, 1 order)
+        order == RowActionOrder.TO && left.table !== right.table
+        -> {
+            publishEvents(
+                prepareEvents(right, oldRef, newRef)
+            )
+        }
+
+        // copy(T1[1] after T1[2])     -> Row 1 is copied to after row 2, named row 3
+        //                             -> Event model: T1[3] (3 value, 3 order) -> T1[3] (1 value, 1 order),
+        //                                             T1[4] (4 value, 4 order) -> T1[4] (3 value, 3 order),
+        //                                             ...,
+        //                                             T1[N] (N value, N order) -> T1[N] (N-1 value, N-1 order)
+        order == RowActionOrder.AFTER && left.table === right.table
+        -> {
+            val indexes = (oldRef.indexes.filter { it > right.index }.toSet() union newRef.indexes.filter { it > right.index }.toSet()).toSortedSet()
+            publishEvents(
+                prepareEventsAfter(right, indexes, oldRef, newRef)
+            )
+        }
+
+        // copy(T1[1] after T2[2])     -> Row 1 is copied to after row 2, in T2, named row 3
+        //                             -> Event model: T2[3] (3 value, 3 order) -> T2[3] (1 value, 1 order),
+        //                                             T2[4] (4 value, 4 order) -> T2[4] (3 value, 3 order),
+        //                                             ...,
+        //                                             T2[N] (N value, N order) -> T2[N] (N-1 value, N-1 order)
+        order == RowActionOrder.AFTER && left.table !== right.table
+        -> {
+            val indexes = (oldRef.indexes.filter { it > right.index }.toSet() union newRef.indexes.filter { it > right.index }.toSet()).toSortedSet()
+            publishEvents(
+                prepareEventsAfter(right, indexes, oldRef, newRef)
+            )
+        }
+
+        // copy(T1[5] before T1[3])    -> Row 5 is copied to before row 3, named row 2
+        //                             -> Event model: T1[2] (2 value, 2 order) -> T1[2] (5 value, 5 order),
+        //                                             T1[1] (1 value, 1 order) -> T1[1] (2 value, 2 order),
+        //                                             T1[0] (0 value, 0 order) -> T1[0] (1 value, 1 order),
+        //                                             T1[-1] (-1 value, -1 order) -> T1[-1] (N-1 value, N-1 order)
+        //                                             ...,
+        //                                             T1[N] (N value, N order) -> T1[N] (N+1 value, N+1 order)
+        order == RowActionOrder.BEFORE && left.table === right.table
+        -> {
+            val indexes = (oldRef.indexes.filter { it < right.index }.toSet() union newRef.indexes.filter { it < right.index }.toSet()).toSortedSet()
+            publishEvents(
+                prepareEventsBefore(right, indexes, oldRef, newRef)
+            )
+        }
+
+        // copy(T1[5] before T2[3])    -> Row 5 is copied to before row 3, in T2, named row 2
+        //                             -> Event model: T2[2] (2 value, 2 order) -> T2[2] (5 value, 5 order),
+        //                                             T2[1] (1 value, 1 order) -> T2[1] (2 value, 2 order),
+        //                                             T2[0] (0 value, 0 order) -> T2[0] (1 value, 1 order),
+        //                                             T2[-1] (-1 value, -1 order) -> T2[-1] (N-1 value, N-1 order)
+        //                                             ...,
+        //                                              T2[N] (N value, N order) -> T2[N] (N+1 value, N+1 order)
+        order == RowActionOrder.BEFORE && left.table !== right.table
+        -> {
+            val indexes = (oldRef.indexes.filter { it < right.index }.toSet() union newRef.indexes.filter { it < right.index }.toSet()).toSortedSet()
+            publishEvents(
+                prepareEventsBefore(right, indexes, oldRef, newRef)
+            )
+        }
+    }
+}
+
 fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
     fun columnMove(left: ColumnHeader, right: ColumnHeader, order: ColumnActionOrder, withName: ColumnHeader, refUpdate: TableRef.() -> TableRef): (ref: TableRef) -> TableRef = { inRef ->
         val ref = inRef.refUpdate()
@@ -1603,7 +1847,7 @@ fun copy(rowToRowAction: RowToRowAction) {
                 )
             }
 
-            // TODO Events
+            publishRowCopyEvents(left, right, order, oldRef, newRef)
         } else {
             // Copy between tables
             val (oldRef, newRef) = right.table.tableRef.refAction { ref ->
@@ -1630,7 +1874,7 @@ fun copy(rowToRowAction: RowToRowAction) {
                 )
             }
 
-            // TODO Events
+            publishRowCopyEvents(left, right, order, oldRef, newRef)
         }
     } else {
         if (left.table === right.table) {
@@ -1664,7 +1908,7 @@ fun copy(rowToRowAction: RowToRowAction) {
                 )
             }
 
-            // TODO Events
+            publishRowCopyEvents(left, right, order, oldRef, newRef)
         } else {
             // Copy between tables
             val (oldRef, newRef) = right.table.tableRef.refAction { ref ->
@@ -1713,7 +1957,7 @@ fun copy(rowToRowAction: RowToRowAction) {
                 )
             }
 
-            // TODO Events
+            publishRowCopyEvents(left, right, order, oldRef, newRef)
         }
     }
 }
