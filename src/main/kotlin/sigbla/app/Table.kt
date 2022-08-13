@@ -558,10 +558,8 @@ internal data class TableRef(
         columns
             .asSequence()
             .filter { !it.component2().prenatal }
-            .sortedBy { it.component2().columnOrder }
             .map { it.component1() to it.component2() }
-            .toList()
-            .asSequence()
+            .sortedBy { it.component2().columnOrder }
     }
 
     val indexes: Sequence<Long> by lazy {
