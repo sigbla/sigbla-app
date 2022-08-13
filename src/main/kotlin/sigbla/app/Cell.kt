@@ -29,7 +29,7 @@ internal fun BigDecimal.toCell(column: Column, index: Long): BigDecimalCell =
 internal fun WebContent.toCell(column: Column, index: Long): WebCell =
     WebCell(column, index, this)
 
-internal class CellValue<T>(private val value: T) {
+internal class CellValue<T>(val value: T) {
     fun toCell(column: Column, index: Long): Cell<*> {
         return when (value) {
             is String -> value.toCell(column, index)
@@ -40,6 +40,10 @@ internal class CellValue<T>(private val value: T) {
             is WebContent -> value.toCell(column, index)
             else -> throw UnsupportedOperationException("Unable to convert to cell: $value")
         }
+    }
+
+    override fun toString(): String {
+        return "CellValue(value=$value)"
     }
 }
 
