@@ -780,7 +780,7 @@ private fun publishTableCopyEvents(
     }
 }
 
-private fun publicRowMoveEvents(
+private fun publishRowMoveEvents(
     left: Row,
     right: Row,
     order: RowActionOrder,
@@ -1442,7 +1442,7 @@ fun move(rowToRowAction: RowToRowAction) {
                 )
             }
 
-            publicRowMoveEvents(left, right, order, oldRef, newRef, oldRef, newRef)
+            publishRowMoveEvents(left, right, order, oldRef, newRef, oldRef, newRef)
         } else {
             // Move between tables
             val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
@@ -1479,7 +1479,7 @@ fun move(rowToRowAction: RowToRowAction) {
                 )
             }
 
-            publicRowMoveEvents(left, right, order, oldRef1, newRef1, oldRef2, newRef2)
+            publishRowMoveEvents(left, right, order, oldRef1, newRef1, oldRef2, newRef2)
         }
     } else {
         if (left.table === right.table) {
@@ -1514,7 +1514,7 @@ fun move(rowToRowAction: RowToRowAction) {
                 )
             }
 
-            publicRowMoveEvents(left, right, order, oldRef, newRef, oldRef, newRef)
+            publishRowMoveEvents(left, right, order, oldRef, newRef, oldRef, newRef)
         } else {
             // Move between tables
             val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
@@ -1573,7 +1573,7 @@ fun move(rowToRowAction: RowToRowAction) {
                 )
             }
 
-            publicRowMoveEvents(left, right, order, oldRef1, newRef1, oldRef2, newRef2)
+            publishRowMoveEvents(left, right, order, oldRef1, newRef1, oldRef2, newRef2)
         }
     }
 }
