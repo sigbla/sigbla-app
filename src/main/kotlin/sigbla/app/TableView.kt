@@ -12,7 +12,7 @@ import kotlin.reflect.KClass
 import com.github.andrewoma.dexx.collection.Map as PMap
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 
-// A table view is associated with one table, and holds meta data related on how to view a table.
+// A table view is associated with one table, and holds metadata related on how to view a table.
 // This includes among other things column widths, row heights, individual cell dimensions, styling, etc..
 
 // TODO Introduce a concept of a view transformer. As with views, this can be on column, row or cell.
@@ -59,6 +59,8 @@ abstract class TableView(val name: String?) : Iterable<Area<*>> {
     abstract operator fun set(type: DEFAULT_ROW_VIEW, init: DefaultRowViewBuilder.() -> Unit)
 
     abstract operator fun set(type: DEFAULT_ROW_VIEW, defaultRowView: DefaultRowView)
+
+    // TODO Does a set/get with DEFAULT_CELL_VIEW make sense?
 
     abstract operator fun get(columnHeader: ColumnHeader): ColumnView
 
@@ -245,6 +247,7 @@ class BaseTableView internal constructor(
 
             eventProcessor.publish(listOf(
                 TableViewListenerEvent(
+                    // TODO Probably clone the tables?
                     Area(this, oldRef.table),
                     Area(this, newRef.table)
                 )

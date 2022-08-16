@@ -97,7 +97,7 @@ internal object SigblaBackend {
         }
     }
 
-    private fun areaContent(view: TableView, x: Long, y: Long, h: Long, w: Long, dims: Dimensions, dirtyCells: Set<Cell<*>>? = null): List<PositionedContent> {
+    private fun areaContent(view: TableView, x: Long, y: Long, h: Long, w: Long, dims: Dimensions, dirtyCells: List<Cell<*>>? = null): List<PositionedContent> {
         // TODO Consider using a stable snapshot ref for view/table
         val table = view.table ?: return emptyList()
 
@@ -368,7 +368,7 @@ internal object SigblaBackend {
         }
     }
 
-    private suspend fun handleDirty(client: SigblaClient, dirtyCells: Set<Cell<*>>) {
+    private suspend fun handleDirty(client: SigblaClient, dirtyCells: List<Cell<*>>) {
         client.mutex.withLock {
             val view = Registry.getView(client.ref) ?: return
             val currentDims = client.contentState.existingDims
@@ -479,7 +479,7 @@ internal object SigblaBackend {
 
                 events {
                     if (any()) {
-                        val dirtyCells = map { it.newValue }.toSet()
+                        val dirtyCells = map { it.newValue }.toList()
                         listeners.values.forEach { client ->
                             if (client.ref == view.name) {
                                 runBlocking {
@@ -605,7 +605,7 @@ internal data class Coordinate(val x: Long, val y: Long)
 
 internal val idGenerator = AtomicLong()
 
-internal class PositionedContent(
+internal data class PositionedContent(
     val contentHeader: ColumnHeader,
     val contentRow: Long,
     val content: String,

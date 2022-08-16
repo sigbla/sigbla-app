@@ -706,6 +706,7 @@ class WebCell internal constructor(column: Column, index: Long, override val val
 
 // TODO Other types of cells:
 
+// Boolean cell
 // Time cell
 // Blob cell for storing blobs of data?
 // Table cell for storing a table in a cell?
