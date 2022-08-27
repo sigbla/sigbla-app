@@ -36,6 +36,8 @@ fun main() {
 
     Thread.sleep(15000)
 
+    var sleepTime = 1000L
+
     while (true) {
         if (ThreadLocalRandom.current().nextBoolean()) {
             val x = ThreadLocalRandom.current().nextInt(0, maxHeaders)
@@ -47,7 +49,11 @@ fun main() {
             copy(table[x] to table[y])
         }
 
-        Thread.sleep(100)
+        // TODO Some UI bug observed consistently when this speeds up and eventually overflow the UI buffer.
+        //      Issue observed is that the first column isn't shown. Seen in Firefox and Chrome.
+        Thread.sleep(sleepTime--)
+
+        if (sleepTime <= 0) sleepTime = 100L
     }
 
     println("END")

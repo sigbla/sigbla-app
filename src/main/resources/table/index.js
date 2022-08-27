@@ -68,7 +68,7 @@ class Sigbla {
     }
 
     submitResize = (target, sizeChangeX, sizeChangeY) => {
-        const resizeEvent = {"type": "resize", "target": target, "sizeChangeX": sizeChangeX, "sizeChangeY": sizeChangeY}
+        const resizeEvent = { type: 8, target: target, sizeChangeX: sizeChangeX, sizeChangeY: sizeChangeY}
 
         if (this.pendingUpdate) {
             this.pendingResize.push(resizeEvent)
@@ -154,7 +154,8 @@ class Sigbla {
 
         this.lastTile = [xtile, ytile, height, width]
 
-        const scrollEvent = {"type": "scroll", "x": xtile, "y": ytile, "h": height, "w": width}
+        // type 1 is scroll event
+        const scrollEvent = { type: 1, x: xtile, y: ytile, h: height, w: width}
 
         if (this.pendingUpdate) {
             this.pendingScrolls.push(scrollEvent)
@@ -171,7 +172,24 @@ class Sigbla {
 
     handleMessage = async (message) => {
         switch (message.type) {
-            case "add": {
+            case 0: { // clear
+                this.target = document.createElement("div")
+                this.corner = null
+                this.end = null
+
+                this.lastTile = [-1, -1, -1, -1]
+                this.swapBuffer = true
+                this.pendingScrolls.length = 0
+                this.pendingResize.length = 0
+                this.pendingUpdate = false
+                this.pendingContent = null
+
+                break
+            }
+            case 1: {
+                // scroll..
+            }
+            case 2: { // add content
                 const div = document.createElement("div")
 
                 div.id = message.id
@@ -237,18 +255,18 @@ class Sigbla {
 
                 break
             }
-            case "add-commit": {
+            case 3: { // add commit
                 if (this.pendingContent === null) break
                 this.target.appendChild(this.pendingContent)
                 this.pendingContent = null
                 break
             }
-            case "rm": {
+            case 4: { // remove content
                 const item = document.getElementById(message.id)
                 if (item) item.remove()
                 break
             }
-            case "update-end": {
+            case 5: { // update end
                 if (this.swapBuffer) {
                     this.swapBuffer = false
 
@@ -262,7 +280,32 @@ class Sigbla {
 
                 break
             }
-            case "dims": {
+            case 6: { // package end
+                this.socket.send(JSON.stringify({ type: 6, id: message.id }))
+
+                let havePendingResize = false
+                let havePendingScroll = false
+
+                if (this.pendingResize.length > 0) {
+                    for (let i = 0; i < this.pendingResize.length; i++) {
+                        this.socket.send(JSON.stringify(this.pendingResize[i]))
+                    }
+                    this.pendingResize.length = 0
+                    havePendingResize = true
+                }
+
+                if (this.pendingScrolls.length > 0) {
+                    let pendingScroll = this.pendingScrolls.pop()
+                    this.pendingScrolls.length = 0
+                    this.socket.send(JSON.stringify(pendingScroll))
+                    havePendingScroll = true
+                }
+
+                this.pendingUpdate = havePendingResize || havePendingScroll
+
+                break
+            }
+            case 7: { // dims
                 const corner = this.corner || (() => {
                     const newCorner = document.createElement("div")
                     newCorner.className = "tc"
@@ -292,45 +335,6 @@ class Sigbla {
                 end.style.left = message.maxX + "px"
 
                 await this.scroll()
-
-                break
-            }
-            case "clear": {
-                this.target = document.createElement("div")
-                this.corner = null
-                this.end = null
-
-                this.lastTile = [-1, -1, -1, -1]
-                this.swapBuffer = true
-                this.pendingScrolls.length = 0
-                this.pendingResize.length = 0
-                this.pendingUpdate = false
-                this.pendingContent = null
-
-                break
-            }
-            case "package-end": {
-                this.socket.send(JSON.stringify({ type: "package-end", id: message.id }))
-
-                let havePendingResize = false
-                let havePendingScroll = false
-
-                if (this.pendingResize.length > 0) {
-                    for (let i = 0; i < this.pendingResize.length; i++) {
-                        this.socket.send(JSON.stringify(this.pendingResize[i]))
-                    }
-                    this.pendingResize.length = 0
-                    havePendingResize = true
-                }
-
-                if (this.pendingScrolls.length > 0) {
-                    let pendingScroll = this.pendingScrolls.pop()
-                    this.pendingScrolls.length = 0
-                    this.socket.send(JSON.stringify(pendingScroll))
-                    havePendingScroll = true
-                }
-
-                this.pendingUpdate = havePendingResize || havePendingScroll
 
                 break
             }

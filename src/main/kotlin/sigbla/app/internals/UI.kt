@@ -15,7 +15,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import sigbla.app.*
 import sigbla.app.exceptions.SigblaAppException
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.ThreadLocalRandom
@@ -60,7 +59,6 @@ internal object SigblaBackend {
                         val ref = call.parameters["ref"]
 
                         if (ref == null || ref.isBlank()) {
-                            println("Close")
                             close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No ref"))
                             return@webSocket
                         }
@@ -68,8 +66,6 @@ internal object SigblaBackend {
                         val client = addListener(this, ref)
 
                         handleDims(client)
-
-                        println("post add listener on $ref")
 
                         try {
                             val jsonParser = Klaxon()
@@ -84,6 +80,7 @@ internal object SigblaBackend {
                                 }
                             }
                         } catch (ex: Exception) {
+                            println("Closing listener due to: " + ex.message)
                             removeListener(this)
                         }
                     }
@@ -251,9 +248,9 @@ internal object SigblaBackend {
             client.contentState.clear()
 
             val jsonParser = Klaxon()
-            val clientPackage = ClientPackage()
+            val clientPackage = ClientPackage(client.nextEventId())
 
-            clientPackage.outgoing.add(jsonParser.toJsonString(ClientEvent("clear")))
+            clientPackage.outgoing.add(jsonParser.toJsonString(ClientEvent(ClientEventType.CLEAR.type)))
 
             Registry.getView(client.ref)?.let { view ->
                 val dims = dims(view)
@@ -277,7 +274,7 @@ internal object SigblaBackend {
 
             client.dims = dims
 
-            val clientPackage = ClientPackage(outgoing = mutableListOf(Klaxon().toJsonString(clientEventDims)))
+            val clientPackage = ClientPackage(client.nextEventId(), outgoing = mutableListOf(Klaxon().toJsonString(clientEventDims)))
             client.publish(clientPackage)
         }
     }
@@ -288,9 +285,9 @@ internal object SigblaBackend {
             val currentRegion = client.contentState.updateTiles(scroll)
 
             val dims = client.dims
-            val clientPackage = ClientPackage()
+            val clientPackage = ClientPackage(client.nextEventId())
 
-            val addedIds = mutableSetOf<String>()
+            val addedIds = mutableSetOf<Long>()
 
             val addBatch = mutableListOf<ClientEventAddContent>()
 
@@ -316,7 +313,7 @@ internal object SigblaBackend {
                     )
 
                     val addContent = ClientEventAddContent(
-                        cellId,
+                        "c$cellId",
                         content.className,
                         content.x,
                         content.y,
@@ -344,12 +341,15 @@ internal object SigblaBackend {
             }
 
             if (addBatch.isNotEmpty()) clientPackage.outgoing.add(jsonParser.toJsonString(addBatch))
-            clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventAddCommit(UUID.randomUUID().toString())))
+
+            if (clientPackage.outgoing.isNotEmpty()) {
+                clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventAddCommit(client.nextEventId().toString())))
+            }
 
             val removeBatch = mutableListOf<ClientEventRemoveContent>()
 
             client.contentState.withRemainingIds(addedIds).forEach { contentId ->
-                val removeContent = ClientEventRemoveContent(contentId)
+                val removeContent = ClientEventRemoveContent("c$contentId")
                 removeBatch.add(removeContent)
 
                 if (removeBatch.size > 25) {
@@ -362,7 +362,10 @@ internal object SigblaBackend {
 
             if (removeBatch.isNotEmpty()) clientPackage.outgoing.add(jsonParser.toJsonString(removeBatch))
 
-            clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventUpdateEnd(UUID.randomUUID().toString())))
+            // TODO Consider if there are some edge cases where we still want to send this on empty outgoing?
+            if (clientPackage.outgoing.isNotEmpty()) {
+                clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventUpdateEnd(client.nextEventId().toString())))
+            }
 
             client.publish(clientPackage)
         }
@@ -373,7 +376,7 @@ internal object SigblaBackend {
             val view = Registry.getView(client.ref) ?: return
             val currentDims = client.contentState.existingDims
 
-            val clientPackage = ClientPackage()
+            val clientPackage = ClientPackage(client.nextEventId())
 
             val batch = mutableListOf<ClientEventAddContent>()
 
@@ -395,7 +398,7 @@ internal object SigblaBackend {
                         content
                     )
                     val addContent = ClientEventAddContent(
-                        cellId,
+                        "c$cellId",
                         content.className,
                         content.x,
                         content.y,
@@ -418,9 +421,13 @@ internal object SigblaBackend {
             }
 
             if (batch.isNotEmpty()) clientPackage.outgoing.add(jsonParser.toJsonString(batch))
-            clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventAddCommit(UUID.randomUUID().toString())))
 
-            clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventUpdateEnd(UUID.randomUUID().toString())))
+            // TODO Consider if there are some edge cases where we still want to send this on empty outgoing?
+            if (clientPackage.outgoing.isNotEmpty()) {
+                clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventAddCommit(client.nextEventId().toString())))
+
+                clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventUpdateEnd(client.nextEventId().toString())))
+            }
 
             client.publish(clientPackage, isDirty = true)
         }
@@ -429,7 +436,9 @@ internal object SigblaBackend {
     private fun handleResize(client: SigblaClient, resize: ClientEventResize) {
         // No lock here as we're not sending data
         val view = Registry.getView(client.ref) ?: return
-        val target = client.contentState.withPCFor(resize.target) ?: return
+        // Note that resize.target is the client side element id
+        val targetId = resize.target.substring(1).toLong()
+        val target = client.contentState.withPCFor(targetId) ?: return
 
         if (resize.sizeChangeX != 0L) {
             val columnView = view[target.contentHeader]
@@ -444,7 +453,7 @@ internal object SigblaBackend {
 
     private suspend fun handlePackageEnd(client: SigblaClient, packageEnd: ClientEventPackageEnd) {
         client.mutex.withLock {
-            client.purge(UUID.fromString(packageEnd.id))
+            client.purge(packageEnd.id.toLong())
         }
     }
 
@@ -506,14 +515,13 @@ internal object SigblaBackend {
     }
 
     private fun removeListener(socket: WebSocketSession) {
-        println("remove listener")
         listeners.remove(socket)
     }
 }
 
 internal data class ClientPackage(
+    val id: Long,
     val outgoing: MutableList<String> = mutableListOf(),
-    val id: UUID = UUID.randomUUID(),
     var published: Boolean = false
 )
 
@@ -526,7 +534,10 @@ internal data class SigblaClient(
 ) {
     private val outgoingPackages = mutableListOf<ClientPackage>()
 
-    private var clearId: UUID? = null
+    private var clearId: Long? = null
+
+    private val idGenerator = AtomicLong()
+    internal fun nextEventId() = idGenerator.getAndIncrement()
 
     suspend fun publish(clientPackage: ClientPackage? = null, isDirty: Boolean = false) {
         if (!mutex.isLocked) throw SigblaAppException("Mutex not locked!")
@@ -535,16 +546,18 @@ internal data class SigblaClient(
 
         if (clientPackage != null) outgoingPackages.add(clientPackage)
 
-        val overflow = outgoingPackages.size > Companion.MAX_PACKAGES
+        val overflow = outgoingPackages.size > MAX_PACKAGES
 
         if (overflow) {
+            println("overflow")
+
             outgoingPackages.clear()
             contentState.clear()
 
             val jsonParser = Klaxon()
-            val clearClientPackage = ClientPackage()
+            val clearClientPackage = ClientPackage(nextEventId())
 
-            clearClientPackage.outgoing.add(jsonParser.toJsonString(ClientEvent("clear")))
+            clearClientPackage.outgoing.add(jsonParser.toJsonString(ClientEvent(ClientEventType.CLEAR.type)))
 
             val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.maxX, dims.maxY)
 
@@ -567,7 +580,7 @@ internal data class SigblaClient(
         socket.outgoing.send(Frame.Text(Klaxon().toJsonString(ClientEventPackageEnd(selectedPackage.id.toString()))))
     }
 
-    suspend fun purge(id: UUID) {
+    suspend fun purge(id: Long) {
         if (!mutex.isLocked) throw SigblaAppException("Mutex not locked!")
         outgoingPackages.removeIf { it.id == id }
         if (clearId == id) clearId = null
@@ -579,31 +592,39 @@ internal data class SigblaClient(
     }
 }
 
-internal data class ClientSession(val id: String)
+internal enum class ClientEventType(val type: Int) {
+    CLEAR(0),
+    SCROLL(1),
+    ADD_CONTENT(2),
+    ADD_COMMIT(3),
+    REMOVE_CONTENT(4),
+    UPDATE_END(5),
+    PACKAGE_END(6),
+    DIMS(7),
+    RESIZE(8)
+}
 
 @TypeFor(field = "type", adapter = ClientEventAdapter::class)
-internal open class ClientEvent(val type: String)
-internal data class ClientEventScroll(val x: Long, val y: Long, val h: Long, val w: Long): ClientEvent("scroll")
-internal data class ClientEventAddContent(val id: String, val classes: String, val x: Long?, val y: Long?, val h: Long, val w: Long, val z: Long?, val mt: Long?, val ml: Long?, val ch: Long?, val cw: Long?, val content: String): ClientEvent("add")
-internal data class ClientEventAddCommit(val id: String): ClientEvent("add-commit")
-internal data class ClientEventRemoveContent(val id: String): ClientEvent("rm")
-internal data class ClientEventUpdateEnd(val id: String): ClientEvent("update-end")
-internal data class ClientEventPackageEnd(val id: String): ClientEvent("package-end")
-internal data class ClientEventDims(val cornerX: Long, val cornerY: Long, val maxX: Long, val maxY: Long): ClientEvent("dims")
-internal data class ClientEventResize(val target: String, val sizeChangeX: Long, val sizeChangeY: Long): ClientEvent("resize")
+internal open class ClientEvent(val type: Int)
+internal data class ClientEventScroll(val x: Long, val y: Long, val h: Long, val w: Long): ClientEvent(ClientEventType.SCROLL.type)
+internal data class ClientEventAddContent(val id: String, val classes: String, val x: Long?, val y: Long?, val h: Long, val w: Long, val z: Long?, val mt: Long?, val ml: Long?, val ch: Long?, val cw: Long?, val content: String): ClientEvent(ClientEventType.ADD_CONTENT.type)
+internal data class ClientEventAddCommit(val id: String): ClientEvent(ClientEventType.ADD_COMMIT.type)
+internal data class ClientEventRemoveContent(val id: String): ClientEvent(ClientEventType.REMOVE_CONTENT.type)
+internal data class ClientEventUpdateEnd(val id: String): ClientEvent(ClientEventType.UPDATE_END.type)
+internal data class ClientEventPackageEnd(val id: String): ClientEvent(ClientEventType.PACKAGE_END.type)
+internal data class ClientEventDims(val cornerX: Long, val cornerY: Long, val maxX: Long, val maxY: Long): ClientEvent(ClientEventType.DIMS.type)
+internal data class ClientEventResize(val target: String, val sizeChangeX: Long, val sizeChangeY: Long): ClientEvent(ClientEventType.RESIZE.type)
 
 internal class ClientEventAdapter: TypeAdapter<ClientEvent> {
-    override fun classFor(type: Any): KClass<out ClientEvent> = when(type as String) {
-        "scroll" -> ClientEventScroll::class
-        "resize" -> ClientEventResize::class
-        "package-end" -> ClientEventPackageEnd::class
+    override fun classFor(type: Any): KClass<out ClientEvent> = when(type as Int) {
+        ClientEventType.SCROLL.type -> ClientEventScroll::class
+        ClientEventType.RESIZE.type -> ClientEventResize::class
+        ClientEventType.PACKAGE_END.type -> ClientEventPackageEnd::class
         else -> throw IllegalArgumentException("Unknown type: $type")
     }
 }
 
 internal data class Coordinate(val x: Long, val y: Long)
-
-internal val idGenerator = AtomicLong()
 
 internal data class PositionedContent(
     val contentHeader: ColumnHeader,
@@ -627,8 +648,9 @@ internal class ContentState(val maxDistance: Int = 2000, val tileSize: Int = 100
     @Volatile
     var existingDims: Dimensions = Dimensions(0, 0, 0, 0)
 
-    private val coordinateIds: ConcurrentMap<Coordinate, String> = ConcurrentHashMap()
-    private val idsContent: ConcurrentMap<String, PositionedContent> = ConcurrentHashMap()
+    private val contentIDGenerator = AtomicLong()
+    private val coordinateIds: ConcurrentMap<Coordinate, Long> = ConcurrentHashMap()
+    private val idsContent: ConcurrentMap<Long, PositionedContent> = ConcurrentHashMap()
 
     fun updateTiles(scroll: ClientEventScroll): Dimensions {
         val x1 = scroll.x - (scroll.x % tileSize)
@@ -641,9 +663,9 @@ internal class ContentState(val maxDistance: Int = 2000, val tileSize: Int = 100
         return existingDims
     }
 
-    fun addIdFor(x: Long, y: Long, pc: PositionedContent): String {
+    fun addIdFor(x: Long, y: Long, pc: PositionedContent): Long {
         val id = coordinateIds.computeIfAbsent(Coordinate(x, y)) {
-            "c${idGenerator.getAndIncrement()}"
+            contentIDGenerator.getAndIncrement()
         }
 
         idsContent[id] = pc
@@ -653,11 +675,11 @@ internal class ContentState(val maxDistance: Int = 2000, val tileSize: Int = 100
 
     fun withIdFor(x: Long, y: Long) = coordinateIds[Coordinate(x, y)]
 
-    fun withPCFor(id: String) = idsContent[id]
+    fun withPCFor(id: Long) = idsContent[id]
 
-    fun withRemainingIds(ids: Set<String>) = idsContent.keys.filter { !ids.contains(it) }.toSet()
+    fun withRemainingIds(ids: Set<Long>) = idsContent.keys.filter { !ids.contains(it) }.toSet()
 
-    fun removeId(id: String) = idsContent.remove(id)
+    fun removeId(id: Long) = idsContent.remove(id)
 
     fun clear() {
         existingDims = Dimensions(0, 0, 0, 0)
