@@ -138,8 +138,6 @@ abstract class Column internal constructor(
     //       Add would just insert a cell at first available location.
     //       Maybe that can be a plus operator function?
 
-    internal abstract fun clear(index: Long): Cell<*>
-
     // TODO: Move these out (remove, rename, clear) like with on
     abstract fun clear()
 
@@ -223,7 +221,7 @@ class BaseColumn internal constructor(
         ) as List<TableListenerEvent<Any, Any>>)
     }
 
-    override fun clear(index: Long): Cell<*> {
+    private fun clear(index: Long): Cell<*> {
         val (oldRef, newRef) = table.tableRef.refAction {
             val meta = it.columns[this.columnHeader] ?: throw InvalidColumnException(this)
             val values = it.columnCells[this.columnHeader] ?: throw InvalidColumnException(this)
