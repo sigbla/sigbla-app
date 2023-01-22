@@ -39,14 +39,25 @@ fun main() {
         }
     }
 
-    tableView.onAny {
+    on(tableView) {
         events {
             newView
             oldView
         }
     }
 
-    tableView.show()
+    /*
+    val listener: TableViewEventReceiver<TableView, Any>.() -> Unit = {
+        events {
+            newView
+            oldView
+        }
+    }
+    on(tableView, listener)
+    on(tableView) = listener
+     */
+
+    show(tableView)
 
     println("END")
 }

@@ -1,14 +1,12 @@
 package sigbla.app
 
+import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.exceptions.InvalidTableException
 import sigbla.app.internals.Registry
-import sigbla.app.internals.SigblaBackend
 import sigbla.app.internals.TableViewEventProcessor
 import sigbla.app.internals.refAction
 import java.util.*
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.NoSuchElementException
-import kotlin.reflect.KClass
 import com.github.andrewoma.dexx.collection.Map as PMap
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 
@@ -19,13 +17,13 @@ import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 //      Some priority ordering might be needed between these, but the transformer would take a value
 //      and convert this into another value. This only affects the view, and is done on demand (i.e.,
 //      when the cell is being rendered), and is used to perform things like formatting etc..
-//
+//      .
 //      Look at having this in the form of view["column"] = { .. } where this is given a cell and
 //      expected to return a cell.
-//
+//      .
 //      Should also allow for view[row number] = { .. } and view[headers.., row] = { .. }, and
 //      view[cell] = { .. }, etc..
-//
+//      .
 //      Also need a way to obtain a transformed cell, maybe with view[cell] returning cell?
 //      Probably should return a special type of cell associated with the view, as this would
 //      also allow for things like move(view[..] before|after|to view[..]) type ops.. like CellView
@@ -33,136 +31,275 @@ import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 //      called materialize, which takes these and returns a table/column/row/cell transformed
 //      according to the view transformations, ex: materialize(view) returns table or
 //      materialize(view["column"]) returns a column, etc...
+//      .
+//      Potentially reuse DestinationOsmosis on a table clone. That way we can make any changes we
+//      want to the clone, which impacts the view only.. On a change a new table clone is used..
+//      (Maybe have ViewBuilder extend DestinationOsmosis? - not a bad idea as it allows h/w to be adjusted too)
 
-// TODO Events on a table view should be much like on a table, with view.onAny or view.on<ColumnView>.
-//      Note that we only have one generic type, as we can't have one type of view convert to another.
-//
-//      A listener can, as with table, call back into the table view to change the view if wanted. And we
-//      use ordering to fire off listeners in the right order. This allows for the final UI listener
-//      to fire after any earlier modifications. A loop detector is also included.
+// TODO Event model:
+//      .
+//      on<TableView>(tableView):
+//      on<TableView>(columnView):
+//      on<TableView>(rowView):
+//      on<TableView>(cellView):
+//      .
+//      on<ColumnView>(tableView):
+//      on<ColumnView>(columnView):
+//      on<ColumnView>(rowView):
+//      on<ColumnView>(cellView):
+//      .
+//      on<RowView>(tableView):
+//      on<RowView>(columnView):
+//      on<RowView>(rowView):
+//      on<RowView>(cellView):
+//      .
+//      on<CellView>(tableView):
+//      on<CellView>(columnView):
+//      on<CellView>(rowView):
+//      on<CellView>(cellView):
+//      .
+//      on<Cell>(tableView) or on<O,N>(tableView):
+//      on<Cell>(columnView) or on<O,N>(columnView):
+//      on<Cell>(rowView) or on<O,N>(rowView):
+//      on<Cell>(cellView) or on<O,N>(cellView):
 
-abstract class TableView(val name: String?) : Iterable<Area<*>> {
+private const val STANDARD_CELL_HEIGHT = 20L
+private const val STANDARD_CELL_WIDTH = 100L
+
+// TODO Should the be sealed rather than abstract?
+abstract class TableView(val name: String?) : Iterable<DerivedCellView> {
+    val tableView: TableView
+        get() = this
+
     abstract var table: Table?
+
+    // TODO? abstract val materializedTable (and materializedColumn/Row elsewhere?)
 
     internal abstract val tableViewRef: AtomicReference<TableViewRef>
 
     internal abstract val eventProcessor: TableViewEventProcessor
 
-    abstract operator fun get(type: DEFAULT_COLUMN_VIEW): DefaultColumnView
+    abstract val columnViews: Sequence<ColumnView>
 
-    abstract operator fun set(type: DEFAULT_COLUMN_VIEW, init: DefaultColumnViewBuilder.() -> Unit)
+    abstract val rowViews: Sequence<RowView>
 
-    abstract operator fun set(type: DEFAULT_COLUMN_VIEW, defaultColumnView: DefaultColumnView)
+    // Note: cellViews return the defined CellViews, while the TableView iterator
+    // returns the calculated cell views for current cells
+    abstract val cellViews: Sequence<CellView>
 
-    abstract operator fun get(type: DEFAULT_ROW_VIEW): DefaultRowView
+    abstract var cellHeight: Long
 
-    abstract operator fun set(type: DEFAULT_ROW_VIEW, init: DefaultRowViewBuilder.() -> Unit)
+    abstract var cellWidth: Long
 
-    abstract operator fun set(type: DEFAULT_ROW_VIEW, defaultRowView: DefaultRowView)
+    operator fun get(tableView: Companion) = this
 
-    // TODO Does a set/get with DEFAULT_CELL_VIEW make sense?
+    abstract operator fun get(header: ColumnHeader): ColumnView
 
-    abstract operator fun get(columnHeader: ColumnHeader): ColumnView
+    operator fun get(vararg header: String): ColumnView = get(
+        ColumnHeader(
+            *header
+        )
+    )
 
-    operator fun get(column: Column) = get(column.columnHeader)
+    abstract operator fun get(index: Long): RowView
 
-    operator fun get(columnView: ColumnView) = get(columnView.columnHeader)
+    operator fun get(header1: String, index: Long): CellView = this[header1][index]
 
-    abstract operator fun get(row: Long): RowView
+    operator fun get(header1: String, header2: String, index: Long): CellView = this[header1, header2][index]
 
-    operator fun get(row: Row) = get(row.index)
+    operator fun get(header1: String, header2: String, header3: String, index: Long): CellView = this[header1, header2, header3][index]
 
-    operator fun get(rowView: RowView) = get(rowView.index)
+    operator fun get(header1: String, header2: String, header3: String, header4: String, index: Long): CellView = this[header1, header2, header3, header4][index]
 
-    abstract operator fun get(columnHeader: ColumnHeader, row: Long): CellView
+    operator fun get(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long): CellView = this[header1, header2, header3, header4, header5][index]
 
-    operator fun get(column: Column, row: Long) = get(column.columnHeader, row)
+    operator fun get(index: Int): RowView = get(index.toLong())
 
-    operator fun get(cell: Cell<*>) = get(cell.column, cell.index)
+    operator fun get(header1: String, index: Int): CellView = this[header1][index]
 
-    operator fun get(cellView: CellView) = get(cellView.columnHeader, cellView.index)
+    operator fun get(header1: String, header2: String, index: Int): CellView = this[header1, header2][index]
+
+    operator fun get(header1: String, header2: String, header3: String, index: Int): CellView = this[header1, header2, header3][index]
+
+    operator fun get(header1: String, header2: String, header3: String, header4: String, index: Int): CellView = this[header1, header2, header3, header4][index]
+
+    operator fun get(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int): CellView = this[header1, header2, header3, header4, header5][index]
+
+    // -----
+
+    operator fun get(cell: Cell<*>): CellView = this[cell.column.columnHeader][cell.index]
+
+    operator fun get(cellView: CellView) = this[cellView.columnView][cellView.index]
+
+    // -----
+
+    operator fun get(column: Column): ColumnView = this[column.columnHeader]
+
+    operator fun get(columnView: ColumnView): ColumnView = this[columnView.columnHeader]
+
+    // -----
+
+    operator fun get(row: Row) = this[row.index]
+
+    operator fun get(rowView: RowView) = this[rowView.index]
+
+    // -----
+
+    operator fun get(index: Long, column: Column): CellView = this[column, index]
+    operator fun get(index: Long, columnHeader: ColumnHeader): CellView = this[columnHeader, index]
+
+    // -----
+
+    operator fun get(column: Column, index: Long): CellView = this[column.columnHeader, index]
+    abstract operator fun get(columnHeader: ColumnHeader, index: Long): CellView
+
+    // -----
+
+    abstract operator fun set(companion: TableView.Companion, tableView: TableView)
+
+    abstract operator fun set(companion: TableView.Companion, init: TableViewBuilder.() -> Unit)
+
+    // -----
+
+    operator fun set(cell: Cell<*>, view: CellView?) {
+        this[cell.column][cell.index] = view
+    }
+
+    operator fun set(cell: Cell<*>, init: CellViewBuilder.() -> Unit) {
+        this[cell.column][cell.index] = init
+    }
+
+    // -----
+
+    operator fun set(cellView: CellView, view: CellView?) {
+        this[cellView.columnView][cellView.index] = view
+    }
+
+    operator fun set(cellView: CellView, init: CellViewBuilder.() -> Unit) {
+        this[cellView.columnView][cellView.index] = init
+    }
+
+    // -----
 
     abstract operator fun set(columnHeader: ColumnHeader, init: ColumnViewBuilder.() -> Unit)
 
     operator fun set(column: Column, init: ColumnViewBuilder.() -> Unit) = set(column.columnHeader, init)
 
-    abstract operator fun set(columnHeader: ColumnHeader, columnView: ColumnView?)
+    operator fun set(columnView: ColumnView, init: ColumnViewBuilder.() -> Unit) = set(columnView.columnHeader, init)
 
-    operator fun set(column: Column, columnView: ColumnView?) = set(column.columnHeader, columnView)
+    abstract operator fun set(columnHeader: ColumnHeader, view: ColumnView?)
 
-    abstract operator fun set(row: Long, init: RowViewBuilder.() -> Unit)
+    operator fun set(column: Column, view: ColumnView?) = set(column.columnHeader, view)
 
-    abstract operator fun set(row: Long, rowView: RowView?)
+    operator fun set(columnView: ColumnView, view: ColumnView?) = set(columnView.columnHeader, view)
 
-    operator fun set(row: Row, rowView: RowView?) = set(row.index, rowView)
+    // -----
+
+    abstract operator fun set(index: Long, init: RowViewBuilder.() -> Unit)
+
+    operator fun set(rowView: RowView, init: RowViewBuilder.() -> Unit) = set(rowView.index, init)
+
+    operator fun set(row: Row, init: RowViewBuilder.() -> Unit) = set(row.index, init)
+
+    abstract operator fun set(index: Long, view: RowView?)
+
+    operator fun set(rowView: RowView, view: RowView?) = set(rowView.index, view)
+
+    operator fun set(row: Row, view: RowView?) = set(row.index, view)
+
+    // -----
 
     abstract operator fun set(columnHeader: ColumnHeader, row: Long, init: CellViewBuilder.() -> Unit)
 
-    operator fun set(column: Column, row: Long, init: CellViewBuilder.() -> Unit) = set(column.columnHeader, row, init)
+    abstract operator fun set(columnHeader: ColumnHeader, row: Long, view: CellView?)
 
-    abstract operator fun set(columnHeader: ColumnHeader, row: Long, cellView: CellView?)
+    // -----
 
-    operator fun set(column: Column, row: Long, cellView: CellView?) = set(column.columnHeader, row, cellView)
-
-    operator fun set(cell: Cell<*>, cellView: CellView?) = set(cell.column, cell.index, cellView)
-
-    fun show() = SigblaBackend.openView(this)
-
-    // TODO Move this and other table view on functions out..
-    inline fun <reified T> on(noinline init: TableViewEventReceiver<TableView, T>.() -> Unit): TableViewListenerReference {
-        return on(T::class, init as TableViewEventReceiver<TableView, Any>.() -> Unit)
+    operator fun set(vararg header: String, init: ColumnViewBuilder.() -> Unit) {
+        this[ColumnHeader(*header)] = init
     }
 
-    fun onAny(init: TableViewEventReceiver<TableView, Any>.() -> Unit): TableViewListenerReference {
-        return on(Any::class, init)
+    // -----
+
+    operator fun set(header1: String, index: Long, init: CellViewBuilder.() -> Unit) {
+        this[ColumnHeader(header1)][index] = init
     }
 
-    fun on(type: KClass<*> = Any::class, init: TableViewEventReceiver<TableView, Any>.() -> Unit): TableViewListenerReference {
-        val eventReceiver = when {
-            type == Any::class -> TableViewEventReceiver<TableView, Any>(
-                this
-            ) { this }
-            else -> TableViewEventReceiver(this) {
-                this.filter {
-                    type.isInstance(it.oldValue.value) || type.isInstance(it.newValue.value)
-                }
+    operator fun set(header1: String, header2: String, index: Long, init: CellViewBuilder.() -> Unit) {
+        this[ColumnHeader(header1, header2)][index] = init
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Long, init: CellViewBuilder.() -> Unit) {
+        this[ColumnHeader(header1, header2, header3)][index] = init
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, init: CellViewBuilder.() -> Unit) {
+        this[ColumnHeader(header1, header2, header3, header4)][index] = init
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, init: CellViewBuilder.() -> Unit) {
+        this[ColumnHeader(header1, header2, header3, header4, header5)][index] = init
+    }
+
+    // -----
+
+    operator fun set(header1: String, index: Int, init: CellViewBuilder.() -> Unit) {
+        this[ColumnHeader(header1)][index] = init
+    }
+
+    operator fun set(header1: String, header2: String, index: Int, init: CellViewBuilder.() -> Unit) {
+        this[ColumnHeader(header1, header2)][index] = init
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Int, init: CellViewBuilder.() -> Unit) {
+        this[ColumnHeader(header1, header2, header3)][index] = init
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, init: CellViewBuilder.() -> Unit) {
+        this[ColumnHeader(header1, header2, header3, header4)][index] = init
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, init: CellViewBuilder.() -> Unit) {
+        this[ColumnHeader(header1, header2, header3, header4, header5)][index] = init
+    }
+
+    // -----
+
+    operator fun set(vararg header: String, view: ColumnView?) {
+        this[ColumnHeader(*header)] = view
+    }
+
+    // -----
+
+    operator fun set(vararg header: String, index: Long, view: CellView?) {
+        this[ColumnHeader(*header)][index] = view
+    }
+
+    // -----
+
+    operator fun set(vararg header: String, index: Int, view: CellView?) {
+        this[ColumnHeader(*header)][index] = view
+    }
+
+    override fun iterator(): Iterator<DerivedCellView> {
+        val ref = tableViewRef.get()
+        val table = ref.table
+            ?: return object : Iterator<DerivedCellView> {
+                override fun hasNext() = false
+                override fun next() = throw NoSuchElementException()
+            }
+
+        val tableIterator = table.iterator()
+
+        return object : Iterator<DerivedCellView> {
+            override fun hasNext() = tableIterator.hasNext()
+            override fun next(): DerivedCellView {
+                val cell = tableIterator.next()
+                val columnView = ColumnView(this@TableView, cell.column.columnHeader)
+                return createDerivedCellViewFromRef(ref, columnView, cell.index)
             }
         }
-        return eventProcessor.subscribe(this, eventReceiver, init)
     }
-
-    override fun iterator(): Iterator<Area<*>> {
-        val view = this
-
-        return object : Iterator<Area<*>> {
-            val ref = tableViewRef.get()
-            // TODO Should this really be here? Table?
-            val tableIterator = if (ref.table != null) listOf(ref.table).iterator() else emptyList<Table>().iterator()
-            val defaultIterator = listOf(ref.defaultColumnView, ref.defaultRowView).iterator()
-            val columnViewIterator = ref.columnViews.values().iterator()
-            val rowViewIterator = ref.rowViews.values().iterator()
-            val cellViewIterator = ref.cellViews.values().iterator()
-
-            override fun hasNext(): Boolean {
-                return tableIterator.hasNext() || defaultIterator.hasNext() || columnViewIterator.hasNext() || rowViewIterator.hasNext() || cellViewIterator.hasNext()
-            }
-
-            override fun next(): Area<*> {
-                return when {
-                    tableIterator.hasNext() -> Area(view, tableIterator.next())
-                    defaultIterator.hasNext() -> Area(view, defaultIterator.next())
-                    columnViewIterator.hasNext() -> Area(view, columnViewIterator.next())
-                    rowViewIterator.hasNext() -> Area(view, rowViewIterator.next())
-                    cellViewIterator.hasNext() -> Area(view, cellViewIterator.next())
-                    else -> throw NoSuchElementException()
-                }
-            }
-        }
-    }
-
-    abstract fun clone(): TableView
-
-    abstract fun clone(name: String): TableView
 
     internal abstract fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableViewRef = tableViewRef.get()!!): TableView
 
@@ -198,12 +335,13 @@ abstract class TableView(val name: String?) : Iterable<Area<*>> {
 }
 
 internal data class TableViewRef(
-    val defaultColumnView: DefaultColumnView,
-    val defaultRowView: DefaultRowView,
-    val columnViews: PMap<ColumnHeader, ColumnViewMeta> = PHashMap(),
-    val rowViews: PMap<Long, RowViewMeta> = PHashMap(),
-    val cellViews: PMap<Pair<ColumnHeader, Long>, CellViewMeta> = PHashMap(),
+    val defaultCellView: ViewMeta = ViewMeta(STANDARD_CELL_HEIGHT, STANDARD_CELL_WIDTH),
+    val columnViews: PMap<ColumnHeader, ViewMeta> = PHashMap(),
+    val rowViews: PMap<Long, ViewMeta> = PHashMap(),
+    val cellViews: PMap<Pair<ColumnHeader, Long>, ViewMeta> = PHashMap(),
     val table: Table? = null
+    // TODO Need version for event management like with TableRef
+    // TODO Need sorting?
 )
 
 class BaseTableView internal constructor(
@@ -212,12 +350,7 @@ class BaseTableView internal constructor(
     override val tableViewRef: AtomicReference<TableViewRef>,
     override val eventProcessor: TableViewEventProcessor = TableViewEventProcessor()
 ) : TableView(name) {
-    constructor(name: String?, table: Table?) : this(name, tableViewRef = AtomicReference(
-        TableViewRef(
-            DefaultColumnView(),
-            DefaultRowView(),
-            table = table
-    )))
+    constructor(name: String?, table: Table?) : this(name, tableViewRef = AtomicReference(TableViewRef(table = table)))
     constructor(table: Table) : this(table.name, table)
     constructor(name: String) : this(name, Registry.getTable(name))
 
@@ -236,27 +369,79 @@ class BaseTableView internal constructor(
 
             if (!eventProcessor.haveListeners()) return
 
-            eventProcessor.publish(listOf(
-                TableViewListenerEvent(
-                    // TODO Probably clone the tables? Perhaps not, to give access to tables
-                    Area(this, oldRef.table),
-                    Area(this, newRef.table)
+            val old = makeClone(ref = oldRef)
+            val new = makeClone(ref = newRef)
+
+            eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(old, new)) as List<TableViewListenerEvent<Any>>)
+        }
+
+    override val columnViews: Sequence<ColumnView>
+        get() = tableViewRef.get()
+            .columnViews
+            .keys()
+            .asSequence()
+            .map { ColumnView(this, it) }
+
+    override val rowViews: Sequence<RowView>
+        get() = tableViewRef.get()
+            .rowViews
+            .keys()
+            .asSequence()
+            .map { RowView(this, it) }
+
+    override val cellViews: Sequence<CellView>
+        get() = tableViewRef.get()
+            .cellViews
+            .keys()
+            .asSequence()
+            .map {
+                CellView(ColumnView(this, it.first), it.second)
+            }
+
+    override var cellHeight: Long
+        get() {
+            val ref = tableView.tableViewRef.get()
+            return ref.defaultCellView.cellHeight ?: STANDARD_CELL_HEIGHT
+        }
+        set(height) {
+            val (oldRef, newRef) = tableViewRef.refAction {
+                it.copy(
+                    defaultCellView = ViewMeta(height, it.defaultCellView.cellWidth)
                 )
-            ) as List<TableViewListenerEvent<Any>>)
+            }
+
+            if (!eventProcessor.haveListeners()) return
+
+            val old = makeClone(ref = oldRef)
+            val new = makeClone(ref = newRef)
+
+            eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(old, new)) as List<TableViewListenerEvent<Any>>)
         }
 
-    override operator fun get(type: DEFAULT_COLUMN_VIEW): DefaultColumnView = tableViewRef.get().defaultColumnView
+    override var cellWidth: Long
+        get() {
+            val ref = tableView.tableViewRef.get()
+            return ref.defaultCellView.cellWidth ?: STANDARD_CELL_WIDTH
+        }
+        set(width) {
+            val (oldRef, newRef) = tableViewRef.refAction {
+                it.copy(
+                    defaultCellView = ViewMeta(it.defaultCellView.cellHeight, width)
+                )
+            }
 
-    override operator fun set(type: DEFAULT_COLUMN_VIEW, init: DefaultColumnViewBuilder.() -> Unit) {
-        val defaultColumnViewBuilder = DefaultColumnViewBuilder()
-        defaultColumnViewBuilder.init()
-        set(type, defaultColumnViewBuilder.build())
-    }
+            if (!eventProcessor.haveListeners()) return
 
-    override operator fun set(type: DEFAULT_COLUMN_VIEW, defaultColumnView: DefaultColumnView) {
+            val old = makeClone(ref = oldRef)
+            val new = makeClone(ref = newRef)
+
+            eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(old, new)) as List<TableViewListenerEvent<Any>>)
+        }
+
+    private fun set(viewMeta: ViewMeta) {
         val (oldRef, newRef) = tableViewRef.refAction {
             it.copy(
-                defaultColumnView = defaultColumnView
+                defaultCellView = viewMeta
             )
         }
 
@@ -265,53 +450,24 @@ class BaseTableView internal constructor(
         val oldView = makeClone(ref = oldRef)
         val newView = makeClone(ref = newRef)
 
-        val old = oldView[DEFAULT_COLUMN_VIEW]
-        val new = newView[DEFAULT_COLUMN_VIEW]
-
-        eventProcessor.publish(listOf(
-            TableViewListenerEvent(
-                Area(this, old),
-                Area(this, new)
-            )
-        ) as List<TableViewListenerEvent<Any>>)
+        eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(oldView, newView)) as List<TableViewListenerEvent<Any>>)
     }
 
-    override operator fun get(type: DEFAULT_ROW_VIEW): DefaultRowView = tableViewRef.get().defaultRowView
+    override fun get(columnHeader: ColumnHeader) = ColumnView(this, columnHeader)
 
-    override operator fun set(type: DEFAULT_ROW_VIEW, init: DefaultRowViewBuilder.() -> Unit) {
-        val defaultRowViewBuilder = DefaultRowViewBuilder()
-        defaultRowViewBuilder.init()
-        set(type, defaultRowViewBuilder.build())
+    override fun get(index: Long) = RowView(this, index)
+
+    override fun get(columnHeader: ColumnHeader, index: Long) = CellView(get(columnHeader), index)
+
+    override fun set(companion: Companion, tableView: TableView) {
+        TODO("Not yet implemented")
     }
 
-    override operator fun set(type: DEFAULT_ROW_VIEW, defaultRowView: DefaultRowView) {
-        val (oldRef, newRef) = tableViewRef.refAction {
-            it.copy(
-                defaultRowView = defaultRowView
-            )
-        }
-
-        if (!eventProcessor.haveListeners()) return
-
-        val oldView = makeClone(ref = oldRef)
-        val newView = makeClone(ref = newRef)
-
-        val old = oldView[DEFAULT_ROW_VIEW]
-        val new = newView[DEFAULT_ROW_VIEW]
-
-        eventProcessor.publish(listOf(
-            TableViewListenerEvent(
-                Area(this, old),
-                Area(this, new)
-            )
-        ) as List<TableViewListenerEvent<Any>>)
+    override fun set(companion: Companion, init: TableViewBuilder.() -> Unit) {
+        val tableViewBuilder = TableViewBuilder()
+        tableViewBuilder.init()
+        set(tableViewBuilder.build())
     }
-
-    override fun get(columnHeader: ColumnHeader): ColumnView = tableViewRef.get().columnViews[columnHeader]?.toColumnView(this, columnHeader) ?: this[DEFAULT_COLUMN_VIEW].toColumnView(this, columnHeader)
-
-    override fun get(row: Long): RowView = tableViewRef.get().rowViews[row]?.toRowView(this, row) ?: this[DEFAULT_ROW_VIEW].toRowView(this, row)
-
-    override fun get(columnHeader: ColumnHeader, row: Long): CellView = tableViewRef.get().cellViews[Pair(columnHeader, row)]?.toCellView(this, columnHeader, row) ?: CellView(this, columnHeader, row, this[DEFAULT_ROW_VIEW].height, this[DEFAULT_COLUMN_VIEW].width)
 
     override fun set(columnHeader: ColumnHeader, init: ColumnViewBuilder.() -> Unit) {
         val columnViewBuilder = ColumnViewBuilder()
@@ -319,15 +475,15 @@ class BaseTableView internal constructor(
         set(columnHeader, columnViewBuilder.build())
     }
 
-    override fun set(columnHeader: ColumnHeader, columnView: ColumnView?) {
-        set(columnHeader, if (columnView != null) ColumnViewMeta(columnView.width) else null)
+    override fun set(columnHeader: ColumnHeader, view: ColumnView?) {
+        set(columnHeader, if (view != null) ViewMeta(null, view.cellWidth) else null)
     }
 
-    private fun set(columnHeader: ColumnHeader, columnViewMeta: ColumnViewMeta?) {
+    private fun set(columnHeader: ColumnHeader, viewMeta: ViewMeta?) {
         val (oldRef, newRef) = tableViewRef.refAction {
             it.copy(
-                columnViews = if (columnViewMeta != null)
-                    it.columnViews.put(columnHeader, columnViewMeta)
+                columnViews = if (viewMeta != null)
+                    it.columnViews.put(columnHeader, viewMeta)
                 else
                     it.columnViews.remove(columnHeader)
             )
@@ -341,12 +497,7 @@ class BaseTableView internal constructor(
         val old = oldView[columnHeader]
         val new = newView[columnHeader]
 
-        eventProcessor.publish(listOf(
-            TableViewListenerEvent(
-                Area(this, old),
-                Area(this, new)
-            )
-        ) as List<TableViewListenerEvent<Any>>)
+        eventProcessor.publish(listOf(TableViewListenerEvent<ColumnView>(old, new)) as List<TableViewListenerEvent<Any>>)
     }
 
     override fun set(row: Long, init: RowViewBuilder.() -> Unit) {
@@ -355,15 +506,15 @@ class BaseTableView internal constructor(
         set(row, rowViewBuilder.build())
     }
 
-    override fun set(row: Long, rowView: RowView?) {
-        set(row, if (rowView != null) RowViewMeta(rowView.height) else null)
+    override fun set(row: Long, view: RowView?) {
+        set(row, if (view != null) ViewMeta(view.cellHeight, null) else null)
     }
 
-    private fun set(row: Long, rowViewMeta: RowViewMeta?) {
+    private fun set(row: Long, viewMeta: ViewMeta?) {
         val (oldRef, newRef) = tableViewRef.refAction {
             it.copy(
-                rowViews = if (rowViewMeta != null)
-                    it.rowViews.put(row, rowViewMeta)
+                rowViews = if (viewMeta != null)
+                    it.rowViews.put(row, viewMeta)
                 else
                     it.rowViews.remove(row)
             )
@@ -377,12 +528,7 @@ class BaseTableView internal constructor(
         val old = oldView[row]
         val new = newView[row]
 
-        eventProcessor.publish(listOf(
-            TableViewListenerEvent(
-                Area(this, old),
-                Area(this, new)
-            )
-        ) as List<TableViewListenerEvent<Any>>)
+        eventProcessor.publish(listOf(TableViewListenerEvent<RowView>(old, new)) as List<TableViewListenerEvent<Any>>)
     }
 
     override fun set(columnHeader: ColumnHeader, row: Long, init: CellViewBuilder.() -> Unit) {
@@ -391,15 +537,15 @@ class BaseTableView internal constructor(
         set(columnHeader, row, cellViewBuilder.build())
     }
 
-    override fun set(columnHeader: ColumnHeader, row: Long, cellView: CellView?) {
-        set(columnHeader, row, if (cellView != null) CellViewMeta(cellView.height, cellView.width) else null)
+    override fun set(columnHeader: ColumnHeader, row: Long, view: CellView?) {
+        set(columnHeader, row, if (view != null) ViewMeta(view.cellHeight, view.cellWidth) else null)
     }
 
-    private fun set(columnHeader: ColumnHeader, row: Long, cellViewMeta: CellViewMeta?) {
+    internal fun set(columnHeader: ColumnHeader, row: Long, viewMeta: ViewMeta?) {
         val (oldRef, newRef) = tableViewRef.refAction {
             it.copy(
-                cellViews = if (cellViewMeta != null)
-                    it.cellViews.put(Pair(columnHeader, row), cellViewMeta)
+                cellViews = if (viewMeta != null)
+                    it.cellViews.put(Pair(columnHeader, row), viewMeta)
                 else
                     it.cellViews.remove(Pair(columnHeader, row))
             )
@@ -410,123 +556,254 @@ class BaseTableView internal constructor(
         val oldView = makeClone(ref = oldRef)
         val newView = makeClone(ref = newRef)
 
-        val old = oldView[columnHeader, row]
-        val new = newView[columnHeader, row]
+        val old = oldView[columnHeader][row]
+        val new = newView[columnHeader][row]
 
-        eventProcessor.publish(listOf(
-            TableViewListenerEvent(
-                Area(this, old),
-                Area(this, new)
-            )
-        ) as List<TableViewListenerEvent<Any>>)
-    }
-
-    override fun clone(): TableView {
-        return makeClone()
-    }
-
-    override fun clone(name: String): TableView {
-        return makeClone(name, true)
+        eventProcessor.publish(listOf(TableViewListenerEvent(old, new)))
     }
 
     override fun makeClone(name: String?, onRegistry: Boolean, ref: TableViewRef) = BaseTableView(name, onRegistry, AtomicReference(ref))
 }
 
-object DEFAULT_COLUMN_VIEW
-object DEFAULT_ROW_VIEW
+internal class ViewMeta(
+    val cellHeight: Long?,
+    val cellWidth: Long?
+)
 
-private const val STANDARD_WIDTH = 100L
-private const val STANDARD_HEIGHT = 20L
-
-// TODO Consider removing Area class completely
-class Area<T>(val view: TableView, val value: T?) {
-    internal fun toUnitArea() = Area<Any>(view, null)
-
-    override fun equals(other: Any?): Boolean {
-        return if (other is Area<*>)
-            this.value == other.value
-        else false
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(this.value)
-    }
-
-    override fun toString(): String {
-        return this.value.toString()
-    }
-}
-
-internal class ColumnViewMeta(
-    val width: Long
+class TableViewBuilder(
+    var cellHeight: Long? = null,
+    var cellWidth: Long? = null,
+    // TODO? var reader: (DestinationOsmosis<CellView>.() -> Unit)? = null
 ) {
-    fun toColumnView(tableView: TableView, columnHeader: ColumnHeader) = ColumnView(tableView, columnHeader, width)
+    internal fun build(): ViewMeta = ViewMeta(cellHeight, cellWidth)
 }
 
-// TODO We want to have on and onAny functions on the below view classes, so that we can subscribe to the columns/rows/cell they represent
-class ColumnView internal constructor(val tableView: TableView, val columnHeader: ColumnHeader, val width: Long = STANDARD_WIDTH) {
-    override fun toString(): String {
-        return "ColumnView(tableView=$tableView, columnHeader=$columnHeader, width=$width)"
-    }
-}
-
-class DefaultColumnView internal constructor(val width: Long = STANDARD_WIDTH) {
-    internal fun toColumnView(tableView: TableView, columnHeader: ColumnHeader) = ColumnView(tableView, columnHeader, width)
-
-    override fun toString(): String {
-        return "DefaultColumnView(width=$width)"
-    }
-}
-
-internal class RowViewMeta(
-    val height: Long
+class ColumnViewBuilder(
+    var cellWidth: Long? = null,
+    // TODO? var reader: (DestinationOsmosis<CellView>.() -> Unit)? = null
 ) {
-    fun toRowView(tableView: TableView, index: Long) = RowView(tableView, index, height)
+    internal fun build(): ViewMeta = ViewMeta(null, cellWidth)
 }
 
-class RowView internal constructor(val tableView: TableView, val index: Long, val height: Long = STANDARD_HEIGHT) {
-    override fun toString(): String {
-        return "RowView(tableView=$tableView, index=$index, height=$height)"
-    }
-}
-
-class DefaultRowView internal constructor(val height: Long = STANDARD_HEIGHT) {
-    internal fun toRowView(tableView: TableView, index: Long) = RowView(tableView, index, height)
-
-    override fun toString(): String {
-        return "DefaultRowView(height=$height)"
-    }
-}
-
-internal class CellViewMeta(
-    val height: Long,
-    val width: Long
+class RowViewBuilder(
+    var cellHeight: Long? = null,
+    // TODO? var reader: (DestinationOsmosis<CellView>.() -> Unit)? = null
 ) {
-    fun toCellView(tableView: TableView, columnHeader: ColumnHeader, index: Long) = CellView(tableView, columnHeader, index, height, width)
+    internal fun build(): ViewMeta = ViewMeta(cellHeight, null)
 }
 
-class CellView internal constructor(val tableView: TableView, val columnHeader: ColumnHeader, val index: Long, val height: Long = STANDARD_HEIGHT, val width: Long = STANDARD_WIDTH) {
-    override fun toString(): String {
-        return "CellView(tableView=$tableView, columnHeader=$columnHeader, index=$index, height=$height, width=$width)"
+class CellViewBuilder(
+    var cellHeight: Long? = null,
+    var cellWidth: Long? = null,
+    // TODO? var reader: (DestinationOsmosis<CellView>.() -> Unit)? = null
+) {
+    internal fun build(): ViewMeta = ViewMeta(cellHeight, cellWidth)
+}
+
+// TODO Add Iterable<DerivedCellView> for symmetry?
+class CellView(
+    val columnView: ColumnView,
+    val index: Long
+) {
+    var cellHeight: Long
+        get() {
+            val ref = tableView.tableViewRef.get()
+            return ref.cellViews[Pair(columnView.columnHeader, index)]?.cellHeight ?: columnView.tableView[index].cellHeight
+        }
+        set(height) {
+            tableView[this] = {
+                cellHeight = height
+            }
+        }
+
+    var cellWidth: Long
+        get() {
+            val ref = tableView.tableViewRef.get()
+            return ref.cellViews[Pair(columnView.columnHeader, index)]?.cellWidth ?: columnView.cellWidth
+        }
+        set(width) {
+            tableView[this] = {
+                cellWidth = width
+            }
+        }
+
+    val tableView: TableView
+        get() = columnView.tableView
+
+    val cell: Cell<*>?
+        get() = tableView.table?.let { return it[columnView.columnHeader][index] }
+
+    val derived: DerivedCellView
+        get() = createDerivedCellViewFromRef(this.tableView.tableViewRef.get(), columnView, index)
+}
+
+internal fun createDerivedCellViewFromRef(ref: TableViewRef, columnView: ColumnView, index: Long): DerivedCellView {
+    val cellViewMeta = ref.cellViews[Pair(columnView.columnHeader, index)]
+    val defaultCellView = ref.defaultCellView
+
+    val height = cellViewMeta?.cellHeight
+        ?: ref.rowViews[index]?.cellHeight
+        ?: defaultCellView.cellHeight
+        ?: STANDARD_CELL_HEIGHT
+
+    val width = cellViewMeta?.cellWidth
+        ?: ref.columnViews[columnView.columnHeader]?.cellWidth
+        ?: defaultCellView.cellWidth
+        ?: STANDARD_CELL_WIDTH
+
+    return DerivedCellView(columnView, index, height, width)
+}
+
+// TODO We could also have a DerivedColumnView and a DerivedRowView
+class DerivedCellView internal constructor(
+    val columnView: ColumnView,
+    val index: Long,
+    val cellHeight: Long,
+    val cellWidth: Long
+) {
+    val tableView: TableView
+        get() = columnView.tableView
+
+    val cell: Cell<*>?
+        get() = tableView.table?.let { return it[columnView.columnHeader][index] }
+}
+
+class ColumnView internal constructor(
+    val tableView: TableView,
+    val columnHeader: ColumnHeader
+) : Iterable<DerivedCellView> {
+    var cellWidth: Long
+        get() {
+            val ref = tableView.tableViewRef.get()
+            return ref.columnViews[columnHeader]?.cellWidth ?: ref.defaultCellView.cellWidth ?: STANDARD_CELL_WIDTH
+        }
+        set(width) {
+            tableView[this] = {
+                cellWidth = width
+            }
+        }
+
+    // Note: cellViews return the defined CellViews, while the TableView iterator
+    // returns the calculated cell views for current cells
+    val cellViews: Sequence<CellView>
+        get() = tableView.tableViewRef.get()
+            .cellViews
+            .keys()
+            .filter { it.first == columnHeader }
+            .asSequence()
+            .map {
+                CellView(ColumnView(this.tableView, it.first), it.second)
+            }
+
+    operator fun get(index: Long): CellView = tableView[columnHeader, index]
+
+    operator fun get(index: Int) = get(index.toLong())
+
+    // TODO Does this need to care about index relations?
+    operator fun get(row: Row) = get(row.index)
+
+    operator fun set(index: Long, init: CellViewBuilder.() -> Unit) { tableView[columnHeader, index] = init }
+
+    operator fun set(index: Int, init: CellViewBuilder.() -> Unit) { this[index.toLong()] = init }
+
+    operator fun set(index: Long, view: CellView?) { tableView[columnHeader, index] = view }
+
+    operator fun set(index: Int, view: CellView?) { this[index.toLong()] = view }
+
+    operator fun set(row: Row, view: CellView?) = set(row.index, view)
+
+    override fun iterator(): Iterator<DerivedCellView> {
+        val ref = tableView.tableViewRef.get()
+        val table = ref.table
+            ?: return object : Iterator<DerivedCellView> {
+                override fun hasNext() = false
+                override fun next() = throw NoSuchElementException()
+            }
+
+        val tableRef = table.tableRef.get()
+        val columnMeta = tableRef.columns[columnHeader]
+            ?: return object : Iterator<DerivedCellView> {
+                override fun hasNext() = false
+                override fun next() = throw NoSuchElementException()
+            }
+
+        // TODO Any need to filter our prenatal, or those are empty columns anyway?
+
+        val values = tableRef.columnCells[columnHeader] ?: throw InvalidColumnException(columnHeader)
+        val columnIterator = values.asSequence().map { it.component2().toCell(BaseColumn(table, columnHeader, columnMeta.columnOrder), it.component1()) }.iterator()
+
+        return object : Iterator<DerivedCellView> {
+            override fun hasNext() = columnIterator.hasNext()
+            override fun next(): DerivedCellView {
+                val cell = columnIterator.next()
+                val columnView = ColumnView(this@ColumnView.tableView, cell.column.columnHeader)
+                return createDerivedCellViewFromRef(ref, columnView, cell.index)
+            }
+        }
     }
 }
 
-class ColumnViewBuilder(var width: Long = STANDARD_WIDTH) {
-    internal fun build(): ColumnViewMeta = ColumnViewMeta(width)
-}
+class RowView internal constructor(
+    val tableView: TableView,
+    val index: Long
+) : Iterable<DerivedCellView> {
+    var cellHeight: Long
+        get() {
+            val ref = tableView.tableViewRef.get()
+            return ref.rowViews[index]?.cellHeight ?: ref.defaultCellView.cellHeight ?: STANDARD_CELL_HEIGHT
+        }
+        set(height) {
+            tableView[this] = {
+                cellHeight = height
+            }
+        }
 
-class RowViewBuilder(var height: Long = STANDARD_HEIGHT) {
-    internal fun build(): RowViewMeta = RowViewMeta(height)
-}
+    // Note: cellViews return the defined CellViews, while the TableView iterator
+    // returns the calculated cell views for current cells
+    val cellViews: Sequence<CellView>
+        get() = TODO()
 
-class CellViewBuilder(var height: Long = STANDARD_HEIGHT, var width: Long = STANDARD_WIDTH) {
-    internal fun build(): CellViewMeta = CellViewMeta(height, width)
-}
+    operator fun get(vararg header: String): CellView = tableView[ColumnHeader(*header), index]
 
-class DefaultColumnViewBuilder(var width: Long = STANDARD_WIDTH) {
-    internal fun build(): DefaultColumnView = DefaultColumnView(width)
-}
+    operator fun get(columnHeader: ColumnHeader): CellView = tableView[columnHeader, index]
 
-class DefaultRowViewBuilder(var height: Long = STANDARD_HEIGHT) {
-    internal fun build(): DefaultRowView = DefaultRowView(height)
+    operator fun get(columnView: ColumnView): CellView = tableView[columnView.columnHeader, index]
+
+    operator fun get(column: Column): CellView = tableView[column.columnHeader, index]
+
+    operator fun set(vararg header: String, init: CellViewBuilder.() -> Unit) { tableView[ColumnHeader(*header), index] = init }
+
+    operator fun set(columnHeader: ColumnHeader, init: CellViewBuilder.() -> Unit) { tableView[columnHeader, index] = init }
+
+    operator fun set(columnView: ColumnView, init: CellViewBuilder.() -> Unit) { tableView[columnView.columnHeader, index] = init }
+
+    operator fun set(column: Column, init: CellViewBuilder.() -> Unit) { tableView[column.columnHeader, index] = init }
+
+    operator fun set(vararg header: String, view: CellView?) { tableView[ColumnHeader(*header), index] = view }
+
+    operator fun set(columnHeader: ColumnHeader, view: CellView?) { tableView[columnHeader, index] = view }
+
+    operator fun set(columnView: ColumnView, view: CellView?) { tableView[columnView.columnHeader, index] = view }
+
+    operator fun set(column: Column, view: CellView?) { tableView[column.columnHeader, index] = view }
+
+    override fun iterator(): Iterator<DerivedCellView> {
+        val ref = tableView.tableViewRef.get()
+        val table = ref.table
+            ?: return object : Iterator<DerivedCellView> {
+                override fun hasNext() = false
+                override fun next() = throw NoSuchElementException()
+            }
+
+        val rowIterator = table[IndexRelation.AT, index].iterator()
+
+        return object : Iterator<DerivedCellView> {
+            override fun hasNext() = rowIterator.hasNext()
+            override fun next(): DerivedCellView {
+                val cell = rowIterator.next()
+                val columnView = ColumnView(this@RowView.tableView, cell.column.columnHeader)
+                return createDerivedCellViewFromRef(ref, columnView, cell.index)
+            }
+        }
+    }
 }

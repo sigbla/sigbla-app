@@ -7,7 +7,7 @@ import kotlin.math.absoluteValue
 fun main() {
     val table = Table["test"]
     val tableView = TableView[table]
-    tableView.show()
+    show(tableView)
 
     table["B", 0] = sum(table["A", 0]..table["A", 9])
 

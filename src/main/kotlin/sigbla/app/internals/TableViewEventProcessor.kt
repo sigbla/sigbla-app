@@ -83,8 +83,10 @@ internal class TableViewEventProcessor {
             //      been altered just before, but after we added to the tableViewListeners..
             //      It might the listener gets duplicates..
             if (!eventReceiver.skipHistory) {
-                listenerRefEvent.listenerEvent(tableView.clone().asSequence().map {
-                    TableViewListenerEvent(it.toUnitArea(), it as Area<Any>)
+                // TODO This also needs to share other views..
+                listenerRefEvent.listenerEvent(clone(tableView).asSequence().map {
+                    // TODO Both old/new should be clones..
+                    TableViewListenerEvent(DerivedCellView(it.columnView, it.index, it.cellHeight, it.cellWidth), it)
                 })
             }
         }
@@ -96,11 +98,11 @@ internal class TableViewEventProcessor {
         return tableViewListeners.size > 0
     }
 
-    internal fun publish(cells: List<TableViewListenerEvent<Any>>) {
+    internal fun publish(views: List<TableViewListenerEvent<Any>>) {
         val buffer = eventBuffer.get()
 
         if (buffer != null) {
-            buffer.addAll(cells)
+            buffer.addAll(views)
 
             activeListener.get()?.let {
                 activeListeners.get()?.add(it) ?: activeListeners.set(mutableSetOf(it))
@@ -109,7 +111,7 @@ internal class TableViewEventProcessor {
             return
         }
 
-        eventBuffer.set(cells.toMutableList())
+        eventBuffer.set(views.toMutableList())
 
         try {
             while (true) {

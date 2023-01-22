@@ -44,9 +44,6 @@ internal object Registry {
         if (view !is BaseTableView) throw InvalidTableViewException()
 
         view.eventProcessor.shutdown()
-        view.tableViewRef.set(TableViewRef(
-            DefaultColumnView(),
-            DefaultRowView()
-        ))
+        view.tableViewRef.set(TableViewRef())
     }
 }

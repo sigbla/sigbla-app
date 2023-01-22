@@ -438,7 +438,23 @@ fun main() {
         }
     }
 
-    tableView.show()
+    table[1]["A", "B"] = {
+
+    }
+
+    // TODO
+    /*
+    on(table["A"] or table["B", 1] or table["C", 1]..table["C", 10] or etc) calc {
+        this["D", 0] = ...
+    }
+
+    or rely on Table, Row, Column, CellRange, Cell having Iterable<Cell<*>> implementations
+    on(table["A"], table["B", 1], table["C", 1]..table["C", 10], etc) calc {
+        this["D", 0] = ...
+    }
+     */
+
+    show(tableView)
 
     println("END")
 }

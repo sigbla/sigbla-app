@@ -21,13 +21,19 @@ fun main() {
     }
 
     val tableView = TableView[table]
-    tableView.show()
+    show(tableView)
 
+    /*
     tableView[DEFAULT_COLUMN_VIEW] = {
         width = 10
     }
     tableView[DEFAULT_ROW_VIEW] = {
         height = 10
+    }
+     */
+    tableView[TableView] = {
+        cellWidth = 10
+        cellHeight = 10
     }
 
     Thread.sleep(15000)
