@@ -56,6 +56,7 @@ class ColumnHeader(vararg header: String) : Comparable<ColumnHeader> {
     operator fun component5() = this[5]
 }
 
+// TODO Should the be sealed rather than abstract? Or just a normal class with no BaseColumn?
 abstract class Column internal constructor(
     val table: Table,
     // TODO Rename to header and order?
@@ -264,7 +265,6 @@ class BaseColumn internal constructor(
     }
 
     override fun iterator(): Iterator<Cell<*>> {
-        // TODO Operate on clone
         val values = table.tableRef.get().columnCells[this.columnHeader] ?: throw InvalidColumnException(this)
         return values.asSequence().map { it.component2().toCell(this, it.component1()) }.iterator()
     }

@@ -14,6 +14,7 @@ import com.github.andrewoma.dexx.collection.Map as PMap
 import com.github.andrewoma.dexx.collection.SortedMap as PSortedMap
 import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
 
+// TODO Should the be sealed rather than abstract? Or just a normal class with no BaseTable?
 abstract class Table(val name: String?) : Iterable<Cell<*>> {
     @Volatile
     var closed: Boolean = false
@@ -148,6 +149,7 @@ abstract class Table(val name: String?) : Iterable<Cell<*>> {
 
     // -----
 
+    // TODO Can't we just replace these and similar with vararg?
     operator fun set(header1: String, index: Long, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[header1][index]).init()
 
     operator fun set(header1: String, header2: String, index: Long, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[header1, header2][index]).init()
@@ -486,14 +488,17 @@ abstract class Table(val name: String?) : Iterable<Cell<*>> {
     fun contains(vararg header: String): Boolean = contains(ColumnHeader(*header))
 
     override fun iterator(): Iterator<Cell<*>> {
-        // TODO This needs to work with the ref snapshot
+        val ref = tableRef.get()
+        val columnIterator = ref.headers.map { BaseColumn(this, it.first, it.second.columnOrder) }.iterator()
+
         return object : Iterator<Cell<*>> {
-            private val columnIterator = columns.iterator()
             private var cellIterator = nextCellIterator()
 
             private fun nextCellIterator(): Iterator<Cell<*>> {
                 while (columnIterator.hasNext()) {
-                    val itr = columnIterator.next().iterator()
+                    val column = columnIterator.next()
+                    val values = ref.columnCells[column.columnHeader] ?: throw InvalidColumnException(column.columnHeader)
+                    val itr = values.asSequence().map { it.component2().toCell(column, it.component1()) }.iterator()
                     if (itr.hasNext()) return itr
                 }
 

@@ -115,6 +115,11 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
     // TODO: Implement assignment ops?
 }
 
+// TODO Implement something that allows us to navigate relative to a cell?
+//      Ex: table["A", 1] up 1 returns table["A", 0], or
+//          table["A", 1] left 1 returns table["B", 1] etc..
+//      But it would need to be able to cope with no-existing columns..
+// TODO Add Iterable<Cell<*>> for symmetry
 sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
     abstract val value: T
 

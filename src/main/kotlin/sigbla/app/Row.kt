@@ -7,6 +7,7 @@ import kotlin.math.min
 import kotlin.math.max
 
 // TODO Add Iterable<Cell<*>> and other operator functions as we have on Column
+// TODO Should the be sealed rather than abstract? Or just a normal class with no BaseRow?
 abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
     abstract val table: Table
 
@@ -52,7 +53,6 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
     }
 
     override fun iterator(): Iterator<Cell<*>> {
-        // TODO Should probably use a cloned table for all iterators, like with events
         val ref = table.tableRef.get()
         val columnCellMap = ref.columnCells
 
