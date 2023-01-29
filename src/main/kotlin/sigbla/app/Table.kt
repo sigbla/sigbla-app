@@ -68,8 +68,9 @@ abstract class Table(val name: String?) : Iterable<Cell<*>> {
 
     operator fun get(index: Int): Row = get(IndexRelation.AT, index)
 
-    operator fun get(indexRelation: IndexRelation, index: Int): Row =
-        BaseRow(this, indexRelation, index.toLong())
+    operator fun get(row: Row): Row = get(row.indexRelation, row.index)
+
+    operator fun get(indexRelation: IndexRelation, index: Int): Row = BaseRow(this, indexRelation, index.toLong())
 
     operator fun get(header1: String, index: Int): Cell<*> = this[header1][index]
 

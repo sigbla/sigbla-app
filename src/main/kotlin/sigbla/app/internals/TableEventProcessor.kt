@@ -163,11 +163,17 @@ internal class TableEventProcessor {
             listenerRef.key = key
 
             if (!eventReceiver.skipHistory) {
-                val tc = clone(table)
-                listenerRefEvent.version = tc.tableRef.get().version
-                listenerRefEvent.listenerEvent(tc.asSequence().map {
-                    // TODO UnitCell must point to separate table clone
-                    TableListenerEvent(UnitCell(it.column, it.index), it) as TableListenerEvent<Any, Any>
+                val ref = table.tableRef.get()
+                val oldTable = table.makeClone(ref = TableRef())
+                val newTable = table.makeClone(ref = ref)
+                listenerRefEvent.version = ref.version
+                listenerRefEvent.listenerEvent(newTable.asSequence().map {
+                    val oldColumn = BaseColumn(
+                        oldTable,
+                        it.column.columnHeader,
+                        ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                    )
+                    TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
                 })
             }
         }
@@ -201,11 +207,17 @@ internal class TableEventProcessor {
             listenerRef.key = key
 
             if (!eventReceiver.skipHistory) {
-                val tc = clone(column.table)
-                listenerRefEvent.version = tc.tableRef.get().version
-                listenerRefEvent.listenerEvent(tc[column].asSequence().map {
-                    // TODO UnitCell must point to separate table clone
-                    TableListenerEvent(UnitCell(it.column, it.index), it) as TableListenerEvent<Any, Any>
+                val ref = column.table.tableRef.get()
+                val oldTable = column.table.makeClone(ref = TableRef())
+                val newTable = column.table.makeClone(ref = ref)
+                listenerRefEvent.version = ref.version
+                listenerRefEvent.listenerEvent(newTable[column].asSequence().map {
+                    val oldColumn = BaseColumn(
+                        oldTable,
+                        it.column.columnHeader,
+                        ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                    )
+                    TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
                 })
             }
         }
@@ -238,10 +250,22 @@ internal class TableEventProcessor {
             rowListeners[key] = listenerRefEvent
             listenerRef.key = key
 
-            // TODO + clone + skipHistory + version
-            //listenerRefEvent.listenerEvent(row.asSequence().map {
-            //    ListenerEvent(UnitCell(it.column, it.index), it) as ListenerEvent<Any, Any>
-            //})
+            if (!eventReceiver.skipHistory) {
+                val ref = row.table.tableRef.get()
+                val oldTable = row.table.makeClone(ref = TableRef())
+                val newTable = row.table.makeClone(ref = ref)
+                listenerRefEvent.version = ref.version
+                listenerRefEvent.listenerEvent(newTable[row].asSequence().map {
+                    val oldColumn = BaseColumn(
+                        oldTable,
+                        it.column.columnHeader,
+                        ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                    )
+                    // TODO While this will always be a UnitCell on the old table,
+                    //  still need to take into account the index relation..?
+                    TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
+                })
+            }
         }
         return listenerRef
     }
@@ -273,11 +297,17 @@ internal class TableEventProcessor {
             listenerRef.key = key
 
             if (!eventReceiver.skipHistory) {
-                val tc = clone(cellRange.table)
-                listenerRefEvent.version = tc.tableRef.get().version
-                listenerRefEvent.listenerEvent(tc[cellRange].asSequence().map {
-                    // TODO UnitCell must point to separate table clone
-                    TableListenerEvent(UnitCell(it.column, it.index), it) as TableListenerEvent<Any, Any>
+                val ref = cellRange.table.tableRef.get()
+                val oldTable = cellRange.table.makeClone(ref = TableRef())
+                val newTable = cellRange.table.makeClone(ref = ref)
+                listenerRefEvent.version = ref.version
+                listenerRefEvent.listenerEvent(newTable[cellRange].asSequence().map {
+                    val oldColumn = BaseColumn(
+                        oldTable,
+                        it.column.columnHeader,
+                        ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                    )
+                    TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
                 })
             }
         }
@@ -311,11 +341,17 @@ internal class TableEventProcessor {
             listenerRef.key = key
 
             if (!eventReceiver.skipHistory) {
-                val tc = clone(cell.table)
-                listenerRefEvent.version = tc.tableRef.get().version
-                listenerRefEvent.listenerEvent(tc[cell].asSequence().map {
-                    // TODO UnitCell must point to separate table clone
-                    TableListenerEvent(UnitCell(it.column, it.index), it) as TableListenerEvent<Any, Any>
+                val ref = cell.table.tableRef.get()
+                val oldTable = cell.table.makeClone(ref = TableRef())
+                val newTable = cell.table.makeClone(ref = ref)
+                listenerRefEvent.version = ref.version
+                listenerRefEvent.listenerEvent(newTable[cell].asSequence().map {
+                    val oldColumn = BaseColumn(
+                        oldTable,
+                        it.column.columnHeader,
+                        ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                    )
+                    TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
                 })
             }
         }
@@ -388,6 +424,7 @@ internal class TableEventProcessor {
                     .values
                     .forEach { listenerRef ->
                         val rowBatch = Collections.unmodifiableList(batch.filter {
+                            // TODO This filtering will need to take into account the index relation
                             return@filter it.newValue.index == listenerRef.listenerReference.row.index
                                     || it.oldValue.index == listenerRef.listenerReference.row.index
                         }.filter { it.newValue.table.tableRef.get().version > listenerRef.version })

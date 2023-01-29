@@ -257,6 +257,8 @@ class TableListenerTest {
         var change: Number = 0
 
         on(t) {
+            skipHistory = true
+
             events {
                 change = newTable["A", 1] - oldTable["A", 1]
             }
@@ -414,6 +416,83 @@ class TableListenerTest {
         assertEquals(202L, v3New)
 
         assertTrue(200L in t["A", 0])
+    }
+
+    @Test
+    fun `old table is an empty clone of source table on first pass`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = 100
+
+        var count = 0
+
+        on(t) {
+            events {
+                assertEquals(0, oldTable.iterator().asSequence().count())
+                assertEquals(1, newTable.iterator().asSequence().count())
+                count += count()
+            }
+
+            off(this)
+        }
+
+        assertEquals(1, count)
+
+        on(t) {
+            skipHistory = true
+
+            events {
+                assertEquals(1, oldTable.iterator().asSequence().count())
+                assertEquals(1, newTable.iterator().asSequence().count())
+                count += count()
+            }
+        }
+
+        t["A", 0] = 200
+
+        assertEquals(2, count)
+    }
+
+    @Test
+    fun `old and new table is a clone of source table`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = 100
+
+        var count = 0
+
+        on(t) {
+            events {
+                oldTable["A", 0] = source["A", 0] + 200
+                newTable["A", 0] = source["A", 0] + 300
+
+                assertEquals(source["A", 0] + 200, oldTable["A", 0])
+                assertEquals(source["A", 0] + 300, newTable["A", 0])
+
+                count += count()
+            }
+        }
+
+        // The second listener is executed after the first listener, and its
+        // old/new table should reflect changes introduced by the first listener.
+        on(t) {
+            skipHistory = true
+
+            events {
+                assertEquals(source["A", 0] + 200, oldTable["A", 0])
+                assertEquals(source["A", 0] + 300, newTable["A", 0])
+
+                count += count()
+            }
+        }
+
+        assertEquals(100L, t["A", 0])
+
+        t["A", 0] = 50
+
+        assertEquals(50L, t["A", 0])
+
+        assertEquals(3, count)
     }
 
     // TODO Test type filters cases like on<A, B> etc..

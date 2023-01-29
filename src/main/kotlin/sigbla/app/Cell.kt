@@ -329,6 +329,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
         return compareTo(that) == 0
     }
 
+    // TODO Can remove this after adding iterator functionality
     fun asSequence(): Sequence<Cell<*>> = sequenceOf(this)
 
     infix fun `=`(value: BigDecimal) {
