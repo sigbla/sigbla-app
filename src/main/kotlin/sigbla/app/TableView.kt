@@ -41,30 +41,42 @@ import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 //      on<TableView>(tableView):
 //      on<TableView>(columnView):
 //      on<TableView>(rowView):
+//      on<TableView>(cellRangeView):
 //      on<TableView>(cellView):
 //      .
 //      on<ColumnView>(tableView):
 //      on<ColumnView>(columnView):
 //      on<ColumnView>(rowView):
+//      on<ColumnView>(cellRangeView):
 //      on<ColumnView>(cellView):
 //      .
 //      on<RowView>(tableView):
 //      on<RowView>(columnView):
 //      on<RowView>(rowView):
+//      on<RowView>(cellRangeView):
 //      on<RowView>(cellView):
+//      .
+//      on<CellRangeView>(tableView):
+//      on<CellRangeView>(columnView):
+//      on<CellRangeView>(rowView):
+//      on<CellRangeView>(cellRangeView):
+//      on<CellRangeView>(cellView):
 //      .
 //      on<CellView>(tableView):
 //      on<CellView>(columnView):
 //      on<CellView>(rowView):
+//      on<CellView>(cellRangeView):
 //      on<CellView>(cellView):
 //      .
+//      Not sure we want these below?
 //      on<Cell>(tableView) or on<O,N>(tableView):
 //      on<Cell>(columnView) or on<O,N>(columnView):
 //      on<Cell>(rowView) or on<O,N>(rowView):
 //      on<Cell>(cellView) or on<O,N>(cellView):
 
-private const val STANDARD_CELL_HEIGHT = 20L
-private const val STANDARD_CELL_WIDTH = 100L
+// TODO Consider if these should be internal?
+const val DEFAULT_CELL_HEIGHT = 20L
+const val DEFAULT_CELL_WIDTH = 100L
 
 // TODO Should the be sealed rather than abstract?
 abstract class TableView(val name: String?) : Iterable<DerivedCellView> {
@@ -130,6 +142,8 @@ abstract class TableView(val name: String?) : Iterable<DerivedCellView> {
     operator fun get(cell: Cell<*>): CellView = this[cell.column.columnHeader][cell.index]
 
     operator fun get(cellView: CellView) = this[cellView.columnView][cellView.index]
+
+    operator fun get(derivedCellView: DerivedCellView) = this[derivedCellView.columnView][derivedCellView.index].derived
 
     // -----
 
@@ -335,12 +349,12 @@ abstract class TableView(val name: String?) : Iterable<DerivedCellView> {
 }
 
 internal data class TableViewRef(
-    val defaultCellView: ViewMeta = ViewMeta(STANDARD_CELL_HEIGHT, STANDARD_CELL_WIDTH),
+    val defaultCellView: ViewMeta = ViewMeta(DEFAULT_CELL_HEIGHT, DEFAULT_CELL_WIDTH),
     val columnViews: PMap<ColumnHeader, ViewMeta> = PHashMap(),
     val rowViews: PMap<Long, ViewMeta> = PHashMap(),
     val cellViews: PMap<Pair<ColumnHeader, Long>, ViewMeta> = PHashMap(),
-    val table: Table? = null
-    // TODO Need version for event management like with TableRef
+    val table: Table? = null,
+    val version: Long = Long.MIN_VALUE,
     // TODO Need sorting?
 )
 
@@ -363,7 +377,8 @@ class BaseTableView internal constructor(
         set(table) {
             val (oldRef, newRef) = tableViewRef.refAction {
                 it.copy(
-                    table = table
+                    table = table,
+                    version = it.version + 1L
                 )
             }
 
@@ -401,12 +416,13 @@ class BaseTableView internal constructor(
     override var cellHeight: Long
         get() {
             val ref = tableView.tableViewRef.get()
-            return ref.defaultCellView.cellHeight ?: STANDARD_CELL_HEIGHT
+            return ref.defaultCellView.cellHeight ?: DEFAULT_CELL_HEIGHT
         }
         set(height) {
             val (oldRef, newRef) = tableViewRef.refAction {
                 it.copy(
-                    defaultCellView = ViewMeta(height, it.defaultCellView.cellWidth)
+                    defaultCellView = ViewMeta(height, it.defaultCellView.cellWidth),
+                    version = it.version + 1L
                 )
             }
 
@@ -421,12 +437,13 @@ class BaseTableView internal constructor(
     override var cellWidth: Long
         get() {
             val ref = tableView.tableViewRef.get()
-            return ref.defaultCellView.cellWidth ?: STANDARD_CELL_WIDTH
+            return ref.defaultCellView.cellWidth ?: DEFAULT_CELL_WIDTH
         }
         set(width) {
             val (oldRef, newRef) = tableViewRef.refAction {
                 it.copy(
-                    defaultCellView = ViewMeta(it.defaultCellView.cellHeight, width)
+                    defaultCellView = ViewMeta(it.defaultCellView.cellHeight, width),
+                    version = it.version + 1L
                 )
             }
 
@@ -441,7 +458,8 @@ class BaseTableView internal constructor(
     private fun set(viewMeta: ViewMeta) {
         val (oldRef, newRef) = tableViewRef.refAction {
             it.copy(
-                defaultCellView = viewMeta
+                defaultCellView = viewMeta,
+                version = it.version + 1L
             )
         }
 
@@ -485,7 +503,8 @@ class BaseTableView internal constructor(
                 columnViews = if (viewMeta != null)
                     it.columnViews.put(columnHeader, viewMeta)
                 else
-                    it.columnViews.remove(columnHeader)
+                    it.columnViews.remove(columnHeader),
+                version = it.version + 1L
             )
         }
 
@@ -516,7 +535,8 @@ class BaseTableView internal constructor(
                 rowViews = if (viewMeta != null)
                     it.rowViews.put(row, viewMeta)
                 else
-                    it.rowViews.remove(row)
+                    it.rowViews.remove(row),
+                version = it.version + 1L
             )
         }
 
@@ -547,7 +567,8 @@ class BaseTableView internal constructor(
                 cellViews = if (viewMeta != null)
                     it.cellViews.put(Pair(columnHeader, row), viewMeta)
                 else
-                    it.cellViews.remove(Pair(columnHeader, row))
+                    it.cellViews.remove(Pair(columnHeader, row)),
+                version = it.version + 1L
             )
         }
 
@@ -600,11 +621,10 @@ class CellViewBuilder(
     internal fun build(): ViewMeta = ViewMeta(cellHeight, cellWidth)
 }
 
-// TODO Add Iterable<DerivedCellView> for symmetry?
 class CellView(
     val columnView: ColumnView,
     val index: Long
-) {
+) : Iterable<DerivedCellView> {
     var cellHeight: Long
         get() {
             val ref = tableView.tableViewRef.get()
@@ -635,6 +655,21 @@ class CellView(
 
     val derived: DerivedCellView
         get() = createDerivedCellViewFromRef(this.tableView.tableViewRef.get(), columnView, index)
+
+    override fun iterator(): Iterator<DerivedCellView> {
+        val ref = tableView.tableViewRef.get()
+        if (ref.table == null)
+            return object : Iterator<DerivedCellView> {
+                override fun hasNext() = false
+                override fun next() = throw NoSuchElementException()
+            }
+
+        val derivedCellView = createDerivedCellViewFromRef(ref, columnView, index)
+
+        return listOf(derivedCellView).iterator()
+    }
+
+    // TODO toString, hashCode, equals
 }
 
 internal fun createDerivedCellViewFromRef(ref: TableViewRef, columnView: ColumnView, index: Long): DerivedCellView {
@@ -644,12 +679,12 @@ internal fun createDerivedCellViewFromRef(ref: TableViewRef, columnView: ColumnV
     val height = cellViewMeta?.cellHeight
         ?: ref.rowViews[index]?.cellHeight
         ?: defaultCellView.cellHeight
-        ?: STANDARD_CELL_HEIGHT
+        ?: DEFAULT_CELL_HEIGHT
 
     val width = cellViewMeta?.cellWidth
         ?: ref.columnViews[columnView.columnHeader]?.cellWidth
         ?: defaultCellView.cellWidth
-        ?: STANDARD_CELL_WIDTH
+        ?: DEFAULT_CELL_WIDTH
 
     return DerivedCellView(columnView, index, height, width)
 }
@@ -660,12 +695,30 @@ class DerivedCellView internal constructor(
     val index: Long,
     val cellHeight: Long,
     val cellWidth: Long
-) {
+) : Iterable<DerivedCellView> {
     val tableView: TableView
         get() = columnView.tableView
 
+    val cellView: CellView
+        get() = columnView[index]
+
     val cell: Cell<*>?
         get() = tableView.table?.let { return it[columnView.columnHeader][index] }
+
+    override fun iterator(): Iterator<DerivedCellView> {
+        val ref = tableView.tableViewRef.get()
+        if (ref.table == null)
+            return object : Iterator<DerivedCellView> {
+                override fun hasNext() = false
+                override fun next() = throw NoSuchElementException()
+            }
+
+        val derivedCellView = createDerivedCellViewFromRef(ref, columnView, index)
+
+        return listOf(derivedCellView).iterator()
+    }
+
+    // TODO toString, hashCode, equals
 }
 
 class ColumnView internal constructor(
@@ -675,7 +728,7 @@ class ColumnView internal constructor(
     var cellWidth: Long
         get() {
             val ref = tableView.tableViewRef.get()
-            return ref.columnViews[columnHeader]?.cellWidth ?: ref.defaultCellView.cellWidth ?: STANDARD_CELL_WIDTH
+            return ref.columnViews[columnHeader]?.cellWidth ?: ref.defaultCellView.cellWidth ?: DEFAULT_CELL_WIDTH
         }
         set(width) {
             tableView[this] = {
@@ -683,7 +736,7 @@ class ColumnView internal constructor(
             }
         }
 
-    // Note: cellViews return the defined CellViews, while the TableView iterator
+    // Note: cellViews return the defined CellViews, while the ColumnView iterator
     // returns the calculated cell views for current cells
     val cellViews: Sequence<CellView>
         get() = tableView.tableViewRef.get()
@@ -741,6 +794,21 @@ class ColumnView internal constructor(
             }
         }
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ColumnView
+
+        if (columnHeader != other.columnHeader) return false
+
+        return true
+    }
+
+    override fun hashCode() = columnHeader.hashCode()
+
+    override fun toString() = columnHeader.toString()
 }
 
 class RowView internal constructor(
@@ -750,7 +818,7 @@ class RowView internal constructor(
     var cellHeight: Long
         get() {
             val ref = tableView.tableViewRef.get()
-            return ref.rowViews[index]?.cellHeight ?: ref.defaultCellView.cellHeight ?: STANDARD_CELL_HEIGHT
+            return ref.rowViews[index]?.cellHeight ?: ref.defaultCellView.cellHeight ?: DEFAULT_CELL_HEIGHT
         }
         set(height) {
             tableView[this] = {
@@ -758,10 +826,17 @@ class RowView internal constructor(
             }
         }
 
-    // Note: cellViews return the defined CellViews, while the TableView iterator
+    // Note: cellViews return the defined CellViews, while the RowView iterator
     // returns the calculated cell views for current cells
     val cellViews: Sequence<CellView>
-        get() = TODO()
+        get() = tableView.tableViewRef.get()
+            .cellViews
+            .keys()
+            .filter { it.second == index }
+            .asSequence()
+            .map {
+                CellView(ColumnView(this.tableView, it.first), it.second)
+            }
 
     operator fun get(vararg header: String): CellView = tableView[ColumnHeader(*header), index]
 
@@ -806,4 +881,19 @@ class RowView internal constructor(
             }
         }
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as RowView
+
+        if (index != other.index) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int = index.hashCode()
+
+    override fun toString(): String = index.toString()
 }

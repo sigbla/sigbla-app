@@ -2,6 +2,7 @@ package sigbla.app
 
 import sigbla.app.exceptions.InvalidSequenceException
 import sigbla.app.exceptions.SigblaAppException
+import kotlin.reflect.KClass
 
 abstract class TableViewListenerReference {
     abstract val name: String?
@@ -18,6 +19,7 @@ data class TableViewListenerEvent<T>(val oldValue: T, val newValue: T)
 
 class TableViewEventReceiver<S, T>(
     val source: S,
+    val type: KClass<*> = Any::class,
     private val typeFilter: Sequence<TableViewListenerEvent<Any>>.() -> Sequence<TableViewListenerEvent<T>>
 ) {
     lateinit var reference: TableViewListenerReference

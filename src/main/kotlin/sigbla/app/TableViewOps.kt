@@ -14,7 +14,8 @@ fun remove(column: ColumnView) {
 
     val (oldRef, newRef) = tableViewRef.refAction {
         it.copy(
-            columnViews = it.columnViews.remove(columnHeader)
+            columnViews = it.columnViews.remove(columnHeader),
+            version = it.version + 1L
         )
     }
 
@@ -35,7 +36,8 @@ fun remove(row: RowView) {
 
     val (oldRef, newRef) = tableViewRef.refAction {
         it.copy(
-            rowViews = it.rowViews.remove(row.index)
+            rowViews = it.rowViews.remove(row.index),
+            version = it.version + 1L
         )
     }
 
@@ -58,7 +60,8 @@ fun remove(cell: CellView) {
 
     val (oldRef, newRef) = tableViewRef.refAction {
         it.copy(
-            cellViews = it.cellViews.remove(Pair(columnHeader, index))
+            cellViews = it.cellViews.remove(Pair(columnHeader, index)),
+            version = it.version + 1L
         )
     }
 
@@ -84,7 +87,6 @@ fun show(tableView: TableView) = SigblaBackend.openView(tableView)
 
 // ---
 
-// TODO You should be able to do on<DerivedCellView>(..) and get the derived cell views when table|column|row|cellView is applied
 inline fun <reified T> on(tableView: TableView, noinline init: TableViewEventReceiver<TableView, T>.() -> Unit): TableViewListenerReference {
     return on(tableView, T::class, init as TableViewEventReceiver<TableView, Any>.() -> Unit)
 }
@@ -92,7 +94,7 @@ inline fun <reified T> on(tableView: TableView, noinline init: TableViewEventRec
 fun on(tableView: TableView, type: KClass<*> = Any::class, init: TableViewEventReceiver<TableView, Any>.() -> Unit): TableViewListenerReference {
     val eventReceiver = when {
         type == Any::class -> TableViewEventReceiver<TableView, Any>(tableView) { this }
-        else -> TableViewEventReceiver(tableView) {
+        else -> TableViewEventReceiver(tableView, type) {
             this.filter {
                 type.isInstance(it.oldValue) || type.isInstance(it.newValue)
             }
@@ -101,4 +103,84 @@ fun on(tableView: TableView, type: KClass<*> = Any::class, init: TableViewEventR
     return tableView.eventProcessor.subscribe(tableView, eventReceiver, init)
 }
 
-// TODO Other on/off functions
+// ---
+
+inline fun <reified T> on(columnView: ColumnView, noinline init: TableViewEventReceiver<ColumnView, T>.() -> Unit): TableViewListenerReference {
+    return on(columnView, T::class, init as TableViewEventReceiver<ColumnView, Any>.() -> Unit)
+}
+
+fun on(columnView: ColumnView, type: KClass<*> = Any::class, init: TableViewEventReceiver<ColumnView, Any>.() -> Unit): TableViewListenerReference {
+    val eventReceiver = when {
+        type == Any::class -> TableViewEventReceiver<ColumnView, Any>(columnView) { this }
+        else -> TableViewEventReceiver(columnView, type) {
+            this.filter {
+                type.isInstance(it.oldValue) || type.isInstance(it.newValue)
+            }
+        }
+    }
+    return columnView.tableView.eventProcessor.subscribe(columnView, eventReceiver, init)
+}
+
+// ---
+
+inline fun <reified T> on(rowView: RowView, noinline init: TableViewEventReceiver<RowView, T>.() -> Unit): TableViewListenerReference {
+    return on(rowView, T::class, init as TableViewEventReceiver<RowView, Any>.() -> Unit)
+}
+
+fun on(rowView: RowView, type: KClass<*> = Any::class, init: TableViewEventReceiver<RowView, Any>.() -> Unit): TableViewListenerReference {
+    val eventReceiver = when {
+        type == Any::class -> TableViewEventReceiver<RowView, Any>(rowView) { this }
+        else -> TableViewEventReceiver(rowView, type) {
+            this.filter {
+                type.isInstance(it.oldValue) || type.isInstance(it.newValue)
+            }
+        }
+    }
+    return rowView.tableView.eventProcessor.subscribe(rowView, eventReceiver, init)
+}
+
+// ---
+
+// TODO CellRange on functions
+
+// ---
+
+inline fun <reified T> on(cellView: CellView, noinline init: TableViewEventReceiver<CellView, T>.() -> Unit): TableViewListenerReference {
+    return on(cellView, T::class, init as TableViewEventReceiver<CellView, Any>.() -> Unit)
+}
+
+fun on(cellView: CellView, type: KClass<*> = Any::class, init: TableViewEventReceiver<CellView, Any>.() -> Unit): TableViewListenerReference {
+    val eventReceiver = when {
+        type == Any::class -> TableViewEventReceiver<CellView, Any>(cellView) { this }
+        else -> TableViewEventReceiver(cellView, type) {
+            this.filter {
+                type.isInstance(it.oldValue) || type.isInstance(it.newValue)
+            }
+        }
+    }
+    return cellView.tableView.eventProcessor.subscribe(cellView, eventReceiver, init)
+}
+
+// ---
+
+inline fun <reified T> on(derivedCellView: DerivedCellView, noinline init: TableViewEventReceiver<DerivedCellView, T>.() -> Unit): TableViewListenerReference {
+    return on(derivedCellView, T::class, init as TableViewEventReceiver<DerivedCellView, Any>.() -> Unit)
+}
+
+fun on(derivedCellView: DerivedCellView, type: KClass<*> = Any::class, init: TableViewEventReceiver<DerivedCellView, Any>.() -> Unit): TableViewListenerReference {
+    val eventReceiver = when {
+        type == Any::class -> TableViewEventReceiver<DerivedCellView, Any>(derivedCellView) { this }
+        else -> TableViewEventReceiver(derivedCellView, type) {
+            this.filter {
+                type.isInstance(it.oldValue) || type.isInstance(it.newValue)
+            }
+        }
+    }
+    return derivedCellView.tableView.eventProcessor.subscribe(derivedCellView, eventReceiver, init)
+}
+
+// ---
+
+fun off(reference: TableViewListenerReference) = reference.unsubscribe()
+
+fun off(tableViewEventReceiver: TableViewEventReceiver<*, *>) = off(tableViewEventReceiver.reference)
