@@ -150,10 +150,6 @@ abstract class Column internal constructor(
         return columnOrder.compareTo(other.columnOrder)
     }
 
-    override fun toString(): String {
-        return columnHeader.toString()
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -165,9 +161,9 @@ abstract class Column internal constructor(
         return true
     }
 
-    override fun hashCode(): Int {
-        return columnHeader.hashCode()
-    }
+    override fun hashCode() = columnHeader.hashCode()
+
+    override fun toString() = columnHeader.toString()
 }
 
 class BaseColumn internal constructor(

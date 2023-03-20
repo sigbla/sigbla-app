@@ -456,6 +456,16 @@ fun main() {
         newTable[..] = ...
         oldTable[..] = ...
     }
+
+    It's probably best to use infix or, as it allows for better type-safty, and we can
+    also introduce infix and:
+
+    or = trigger on any update on either of the defined inputs
+    and = trigger when all defined inputs have updates
+
+    Example:
+
+    on((table["input", 1] or table["input", 2]) and table["button", 1]) ..
      */
 
     show(tableView)

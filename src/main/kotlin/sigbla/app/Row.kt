@@ -100,8 +100,6 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
         else -> indexRelation.compareTo(other.indexRelation)
     }
 
-    override fun toString(): String = index.toString()
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -114,7 +112,9 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
         return true
     }
 
-    override fun hashCode(): Int = index.hashCode()
+    override fun hashCode() = index.hashCode()
+
+    override fun toString() = index.toString()
 }
 
 class BaseRow internal constructor(override val table: Table, override val indexRelation: IndexRelation, override val index: Long) : Row()

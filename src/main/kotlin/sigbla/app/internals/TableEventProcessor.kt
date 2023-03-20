@@ -406,9 +406,9 @@ internal class TableEventProcessor {
                     .forEach { listenerRef ->
                         val columnBatch = Collections.unmodifiableList(batch.filter {
                             return@filter it.newValue.column == listenerRef.listenerReference.column
-                                    || it.newValue.column.columnHeader == listenerRef.listenerReference.column.columnHeader
+                                    || it.newValue.column.columnHeader == listenerRef.listenerReference.column.columnHeader // TODO Might not need this?
                                     || it.oldValue.column == listenerRef.listenerReference.column
-                                    || it.oldValue.column.columnHeader == listenerRef.listenerReference.column.columnHeader
+                                    || it.oldValue.column.columnHeader == listenerRef.listenerReference.column.columnHeader // TODO Might not need this?
                         }.filter { it.newValue.table.tableRef.get().version > listenerRef.version })
 
                         if (columnBatch.isNotEmpty()) {
@@ -455,18 +455,18 @@ internal class TableEventProcessor {
                         }
                     }
 
-                // TODO rowRangeListeners..
+                // TODO rowRangeListeners..? columnRange?
 
                 cellListeners
                     .values
                     .forEach { listenerRef ->
                         val cellBatch = Collections.unmodifiableList(batch.filter {
                             return@filter (listenerRef.listenerReference.cell.index == it.newValue.index
-                                    && (listenerRef.listenerReference.cell.column == it.newValue.column
-                                    || listenerRef.listenerReference.cell.column.columnHeader == it.newValue.column.columnHeader))
-                                    || (listenerRef.listenerReference.cell.index == it.oldValue.index
-                                    && (listenerRef.listenerReference.cell.column == it.oldValue.column
-                                    || listenerRef.listenerReference.cell.column.columnHeader == it.oldValue.column.columnHeader))
+                                            && (listenerRef.listenerReference.cell.column == it.newValue.column
+                                            || listenerRef.listenerReference.cell.column.columnHeader == it.newValue.column.columnHeader)) // TODO Is the columnHeader check really needed?
+                                        || (listenerRef.listenerReference.cell.index == it.oldValue.index
+                                            && (listenerRef.listenerReference.cell.column == it.oldValue.column
+                                            || listenerRef.listenerReference.cell.column.columnHeader == it.oldValue.column.columnHeader)) // TODO Is the columnHeader check really needed?
                         }.filter { it.newValue.table.tableRef.get().version > listenerRef.version })
 
                         if (cellBatch.isNotEmpty()) {

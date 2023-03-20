@@ -360,17 +360,11 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
         table[this] = value
     }
 
-    override fun equals(other: Any?): Boolean {
-        return this.compareTo(other) == 0
-    }
+    override fun equals(other: Any?) = this.compareTo(other) == 0
 
-    override fun hashCode(): Int {
-        return Objects.hash(this.value)
-    }
+    override fun hashCode() = Objects.hash(this.value)
 
-    override fun toString(): String {
-        return this.value.toString()
-    }
+    override fun toString() = this.value.toString()
 }
 
 class UnitCell internal constructor(column: Column, index: Long) : Cell<Unit>(column, index) {
