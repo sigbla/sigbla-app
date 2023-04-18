@@ -95,8 +95,8 @@ internal object SigblaBackend {
     }
 
     private fun areaContent(view: TableView, x: Long, y: Long, h: Long, w: Long, dims: Dimensions, dirtyCells: List<Cell<*>>? = null): List<PositionedContent> {
-        // TODO Consider using a stable snapshot ref for view/table
-        val table = view.table ?: return emptyList()
+        val view = clone(view)
+        val table = view.table?.let { clone(it) } ?: return emptyList()
 
         val dirtyColumnHeaders = dirtyCells?.map { it.column.columnHeader }?.toSet()
         val dirtyRowIndices = dirtyCells?.map { it.index }?.toSet()
@@ -106,8 +106,7 @@ internal object SigblaBackend {
         var maxHeaderOffset = 0L
         var maxHeaderCells = 0
 
-        // TODO Look to avoid creating new instances, this is just the default width anyway?
-        val headerWidth = view[ColumnHeader()].cellWidth
+        val headerWidth = view[emptyColumnHeader].cellWidth
 
         for (column in table.columns) {
             if (x <= runningWidth && runningWidth <= x + w) applicableColumns.add(Pair(column, runningWidth))
@@ -141,7 +140,9 @@ internal object SigblaBackend {
                     ml = applicableX + headerWidth,
                     cw = dims.maxX,
                     ch = dims.maxY,
-                    className = "ch",
+                    // TODO This needs to use the derived column to get tableView level classes and topics
+                    className = ("ch " + view[applicableColumn].cellClasses.joinToString(separator = " ")).trim(),
+                    topics = view[applicableColumn].cellTopics.toList(),
                     x = null,
                     y = yOffset
                 ))
@@ -174,7 +175,9 @@ internal object SigblaBackend {
                 mt = applicableY,
                 cw = dims.maxX,
                 ch = dims.maxY,
-                className = "rh",
+                // TODO This needs to use the derived row to get tableView level classes and topics
+                className = ("rh " + view[applicableRow].cellClasses.joinToString(separator = " ")).trim(),
+                topics = view[applicableRow].cellTopics.toList(),
                 x = 0,
                 y = null
             ))
@@ -194,10 +197,11 @@ internal object SigblaBackend {
                 output.add(PositionedContent(
                     applicableColumn.columnHeader,
                     applicableRow,
-                    cell.toString(),
+                    if (cell is UnitCell) null else cell.toString(),
                     view[applicableRow].cellHeight,
                     view[applicableColumn].cellWidth,
-                    className = if (cell is WebCell) "hc c" else "c",
+                    className = ((if (cell is WebCell) "hc c " else "c ") + view[applicableColumn, applicableRow].derived.cellClasses.joinToString(separator = " ")).trim(),
+                    topics = view[applicableColumn, applicableRow].derived.cellTopics.toList(),
                     x = applicableX + headerWidth,
                     y = applicableY
                 ))
@@ -212,7 +216,7 @@ internal object SigblaBackend {
         val table = view.table ?: return Dimensions(0, 0, 0, 0)
 
         val headerHeight = view[-1].cellHeight
-        val headerWidth = view[ColumnHeader()].cellWidth
+        val headerWidth = view[emptyColumnHeader].cellWidth
 
         var maxHeaderOffset = headerHeight
         var runningWidth = headerWidth
@@ -316,6 +320,7 @@ internal object SigblaBackend {
                     val addContent = ClientEventAddContent(
                         "c$cellId",
                         content.className,
+                        content.topics,
                         content.x,
                         content.y,
                         content.h,
@@ -401,6 +406,7 @@ internal object SigblaBackend {
                     val addContent = ClientEventAddContent(
                         "c$cellId",
                         content.className,
+                        content.topics,
                         content.x,
                         content.y,
                         content.h,
@@ -472,10 +478,34 @@ internal object SigblaBackend {
 
             events {
                 if (any()) {
-                    listeners.values.forEach { client ->
-                        if (client.ref == source.name) {
-                            runBlocking {
-                                handleClear(client)
+                    // TODO: Might be able to just do as below for table events and not clear if we just extract cells?
+                    var clear = false
+                    val dirtyCells = mutableListOf<Cell<*>>()
+                    for (event in this) {
+                        when (val newValue = event.newValue) {
+                            is CellView -> newValue.cell?.let { dirtyCells.add(it) }
+                            else -> {
+                                clear = true
+                                break
+                            }
+                        }
+                    }
+
+                    if (clear) {
+                        listeners.values.forEach { client ->
+                            if (client.ref == source.name) {
+                                runBlocking {
+                                    handleClear(client)
+                                }
+                            }
+                        }
+                    } else {
+                        listeners.values.forEach { client ->
+                            if (client.ref == view.name) {
+                                runBlocking {
+                                    handleDims(client)
+                                    handleDirty(client, dirtyCells)
+                                }
                             }
                         }
                     }
@@ -593,7 +623,7 @@ internal data class SigblaClient(
     }
 
     companion object {
-        private const val MAX_PACKAGES = 10
+        private const val MAX_PACKAGES = 100
     }
 }
 
@@ -610,15 +640,61 @@ internal enum class ClientEventType(val type: Int) {
 }
 
 @TypeFor(field = "type", adapter = ClientEventAdapter::class)
-internal open class ClientEvent(val type: Int)
-internal data class ClientEventScroll(val x: Long, val y: Long, val h: Long, val w: Long): ClientEvent(ClientEventType.SCROLL.type)
-internal data class ClientEventAddContent(val id: String, val classes: String, val x: Long?, val y: Long?, val h: Long, val w: Long, val z: Long?, val mt: Long?, val ml: Long?, val ch: Long?, val cw: Long?, val content: String): ClientEvent(ClientEventType.ADD_CONTENT.type)
-internal data class ClientEventAddCommit(val id: String): ClientEvent(ClientEventType.ADD_COMMIT.type)
-internal data class ClientEventRemoveContent(val id: String): ClientEvent(ClientEventType.REMOVE_CONTENT.type)
-internal data class ClientEventUpdateEnd(val id: String): ClientEvent(ClientEventType.UPDATE_END.type)
-internal data class ClientEventPackageEnd(val id: String): ClientEvent(ClientEventType.PACKAGE_END.type)
-internal data class ClientEventDims(val cornerX: Long, val cornerY: Long, val maxX: Long, val maxY: Long): ClientEvent(ClientEventType.DIMS.type)
-internal data class ClientEventResize(val target: String, val sizeChangeX: Long, val sizeChangeY: Long): ClientEvent(ClientEventType.RESIZE.type)
+internal open class ClientEvent(
+    val type: Int
+)
+
+internal data class ClientEventScroll(
+    val x: Long,
+    val y: Long,
+    val h: Long,
+    val w: Long
+): ClientEvent(ClientEventType.SCROLL.type)
+
+internal data class ClientEventAddContent(
+    val id: String,
+    val classes: String,
+    val topics: List<String>?,
+    val x: Long?,
+    val y: Long?,
+    val h: Long,
+    val w: Long,
+    val z: Long?,
+    val mt: Long?,
+    val ml: Long?,
+    val ch: Long?,
+    val cw: Long?,
+    val content: String?
+): ClientEvent(ClientEventType.ADD_CONTENT.type)
+
+internal data class ClientEventAddCommit(
+    val id: String
+): ClientEvent(ClientEventType.ADD_COMMIT.type)
+
+internal data class ClientEventRemoveContent(
+    val id: String
+): ClientEvent(ClientEventType.REMOVE_CONTENT.type)
+
+internal data class ClientEventUpdateEnd(
+    val id: String
+): ClientEvent(ClientEventType.UPDATE_END.type)
+
+internal data class ClientEventPackageEnd(
+    val id: String
+): ClientEvent(ClientEventType.PACKAGE_END.type)
+
+internal data class ClientEventDims(
+    val cornerX: Long,
+    val cornerY: Long,
+    val maxX: Long,
+    val maxY: Long
+): ClientEvent(ClientEventType.DIMS.type)
+
+internal data class ClientEventResize(
+    val target: String,
+    val sizeChangeX: Long,
+    val sizeChangeY: Long
+): ClientEvent(ClientEventType.RESIZE.type)
 
 internal class ClientEventAdapter: TypeAdapter<ClientEvent> {
     override fun classFor(type: Any): KClass<out ClientEvent> = when(type as Int) {
@@ -634,7 +710,7 @@ internal data class Coordinate(val x: Long, val y: Long)
 internal data class PositionedContent(
     val contentHeader: ColumnHeader,
     val contentRow: Long,
-    val content: String,
+    val content: String?,
     val h: Long,
     val w: Long,
     val z: Long? = null,
@@ -643,6 +719,7 @@ internal data class PositionedContent(
     val cw: Long? = null, // Container width
     val ch: Long? = null, // Container height
     val className: String = "",
+    val topics: List<String>?,
     val x: Long?,
     val y: Long?
 )

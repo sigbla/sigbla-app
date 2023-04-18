@@ -7,11 +7,14 @@ import java.util.concurrent.ThreadLocalRandom
 fun main() {
     val table = Table["test"]
 
+    val tableView = TableView[table]
+
     fun cell(x: Int, y: Int, black: Boolean) {
         table[x.toString(), y] = div {
             if (black) style = "background-color: black; width: 100%; height: 100%"
             else "background-color: white; width: 100%; height: 100%"
         }
+        tableView[x.toString(), y].cellClasses = if (black) sortedSetOf("black") else sortedSetOf("white")
     }
 
     for (x in 0..99) {
@@ -19,9 +22,6 @@ fun main() {
             cell(x, y, true)
         }
     }
-
-    val tableView = TableView[table]
-    show(tableView)
 
     /*
     tableView[DEFAULT_COLUMN_VIEW] = {
@@ -36,6 +36,7 @@ fun main() {
         cellHeight = 10
     }
 
+    show(tableView)
     Thread.sleep(15000)
 
     while (true) {

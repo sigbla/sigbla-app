@@ -31,6 +31,8 @@ class Sigbla {
         this.targetParent.innerHTML = ""
 
         this.target = document.createElement("div")
+
+        // debug this.targetParent.addEventListener("test-event", (e) => console.log(e))
     }
 
     rbMousedown = (e) => {
@@ -194,7 +196,7 @@ class Sigbla {
 
                 div.id = message.id
 
-                if (message.classes === "ch" || message.classes === "rh") {
+                if (message.classes.startsWith("ch") || message.classes.startsWith("rh")) {
                     const child = document.createElement("div")
                     child.className = message.classes
                     div.className = "container"
@@ -243,15 +245,29 @@ class Sigbla {
                 const old = document.getElementById(message.id)
 
                 if (old) {
+                    (message.topics || []).forEach(e => old.dispatchEvent(new CustomEvent(e, {
+                        bubbles: true,
+                        detail: {
+                            action: "hide"
+                        }
+                    })))
                     old.remove()
-                    this.target.appendChild(div)
-                } else {
+
+                    if (message.content !== null) this.target.appendChild(div)
+                } else if (message.content !== null) {
                     if (this.pendingContent === null) {
                         this.pendingContent = document.createDocumentFragment()
                     }
 
                     this.pendingContent.appendChild(div)
                 }
+
+                (message.topics || []).forEach((e) => div.dispatchEvent(new CustomEvent(e, {
+                    bubbles: true,
+                    detail: {
+                        action: "show"
+                    }
+                })))
 
                 break
             }
@@ -263,7 +279,15 @@ class Sigbla {
             }
             case 4: { // remove content
                 const item = document.getElementById(message.id)
-                if (item) item.remove()
+                if (item) {
+                    (message.topics || []).forEach(e => item.dispatchEvent(new CustomEvent(e, {
+                        bubbles: true,
+                        detail: {
+                            action: "hide"
+                        }
+                    })))
+                    item.remove()
+                }
                 break
             }
             case 5: { // update end
@@ -343,8 +367,8 @@ class Sigbla {
 
     socketMessage = async (e) => {
         let messages = JSON.parse(e.data)
-        if (!Array.isArray(messages)) messages = [messages]
-        messages.forEach(await this.handleMessage)
+        if (!Array.isArray(messages)) await this.handleMessage(messages)
+        else messages.forEach(await this.handleMessage)
     }
 
     init = () => {

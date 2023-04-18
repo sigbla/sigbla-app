@@ -6,9 +6,12 @@ import sigbla.app.internals.Registry
 import sigbla.app.internals.TableViewEventProcessor
 import sigbla.app.internals.refAction
 import java.util.*
+import java.util.Collections.emptySortedSet
 import java.util.concurrent.atomic.AtomicReference
+import com.github.andrewoma.dexx.kollection.toImmutableSet
 import com.github.andrewoma.dexx.collection.Map as PMap
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
+import com.github.andrewoma.dexx.kollection.ImmutableSet as PSet
 
 // A table view is associated with one table, and holds metadata related on how to view a table.
 // This includes among other things column widths, row heights, individual cell dimensions, styling, etc..
@@ -78,7 +81,7 @@ import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 const val DEFAULT_CELL_HEIGHT = 20L
 const val DEFAULT_CELL_WIDTH = 100L
 
-// TODO Should the be sealed rather than abstract?
+// TODO Should this be sealed rather than abstract?
 abstract class TableView(val name: String?) : Iterable<DerivedCellView> {
     val tableView: TableView
         get() = this
@@ -102,6 +105,11 @@ abstract class TableView(val name: String?) : Iterable<DerivedCellView> {
     abstract var cellHeight: Long
 
     abstract var cellWidth: Long
+
+    // TODO Add convenience operators like = "new topic", += "new topic", and -= "existing topic" to this and similar below
+    abstract var cellTopics: SortedSet<String>
+
+    abstract var cellClasses: SortedSet<String>
 
     operator fun get(tableView: Companion) = this
 
@@ -348,18 +356,20 @@ abstract class TableView(val name: String?) : Iterable<DerivedCellView> {
     }
 }
 
+internal data class ViewMeta(
+    val cellHeight: Long? = null,
+    val cellWidth: Long? = null,
+    val cellClasses: PSet<String>? = null,
+    val cellTopics: PSet<String>? = null
+)
+
 internal data class TableViewRef(
-    val defaultCellView: ViewMeta = ViewMeta(null, null),
+    val defaultCellView: ViewMeta = ViewMeta(),
     val columnViews: PMap<ColumnHeader, ViewMeta> = PHashMap(),
     val rowViews: PMap<Long, ViewMeta> = PHashMap(),
     val cellViews: PMap<Pair<ColumnHeader, Long>, ViewMeta> = PHashMap(),
     val table: Table? = null,
     val version: Long = Long.MIN_VALUE,
-)
-
-internal class ViewMeta(
-    val cellHeight: Long?,
-    val cellWidth: Long?
 )
 
 class BaseTableView internal constructor(
@@ -425,7 +435,9 @@ class BaseTableView internal constructor(
         set(height) {
             val (oldRef, newRef) = tableViewRef.refAction {
                 it.copy(
-                    defaultCellView = ViewMeta(height, it.defaultCellView.cellWidth),
+                    defaultCellView = it.defaultCellView.copy(
+                        cellHeight = height
+                    ),
                     version = it.version + 1L
                 )
             }
@@ -446,8 +458,54 @@ class BaseTableView internal constructor(
         set(width) {
             val (oldRef, newRef) = tableViewRef.refAction {
                 it.copy(
-                    defaultCellView = ViewMeta(it.defaultCellView.cellHeight, width),
+                    defaultCellView = it.defaultCellView.copy(
+                        cellWidth = width
+                    ),
                     version = it.version + 1L
+                )
+            }
+
+            if (!eventProcessor.haveListeners()) return
+
+            val old = makeClone(ref = oldRef)
+            val new = makeClone(ref = newRef)
+
+            eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(old, new)) as List<TableViewListenerEvent<Any>>)
+        }
+
+    override var cellClasses: SortedSet<String>
+        get() {
+            val ref = tableView.tableViewRef.get()
+            return ref.defaultCellView.cellClasses?.toSortedSet() ?: emptySortedSet()
+        }
+        set(classes) {
+            val (oldRef, newRef) = tableViewRef.refAction {
+                it.copy(
+                    defaultCellView = it.defaultCellView.copy(
+                        cellClasses = classes.toImmutableSet()
+                    )
+                )
+            }
+
+            if (!eventProcessor.haveListeners()) return
+
+            val old = makeClone(ref = oldRef)
+            val new = makeClone(ref = newRef)
+
+            eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(old, new)) as List<TableViewListenerEvent<Any>>)
+        }
+
+    override var cellTopics: SortedSet<String>
+        get() {
+            val ref = tableView.tableViewRef.get()
+            return ref.defaultCellView.cellTopics?.toSortedSet() ?: emptySortedSet()
+        }
+        set(topics) {
+            val (oldRef, newRef) = tableViewRef.refAction {
+                it.copy(
+                    defaultCellView = it.defaultCellView.copy(
+                        cellTopics = topics.toImmutableSet()
+                    )
                 )
             }
 
@@ -471,7 +529,12 @@ class BaseTableView internal constructor(
 
     override fun set(companion: Companion, init: TableViewBuilder.() -> Unit) {
         val (oldRef, newRef) = tableViewRef.refAction {
-            val tableViewBuilder = TableViewBuilder(it.defaultCellView.cellHeight, it.defaultCellView.cellWidth)
+            val tableViewBuilder = TableViewBuilder(
+                it.defaultCellView.cellHeight,
+                it.defaultCellView.cellWidth,
+                it.defaultCellView.cellClasses?.toSortedSet(),
+                it.defaultCellView.cellTopics?.toSortedSet()
+            )
             tableViewBuilder.init()
             val viewMeta = tableViewBuilder.build()
 
@@ -491,7 +554,12 @@ class BaseTableView internal constructor(
 
     override fun set(columnHeader: ColumnHeader, init: ColumnViewBuilder.() -> Unit) {
         val (oldRef, newRef) = tableViewRef.refAction {
-            val columnViewBuilder = ColumnViewBuilder(it.columnViews[columnHeader]?.cellWidth)
+            val oldMeta = it.columnViews[columnHeader]
+            val columnViewBuilder = ColumnViewBuilder(
+                oldMeta?.cellWidth,
+                oldMeta?.cellClasses?.toSortedSet(),
+                oldMeta?.cellTopics?.toSortedSet()
+            )
             columnViewBuilder.init()
             val viewMeta = columnViewBuilder.build()
 
@@ -514,7 +582,7 @@ class BaseTableView internal constructor(
 
     override fun set(columnHeader: ColumnHeader, view: ColumnView?) {
         val (oldRef, newRef) = tableViewRef.refAction {
-            val viewMeta = if (view != null) ViewMeta(null, view.cellWidth) else null
+            val viewMeta = if (view == null) null else view.tableView.tableViewRef.get().columnViews[view.columnHeader]
 
             it.copy(
                 columnViews = if (viewMeta != null)
@@ -538,7 +606,12 @@ class BaseTableView internal constructor(
 
     override fun set(row: Long, init: RowViewBuilder.() -> Unit) {
         val (oldRef, newRef) = tableViewRef.refAction {
-            val rowViewBuilder = RowViewBuilder(it.rowViews[row]?.cellHeight)
+            val oldMeta = it.rowViews[row]
+            val rowViewBuilder = RowViewBuilder(
+                oldMeta?.cellHeight,
+                oldMeta?.cellClasses?.toSortedSet(),
+                oldMeta?.cellTopics?.toSortedSet()
+            )
             rowViewBuilder.init()
             val viewMeta = rowViewBuilder.build()
 
@@ -561,7 +634,7 @@ class BaseTableView internal constructor(
 
     override fun set(row: Long, view: RowView?) {
         val (oldRef, newRef) = tableViewRef.refAction {
-            val viewMeta = if (view != null) ViewMeta(view.cellHeight, null) else null
+            val viewMeta = if (view == null) null else view.tableView.tableViewRef.get().rowViews[view.index]
 
             it.copy(
                 rowViews = if (viewMeta != null)
@@ -587,7 +660,12 @@ class BaseTableView internal constructor(
         val (oldRef, newRef) = tableViewRef.refAction {
             val key = Pair(columnHeader, row)
             val oldMeta = it.cellViews[key]
-            val cellViewBuilder = CellViewBuilder(oldMeta?.cellHeight, oldMeta?.cellWidth)
+            val cellViewBuilder = CellViewBuilder(
+                oldMeta?.cellHeight,
+                oldMeta?.cellWidth,
+                oldMeta?.cellClasses?.toSortedSet(),
+                oldMeta?.cellTopics?.toSortedSet()
+            )
             cellViewBuilder.init()
             val viewMeta = cellViewBuilder.build()
 
@@ -609,14 +687,15 @@ class BaseTableView internal constructor(
     }
 
     override fun set(columnHeader: ColumnHeader, row: Long, view: CellView?) {
+        val cell = Pair(columnHeader, row)
         val (oldRef, newRef) = tableViewRef.refAction {
-            val viewMeta = if (view != null) ViewMeta(view.cellHeight, view.cellWidth) else null
+            val viewMeta = if (view == null) null else view.tableView.tableViewRef.get().cellViews[cell]
 
             it.copy(
                 cellViews = if (viewMeta != null)
-                    it.cellViews.put(Pair(columnHeader, row), viewMeta)
+                    it.cellViews.put(cell, viewMeta)
                 else
-                    it.cellViews.remove(Pair(columnHeader, row)),
+                    it.cellViews.remove(cell),
                 version = it.version + 1L
             )
         }
@@ -635,34 +714,63 @@ class BaseTableView internal constructor(
     override fun makeClone(name: String?, onRegistry: Boolean, ref: TableViewRef) = BaseTableView(name, onRegistry, AtomicReference(ref))
 }
 
+// TODO? These builders could get the old ViewMeta instance, and lazily read from this/update this
 class TableViewBuilder(
     var cellHeight: Long? = null,
     var cellWidth: Long? = null,
+    var cellClasses: SortedSet<String>?,
+    var cellTopics: SortedSet<String>?,
     // TODO? var reader: (DestinationOsmosis<CellView>.() -> Unit)? = null
 ) {
-    internal fun build(): ViewMeta = ViewMeta(cellHeight, cellWidth)
+    internal fun build(): ViewMeta = ViewMeta(
+        cellHeight = cellHeight,
+        cellWidth = cellWidth,
+        cellClasses = cellClasses?.toImmutableSet(),
+        cellTopics = cellTopics?.toImmutableSet()
+    )
 }
 
 class ColumnViewBuilder(
     var cellWidth: Long? = null,
+    var cellClasses: SortedSet<String>?,
+    var cellTopics: SortedSet<String>?,
     // TODO? var reader: (DestinationOsmosis<CellView>.() -> Unit)? = null
 ) {
-    internal fun build(): ViewMeta = ViewMeta(null, cellWidth)
+    internal fun build(): ViewMeta = ViewMeta(
+        cellHeight = null,
+        cellWidth = cellWidth,
+        cellClasses = cellClasses?.toImmutableSet(),
+        cellTopics = cellTopics?.toImmutableSet()
+    )
 }
 
 class RowViewBuilder(
     var cellHeight: Long? = null,
+    var cellClasses: SortedSet<String>?,
+    var cellTopics: SortedSet<String>?,
     // TODO? var reader: (DestinationOsmosis<CellView>.() -> Unit)? = null
 ) {
-    internal fun build(): ViewMeta = ViewMeta(cellHeight, null)
+    internal fun build(): ViewMeta = ViewMeta(
+        cellHeight = cellHeight,
+        cellWidth = null,
+        cellClasses = cellClasses?.toImmutableSet(),
+        cellTopics = cellTopics?.toImmutableSet()
+    )
 }
 
 class CellViewBuilder(
     var cellHeight: Long? = null,
     var cellWidth: Long? = null,
+    var cellClasses: SortedSet<String>?,
+    var cellTopics: SortedSet<String>?,
     // TODO? var reader: (DestinationOsmosis<CellView>.() -> Unit)? = null
 ) {
-    internal fun build(): ViewMeta = ViewMeta(cellHeight, cellWidth)
+    internal fun build(): ViewMeta = ViewMeta(
+        cellHeight = cellHeight,
+        cellWidth = cellWidth,
+        cellClasses = cellClasses?.toImmutableSet(),
+        cellTopics = cellTopics?.toImmutableSet()
+    )
 }
 
 class CellView(
@@ -688,6 +796,28 @@ class CellView(
         set(width) {
             tableView[this] = {
                 cellWidth = width
+            }
+        }
+
+    var cellClasses: SortedSet<String>
+        get() {
+            val ref = tableView.tableViewRef.get()
+            return ref.cellViews[Pair(columnView.columnHeader, index)]?.cellClasses?.toSortedSet() ?: emptySortedSet()
+        }
+        set(classes) {
+            tableView[this] = {
+                cellClasses = classes
+            }
+        }
+
+    var cellTopics: SortedSet<String>
+        get() {
+            val ref = tableView.tableViewRef.get()
+            return ref.cellViews[Pair(columnView.columnHeader, index)]?.cellTopics?.toSortedSet() ?: emptySortedSet()
+        }
+        set(topics) {
+            tableView[this] = {
+                cellTopics = topics
             }
         }
 
@@ -718,27 +848,45 @@ class CellView(
 
 internal fun createDerivedCellViewFromRef(ref: TableViewRef, columnView: ColumnView, index: Long): DerivedCellView {
     val cellViewMeta = ref.cellViews[Pair(columnView.columnHeader, index)]
-    val defaultCellView = ref.defaultCellView
+    val defaultCellViewMeta = ref.defaultCellView
+    val columnViewMeta = ref.columnViews[columnView.columnHeader]
+    val rowViewMeta = ref.rowViews[index]
 
     val height = cellViewMeta?.cellHeight
-        ?: ref.rowViews[index]?.cellHeight
-        ?: defaultCellView.cellHeight
+        ?: rowViewMeta?.cellHeight
+        ?: defaultCellViewMeta.cellHeight
         ?: DEFAULT_CELL_HEIGHT
 
     val width = cellViewMeta?.cellWidth
-        ?: ref.columnViews[columnView.columnHeader]?.cellWidth
-        ?: defaultCellView.cellWidth
+        ?: columnViewMeta?.cellWidth
+        ?: defaultCellViewMeta.cellWidth
         ?: DEFAULT_CELL_WIDTH
 
-    return DerivedCellView(columnView, index, height, width)
+    val classes = (
+            (cellViewMeta?.cellClasses?.toMutableSet() ?: mutableSetOf())
+                    + (columnViewMeta?.cellClasses?.toMutableSet() ?: mutableSetOf())
+                    + (rowViewMeta?.cellClasses?.toMutableSet() ?: mutableSetOf())
+                    + (defaultCellViewMeta.cellClasses?.toMutableSet() ?: mutableSetOf())
+            ).toSortedSet()
+
+    val topics = (
+            (cellViewMeta?.cellTopics?.toMutableSet() ?: mutableSetOf())
+                    + (columnViewMeta?.cellTopics?.toMutableSet() ?: mutableSetOf())
+                    + (rowViewMeta?.cellTopics?.toMutableSet() ?: mutableSetOf())
+                    + (defaultCellViewMeta.cellTopics?.toMutableSet() ?: mutableSetOf())
+            ).toSortedSet()
+
+    return DerivedCellView(columnView, index, height, width, classes, topics)
 }
 
-// TODO We could also have a DerivedColumnView and a DerivedRowView
+// TODO We also need DerivedColumnView and a DerivedRowView
 class DerivedCellView internal constructor(
     val columnView: ColumnView,
     val index: Long,
     val cellHeight: Long,
-    val cellWidth: Long
+    val cellWidth: Long,
+    val cellClasses: SortedSet<String>,
+    val cellTopics: SortedSet<String>
 ) : Iterable<DerivedCellView> {
     val tableView: TableView
         get() = columnView.tableView
@@ -777,6 +925,28 @@ class ColumnView internal constructor(
         set(width) {
             tableView[this] = {
                 cellWidth = width
+            }
+        }
+
+    var cellClasses: SortedSet<String>
+        get() {
+            val ref = tableView.tableViewRef.get()
+            return ref.columnViews[columnHeader]?.cellClasses?.toSortedSet() ?: emptySortedSet()
+        }
+        set(classes) {
+            tableView[this] = {
+                cellClasses = classes
+            }
+        }
+
+    var cellTopics: SortedSet<String>
+        get() {
+            val ref = tableView.tableViewRef.get()
+            return ref.columnViews[columnHeader]?.cellTopics?.toSortedSet() ?: emptySortedSet()
+        }
+        set(topics) {
+            tableView[this] = {
+                cellTopics = topics
             }
         }
 
@@ -867,6 +1037,28 @@ class RowView internal constructor(
         set(height) {
             tableView[this] = {
                 cellHeight = height
+            }
+        }
+
+    var cellClasses: SortedSet<String>
+        get() {
+            val ref = tableView.tableViewRef.get()
+            return ref.rowViews[index]?.cellClasses?.toSortedSet() ?: emptySortedSet()
+        }
+        set(classes) {
+            tableView[this] = {
+                cellClasses = classes
+            }
+        }
+
+    var cellTopics: SortedSet<String>
+        get() {
+            val ref = tableView.tableViewRef.get()
+            return ref.rowViews[index]?.cellTopics?.toSortedSet() ?: emptySortedSet()
+        }
+        set(topics) {
+            tableView[this] = {
+                cellTopics = topics
             }
         }
 
