@@ -1,7 +1,7 @@
 package sigbla.app
 
 import sigbla.app.exceptions.InvalidColumnException
-import sigbla.app.exceptions.InvalidTableException
+import sigbla.app.exceptions.InvalidTableViewException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.TableViewEventProcessor
 import sigbla.app.internals.refAction
@@ -332,7 +332,7 @@ abstract class TableView(val name: String?) : Iterable<DerivedCellView> {
 
         operator fun get(name: String, table: Table): TableView = BaseTableView(name, table)
 
-        fun fromRegistry(name: String): TableView = Registry.getView(name) ?: throw InvalidTableException("No table view by name $name")
+        fun fromRegistry(name: String): TableView = Registry.getView(name) ?: throw InvalidTableViewException("No table view by name $name")
 
         fun fromStorage(storage: Storage, name: String): TableView {
             TODO()
