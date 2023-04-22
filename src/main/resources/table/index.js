@@ -17,6 +17,7 @@ class Sigbla {
     pendingUpdate = false
     pendingScrolls = []
     pendingResize = []
+    pendingEvents = []
 
     resizeTarget
     resizeStartX
@@ -175,6 +176,8 @@ class Sigbla {
     handleMessage = async (message) => {
         switch (message.type) {
             case 0: { // clear
+                // TODO Probably should add some type of event for this as well..
+
                 this.target = document.createElement("div")
                 this.corner = null
                 this.end = null
@@ -262,12 +265,7 @@ class Sigbla {
                     this.pendingContent.appendChild(div)
                 }
 
-                (message.topics || []).forEach((e) => div.dispatchEvent(new CustomEvent(e, {
-                    bubbles: true,
-                    detail: {
-                        action: "show"
-                    }
-                })))
+                (message.topics || []).forEach((e) => this.pendingEvents.push([div, e]))
 
                 break
             }
@@ -301,6 +299,15 @@ class Sigbla {
 
                     this.overlay.style.display = "none"
                 }
+
+                this.pendingEvents.forEach((divEvent) => divEvent[0].dispatchEvent(new CustomEvent(divEvent[1], {
+                    bubbles: true,
+                    detail: {
+                        action: "show"
+                    }
+                })))
+
+                this.pendingEvents = []
 
                 break
             }
