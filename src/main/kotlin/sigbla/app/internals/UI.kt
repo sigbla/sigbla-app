@@ -106,13 +106,13 @@ internal object SigblaBackend {
         var maxHeaderOffset = 0L
         var maxHeaderCells = 0
 
-        val headerWidth = view[emptyColumnHeader].cellWidth
+        val headerWidth = view[emptyColumnHeader].derived.cellWidth
 
         for (column in table.columns) {
             if (x <= runningWidth && runningWidth <= x + w) applicableColumns.add(Pair(column, runningWidth))
-            runningWidth += view[column].cellWidth
+            runningWidth += view[column].derived.cellWidth
 
-            val yOffset = column.columnHeader.header.mapIndexed { i, _ -> view[(-(column.columnHeader.header.size) + i).toLong()].cellHeight }.sum()
+            val yOffset = column.columnHeader.header.mapIndexed { i, _ -> view[(-(column.columnHeader.header.size) + i).toLong()].derived.cellHeight }.sum()
             if (yOffset > maxHeaderOffset) maxHeaderOffset = yOffset
             if (column.columnHeader.header.size > maxHeaderCells) maxHeaderCells = column.columnHeader.header.size
         }
@@ -128,21 +128,21 @@ internal object SigblaBackend {
 
             for (idx in 0 until maxHeaderCells) {
                 val headerText = applicableColumn.columnHeader[idx]
-                val yOffset = applicableColumn.columnHeader.header.mapIndexed { i, _ -> if (i < idx) view[(-maxHeaderCells + i).toLong()].cellHeight else 0L }.sum()
+                val yOffset = applicableColumn.columnHeader.header.mapIndexed { i, _ -> if (i < idx) view[(-maxHeaderCells + i).toLong()].derived.cellHeight else 0L }.sum()
 
                 output.add(PositionedContent(
                     applicableColumn.columnHeader,
                     (-maxHeaderCells + idx).toLong(),
                     headerText,
-                    view[(-maxHeaderCells + idx).toLong()].cellHeight,
-                    view[applicableColumn].cellWidth,
+                    view[(-maxHeaderCells + idx).toLong()].derived.cellHeight,
+                    view[applicableColumn].derived.cellWidth,
                     colHeaderZ,
                     ml = applicableX + headerWidth,
                     cw = dims.maxX,
                     ch = dims.maxY,
                     // TODO This needs to use the derived column to get tableView level classes and topics
-                    className = ("ch " + view[applicableColumn].cellClasses.joinToString(separator = " ")).trim(),
-                    topics = view[applicableColumn].cellTopics.toList(),
+                    className = ("ch " + view[applicableColumn].derived.cellClasses.joinToString(separator = " ")).trim(),
+                    topics = view[applicableColumn].derived.cellTopics.toList(),
                     x = null,
                     y = yOffset
                 ))
@@ -156,7 +156,7 @@ internal object SigblaBackend {
         for (row in 0..lastKey) {
             if (y <= runningHeight && runningHeight <= y + h) applicableRows.add(Pair(row, runningHeight))
 
-            runningHeight += view[row].cellHeight
+            runningHeight += view[row].derived.cellHeight
 
             if (runningHeight > y + h || runningHeight < 0L) break
         }
@@ -169,15 +169,15 @@ internal object SigblaBackend {
                 emptyColumnHeader,
                 applicableRow,
                 applicableRow.toString(),
-                view[applicableRow].cellHeight,
+                view[applicableRow].derived.cellHeight,
                 headerWidth,
                 rowHeaderZ,
                 mt = applicableY,
                 cw = dims.maxX,
                 ch = dims.maxY,
                 // TODO This needs to use the derived row to get tableView level classes and topics
-                className = ("rh " + view[applicableRow].cellClasses.joinToString(separator = " ")).trim(),
-                topics = view[applicableRow].cellTopics.toList(),
+                className = ("rh " + view[applicableRow].derived.cellClasses.joinToString(separator = " ")).trim(),
+                topics = view[applicableRow].derived.cellTopics.toList(),
                 x = 0,
                 y = null
             ))
@@ -198,8 +198,8 @@ internal object SigblaBackend {
                     applicableColumn.columnHeader,
                     applicableRow,
                     if (cell is UnitCell) null else cell.toString(),
-                    view[applicableRow].cellHeight,
-                    view[applicableColumn].cellWidth,
+                    view[applicableRow].derived.cellHeight,
+                    view[applicableColumn].derived.cellWidth,
                     className = ((if (cell is WebCell) "hc c " else "c ") + view[applicableColumn, applicableRow].derived.cellClasses.joinToString(separator = " ")).trim(),
                     topics = view[applicableColumn, applicableRow].derived.cellTopics.toList(),
                     x = applicableX + headerWidth,
@@ -215,16 +215,16 @@ internal object SigblaBackend {
         // TODO Consider using a stable snapshot ref for view/table
         val table = view.table ?: return Dimensions(0, 0, 0, 0)
 
-        val headerHeight = view[-1].cellHeight
-        val headerWidth = view[emptyColumnHeader].cellWidth
+        val headerHeight = view[-1].derived.cellHeight
+        val headerWidth = view[emptyColumnHeader].derived.cellWidth
 
         var maxHeaderOffset = headerHeight
         var runningWidth = headerWidth
 
         for (column in table.columns) {
-            runningWidth += view[column].cellWidth
+            runningWidth += view[column].derived.cellWidth
 
-            val yOffset = column.columnHeader.header.mapIndexed { i, _ -> view[(-(column.columnHeader.header.size) + i).toLong()].cellHeight }.sum()
+            val yOffset = column.columnHeader.header.mapIndexed { i, _ -> view[(-(column.columnHeader.header.size) + i).toLong()].derived.cellHeight }.sum()
             if (yOffset > maxHeaderOffset) maxHeaderOffset = yOffset
         }
 
@@ -232,7 +232,7 @@ internal object SigblaBackend {
 
         val lastKey = table.tableRef.get().columnCells.values().map { it.last()?.component1() ?: -1 }.maxOrNull() ?: -1
         for (row in 0..lastKey) {
-            runningHeight += view[row].cellHeight
+            runningHeight += view[row].derived.cellHeight
         }
 
         return Dimensions(headerWidth, maxHeaderOffset, runningWidth, runningHeight)
@@ -450,14 +450,14 @@ internal object SigblaBackend {
         if (resize.sizeChangeX != 0L) {
             val columnView = view[target.contentHeader]
             view[target.contentHeader] = {
-                cellWidth = 10L.coerceAtLeast(columnView.cellWidth + resize.sizeChangeX)
+                cellWidth = 10L.coerceAtLeast(columnView.derived.cellWidth + resize.sizeChangeX)
             }
         }
 
         if (resize.sizeChangeY != 0L) {
             val rowView = view[target.contentRow]
             view[target.contentRow] = {
-                cellHeight = 10L.coerceAtLeast(rowView.cellHeight + resize.sizeChangeY)
+                cellHeight = 10L.coerceAtLeast(rowView.derived.cellHeight + resize.sizeChangeY)
             }
         }
     }

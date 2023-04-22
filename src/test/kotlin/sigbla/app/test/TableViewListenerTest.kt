@@ -232,8 +232,8 @@ class TableViewListenerTest {
 
             events {
                 forEach { _ ->
-                    if (t["A", 1].cellWidth < 1000)
-                        t["A", 1].cellWidth = t["A", 1].cellWidth + 1
+                    if (t["A", 1].derived.cellWidth < 1000)
+                        t["A", 1].cellWidth = t["A", 1].derived.cellWidth + 1
                 }
             }
         }
@@ -337,8 +337,8 @@ class TableViewListenerTest {
             skipHistory = true
 
             events {
-                heightChange = newView["A", 1].cellHeight - oldView["A", 1].cellHeight
-                widthChange = newView["A", 1].cellWidth - oldView["A", 1].cellWidth
+                heightChange = newView["A", 1].derived.cellHeight - oldView["A", 1].derived.cellHeight
+                widthChange = newView["A", 1].derived.cellWidth - oldView["A", 1].derived.cellWidth
             }
         }
 
@@ -435,8 +435,8 @@ class TableViewListenerTest {
 
                 assertEquals(t["A", 0].cellWidth, source["A", 0].cellWidth)
 
-                newView["A", 0].cellWidth = newView["A", 0].cellWidth + 1
-                oldView["A", 0].cellWidth = oldView["A", 0].cellWidth - 1
+                newView["A", 0].cellWidth = newView["A", 0].derived.cellWidth + 1
+                oldView["A", 0].cellWidth = oldView["A", 0].derived.cellWidth - 1
             }
         }
 
@@ -450,8 +450,8 @@ class TableViewListenerTest {
 
                 assertEquals(t["A", 0].cellWidth, source["A", 0].cellWidth)
 
-                newView["A", 0].cellWidth = newView["A", 0].cellWidth + 1
-                oldView["A", 0].cellWidth = oldView["A", 0].cellWidth - 1
+                newView["A", 0].cellWidth = newView["A", 0].derived.cellWidth + 1
+                oldView["A", 0].cellWidth = oldView["A", 0].derived.cellWidth - 1
             }
         }
 
@@ -465,8 +465,8 @@ class TableViewListenerTest {
 
                 assertEquals(t["A", 0].cellWidth, source["A", 0].cellWidth)
 
-                newView["A", 0].cellWidth = newView["A", 0].cellWidth + 1
-                oldView["A", 0].cellWidth = oldView["A", 0].cellWidth - 1
+                newView["A", 0].cellWidth = newView["A", 0].derived.cellWidth + 1
+                oldView["A", 0].cellWidth = oldView["A", 0].derived.cellWidth - 1
             }
         }
 
@@ -481,7 +481,7 @@ class TableViewListenerTest {
 
         t["A", 0].cellWidth = DEFAULT_CELL_WIDTH * 2
 
-        assertEquals(DEFAULT_CELL_WIDTH, v1Old)
+        assertEquals(null, v1Old)
         assertEquals(DEFAULT_CELL_WIDTH - 1, v2Old)
         assertEquals(DEFAULT_CELL_WIDTH - 2, v3Old)
 
@@ -550,11 +550,11 @@ class TableViewListenerTest {
 
         on(t) {
             events {
-                oldView["A", 0].cellWidth = source["A", 0].cellWidth + 200
-                newView["A", 0].cellWidth = source["A", 0].cellWidth + 300
+                oldView["A", 0].cellWidth = source["A", 0].derived.cellWidth + 200
+                newView["A", 0].cellWidth = source["A", 0].derived.cellWidth + 300
 
-                assertEquals(source["A", 0].cellWidth + 200, oldView["A", 0].cellWidth)
-                assertEquals(source["A", 0].cellWidth + 300, newView["A", 0].cellWidth)
+                assertEquals(source["A", 0].derived.cellWidth + 200, oldView["A", 0].cellWidth)
+                assertEquals(source["A", 0].derived.cellWidth + 300, newView["A", 0].cellWidth)
 
                 count += count()
             }
@@ -566,8 +566,8 @@ class TableViewListenerTest {
             skipHistory = true
 
             events {
-                assertEquals(source["A", 0].cellWidth + 200, oldView["A", 0].cellWidth)
-                assertEquals(source["A", 0].cellWidth + 300, newView["A", 0].cellWidth)
+                assertEquals(source["A", 0].derived.cellWidth + 200, oldView["A", 0].cellWidth)
+                assertEquals(source["A", 0].derived.cellWidth + 300, newView["A", 0].cellWidth)
 
                 count += count()
             }

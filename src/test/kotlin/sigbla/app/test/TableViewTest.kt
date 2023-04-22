@@ -20,8 +20,8 @@ class TableViewTest {
         val t1 = Table[object {}.javaClass.enclosingMethod.name]
         val tv1 = TableView[t1]
 
-        assertEquals(DEFAULT_CELL_HEIGHT, tv1.cellHeight)
-        assertEquals(DEFAULT_CELL_WIDTH, tv1.cellWidth)
+        assertEquals(null, tv1.cellHeight)
+        assertEquals(null, tv1.cellWidth)
 
         tv1[TableView] = {
             assertEquals(null, cellHeight)
@@ -43,8 +43,8 @@ class TableViewTest {
             cellWidth = null
         }
 
-        assertEquals(DEFAULT_CELL_HEIGHT, tv1.cellHeight)
-        assertEquals(DEFAULT_CELL_WIDTH, tv1.cellWidth)
+        assertEquals(null, tv1.cellHeight)
+        assertEquals(null, tv1.cellWidth)
     }
 
     @Test
@@ -52,7 +52,7 @@ class TableViewTest {
         val t1 = Table[object {}.javaClass.enclosingMethod.name]
         val tv1 = TableView[t1]
 
-        assertEquals(DEFAULT_CELL_WIDTH, tv1["A"].cellWidth)
+        assertEquals(null, tv1["A"].cellWidth)
 
         tv1["A"] = {
             assertEquals(null, cellWidth)
@@ -68,7 +68,7 @@ class TableViewTest {
             cellWidth = null
         }
 
-        assertEquals(DEFAULT_CELL_WIDTH, tv1["A"].cellWidth)
+        assertEquals(null, tv1["A"].cellWidth)
     }
 
     @Test
@@ -76,7 +76,7 @@ class TableViewTest {
         val t1 = Table[object {}.javaClass.enclosingMethod.name]
         val tv1 = TableView[t1]
 
-        assertEquals(DEFAULT_CELL_HEIGHT, tv1[1].cellHeight)
+        assertEquals(null, tv1[1].cellHeight)
 
         tv1[1] = {
             assertEquals(null, cellHeight)
@@ -92,7 +92,7 @@ class TableViewTest {
             cellHeight = null
         }
 
-        assertEquals(DEFAULT_CELL_HEIGHT, tv1[1].cellHeight)
+        assertEquals(null, tv1[1].cellHeight)
     }
 
     // TODO See TableTest for inspiration
