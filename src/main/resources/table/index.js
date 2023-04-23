@@ -17,6 +17,7 @@ class Sigbla {
     pendingUpdate = false
     pendingScrolls = []
     pendingResize = []
+    // TODO Change this from being events to being function calls, that way we can change the dom before mounting etc
     pendingEvents = []
 
     resizeTarget
