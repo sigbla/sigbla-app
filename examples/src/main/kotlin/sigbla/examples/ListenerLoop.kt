@@ -1,4 +1,4 @@
-package sigbla.tmp
+package sigbla.examples
 
 import sigbla.app.*
 

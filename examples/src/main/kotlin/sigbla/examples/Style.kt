@@ -1,4 +1,4 @@
-package sigbla.tmp
+package sigbla.examples
 
 import kotlinx.html.style
 import sigbla.app.*

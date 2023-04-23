@@ -1,4 +1,4 @@
-package sigbla.tmp
+package sigbla.examples
 
 import kotlinx.html.div
 import kotlinx.html.span
