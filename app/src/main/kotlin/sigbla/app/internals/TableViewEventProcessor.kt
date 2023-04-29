@@ -422,6 +422,7 @@ internal class TableViewEventProcessor {
     }
 
     // TODO Look at changing cells and buffers to use seqs
+    // TODO There's a risk that this is called out of order compared to the ref updates
     internal fun publish(views: List<TableViewListenerEvent<Any>>) {
         val buffer = eventBuffer.get()
 

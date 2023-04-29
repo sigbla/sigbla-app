@@ -368,6 +368,7 @@ internal class TableEventProcessor {
     }
 
     // TODO Look at changing cells and buffers to use seqs
+    // TODO There's a risk that this is called out of order compared to the ref updates
     internal fun publish(cells: List<TableListenerEvent<Any, Any>>) {
         val buffer = eventBuffer.get()
 

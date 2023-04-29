@@ -326,39 +326,10 @@ class TableView internal constructor(
         TODO("Not yet implemented")
     }
 
-    operator fun set(companion: Companion, init: TableViewBuilder.() -> Unit) {
-        val (oldRef, newRef) = tableViewRef.refAction {
-            val tableViewBuilder = TableViewBuilder(
-                it.defaultCellView.cellHeight,
-                it.defaultCellView.cellWidth,
-                it.defaultCellView.cellClasses?.toSortedSet(),
-                it.defaultCellView.cellTopics?.toSortedSet()
-            )
-            tableViewBuilder.init()
-            val viewMeta = tableViewBuilder.build()
-
-            it.copy(
-                defaultCellView = viewMeta,
-                version = it.version + 1L
-            )
-        }
-
-        if (!eventProcessor.haveListeners()) return
-
-        val oldView = makeClone(ref = oldRef)
-        val newView = makeClone(ref = newRef)
-
-        eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(oldView, newView)) as List<TableViewListenerEvent<Any>>)
-    }
-
     // -----
 
     operator fun set(cell: Cell<*>, view: CellView?) {
         this[cell.column][cell.index] = view
-    }
-
-    operator fun set(cell: Cell<*>, init: CellViewBuilder.() -> Unit) {
-        this[cell.column][cell.index] = init
     }
 
     // -----
@@ -367,43 +338,7 @@ class TableView internal constructor(
         this[cellView.columnView][cellView.index] = view
     }
 
-    operator fun set(cellView: CellView, init: CellViewBuilder.() -> Unit) {
-        this[cellView.columnView][cellView.index] = init
-    }
-
     // -----
-
-    operator fun set(columnHeader: ColumnHeader, init: ColumnViewBuilder.() -> Unit) {
-        val (oldRef, newRef) = tableViewRef.refAction {
-            val oldMeta = it.columnViews[columnHeader]
-            val columnViewBuilder = ColumnViewBuilder(
-                oldMeta?.cellWidth,
-                oldMeta?.cellClasses?.toSortedSet(),
-                oldMeta?.cellTopics?.toSortedSet()
-            )
-            columnViewBuilder.init()
-            val viewMeta = columnViewBuilder.build()
-
-            it.copy(
-                columnViews = it.columnViews.put(columnHeader, viewMeta),
-                version = it.version + 1L
-            )
-        }
-
-        if (!eventProcessor.haveListeners()) return
-
-        val oldView = makeClone(ref = oldRef)
-        val newView = makeClone(ref = newRef)
-
-        val old = oldView[columnHeader]
-        val new = newView[columnHeader]
-
-        eventProcessor.publish(listOf(TableViewListenerEvent<ColumnView>(old, new)) as List<TableViewListenerEvent<Any>>)
-    }
-
-    operator fun set(column: Column, init: ColumnViewBuilder.() -> Unit) = set(column.columnHeader, init)
-
-    operator fun set(columnView: ColumnView, init: ColumnViewBuilder.() -> Unit) = set(columnView.columnHeader, init)
 
     operator fun set(columnHeader: ColumnHeader, view: ColumnView?) {
         val (oldRef, newRef) = tableViewRef.refAction {
@@ -435,38 +370,6 @@ class TableView internal constructor(
 
     // -----
 
-    operator fun set(row: Long, init: RowViewBuilder.() -> Unit) {
-        val (oldRef, newRef) = tableViewRef.refAction {
-            val oldMeta = it.rowViews[row]
-            val rowViewBuilder = RowViewBuilder(
-                oldMeta?.cellHeight,
-                oldMeta?.cellClasses?.toSortedSet(),
-                oldMeta?.cellTopics?.toSortedSet()
-            )
-            rowViewBuilder.init()
-            val viewMeta = rowViewBuilder.build()
-
-            it.copy(
-                rowViews = it.rowViews.put(row, viewMeta),
-                version = it.version + 1L
-            )
-        }
-
-        if (!eventProcessor.haveListeners()) return
-
-        val oldView = makeClone(ref = oldRef)
-        val newView = makeClone(ref = newRef)
-
-        val old = oldView[row]
-        val new = newView[row]
-
-        eventProcessor.publish(listOf(TableViewListenerEvent<RowView>(old, new)) as List<TableViewListenerEvent<Any>>)
-    }
-
-    operator fun set(rowView: RowView, init: RowViewBuilder.() -> Unit) = set(rowView.index, init)
-
-    operator fun set(row: Row, init: RowViewBuilder.() -> Unit) = set(row.index, init)
-
     operator fun set(row: Long, view: RowView?) {
         val (oldRef, newRef) = tableViewRef.refAction {
             val viewMeta = if (view == null) null else view.tableView.tableViewRef.get().rowViews[view.index]
@@ -497,36 +400,6 @@ class TableView internal constructor(
 
     // -----
 
-    operator fun set(columnHeader: ColumnHeader, row: Long, init: CellViewBuilder.() -> Unit) {
-        val (oldRef, newRef) = tableViewRef.refAction {
-            val key = Pair(columnHeader, row)
-            val oldMeta = it.cellViews[key]
-            val cellViewBuilder = CellViewBuilder(
-                oldMeta?.cellHeight,
-                oldMeta?.cellWidth,
-                oldMeta?.cellClasses?.toSortedSet(),
-                oldMeta?.cellTopics?.toSortedSet()
-            )
-            cellViewBuilder.init()
-            val viewMeta = cellViewBuilder.build()
-
-            it.copy(
-                cellViews = it.cellViews.put(key, viewMeta),
-                version = it.version + 1L
-            )
-        }
-
-        if (!eventProcessor.haveListeners()) return
-
-        val oldView = makeClone(ref = oldRef)
-        val newView = makeClone(ref = newRef)
-
-        val old = oldView[columnHeader][row]
-        val new = newView[columnHeader][row]
-
-        eventProcessor.publish(listOf(TableViewListenerEvent(old, new)))
-    }
-
     operator fun set(columnHeader: ColumnHeader, row: Long, view: CellView?) {
         val cell = Pair(columnHeader, row)
         val (oldRef, newRef) = tableViewRef.refAction {
@@ -550,56 +423,6 @@ class TableView internal constructor(
         val new = newView[columnHeader][row]
 
         eventProcessor.publish(listOf(TableViewListenerEvent(old, new)))
-    }
-
-    // -----
-
-    operator fun set(vararg header: String, init: ColumnViewBuilder.() -> Unit) {
-        this[ColumnHeader(*header)] = init
-    }
-
-    // -----
-
-    operator fun set(header1: String, index: Long, init: CellViewBuilder.() -> Unit) {
-        this[ColumnHeader(header1)][index] = init
-    }
-
-    operator fun set(header1: String, header2: String, index: Long, init: CellViewBuilder.() -> Unit) {
-        this[ColumnHeader(header1, header2)][index] = init
-    }
-
-    operator fun set(header1: String, header2: String, header3: String, index: Long, init: CellViewBuilder.() -> Unit) {
-        this[ColumnHeader(header1, header2, header3)][index] = init
-    }
-
-    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, init: CellViewBuilder.() -> Unit) {
-        this[ColumnHeader(header1, header2, header3, header4)][index] = init
-    }
-
-    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, init: CellViewBuilder.() -> Unit) {
-        this[ColumnHeader(header1, header2, header3, header4, header5)][index] = init
-    }
-
-    // -----
-
-    operator fun set(header1: String, index: Int, init: CellViewBuilder.() -> Unit) {
-        this[ColumnHeader(header1)][index] = init
-    }
-
-    operator fun set(header1: String, header2: String, index: Int, init: CellViewBuilder.() -> Unit) {
-        this[ColumnHeader(header1, header2)][index] = init
-    }
-
-    operator fun set(header1: String, header2: String, header3: String, index: Int, init: CellViewBuilder.() -> Unit) {
-        this[ColumnHeader(header1, header2, header3)][index] = init
-    }
-
-    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, init: CellViewBuilder.() -> Unit) {
-        this[ColumnHeader(header1, header2, header3, header4)][index] = init
-    }
-
-    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, init: CellViewBuilder.() -> Unit) {
-        this[ColumnHeader(header1, header2, header3, header4, header5)][index] = init
     }
 
     // -----
@@ -673,64 +496,12 @@ class TableView internal constructor(
     }
 }
 
-// TODO? These builders could get the old ViewMeta instance, and lazily read from this/update this
-class TableViewBuilder(
-    var cellHeight: Long? = null,
-    var cellWidth: Long? = null,
-    var cellClasses: SortedSet<String>?,
-    var cellTopics: SortedSet<String>?,
-    // TODO? var reader: (DestinationOsmosis<CellView>.() -> Unit)? = null
-) {
-    internal fun build(): ViewMeta = ViewMeta(
-        cellHeight = cellHeight,
-        cellWidth = cellWidth,
-        cellClasses = cellClasses?.toImmutableSet(),
-        cellTopics = cellTopics?.toImmutableSet()
-    )
-}
-
-class ColumnViewBuilder(
-    var cellWidth: Long? = null,
-    var cellClasses: SortedSet<String>?,
-    var cellTopics: SortedSet<String>?,
-    // TODO? var reader: (DestinationOsmosis<CellView>.() -> Unit)? = null
-) {
-    internal fun build(): ViewMeta = ViewMeta(
-        cellHeight = null,
-        cellWidth = cellWidth,
-        cellClasses = cellClasses?.toImmutableSet(),
-        cellTopics = cellTopics?.toImmutableSet()
-    )
-}
-
-class RowViewBuilder(
-    var cellHeight: Long? = null,
-    var cellClasses: SortedSet<String>?,
-    var cellTopics: SortedSet<String>?,
-    // TODO? var reader: (DestinationOsmosis<CellView>.() -> Unit)? = null
-) {
-    internal fun build(): ViewMeta = ViewMeta(
-        cellHeight = cellHeight,
-        cellWidth = null,
-        cellClasses = cellClasses?.toImmutableSet(),
-        cellTopics = cellTopics?.toImmutableSet()
-    )
-}
-
-class CellViewBuilder(
-    var cellHeight: Long? = null,
-    var cellWidth: Long? = null,
-    var cellClasses: SortedSet<String>?,
-    var cellTopics: SortedSet<String>?,
-    // TODO? var reader: (DestinationOsmosis<CellView>.() -> Unit)? = null
-) {
-    internal fun build(): ViewMeta = ViewMeta(
-        cellHeight = cellHeight,
-        cellWidth = cellWidth,
-        cellClasses = cellClasses?.toImmutableSet(),
-        cellTopics = cellTopics?.toImmutableSet()
-    )
-}
+/* TODO Introduce a way to make atomic updates across several properties, with
+        view = {
+            it[..] = ..
+            it[..] = ..
+        }
+*/
 
 class CellView(
     val columnView: ColumnView,
@@ -742,9 +513,26 @@ class CellView(
             return ref.cellViews[Pair(columnView.columnHeader, index)]?.cellHeight
         }
         set(height) {
-            tableView[this] = {
-                cellHeight = height
+            val (oldRef, newRef) = columnView.tableView.tableViewRef.refAction {
+                val key = Pair(columnView.columnHeader, index)
+                val oldMeta = it.cellViews[key]
+                val viewMeta = oldMeta?.copy(cellHeight = height) ?: ViewMeta(cellHeight = height)
+
+                it.copy(
+                    cellViews = it.cellViews.put(key, viewMeta),
+                    version = it.version + 1L
+                )
             }
+
+            if (!columnView.tableView.eventProcessor.haveListeners()) return
+
+            val oldView = columnView.tableView.makeClone(ref = oldRef)
+            val newView = columnView.tableView.makeClone(ref = newRef)
+
+            val old = oldView[columnView.columnHeader][index]
+            val new = newView[columnView.columnHeader][index]
+
+            columnView.tableView.eventProcessor.publish(listOf(TableViewListenerEvent(old, new)))
         }
 
     var cellWidth: Long?
@@ -753,9 +541,26 @@ class CellView(
             return ref.cellViews[Pair(columnView.columnHeader, index)]?.cellWidth
         }
         set(width) {
-            tableView[this] = {
-                cellWidth = width
+            val (oldRef, newRef) = columnView.tableView.tableViewRef.refAction {
+                val key = Pair(columnView.columnHeader, index)
+                val oldMeta = it.cellViews[key]
+                val viewMeta = oldMeta?.copy(cellWidth = width) ?: ViewMeta(cellWidth = width)
+
+                it.copy(
+                    cellViews = it.cellViews.put(key, viewMeta),
+                    version = it.version + 1L
+                )
             }
+
+            if (!columnView.tableView.eventProcessor.haveListeners()) return
+
+            val oldView = columnView.tableView.makeClone(ref = oldRef)
+            val newView = columnView.tableView.makeClone(ref = newRef)
+
+            val old = oldView[columnView.columnHeader][index]
+            val new = newView[columnView.columnHeader][index]
+
+            columnView.tableView.eventProcessor.publish(listOf(TableViewListenerEvent(old, new)))
         }
 
     var cellClasses: SortedSet<String>
@@ -764,9 +569,26 @@ class CellView(
             return Collections.unmodifiableSortedSet(ref.cellViews[Pair(columnView.columnHeader, index)]?.cellClasses?.toSortedSet() ?: emptySortedSet())
         }
         set(classes) {
-            tableView[this] = {
-                cellClasses = classes
+            val (oldRef, newRef) = columnView.tableView.tableViewRef.refAction {
+                val key = Pair(columnView.columnHeader, index)
+                val oldMeta = it.cellViews[key]
+                val viewMeta = oldMeta?.copy(cellClasses = classes.toImmutableSet()) ?: ViewMeta(cellClasses = classes.toImmutableSet())
+
+                it.copy(
+                    cellViews = it.cellViews.put(key, viewMeta),
+                    version = it.version + 1L
+                )
             }
+
+            if (!columnView.tableView.eventProcessor.haveListeners()) return
+
+            val oldView = columnView.tableView.makeClone(ref = oldRef)
+            val newView = columnView.tableView.makeClone(ref = newRef)
+
+            val old = oldView[columnView.columnHeader][index]
+            val new = newView[columnView.columnHeader][index]
+
+            columnView.tableView.eventProcessor.publish(listOf(TableViewListenerEvent(old, new)))
         }
 
     var cellTopics: SortedSet<String>
@@ -775,9 +597,26 @@ class CellView(
             return Collections.unmodifiableSortedSet(ref.cellViews[Pair(columnView.columnHeader, index)]?.cellTopics?.toSortedSet() ?: emptySortedSet())
         }
         set(topics) {
-            tableView[this] = {
-                cellTopics = topics
+            val (oldRef, newRef) = columnView.tableView.tableViewRef.refAction {
+                val key = Pair(columnView.columnHeader, index)
+                val oldMeta = it.cellViews[key]
+                val viewMeta = oldMeta?.copy(cellTopics = topics.toImmutableSet()) ?: ViewMeta(cellTopics = topics.toImmutableSet())
+
+                it.copy(
+                    cellViews = it.cellViews.put(key, viewMeta),
+                    version = it.version + 1L
+                )
             }
+
+            if (!columnView.tableView.eventProcessor.haveListeners()) return
+
+            val oldView = columnView.tableView.makeClone(ref = oldRef)
+            val newView = columnView.tableView.makeClone(ref = newRef)
+
+            val old = oldView[columnView.columnHeader][index]
+            val new = newView[columnView.columnHeader][index]
+
+            columnView.tableView.eventProcessor.publish(listOf(TableViewListenerEvent(old, new)))
         }
 
     val tableView: TableView
@@ -882,9 +721,25 @@ class ColumnView internal constructor(
             return ref.columnViews[columnHeader]?.cellWidth
         }
         set(width) {
-            tableView[this] = {
-                cellWidth = width
+            val (oldRef, newRef) = tableView.tableViewRef.refAction {
+                val oldMeta = it.columnViews[columnHeader]
+                val viewMeta = oldMeta?.copy(cellWidth = width) ?: ViewMeta(cellWidth = width)
+
+                it.copy(
+                    columnViews = it.columnViews.put(columnHeader, viewMeta),
+                    version = it.version + 1L
+                )
             }
+
+            if (!tableView.eventProcessor.haveListeners()) return
+
+            val oldView = tableView.makeClone(ref = oldRef)
+            val newView = tableView.makeClone(ref = newRef)
+
+            val old = oldView[columnHeader]
+            val new = newView[columnHeader]
+
+            tableView.eventProcessor.publish(listOf(TableViewListenerEvent<ColumnView>(old, new)) as List<TableViewListenerEvent<Any>>)
         }
 
     var cellClasses: SortedSet<String>
@@ -893,9 +748,25 @@ class ColumnView internal constructor(
             return Collections.unmodifiableSortedSet(ref.columnViews[columnHeader]?.cellClasses?.toSortedSet() ?: emptySortedSet())
         }
         set(classes) {
-            tableView[this] = {
-                cellClasses = classes
+            val (oldRef, newRef) = tableView.tableViewRef.refAction {
+                val oldMeta = it.columnViews[columnHeader]
+                val viewMeta = oldMeta?.copy(cellClasses = classes.toImmutableSet()) ?: ViewMeta(cellClasses = classes.toImmutableSet())
+
+                it.copy(
+                    columnViews = it.columnViews.put(columnHeader, viewMeta),
+                    version = it.version + 1L
+                )
             }
+
+            if (!tableView.eventProcessor.haveListeners()) return
+
+            val oldView = tableView.makeClone(ref = oldRef)
+            val newView = tableView.makeClone(ref = newRef)
+
+            val old = oldView[columnHeader]
+            val new = newView[columnHeader]
+
+            tableView.eventProcessor.publish(listOf(TableViewListenerEvent<ColumnView>(old, new)) as List<TableViewListenerEvent<Any>>)
         }
 
     var cellTopics: SortedSet<String>
@@ -904,9 +775,25 @@ class ColumnView internal constructor(
             return Collections.unmodifiableSortedSet(ref.columnViews[columnHeader]?.cellTopics?.toSortedSet() ?: emptySortedSet())
         }
         set(topics) {
-            tableView[this] = {
-                cellTopics = topics
+            val (oldRef, newRef) = tableView.tableViewRef.refAction {
+                val oldMeta = it.columnViews[columnHeader]
+                val viewMeta = oldMeta?.copy(cellTopics = topics.toImmutableSet()) ?: ViewMeta(cellTopics = topics.toImmutableSet())
+
+                it.copy(
+                    columnViews = it.columnViews.put(columnHeader, viewMeta),
+                    version = it.version + 1L
+                )
             }
+
+            if (!tableView.eventProcessor.haveListeners()) return
+
+            val oldView = tableView.makeClone(ref = oldRef)
+            val newView = tableView.makeClone(ref = newRef)
+
+            val old = oldView[columnHeader]
+            val new = newView[columnHeader]
+
+            tableView.eventProcessor.publish(listOf(TableViewListenerEvent<ColumnView>(old, new)) as List<TableViewListenerEvent<Any>>)
         }
 
     // Note: cellViews return the defined CellViews, while the ColumnView iterator
@@ -930,10 +817,6 @@ class ColumnView internal constructor(
 
     // TODO Does this need to care about index relations?
     operator fun get(row: Row) = get(row.index)
-
-    operator fun set(index: Long, init: CellViewBuilder.() -> Unit) { tableView[columnHeader, index] = init }
-
-    operator fun set(index: Int, init: CellViewBuilder.() -> Unit) { this[index.toLong()] = init }
 
     operator fun set(index: Long, view: CellView?) { tableView[columnHeader, index] = view }
 
@@ -1036,9 +919,25 @@ class RowView internal constructor(
             return ref.rowViews[index]?.cellHeight
         }
         set(height) {
-            tableView[this] = {
-                cellHeight = height
+            val (oldRef, newRef) = tableView.tableViewRef.refAction {
+                val oldMeta = it.rowViews[index]
+                val viewMeta = oldMeta?.copy(cellHeight = height) ?: ViewMeta(cellHeight = height)
+
+                it.copy(
+                    rowViews = it.rowViews.put(index, viewMeta),
+                    version = it.version + 1L
+                )
             }
+
+            if (!tableView.eventProcessor.haveListeners()) return
+
+            val oldView = tableView.makeClone(ref = oldRef)
+            val newView = tableView.makeClone(ref = newRef)
+
+            val old = oldView[index]
+            val new = newView[index]
+
+            tableView.eventProcessor.publish(listOf(TableViewListenerEvent<RowView>(old, new)) as List<TableViewListenerEvent<Any>>)
         }
 
     var cellClasses: SortedSet<String>
@@ -1047,9 +946,25 @@ class RowView internal constructor(
             return Collections.unmodifiableSortedSet(ref.rowViews[index]?.cellClasses?.toSortedSet() ?: emptySortedSet())
         }
         set(classes) {
-            tableView[this] = {
-                cellClasses = classes
+            val (oldRef, newRef) = tableView.tableViewRef.refAction {
+                val oldMeta = it.rowViews[index]
+                val viewMeta = oldMeta?.copy(cellClasses = classes.toImmutableSet()) ?: ViewMeta(cellClasses = classes.toImmutableSet())
+
+                it.copy(
+                    rowViews = it.rowViews.put(index, viewMeta),
+                    version = it.version + 1L
+                )
             }
+
+            if (!tableView.eventProcessor.haveListeners()) return
+
+            val oldView = tableView.makeClone(ref = oldRef)
+            val newView = tableView.makeClone(ref = newRef)
+
+            val old = oldView[index]
+            val new = newView[index]
+
+            tableView.eventProcessor.publish(listOf(TableViewListenerEvent<RowView>(old, new)) as List<TableViewListenerEvent<Any>>)
         }
 
     var cellTopics: SortedSet<String>
@@ -1058,9 +973,25 @@ class RowView internal constructor(
             return Collections.unmodifiableSortedSet(ref.rowViews[index]?.cellTopics?.toSortedSet() ?: emptySortedSet())
         }
         set(topics) {
-            tableView[this] = {
-                cellTopics = topics
+            val (oldRef, newRef) = tableView.tableViewRef.refAction {
+                val oldMeta = it.rowViews[index]
+                val viewMeta = oldMeta?.copy(cellTopics = topics.toImmutableSet()) ?: ViewMeta(cellTopics = topics.toImmutableSet())
+
+                it.copy(
+                    rowViews = it.rowViews.put(index, viewMeta),
+                    version = it.version + 1L
+                )
             }
+
+            if (!tableView.eventProcessor.haveListeners()) return
+
+            val oldView = tableView.makeClone(ref = oldRef)
+            val newView = tableView.makeClone(ref = newRef)
+
+            val old = oldView[index]
+            val new = newView[index]
+
+            tableView.eventProcessor.publish(listOf(TableViewListenerEvent<RowView>(old, new)) as List<TableViewListenerEvent<Any>>)
         }
 
     // Note: cellViews return the defined CellViews, while the RowView iterator
@@ -1085,14 +1016,6 @@ class RowView internal constructor(
     operator fun get(columnView: ColumnView): CellView = tableView[columnView.columnHeader, index]
 
     operator fun get(column: Column): CellView = tableView[column.columnHeader, index]
-
-    operator fun set(vararg header: String, init: CellViewBuilder.() -> Unit) { tableView[ColumnHeader(*header), index] = init }
-
-    operator fun set(columnHeader: ColumnHeader, init: CellViewBuilder.() -> Unit) { tableView[columnHeader, index] = init }
-
-    operator fun set(columnView: ColumnView, init: CellViewBuilder.() -> Unit) { tableView[columnView.columnHeader, index] = init }
-
-    operator fun set(column: Column, init: CellViewBuilder.() -> Unit) { tableView[column.columnHeader, index] = init }
 
     operator fun set(vararg header: String, view: CellView?) { tableView[ColumnHeader(*header), index] = view }
 

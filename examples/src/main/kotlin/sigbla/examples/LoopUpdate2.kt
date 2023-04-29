@@ -31,10 +31,14 @@ fun main() {
         height = 10
     }
      */
+    /*
     tableView[TableView] = {
         cellWidth = 10
         cellHeight = 10
     }
+     */
+    tableView.cellWidth = 10
+    tableView.cellHeight = 10
 
     show(tableView)
     Thread.sleep(15000)

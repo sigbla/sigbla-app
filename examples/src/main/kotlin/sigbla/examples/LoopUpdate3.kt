@@ -35,14 +35,18 @@ fun main() {
         height = 10
     }
      */
+    /*
     tableView[TableView] = {
         cellWidth = 10
         cellHeight = 10
     }
+     */
+    tableView.cellWidth = 10
+    tableView.cellHeight = 10
 
     Thread.sleep(15000)
 
-    var sleepTime = 1000L
+    var sleepTime = 100L
 
     while (true) {
         if (ThreadLocalRandom.current().nextBoolean()) {

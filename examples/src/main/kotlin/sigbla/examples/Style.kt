@@ -53,6 +53,7 @@ fun main() {
 
     }
 
+    /*
     tableView["A"] = {
 
     }
@@ -122,6 +123,7 @@ fun main() {
     tableView[ColumnHeader("A", "B"), 1L] = {
 
     }
+     */
 
     tableView["A"].let {
 
@@ -193,6 +195,7 @@ fun main() {
 
     }
 
+    /*
     tableView[ColumnHeader("A"), 1] = {
         cellHeight = null
         cellWidth = 100
@@ -209,6 +212,9 @@ fun main() {
         }
          */
     }
+     */
+    tableView[ColumnHeader("A"), 1].cellHeight = null
+    tableView[ColumnHeader("A"), 1].cellWidth = 100
 
     // TODO?
     /*
@@ -222,9 +228,11 @@ fun main() {
     cv.cellWidth = 100
     cv.cellHeight
 
+    /*
     tableView[ColumnHeader("A")] = {
         cellWidth = 100
     }
+     */
 
     show(tableView)
 
