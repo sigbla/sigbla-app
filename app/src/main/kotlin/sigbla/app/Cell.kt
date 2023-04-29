@@ -332,6 +332,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
     // TODO Can remove this after adding iterator functionality
     fun asSequence(): Sequence<Cell<*>> = sequenceOf(this)
 
+    // TODO Consider changing these to use invoke instead?
     infix fun `=`(value: BigDecimal) {
         table[this] = value
     }

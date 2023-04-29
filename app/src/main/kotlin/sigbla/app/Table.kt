@@ -14,7 +14,7 @@ import com.github.andrewoma.dexx.collection.Map as PMap
 import com.github.andrewoma.dexx.collection.SortedMap as PSortedMap
 import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
 
-// TODO Should the be sealed rather than abstract? Or just a normal class with no BaseTable?
+// TODO Should this be sealed rather than abstract? Or just a normal class with no BaseTable?
 abstract class Table(val name: String?) : Iterable<Cell<*>> {
     @Volatile
     var closed: Boolean = false
