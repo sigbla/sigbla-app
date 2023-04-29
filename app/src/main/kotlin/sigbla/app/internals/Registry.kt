@@ -41,8 +41,6 @@ internal object Registry {
     private fun deleteView(view: TableView?) {
         if (view == null) return
 
-        if (view !is BaseTableView) throw InvalidTableViewException()
-
         view.eventProcessor.shutdown()
         view.tableViewRef.set(TableViewRef())
     }
