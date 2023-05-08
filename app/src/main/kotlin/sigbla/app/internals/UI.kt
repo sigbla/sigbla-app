@@ -449,12 +449,12 @@ internal object SigblaBackend {
 
         if (resize.sizeChangeX != 0L) {
             val columnView = view[target.contentHeader]
-            view[target.contentHeader].cellWidth = 10L.coerceAtLeast(columnView.derived.cellWidth + resize.sizeChangeX)
+            view[target.contentHeader][CellWidth] = 10L.coerceAtLeast(columnView.derived.cellWidth + resize.sizeChangeX)
         }
 
         if (resize.sizeChangeY != 0L) {
             val rowView = view[target.contentRow]
-            view[target.contentRow].cellHeight = 10L.coerceAtLeast(rowView.derived.cellHeight + resize.sizeChangeY)
+            view[target.contentRow][CellHeight] = 10L.coerceAtLeast(rowView.derived.cellHeight + resize.sizeChangeY)
         }
     }
 
@@ -472,22 +472,34 @@ internal object SigblaBackend {
             order = Long.MAX_VALUE
             name = "UI"
 
+            fun getCell(newValue: Any?): Any? {
+                return when (newValue) {
+                    is CellView -> newValue.cell
+                    is CellHeight<*, *> -> getCell(newValue.source)
+                    is CellWidth<*, *> -> getCell(newValue.source)
+                    is CellClasses<*> -> getCell(newValue.source)
+                    is CellTopics<*> -> getCell(newValue.source)
+                    else -> false
+                }
+            }
+
             events {
                 if (any()) {
                     // TODO: Might be able to just do as below for table events and not clear if we just extract cells?
                     var clear = false
                     val dirtyCells = mutableListOf<Cell<*>>()
                     for (event in this) {
-                        when (val newValue = event.newValue) {
-                            is CellView -> newValue.cell?.let { dirtyCells.add(it) }
-                            else -> {
+                        when (val value = getCell(event.newValue)) {
+                            false -> {
                                 clear = true
                                 break
                             }
+                            is Cell<*> -> dirtyCells.add(value)
                         }
                     }
 
                     if (clear) {
+                        println("force clear")
                         listeners.values.forEach { client ->
                             if (client.ref == source.name) {
                                 runBlocking {

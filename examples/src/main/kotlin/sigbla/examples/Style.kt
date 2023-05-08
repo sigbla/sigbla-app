@@ -25,12 +25,22 @@ fun main() {
 
     val tableView = TableView[table]
 
-    tableView.cellHeight = 100
-    tableView.cellWidth
-    tableView["A"].cellWidth
-    tableView[1].cellHeight
-    tableView["A", 1].cellHeight
-    tableView["A", 1].cellWidth
+    tableView[CellHeight] = 100
+    tableView[CellHeight] = tableView[CellHeight] + 100
+    val cellHeight = tableView[CellHeight]
+    tableView[CellWidth]
+    tableView[CellClasses] = "  "
+    tableView[CellClasses] = setOf("a", "b")
+    tableView[CellClasses] = listOf("a", "b")
+    tableView[CellClasses] = tableView[CellClasses] + "c"
+    tableView[CellClasses] = tableView[CellClasses] + setOf("d", "e")
+    tableView[CellClasses] = tableView[CellClasses] - "e"
+    tableView[CellClasses] = tableView[CellClasses] - setOf("a", "d")
+    tableView[CellClasses] = null
+    tableView["A"][CellWidth]
+    tableView[1][CellHeight]
+    tableView["A", 1][CellHeight]
+    tableView["A", 1][CellWidth]
     table["A"].table.table.table
     tableView["A"].tableView.tableView
     table["A", 1] = 1
@@ -213,8 +223,8 @@ fun main() {
          */
     }
      */
-    tableView[ColumnHeader("A"), 1].cellHeight = null
-    tableView[ColumnHeader("A"), 1].cellWidth = 100
+    tableView[ColumnHeader("A"), 1][CellHeight] = null
+    tableView[ColumnHeader("A"), 1][CellWidth] = 100
 
     // TODO?
     /*
@@ -225,8 +235,14 @@ fun main() {
 
     val cv = tableView["A", 1]
 
-    cv.cellWidth = 100
-    cv.cellHeight
+    cv[CellWidth] = 100
+    cv[CellHeight]
+
+    tableView[CellHeight] = 100
+    tableView[CellHeight] = null
+    tableView[CellHeight] = 100L
+    val height = tableView[CellHeight] + 100
+    tableView[CellHeight] = height
 
     /*
     tableView[ColumnHeader("A")] = {

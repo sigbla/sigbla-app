@@ -41,8 +41,8 @@ fun main() {
         cellHeight = 10
     }
      */
-    tableView.cellWidth = 10
-    tableView.cellHeight = 10
+    tableView[CellWidth] = 10
+    tableView[CellHeight] = 10
 
     Thread.sleep(15000)
 

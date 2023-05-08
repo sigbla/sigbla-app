@@ -8,8 +8,8 @@ fun main() {
     val table = Table["test"]
     val tableView = TableView[table]
 
-    tableView.cellClasses = sortedSetOf("testClass")
-    tableView.cellTopics = sortedSetOf("test-event")
+    tableView[CellClasses] = "testClass"
+    tableView[CellTopics] = sortedSetOf("test-event")
 
     show(tableView)
 

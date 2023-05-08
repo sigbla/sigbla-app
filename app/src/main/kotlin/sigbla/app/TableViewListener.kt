@@ -45,24 +45,38 @@ class TableViewEventReceiver<S, T>(
 // TODO Can these be lazy? I.e., reuse same value?
 val Sequence<TableViewListenerEvent<*>>.newView: TableView
     get() = this.firstOrNull()?.let {
-        return when (it.newValue) {
-            is TableView -> it.newValue.tableView
-            is ColumnView -> it.newValue.tableView
-            is RowView -> it.newValue.tableView
-            is CellView -> it.newValue.tableView
-            is DerivedCellView -> it.newValue.tableView
-            else -> throw SigblaAppException("Unknown type: ${it.newValue?.javaClass}")
+        fun getTableView(value: Any?): TableView {
+            return when (value) {
+                is TableView -> value.tableView
+                is ColumnView -> value.tableView
+                is RowView -> value.tableView
+                is CellView -> value.tableView
+                is DerivedCellView -> value.tableView
+                is CellHeight<*, *> -> getTableView(value.source)
+                is CellWidth<*, *> -> getTableView(value.source)
+                is CellClasses<*> -> getTableView(value.source)
+                is CellTopics<*> -> getTableView(value.source)
+                else -> throw SigblaAppException("Unknown type: ${it.newValue?.javaClass}")
+            }
         }
+        getTableView(it.newValue)
     } ?: throw InvalidSequenceException()
 
 val Sequence<TableViewListenerEvent<*>>.oldView: TableView
     get() = this.firstOrNull()?.let {
-        return when (it.oldValue) {
-            is TableView -> it.oldValue.tableView
-            is ColumnView -> it.oldValue.tableView
-            is RowView -> it.oldValue.tableView
-            is CellView -> it.oldValue.tableView
-            is DerivedCellView -> it.oldValue.tableView
-            else -> throw SigblaAppException("Unknown type: ${it.oldValue?.javaClass}")
+        fun getTableView(value: Any?): TableView {
+            return when (value) {
+                is TableView -> value.tableView
+                is ColumnView -> value.tableView
+                is RowView -> value.tableView
+                is CellView -> value.tableView
+                is DerivedCellView -> value.tableView
+                is CellHeight<*, *> -> getTableView(value.source)
+                is CellWidth<*, *> -> getTableView(value.source)
+                is CellClasses<*> -> getTableView(value.source)
+                is CellTopics<*> -> getTableView(value.source)
+                else -> throw SigblaAppException("Unknown type: ${it.newValue?.javaClass}")
+            }
         }
+        getTableView(it.oldValue)
     } ?: throw InvalidSequenceException()

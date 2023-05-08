@@ -438,31 +438,43 @@ internal class TableViewEventProcessor {
 
         eventBuffer.set(views.toMutableList())
 
-        fun newValueVersion(newValue: Any) = when (newValue) {
+        fun newValueVersion(newValue: Any?): Long = when (newValue) {
             is TableView -> newValue.tableView.tableViewRef.get().version
             is ColumnView -> newValue.tableView.tableViewRef.get().version
             is RowView -> newValue.tableView.tableViewRef.get().version
             is CellView -> newValue.tableView.tableViewRef.get().version
             is DerivedCellView -> newValue.tableView.tableViewRef.get().version
-            else -> throw SigblaAppException("Unsupported type: ${newValue.javaClass}")
+            is CellHeight<*, *> -> newValueVersion(newValue.source)
+            is CellWidth<*, *> -> newValueVersion(newValue.source)
+            is CellClasses<*> -> newValueVersion(newValue.source)
+            is CellTopics<*> -> newValueVersion(newValue.source)
+            else -> throw SigblaAppException("Unsupported type: ${newValue?.javaClass}")
         }
 
-        fun valueColumn(value: Any) = when (value) {
+        fun valueColumn(value: Any?): ColumnView? = when (value) {
             // TODO is TableView -> null
             is ColumnView -> value
             is RowView -> null
             is CellView -> value.columnView
             is DerivedCellView -> value.columnView
-            else -> throw SigblaAppException("Unsupported type: ${value.javaClass}")
+            is CellHeight<*, *> -> valueColumn(value.source)
+            is CellWidth<*, *> -> valueColumn(value.source)
+            is CellClasses<*> -> valueColumn(value.source)
+            is CellTopics<*> -> valueColumn(value.source)
+            else -> throw SigblaAppException("Unsupported type: ${value?.javaClass}")
         }
 
-        fun valueIndex(value: Any) = when (value) {
+        fun valueIndex(value: Any?): Long? = when (value) {
             // TODO is TableView -> null
             is ColumnView -> null
             is RowView -> value.index
             is CellView -> value.index
             is DerivedCellView -> value.index
-            else -> throw SigblaAppException("Unsupported type: ${value.javaClass}")
+            is CellHeight<*, *> -> valueIndex(value.source)
+            is CellWidth<*, *> -> valueIndex(value.source)
+            is CellClasses<*> -> valueIndex(value.source)
+            is CellTopics<*> -> valueIndex(value.source)
+            else -> throw SigblaAppException("Unsupported type: ${value?.javaClass}")
         }
 
         try {

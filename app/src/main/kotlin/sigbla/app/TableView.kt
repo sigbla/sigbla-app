@@ -1,14 +1,17 @@
 package sigbla.app
 
+import com.github.andrewoma.dexx.kollection.ImmutableSet
 import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.exceptions.InvalidTableViewException
+import sigbla.app.exceptions.InvalidCellHeightException
+import sigbla.app.exceptions.InvalidCellWidthException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.TableViewEventProcessor
 import sigbla.app.internals.refAction
 import java.util.*
-import java.util.Collections.emptySortedSet
 import java.util.concurrent.atomic.AtomicReference
 import com.github.andrewoma.dexx.kollection.toImmutableSet
+import com.github.andrewoma.dexx.kollection.immutableSetOf
 import com.github.andrewoma.dexx.collection.Map as PMap
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 import com.github.andrewoma.dexx.kollection.ImmutableSet as PSet
@@ -77,6 +80,8 @@ import com.github.andrewoma.dexx.kollection.ImmutableSet as PSet
 //      on<Cell>(rowView) or on<O,N>(rowView):
 //      on<Cell>(cellView) or on<O,N>(cellView):
 
+private val EMPTY_IMMUTABLE_STRING_SET = immutableSetOf<String>()
+
 const val DEFAULT_CELL_HEIGHT = 20L
 const val DEFAULT_CELL_WIDTH = 100L
 
@@ -135,6 +140,7 @@ class TableView internal constructor(
             val old = makeClone(ref = oldRef)
             val new = makeClone(ref = newRef)
 
+            // TODO This needs to emit a Table? Probably not, need the view ref..
             eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(old, new)) as List<TableViewListenerEvent<Any>>)
         }
 
@@ -163,99 +169,159 @@ class TableView internal constructor(
                 CellView(ColumnView(this, it.first), it.second)
             }
 
-    // TODO should use get/set operators
-    var cellHeight: Long?
-        get() {
-            val ref = tableView.tableViewRef.get()
-            return ref.defaultCellView.cellHeight
+    operator fun get(cellHeight: CellHeight.Companion): CellHeight<TableView, *> {
+        val ref = tableView.tableViewRef.get()
+        return when (val height = ref.defaultCellView.cellHeight) {
+            is Long -> PixelCellHeight(this, height)
+            else -> UnitCellHeight(this)
         }
-        set(height) {
-            val (oldRef, newRef) = tableViewRef.refAction {
-                it.copy(
-                    defaultCellView = it.defaultCellView.copy(
-                        cellHeight = height
-                    ),
-                    version = it.version + 1L
-                )
-            }
+    }
 
-            if (!eventProcessor.haveListeners()) return
+    operator fun set(cellHeight: CellHeight.Companion, height: Long) {
+        setCellHeight(height)
+    }
 
-            val old = makeClone(ref = oldRef)
-            val new = makeClone(ref = newRef)
-
-            eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(old, new)) as List<TableViewListenerEvent<Any>>)
+    operator fun set(cellHeight: CellHeight.Companion, height: Number) {
+        when (height) {
+            is Int -> setCellHeight(height.toLong())
+            is Long -> setCellHeight(height)
+            else -> throw InvalidCellHeightException("Unsupported type: ${height::class}")
         }
+    }
 
-    // TODO should use get/set operators
-    var cellWidth: Long?
-        get() {
-            val ref = tableView.tableViewRef.get()
-            return ref.defaultCellView.cellWidth
-        }
-        set(width) {
-            val (oldRef, newRef) = tableViewRef.refAction {
-                it.copy(
-                    defaultCellView = it.defaultCellView.copy(
-                        cellWidth = width
-                    ),
-                    version = it.version + 1L
-                )
-            }
+    operator fun set(cellHeight: CellHeight.Companion, height: CellHeight<*, *>?) {
+        setCellHeight(height?.toLong())
+    }
 
-            if (!eventProcessor.haveListeners()) return
-
-            val old = makeClone(ref = oldRef)
-            val new = makeClone(ref = newRef)
-
-            eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(old, new)) as List<TableViewListenerEvent<Any>>)
+    private fun setCellHeight(height: Long?) {
+        val (oldRef, newRef) = tableViewRef.refAction {
+            it.copy(
+                defaultCellView = it.defaultCellView.copy(
+                    cellHeight = height
+                ),
+                version = it.version + 1L
+            )
         }
 
-    // TODO should use get/set operators
-    var cellClasses: SortedSet<String>
-        get() {
-            val ref = tableView.tableViewRef.get()
-            return Collections.unmodifiableSortedSet(ref.defaultCellView.cellClasses?.toSortedSet() ?: emptySortedSet())
+        if (!eventProcessor.haveListeners()) return
+
+        val old = makeClone(ref = oldRef)
+        val new = makeClone(ref = newRef)
+
+        eventProcessor.publish(listOf(TableViewListenerEvent<CellHeight<TableView, *>>(old[CellHeight], new[CellHeight])) as List<TableViewListenerEvent<Any>>)
+    }
+
+    operator fun get(cellWidth: CellWidth.Companion): CellWidth<TableView, *> {
+        val ref = tableView.tableViewRef.get()
+        return when (val width = ref.defaultCellView.cellWidth) {
+            is Long -> PixelCellWidth(this, width)
+            else -> UnitCellWidth(this)
         }
-        set(classes) {
-            val (oldRef, newRef) = tableViewRef.refAction {
-                it.copy(
-                    defaultCellView = it.defaultCellView.copy(
-                        cellClasses = classes.toImmutableSet()
-                    )
-                )
-            }
+    }
 
-            if (!eventProcessor.haveListeners()) return
+    operator fun set(cellWidth: CellWidth.Companion, width: Long) {
+        setCellWidth(width)
+    }
 
-            val old = makeClone(ref = oldRef)
-            val new = makeClone(ref = newRef)
+    operator fun set(cellWidth: CellWidth.Companion, width: Number) {
+        when (width) {
+            is Int -> setCellWidth(width.toLong())
+            is Long -> setCellWidth(width)
+            else -> throw InvalidCellWidthException("Unsupported type: ${width::class}")
+        }
+    }
 
-            eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(old, new)) as List<TableViewListenerEvent<Any>>)
+    operator fun set(cellWidth: CellWidth.Companion, width: CellWidth<*, *>?) {
+        setCellWidth(width?.toLong())
+    }
+
+    private fun setCellWidth(width: Long?) {
+        val (oldRef, newRef) = tableViewRef.refAction {
+            it.copy(
+                defaultCellView = it.defaultCellView.copy(
+                    cellWidth = width
+                ),
+                version = it.version + 1L
+            )
         }
 
-    // TODO should use get/set operators
-    var cellTopics: SortedSet<String>
-        get() {
-            val ref = tableView.tableViewRef.get()
-            return Collections.unmodifiableSortedSet(ref.defaultCellView.cellTopics?.toSortedSet() ?: emptySortedSet())
+        if (!eventProcessor.haveListeners()) return
+
+        val old = makeClone(ref = oldRef)
+        val new = makeClone(ref = newRef)
+
+        eventProcessor.publish(listOf(TableViewListenerEvent<CellWidth<TableView, *>>(old[CellWidth], new[CellWidth])) as List<TableViewListenerEvent<Any>>)
+    }
+
+    operator fun get(cellClasses: CellClasses.Companion): CellClasses<TableView> {
+        val ref = tableView.tableViewRef.get()
+        return CellClasses(this, ref.defaultCellView.cellClasses ?: immutableSetOf())
+    }
+
+    operator fun set(cellClasses: CellClasses.Companion, classes: String) {
+        setCellClasses(immutableSetOf(classes))
+    }
+
+    operator fun set(cellClasses: CellClasses.Companion, classes: Collection<String>) {
+        setCellClasses(classes.toImmutableSet())
+    }
+
+    operator fun set(cellClasses: CellClasses.Companion, classes: CellClasses<*>?) {
+        setCellClasses(classes?._classes)
+    }
+
+    private fun setCellClasses(classes: PSet<String>?) {
+        val (oldRef, newRef) = tableViewRef.refAction {
+            it.copy(
+                defaultCellView = it.defaultCellView.copy(
+                    cellClasses = if (classes?.isEmpty() == true) null else classes
+                ),
+                version = it.version + 1L
+            )
         }
-        set(topics) {
-            val (oldRef, newRef) = tableViewRef.refAction {
-                it.copy(
-                    defaultCellView = it.defaultCellView.copy(
-                        cellTopics = topics.toImmutableSet()
-                    )
-                )
-            }
 
-            if (!eventProcessor.haveListeners()) return
+        if (!eventProcessor.haveListeners()) return
 
-            val old = makeClone(ref = oldRef)
-            val new = makeClone(ref = newRef)
+        val old = makeClone(ref = oldRef)
+        val new = makeClone(ref = newRef)
 
-            eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(old, new)) as List<TableViewListenerEvent<Any>>)
+        eventProcessor.publish(listOf(TableViewListenerEvent<CellClasses<TableView>>(old[CellClasses], new[CellClasses])) as List<TableViewListenerEvent<Any>>)
+    }
+
+    operator fun get(cellTopics: CellTopics.Companion): CellTopics<TableView> {
+        val ref = tableView.tableViewRef.get()
+        return CellTopics(this, ref.defaultCellView.cellTopics ?: immutableSetOf())
+    }
+
+    operator fun set(cellTopics: CellTopics.Companion, topics: String) {
+        setCellTopics(immutableSetOf(topics))
+    }
+
+    operator fun set(cellTopics: CellTopics.Companion, topics: Collection<String>) {
+        setCellTopics(topics.toImmutableSet())
+    }
+
+    operator fun set(cellTopics: CellTopics.Companion, topics: CellTopics<*>?) {
+        setCellTopics(topics?._topics)
+    }
+
+    private fun setCellTopics(topics: PSet<String>?) {
+        val (oldRef, newRef) = tableViewRef.refAction {
+            it.copy(
+                defaultCellView = it.defaultCellView.copy(
+                    cellTopics = if (topics?.isEmpty() == true) null else topics
+                ),
+                version = it.version + 1L
+            )
         }
+
+        if (!eventProcessor.haveListeners()) return
+
+        val old = makeClone(ref = oldRef)
+        val new = makeClone(ref = newRef)
+
+        eventProcessor.publish(listOf(TableViewListenerEvent<CellTopics<TableView>>(old[CellTopics], new[CellTopics])) as List<TableViewListenerEvent<Any>>)
+    }
 
     operator fun get(columnHeader: ColumnHeader) = ColumnView(this, columnHeader)
 
@@ -507,117 +573,179 @@ class CellView(
     val columnView: ColumnView,
     val index: Long
 ) : Iterable<DerivedCellView> {
-    var cellHeight: Long?
-        get() {
-            val ref = tableView.tableViewRef.get()
-            return ref.cellViews[Pair(columnView.columnHeader, index)]?.cellHeight
+    operator fun get(cellHeight: CellHeight.Companion): CellHeight<CellView, *> {
+        val ref = tableView.tableViewRef.get()
+        return when (val height = ref.cellViews[Pair(columnView.columnHeader, index)]?.cellHeight) {
+            is Long -> PixelCellHeight(this, height)
+            else -> UnitCellHeight(this)
         }
-        set(height) {
-            val (oldRef, newRef) = columnView.tableView.tableViewRef.refAction {
-                val key = Pair(columnView.columnHeader, index)
-                val oldMeta = it.cellViews[key]
-                val viewMeta = oldMeta?.copy(cellHeight = height) ?: ViewMeta(cellHeight = height)
+    }
 
-                it.copy(
-                    cellViews = it.cellViews.put(key, viewMeta),
-                    version = it.version + 1L
-                )
-            }
+    operator fun set(cellHeight: CellHeight.Companion, height: Long) {
+        setCellHeight(height)
+    }
 
-            if (!columnView.tableView.eventProcessor.haveListeners()) return
-
-            val oldView = columnView.tableView.makeClone(ref = oldRef)
-            val newView = columnView.tableView.makeClone(ref = newRef)
-
-            val old = oldView[columnView.columnHeader][index]
-            val new = newView[columnView.columnHeader][index]
-
-            columnView.tableView.eventProcessor.publish(listOf(TableViewListenerEvent(old, new)))
+    operator fun set(cellHeight: CellHeight.Companion, height: Number) {
+        when (height) {
+            is Int -> setCellHeight(height.toLong())
+            is Long -> setCellHeight(height)
+            else -> throw InvalidCellHeightException("Unsupported type: ${height::class}")
         }
+    }
 
-    var cellWidth: Long?
-        get() {
-            val ref = tableView.tableViewRef.get()
-            return ref.cellViews[Pair(columnView.columnHeader, index)]?.cellWidth
-        }
-        set(width) {
-            val (oldRef, newRef) = columnView.tableView.tableViewRef.refAction {
-                val key = Pair(columnView.columnHeader, index)
-                val oldMeta = it.cellViews[key]
-                val viewMeta = oldMeta?.copy(cellWidth = width) ?: ViewMeta(cellWidth = width)
+    operator fun set(cellHeight: CellHeight.Companion, height: CellHeight<*, *>?) {
+        setCellHeight(height?.toLong())
+    }
 
-                it.copy(
-                    cellViews = it.cellViews.put(key, viewMeta),
-                    version = it.version + 1L
-                )
-            }
+    private fun setCellHeight(height: Long?) {
+        val (oldRef, newRef) = columnView.tableView.tableViewRef.refAction {
+            val key = Pair(columnView.columnHeader, index)
+            val oldMeta = it.cellViews[key]
+            val viewMeta = oldMeta?.copy(cellHeight = height) ?: ViewMeta(cellHeight = height)
 
-            if (!columnView.tableView.eventProcessor.haveListeners()) return
-
-            val oldView = columnView.tableView.makeClone(ref = oldRef)
-            val newView = columnView.tableView.makeClone(ref = newRef)
-
-            val old = oldView[columnView.columnHeader][index]
-            val new = newView[columnView.columnHeader][index]
-
-            columnView.tableView.eventProcessor.publish(listOf(TableViewListenerEvent(old, new)))
+            it.copy(
+                cellViews = it.cellViews.put(key, viewMeta),
+                version = it.version + 1L
+            )
         }
 
-    var cellClasses: SortedSet<String>
-        get() {
-            val ref = tableView.tableViewRef.get()
-            return Collections.unmodifiableSortedSet(ref.cellViews[Pair(columnView.columnHeader, index)]?.cellClasses?.toSortedSet() ?: emptySortedSet())
+        if (!columnView.tableView.eventProcessor.haveListeners()) return
+
+        val oldView = columnView.tableView.makeClone(ref = oldRef)
+        val newView = columnView.tableView.makeClone(ref = newRef)
+
+        val old = oldView[columnView.columnHeader][index][CellHeight]
+        val new = newView[columnView.columnHeader][index][CellHeight]
+
+        columnView.tableView.eventProcessor.publish(listOf(TableViewListenerEvent<CellHeight<CellView, *>>(old, new)) as List<TableViewListenerEvent<Any>>)
+    }
+
+    operator fun get(cellWidth: CellWidth.Companion): CellWidth<CellView, *> {
+        val ref = tableView.tableViewRef.get()
+        return when (val width = ref.cellViews[Pair(columnView.columnHeader, index)]?.cellWidth) {
+            is Long -> PixelCellWidth(this, width)
+            else -> UnitCellWidth(this)
         }
-        set(classes) {
-            val (oldRef, newRef) = columnView.tableView.tableViewRef.refAction {
-                val key = Pair(columnView.columnHeader, index)
-                val oldMeta = it.cellViews[key]
-                val viewMeta = oldMeta?.copy(cellClasses = classes.toImmutableSet()) ?: ViewMeta(cellClasses = classes.toImmutableSet())
+    }
 
-                it.copy(
-                    cellViews = it.cellViews.put(key, viewMeta),
-                    version = it.version + 1L
-                )
-            }
+    operator fun set(cellWidth: CellWidth.Companion, width: Long) {
+        setCellWidth(width)
+    }
 
-            if (!columnView.tableView.eventProcessor.haveListeners()) return
+    operator fun set(cellWidth: CellWidth.Companion, width: Number) {
+        when (width) {
+            is Int -> setCellWidth(width.toLong())
+            is Long -> setCellWidth(width)
+            else -> throw InvalidCellWidthException("Unsupported type: ${width::class}")
+        }
+    }
 
-            val oldView = columnView.tableView.makeClone(ref = oldRef)
-            val newView = columnView.tableView.makeClone(ref = newRef)
+    operator fun set(cellWidth: CellWidth.Companion, width: CellWidth<*, *>?) {
+        setCellWidth(width?.toLong())
+    }
 
-            val old = oldView[columnView.columnHeader][index]
-            val new = newView[columnView.columnHeader][index]
+    private fun setCellWidth(width: Long?) {
+        val (oldRef, newRef) = columnView.tableView.tableViewRef.refAction {
+            val key = Pair(columnView.columnHeader, index)
+            val oldMeta = it.cellViews[key]
+            val viewMeta = oldMeta?.copy(cellWidth = width) ?: ViewMeta(cellWidth = width)
 
-            columnView.tableView.eventProcessor.publish(listOf(TableViewListenerEvent(old, new)))
+            it.copy(
+                cellViews = it.cellViews.put(key, viewMeta),
+                version = it.version + 1L
+            )
         }
 
-    var cellTopics: SortedSet<String>
-        get() {
-            val ref = tableView.tableViewRef.get()
-            return Collections.unmodifiableSortedSet(ref.cellViews[Pair(columnView.columnHeader, index)]?.cellTopics?.toSortedSet() ?: emptySortedSet())
+        if (!columnView.tableView.eventProcessor.haveListeners()) return
+
+        val oldView = columnView.tableView.makeClone(ref = oldRef)
+        val newView = columnView.tableView.makeClone(ref = newRef)
+
+        val old = oldView[columnView.columnHeader][index][CellWidth]
+        val new = newView[columnView.columnHeader][index][CellWidth]
+
+        columnView.tableView.eventProcessor.publish(listOf(TableViewListenerEvent<CellWidth<CellView, *>>(old, new)) as List<TableViewListenerEvent<Any>>)
+    }
+
+    operator fun get(cellClasses: CellClasses.Companion): CellClasses<CellView> {
+        val ref = tableView.tableViewRef.get()
+        return CellClasses(this, ref.cellViews[Pair(columnView.columnHeader, index)]?.cellClasses ?: immutableSetOf())
+    }
+
+    operator fun set(cellClasses: CellClasses.Companion, classes: String) {
+        setCellClasses(immutableSetOf(classes))
+    }
+
+    operator fun set(cellClasses: CellClasses.Companion, classes: Collection<String>) {
+        setCellClasses(classes.toImmutableSet())
+    }
+
+    operator fun set(cellClasses: CellClasses.Companion, classes: CellClasses<*>?) {
+        setCellClasses(classes?._classes)
+    }
+
+    private fun setCellClasses(classes: PSet<String>?) {
+        val (oldRef, newRef) = columnView.tableView.tableViewRef.refAction {
+            val key = Pair(columnView.columnHeader, index)
+            val oldMeta = it.cellViews[key]
+            val viewMeta = oldMeta?.copy(cellClasses = if (classes?.isEmpty() == true) null else classes) ?: ViewMeta(cellClasses = if (classes?.isEmpty() == true) null else classes)
+
+            it.copy(
+                cellViews = it.cellViews.put(key, viewMeta),
+                version = it.version + 1L
+            )
         }
-        set(topics) {
-            val (oldRef, newRef) = columnView.tableView.tableViewRef.refAction {
-                val key = Pair(columnView.columnHeader, index)
-                val oldMeta = it.cellViews[key]
-                val viewMeta = oldMeta?.copy(cellTopics = topics.toImmutableSet()) ?: ViewMeta(cellTopics = topics.toImmutableSet())
 
-                it.copy(
-                    cellViews = it.cellViews.put(key, viewMeta),
-                    version = it.version + 1L
-                )
-            }
+        if (!columnView.tableView.eventProcessor.haveListeners()) return
 
-            if (!columnView.tableView.eventProcessor.haveListeners()) return
+        val oldView = columnView.tableView.makeClone(ref = oldRef)
+        val newView = columnView.tableView.makeClone(ref = newRef)
 
-            val oldView = columnView.tableView.makeClone(ref = oldRef)
-            val newView = columnView.tableView.makeClone(ref = newRef)
+        val old = oldView[columnView.columnHeader][index][CellClasses]
+        val new = newView[columnView.columnHeader][index][CellClasses]
 
-            val old = oldView[columnView.columnHeader][index]
-            val new = newView[columnView.columnHeader][index]
+        columnView.tableView.eventProcessor.publish(listOf(TableViewListenerEvent<CellClasses<CellView>>(old, new)) as List<TableViewListenerEvent<Any>>)
+    }
 
-            columnView.tableView.eventProcessor.publish(listOf(TableViewListenerEvent(old, new)))
+    operator fun get(cellTopics: CellTopics.Companion): CellTopics<CellView> {
+        val ref = tableView.tableViewRef.get()
+        return CellTopics(this, ref.cellViews[Pair(columnView.columnHeader, index)]?.cellTopics ?: immutableSetOf())
+    }
+
+    operator fun set(cellTopics: CellTopics.Companion, topics: String) {
+        setCellTopics(immutableSetOf(topics))
+    }
+
+    operator fun set(cellTopics: CellTopics.Companion, topics: Collection<String>) {
+        setCellTopics(topics.toImmutableSet())
+    }
+
+    operator fun set(cellTopics: CellTopics.Companion, topics: CellTopics<*>?) {
+        setCellTopics(topics?._topics)
+    }
+
+    private fun setCellTopics(topics: PSet<String>?) {
+        val (oldRef, newRef) = columnView.tableView.tableViewRef.refAction {
+            val key = Pair(columnView.columnHeader, index)
+            val oldMeta = it.cellViews[key]
+            val viewMeta = oldMeta?.copy(cellTopics = if (topics?.isEmpty() == true) null else topics) ?: ViewMeta(cellTopics = if (topics?.isEmpty() == true) null else topics)
+
+            it.copy(
+                cellViews = it.cellViews.put(key, viewMeta),
+                version = it.version + 1L
+            )
         }
+
+        if (!columnView.tableView.eventProcessor.haveListeners()) return
+
+        val oldView = columnView.tableView.makeClone(ref = oldRef)
+        val newView = columnView.tableView.makeClone(ref = newRef)
+
+        val old = oldView[columnView.columnHeader][index][CellTopics]
+        val new = newView[columnView.columnHeader][index][CellTopics]
+
+        columnView.tableView.eventProcessor.publish(listOf(TableViewListenerEvent<CellTopics<CellView>>(old, new)) as List<TableViewListenerEvent<Any>>)
+    }
 
     val tableView: TableView
         get() = columnView.tableView
@@ -645,9 +773,11 @@ class CellView(
 }
 
 internal fun createDerivedCellViewFromRef(ref: TableViewRef, columnView: ColumnView, index: Long): DerivedCellView {
-    val cellViewMeta = ref.cellViews[Pair(columnView.columnHeader, index)]
+    // TODO Consider if this and other Derived.. instances should operate on clones
+    val columnHeader = columnView.columnHeader
+    val cellViewMeta = ref.cellViews[Pair(columnHeader, index)]
     val defaultCellViewMeta = ref.defaultCellView
-    val columnViewMeta = ref.columnViews[columnView.columnHeader]
+    val columnViewMeta = ref.columnViews[columnHeader]
     val rowViewMeta = ref.rowViews[index]
 
     val height = cellViewMeta?.cellHeight
@@ -660,31 +790,26 @@ internal fun createDerivedCellViewFromRef(ref: TableViewRef, columnView: ColumnV
         ?: defaultCellViewMeta.cellWidth
         ?: DEFAULT_CELL_WIDTH
 
-    val classes = Collections.unmodifiableSortedSet((
-            (cellViewMeta?.cellClasses?.toMutableSet() ?: mutableSetOf())
-                    + (columnViewMeta?.cellClasses?.toMutableSet() ?: mutableSetOf())
-                    + (rowViewMeta?.cellClasses?.toMutableSet() ?: mutableSetOf())
-                    + (defaultCellViewMeta.cellClasses?.toMutableSet() ?: mutableSetOf())
-            ).toSortedSet())
+    val classes = (cellViewMeta?.cellClasses ?: EMPTY_IMMUTABLE_STRING_SET) +
+            (columnViewMeta?.cellClasses ?: EMPTY_IMMUTABLE_STRING_SET) +
+            (rowViewMeta?.cellClasses ?: EMPTY_IMMUTABLE_STRING_SET) +
+            (defaultCellViewMeta.cellClasses ?: EMPTY_IMMUTABLE_STRING_SET)
 
-    val topics = Collections.unmodifiableSortedSet((
-            (cellViewMeta?.cellTopics?.toMutableSet() ?: mutableSetOf())
-                    + (columnViewMeta?.cellTopics?.toMutableSet() ?: mutableSetOf())
-                    + (rowViewMeta?.cellTopics?.toMutableSet() ?: mutableSetOf())
-                    + (defaultCellViewMeta.cellTopics?.toMutableSet() ?: mutableSetOf())
-            ).toSortedSet())
+    val topics = (cellViewMeta?.cellTopics ?: EMPTY_IMMUTABLE_STRING_SET) +
+            (columnViewMeta?.cellTopics ?: EMPTY_IMMUTABLE_STRING_SET) +
+            (rowViewMeta?.cellTopics ?: EMPTY_IMMUTABLE_STRING_SET) +
+            (defaultCellViewMeta.cellTopics ?: EMPTY_IMMUTABLE_STRING_SET)
 
     return DerivedCellView(columnView, index, height, width, classes, topics)
 }
 
-// TODO We also need DerivedColumnView and a DerivedRowView
 class DerivedCellView internal constructor(
     val columnView: ColumnView,
     val index: Long,
     val cellHeight: Long,
     val cellWidth: Long,
-    val cellClasses: SortedSet<String>,
-    val cellTopics: SortedSet<String>
+    classes: ImmutableSet<String>,
+    topics: ImmutableSet<String>
 ) : Iterable<DerivedCellView> {
     val tableView: TableView
         get() = columnView.tableView
@@ -692,8 +817,16 @@ class DerivedCellView internal constructor(
     val cellView: CellView
         get() = columnView[index]
 
-    val cell: Cell<*>?
-        get() = tableView.table?.let { return it[columnView.columnHeader][index] }
+    // Note: This is assigned on init to preserve the derived nature of the class
+    val cell: Cell<*>? = tableView.table?.let { it[columnView.columnHeader][index] }
+
+    val cellClasses: CellClasses<DerivedCellView> by lazy {
+        CellClasses(this, classes)
+    }
+
+    val cellTopics: CellTopics<DerivedCellView> by lazy {
+        CellTopics(this, topics)
+    }
 
     override fun iterator(): Iterator<DerivedCellView> {
         val ref = tableView.tableViewRef.get()
@@ -715,86 +848,129 @@ class ColumnView internal constructor(
     val tableView: TableView,
     val columnHeader: ColumnHeader
 ) : Iterable<DerivedCellView> {
-    var cellWidth: Long?
-        get() {
-            val ref = tableView.tableViewRef.get()
-            return ref.columnViews[columnHeader]?.cellWidth
+    operator fun get(cellWidth: CellWidth.Companion): CellWidth<ColumnView, *> {
+        val ref = tableView.tableViewRef.get()
+        return when (val width = ref.columnViews[columnHeader]?.cellWidth) {
+            is Long -> PixelCellWidth(this, width)
+            else -> UnitCellWidth(this)
         }
-        set(width) {
-            val (oldRef, newRef) = tableView.tableViewRef.refAction {
-                val oldMeta = it.columnViews[columnHeader]
-                val viewMeta = oldMeta?.copy(cellWidth = width) ?: ViewMeta(cellWidth = width)
+    }
 
-                it.copy(
-                    columnViews = it.columnViews.put(columnHeader, viewMeta),
-                    version = it.version + 1L
-                )
-            }
+    operator fun set(cellWidth: CellWidth.Companion, width: Long) {
+        setCellWidth(width)
+    }
 
-            if (!tableView.eventProcessor.haveListeners()) return
-
-            val oldView = tableView.makeClone(ref = oldRef)
-            val newView = tableView.makeClone(ref = newRef)
-
-            val old = oldView[columnHeader]
-            val new = newView[columnHeader]
-
-            tableView.eventProcessor.publish(listOf(TableViewListenerEvent<ColumnView>(old, new)) as List<TableViewListenerEvent<Any>>)
+    operator fun set(cellWidth: CellWidth.Companion, width: Number) {
+        when (width) {
+            is Int -> setCellWidth(width.toLong())
+            is Long -> setCellWidth(width)
+            else -> throw InvalidCellWidthException("Unsupported type: ${width::class}")
         }
+    }
 
-    var cellClasses: SortedSet<String>
-        get() {
-            val ref = tableView.tableViewRef.get()
-            return Collections.unmodifiableSortedSet(ref.columnViews[columnHeader]?.cellClasses?.toSortedSet() ?: emptySortedSet())
-        }
-        set(classes) {
-            val (oldRef, newRef) = tableView.tableViewRef.refAction {
-                val oldMeta = it.columnViews[columnHeader]
-                val viewMeta = oldMeta?.copy(cellClasses = classes.toImmutableSet()) ?: ViewMeta(cellClasses = classes.toImmutableSet())
+    operator fun set(cellWidth: CellWidth.Companion, width: CellWidth<*, *>?) {
+        setCellWidth(width?.toLong())
+    }
 
-                it.copy(
-                    columnViews = it.columnViews.put(columnHeader, viewMeta),
-                    version = it.version + 1L
-                )
-            }
+    private fun setCellWidth(width: Long?) {
+        val (oldRef, newRef) = tableView.tableViewRef.refAction {
+            val oldMeta = it.columnViews[columnHeader]
+            val viewMeta = oldMeta?.copy(cellWidth = width) ?: ViewMeta(cellWidth = width)
 
-            if (!tableView.eventProcessor.haveListeners()) return
-
-            val oldView = tableView.makeClone(ref = oldRef)
-            val newView = tableView.makeClone(ref = newRef)
-
-            val old = oldView[columnHeader]
-            val new = newView[columnHeader]
-
-            tableView.eventProcessor.publish(listOf(TableViewListenerEvent<ColumnView>(old, new)) as List<TableViewListenerEvent<Any>>)
+            it.copy(
+                columnViews = it.columnViews.put(columnHeader, viewMeta),
+                version = it.version + 1L
+            )
         }
 
-    var cellTopics: SortedSet<String>
-        get() {
-            val ref = tableView.tableViewRef.get()
-            return Collections.unmodifiableSortedSet(ref.columnViews[columnHeader]?.cellTopics?.toSortedSet() ?: emptySortedSet())
+        if (!tableView.eventProcessor.haveListeners()) return
+
+        val oldView = tableView.makeClone(ref = oldRef)
+        val newView = tableView.makeClone(ref = newRef)
+
+        val old = oldView[columnHeader][CellWidth]
+        val new = newView[columnHeader][CellWidth]
+
+        tableView.eventProcessor.publish(listOf(TableViewListenerEvent<CellWidth<ColumnView, *>>(old, new)) as List<TableViewListenerEvent<Any>>)
+    }
+
+    operator fun get(cellClasses: CellClasses.Companion): CellClasses<ColumnView> {
+        val ref = tableView.tableViewRef.get()
+        return CellClasses(this, ref.columnViews[columnHeader]?.cellClasses ?: immutableSetOf())
+    }
+
+    operator fun set(cellClasses: CellClasses.Companion, classes: String) {
+        setCellClasses(immutableSetOf(classes))
+    }
+
+    operator fun set(cellClasses: CellClasses.Companion, classes: Collection<String>) {
+        setCellClasses(classes.toImmutableSet())
+    }
+
+    operator fun set(cellClasses: CellClasses.Companion, classes: CellClasses<*>?) {
+        setCellClasses(classes?._classes)
+    }
+
+    private fun setCellClasses(classes: PSet<String>?) {
+        val (oldRef, newRef) = tableView.tableViewRef.refAction {
+            val oldMeta = it.columnViews[columnHeader]
+            val viewMeta = oldMeta?.copy(cellClasses = if (classes?.isEmpty() == true) null else classes) ?: ViewMeta(cellClasses = if (classes?.isEmpty() == true) null else classes)
+
+            it.copy(
+                columnViews = it.columnViews.put(columnHeader, viewMeta),
+                version = it.version + 1L
+            )
         }
-        set(topics) {
-            val (oldRef, newRef) = tableView.tableViewRef.refAction {
-                val oldMeta = it.columnViews[columnHeader]
-                val viewMeta = oldMeta?.copy(cellTopics = topics.toImmutableSet()) ?: ViewMeta(cellTopics = topics.toImmutableSet())
 
-                it.copy(
-                    columnViews = it.columnViews.put(columnHeader, viewMeta),
-                    version = it.version + 1L
-                )
-            }
+        if (!tableView.eventProcessor.haveListeners()) return
 
-            if (!tableView.eventProcessor.haveListeners()) return
+        val oldView = tableView.makeClone(ref = oldRef)
+        val newView = tableView.makeClone(ref = newRef)
 
-            val oldView = tableView.makeClone(ref = oldRef)
-            val newView = tableView.makeClone(ref = newRef)
+        val old = oldView[columnHeader][CellClasses]
+        val new = newView[columnHeader][CellClasses]
 
-            val old = oldView[columnHeader]
-            val new = newView[columnHeader]
+        tableView.eventProcessor.publish(listOf(TableViewListenerEvent<CellClasses<ColumnView>>(old, new)) as List<TableViewListenerEvent<Any>>)
+    }
 
-            tableView.eventProcessor.publish(listOf(TableViewListenerEvent<ColumnView>(old, new)) as List<TableViewListenerEvent<Any>>)
+    operator fun get(cellTopics: CellTopics.Companion): CellTopics<ColumnView> {
+        val ref = tableView.tableViewRef.get()
+        return CellTopics(this, ref.columnViews[columnHeader]?.cellTopics ?: immutableSetOf())
+    }
+
+    operator fun set(cellTopics: CellTopics.Companion, topics: String) {
+        setCellTopics(immutableSetOf(topics))
+    }
+
+    operator fun set(cellTopics: CellTopics.Companion, topics: Collection<String>) {
+        setCellTopics(topics.toImmutableSet())
+    }
+
+    operator fun set(cellTopics: CellTopics.Companion, topics: CellTopics<*>?) {
+        setCellTopics(topics?._topics)
+    }
+
+    private fun setCellTopics(topics: PSet<String>?) {
+        val (oldRef, newRef) = tableView.tableViewRef.refAction {
+            val oldMeta = it.columnViews[columnHeader]
+            val viewMeta = oldMeta?.copy(cellTopics = if (topics?.isEmpty() == true) null else topics) ?: ViewMeta(cellTopics = if (topics?.isEmpty() == true) null else topics)
+
+            it.copy(
+                columnViews = it.columnViews.put(columnHeader, viewMeta),
+                version = it.version + 1L
+            )
         }
+
+        if (!tableView.eventProcessor.haveListeners()) return
+
+        val oldView = tableView.makeClone(ref = oldRef)
+        val newView = tableView.makeClone(ref = newRef)
+
+        val old = oldView[columnHeader][CellTopics]
+        val new = newView[columnHeader][CellTopics]
+
+        tableView.eventProcessor.publish(listOf(TableViewListenerEvent<CellTopics<ColumnView>>(old, new)) as List<TableViewListenerEvent<Any>>)
+    }
 
     // Note: cellViews return the defined CellViews, while the ColumnView iterator
     // returns the calculated cell views for current cells
@@ -879,15 +1055,11 @@ internal fun createDerivedColumnView(columnView: ColumnView): DerivedColumnView 
         ?: defaultCellViewMeta.cellWidth
         ?: DEFAULT_CELL_WIDTH
 
-    val classes = Collections.unmodifiableSortedSet((
-            (columnViewMeta?.cellClasses?.toMutableSet() ?: mutableSetOf())
-                    + (defaultCellViewMeta.cellClasses?.toMutableSet() ?: mutableSetOf())
-            ).toSortedSet())
+    val classes = (columnViewMeta?.cellClasses ?: EMPTY_IMMUTABLE_STRING_SET) +
+            (defaultCellViewMeta.cellClasses ?: EMPTY_IMMUTABLE_STRING_SET)
 
-    val topics = Collections.unmodifiableSortedSet((
-            (columnViewMeta?.cellTopics?.toMutableSet() ?: mutableSetOf())
-                    + (defaultCellViewMeta.cellTopics?.toMutableSet() ?: mutableSetOf())
-            ).toSortedSet())
+    val topics = (columnViewMeta?.cellTopics ?: EMPTY_IMMUTABLE_STRING_SET) +
+            (defaultCellViewMeta.cellTopics ?: EMPTY_IMMUTABLE_STRING_SET)
 
     return DerivedColumnView(columnView, width, classes, topics)
 }
@@ -895,14 +1067,22 @@ internal fun createDerivedColumnView(columnView: ColumnView): DerivedColumnView 
 class DerivedColumnView internal constructor(
     val columnView: ColumnView,
     val cellWidth: Long,
-    val cellClasses: SortedSet<String>,
-    val cellTopics: SortedSet<String>
+    classes: ImmutableSet<String>,
+    topics: ImmutableSet<String>
 ) : Iterable<DerivedCellView> {
     val tableView: TableView
         get() = columnView.tableView
 
     val columnHeader: ColumnHeader
         get() = columnView.columnHeader
+
+    val cellClasses: CellClasses<DerivedColumnView> by lazy {
+        CellClasses(this, classes)
+    }
+
+    val cellTopics: CellTopics<DerivedColumnView> by lazy {
+        CellTopics(this, topics)
+    }
 
     override fun iterator() = columnView.iterator()
 
@@ -913,86 +1093,129 @@ class RowView internal constructor(
     val tableView: TableView,
     val index: Long
 ) : Iterable<DerivedCellView> {
-    var cellHeight: Long?
-        get() {
-            val ref = tableView.tableViewRef.get()
-            return ref.rowViews[index]?.cellHeight
+    operator fun get(cellHeight: CellHeight.Companion): CellHeight<RowView, *> {
+        val ref = tableView.tableViewRef.get()
+        return when (val height = ref.rowViews[index]?.cellHeight) {
+            is Long -> PixelCellHeight(this, height)
+            else -> UnitCellHeight(this)
         }
-        set(height) {
-            val (oldRef, newRef) = tableView.tableViewRef.refAction {
-                val oldMeta = it.rowViews[index]
-                val viewMeta = oldMeta?.copy(cellHeight = height) ?: ViewMeta(cellHeight = height)
+    }
 
-                it.copy(
-                    rowViews = it.rowViews.put(index, viewMeta),
-                    version = it.version + 1L
-                )
-            }
+    operator fun set(cellHeight: CellHeight.Companion, height: Long) {
+        setCellHeight(height)
+    }
 
-            if (!tableView.eventProcessor.haveListeners()) return
-
-            val oldView = tableView.makeClone(ref = oldRef)
-            val newView = tableView.makeClone(ref = newRef)
-
-            val old = oldView[index]
-            val new = newView[index]
-
-            tableView.eventProcessor.publish(listOf(TableViewListenerEvent<RowView>(old, new)) as List<TableViewListenerEvent<Any>>)
+    operator fun set(cellHeight: CellHeight.Companion, height: Number) {
+        when (height) {
+            is Int -> setCellHeight(height.toLong())
+            is Long -> setCellHeight(height)
+            else -> throw InvalidCellHeightException("Unsupported type: ${height::class}")
         }
+    }
 
-    var cellClasses: SortedSet<String>
-        get() {
-            val ref = tableView.tableViewRef.get()
-            return Collections.unmodifiableSortedSet(ref.rowViews[index]?.cellClasses?.toSortedSet() ?: emptySortedSet())
-        }
-        set(classes) {
-            val (oldRef, newRef) = tableView.tableViewRef.refAction {
-                val oldMeta = it.rowViews[index]
-                val viewMeta = oldMeta?.copy(cellClasses = classes.toImmutableSet()) ?: ViewMeta(cellClasses = classes.toImmutableSet())
+    operator fun set(cellHeight: CellHeight.Companion, height: CellHeight<*, *>?) {
+        setCellHeight(height?.toLong())
+    }
 
-                it.copy(
-                    rowViews = it.rowViews.put(index, viewMeta),
-                    version = it.version + 1L
-                )
-            }
+    private fun setCellHeight(height: Long?) {
+        val (oldRef, newRef) = tableView.tableViewRef.refAction {
+            val oldMeta = it.rowViews[index]
+            val viewMeta = oldMeta?.copy(cellHeight = height) ?: ViewMeta(cellHeight = height)
 
-            if (!tableView.eventProcessor.haveListeners()) return
-
-            val oldView = tableView.makeClone(ref = oldRef)
-            val newView = tableView.makeClone(ref = newRef)
-
-            val old = oldView[index]
-            val new = newView[index]
-
-            tableView.eventProcessor.publish(listOf(TableViewListenerEvent<RowView>(old, new)) as List<TableViewListenerEvent<Any>>)
+            it.copy(
+                rowViews = it.rowViews.put(index, viewMeta),
+                version = it.version + 1L
+            )
         }
 
-    var cellTopics: SortedSet<String>
-        get() {
-            val ref = tableView.tableViewRef.get()
-            return Collections.unmodifiableSortedSet(ref.rowViews[index]?.cellTopics?.toSortedSet() ?: emptySortedSet())
+        if (!tableView.eventProcessor.haveListeners()) return
+
+        val oldView = tableView.makeClone(ref = oldRef)
+        val newView = tableView.makeClone(ref = newRef)
+
+        val old = oldView[index][CellHeight]
+        val new = newView[index][CellHeight]
+
+        tableView.eventProcessor.publish(listOf(TableViewListenerEvent<CellHeight<RowView, *>>(old, new)) as List<TableViewListenerEvent<Any>>)
+    }
+
+    operator fun get(cellClasses: CellClasses.Companion): CellClasses<RowView> {
+        val ref = tableView.tableViewRef.get()
+        return CellClasses(this, ref.rowViews[index]?.cellClasses ?: immutableSetOf())
+    }
+
+    operator fun set(cellClasses: CellClasses.Companion, classes: String) {
+        setCellClasses(immutableSetOf(classes))
+    }
+
+    operator fun set(cellClasses: CellClasses.Companion, classes: Collection<String>) {
+        setCellClasses(classes.toImmutableSet())
+    }
+
+    operator fun set(cellClasses: CellClasses.Companion, classes: CellClasses<*>?) {
+        setCellClasses(classes?._classes)
+    }
+
+    private fun setCellClasses(classes: PSet<String>?) {
+        val (oldRef, newRef) = tableView.tableViewRef.refAction {
+            val oldMeta = it.rowViews[index]
+            val viewMeta = oldMeta?.copy(cellClasses = if (classes?.isEmpty() == true) null else classes) ?: ViewMeta(cellClasses = if (classes?.isEmpty() == true) null else classes)
+
+            it.copy(
+                rowViews = it.rowViews.put(index, viewMeta),
+                version = it.version + 1L
+            )
         }
-        set(topics) {
-            val (oldRef, newRef) = tableView.tableViewRef.refAction {
-                val oldMeta = it.rowViews[index]
-                val viewMeta = oldMeta?.copy(cellTopics = topics.toImmutableSet()) ?: ViewMeta(cellTopics = topics.toImmutableSet())
 
-                it.copy(
-                    rowViews = it.rowViews.put(index, viewMeta),
-                    version = it.version + 1L
-                )
-            }
+        if (!tableView.eventProcessor.haveListeners()) return
 
-            if (!tableView.eventProcessor.haveListeners()) return
+        val oldView = tableView.makeClone(ref = oldRef)
+        val newView = tableView.makeClone(ref = newRef)
 
-            val oldView = tableView.makeClone(ref = oldRef)
-            val newView = tableView.makeClone(ref = newRef)
+        val old = oldView[index][CellClasses]
+        val new = newView[index][CellClasses]
 
-            val old = oldView[index]
-            val new = newView[index]
+        tableView.eventProcessor.publish(listOf(TableViewListenerEvent<CellClasses<RowView>>(old, new)) as List<TableViewListenerEvent<Any>>)
+    }
 
-            tableView.eventProcessor.publish(listOf(TableViewListenerEvent<RowView>(old, new)) as List<TableViewListenerEvent<Any>>)
+    operator fun get(cellTopics: CellTopics.Companion): CellTopics<RowView> {
+        val ref = tableView.tableViewRef.get()
+        return CellTopics(this, ref.rowViews[index]?.cellTopics ?: immutableSetOf())
+    }
+
+    operator fun set(cellTopics: CellTopics.Companion, topics: String) {
+        setCellTopics(immutableSetOf(topics))
+    }
+
+    operator fun set(cellTopics: CellTopics.Companion, topics: Collection<String>) {
+        setCellTopics(topics.toImmutableSet())
+    }
+
+    operator fun set(cellTopics: CellTopics.Companion, topics: CellTopics<*>?) {
+        setCellTopics(topics?._topics)
+    }
+
+    private fun setCellTopics(topics: PSet<String>?) {
+        val (oldRef, newRef) = tableView.tableViewRef.refAction {
+            val oldMeta = it.rowViews[index]
+            val viewMeta = oldMeta?.copy(cellTopics = if (topics?.isEmpty() == true) null else topics) ?: ViewMeta(cellTopics = if (topics?.isEmpty() == true) null else topics)
+
+            it.copy(
+                rowViews = it.rowViews.put(index, viewMeta),
+                version = it.version + 1L
+            )
         }
+
+        if (!tableView.eventProcessor.haveListeners()) return
+
+        val oldView = tableView.makeClone(ref = oldRef)
+        val newView = tableView.makeClone(ref = newRef)
+
+        val old = oldView[index][CellTopics]
+        val new = newView[index][CellTopics]
+
+        tableView.eventProcessor.publish(listOf(TableViewListenerEvent<CellTopics<RowView>>(old, new)) as List<TableViewListenerEvent<Any>>)
+    }
 
     // Note: cellViews return the defined CellViews, while the RowView iterator
     // returns the calculated cell views for current cells
@@ -1070,15 +1293,11 @@ internal fun createDerivedRowView(rowView: RowView): DerivedRowView {
         ?: defaultCellViewMeta.cellHeight
         ?: DEFAULT_CELL_HEIGHT
 
-    val classes = Collections.unmodifiableSortedSet((
-            (rowViewMeta?.cellClasses?.toMutableSet() ?: mutableSetOf())
-                    + (defaultCellViewMeta.cellClasses?.toMutableSet() ?: mutableSetOf())
-            ).toSortedSet())
+    val classes = (rowViewMeta?.cellClasses ?: EMPTY_IMMUTABLE_STRING_SET) +
+            (defaultCellViewMeta.cellClasses ?: EMPTY_IMMUTABLE_STRING_SET)
 
-    val topics = Collections.unmodifiableSortedSet((
-            (rowViewMeta?.cellTopics?.toMutableSet() ?: mutableSetOf())
-                    + (defaultCellViewMeta.cellTopics?.toMutableSet() ?: mutableSetOf())
-            ).toSortedSet())
+    val topics = (rowViewMeta?.cellTopics ?: EMPTY_IMMUTABLE_STRING_SET) +
+            (defaultCellViewMeta.cellTopics ?: EMPTY_IMMUTABLE_STRING_SET)
 
     return DerivedRowView(rowView, height, classes, topics)
 }
@@ -1086,8 +1305,8 @@ internal fun createDerivedRowView(rowView: RowView): DerivedRowView {
 class DerivedRowView internal constructor(
     val rowView: RowView,
     val cellHeight: Long,
-    val cellClasses: SortedSet<String>,
-    val cellTopics: SortedSet<String>
+    classes: ImmutableSet<String>,
+    topics: ImmutableSet<String>
 ) : Iterable<DerivedCellView> {
     val tableView: TableView
         get() = rowView.tableView
@@ -1095,7 +1314,455 @@ class DerivedRowView internal constructor(
     val index: Long
         get() = rowView.index
 
+    val cellClasses: CellClasses<DerivedRowView> by lazy {
+        CellClasses(this, classes)
+    }
+
+    val cellTopics: CellTopics<DerivedRowView> by lazy {
+        CellTopics(this, topics)
+    }
+
     override fun iterator() = rowView.iterator()
 
     // TODO toString, hashCode, equals
+}
+
+sealed class CellHeight<S, T> {
+    abstract val source: S
+    abstract val height: T
+
+    open fun isNumeric(): Boolean = false
+    open fun toLong(): Long? = null
+
+    operator fun plus(that: CellHeight<*, *>): Number {
+        return when (that.height) {
+            is Int -> plus(that.toLong() ?: 0L)
+            is Long -> plus(that.toLong() ?: 0L)
+            else -> throw InvalidCellHeightException("CellHeight not numeric at $source")
+        }
+    }
+
+    operator fun plus(that: Number): Number {
+        return when (that) {
+            is Int -> plus(that.toLong())
+            is Long -> plus(that.toLong())
+            else -> throw InvalidCellHeightException("Unsupported type: ${that::class}")
+        }
+    }
+
+    open operator fun plus(that: Int): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
+    open operator fun plus(that: Long): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
+
+    operator fun minus(that: CellHeight<*, *>): Number {
+        return when (that.height) {
+            is Int -> minus(that.toLong() ?: 0L)
+            is Long -> minus(that.toLong() ?: 0L)
+            else -> throw InvalidCellHeightException("CellHeight not numeric at $source")
+        }
+    }
+
+    operator fun minus(that: Number): Number {
+        return when (that) {
+            is Int -> minus(that.toLong())
+            is Long -> minus(that.toLong())
+            else -> throw InvalidCellHeightException("Unsupported type: ${that::class}")
+        }
+    }
+
+    open operator fun minus(that: Int): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
+    open operator fun minus(that: Long): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
+
+    operator fun times(that: CellHeight<*, *>): Number {
+        return when (that.height) {
+            is Int -> times(that.toLong() ?: 0L)
+            is Long -> times(that.toLong() ?: 0L)
+            else -> throw InvalidCellHeightException("CellHeight not numeric at $source")
+        }
+    }
+
+    operator fun times(that: Number): Number {
+        return when (that) {
+            is Int -> minus(that.toLong())
+            is Long -> minus(that.toLong())
+            else -> throw InvalidCellHeightException("Unsupported type: ${that::class}")
+        }
+    }
+
+    open operator fun times(that: Int): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
+    open operator fun times(that: Long): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
+
+    operator fun div(that: CellHeight<*, *>): Number {
+        return when (that.height) {
+            is Int -> div(that.toLong() ?: 0L)
+            is Long -> div(that.toLong() ?: 0L)
+            else -> throw InvalidCellHeightException("CellHeight not numeric at $source")
+        }
+    }
+
+    operator fun div(that: Number): Number {
+        return when (that) {
+            is Int -> div(that.toLong())
+            is Long -> div(that.toLong())
+            else -> throw InvalidCellHeightException("Unsupported type: ${that::class}")
+        }
+    }
+
+    open operator fun div(that: Int): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
+    open operator fun div(that: Long): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
+
+    operator fun rem(that: CellHeight<*, *>): Number {
+        return when (that.height) {
+            is Int -> rem(that.toLong() ?: 0L)
+            is Long -> rem(that.toLong() ?: 0L)
+            else -> throw InvalidCellHeightException("CellHeight not numeric at $source")
+        }
+    }
+
+    operator fun rem(that: Number): Number {
+        return when (that) {
+            is Int -> rem(that.toLong())
+            is Long -> rem(that.toLong())
+            else -> throw InvalidCellHeightException("Unsupported type: ${that::class}")
+        }
+    }
+
+    open operator fun rem(that: Int): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
+    open operator fun rem(that: Long): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
+
+    // TODO Consider changing these to use invoke instead?
+    infix fun `=`(value: Int) {
+        TODO()
+    }
+
+    infix fun `=`(value: Long) {
+        TODO()
+    }
+
+    infix fun `=`(value: CellHeight<*,*>?) {
+        TODO()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        val height = this.height
+
+        return when {
+            other is CellHeight<*, *> -> height == other.height
+            other is Number -> if (height is Number) {
+                when (val v = this - other) {
+                    is Int -> v == 0
+                    is Long -> v == 0L
+                    else -> throw InvalidCellHeightException("Unsupported type: ${v::class}")
+                }
+            } else false
+            else -> height == other
+        }
+    }
+
+    override fun hashCode() = Objects.hash(this.height)
+
+    override fun toString() = this.height.toString()
+
+    companion object
+}
+
+class UnitCellHeight<S> internal constructor(
+    override val source: S
+) : CellHeight<S, Unit>() {
+    override val height = Unit
+
+    override fun toString() = ""
+}
+
+class PixelCellHeight<S> internal constructor(
+    override val source: S,
+    override val height: Long
+) : CellHeight<S, Long>() {
+    override fun isNumeric() = true
+
+    override fun toLong() = height
+
+    override fun plus(that: Int) = height + that
+
+    override fun plus(that: Long) = height + that
+
+    override fun minus(that: Int) = height - that
+
+    override fun minus(that: Long) = height - that
+
+    override fun times(that: Int) = height * that
+
+    override fun times(that: Long) = height * that
+
+    override fun div(that: Int) = height / that
+
+    override fun div(that: Long) = height / that
+
+    override fun rem(that: Int) = height % that
+
+    override fun rem(that: Long) = height % that
+}
+
+sealed class CellWidth<S, T> {
+    abstract val source: S
+    abstract val width: T
+
+    open fun isNumeric(): Boolean = false
+    open fun toLong(): Long? = null
+
+    operator fun plus(that: CellWidth<*, *>): Number {
+        return when (that.width) {
+            is Int -> plus(that.toLong() ?: 0L)
+            is Long -> plus(that.toLong() ?: 0L)
+            else -> throw InvalidCellWidthException("CellWidth not numeric at $source")
+        }
+    }
+
+    operator fun plus(that: Number): Number {
+        return when (that) {
+            is Int -> plus(that.toLong())
+            is Long -> plus(that.toLong())
+            else -> throw InvalidCellWidthException("Unsupported type: ${that::class}")
+        }
+    }
+
+    open operator fun plus(that: Int): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
+    open operator fun plus(that: Long): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
+
+    operator fun minus(that: CellWidth<*, *>): Number {
+        return when (that.width) {
+            is Int -> minus(that.toLong() ?: 0L)
+            is Long -> minus(that.toLong() ?: 0L)
+            else -> throw InvalidCellWidthException("CellWidth not numeric at $source")
+        }
+    }
+
+    operator fun minus(that: Number): Number {
+        return when (that) {
+            is Int -> minus(that.toLong())
+            is Long -> minus(that.toLong())
+            else -> throw InvalidCellWidthException("Unsupported type: ${that::class}")
+        }
+    }
+
+    open operator fun minus(that: Int): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
+    open operator fun minus(that: Long): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
+
+    operator fun times(that: CellWidth<*, *>): Number {
+        return when (that.width) {
+            is Int -> times(that.toLong() ?: 0L)
+            is Long -> times(that.toLong() ?: 0L)
+            else -> throw InvalidCellWidthException("CellWidth not numeric at $source")
+        }
+    }
+
+    operator fun times(that: Number): Number {
+        return when (that) {
+            is Int -> minus(that.toLong())
+            is Long -> minus(that.toLong())
+            else -> throw InvalidCellWidthException("Unsupported type: ${that::class}")
+        }
+    }
+
+    open operator fun times(that: Int): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
+    open operator fun times(that: Long): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
+
+    operator fun div(that: CellWidth<*, *>): Number {
+        return when (that.width) {
+            is Int -> div(that.toLong() ?: 0L)
+            is Long -> div(that.toLong() ?: 0L)
+            else -> throw InvalidCellWidthException("CellWidth not numeric at $source")
+        }
+    }
+
+    operator fun div(that: Number): Number {
+        return when (that) {
+            is Int -> div(that.toLong())
+            is Long -> div(that.toLong())
+            else -> throw InvalidCellWidthException("Unsupported type: ${that::class}")
+        }
+    }
+
+    open operator fun div(that: Int): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
+    open operator fun div(that: Long): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
+
+    operator fun rem(that: CellWidth<*, *>): Number {
+        return when (that.width) {
+            is Int -> rem(that.toLong() ?: 0L)
+            is Long -> rem(that.toLong() ?: 0L)
+            else -> throw InvalidCellWidthException("CellWidth not numeric at $source")
+        }
+    }
+
+    operator fun rem(that: Number): Number {
+        return when (that) {
+            is Int -> rem(that.toLong())
+            is Long -> rem(that.toLong())
+            else -> throw InvalidCellWidthException("Unsupported type: ${that::class}")
+        }
+    }
+
+    open operator fun rem(that: Int): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
+    open operator fun rem(that: Long): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
+
+    // TODO Consider changing these to use invoke instead?
+    infix fun `=`(value: Int) {
+        TODO()
+    }
+
+    infix fun `=`(value: Long) {
+        TODO()
+    }
+
+    infix fun `=`(value: CellWidth<*,*>?) {
+        TODO()
+    }
+
+    // TODO Add functionality to make this symmetric?
+    override fun equals(other: Any?): Boolean {
+        val height = this.width
+
+        return when (other) {
+            is CellWidth<*, *> -> height == other.width
+            is Number -> if (height is Number) {
+                when (val v = this - other) {
+                    is Int -> v == 0
+                    is Long -> v == 0L
+                    else -> throw InvalidCellWidthException("Unsupported type: ${v::class}")
+                }
+            } else false
+
+            else -> height == other
+        }
+    }
+
+    override fun hashCode() = Objects.hash(this.width)
+
+    override fun toString() = this.width.toString()
+
+    companion object
+}
+
+class UnitCellWidth<S> internal constructor(
+    override val source: S
+) : CellWidth<S, Unit>() {
+    override val width = Unit
+
+    override fun toString() = ""
+}
+
+class PixelCellWidth<S> internal constructor(
+    override val source: S,
+    override val width: Long
+) : CellWidth<S, Long>() {
+    override fun isNumeric() = true
+
+    override fun toLong() = width
+
+    override fun plus(that: Int) = width + that
+
+    override fun plus(that: Long) = width + that
+
+    override fun minus(that: Int) = width - that
+
+    override fun minus(that: Long) = width - that
+
+    override fun times(that: Int) = width * that
+
+    override fun times(that: Long) = width * that
+
+    override fun div(that: Int) = width / that
+
+    override fun div(that: Long) = width / that
+
+    override fun rem(that: Int) = width % that
+
+    override fun rem(that: Long) = width % that
+}
+
+class CellClasses<S> internal constructor(
+    val source: S,
+    internal val _classes: PSet<String>
+) : Iterable<String> {
+    val classes: List<String> by lazy {
+        _classes.sorted().toList()
+    }
+
+    operator fun plus(topic: String): CellClasses<S> = CellClasses(source, _classes + topic)
+    operator fun plus(topics: Collection<String>): CellClasses<S> = CellClasses(source, topics.fold(this._classes) { acc, topic -> acc + topic })
+    operator fun minus(topic: String): CellClasses<S> = CellClasses(source, _classes - topic)
+    operator fun minus(topics: Collection<String>): CellClasses<S> = CellClasses(source, topics.fold(this._classes) { acc, topic -> acc - topic })
+    override fun iterator(): Iterator<String> = classes.iterator()
+
+    // TODO Consider changing these to use invoke instead?
+    infix fun `=`(value: String) {
+        TODO()
+    }
+
+    infix fun `=`(value: Iterator<String>) {
+        TODO()
+    }
+
+    infix fun `=`(value: CellClasses<*>?) {
+        TODO()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        // TODO Add functionality to make this symmetric, i.e. "some string" == some CellClasses containing just "some string" must return true, etc..
+        return when (other) {
+            is CellClasses<*> -> _classes == other._classes
+            is String -> _classes.contains(other) && _classes.size == 1
+            is Iterable<*> -> other.toSet().let { _classes.containsAll(it) && _classes.size == it.size }
+            else -> _classes == other
+        }
+    }
+
+    override fun hashCode() = Objects.hash(this._classes)
+
+    override fun toString() = classes.toString()
+
+    companion object
+}
+
+class CellTopics<S> internal constructor(
+    val source: S,
+    internal val _topics: ImmutableSet<String>
+) : Iterable<String> {
+    val topics: List<String> by lazy {
+        _topics.sorted().toList()
+    }
+
+    operator fun plus(topic: String): CellTopics<S> = CellTopics(source, _topics + topic)
+    operator fun plus(topics: Collection<String>): CellTopics<S> = CellTopics(source, topics.fold(this._topics) { acc, topic -> acc + topic })
+    operator fun minus(topic: String): CellTopics<S> = CellTopics(source, _topics - topic)
+    operator fun minus(topics: Collection<String>): CellTopics<S> = CellTopics(source, topics.fold(this._topics) { acc, topic -> acc - topic })
+    override fun iterator(): Iterator<String> = topics.iterator()
+
+    // TODO Consider changing these to use invoke instead?
+    infix fun `=`(value: String) {
+        TODO()
+    }
+
+    infix fun `=`(value: Iterator<String>) {
+        TODO()
+    }
+
+    infix fun `=`(value: CellTopics<*>?) {
+        TODO()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        // TODO Add functionality to make this symmetric, i.e. "some string" == some CellTopics containing just "some string" must return true, etc..
+        return when (other) {
+            is CellTopics<*> -> _topics == other._topics
+            is String -> _topics.contains(other) && _topics.size == 1
+            is Iterable<*> -> other.toSet().let { _topics.containsAll(it) && _topics.size == it.size }
+            else -> _topics == other
+        }
+    }
+
+    override fun hashCode() = Objects.hash(this._topics)
+
+    override fun toString() = topics.toString()
+
+    companion object
 }

@@ -14,7 +14,7 @@ fun main() {
             if (black) style = "background-color: black; width: 100%; height: 100%"
             else "background-color: white; width: 100%; height: 100%"
         }
-        tableView[x.toString(), y].cellClasses = if (black) sortedSetOf("black") else sortedSetOf("white")
+        tableView[x.toString(), y][CellClasses] = if (black) "black" else "white"
     }
 
     for (x in 0..99) {
@@ -37,8 +37,8 @@ fun main() {
         cellHeight = 10
     }
      */
-    tableView.cellWidth = 10
-    tableView.cellHeight = 10
+    tableView[CellWidth] = 10
+    tableView[CellHeight] = 10
 
     show(tableView)
     Thread.sleep(15000)

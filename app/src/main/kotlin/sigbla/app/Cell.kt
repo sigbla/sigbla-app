@@ -135,7 +135,8 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
     open fun isNumeric(): Boolean = false
     open fun isText(): Boolean = false
 
-    // TODO Look at making these internal and introduce a CellOps
+    // TODO? Look at making these internal and introduce a CellOps
+    // TODO Make these return null instead of throwing exception
     open fun toLong(): Long = throw InvalidCellException("Cell not numeric at $column:$index")
     open fun toDouble(): Double = throw InvalidCellException("Cell not numeric at $column:$index")
     open fun toBigInteger(): BigInteger = throw InvalidCellException("Cell not numeric at $column:$index")
@@ -361,6 +362,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
         table[this] = value
     }
 
+    // TODO Add functionality to make this symmetric? Add to BasicMath?
     override fun equals(other: Any?) = this.compareTo(other) == 0
 
     override fun hashCode() = Objects.hash(this.value)
