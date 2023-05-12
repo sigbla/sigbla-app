@@ -333,7 +333,12 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
     // TODO Can remove this after adding iterator functionality
     fun asSequence(): Sequence<Cell<*>> = sequenceOf(this)
 
-    // TODO Consider changing these to use invoke instead?
+    // TODO Consider changing these to use invoke instead with type safe builder?
+    //   operator fun invoke(block: Cell<*>.() -> BigDecimal) {
+    //       table[this] = block()
+    //   }
+    //   Could also have one where the block return Any? and find the type, which would allow for options like
+    //   table["A", 1] { if (true) "string" else 100 }
     infix fun `=`(value: BigDecimal) {
         table[this] = value
     }
@@ -719,6 +724,10 @@ class WebCell internal constructor(column: Column, index: Long, override val val
 
 // Chart cell to be done as a WebCell instead..
 
+// TODO Might be able to remove DestinationOsmosis if we have
+//   operator fun invoke(block: Cell<*>.() -> ..) {
+//       table[this] = block()
+//   }
 class DestinationOsmosis<D>(val destination: D)
 
 fun div(

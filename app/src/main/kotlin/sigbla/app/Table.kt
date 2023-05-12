@@ -20,6 +20,7 @@ abstract class Table(val name: String?) : Iterable<Cell<*>> {
     var closed: Boolean = false
         internal set
 
+    // TODO Remove as we have table[Table]
     val table: Table
         get() = this
 
@@ -112,7 +113,10 @@ abstract class Table(val name: String?) : Iterable<Cell<*>> {
 
     // TODO get(index, columnHeader/column)
 
-    operator fun get(table: Table): Table {
+    // TODO Consider if get(table: Table) and set(..: Table, ..) should be included for symmetry?
+
+    // TODO Include set as well, which will, like with TableView, copy over all the data
+    operator fun get(table: Table.Companion): Table {
         return this
     }
 

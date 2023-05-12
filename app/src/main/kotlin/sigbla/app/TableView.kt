@@ -143,11 +143,13 @@ class TableView internal constructor(
                 CellView(ColumnView(this, it.first), it.second)
             }
 
+    // TODO Consider if get(tableView: TableView) and set(..: TableView, ..) should be included for symmetry?
+
     operator fun get(tableView: Companion) = this
 
-    operator fun set(companion: Companion, tableView: TableView) {
+    operator fun set(tableView: Companion, newTableView: TableView) {
         val (oldRef, newRef) = tableViewRef.refAction {
-            tableView.tableViewRef.get().copy(
+            newTableView.tableViewRef.get().copy(
                 table = it.table,
                 version = it.version + 1L
             )
@@ -160,6 +162,8 @@ class TableView internal constructor(
 
         eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(old, new)) as List<TableViewListenerEvent<Any>>)
     }
+
+    // TODO Consider if get(table: Table) and set(..: Table, ..) should be included for symmetry?
 
     operator fun get(table: Table.Companion): Table? {
         return tableViewRef.get().table
