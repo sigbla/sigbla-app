@@ -2,6 +2,7 @@ package sigbla.app.test
 
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 import sigbla.app.CellClasses
 import sigbla.app.CellHeight
@@ -233,6 +234,123 @@ class TableViewTest {
         assertEquals(setOf("tv ct", "tv_1 ct"), tv1["B", 1].derived.cellTopics.toSet())
         assertEquals(setOf("tv cc"), tv1["B", 2].derived.cellClasses.toSet())
         assertEquals(setOf("tv ct"), tv1["B", 2].derived.cellTopics.toSet())
+    }
+
+    @Test
+    fun `table view swaps`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        val tv1 = TableView[t1]
+        val tv2 = TableView["t2"]
+        val tv3 = TableView["t3"]
+
+        assertEquals(t1, tv1[Table])
+
+        assertNull(tv2[Table])
+
+        tv2[Table] = t1
+        assertEquals(t1, tv2[Table])
+
+        assertEquals(UnitCellHeight::class, tv2[CellHeight]::class)
+        assertEquals(UnitCellWidth::class, tv2[CellWidth]::class)
+        assertEquals(emptySet<String>(), tv2[CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv2[CellTopics].toSet())
+
+        assertEquals(UnitCellWidth::class, tv2["A"][CellWidth]::class)
+        assertEquals(emptySet<String>(), tv2["A"][CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv2["A"][CellTopics].toSet())
+
+        assertEquals(UnitCellHeight::class, tv2[1][CellHeight]::class)
+        assertEquals(emptySet<String>(), tv2[1][CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv2[1][CellTopics].toSet())
+
+        assertEquals(UnitCellHeight::class, tv2["B", 2][CellHeight]::class)
+        assertEquals(UnitCellWidth::class, tv2["B", 2][CellWidth]::class)
+        assertEquals(emptySet<String>(), tv2["B", 2][CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv2["B", 2][CellTopics].toSet())
+
+        tv1[CellHeight] = 100
+        tv1[CellWidth] = 200
+        tv1[CellClasses] = "cc1"
+        tv1[CellTopics] = "ct1"
+
+        tv1["A"][CellWidth] = 300
+        tv1["A"][CellClasses] = "cc2"
+        tv1["A"][CellTopics] = "ct2"
+
+        tv1[1][CellHeight] = 400
+        tv1[1][CellClasses] = "cc3"
+        tv1[1][CellTopics] = "ct3"
+
+        tv1["B", 2][CellHeight] = 500
+        tv1["B", 2][CellWidth] = 600
+        tv1["B", 2][CellClasses] = "cc4"
+        tv1["B", 2][CellTopics] = "ct4"
+
+        assertEquals(UnitCellHeight::class, tv2[CellHeight]::class)
+        assertEquals(UnitCellWidth::class, tv2[CellWidth]::class)
+        assertEquals(emptySet<String>(), tv2[CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv2[CellTopics].toSet())
+
+        assertEquals(UnitCellWidth::class, tv2["A"][CellWidth]::class)
+        assertEquals(emptySet<String>(), tv2["A"][CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv2["A"][CellTopics].toSet())
+
+        assertEquals(UnitCellHeight::class, tv2[1][CellHeight]::class)
+        assertEquals(emptySet<String>(), tv2[1][CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv2[1][CellTopics].toSet())
+
+        assertEquals(UnitCellHeight::class, tv2["B", 2][CellHeight]::class)
+        assertEquals(UnitCellWidth::class, tv2["B", 2][CellWidth]::class)
+        assertEquals(emptySet<String>(), tv2["B", 2][CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv2["B", 2][CellTopics].toSet())
+
+        tv2[Table] = null
+        assertNull(tv2[Table])
+
+        tv2[TableView] = tv1
+
+        assertNull(tv2[Table])
+
+        assertEquals(100L, tv2[CellHeight].height)
+        assertEquals(200L, tv2[CellWidth].width)
+        assertEquals(setOf("cc1"), tv2[CellClasses].toSet())
+        assertEquals(setOf("ct1"), tv2[CellTopics].toSet())
+
+        assertEquals(300L, tv2["A"][CellWidth].width)
+        assertEquals(setOf("cc2"), tv2["A"][CellClasses].toSet())
+        assertEquals(setOf("ct2"), tv2["A"][CellTopics].toSet())
+
+        assertEquals(400L, tv2[1][CellHeight].height)
+        assertEquals(setOf("cc3"), tv2[1][CellClasses].toSet())
+        assertEquals(setOf("ct3"), tv2[1][CellTopics].toSet())
+
+        assertEquals(500L, tv2["B", 2][CellHeight].height)
+        assertEquals(600L, tv2["B", 2][CellWidth].width)
+        assertEquals(setOf("cc4"), tv2["B", 2][CellClasses].toSet())
+        assertEquals(setOf("ct4"), tv2["B", 2][CellTopics].toSet())
+
+        tv2[TableView] = tv3
+
+        assertEquals(UnitCellHeight::class, tv2[CellHeight]::class)
+        assertEquals(UnitCellWidth::class, tv2[CellWidth]::class)
+        assertEquals(emptySet<String>(), tv2[CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv2[CellTopics].toSet())
+
+        assertEquals(UnitCellWidth::class, tv2["A"][CellWidth]::class)
+        assertEquals(emptySet<String>(), tv2["A"][CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv2["A"][CellTopics].toSet())
+
+        assertEquals(UnitCellHeight::class, tv2[1][CellHeight]::class)
+        assertEquals(emptySet<String>(), tv2[1][CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv2[1][CellTopics].toSet())
+
+        assertEquals(UnitCellHeight::class, tv2["B", 2][CellHeight]::class)
+        assertEquals(UnitCellWidth::class, tv2["B", 2][CellWidth]::class)
+        assertEquals(emptySet<String>(), tv2["B", 2][CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv2["B", 2][CellTopics].toSet())
+
+        assertNull(tv2[Table])
     }
 
     // TODO See TableTest for inspiration

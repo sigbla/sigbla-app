@@ -116,33 +116,7 @@ class TableView internal constructor(
         if (name != null && onRegistry) Registry.setView(name, this)
     }
 
-    // TODO This or the operator function should go?
-    val tableView: TableView
-        get() = this
-
-    operator fun get(tableView: TableView.Companion) = this
-
     // TODO? val materializedTable (and materializedColumn/Row elsewhere?)
-
-    // TODO Change to get/set operator: view[Table] = table
-    var table
-        get() = tableViewRef.get().table
-        set(table) {
-            val (oldRef, newRef) = tableViewRef.refAction {
-                it.copy(
-                    table = table,
-                    version = it.version + 1L
-                )
-            }
-
-            if (!eventProcessor.haveListeners()) return
-
-            val old = makeClone(ref = oldRef)
-            val new = makeClone(ref = newRef)
-
-            // TODO This needs to emit a Table? Probably not, need the view ref..
-            eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(old, new)) as List<TableViewListenerEvent<Any>>)
-        }
 
     val columnViews: Sequence<ColumnView>
         get() = tableViewRef.get()
@@ -169,8 +143,46 @@ class TableView internal constructor(
                 CellView(ColumnView(this, it.first), it.second)
             }
 
+    operator fun get(tableView: Companion) = this
+
+    operator fun set(companion: Companion, tableView: TableView) {
+        val (oldRef, newRef) = tableViewRef.refAction {
+            tableView.tableViewRef.get().copy(
+                table = it.table,
+                version = it.version + 1L
+            )
+        }
+
+        if (!eventProcessor.haveListeners()) return
+
+        val old = makeClone(ref = oldRef)
+        val new = makeClone(ref = newRef)
+
+        eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(old, new)) as List<TableViewListenerEvent<Any>>)
+    }
+
+    operator fun get(table: Table.Companion): Table? {
+        return tableViewRef.get().table
+    }
+
+    operator fun set(table: Table.Companion, newTable: Table?) {
+        val (oldRef, newRef) = tableViewRef.refAction {
+            it.copy(
+                table = newTable,
+                version = it.version + 1L
+            )
+        }
+
+        if (!eventProcessor.haveListeners()) return
+
+        val old = makeClone(ref = oldRef)
+        val new = makeClone(ref = newRef)
+
+        eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(old, new)) as List<TableViewListenerEvent<Any>>)
+    }
+
     operator fun get(cellHeight: CellHeight.Companion): CellHeight<TableView, *> {
-        val ref = tableView.tableViewRef.get()
+        val ref = tableViewRef.get()
         return when (val height = ref.defaultCellView.cellHeight) {
             is Long -> PixelCellHeight(this, height)
             else -> UnitCellHeight(this)
@@ -212,7 +224,7 @@ class TableView internal constructor(
     }
 
     operator fun get(cellWidth: CellWidth.Companion): CellWidth<TableView, *> {
-        val ref = tableView.tableViewRef.get()
+        val ref = tableViewRef.get()
         return when (val width = ref.defaultCellView.cellWidth) {
             is Long -> PixelCellWidth(this, width)
             else -> UnitCellWidth(this)
@@ -254,7 +266,7 @@ class TableView internal constructor(
     }
 
     operator fun get(cellClasses: CellClasses.Companion): CellClasses<TableView> {
-        val ref = tableView.tableViewRef.get()
+        val ref = tableViewRef.get()
         return CellClasses(this, ref.defaultCellView.cellClasses ?: immutableSetOf())
     }
 
@@ -289,7 +301,7 @@ class TableView internal constructor(
     }
 
     operator fun get(cellTopics: CellTopics.Companion): CellTopics<TableView> {
-        val ref = tableView.tableViewRef.get()
+        val ref = tableViewRef.get()
         return CellTopics(this, ref.defaultCellView.cellTopics ?: immutableSetOf())
     }
 
@@ -385,12 +397,6 @@ class TableView internal constructor(
     operator fun get(column: Column, index: Long): CellView = this[column.columnHeader, index]
 
     operator fun get(columnHeader: ColumnHeader, index: Long): CellView = CellView(get(columnHeader), index)
-
-    // -----
-
-    operator fun set(companion: Companion, tableView: TableView) {
-        TODO("Not yet implemented")
-    }
 
     // -----
 
@@ -751,7 +757,7 @@ class CellView(
         get() = columnView.tableView
 
     val cell: Cell<*>?
-        get() = tableView.table?.let { return it[columnView.columnHeader][index] }
+        get() = tableView[Table]?.let { return it[columnView.columnHeader][index] }
 
     val derived: DerivedCellView
         get() = createDerivedCellViewFromRef(this.tableView.tableViewRef.get(), columnView, index)
@@ -818,7 +824,7 @@ class DerivedCellView internal constructor(
         get() = columnView[index]
 
     // Note: This is assigned on init to preserve the derived nature of the class
-    val cell: Cell<*>? = tableView.table?.let { it[columnView.columnHeader][index] }
+    val cell: Cell<*>? = tableView[Table]?.let { it[columnView.columnHeader][index] }
 
     val cellClasses: CellClasses<DerivedCellView> by lazy {
         CellClasses(this, classes)

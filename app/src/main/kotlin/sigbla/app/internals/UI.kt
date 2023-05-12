@@ -96,7 +96,7 @@ internal object SigblaBackend {
 
     private fun areaContent(view: TableView, x: Long, y: Long, h: Long, w: Long, dims: Dimensions, dirtyCells: List<Cell<*>>? = null): List<PositionedContent> {
         val view = clone(view)
-        val table = view.table?.let { clone(it) } ?: return emptyList()
+        val table = view[Table]?.let { clone(it) } ?: return emptyList()
 
         val dirtyColumnHeaders = dirtyCells?.map { it.column.columnHeader }?.toSet()
         val dirtyRowIndices = dirtyCells?.map { it.index }?.toSet()
@@ -213,7 +213,7 @@ internal object SigblaBackend {
 
     private fun dims(view: TableView): Dimensions {
         // TODO Consider using a stable snapshot ref for view/table
-        val table = view.table ?: return Dimensions(0, 0, 0, 0)
+        val table = view[Table] ?: return Dimensions(0, 0, 0, 0)
 
         val headerHeight = view[-1].derived.cellHeight
         val headerWidth = view[emptyColumnHeader].derived.cellWidth
@@ -523,7 +523,7 @@ internal object SigblaBackend {
 
         // TODO As with the view, the underlying table might also change, so we need to remove
         //      and add a new listener when this happens..
-        view.table?.apply {
+        view[Table]?.apply {
             on(this) {
                 skipHistory = true
                 order = Long.MAX_VALUE

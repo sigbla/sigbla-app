@@ -47,7 +47,7 @@ val Sequence<TableViewListenerEvent<*>>.newView: TableView
     get() = this.firstOrNull()?.let {
         fun getTableView(value: Any?): TableView {
             return when (value) {
-                is TableView -> value.tableView
+                is TableView -> value
                 is ColumnView -> value.tableView
                 is RowView -> value.tableView
                 is CellView -> value.tableView
@@ -66,7 +66,7 @@ val Sequence<TableViewListenerEvent<*>>.oldView: TableView
     get() = this.firstOrNull()?.let {
         fun getTableView(value: Any?): TableView {
             return when (value) {
-                is TableView -> value.tableView
+                is TableView -> value
                 is ColumnView -> value.tableView
                 is RowView -> value.tableView
                 is CellView -> value.tableView

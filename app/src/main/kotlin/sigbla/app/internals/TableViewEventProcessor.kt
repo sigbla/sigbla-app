@@ -439,7 +439,7 @@ internal class TableViewEventProcessor {
         eventBuffer.set(views.toMutableList())
 
         fun newValueVersion(newValue: Any?): Long = when (newValue) {
-            is TableView -> newValue.tableView.tableViewRef.get().version
+            is TableView -> newValue.tableViewRef.get().version
             is ColumnView -> newValue.tableView.tableViewRef.get().version
             is RowView -> newValue.tableView.tableViewRef.get().version
             is CellView -> newValue.tableView.tableViewRef.get().version

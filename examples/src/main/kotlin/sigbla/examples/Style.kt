@@ -42,7 +42,7 @@ fun main() {
     tableView["A", 1][CellHeight]
     tableView["A", 1][CellWidth]
     table["A"].table.table.table
-    tableView["A"].tableView.tableView
+    tableView["A"].tableView
     table["A", 1] = 1
     table["A", 1] = {
         destination `=` 10

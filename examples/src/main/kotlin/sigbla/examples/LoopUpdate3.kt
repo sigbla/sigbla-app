@@ -21,6 +21,7 @@ fun main() {
     for (x in 0 until maxHeaders) {
         for (y in 0 until maxRows) {
             cell(x, y, x % 2 == 0)
+            //cell(x, y, ThreadLocalRandom.current().nextBoolean())
         }
     }
 
