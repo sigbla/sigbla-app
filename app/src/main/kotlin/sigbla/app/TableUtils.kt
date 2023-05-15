@@ -11,13 +11,12 @@ inline fun <reified T> valueOf(cell: Cell<*>): T? = valueOf(cell, T::class) as T
 
 fun valueOf(cell: Cell<*>, typeFilter: KClass<*>): Any? = if (typeFilter.isInstance(cell.value)) cell.value else null
 
-inline fun <reified T> valueOf(noinline source: DestinationOsmosis<Cell<*>>.() -> Unit): T? = valueOf(source, T::class) as T?
+inline fun <reified T> valueOf(noinline source: Cell<*>.() -> Unit): T? = valueOf(source, T::class) as T?
 
-fun valueOf(source: DestinationOsmosis<Cell<*>>.() -> Unit, typeFilter: KClass<*>): Any? {
+fun valueOf(source: Cell<*>.() -> Unit, typeFilter: KClass<*>): Any? {
     val table = BaseTable("", false, AtomicReference(TableRef())) as Table
-    table["valueOf", 0L] = source // Subscribe
+    table["valueOf", 0L].source()
     val value = valueOf(table["valueOf", 0L], typeFilter)
-    table["valueOf", 0L] = null // Unsubscribe
     Registry.deleteTable(table) // Clean up
     return value
 }

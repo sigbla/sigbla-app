@@ -1998,7 +1998,7 @@ fun clear(column: Column): Unit = TODO()
 
 fun clear(row: Row): Unit = TODO()
 
-fun clear(cell: Cell<*>) = cell `=` null
+fun clear(cell: Cell<*>) = cell { null }
 
 fun clone(table: Table): Table = table.makeClone()
 

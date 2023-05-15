@@ -35,7 +35,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
     operator fun set(header: ColumnHeader, value: BigInteger) = table[header].set(index, value)
     operator fun set(header: ColumnHeader, value: BigDecimal) = table[header].set(index, value)
     operator fun set(header: ColumnHeader, value: Number) = table[header].set(index, value)
-    operator fun set(header: ColumnHeader, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(table[header][index]).init()
+    operator fun set(header: ColumnHeader, init: Cell<*>.() -> Any?) = table[header][index] { init() }
 
     operator fun set(vararg header: String, value: Cell<*>?) = table[ColumnHeader(*header)].set(index, value)
     operator fun set(vararg header: String, value: String) = table[ColumnHeader(*header)].set(index, value)
@@ -46,7 +46,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
     operator fun set(vararg header: String, value: BigInteger) = table[ColumnHeader(*header)].set(index, value)
     operator fun set(vararg header: String, value: BigDecimal) = table[ColumnHeader(*header)].set(index, value)
     operator fun set(vararg header: String, value: Number) = table[ColumnHeader(*header)].set(index, value)
-    operator fun set(vararg header: String, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(table[ColumnHeader(*header)][index]).init()
+    operator fun set(vararg header: String, init: Cell<*>.() -> Any?) = table[ColumnHeader(*header)][index] { init() }
 
     operator fun rangeTo(other: Row): RowRange {
         return RowRange(this, other)

@@ -131,9 +131,9 @@ abstract class Column internal constructor(
 
     operator fun set(index: Int, value: Number) = set(index.toLong(), value)
 
-    operator fun set(index: Long, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[index]).init()
+    operator fun set(index: Long, init: Cell<*>.() -> Any?) = this[index] { init() }
 
-    operator fun set(index: Int, init: DestinationOsmosis<Cell<*>>.() -> Unit) = DestinationOsmosis(this[index]).init()
+    operator fun set(index: Int, init: Cell<*>.() -> Any?) = this[index] { init() }
 
     // TODO: Look at adding a add(..) function.
     //       Add would just insert a cell at first available location.

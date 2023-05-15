@@ -14,7 +14,6 @@ import java.math.MathContext
 import java.util.*
 import kotlin.math.min
 import kotlin.math.max
-import kotlin.reflect.KClass
 
 internal fun String.toCell(column: Column, index: Long) =
     StringCell(column, index, this)
@@ -333,38 +332,20 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
     // TODO Can remove this after adding iterator functionality
     fun asSequence(): Sequence<Cell<*>> = sequenceOf(this)
 
-    // TODO Consider changing these to use invoke instead with type safe builder?
-    //   operator fun invoke(block: Cell<*>.() -> BigDecimal) {
-    //       table[this] = block()
-    //   }
-    //   Could also have one where the block return Any? and find the type, which would allow for options like
-    //   table["A", 1] { if (true) "string" else 100 }
-    infix fun `=`(value: BigDecimal) {
-        table[this] = value
-    }
-
-    infix fun `=`(value: BigInteger) {
-        table[this] = value
-    }
-
-    infix fun `=`(value: Double) {
-        table[this] = value
-    }
-
-    infix fun `=`(value: Long) {
-        table[this] = value
-    }
-
-    infix fun `=`(value: Number) {
-        table[this] = value
-    }
-
-    infix fun `=`(value: String) {
-        table[this] = value
-    }
-
-    infix fun `=`(value: Cell<*>?) {
-        table[this] = value
+    operator fun <T> invoke(function: Cell<*>.() -> T): T {
+        return when (val value = function()) {
+            is BigDecimal -> { table[this] = value; value }
+            is BigInteger -> { table[this] = value; value }
+            is Double -> { table[this] = value; value }
+            is Long -> { table[this] = value; value }
+            is Number -> { table[this] = value; value }
+            is String -> { table[this] = value; value }
+            is Cell<*> -> { table[this] = value; value }
+            is Unit -> { /* no assignment */ Unit as T }
+            is Function1<*, *> -> { invoke(value as Cell<*>.() -> T?) as T }
+            null -> { table[this] = null; null as T }
+            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
+        }
     }
 
     // TODO Add functionality to make this symmetric? Add to BasicMath?
@@ -724,22 +705,16 @@ class WebCell internal constructor(column: Column, index: Long, override val val
 
 // Chart cell to be done as a WebCell instead..
 
-// TODO Might be able to remove DestinationOsmosis if we have
-//   operator fun invoke(block: Cell<*>.() -> ..) {
-//       table[this] = block()
-//   }
-class DestinationOsmosis<D>(val destination: D)
-
 fun div(
     classes : String? = null, block : DIV.() -> Unit = {}
-): DestinationOsmosis<Cell<*>>.() -> Unit = {
+): Cell<*>.() -> WebCell = {
     val builder = HTMLStreamBuilder(StringBuilder(256), prettyPrint = false, xhtmlCompatible = false)
         .onFinalizeMap { sb, _ -> sb.toString() }
         .delayed()
 
-    destination `=` WebCell(
-        destination.column,
-        destination.index,
+    WebCell(
+        column,
+        index,
         builder.div(classes, block).toWebContent()
     )
 }

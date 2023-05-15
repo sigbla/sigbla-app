@@ -393,7 +393,8 @@ fun main() {
 //    tableView[table["A"][1]] = cellStyle {}
 
     // WIP
-    table["DST", 0] = {
+    table["DST", 0] <Unit>{
+        val destination = this
         on<Any, Number>(table) {
             name = "L"
 
@@ -421,8 +422,9 @@ fun main() {
         }
     }
 
-    table["DIV", 1] = {
-        destination.table[destination] = div {
+    table["DIV", 1] <Unit>{
+        val destination = this
+        this.table[this] = div {
             +"Pre Event"
         }
 

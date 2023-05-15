@@ -45,8 +45,12 @@ fun main() {
     tableView["A"].tableView
     table["A", 1] = 1
     table["A", 1] = {
-        destination `=` 10
-        destination.table[destination] = 10
+        this { 10 }
+        //this.table[this] = 10
+        //10
+    }
+    table["A", 1] {
+        10
     }
     on(table["A", 1]) {
         events {
