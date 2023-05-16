@@ -460,7 +460,7 @@ class TableViewListenerTest {
         assertEquals(DEFAULT_CELL_WIDTH * 2 + 1, v2New)
         assertEquals(DEFAULT_CELL_WIDTH * 2 + 2, v3New)
 
-        assertEquals(DEFAULT_CELL_WIDTH * 2, t["A", 0][CellWidth])
+        assertEquals<Any>(DEFAULT_CELL_WIDTH * 2, t["A", 0][CellWidth])
 
         t["A", 0][CellWidth] = DEFAULT_CELL_WIDTH * 3
 
@@ -472,7 +472,7 @@ class TableViewListenerTest {
         assertEquals(DEFAULT_CELL_WIDTH * 3 + 1, v2New)
         assertEquals(DEFAULT_CELL_WIDTH * 3 + 2, v3New)
 
-        assertEquals(DEFAULT_CELL_WIDTH * 3, t["A", 0][CellWidth])
+        assertEquals<Any>(DEFAULT_CELL_WIDTH * 3, t["A", 0][CellWidth])
     }
 
     @Test
@@ -524,8 +524,8 @@ class TableViewListenerTest {
                 oldView["A", 0][CellWidth] = source["A", 0].derived.cellWidth + 200
                 newView["A", 0][CellWidth] = source["A", 0].derived.cellWidth + 300
 
-                assertEquals(source["A", 0].derived.cellWidth + 200, oldView["A", 0][CellWidth])
-                assertEquals(source["A", 0].derived.cellWidth + 300, newView["A", 0][CellWidth])
+                assertEquals<Any>(source["A", 0].derived.cellWidth + 200, oldView["A", 0][CellWidth])
+                assertEquals<Any>(source["A", 0].derived.cellWidth + 300, newView["A", 0][CellWidth])
 
                 count += count()
             }
@@ -537,18 +537,18 @@ class TableViewListenerTest {
             skipHistory = true
 
             events {
-                assertEquals(source["A", 0].derived.cellWidth + 200, oldView["A", 0][CellWidth])
-                assertEquals(source["A", 0].derived.cellWidth + 300, newView["A", 0][CellWidth])
+                assertEquals<Any>(source["A", 0].derived.cellWidth + 200, oldView["A", 0][CellWidth])
+                assertEquals<Any>(source["A", 0].derived.cellWidth + 300, newView["A", 0][CellWidth])
 
                 count += count()
             }
         }
 
-        assertEquals(DEFAULT_CELL_WIDTH, t["A", 0][CellWidth])
+        assertEquals<Any>(DEFAULT_CELL_WIDTH, t["A", 0][CellWidth])
 
         t["A", 0][CellWidth] = DEFAULT_CELL_WIDTH / 2
 
-        assertEquals(DEFAULT_CELL_WIDTH / 2, t["A", 0][CellWidth])
+        assertEquals<Any>(DEFAULT_CELL_WIDTH / 2, t["A", 0][CellWidth])
 
         assertEquals(3, count)
     }

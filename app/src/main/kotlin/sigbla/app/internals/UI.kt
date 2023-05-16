@@ -77,6 +77,7 @@ internal object SigblaBackend {
                                         val event = jsonParser.parse<ClientEvent>(text)
                                         if (event != null) handleEvent(this, event)
                                     }
+                                    else -> { /* ignore */ }
                                 }
                             }
                         } catch (ex: Exception) {

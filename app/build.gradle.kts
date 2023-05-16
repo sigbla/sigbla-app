@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("java-library")
     id("application")
-    id("org.jetbrains.kotlin.jvm") version "1.4.10"
+    kotlin("jvm") version "1.8.21"
 }
 
 group = "sigbla.app"
@@ -30,7 +30,7 @@ dependencies {
 
     api("org.jetbrains.kotlinx:kotlinx-html-jvm:0.6.12")
 
-    testImplementation("junit:junit:4.12")
+    testImplementation("junit:junit:4.13.2")
 }
 
 val compileKotlin: KotlinCompile by tasks

@@ -466,8 +466,8 @@ class TableListenerTest {
                 oldTable["A", 0] = source["A", 0] + 200
                 newTable["A", 0] = source["A", 0] + 300
 
-                assertEquals(source["A", 0] + 200, oldTable["A", 0])
-                assertEquals(source["A", 0] + 300, newTable["A", 0])
+                assertEquals<Any>(source["A", 0] + 200, oldTable["A", 0])
+                assertEquals<Any>(source["A", 0] + 300, newTable["A", 0])
 
                 count += count()
             }
@@ -479,18 +479,18 @@ class TableListenerTest {
             skipHistory = true
 
             events {
-                assertEquals(source["A", 0] + 200, oldTable["A", 0])
-                assertEquals(source["A", 0] + 300, newTable["A", 0])
+                assertEquals<Any>(source["A", 0] + 200, oldTable["A", 0])
+                assertEquals<Any>(source["A", 0] + 300, newTable["A", 0])
 
                 count += count()
             }
         }
 
-        assertEquals(100L, t["A", 0])
+        assertEquals<Any>(100L, t["A", 0])
 
         t["A", 0] = 50
 
-        assertEquals(50L, t["A", 0])
+        assertEquals<Any>(50L, t["A", 0])
 
         assertEquals(3, count)
     }
