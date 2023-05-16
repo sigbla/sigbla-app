@@ -9,8 +9,10 @@ plugins {
 group = "sigbla.app"
 version = "1.0-SNAPSHOT"
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }
 
 repositories {
@@ -31,15 +33,4 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-html-jvm:0.6.12")
 
     testImplementation("junit:junit:4.13.2")
-}
-
-val compileKotlin: KotlinCompile by tasks
-val compileTestKotlin: KotlinCompile by tasks
-
-compileKotlin.kotlinOptions {
-    jvmTarget = "11"
-}
-
-compileTestKotlin.kotlinOptions {
-    jvmTarget = "11"
 }
