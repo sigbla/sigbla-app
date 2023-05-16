@@ -5,6 +5,7 @@ import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.exceptions.InvalidTableViewException
 import sigbla.app.exceptions.InvalidCellHeightException
 import sigbla.app.exceptions.InvalidCellWidthException
+import sigbla.app.exceptions.InvalidValueException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.TableViewEventProcessor
 import sigbla.app.internals.refAction
@@ -1439,17 +1440,27 @@ sealed class CellHeight<S, T> {
     open operator fun rem(that: Int): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
     open operator fun rem(that: Long): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
 
-    // TODO Consider changing these to use invoke instead?
-    infix fun `=`(value: Int) {
-        TODO()
-    }
+    operator fun <T> invoke(function: CellHeight<*,*>.() -> T): T {
+        val value = this.function()
+        val longValue = when(value) {
+            is Unit -> /* no assignment */ return Unit as T
+            is Int -> value.toLong()
+            is Long -> value
+            is CellHeight<*,*> -> when (val height = value.height) {
+                is Number -> height.toLong()
+                else -> null
+            }
+            null -> null
+            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
+        }
 
-    infix fun `=`(value: Long) {
-        TODO()
-    }
+        when (val source = source) {
+            is TableView -> if (longValue == null) source[CellHeight] = null else source[CellHeight] = longValue
+            is RowView -> if (longValue == null) source[CellHeight] = null else source[CellHeight] = longValue
+            is CellView -> if (longValue == null) source[CellHeight] = null else source[CellHeight] = longValue
+        }
 
-    infix fun `=`(value: CellHeight<*,*>?) {
-        TODO()
+        return value
     }
 
     override fun equals(other: Any?): Boolean {
@@ -1614,17 +1625,27 @@ sealed class CellWidth<S, T> {
     open operator fun rem(that: Int): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
     open operator fun rem(that: Long): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
 
-    // TODO Consider changing these to use invoke instead?
-    infix fun `=`(value: Int) {
-        TODO()
-    }
+    operator fun <T> invoke(function: CellWidth<*,*>.() -> T): T {
+        val value = this.function()
+        val longValue = when(value) {
+            is Unit -> /* no assignment */ return Unit as T
+            is Int -> value.toLong()
+            is Long -> value
+            is CellWidth<*,*> -> when (val width = value.width) {
+                is Number -> width.toLong()
+                else -> null
+            }
+            null -> null
+            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
+        }
 
-    infix fun `=`(value: Long) {
-        TODO()
-    }
+        when (val source = source) {
+            is TableView -> if (longValue == null) source[CellWidth] = null else source[CellWidth] = longValue
+            is ColumnView -> if (longValue == null) source[CellWidth] = null else source[CellWidth] = longValue
+            is CellView -> if (longValue == null) source[CellWidth] = null else source[CellWidth] = longValue
+        }
 
-    infix fun `=`(value: CellWidth<*,*>?) {
-        TODO()
+        return value
     }
 
     // TODO Add functionality to make this symmetric?
@@ -1703,17 +1724,25 @@ class CellClasses<S> internal constructor(
     operator fun minus(topics: Collection<String>): CellClasses<S> = CellClasses(source, topics.fold(this._classes) { acc, topic -> acc - topic })
     override fun iterator(): Iterator<String> = classes.iterator()
 
-    // TODO Consider changing these to use invoke instead?
-    infix fun `=`(value: String) {
-        TODO()
-    }
+    operator fun <T> invoke(function: CellClasses<*>.() -> T): T {
+        val value = this.function()
+        val classes = when(value) {
+            is Unit -> /* no assignment */ return Unit as T
+            is String -> setOf(value)
+            is Collection<*> -> value as Collection<String>
+            is CellClasses<*> -> value.classes
+            null -> null
+            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
+        }
 
-    infix fun `=`(value: Iterator<String>) {
-        TODO()
-    }
+        when (val source = source) {
+            is TableView -> if (classes == null) source[CellClasses] = null else source[CellClasses] = classes
+            is ColumnView -> if (classes == null) source[CellClasses] = null else source[CellClasses] = classes
+            is RowView -> if (classes == null) source[CellClasses] = null else source[CellClasses] = classes
+            is CellView -> if (classes == null) source[CellClasses] = null else source[CellClasses] = classes
+        }
 
-    infix fun `=`(value: CellClasses<*>?) {
-        TODO()
+        return value
     }
 
     override fun equals(other: Any?): Boolean {
@@ -1747,17 +1776,25 @@ class CellTopics<S> internal constructor(
     operator fun minus(topics: Collection<String>): CellTopics<S> = CellTopics(source, topics.fold(this._topics) { acc, topic -> acc - topic })
     override fun iterator(): Iterator<String> = topics.iterator()
 
-    // TODO Consider changing these to use invoke instead?
-    infix fun `=`(value: String) {
-        TODO()
-    }
+    operator fun <T> invoke(function: CellTopics<*>.() -> T): T {
+        val value = this.function()
+        val topics = when(value) {
+            is Unit -> /* no assignment */ return Unit as T
+            is String -> setOf(value)
+            is Collection<*> -> value as Collection<String>
+            is CellTopics<*> -> value.topics
+            null -> null
+            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
+        }
 
-    infix fun `=`(value: Iterator<String>) {
-        TODO()
-    }
+        when (val source = source) {
+            is TableView -> if (topics == null) source[CellTopics] = null else source[CellTopics] = topics
+            is ColumnView -> if (topics == null) source[CellTopics] = null else source[CellTopics] = topics
+            is RowView -> if (topics == null) source[CellTopics] = null else source[CellTopics] = topics
+            is CellView -> if (topics == null) source[CellTopics] = null else source[CellTopics] = topics
+        }
 
-    infix fun `=`(value: CellTopics<*>?) {
-        TODO()
+        return value
     }
 
     override fun equals(other: Any?): Boolean {
