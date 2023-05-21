@@ -1,9 +1,6 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     id("java")
-    id("application")
-    kotlin("jvm") version "1.8.21"
+    kotlin("jvm")
 }
 
 group = "sigbla.examples"

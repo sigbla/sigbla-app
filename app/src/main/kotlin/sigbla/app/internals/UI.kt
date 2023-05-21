@@ -3,12 +3,14 @@ package sigbla.app.internals
 import com.beust.klaxon.Klaxon
 import com.beust.klaxon.TypeAdapter
 import com.beust.klaxon.TypeFor
-import io.ktor.application.*
-import io.ktor.http.cio.websocket.*
-import io.ktor.http.content.*
-import io.ktor.routing.*
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.http.content.*
+import io.ktor.server.response.*
+import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -29,10 +31,12 @@ import kotlin.collections.mutableListOf
 import kotlin.collections.mutableSetOf
 import kotlin.collections.set
 import kotlin.collections.toSet
+import kotlin.concurrent.thread
 import kotlin.reflect.KClass
 
 internal object SigblaBackend {
     private val engine: ApplicationEngine
+    private val blockingThread: Thread
     val port: Int
 
     private val listeners: ConcurrentMap<WebSocketSession, SigblaClient> = ConcurrentHashMap()
@@ -41,6 +45,9 @@ internal object SigblaBackend {
         val (engine, port) = start(10)
         this.engine = engine
         this.port = port
+        this.blockingThread = thread(name="UI") {
+            Thread.sleep(Long.MAX_VALUE)
+        }
     }
 
     private fun start(n: Int): Pair<ApplicationEngine, Int> {
@@ -50,11 +57,23 @@ internal object SigblaBackend {
                 install(WebSockets)
 
                 routing {
-                    static("/t/{ref}") {
-                        resources("table")
-                        defaultResource("index.html", "table")
+                    route("/t/{ref}", HttpMethod.Get) {
+                        handle {
+                            val ref = call.parameters["ref"]
+                            call.respondRedirect("/t/$ref/", permanent = true)
+                        }
                     }
-
+                    route("/t/{ref}/", HttpMethod.Get) {
+                        handle {
+                            call.respondText(
+                                ContentType.Text.Html,
+                                HttpStatusCode.OK
+                            ) {
+                                this.javaClass.getResource("/table.html").readText()
+                            }
+                        }
+                    }
+                    staticResources("/t/{ref}", "table")
                     webSocket("/t/{ref}/socket") {
                         val ref = call.parameters["ref"]
 
