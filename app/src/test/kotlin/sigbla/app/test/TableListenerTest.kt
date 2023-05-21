@@ -466,8 +466,8 @@ class TableListenerTest {
                 oldTable["A", 0] = source["A", 0] + 200
                 newTable["A", 0] = source["A", 0] + 300
 
-                assertEquals<Any>(source["A", 0] + 200, oldTable["A", 0])
-                assertEquals<Any>(source["A", 0] + 300, newTable["A", 0])
+                assertEquals<Any>(source["A", 0] + 200, oldTable["A", 0].toLong())
+                assertEquals<Any>(source["A", 0] + 300, newTable["A", 0].toLong())
 
                 count += count()
             }
@@ -479,18 +479,18 @@ class TableListenerTest {
             skipHistory = true
 
             events {
-                assertEquals<Any>(source["A", 0] + 200, oldTable["A", 0])
-                assertEquals<Any>(source["A", 0] + 300, newTable["A", 0])
+                assertEquals<Any>(source["A", 0] + 200, oldTable["A", 0].toLong())
+                assertEquals<Any>(source["A", 0] + 300, newTable["A", 0].toLong())
 
                 count += count()
             }
         }
 
-        assertEquals<Any>(100L, t["A", 0])
+        assertEquals<Any>(100L, t["A", 0].toLong())
 
         t["A", 0] = 50
 
-        assertEquals<Any>(50L, t["A", 0])
+        assertEquals<Any>(50L, t["A", 0].toLong())
 
         assertEquals(3, count)
     }

@@ -14,10 +14,8 @@ kotlin {
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
     implementation(project(":app"))
-    testImplementation("junit:junit:4.13.1")
 }

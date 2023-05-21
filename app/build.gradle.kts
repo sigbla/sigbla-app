@@ -15,7 +15,7 @@ kotlin {
 
 repositories {
     mavenCentral()
-    jcenter()
+    maven { url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven") }
 }
 
 application {
@@ -23,14 +23,14 @@ application {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.10")
-    implementation("com.beust:klaxon:5.2")
+    implementation("com.beust:klaxon:5.5")
     implementation("com.github.andrewoma.dexx:kollection:0.7")
     implementation("io.ktor:ktor-server-core")
     implementation("io.ktor:ktor-server-netty")
     implementation("io.ktor:ktor-server-websockets")
 
-    api("org.jetbrains.kotlinx:kotlinx-html-jvm:0.6.12")
+    api("org.jetbrains.kotlinx:kotlinx-html-jvm:0.8.1")
 
     testImplementation("junit:junit:4.13.2")
+    testImplementation(kotlin("test"))
 }
