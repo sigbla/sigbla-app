@@ -104,6 +104,31 @@ internal object SigblaBackend {
                             removeListener(this)
                         }
                     }
+                    route("/t/{ref}/resources/{resource...}") {
+                        handle {
+                            val ref = call.parameters["ref"]
+
+                            if (ref == null || ref.isBlank()) {
+                                call.respondText(status = HttpStatusCode.NotFound, text = "Not found")
+                                return@handle
+                            }
+
+                            val view = Registry.getView(ref)
+                            if (view == null) {
+                                call.respondText(status = HttpStatusCode.NotFound, text = "Not found")
+                                return@handle
+                            }
+
+                            val resource = call.parameters.getAll("resource")?.joinToString("/")
+                            val handler = if (resource == null) null else view[Resources]._resources[resource]
+                            if (handler == null) {
+                                call.respondText(status = HttpStatusCode.NotFound, text = "Not found")
+                                return@handle
+                            }
+
+                            handler()
+                        }
+                    }
                 }
             }.start(wait = false)
 

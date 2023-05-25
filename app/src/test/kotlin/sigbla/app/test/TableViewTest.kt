@@ -1,19 +1,12 @@
 package sigbla.app.test
 
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.util.pipeline.*
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import org.junit.Assert.*
 import org.junit.Test
-import sigbla.app.CellClasses
-import sigbla.app.CellHeight
-import sigbla.app.CellTopics
-import sigbla.app.CellWidth
-import sigbla.app.DEFAULT_CELL_HEIGHT
-import sigbla.app.DEFAULT_CELL_WIDTH
-import sigbla.app.Table
-import sigbla.app.TableView
-import sigbla.app.UnitCellHeight
-import sigbla.app.UnitCellWidth
+import sigbla.app.*
 
 class TableViewTest {
     @After
@@ -547,6 +540,54 @@ class TableViewTest {
         assertEquals(Unit, tv1["A", 1][CellWidth].width)
         assertEquals(emptyList<String>(), tv1["A", 1][CellClasses].classes)
         assertEquals(emptyList<String>(), tv1["A", 1][CellTopics].topics)
+    }
+
+    @Test
+    fun `tableview resources`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        fun getHandler1(): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
+            return {
+                call.respondText(text = "Response 1")
+            }
+        }
+
+        fun getHandler2(): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
+            return {
+                call.respondText(text = "Response 2")
+            }
+        }
+
+        val resources1 = tv1[Resources]
+        assertTrue(resources1.resources.isEmpty())
+
+        val handler1 = getHandler1()
+        val handler2 = getHandler2()
+
+        tv1[Resources] = "foo/bar" to handler1
+
+        assertTrue(resources1.resources.isEmpty())
+        val resources2 = tv1[Resources]
+        assertEquals(mapOf("foo/bar" to handler1), resources2.resources)
+        assertNotEquals(mapOf("foo/bar" to handler2), resources2.resources)
+
+        tv1[Resources] { /* no assignment */ }
+        assertEquals(mapOf("foo/bar" to handler1), tv1[Resources].resources)
+
+        tv1[Resources] { mapOf("fiz/buz" to handler2) }
+        assertEquals(mapOf("fiz/buz" to handler2), tv1[Resources].resources)
+
+        tv1[Resources] { "fiz/buz" to handler1 }
+        assertEquals(mapOf("fiz/buz" to handler1), tv1[Resources].resources)
+
+        tv1[Resources] { listOf("foo/bar" to handler2) }
+        assertEquals(mapOf("foo/bar" to handler2), tv1[Resources].resources)
+
+        tv1[Resources] { resources1 }
+        assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), tv1[Resources].resources)
+
+        tv1[Resources] { resources2 }
+        assertEquals(mapOf("foo/bar" to handler1), tv1[Resources].resources)
     }
 
     // TODO See TableTest for inspiration

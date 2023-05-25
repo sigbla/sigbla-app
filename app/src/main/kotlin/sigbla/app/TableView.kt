@@ -1,6 +1,5 @@
 package sigbla.app
 
-import com.github.andrewoma.dexx.kollection.ImmutableSet
 import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.exceptions.InvalidTableViewException
 import sigbla.app.exceptions.InvalidCellHeightException
@@ -9,6 +8,8 @@ import sigbla.app.exceptions.InvalidValueException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.TableViewEventProcessor
 import sigbla.app.internals.refAction
+import io.ktor.server.application.*
+import io.ktor.util.pipeline.*
 import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import com.github.andrewoma.dexx.kollection.toImmutableSet
@@ -98,6 +99,7 @@ internal data class TableViewRef(
     val columnViews: PMap<ColumnHeader, ViewMeta> = PHashMap(),
     val rowViews: PMap<Long, ViewMeta> = PHashMap(),
     val cellViews: PMap<Pair<ColumnHeader, Long>, ViewMeta> = PHashMap(),
+    val resources: PMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = PHashMap(),
     val table: Table? = null,
     val version: Long = Long.MIN_VALUE,
 )
@@ -338,6 +340,43 @@ class TableView internal constructor(
         val new = makeClone(ref = newRef)
 
         eventProcessor.publish(listOf(TableViewListenerEvent<CellTopics<TableView>>(old[CellTopics], new[CellTopics])) as List<TableViewListenerEvent<Any>>)
+    }
+
+    operator fun get(resources: Resources.Companion): Resources {
+        val ref = tableViewRef.get()
+        return Resources(this, ref.resources)
+    }
+
+    operator fun set(resources: Resources.Companion, resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>) {
+        setResources(PHashMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>().put(resource.first, resource.second))
+    }
+
+    operator fun set(resources: Resources.Companion, newResources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>) {
+        setResources(newResources.fold(PHashMap()) { acc, r -> acc.put(r.first, r.second)})
+    }
+
+    operator fun set(resources: Resources.Companion, newResources: Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>) {
+        setResources(newResources.entries.fold(PHashMap()) { acc, r -> acc.put(r.key, r.value)})
+    }
+
+    operator fun set(resources: Resources.Companion, newResources: Resources?) {
+        setResources(newResources?._resources)
+    }
+
+    private fun setResources(resources: PMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>?) {
+        val (oldRef, newRef) = tableViewRef.refAction {
+            it.copy(
+                resources = resources ?: PHashMap(),
+                version = it.version + 1L
+            )
+        }
+
+        if (!eventProcessor.haveListeners()) return
+
+        val old = makeClone(ref = oldRef)
+        val new = makeClone(ref = newRef)
+
+        eventProcessor.publish(listOf(TableViewListenerEvent<Resources>(old[Resources], new[Resources])) as List<TableViewListenerEvent<Any>>)
     }
 
     operator fun get(columnHeader: ColumnHeader) = ColumnView(this, columnHeader)
@@ -819,8 +858,8 @@ class DerivedCellView internal constructor(
     val index: Long,
     val cellHeight: Long,
     val cellWidth: Long,
-    classes: ImmutableSet<String>,
-    topics: ImmutableSet<String>
+    classes: PSet<String>,
+    topics: PSet<String>
 ) : Iterable<DerivedCellView> {
     val tableView: TableView
         get() = columnView.tableView
@@ -1078,8 +1117,8 @@ internal fun createDerivedColumnView(columnView: ColumnView): DerivedColumnView 
 class DerivedColumnView internal constructor(
     val columnView: ColumnView,
     val cellWidth: Long,
-    classes: ImmutableSet<String>,
-    topics: ImmutableSet<String>
+    classes: PSet<String>,
+    topics: PSet<String>
 ) : Iterable<DerivedCellView> {
     val tableView: TableView
         get() = columnView.tableView
@@ -1316,8 +1355,8 @@ internal fun createDerivedRowView(rowView: RowView): DerivedRowView {
 class DerivedRowView internal constructor(
     val rowView: RowView,
     val cellHeight: Long,
-    classes: ImmutableSet<String>,
-    topics: ImmutableSet<String>
+    classes: PSet<String>,
+    topics: PSet<String>
 ) : Iterable<DerivedCellView> {
     val tableView: TableView
         get() = rowView.tableView
@@ -1764,7 +1803,7 @@ class CellClasses<S> internal constructor(
 
 class CellTopics<S> internal constructor(
     val source: S,
-    internal val _topics: ImmutableSet<String>
+    internal val _topics: PSet<String>
 ) : Iterable<String> {
     val topics: List<String> by lazy {
         _topics.sorted().toList()
@@ -1810,6 +1849,65 @@ class CellTopics<S> internal constructor(
     override fun hashCode() = Objects.hash(this._topics)
 
     override fun toString() = topics.toString()
+
+    companion object
+}
+
+class Resources internal constructor(
+    val source: TableView,
+    internal val _resources: PMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>
+): Iterable<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>> {
+    val resources: Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> by lazy {
+        _resources.asMap()
+    }
+
+    operator fun plus(resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>): Resources = Resources(source, _resources.put(resource.first, resource.second))
+    operator fun plus(resources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>): Resources = Resources(source, resources.fold(_resources) {acc, resource -> acc.remove(resource.first)})
+    operator fun minus(resource: String): Resources = Resources(source, _resources.remove(resource))
+    operator fun minus(resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>): Resources = this - resource.first
+    operator fun minus(resources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>): Resources = Resources(source, resources.fold(_resources) {acc, resource -> acc.remove(resource.first)})
+    override fun iterator(): Iterator<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>> = resources.map { Pair(it.key, it.value) }.iterator()
+
+    operator fun <T> invoke(function: Resources.() -> T): T {
+        val value = this.function()
+        val resources = when(value) {
+            is Unit -> /* no assignment */ return Unit as T
+            is Map<*, *> -> value as Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>
+            is Pair<*, *> -> mapOf(value as Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>)
+            is Collection<*> -> (value as Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>).toMap()
+            is Resources -> value.resources
+            null -> null
+            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
+        }
+
+        if (resources == null) source[Resources] = null else source[Resources] = resources
+
+        return value
+    }
+
+    override fun equals(other: Any?): Boolean {
+        // TODO Add functionality to make this symmetric, i.e. "some string" == some CellTopics containing just "some string" must return true, etc..
+        return when (other) {
+            is Resources -> _resources == other._resources
+            is Map<*,*> -> _resources.all { other[it.component1()] == it.component2() } && _resources.size() == other.size
+            is Pair<*,*> -> other.first is String && _resources[other.first as String] == other.second && _resources.size() == 1
+            is Iterable<*> -> {
+                val otherList = other.toList()
+                if (otherList.size != _resources.size()) return false
+                val otherMap = otherList.filterIsInstance<Pair<*, *>>().fold(mutableMapOf<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>()) {
+                    acc, pair -> acc[pair.first as String] = pair.second as suspend PipelineContext<*, ApplicationCall>.() -> Unit; acc
+                }
+                if (otherMap.size != otherList.size) return false
+                if (otherMap.size != _resources.size()) return false
+                _resources.all { otherMap[it.component1()] == it.component2() }
+            }
+            else -> _resources == other
+        }
+    }
+
+    override fun hashCode() = Objects.hash(this._resources)
+
+    override fun toString() = resources.toString()
 
     companion object
 }
