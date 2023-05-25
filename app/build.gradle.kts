@@ -1,6 +1,5 @@
 plugins {
     id("java-library")
-    id("io.ktor.plugin") version "2.3.0"
     kotlin("jvm")
 }
 
@@ -18,19 +17,22 @@ repositories {
     maven { url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven") }
 }
 
-application {
-    mainClass.set("")
-}
+val klaxonVersion = "5.5"
+val dexxVersion = "0.7"
+val ktorVersion = "2.3.0"
+val kotlinxVersion = "0.8.1"
+val junitVersion = "4.13.2"
 
 dependencies {
-    implementation("com.beust:klaxon:5.5")
-    implementation("com.github.andrewoma.dexx:kollection:0.7")
-    implementation("io.ktor:ktor-server-core")
-    implementation("io.ktor:ktor-server-netty")
-    implementation("io.ktor:ktor-server-websockets")
+    implementation("com.beust:klaxon:$klaxonVersion")
+    implementation("com.github.andrewoma.dexx:kollection:$dexxVersion")
 
-    api("org.jetbrains.kotlinx:kotlinx-html-jvm:0.8.1")
+    api("io.ktor:ktor-server-core:$ktorVersion")
+    api("io.ktor:ktor-server-netty:$ktorVersion")
+    api("io.ktor:ktor-server-websockets:$ktorVersion")
 
-    testImplementation("junit:junit:4.13.2")
+    api("org.jetbrains.kotlinx:kotlinx-html-jvm:$kotlinxVersion")
+
+    testImplementation("junit:junit:$junitVersion")
     testImplementation(kotlin("test"))
 }
