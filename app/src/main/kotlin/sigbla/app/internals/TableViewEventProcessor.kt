@@ -448,6 +448,7 @@ internal class TableViewEventProcessor {
             is CellWidth<*, *> -> newValueVersion(newValue.source)
             is CellClasses<*> -> newValueVersion(newValue.source)
             is CellTopics<*> -> newValueVersion(newValue.source)
+            is Resources -> newValueVersion(newValue.source)
             else -> throw SigblaAppException("Unsupported type: ${newValue?.javaClass}")
         }
 
@@ -461,6 +462,7 @@ internal class TableViewEventProcessor {
             is CellWidth<*, *> -> valueColumn(value.source)
             is CellClasses<*> -> valueColumn(value.source)
             is CellTopics<*> -> valueColumn(value.source)
+            is Resources -> valueColumn(value.source)
             else -> throw SigblaAppException("Unsupported type: ${value?.javaClass}")
         }
 
@@ -474,6 +476,7 @@ internal class TableViewEventProcessor {
             is CellWidth<*, *> -> valueIndex(value.source)
             is CellClasses<*> -> valueIndex(value.source)
             is CellTopics<*> -> valueIndex(value.source)
+            is Resources -> valueIndex(value.source)
             else -> throw SigblaAppException("Unsupported type: ${value?.javaClass}")
         }
 

@@ -29,11 +29,11 @@ fun main() {
         this + ("static-file/sigbla.txt" to staticFile(tmpFile))
     }
 
+    show(tableView)
+
     tableView[Resources] {
         this + ("static-resource/magpie.jpg" to staticResource("/test-folder/magpie.jpg"))
     }
-
-    show(tableView)
 
     println("END")
 }

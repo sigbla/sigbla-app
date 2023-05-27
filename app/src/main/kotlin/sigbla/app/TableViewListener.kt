@@ -56,6 +56,7 @@ val Sequence<TableViewListenerEvent<*>>.newView: TableView
                 is CellWidth<*, *> -> getTableView(value.source)
                 is CellClasses<*> -> getTableView(value.source)
                 is CellTopics<*> -> getTableView(value.source)
+                is Resources -> getTableView(value.source)
                 else -> throw SigblaAppException("Unknown type: ${it.newValue?.javaClass}")
             }
         }
@@ -75,6 +76,7 @@ val Sequence<TableViewListenerEvent<*>>.oldView: TableView
                 is CellWidth<*, *> -> getTableView(value.source)
                 is CellClasses<*> -> getTableView(value.source)
                 is CellTopics<*> -> getTableView(value.source)
+                is Resources -> getTableView(value.source)
                 else -> throw SigblaAppException("Unknown type: ${it.newValue?.javaClass}")
             }
         }
