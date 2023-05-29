@@ -6,6 +6,8 @@ import java.math.BigInteger
 import java.math.MathContext
 import java.math.RoundingMode
 
+// TODO Consider if this should be defined with something like Table[BigDecimalPrecision] { .. } (on Table companion as it's global)
+//      Might not want that as this goes beyond just the tables tho..
 object DefaultBigDecimalPrecision {
     var mathContext: MathContext = MathContext.DECIMAL32
     var divRoundingMode: RoundingMode = RoundingMode.HALF_EVEN

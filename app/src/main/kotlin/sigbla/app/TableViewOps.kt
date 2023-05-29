@@ -7,6 +7,10 @@ import kotlin.reflect.KClass
 // TODO We still want a ColumnView and RowView so we can do tableView["A"/1] to get one,
 //      and also tableView["A"][1] to get CellView (with short cuts for tableView["A", 1] like on Table)
 //      Should also allow table["A"/1] = { .. } but this would be a CellViewBuilder..
+
+// TODO Might want to rename these to clear? On table, doing a remove deletes data + columns, etc,
+//      while clear keeps the columns and similar, but remove the data.. Because a tableView depends on table
+//      as to what columns/rows are active and their order, clear might make more sense semantically..?
 fun remove(column: ColumnView) {
     val tableViewRef = column.tableView.tableViewRef
     val columnHeader = column.columnHeader
