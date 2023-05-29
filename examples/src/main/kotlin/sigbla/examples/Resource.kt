@@ -10,6 +10,8 @@ fun main() {
     val table = Table["test"]
     val tableView = TableView[table]
 
+    table["A", 0] = ""
+
     fun getHandler(): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
         return {
             call.respondText(text = "Works!")
@@ -33,6 +35,14 @@ fun main() {
 
     tableView[Resources] {
         this + ("static-resource/magpie.jpg" to staticResource("/test-folder/magpie.jpg"))
+    }
+
+    tableView[Resources] {
+        this + ("js/test.js" to jsResource("/test-folder/test.js"))
+    }
+
+    tableView[Resources] {
+        this + ("css/test.css" to cssResource("/test-folder/test.css"))
     }
 
     println("END")

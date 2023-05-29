@@ -7,6 +7,7 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Test
 import sigbla.app.*
+import java.io.File
 
 class TableViewTest {
     @After
@@ -588,6 +589,61 @@ class TableViewTest {
 
         tv1[Resources] { resources2 }
         assertEquals(mapOf("foo/bar" to handler1), tv1[Resources].resources)
+    }
+
+    @Test
+    fun `tableview js and css resources`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        assertTrue(jsHandlers.isEmpty())
+        assertTrue(cssHandlers.isEmpty())
+
+        fun getHandler1(): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
+            return {
+                call.respondText(text = "Response 1")
+            }
+        }
+
+        tv1[Resources] {
+            this + ("other/resource" to getHandler1())
+        }
+
+        assertTrue(jsHandlers.isEmpty())
+        assertTrue(cssHandlers.isEmpty())
+
+        tv1[Resources] {
+            this + ("js/resource.js" to jsResource("/js/resource.js"))
+        }
+
+        assertEquals(1, jsHandlers.size)
+        assertTrue(cssHandlers.isEmpty())
+
+        tv1[Resources] {
+            this + ("css/resource.css" to cssResource("/css/resource.css"))
+        }
+
+        assertEquals(1, jsHandlers.size)
+        assertEquals(1, cssHandlers.size)
+
+        tv1[Resources] {
+            val tmpFile = File.createTempFile("tmpJsFile", ".js")
+            tmpFile.deleteOnExit()
+            this.javaClass.getResourceAsStream("/js/resource.js").buffered().transferTo(tmpFile.outputStream())
+            this + ("js/resource2.js" to jsFile(tmpFile))
+        }
+
+        assertEquals(2, jsHandlers.size)
+        assertEquals(1, cssHandlers.size)
+
+        tv1[Resources] {
+            val tmpFile = File.createTempFile("tmpCssFile", ".css")
+            tmpFile.deleteOnExit()
+            this.javaClass.getResourceAsStream("/css/resource.css").buffered().transferTo(tmpFile.outputStream())
+            this + ("css/resource2.css" to cssFile(tmpFile))
+        }
+
+        assertEquals(2, jsHandlers.size)
+        assertEquals(2, cssHandlers.size)
     }
 
     // TODO See TableTest for inspiration

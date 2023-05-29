@@ -99,6 +99,7 @@ internal data class TableViewRef(
     val columnViews: PMap<ColumnHeader, ViewMeta> = PHashMap(),
     val rowViews: PMap<Long, ViewMeta> = PHashMap(),
     val cellViews: PMap<Pair<ColumnHeader, Long>, ViewMeta> = PHashMap(),
+    // TODO See if this can be make to return entries in the order they were added
     val resources: PMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = PHashMap(),
     val table: Table? = null,
     val version: Long = Long.MIN_VALUE,
@@ -609,6 +610,8 @@ class TableView internal constructor(
         val names: SortedSet<String> get() = Registry.viewNames()
 
         fun delete(name: String) = Registry.deleteView(name)
+
+        // TODO Consider a operator get/set(resources: Resources, ..) on this level as well to allow for global resources
     }
 }
 
@@ -1862,7 +1865,7 @@ class Resources internal constructor(
     }
 
     operator fun plus(resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>): Resources = Resources(source, _resources.put(resource.first, resource.second))
-    operator fun plus(resources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>): Resources = Resources(source, resources.fold(_resources) {acc, resource -> acc.remove(resource.first)})
+    operator fun plus(resources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>): Resources = Resources(source, resources.fold(_resources) {acc, resource -> acc.put(resource.first, resource.second)})
     operator fun minus(resource: String): Resources = Resources(source, _resources.remove(resource))
     operator fun minus(resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>): Resources = this - resource.first
     operator fun minus(resources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>): Resources = Resources(source, resources.fold(_resources) {acc, resource -> acc.remove(resource.first)})
@@ -1911,3 +1914,5 @@ class Resources internal constructor(
 
     companion object
 }
+
+// TODO Consider an Index type which allows us to replace the index.html file served for a table

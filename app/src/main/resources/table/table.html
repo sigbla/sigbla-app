@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <style type="text/css">
+    <style>
         @font-face {
             font-family: 'Roboto';
             src: url('Roboto-Regular.ttf') format('truetype');
@@ -164,6 +164,7 @@
 <script src="table.js"></script>
 <script>
     const sigbla = new Sigbla(document.getElementById("body"))
+    window.sigbla = sigbla
 
     if (document.readyState !== "loading") {
         sigbla.init()

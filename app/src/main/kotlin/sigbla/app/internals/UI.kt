@@ -69,7 +69,7 @@ internal object SigblaBackend {
                                 ContentType.Text.Html,
                                 HttpStatusCode.OK
                             ) {
-                                this.javaClass.getResource("/table.html").readText()
+                                this.javaClass.getResource("/table/table.html").readText()
                             }
                         }
                     }
@@ -140,7 +140,6 @@ internal object SigblaBackend {
     }
 
     private fun areaContent(view: TableView, x: Long, y: Long, h: Long, w: Long, dims: Dimensions, dirtyCells: List<Cell<*>>? = null): List<PositionedContent> {
-        val view = clone(view)
         val table = view[Table]?.let { clone(it) } ?: return emptyList()
 
         val dirtyColumnHeaders = dirtyCells?.map { it.column.columnHeader }?.toSet()
@@ -331,7 +330,7 @@ internal object SigblaBackend {
 
     private suspend fun handleTiles(client: SigblaClient, scroll: ClientEventScroll) {
         client.mutex.withLock {
-            val view = Registry.getView(client.ref) ?: return
+            val view = clone(Registry.getView(client.ref) ?: return)
             val currentRegion = client.contentState.updateTiles(scroll)
 
             val dims = client.dims
@@ -347,6 +346,12 @@ internal object SigblaBackend {
             val h = currentRegion.maxY - currentRegion.cornerY
 
             val jsonParser = Klaxon()
+
+            val cssUrls = view[Resources]._resources.filter { cssHandlers.contains(it.component2()) }.map { it.component1() }.toList()
+            clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventLoadCSS(cssUrls)))
+
+            val jsUrls = view[Resources]._resources.filter { jsHandlers.contains(it.component2()) }.map { it.component1() }.toList()
+            clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventLoadJavaScript(jsUrls)))
 
             areaContent(view, x, y, h, w, dims).forEach { content ->
                 val existingId = client.contentState.withIdFor(
@@ -404,7 +409,7 @@ internal object SigblaBackend {
                 removeBatch.add(removeContent)
 
                 if (removeBatch.size > 25) {
-                    clientPackage.outgoing.add(Klaxon().toJsonString(removeBatch))
+                    clientPackage.outgoing.add(jsonParser.toJsonString(removeBatch))
                     removeBatch.clear()
                 }
 
@@ -424,7 +429,7 @@ internal object SigblaBackend {
 
     private suspend fun handleDirty(client: SigblaClient, dirtyCells: List<Cell<*>>) {
         client.mutex.withLock {
-            val view = Registry.getView(client.ref) ?: return
+            val view = clone(Registry.getView(client.ref) ?: return)
             val currentDims = client.contentState.existingDims
 
             val clientPackage = ClientPackage(client.nextEventId())
@@ -689,7 +694,9 @@ internal enum class ClientEventType(val type: Int) {
     UPDATE_END(5),
     PACKAGE_END(6),
     DIMS(7),
-    RESIZE(8)
+    RESIZE(8),
+    LOAD_CSS(9),
+    LOAD_JS(10)
 }
 
 @TypeFor(field = "type", adapter = ClientEventAdapter::class)
@@ -748,6 +755,14 @@ internal data class ClientEventResize(
     val sizeChangeX: Long,
     val sizeChangeY: Long
 ): ClientEvent(ClientEventType.RESIZE.type)
+
+internal data class ClientEventLoadCSS(
+    val urls: List<String>
+): ClientEvent(ClientEventType.LOAD_CSS.type)
+
+internal data class ClientEventLoadJavaScript(
+    val urls: List<String>
+): ClientEvent(ClientEventType.LOAD_JS.type)
 
 internal class ClientEventAdapter: TypeAdapter<ClientEvent> {
     override fun classFor(type: Any): KClass<out ClientEvent> = when(type as Int) {

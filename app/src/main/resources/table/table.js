@@ -174,6 +174,40 @@ class Sigbla {
         window.addEventListener("resize", this.scroll)
     }
 
+    dynamicallyLoadStyle = (url) => {
+        let pathname = location.pathname.endsWith("/") ? location.pathname : location.pathname + "/"
+        let fullURL = new URL(pathname + "resources/" + url, window.location.href).href
+
+        let existingUrls = document.head.querySelectorAll("link[href]")
+        for (let i = 0; i < existingUrls.length; i++) {
+            if (existingUrls[i].href === fullURL) {
+                return
+            }
+        }
+
+        let link = document.createElement("link")
+        link.rel = "stylesheet"
+        link.type = "text/css"
+        link.href = fullURL
+        document.head.appendChild(link)
+    }
+
+    dynamicallyLoadScript = (url) => {
+        let pathname = location.pathname.endsWith("/") ? location.pathname : location.pathname + "/"
+        let fullURL = new URL(pathname + "resources/" + url, window.location.href).href
+
+        let existingUrls = document.head.querySelectorAll("script[src]")
+        for (let i = 0; i < existingUrls.length; i++) {
+            if (existingUrls[i].src === fullURL) {
+                return
+            }
+        }
+
+        let script = document.createElement("script")
+        script.src = fullURL
+        document.head.appendChild(script)
+    }
+
     handleMessage = async (message) => {
         switch (message.type) {
             case 0: { // clear
@@ -194,6 +228,8 @@ class Sigbla {
             }
             case 1: {
                 // scroll..
+
+                break
             }
             case 2: { // add content
                 const div = document.createElement("div")
@@ -367,6 +403,23 @@ class Sigbla {
                 end.style.left = message.maxX + "px"
 
                 await this.scroll()
+
+                break
+            }
+            case 8: {
+                // Resize
+
+                break
+            }
+            case 9: {
+                // Load CSS
+                (message.urls || []).forEach(this.dynamicallyLoadStyle)
+
+                break
+            }
+            case 10: {
+                // Load JS
+                (message.urls || []).forEach(this.dynamicallyLoadScript)
 
                 break
             }
