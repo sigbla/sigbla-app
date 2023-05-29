@@ -60,16 +60,41 @@ internal object SigblaBackend {
                     route("/t/{ref}", HttpMethod.Get) {
                         handle {
                             val ref = call.parameters["ref"]
+
+                            if (ref == null || ref.isBlank()) {
+                                call.respondText(status = HttpStatusCode.NotFound, text = "Not found")
+                                return@handle
+                            }
+
+                            val view = Registry.getView(ref)
+                            if (view == null) {
+                                call.respondText(status = HttpStatusCode.NotFound, text = "Not found")
+                                return@handle
+                            }
+
                             call.respondRedirect("/t/$ref/", permanent = true)
                         }
                     }
                     route("/t/{ref}/", HttpMethod.Get) {
                         handle {
+                            val ref = call.parameters["ref"]
+
+                            if (ref == null || ref.isBlank()) {
+                                call.respondText(status = HttpStatusCode.NotFound, text = "Not found")
+                                return@handle
+                            }
+
+                            val view = Registry.getView(ref)
+                            if (view == null) {
+                                call.respondText(status = HttpStatusCode.NotFound, text = "Not found")
+                                return@handle
+                            }
+
                             call.respondText(
                                 ContentType.Text.Html,
                                 HttpStatusCode.OK
                             ) {
-                                this.javaClass.getResource("/table/table.html").readText()
+                                this.javaClass.getResource("/table/table.html").readText().replace("\${title}", ref)
                             }
                         }
                     }
@@ -80,6 +105,11 @@ internal object SigblaBackend {
                         if (ref == null || ref.isBlank()) {
                             close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No ref"))
                             return@webSocket
+                        }
+
+                        val view = Registry.getView(ref)
+                        if (view == null) {
+                            close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No ref"))
                         }
 
                         val client = addListener(this, ref)

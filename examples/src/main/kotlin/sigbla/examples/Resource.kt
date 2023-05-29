@@ -7,7 +7,7 @@ import io.ktor.util.pipeline.*
 import java.io.File
 
 fun main() {
-    val table = Table["test"]
+    val table = Table["Resource Example"]
     val tableView = TableView[table]
 
     table["A", 0] = ""
