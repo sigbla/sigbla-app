@@ -5,12 +5,19 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
 import java.io.File
+import java.time.LocalTime
+import kotlin.concurrent.thread
 
 fun main() {
-    val table = Table["Resource Example"]
+    val table = Table["Resource_Example"]
     val tableView = TableView[table]
 
-    table["A", 0] = ""
+    thread {
+        while (true) {
+            Thread.sleep(1000)
+            table["A", 0] = LocalTime.now().toString()
+        }
+    }
 
     fun getHandler(): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
         return {
@@ -44,6 +51,8 @@ fun main() {
     tableView[Resources] {
         this + ("css/test.css" to cssResource("/test-folder/test.css"))
     }
+
+    tableView["A", 0][CellTopics] = "resourceTopic1"
 
     println("END")
 }

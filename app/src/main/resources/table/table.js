@@ -17,8 +17,9 @@ class Sigbla {
     #pendingUpdate = false;
     #pendingScrolls = [];
     #pendingResize = [];
-    // TODO Change this from being events to being function calls, that way we can change the dom before mounting etc
-    #pendingEvents = [];
+
+    #pendingMessages = [];
+    #enablePendingMessages = false;
 
     #resizeTarget;
     #resizeStartX;
@@ -28,13 +29,15 @@ class Sigbla {
 
     #swapBuffer = false;
 
+    #clearListeners = new Map();
+    #topicListeners = new Map();
+    #listenerCount = 0;
+
     constructor(targetParent) {
         this.#targetParent = targetParent;
         this.#targetParent.innerHTML = "";
 
         this.#target = document.createElement("div");
-
-        // debug this.targetParent.addEventListener("test-event", (e) => console.log(e))
     }
 
     #rbMousedown = (e) => {
@@ -203,15 +206,30 @@ class Sigbla {
             }
         }
 
+        this.#enablePendingMessages = true;
         let script = document.createElement("script");
         script.src = fullURL;
+        script.onload = async () => {
+            this.#enablePendingMessages = false;
+            const pendingMessages = this.#pendingMessages;
+            this.#pendingMessages = []
+            pendingMessages.forEach(await this.#handleMessage)
+        }
         document.head.appendChild(script);
     };
 
     #handleMessage = async (message) => {
+        if (this.#enablePendingMessages) {
+            this.#pendingMessages.push(message);
+            return;
+        }
+
         switch (message.type) {
             case 0: { // clear
-                // TODO Probably should add some type of event for this as well..
+                this.#dispatchClear({
+                    action: "clear",
+                    target: this.#target
+                });
 
                 this.#target = document.createElement("div");
                 this.#corner = null;
@@ -226,9 +244,7 @@ class Sigbla {
 
                 break;
             }
-            case 1: {
-                // scroll..
-
+            case 1: { // scroll..
                 break;
             }
             case 2: { // add content
@@ -285,12 +301,11 @@ class Sigbla {
                 const old = document.getElementById(message.id);
 
                 if (old) {
-                    (message.topics || []).forEach(e => old.dispatchEvent(new CustomEvent(e, {
-                        bubbles: true,
-                        detail: {
-                            action: "hide"
-                        }
-                    })));
+                    (message.topics || []).forEach(topic => this.#dispatchTopic({
+                        topic: topic,
+                        action: "hide",
+                        target: old
+                    }));
                     old.remove();
 
                     if (message.content !== null) this.#target.appendChild(div);
@@ -302,7 +317,11 @@ class Sigbla {
                     this.#pendingContent.appendChild(div);
                 }
 
-                (message.topics || []).forEach((e) => this.#pendingEvents.push([div, e]));
+                (message.topics || []).forEach(topic => this.#dispatchTopic({
+                    topic: topic,
+                    action: "show",
+                    target: div
+                }));
 
                 break;
             }
@@ -310,19 +329,20 @@ class Sigbla {
                 if (this.#pendingContent === null) break;
                 this.#target.appendChild(this.#pendingContent);
                 this.#pendingContent = null;
+
                 break;
             }
             case 4: { // remove content
                 const item = document.getElementById(message.id);
                 if (item) {
-                    (message.topics || []).forEach(e => item.dispatchEvent(new CustomEvent(e, {
-                        bubbles: true,
-                        detail: {
-                            action: "hide"
-                        }
-                    })));
+                    (message.topics || []).forEach(topic => this.#dispatchTopic({
+                        topic: topic,
+                        action: "hide",
+                        target: item
+                    }));
                     item.remove();
                 }
+
                 break;
             }
             case 5: { // update end
@@ -336,15 +356,6 @@ class Sigbla {
 
                     this.#overlay.style.display = "none";
                 }
-
-                this.#pendingEvents.forEach((divEvent) => divEvent[0].dispatchEvent(new CustomEvent(divEvent[1], {
-                    bubbles: true,
-                    detail: {
-                        action: "show"
-                    }
-                })));
-
-                this.#pendingEvents = [];
 
                 break;
             }
@@ -406,19 +417,15 @@ class Sigbla {
 
                 break;
             }
-            case 8: {
-                // Resize
-
+            case 8: { // resize
                 break;
             }
-            case 9: {
-                // Load CSS
+            case 9: { // load css
                 (message.urls || []).forEach(this.#dynamicallyLoadStyle);
 
                 break;
             }
-            case 10: {
-                // Load JS
+            case 10: { // load js
                 (message.urls || []).forEach(this.#dynamicallyLoadScript);
 
                 break;
@@ -453,4 +460,52 @@ class Sigbla {
 
         return true;
     };
+
+    onTopic = (topic, listener) => {
+        let listenerMap;
+        if (this.#topicListeners.has(topic)) {
+            listenerMap = this.#topicListeners.get(topic);
+        } else {
+            listenerMap = new Map()
+            this.#topicListeners.set(topic, listenerMap);
+        }
+
+        const listenerIndex = this.#listenerCount++;
+        listenerMap.set(listenerIndex, listener);
+
+        return new ListenerRef(() => {
+            return listenerMap.delete(listenerIndex);
+        })
+    }
+
+    #dispatchTopic = (data) => {
+        const itr = (this.#topicListeners.get(data.topic) || new Map()).values();
+        for (const listener of itr) {
+            listener(data);
+        }
+    }
+
+    onClear = (listener) => {
+        const listenerIndex = this.#listenerCount++;
+        this.#clearListeners.set(listenerIndex, listener);
+
+        return new ListenerRef(() => {
+            return this.#clearListeners.delete(listenerIndex);
+        })
+    }
+
+    #dispatchClear = (data) => {
+        const itr = this.#clearListeners.values();
+        for (const listener of itr) {
+            listener(data);
+        }
+    }
+}
+
+class ListenerRef {
+    unsubscribe = () => { return false };
+
+    constructor(unsubscribe) {
+        this.unsubscribe = unsubscribe;
+    }
 }
