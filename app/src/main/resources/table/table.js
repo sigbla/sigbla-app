@@ -228,7 +228,8 @@ class Sigbla {
             case 0: { // clear
                 this.#dispatchClear({
                     action: "clear",
-                    target: this.#target
+                    target: this.#target,
+                    message: message
                 });
 
                 this.#target = document.createElement("div");
@@ -304,7 +305,8 @@ class Sigbla {
                     (message.topics || []).forEach(topic => this.#dispatchTopic({
                         topic: topic,
                         action: "hide",
-                        target: old
+                        target: old,
+                        message: message
                     }));
                     old.remove();
 
@@ -320,7 +322,8 @@ class Sigbla {
                 (message.topics || []).forEach(topic => this.#dispatchTopic({
                     topic: topic,
                     action: "show",
-                    target: div
+                    target: div,
+                    message: message
                 }));
 
                 break;
@@ -338,7 +341,8 @@ class Sigbla {
                     (message.topics || []).forEach(topic => this.#dispatchTopic({
                         topic: topic,
                         action: "hide",
-                        target: item
+                        target: item,
+                        message: message
                     }));
                     item.remove();
                 }
