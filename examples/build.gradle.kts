@@ -18,4 +18,6 @@ repositories {
 
 dependencies {
     implementation(project(":app"))
+    implementation(project(":widgets"))
+    implementation("org.slf4j:slf4j-simple:2.0.7")
 }
