@@ -2009,6 +2009,10 @@ fun clone(table: Table, withName: String?): Table = table.makeClone(withName, tr
 // TODO Introduce a lister for table ops, maybe like an enum TableOps.MOVE|COPY|CLEAR|SET etc..?
 //      This will trigger in addition to the cell events, so that someone can subscribe to the operations
 
+// TODO For some ops, it would be good to have a simplified experience, like
+//      on(...) run { ... } which allows for something like on(...) run { source["A", 1] = source["A", 2] + source["A", 3] }
+//      rather than the full blown on(..) { events { ... } }
+
 inline fun <reified O, reified N> on(table: Table, noinline init: TableEventReceiver<Table, O, N>.() -> Unit): TableListenerReference {
     return on(table, O::class, N::class, init as TableEventReceiver<Table, Any, Any>.() -> Unit)
 }
