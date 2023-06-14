@@ -134,6 +134,7 @@ internal object SigblaBackend {
                             removeListener(this)
                         }
                     }
+                    // TODO Consider allowing this to be /t/{ref}/{resource...}, dropping the middle /resources/
                     route("/t/{ref}/resources/{resource...}") {
                         handle {
                             val ref = call.parameters["ref"]
