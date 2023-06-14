@@ -4,17 +4,10 @@ import sigbla.app.internals.SigblaBackend
 import sigbla.app.internals.refAction
 import kotlin.reflect.KClass
 
-// TODO We still want a ColumnView and RowView so we can do tableView["A"/1] to get one,
-//      and also tableView["A"][1] to get CellView (with short cuts for tableView["A", 1] like on Table)
-//      Should also allow table["A"/1] = { .. } but this would be a CellViewBuilder..
-
-// TODO Might want to rename these to clear? On table, doing a remove deletes data + columns, etc,
-//      while clear keeps the columns and similar, but remove the data.. Because a tableView depends on table
-//      as to what columns/rows are active and their order, clear might make more sense semantically..?
-fun remove(column: ColumnView) {
-    val tableViewRef = column.tableView.tableViewRef
-    val columnHeader = column.columnHeader
-    val eventProcessor = column.tableView.eventProcessor
+fun clear(columnView: ColumnView) {
+    val tableViewRef = columnView.tableView.tableViewRef
+    val columnHeader = columnView.columnHeader
+    val eventProcessor = columnView.tableView.eventProcessor
 
     val (oldRef, newRef) = tableViewRef.refAction {
         it.copy(
@@ -25,42 +18,42 @@ fun remove(column: ColumnView) {
 
     if (!eventProcessor.haveListeners()) return
 
-    val oldView = column.tableView.makeClone(ref = oldRef)
-    val newView = column.tableView.makeClone(ref = newRef)
+    val oldView = columnView.tableView.makeClone(ref = oldRef)
+    val newView = columnView.tableView.makeClone(ref = newRef)
 
-    val old = oldView[column]
-    val new = newView[column]
+    val old = oldView[columnView]
+    val new = newView[columnView]
 
     eventProcessor.publish(listOf(TableViewListenerEvent<ColumnView>(old, new)) as List<TableViewListenerEvent<Any>>)
 }
 
-fun remove(row: RowView) {
-    val tableViewRef = row.tableView.tableViewRef
-    val eventProcessor = row.tableView.eventProcessor
+fun clear(rowView: RowView) {
+    val tableViewRef = rowView.tableView.tableViewRef
+    val eventProcessor = rowView.tableView.eventProcessor
 
     val (oldRef, newRef) = tableViewRef.refAction {
         it.copy(
-            rowViews = it.rowViews.remove(row.index),
+            rowViews = it.rowViews.remove(rowView.index),
             version = it.version + 1L
         )
     }
 
     if (!eventProcessor.haveListeners()) return
 
-    val oldView = row.tableView.makeClone(ref = oldRef)
-    val newView = row.tableView.makeClone(ref = newRef)
+    val oldView = rowView.tableView.makeClone(ref = oldRef)
+    val newView = rowView.tableView.makeClone(ref = newRef)
 
-    val old = oldView[row]
-    val new = newView[row]
+    val old = oldView[rowView]
+    val new = newView[rowView]
 
     eventProcessor.publish(listOf(TableViewListenerEvent<RowView>(old, new)) as List<TableViewListenerEvent<Any>>)
 }
 
-fun remove(cell: CellView) {
-    val tableViewRef = cell.tableView.tableViewRef
-    val columnHeader = cell.columnView.columnHeader
-    val index = cell.index
-    val eventProcessor = cell.tableView.eventProcessor
+fun clear(cellView: CellView) {
+    val tableViewRef = cellView.tableView.tableViewRef
+    val columnHeader = cellView.columnView.columnHeader
+    val index = cellView.index
+    val eventProcessor = cellView.tableView.eventProcessor
 
     val (oldRef, newRef) = tableViewRef.refAction {
         it.copy(
@@ -71,11 +64,11 @@ fun remove(cell: CellView) {
 
     if (!eventProcessor.haveListeners()) return
 
-    val oldView = cell.tableView.makeClone(ref = oldRef)
-    val newView = cell.tableView.makeClone(ref = newRef)
+    val oldView = cellView.tableView.makeClone(ref = oldRef)
+    val newView = cellView.tableView.makeClone(ref = newRef)
 
-    val old = oldView[cell]
-    val new = newView[cell]
+    val old = oldView[cellView]
+    val new = newView[cellView]
 
     eventProcessor.publish(listOf(TableViewListenerEvent<CellView>(old, new)) as List<TableViewListenerEvent<Any>>)
 }
