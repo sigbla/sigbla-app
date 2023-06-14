@@ -238,12 +238,11 @@ class TableViewTest {
         val tv2 = TableView["t2"]
         val tv3 = TableView["t3"]
 
-        assertEquals(t1, tv1[Table])
+        assertEquals(t1.name, tv1[Table].name)
 
-        assertNull(tv2[Table])
-
+        assertNotEquals(t1.name, tv2[Table].name)
         tv2[Table] = t1
-        assertEquals(t1, tv2[Table])
+        assertEquals(t1.name, tv2[Table].name)
 
         assertEquals(UnitCellHeight::class, tv2[CellHeight]::class)
         assertEquals(UnitCellWidth::class, tv2[CellWidth]::class)
@@ -300,11 +299,11 @@ class TableViewTest {
         assertEquals(emptySet<String>(), tv2["B", 2][CellTopics].toSet())
 
         tv2[Table] = null
-        assertNull(tv2[Table])
+        assertTrue(tv2[Table].toList().isEmpty())
 
         tv2[TableView] = tv1
 
-        assertNull(tv2[Table])
+        assertTrue(tv2[Table].toList().isEmpty())
 
         assertEquals(100L, tv2[CellHeight].height)
         assertEquals(200L, tv2[CellWidth].width)
@@ -344,7 +343,7 @@ class TableViewTest {
         assertEquals(emptySet<String>(), tv2["B", 2][CellClasses].toSet())
         assertEquals(emptySet<String>(), tv2["B", 2][CellTopics].toSet())
 
-        assertNull(tv2[Table])
+        assertTrue(tv2[Table].toList().isEmpty())
     }
 
     @Test
