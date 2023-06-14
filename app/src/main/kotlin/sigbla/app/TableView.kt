@@ -101,6 +101,7 @@ internal data class TableViewRef(
     val cellViews: PMap<Pair<ColumnHeader, Long>, ViewMeta> = PHashMap(),
     // TODO See if this can be make to return entries in the order they were added
     val resources: PMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = PHashMap(),
+    val cellTransformers: PMap<Pair<ColumnHeader, Long>, Cell<*>.() -> Any?> = PHashMap(),
     val table: Table? = null,
     val version: Long = Long.MIN_VALUE,
 )
@@ -169,8 +170,17 @@ class TableView internal constructor(
 
     // TODO Consider if get(table: Table) and set(..: Table, ..) should be included for symmetry?
 
-    operator fun get(table: Table.Companion): Table? {
-        return tableViewRef.get().table
+    operator fun get(table: Table.Companion): Table {
+        val ref = tableViewRef.get()
+        val table = ref.table?.let { clone(it) } ?: BaseTable(name = null, onRegistry = false)
+
+        ref.cellTransformers.forEach {
+            val key = it.component1()
+            val init = it.component2()
+            table[key.first][key.second] = init
+        }
+
+        return table
     }
 
     operator fun set(table: Table.Companion, newTable: Table?) {
@@ -800,6 +810,55 @@ class CellView(
         columnView.tableView.eventProcessor.publish(listOf(TableViewListenerEvent<CellTopics<CellView>>(old, new)) as List<TableViewListenerEvent<Any>>)
     }
 
+    operator fun get(cell: CellTransformer.Companion): CellTransformer<*> {
+        val ref = tableView.tableViewRef.get()
+        val function = ref.cellTransformers[Pair(columnView.columnHeader, index)] ?: return UnitCellTransformer(this)
+        return FunctionCellTransformer(this, function)
+    }
+
+    operator fun set(cell: CellTransformer.Companion, cellTransformer: CellTransformer<*>?) {
+        setCellTransformer(if (cellTransformer == null) null else cellTransformer.function as (Cell<*>.() -> Any?)?)
+    }
+
+    operator fun set(cell: CellTransformer.Companion, cellTransformer: (Cell<*>.() -> Any?)?) {
+        setCellTransformer(cellTransformer)
+    }
+
+    private fun setCellTransformer(init: (Cell<*>.() -> Any?)?) {
+        val (oldRef, newRef) = columnView.tableView.tableViewRef.refAction {
+            val key = Pair(columnView.columnHeader, index)
+
+            it.copy(
+                cellTransformers = if (init == null) it.cellTransformers.remove(key) else it.cellTransformers.put(key, init),
+                version = it.version + 1L
+            )
+        }
+
+        if (!columnView.tableView.eventProcessor.haveListeners()) return
+
+        val oldView = columnView.tableView.makeClone(ref = oldRef)
+        val newView = columnView.tableView.makeClone(ref = newRef)
+
+        val old = oldView[columnView.columnHeader][index][CellTransformer]
+        val new = newView[columnView.columnHeader][index][CellTransformer]
+
+        columnView.tableView.eventProcessor.publish(listOf(TableViewListenerEvent<CellTransformer<*>>(old, new)) as List<TableViewListenerEvent<Any>>)
+    }
+
+    operator fun <T> invoke(function: CellView.() -> T): T {
+        return when (val value = function()) {
+            is CellHeight<*, *> -> { tableView[this][CellHeight] = value; value }
+            is CellWidth<*, *> -> { tableView[this][CellWidth] = value; value }
+            is CellClasses<*> -> { tableView[this][CellClasses] = value; value }
+            is CellTopics<*> -> { tableView[this][CellTopics] = value; value }
+            is Unit -> { /* no assignment */ Unit as T }
+            is Function1<*, *> -> { invoke(value as CellView.() -> T?) as T }
+            // TODO CellTransformer?
+            // TODO null?
+            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
+        }
+    }
+
     val tableView: TableView
         get() = columnView.tableView
 
@@ -822,7 +881,11 @@ class CellView(
         return listOf(derivedCellView).iterator()
     }
 
-    // TODO toString, hashCode, equals
+    override fun toString(): String {
+        return "$columnView:$index"
+    }
+
+    // TODO hashCode, equals
 }
 
 internal fun createDerivedCellViewFromRef(ref: TableViewRef, columnView: ColumnView, index: Long): DerivedCellView {
@@ -1855,6 +1918,24 @@ class CellTopics<S> internal constructor(
 
     companion object
 }
+
+sealed class CellTransformer<T> {
+    abstract val source: CellView
+    abstract val function: T
+
+    companion object
+}
+
+class UnitCellTransformer internal constructor(
+    override val source: CellView
+): CellTransformer<Unit>() {
+    override val function = Unit
+}
+
+class FunctionCellTransformer internal constructor(
+    override val source: CellView,
+    override val function: Cell<*>.() -> Any?
+): CellTransformer<Cell<*>.() -> Any?>()
 
 class Resources internal constructor(
     val source: TableView,
