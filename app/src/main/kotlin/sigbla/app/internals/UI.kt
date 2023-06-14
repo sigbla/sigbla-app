@@ -552,24 +552,13 @@ internal object SigblaBackend {
             order = Long.MAX_VALUE
             name = "UI"
 
-            fun getCell(newValue: Any?): Any? {
-                return when (newValue) {
-                    is CellView -> newValue.cell
-                    is CellHeight<*, *> -> getCell(newValue.source)
-                    is CellWidth<*, *> -> getCell(newValue.source)
-                    is CellClasses<*> -> getCell(newValue.source)
-                    is CellTopics<*> -> getCell(newValue.source)
-                    else -> false
-                }
-            }
-
             events {
                 if (any()) {
                     // TODO: Might be able to just do as below for table events and not clear if we just extract cells?
                     var clear = false
                     val dirtyCells = mutableListOf<Cell<*>>()
                     for (event in this) {
-                        when (val value = getCell(event.newValue)) {
+                        when (val value = cellOrFalseFromViewRelated(event.newValue)) {
                             false -> {
                                 clear = true
                                 break

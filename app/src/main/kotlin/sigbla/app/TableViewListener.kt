@@ -45,40 +45,10 @@ class TableViewEventReceiver<S, T>(
 // TODO Can these be lazy? I.e., reuse same value?
 val Sequence<TableViewListenerEvent<*>>.newView: TableView
     get() = this.firstOrNull()?.let {
-        fun getTableView(value: Any?): TableView {
-            return when (value) {
-                is TableView -> value
-                is ColumnView -> value.tableView
-                is RowView -> value.tableView
-                is CellView -> value.tableView
-                is DerivedCellView -> value.tableView
-                is CellHeight<*, *> -> getTableView(value.source)
-                is CellWidth<*, *> -> getTableView(value.source)
-                is CellClasses<*> -> getTableView(value.source)
-                is CellTopics<*> -> getTableView(value.source)
-                is Resources -> getTableView(value.source)
-                else -> throw SigblaAppException("Unknown type: ${it.newValue?.javaClass}")
-            }
-        }
-        getTableView(it.newValue)
+        tableViewFromViewRelated(it.newValue)
     } ?: throw InvalidSequenceException()
 
 val Sequence<TableViewListenerEvent<*>>.oldView: TableView
     get() = this.firstOrNull()?.let {
-        fun getTableView(value: Any?): TableView {
-            return when (value) {
-                is TableView -> value
-                is ColumnView -> value.tableView
-                is RowView -> value.tableView
-                is CellView -> value.tableView
-                is DerivedCellView -> value.tableView
-                is CellHeight<*, *> -> getTableView(value.source)
-                is CellWidth<*, *> -> getTableView(value.source)
-                is CellClasses<*> -> getTableView(value.source)
-                is CellTopics<*> -> getTableView(value.source)
-                is Resources -> getTableView(value.source)
-                else -> throw SigblaAppException("Unknown type: ${it.newValue?.javaClass}")
-            }
-        }
-        getTableView(it.oldValue)
+        tableViewFromViewRelated(it.oldValue)
     } ?: throw InvalidSequenceException()

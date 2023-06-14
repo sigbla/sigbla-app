@@ -3,7 +3,6 @@ package sigbla.app.internals
 import sigbla.app.*
 import sigbla.app.exceptions.InvalidListenerException
 import sigbla.app.exceptions.ListenerLoopException
-import sigbla.app.exceptions.SigblaAppException
 import java.util.*
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.ConcurrentSkipListMap
@@ -438,48 +437,6 @@ internal class TableViewEventProcessor {
 
         eventBuffer.set(views.toMutableList())
 
-        fun newValueVersion(newValue: Any?): Long = when (newValue) {
-            is TableView -> newValue.tableViewRef.get().version
-            is ColumnView -> newValue.tableView.tableViewRef.get().version
-            is RowView -> newValue.tableView.tableViewRef.get().version
-            is CellView -> newValue.tableView.tableViewRef.get().version
-            is DerivedCellView -> newValue.tableView.tableViewRef.get().version
-            is CellHeight<*, *> -> newValueVersion(newValue.source)
-            is CellWidth<*, *> -> newValueVersion(newValue.source)
-            is CellClasses<*> -> newValueVersion(newValue.source)
-            is CellTopics<*> -> newValueVersion(newValue.source)
-            is Resources -> newValueVersion(newValue.source)
-            else -> throw SigblaAppException("Unsupported type: ${newValue?.javaClass}")
-        }
-
-        fun valueColumn(value: Any?): ColumnView? = when (value) {
-            // TODO is TableView -> null
-            is ColumnView -> value
-            is RowView -> null
-            is CellView -> value.columnView
-            is DerivedCellView -> value.columnView
-            is CellHeight<*, *> -> valueColumn(value.source)
-            is CellWidth<*, *> -> valueColumn(value.source)
-            is CellClasses<*> -> valueColumn(value.source)
-            is CellTopics<*> -> valueColumn(value.source)
-            is Resources -> valueColumn(value.source)
-            else -> throw SigblaAppException("Unsupported type: ${value?.javaClass}")
-        }
-
-        fun valueIndex(value: Any?): Long? = when (value) {
-            // TODO is TableView -> null
-            is ColumnView -> null
-            is RowView -> value.index
-            is CellView -> value.index
-            is DerivedCellView -> value.index
-            is CellHeight<*, *> -> valueIndex(value.source)
-            is CellWidth<*, *> -> valueIndex(value.source)
-            is CellClasses<*> -> valueIndex(value.source)
-            is CellTopics<*> -> valueIndex(value.source)
-            is Resources -> valueIndex(value.source)
-            else -> throw SigblaAppException("Unsupported type: ${value?.javaClass}")
-        }
-
         try {
             while (true) {
                 val batch = Collections.unmodifiableList(eventBuffer.get() ?: break)
@@ -492,7 +449,7 @@ internal class TableViewEventProcessor {
                     .forEach { listenerRef ->
                         synchronized(listenerRef) {
                             loopCheck(listenerRef.listenerReference)
-                            listenerRef.listenerEvent(batch.asSequence().filter { newValueVersion(it.newValue) > listenerRef.version })
+                            listenerRef.listenerEvent(batch.asSequence().filter { refVersionFromViewRelated(it.newValue) > listenerRef.version })
                             // TODO Do we really need to clear this here and below?
                             if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                         }
@@ -502,14 +459,14 @@ internal class TableViewEventProcessor {
                     .values
                     .forEach { listenerRef ->
                         val columnBatch = Collections.unmodifiableList(batch.filter {
-                            val newValueColumn = valueColumn(it.newValue)
-                            val oldValueColumn = valueColumn(it.oldValue)
+                            val newValueColumn = columnViewFromViewRelated(it.newValue)
+                            val oldValueColumn = columnViewFromViewRelated(it.oldValue)
                             return@filter newValueColumn == null || oldValueColumn == null
                                     || newValueColumn == listenerRef.listenerReference.columnView
                                     || newValueColumn.columnHeader == listenerRef.listenerReference.columnView.columnHeader // TODO Might not need this?
                                     || oldValueColumn == listenerRef.listenerReference.columnView
                                     || oldValueColumn.columnHeader == listenerRef.listenerReference.columnView.columnHeader // TODO Might not need this?
-                        }.filter { newValueVersion(it.newValue) > listenerRef.version })
+                        }.filter { refVersionFromViewRelated(it.newValue) > listenerRef.version })
 
                         if (columnBatch.isNotEmpty()) {
                             synchronized(listenerRef) {
@@ -525,12 +482,12 @@ internal class TableViewEventProcessor {
                     .forEach { listenerRef ->
                         val rowBatch = Collections.unmodifiableList(batch.filter {
                             // TODO This filtering will need to take into account the index relation if supported?
-                            val newValueIndex = valueIndex(it.newValue)
-                            val oldValueIndex = valueIndex(it.oldValue)
+                            val newValueIndex = indexFromViewRelated(it.newValue)
+                            val oldValueIndex = indexFromViewRelated(it.oldValue)
                             return@filter newValueIndex == null || oldValueIndex == null
                                     || newValueIndex == listenerRef.listenerReference.rowView.index
                                     || oldValueIndex == listenerRef.listenerReference.rowView.index
-                        }.filter { newValueVersion(it.newValue) > listenerRef.version })
+                        }.filter { refVersionFromViewRelated(it.newValue) > listenerRef.version })
 
                         if (rowBatch.isNotEmpty()) {
                             synchronized(listenerRef) {
@@ -547,10 +504,10 @@ internal class TableViewEventProcessor {
                     .values
                     .forEach { listenerRef ->
                         val cellBatch = Collections.unmodifiableList(batch.filter {
-                            val newValueColumn = valueColumn(it.newValue)
-                            val oldValueColumn = valueColumn(it.oldValue)
-                            val newValueIndex = valueIndex(it.newValue)
-                            val oldValueIndex = valueIndex(it.oldValue)
+                            val newValueColumn = columnViewFromViewRelated(it.newValue)
+                            val oldValueColumn = columnViewFromViewRelated(it.oldValue)
+                            val newValueIndex = indexFromViewRelated(it.newValue)
+                            val oldValueIndex = indexFromViewRelated(it.oldValue)
                             return@filter (newValueColumn == null || newValueIndex == null || oldValueColumn == null || oldValueIndex == null)
                                     || (listenerRef.listenerReference.cellView.index == newValueIndex
                                         && (listenerRef.listenerReference.cellView.columnView == newValueColumn
@@ -558,7 +515,7 @@ internal class TableViewEventProcessor {
                                     || (listenerRef.listenerReference.cellView.index == oldValueIndex
                                         && (listenerRef.listenerReference.cellView.columnView == oldValueColumn
                                         || listenerRef.listenerReference.cellView.columnView.columnHeader == oldValueColumn.columnHeader)) // TODO Is the columnHeader check really needed?
-                        }.filter { newValueVersion(it.newValue) > listenerRef.version })
+                        }.filter { refVersionFromViewRelated(it.newValue) > listenerRef.version })
 
                         if (cellBatch.isNotEmpty()) {
                             synchronized(listenerRef) {
@@ -573,10 +530,10 @@ internal class TableViewEventProcessor {
                     .values
                     .forEach { listenerRef ->
                         val cellBatch = Collections.unmodifiableList(batch.filter {
-                            val newValueColumn = valueColumn(it.newValue)
-                            val oldValueColumn = valueColumn(it.oldValue)
-                            val newValueIndex = valueIndex(it.newValue)
-                            val oldValueIndex = valueIndex(it.oldValue)
+                            val newValueColumn = columnViewFromViewRelated(it.newValue)
+                            val oldValueColumn = columnViewFromViewRelated(it.oldValue)
+                            val newValueIndex = indexFromViewRelated(it.newValue)
+                            val oldValueIndex = indexFromViewRelated(it.oldValue)
                             return@filter (newValueColumn == null || newValueIndex == null || oldValueColumn == null || oldValueIndex == null)
                                     || (listenerRef.listenerReference.derivedCellView.index == newValueIndex
                                     && (listenerRef.listenerReference.derivedCellView.columnView == newValueColumn
@@ -584,7 +541,7 @@ internal class TableViewEventProcessor {
                                     || (listenerRef.listenerReference.derivedCellView.index == oldValueIndex
                                     && (listenerRef.listenerReference.derivedCellView.columnView == oldValueColumn
                                     || listenerRef.listenerReference.derivedCellView.columnView.columnHeader == oldValueColumn.columnHeader)) // TODO Is the columnHeader check really needed?
-                        }.filter { newValueVersion(it.newValue) > listenerRef.version })
+                        }.filter { refVersionFromViewRelated(it.newValue) > listenerRef.version })
 
                         if (cellBatch.isNotEmpty()) {
                             synchronized(listenerRef) {
