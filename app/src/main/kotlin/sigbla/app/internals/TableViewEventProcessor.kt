@@ -61,7 +61,7 @@ internal class TableViewEventProcessor {
     }
 
     private class ListenerColumnViewRef(
-        private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerTableViewRef>>,
+        private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerColumnViewRef>>,
         val columnView: ColumnView
     ) : ListenerUnsubscribeRef() {
         var lazyName: String? = null
@@ -79,7 +79,7 @@ internal class TableViewEventProcessor {
     }
 
     private class ListenerRowViewRef(
-        private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerTableViewRef>>,
+        private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerRowViewRef>>,
         val rowView: RowView
     ) : ListenerUnsubscribeRef() {
         var lazyName: String? = null
@@ -99,7 +99,7 @@ internal class TableViewEventProcessor {
     // TODO CellRange
 
     private class ListenerCellViewRef(
-        private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerTableViewRef>>,
+        private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerCellViewRef>>,
         val cellView: CellView
     ) : ListenerUnsubscribeRef() {
         var lazyName: String? = null
@@ -117,7 +117,7 @@ internal class TableViewEventProcessor {
     }
 
     private class ListenerDerivedCellViewRef(
-        private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerTableViewRef>>,
+        private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerDerivedCellViewRef>>,
         val derivedCellView: DerivedCellView
     ) : ListenerUnsubscribeRef() {
         var lazyName: String? = null
@@ -195,7 +195,7 @@ internal class TableViewEventProcessor {
         init: TableViewEventReceiver<ColumnView, Any>.() -> Unit
     ): TableViewListenerReference {
         val listenerRef = ListenerColumnViewRef(
-            tableViewListeners,
+            columnViewListeners,
             columnView
         )
 
@@ -250,7 +250,7 @@ internal class TableViewEventProcessor {
         init: TableViewEventReceiver<RowView, Any>.() -> Unit
     ): TableViewListenerReference {
         val listenerRef = ListenerRowViewRef(
-            tableViewListeners,
+            rowViewListeners,
             rowView
         )
 
@@ -307,7 +307,7 @@ internal class TableViewEventProcessor {
         init: TableViewEventReceiver<CellView, Any>.() -> Unit
     ): TableViewListenerReference {
         val listenerRef = ListenerCellViewRef(
-            tableViewListeners,
+            cellViewListeners,
             cellView
         )
 
@@ -362,7 +362,7 @@ internal class TableViewEventProcessor {
         init: TableViewEventReceiver<DerivedCellView, Any>.() -> Unit
     ): TableViewListenerReference {
         val listenerRef = ListenerDerivedCellViewRef(
-            tableViewListeners,
+            derivedCellViewListeners,
             derivedCellView
         )
 
