@@ -171,7 +171,7 @@ internal object SigblaBackend {
     }
 
     private fun areaContent(view: TableView, x: Long, y: Long, h: Long, w: Long, dims: Dimensions, dirtyCells: List<Cell<*>>? = null): List<PositionedContent> {
-        val table = view[Table]?.let { clone(it) } ?: return emptyList()
+        val table = view[Table]
 
         val dirtyColumnHeaders = dirtyCells?.map { it.column.columnHeader }?.toSet()
         val dirtyRowIndices = dirtyCells?.map { it.index }?.toSet()
@@ -593,7 +593,7 @@ internal object SigblaBackend {
 
         // TODO As with the view, the underlying table might also change, so we need to remove
         //      and add a new listener when this happens..
-        view[Table]?.apply {
+        view.tableViewRef.get().table?.apply {
             on(this) {
                 skipHistory = true
                 order = Long.MAX_VALUE

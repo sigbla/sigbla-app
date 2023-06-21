@@ -14,7 +14,7 @@ fun valueOf(cell: Cell<*>, typeFilter: KClass<*>): Any? = if (typeFilter.isInsta
 inline fun <reified T> valueOf(noinline source: Cell<*>.() -> Unit): T? = valueOf(source, T::class) as T?
 
 fun valueOf(source: Cell<*>.() -> Unit, typeFilter: KClass<*>): Any? {
-    val table = BaseTable("", false, AtomicReference(TableRef())) as Table
+    val table = BaseTable("", null, false, AtomicReference(TableRef())) as Table
     table["valueOf", 0L].source()
     val value = valueOf(table["valueOf", 0L], typeFilter)
     Registry.deleteTable(table) // Clean up
@@ -67,6 +67,7 @@ fun print(table: Table) {
 }
 
 fun print(table: Table, writer: Writer) {
+    // TODO Use snapshot rather than clone?
     val table = clone(table)
 
     val headers = table.headers

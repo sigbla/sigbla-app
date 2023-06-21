@@ -239,10 +239,16 @@ class TableViewTest {
         val tv3 = TableView["t3"]
 
         assertEquals(t1.name, tv1[Table].name)
+        assertNotEquals(t1, tv1[Table])
+        assertEquals(t1, tv1[Table].source)
+        assertTrue(t1 === tv1[Table].source)
 
         assertNotEquals(t1.name, tv2[Table].name)
         tv2[Table] = t1
         assertEquals(t1.name, tv2[Table].name)
+        assertNotEquals(t1, tv2[Table])
+        assertEquals(t1, tv2[Table].source)
+        assertTrue(t1 === tv2[Table].source)
 
         assertEquals(UnitCellHeight::class, tv2[CellHeight]::class)
         assertEquals(UnitCellWidth::class, tv2[CellWidth]::class)

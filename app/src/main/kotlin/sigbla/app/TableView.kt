@@ -172,8 +172,9 @@ class TableView internal constructor(
 
     operator fun get(table: Table.Companion): Table {
         val ref = tableViewRef.get()
-        val table = ref.table?.let { clone(it) } ?: BaseTable(name = null, onRegistry = false)
+        val table = ref.table?.let { it.makeClone() } ?: BaseTable(name = null, source = null, onRegistry = false)
 
+        // TODO Look into making this lazy?
         ref.cellTransformers.forEach {
             val key = it.component1()
             val init = it.component2()

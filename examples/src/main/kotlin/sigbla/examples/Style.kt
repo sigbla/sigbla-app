@@ -41,7 +41,6 @@ fun main() {
     tableView[1][CellHeight]
     tableView["A", 1][CellHeight]
     tableView["A", 1][CellWidth]
-    table["A"].table.table.table
     tableView["A"].tableView
     table["A", 1] = 1
     table["A", 1] = {

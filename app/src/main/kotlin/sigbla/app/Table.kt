@@ -15,14 +15,10 @@ import com.github.andrewoma.dexx.collection.SortedMap as PSortedMap
 import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
 
 // TODO Should this be sealed rather than abstract? Or just a normal class with no BaseTable?
-abstract class Table(val name: String?) : Iterable<Cell<*>> {
+abstract class Table(val name: String?, internal val source: Table?) : Iterable<Cell<*>> {
     @Volatile
     var closed: Boolean = false
         internal set
-
-    // TODO Remove as we have table[Table]
-    val table: Table
-        get() = this
 
     abstract val headers: Sequence<ColumnHeader>
 
@@ -520,14 +516,14 @@ abstract class Table(val name: String?) : Iterable<Cell<*>> {
         }
     }
 
-    internal abstract fun makeClone(name: String? = table.name, onRegistry: Boolean = false, ref: TableRef = tableRef.get()!!): Table
+    internal abstract fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableRef = tableRef.get()!!): Table
 
     override fun toString(): String {
         return "Table[$name]"
     }
 
     companion object {
-        operator fun get(name: String?): Table = BaseTable(name)
+        operator fun get(name: String?): Table = BaseTable(name, null)
 
         fun fromRegistry(name: String): Table = Registry.getTable(name) ?: throw InvalidTableException("No table by name $name")
 
@@ -587,10 +583,11 @@ internal data class TableRef(
 
 class BaseTable internal constructor(
     name: String?,
+    source: Table?,
     onRegistry: Boolean = true,
     override val tableRef: AtomicReference<TableRef> = AtomicReference(TableRef()),
     override val eventProcessor: TableEventProcessor = TableEventProcessor()
-) : Table(name) {
+) : Table(name, source) {
     init {
         if (name != null && onRegistry) Registry.setTable(name, this)
     }
@@ -625,7 +622,7 @@ class BaseTable internal constructor(
 
     override fun contains(header: ColumnHeader): Boolean = tableRef.get().columns[header]?.prenatal == false
 
-    override fun makeClone(name: String?, onRegistry: Boolean, ref: TableRef): Table = BaseTable(name, onRegistry, AtomicReference(ref))
+    override fun makeClone(name: String?, onRegistry: Boolean, ref: TableRef): Table = BaseTable(name, this, onRegistry, AtomicReference(ref))
 
     companion object
 }
