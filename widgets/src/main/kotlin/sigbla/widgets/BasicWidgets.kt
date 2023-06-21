@@ -137,7 +137,7 @@ internal fun checkBox(
     val cellView = this
     clear(cellView)
 
-    val callback = "sigbla/widgets/button/$id-${widgetCounter.getAndIncrement()}"
+    val callback = "sigbla/widgets/checkbox/$id-${widgetCounter.getAndIncrement()}"
 
     val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
         if (call.request.httpMethod == HttpMethod.Post) {
@@ -189,3 +189,99 @@ internal fun checkBox(
         }
     }
 }
+
+class Radio(
+    val source: CellView,
+    text: String,
+    selected: Boolean
+) {
+    internal var modified: Boolean = false
+        private set
+
+    var text: String = text
+        set(value) {
+            field = value
+            modified = true
+        }
+
+    var selected: Boolean = selected
+        set(value) {
+            field = value
+            modified = true
+        }
+}
+
+fun radio(
+    text: String = "",
+    selected: Boolean = false,
+    action: Radio.() -> Unit = {}
+) = radio(
+    "radio-${widgetCounter.getAndIncrement()}-${ThreadLocalRandom.current().nextInt().absoluteValue}",
+    text,
+    selected,
+    action
+)
+
+internal fun radio(
+    id: String,
+    text: String = "",
+    selected: Boolean = false,
+    action: Radio.() -> Unit
+): CellView.() -> Unit = {
+    // Remove all existing properties on cellview
+    val cellView = this
+    clear(cellView)
+
+    val callback = "sigbla/widgets/radio/$id-${widgetCounter.getAndIncrement()}"
+
+    val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
+        if (call.request.httpMethod == HttpMethod.Post) {
+            val newSelected = call.receiveText() == "true"
+            val r = Radio(cellView, text, newSelected)
+            r.action()
+            if (r.modified || newSelected != selected) {
+                cellView { radio(id, r.text, r.selected, action) }
+                call.respondText { "false" }
+            } else {
+                call.respondText { "true" }
+            }
+        }
+    }
+
+    this.tableView[Resources] {
+        this + listOf(
+            (callback to handler),
+            ("sigbla/widgets.css" to cssResource("/widgets.css")),
+            ("sigbla/widgets.js" to jsResource("/widgets.js"))
+        )
+    }
+
+    val transformer = div("sigbla-widgets") {
+        input {
+            type = InputType.radio
+            attributes["id"] = id
+            attributes["callback"] = callback
+            if (selected) attributes["checked"] = "checked"
+        }
+        label {
+            attributes["for"] = id
+            +text
+        }
+    }
+    this[CellTransformer] = transformer
+
+    this[CellTopics] = "sigbla-widgets-radio"
+
+    on(this) {
+        val unsubscribe = { off(this) }
+        skipHistory = true
+        events {
+            if (any() && source.tableView[source][CellTransformer].function != transformer) {
+                // clean up
+                unsubscribe()
+                source.tableView[Resources] = source.tableView[Resources] - callback
+            }
+        }
+    }
+}
+

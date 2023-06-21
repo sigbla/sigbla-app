@@ -19,10 +19,24 @@ fun main() {
 
     tableView["A", 1] {
         checkBox("Check me") {
-            println("Action: ${checked}")
+            println("Checkbox action: ${checked}")
             text = if (checked) "I'm checked! =)" else "I'm not checked :("
         }
     }
+
+    fun radioMaker(index: Int, otherIndex: Int, selected: Boolean?) {
+        tableView["A", index] {
+            radio(if (selected == null) "I'm a radio button" else if (selected) "I'm selected! =)" else "I'm not selected :(") {
+                println("Radio action: ${this.selected}")
+                text = if (this.selected) "I'm selected! =)" else "I'm not selected :("
+
+                if (this.selected) radioMaker(otherIndex, index, false)
+            }
+        }
+    }
+
+    radioMaker(3, 4, null)
+    radioMaker(4, 3, null)
 
     move(table["A"] before table["B"])
 
