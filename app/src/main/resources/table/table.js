@@ -14,6 +14,7 @@ class Sigbla {
     #lastTile = [-1, -1, -1, -1];
 
     #pendingContent = null;
+    #pendingContentTopics = [];
     #pendingUpdate = false;
     #pendingScrolls = [];
     #pendingResize = [];
@@ -137,6 +138,7 @@ class Sigbla {
     #stateInit = () => {
         this.#lastTile = [-1, -1, -1, -1];
         this.#pendingContent = null;
+        this.#pendingContentTopics = [];
         this.#pendingUpdate = false;
         this.#pendingScrolls = [];
         this.#pendingResize = [];
@@ -242,6 +244,7 @@ class Sigbla {
                 this.#pendingResize.length = 0;
                 this.#pendingUpdate = false;
                 this.#pendingContent = null;
+                this.#pendingContentTopics = [];
 
                 break;
             }
@@ -304,16 +307,23 @@ class Sigbla {
                 if (old) {
                     (message.topics || []).forEach(topic => this.#dispatchTopic({
                         topic: topic,
-                        action: "hide",
+                        action: "removing",
                         target: old,
                         message: message
                     }));
                     old.remove();
+                    (message.topics || []).forEach(topic => this.#dispatchTopic({
+                        topic: topic,
+                        action: "removed",
+                        target: old,
+                        message: message
+                    }));
 
                     if (message.content !== null) this.#target.appendChild(div);
                 } else if (message.content !== null) {
                     if (this.#pendingContent === null) {
                         this.#pendingContent = document.createDocumentFragment();
+                        this.#pendingContentTopics = [];
                     }
 
                     this.#pendingContent.appendChild(div);
@@ -321,10 +331,12 @@ class Sigbla {
 
                 (message.topics || []).forEach(topic => this.#dispatchTopic({
                     topic: topic,
-                    action: "show",
+                    action: "preparing",
                     target: div,
                     message: message
                 }));
+
+                this.#pendingContentTopics.push([div, message.topics || []]);
 
                 break;
             }
@@ -333,6 +345,16 @@ class Sigbla {
                 this.#target.appendChild(this.#pendingContent);
                 this.#pendingContent = null;
 
+                this.#pendingContentTopics.forEach(data => {
+                    data[1].forEach(topic => this.#dispatchTopic({
+                        topic: topic,
+                        action: "attached",
+                        target: data[0],
+                        message: message
+                    }));
+                });
+                this.#pendingContentTopics = [];
+
                 break;
             }
             case 4: { // remove content
@@ -340,11 +362,17 @@ class Sigbla {
                 if (item) {
                     (message.topics || []).forEach(topic => this.#dispatchTopic({
                         topic: topic,
-                        action: "hide",
+                        action: "removing",
                         target: item,
                         message: message
                     }));
                     item.remove();
+                    (message.topics || []).forEach(topic => this.#dispatchTopic({
+                        topic: topic,
+                        action: "removed",
+                        target: item,
+                        message: message
+                    }));
                 }
 
                 break;
