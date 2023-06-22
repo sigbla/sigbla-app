@@ -38,6 +38,13 @@ fun main() {
     radioMaker(3, 4, null)
     radioMaker(4, 3, null)
 
+    tableView["A", 6] {
+        textField {
+            println("Text field action: ${text}")
+            if (!text.startsWith("*")) text = "* $text"
+        }
+    }
+
     move(table["A"] before table["B"])
 
     show(tableView)

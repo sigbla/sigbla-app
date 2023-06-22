@@ -285,3 +285,85 @@ internal fun radio(
     }
 }
 
+// TODO Create a radioGroup function that makes it easy to create a group of radio buttons
+
+class TextField(
+    val source: CellView,
+    text: String
+) {
+    internal var modified: Boolean = false
+        private set
+
+    var text: String = text
+        set(value) {
+            field = value
+            modified = true
+        }
+}
+
+fun textField(
+    text: String = "",
+    action: TextField.() -> Unit = {}
+) = textField(
+    "textfield-${widgetCounter.getAndIncrement()}-${ThreadLocalRandom.current().nextInt().absoluteValue}",
+    text,
+    action
+)
+
+internal fun textField(
+    id: String,
+    text: String,
+    action: TextField.() -> Unit = {}
+): CellView.() -> Unit = {
+    // Remove all existing properties on cellview
+    val cellView = this
+    clear(cellView)
+
+    val callback = "sigbla/widgets/textfield/$id-${widgetCounter.getAndIncrement()}"
+
+    val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
+        if (call.request.httpMethod == HttpMethod.Post) {
+            val newText = call.receiveText()
+            val tf = TextField(cellView, newText)
+            tf.action()
+            if (tf.modified || newText != text) {
+                cellView { textField(id, tf.text, action) }
+                call.respondText { "false" }
+            } else {
+                call.respondText { "true" }
+            }
+        }
+    }
+
+    this.tableView[Resources] {
+        this + listOf(
+            (callback to handler),
+            ("sigbla/widgets.css" to cssResource("/widgets.css")),
+            ("sigbla/widgets.js" to jsResource("/widgets.js"))
+        )
+    }
+
+    val transformer = div("sigbla-widgets") {
+        input {
+            type = InputType.text
+            value = text
+            attributes["id"] = id
+            attributes["callback"] = callback
+        }
+    }
+    this[CellTransformer] = transformer
+
+    this[CellTopics] = "sigbla-widgets-textfield"
+
+    on(this) {
+        val unsubscribe = { off(this) }
+        skipHistory = true
+        events {
+            if (any() && source.tableView[source][CellTransformer].function != transformer) {
+                // clean up
+                unsubscribe()
+                source.tableView[Resources] = source.tableView[Resources] - callback
+            }
+        }
+    }
+}
