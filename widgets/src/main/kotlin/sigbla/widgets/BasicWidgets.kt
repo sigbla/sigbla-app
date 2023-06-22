@@ -47,7 +47,7 @@ internal fun button(
     val cellView = this
     clear(cellView)
 
-    val callback = "sigbla/widgets/button/$id-${widgetCounter.getAndIncrement()}"
+    val callback = "sigbla/widgets/$id-${widgetCounter.getAndIncrement()}"
 
     val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
         if (call.request.httpMethod == HttpMethod.Post) {
@@ -137,7 +137,7 @@ internal fun checkBox(
     val cellView = this
     clear(cellView)
 
-    val callback = "sigbla/widgets/checkbox/$id-${widgetCounter.getAndIncrement()}"
+    val callback = "sigbla/widgets/$id-${widgetCounter.getAndIncrement()}"
 
     val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
         if (call.request.httpMethod == HttpMethod.Post) {
@@ -232,7 +232,7 @@ internal fun radio(
     val cellView = this
     clear(cellView)
 
-    val callback = "sigbla/widgets/radio/$id-${widgetCounter.getAndIncrement()}"
+    val callback = "sigbla/widgets/$id-${widgetCounter.getAndIncrement()}"
 
     val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
         if (call.request.httpMethod == HttpMethod.Post) {
@@ -319,7 +319,7 @@ internal fun textField(
     val cellView = this
     clear(cellView)
 
-    val callback = "sigbla/widgets/textfield/$id-${widgetCounter.getAndIncrement()}"
+    val callback = "sigbla/widgets/$id-${widgetCounter.getAndIncrement()}"
 
     val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
         if (call.request.httpMethod == HttpMethod.Post) {
