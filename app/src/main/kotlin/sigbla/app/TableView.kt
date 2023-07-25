@@ -1997,4 +1997,6 @@ class Resources internal constructor(
     companion object
 }
 
-// TODO Consider an Index type which allows us to replace the index.html file served for a table
+// TODO Consider an Index type which allows us to replace the index.html file served for a table,
+//      or let that happen straight on tableView[Resources] ?
+// TODO Add plusAssign and minusAssign to the companion object on Resources to allow for root resources ?

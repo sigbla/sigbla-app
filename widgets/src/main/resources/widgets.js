@@ -7,7 +7,7 @@ window.sigbla.onTopic("sigbla-widgets-button", (data) => {
         if (callback === null || callback === undefined || callback.trim() === "") return;
 
         const onclick = async (e) => {
-            const response = await fetch("resources/" + callback, {
+            const response = await fetch(callback, {
                 method: "POST"
             });
             e.target.disabled = true;
@@ -36,7 +36,7 @@ window.sigbla.onTopic("sigbla-widgets-checkbox", (data) => {
         if (callback === null || callback === undefined || callback.trim() === "") return;
 
         const onclick = async (e) => {
-            const response = await fetch("resources/" + callback, {
+            const response = await fetch(callback, {
                 method: "POST",
                 body: e.target.checked ? "true" : "false"
             });
@@ -66,7 +66,7 @@ window.sigbla.onTopic("sigbla-widgets-radio", (data) => {
         if (callback === null || callback === undefined || callback.trim() === "") return;
 
         const onclick = async (e) => {
-            const response = await fetch("resources/" + callback, {
+            const response = await fetch(callback, {
                 method: "POST",
                 body: e.target.checked ? "true" : "false"
             });
@@ -96,8 +96,7 @@ window.sigbla.onTopic("sigbla-widgets-textfield", (data) => {
         if (callback === null || callback === undefined || callback.trim() === "") return;
 
         const onblur = async (e) => {
-            console.log("onblur", e.target.value);
-            const response = await fetch("resources/" + callback, {
+            const response = await fetch(callback, {
                 method: "POST",
                 body: e.target.value
             });

@@ -181,7 +181,7 @@ class Sigbla {
 
     #dynamicallyLoadStyle = (url) => {
         let pathname = location.pathname.endsWith("/") ? location.pathname : location.pathname + "/";
-        let fullURL = new URL(pathname + "resources/" + url, window.location.href).href;
+        let fullURL = new URL(pathname + url, window.location.href).href;
 
         let existingUrls = document.head.querySelectorAll("link[href]");
         for (let i = 0; i < existingUrls.length; i++) {
@@ -199,7 +199,7 @@ class Sigbla {
 
     #dynamicallyLoadScript = (url) => {
         let pathname = location.pathname.endsWith("/") ? location.pathname : location.pathname + "/";
-        let fullURL = new URL(pathname + "resources/" + url, window.location.href).href;
+        let fullURL = new URL(pathname + url, window.location.href).href;
 
         let existingUrls = document.head.querySelectorAll("script[src]");
         for (let i = 0; i < existingUrls.length; i++) {

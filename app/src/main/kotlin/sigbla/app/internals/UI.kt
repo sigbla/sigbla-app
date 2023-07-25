@@ -57,6 +57,7 @@ internal object SigblaBackend {
                 install(WebSockets)
 
                 routing {
+                    staticResources("/_static", "_static")
                     route("/t/{ref}", HttpMethod.Get) {
                         handle {
                             val ref = call.parameters["ref"]
@@ -98,7 +99,6 @@ internal object SigblaBackend {
                             }
                         }
                     }
-                    staticResources("/t/{ref}", "table")
                     webSocket("/t/{ref}/socket") {
                         val ref = call.parameters["ref"]
 
@@ -134,8 +134,7 @@ internal object SigblaBackend {
                             removeListener(this)
                         }
                     }
-                    // TODO Consider allowing this to be /t/{ref}/{resource...}, dropping the middle /resources/
-                    route("/t/{ref}/resources/{resource...}") {
+                    route("/t/{ref}/{resource...}") {
                         handle {
                             val ref = call.parameters["ref"]
 
