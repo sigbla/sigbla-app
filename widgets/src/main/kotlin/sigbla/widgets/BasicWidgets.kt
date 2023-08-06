@@ -29,6 +29,9 @@ class Button(
         }
 }
 
+// TODO Would be good to be able to easily tie this to cells, for example button(table["..", ..]) { .. }
+//      where the value is fetched from and subscribed to the cell given. Same for other widgets..
+
 fun button(
     text: String,
     action: Button.() -> Unit = {}
