@@ -975,6 +975,12 @@ class ColumnView internal constructor(
     val tableView: TableView,
     val columnHeader: ColumnHeader
 ) : Iterable<DerivedCellView> {
+    init {
+        // Best efforts to help columns appear in the order they are referenced,
+        // but ultimately this is controlled by the underlying table.
+        if (columnHeader !== emptyColumnHeader) tableView.tableViewRef.get().table?.get(columnHeader)
+    }
+
     operator fun get(cellWidth: CellWidth.Companion): CellWidth<ColumnView, *> {
         val ref = tableView.tableViewRef.get()
         return when (val width = ref.columnViews[columnHeader]?.cellWidth) {
