@@ -20,7 +20,7 @@ class Sigbla {
     #pendingResize = [];
 
     #pendingMessages = [];
-    #enablePendingMessages = false;
+    #pendingMessageBlockers = 0;
 
     #resizeTarget;
     #resizeStartX;
@@ -174,6 +174,18 @@ class Sigbla {
         }
     };
 
+    #clear = async () => {
+        // type 0 is clear event
+        const clearEvent = {type: 0}
+
+        if (this.#pendingUpdate) {
+            this.#pendingScrolls.push(clearEvent);
+        } else {
+            this.#pendingUpdate = true;
+            this.#socket.send(JSON.stringify(clearEvent));
+        }
+    }
+
     #socketOpen = async (_) => {
         window.addEventListener("scroll", this.#scroll);
         window.addEventListener("resize", this.#scroll);
@@ -186,7 +198,7 @@ class Sigbla {
         let existingUrls = document.head.querySelectorAll("link[href]");
         for (let i = 0; i < existingUrls.length; i++) {
             if (existingUrls[i].href === fullURL) {
-                return;
+                return false;
             }
         }
 
@@ -195,6 +207,8 @@ class Sigbla {
         link.type = "text/css";
         link.href = fullURL;
         document.head.appendChild(link);
+
+        return true;
     };
 
     #dynamicallyLoadScript = (url) => {
@@ -204,24 +218,31 @@ class Sigbla {
         let existingUrls = document.head.querySelectorAll("script[src]");
         for (let i = 0; i < existingUrls.length; i++) {
             if (existingUrls[i].src === fullURL) {
-                return;
+                return false;
             }
         }
 
-        this.#enablePendingMessages = true;
+        this.#pendingMessageBlockers++;
         let script = document.createElement("script");
         script.src = fullURL;
+        script.async = false;
+        script.defer = false;
         script.onload = async () => {
-            this.#enablePendingMessages = false;
-            const pendingMessages = this.#pendingMessages;
-            this.#pendingMessages = []
-            pendingMessages.forEach(await this.#handleMessage)
+            this.#pendingMessageBlockers--;
+            if (this.#pendingMessageBlockers <= 0) {
+                const pendingMessages = this.#pendingMessages;
+                this.#pendingMessages = [];
+                this.#pendingMessageBlockers = 0;
+                pendingMessages.forEach(await this.#handleMessage)
+            }
         }
         document.head.appendChild(script);
+
+        return true;
     };
 
     #handleMessage = async (message) => {
-        if (this.#enablePendingMessages) {
+        if (this.#pendingMessageBlockers > 0) {
             this.#pendingMessages.push(message);
             return;
         }
@@ -341,9 +362,10 @@ class Sigbla {
                 break;
             }
             case 3: { // add commit
-                if (this.#pendingContent === null) break;
-                this.#target.appendChild(this.#pendingContent);
-                this.#pendingContent = null;
+                if (this.#pendingContent !== null) {
+                    this.#target.appendChild(this.#pendingContent);
+                    this.#pendingContent = null;
+                }
 
                 this.#pendingContentTopics.forEach(data => {
                     data[1].forEach(topic => this.#dispatchTopic({
@@ -458,7 +480,11 @@ class Sigbla {
                 break;
             }
             case 10: { // load js
-                (message.urls || []).forEach(this.#dynamicallyLoadScript);
+                const newJS = (message.urls || []).map(this.#dynamicallyLoadScript).some(n => n);
+                if (newJS && message.dirty) {
+                    // Because this is unseen JS code, request a clear to redo all rendering
+                    await this.#clear();
+                }
 
                 break;
             }
