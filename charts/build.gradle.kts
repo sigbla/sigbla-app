@@ -1,9 +1,9 @@
 plugins {
-    id("java")
+    id("java-library")
     kotlin("jvm")
 }
 
-group = "sigbla.examples"
+group = "sigbla.charts"
 version = "1.0-SNAPSHOT"
 
 kotlin {
@@ -16,9 +16,9 @@ repositories {
     mavenCentral()
 }
 
+val klaxonVersion = "5.5"
+
 dependencies {
     implementation(project(":app"))
-    implementation(project(":widgets"))
-    implementation(project(":charts"))
-    implementation("org.slf4j:slf4j-simple:2.0.7")
+    implementation("com.beust:klaxon:$klaxonVersion")
 }
