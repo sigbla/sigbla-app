@@ -110,6 +110,7 @@ internal object SigblaBackend {
                         val view = Registry.getView(ref)
                         if (view == null) {
                             close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No ref"))
+                            // TODO return@webSocket ?
                         }
 
                         val client = addListener(this, ref)
@@ -150,7 +151,7 @@ internal object SigblaBackend {
                             }
 
                             val resource = call.parameters.getAll("resource")?.joinToString("/")
-                            val handler = if (resource == null) null else view[Resources]._resources[resource]
+                            val handler = if (resource == null) null else view[Resources]._resources[resource]?.second
                             if (handler == null) {
                                 call.respondText(status = HttpStatusCode.NotFound, text = "Not found")
                                 return@handle
@@ -378,10 +379,10 @@ internal object SigblaBackend {
 
             val jsonParser = Klaxon()
 
-            val cssUrls = view[Resources]._resources.filter { cssHandlers.contains(it.component2()) }.map { it.component1() }.toList()
+            val cssUrls = view[Resources]._resources.filter { cssHandlers.contains(it.component2().second) }.sortedBy { it.component2().first }.map { it.component1() }.toList()
             clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventLoadCSS(cssUrls)))
 
-            val jsUrls = view[Resources]._resources.filter { jsHandlers.contains(it.component2()) }.map { it.component1() }.toList()
+            val jsUrls = view[Resources]._resources.filter { jsHandlers.contains(it.component2().second) }.sortedBy { it.component2().first }.map { it.component1() }.toList()
             clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventLoadJavaScript(jsUrls)))
 
             areaContent(view, x, y, h, w, dims).forEach { content ->
@@ -458,7 +459,7 @@ internal object SigblaBackend {
         }
     }
 
-    private suspend fun handleDirty(client: SigblaClient, dirtyCells: List<Cell<*>>) {
+    private suspend fun handleDirty(client: SigblaClient, dirtyCells: List<Cell<*>>, dirtyResources: List<Resources>) {
         client.mutex.withLock {
             val view = clone(Registry.getView(client.ref) ?: return)
             val currentDims = client.contentState.existingDims
@@ -473,6 +474,12 @@ internal object SigblaBackend {
             val h = currentDims.maxY - currentDims.cornerY
 
             val jsonParser = Klaxon()
+
+            val cssUrls = dirtyResources.asSequence().map { it._resources }.flatten().filter { cssHandlers.contains(it.component2().second) }.sortedBy { it.component2().first }.map { it.component1() }.distinct().toList()
+            clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventLoadCSS(cssUrls, dirty = true)))
+
+            val jsUrls = dirtyResources.asSequence().map { it._resources }.flatten().filter { jsHandlers.contains(it.component2().second) }.sortedBy { it.component2().first }.map { it.component1() }.distinct().toList()
+            clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventLoadJavaScript(jsUrls, dirty = true)))
 
             areaContent(view, x, y, h, w, client.dims, dirtyCells).forEach { content ->
                 val existingId = client.contentState.withIdFor(content.x ?: content.ml ?: throw Exception(), content.y ?: content.mt ?: throw Exception())
@@ -558,13 +565,15 @@ internal object SigblaBackend {
                     // TODO: Might be able to just do as below for table events and not clear if we just extract cells?
                     var clear = false
                     val dirtyCells = mutableListOf<Cell<*>>()
+                    val dirtyResources = mutableListOf<Resources>()
                     for (event in this) {
-                        when (val value = cellOrFalseFromViewRelated(event.newValue)) {
+                        when (val value = cellOrResourceOrFalseFromViewRelated(event.newValue)) {
                             false -> {
                                 clear = true
                                 break
                             }
                             is Cell<*> -> dirtyCells.add(value)
+                            is Resources -> dirtyResources.add(value)
                         }
                     }
 
@@ -582,7 +591,7 @@ internal object SigblaBackend {
                             if (client.ref == view.name) {
                                 runBlocking {
                                     handleDims(client)
-                                    handleDirty(client, dirtyCells)
+                                    handleDirty(client, dirtyCells, dirtyResources)
                                 }
                             }
                         }
@@ -606,7 +615,7 @@ internal object SigblaBackend {
                             if (client.ref == view.name) {
                                 runBlocking {
                                     handleDims(client)
-                                    handleDirty(client, dirtyCells)
+                                    handleDirty(client, dirtyCells, emptyList())
                                 }
                             }
                         }
@@ -777,11 +786,13 @@ internal data class ClientEventResize(
 ): ClientEvent(ClientEventType.RESIZE.type)
 
 internal data class ClientEventLoadCSS(
-    val urls: List<String>
+    val urls: List<String>,
+    val dirty: Boolean = false
 ): ClientEvent(ClientEventType.LOAD_CSS.type)
 
 internal data class ClientEventLoadJavaScript(
-    val urls: List<String>
+    val urls: List<String>,
+    val dirty: Boolean = false
 ): ClientEvent(ClientEventType.LOAD_JS.type)
 
 internal class ClientEventAdapter: TypeAdapter<ClientEvent> {

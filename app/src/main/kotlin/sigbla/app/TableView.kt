@@ -8,9 +8,11 @@ import sigbla.app.exceptions.InvalidValueException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.TableViewEventProcessor
 import sigbla.app.internals.refAction
+import kotlin.collections.LinkedHashMap
 import io.ktor.server.application.*
 import io.ktor.util.pipeline.*
 import java.util.*
+import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import com.github.andrewoma.dexx.kollection.toImmutableSet
 import com.github.andrewoma.dexx.kollection.immutableSetOf
@@ -82,6 +84,14 @@ import com.github.andrewoma.dexx.kollection.ImmutableSet as PSet
 //      on<Cell>(rowView) or on<O,N>(rowView):
 //      on<Cell>(cellView) or on<O,N>(cellView):
 
+// TODO Would be good to have something like on<INACTIVE>(tableView) { .. } with something like
+//      on<INACTIVE>(tableView) {
+//        timeout = ...
+//        events { .. }
+//      }
+//      This would allow for views with no clients to be cleaned up..
+//      Might want on<NO_CLIENT>(tableView) { .. } rather than INACTIVE?
+
 private val EMPTY_IMMUTABLE_STRING_SET = immutableSetOf<String>()
 
 const val DEFAULT_CELL_HEIGHT = 20L
@@ -99,8 +109,7 @@ internal data class TableViewRef(
     val columnViews: PMap<ColumnHeader, ViewMeta> = PHashMap(),
     val rowViews: PMap<Long, ViewMeta> = PHashMap(),
     val cellViews: PMap<Pair<ColumnHeader, Long>, ViewMeta> = PHashMap(),
-    // TODO See if this can be make to return entries in the order they were added
-    val resources: PMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = PHashMap(),
+    val resources: PMap<String, Pair<Long, suspend PipelineContext<*, ApplicationCall>.() -> Unit>> = PHashMap(),
     val cellTransformers: PMap<Pair<ColumnHeader, Long>, Cell<*>.() -> Any?> = PHashMap(),
     val table: Table? = null,
     val version: Long = Long.MIN_VALUE,
@@ -360,22 +369,22 @@ class TableView internal constructor(
     }
 
     operator fun set(resources: Resources.Companion, resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>) {
-        setResources(PHashMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>().put(resource.first, resource.second))
+        setResources(PHashMap<String, Pair<Long, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>().put(resource.first, Resources.RESOURCE_COUNTER.getAndIncrement() to resource.second))
     }
 
     operator fun set(resources: Resources.Companion, newResources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>) {
-        setResources(newResources.fold(PHashMap()) { acc, r -> acc.put(r.first, r.second)})
+        setResources(newResources.fold(PHashMap()) { acc, r -> acc.put(r.first, Resources.RESOURCE_COUNTER.getAndIncrement() to r.second)})
     }
 
     operator fun set(resources: Resources.Companion, newResources: Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>) {
-        setResources(newResources.entries.fold(PHashMap()) { acc, r -> acc.put(r.key, r.value)})
+        setResources(newResources.entries.fold(PHashMap()) { acc, r -> acc.put(r.key, Resources.RESOURCE_COUNTER.getAndIncrement() to r.value)})
     }
 
     operator fun set(resources: Resources.Companion, newResources: Resources?) {
         setResources(newResources?._resources)
     }
 
-    private fun setResources(resources: PMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>?) {
+    private fun setResources(resources: PMap<String, Pair<Long, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>?) {
         val (oldRef, newRef) = tableViewRef.refAction {
             it.copy(
                 resources = resources ?: PHashMap(),
@@ -645,6 +654,7 @@ class CellView(
         }
     }
 
+    // TODO Ensure cell height and width is rendered (currently ignored)
     operator fun set(cellHeight: CellHeight.Companion, height: Long) {
         setCellHeight(height)
     }
@@ -1940,14 +1950,14 @@ class FunctionCellTransformer internal constructor(
 
 class Resources internal constructor(
     val source: TableView,
-    internal val _resources: PMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>
+    internal val _resources: PMap<String, Pair<Long, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>
 ): Iterable<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>> {
     val resources: Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> by lazy {
-        _resources.asMap()
+        _resources.sortedBy { it.component2().first }.map { it.component1() to it.component2().second }.toMap(LinkedHashMap())
     }
 
-    operator fun plus(resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>): Resources = Resources(source, _resources.put(resource.first, resource.second))
-    operator fun plus(resources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>): Resources = Resources(source, resources.fold(_resources) {acc, resource -> acc.put(resource.first, resource.second)})
+    operator fun plus(resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>): Resources = Resources(source, _resources.put(resource.first, RESOURCE_COUNTER.getAndIncrement() to resource.second))
+    operator fun plus(resources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>): Resources = Resources(source, resources.fold(_resources) {acc, resource -> acc.put(resource.first, RESOURCE_COUNTER.getAndIncrement() to resource.second)})
     operator fun minus(resource: String): Resources = Resources(source, _resources.remove(resource))
     operator fun minus(resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>): Resources = this - resource.first
     operator fun minus(resources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>): Resources = Resources(source, resources.fold(_resources) {acc, resource -> acc.remove(resource.first)})
@@ -1994,7 +2004,9 @@ class Resources internal constructor(
 
     override fun toString() = resources.toString()
 
-    companion object
+    companion object {
+        internal val RESOURCE_COUNTER = AtomicLong()
+    }
 }
 
 // TODO Consider an Index type which allows us to replace the index.html file served for a table,

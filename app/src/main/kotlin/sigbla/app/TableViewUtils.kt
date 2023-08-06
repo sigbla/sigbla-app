@@ -110,11 +110,13 @@ internal fun refVersionFromViewRelated(value: Any?): Long = when (value) {
     else -> throw InvalidValueException("Unsupported type: ${value?.javaClass}")
 }
 
-internal fun cellOrFalseFromViewRelated(value: Any?): Any? = when (value) {
+internal fun cellOrResourceOrFalseFromViewRelated(value: Any?): Any? = when (value) {
     is CellView -> value.cell
-    is CellHeight<*, *> -> cellOrFalseFromViewRelated(value.source)
-    is CellWidth<*, *> -> cellOrFalseFromViewRelated(value.source)
-    is CellClasses<*> -> cellOrFalseFromViewRelated(value.source)
-    is CellTopics<*> -> cellOrFalseFromViewRelated(value.source)
+    is CellHeight<*, *> -> cellOrResourceOrFalseFromViewRelated(value.source)
+    is CellWidth<*, *> -> cellOrResourceOrFalseFromViewRelated(value.source)
+    is CellClasses<*> -> cellOrResourceOrFalseFromViewRelated(value.source)
+    is CellTopics<*> -> cellOrResourceOrFalseFromViewRelated(value.source)
+    is CellTransformer<*> -> cellOrResourceOrFalseFromViewRelated(value.source)
+    is Resources -> value
     else -> false
 }
