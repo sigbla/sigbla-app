@@ -315,10 +315,11 @@ internal object SigblaBackend {
     private suspend fun handleEvent(socket: WebSocketSession, event: ClientEvent) {
         val client = listeners[socket] ?: return
 
-        when (event) {
-            is ClientEventScroll -> handleTiles(client, event)
-            is ClientEventResize -> handleResize(client, event)
-            is ClientEventPackageEnd -> handlePackageEnd(client, event)
+        when {
+            event.type == ClientEventType.CLEAR.type -> handleClear(client)
+            event is ClientEventScroll -> handleTiles(client, event)
+            event is ClientEventResize -> handleResize(client, event)
+            event is ClientEventPackageEnd -> handlePackageEnd(client, event)
         }
     }
 
@@ -785,6 +786,7 @@ internal data class ClientEventLoadJavaScript(
 
 internal class ClientEventAdapter: TypeAdapter<ClientEvent> {
     override fun classFor(type: Any): KClass<out ClientEvent> = when(type as Int) {
+        ClientEventType.CLEAR.type -> ClientEvent::class
         ClientEventType.SCROLL.type -> ClientEventScroll::class
         ClientEventType.RESIZE.type -> ClientEventResize::class
         ClientEventType.PACKAGE_END.type -> ClientEventPackageEnd::class
