@@ -2,7 +2,10 @@ package sigbla.app
 
 import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.internals.Registry
+import sigbla.app.internals.load1
 import sigbla.app.internals.refAction
+import sigbla.app.internals.save1
+import java.io.File
 import java.util.*
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
@@ -1976,6 +1979,8 @@ fun rename(column: Column, withName: ColumnHeader): Unit = move(column to column
 
 fun rename(column: Column, vararg withName: String): Unit = move(column to column, *withName)
 
+// TODO rename(table: Table, withName: String)..
+
 fun remove(table: Table) = Registry.deleteTable(table)
 
 fun remove(column: Column) {
@@ -2156,3 +2161,17 @@ fun on(cell: Cell<*>, old: KClass<*> = Any::class, new: KClass<*> = Any::class, 
 fun off(reference: TableListenerReference) = reference.unsubscribe()
 
 fun off(tableEventReceiver: TableEventReceiver<*, *, *>) = off(tableEventReceiver.reference)
+
+// ---
+
+fun load(
+    resources: Pair<File, Table>,
+    extension: String = "sigt",
+    filter: Column.() -> Column? = { this }
+) = load1(resources, extension, filter)
+
+fun save(
+    resources: Pair<Table, File>,
+    extension: String = "sigt",
+    compress: Boolean = true
+) = save1(resources, extension, compress)

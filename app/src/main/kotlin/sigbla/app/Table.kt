@@ -112,6 +112,9 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
     // TODO Consider if get(table: Table) and set(..: Table, ..) should be included for symmetry?
 
     // TODO Include set as well, which will, like with TableView, copy over all the data
+
+    // TODO Add a set(column: Column) = Column to copy over a whole column efficiently
+
     operator fun get(table: Table.Companion): Table {
         return this
     }
@@ -526,22 +529,6 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
         operator fun get(name: String?): Table = BaseTable(name, null)
 
         fun fromRegistry(name: String): Table = Registry.getTable(name) ?: throw InvalidTableException("No table by name $name")
-
-        fun fromStorage(storage: Storage, name: String): Table {
-            TODO()
-        }
-
-        fun fromStorageAs(storage: Storage, name: String, newName: String): Table {
-            TODO()
-        }
-
-        fun fromStorageRange(storage: Storage, name: String, fromIndex: Long, toIndex: Long): Table {
-            TODO()
-        }
-
-        fun fromStorageRangeAs(storage: Storage, name: String, fromIndex: Long, toIndex: Long, newName: String): Table {
-            TODO()
-        }
 
         val names: SortedSet<String> get() = Registry.tableNames()
 

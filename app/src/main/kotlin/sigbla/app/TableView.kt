@@ -611,22 +611,6 @@ class TableView internal constructor(
 
         fun fromRegistry(name: String): TableView = Registry.getView(name) ?: throw InvalidTableViewException("No table view by name $name")
 
-        fun fromStorage(storage: Storage, name: String): TableView {
-            TODO()
-        }
-
-        fun fromStorageAs(storage: Storage, name: String, newName: String): TableView {
-            TODO()
-        }
-
-        fun fromStorageRange(storage: Storage, name: String, fromIndex: Long, toIndex: Long): TableView {
-            TODO()
-        }
-
-        fun fromStorageRangeAs(storage: Storage, name: String, fromIndex: Long, toIndex: Long, newName: String): TableView {
-            TODO()
-        }
-
         val names: SortedSet<String> get() = Registry.viewNames()
 
         fun delete(name: String) = Registry.deleteView(name)
