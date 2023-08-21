@@ -7,7 +7,7 @@ import sigbla.app.internals.TableEventProcessor
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 import com.github.andrewoma.dexx.collection.Map as PMap
@@ -550,7 +550,7 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 }
 
 internal data class ColumnMeta(
-    val columnOrder: Int,
+    val columnOrder: Long,
     val prenatal: Boolean
 )
 
@@ -558,7 +558,7 @@ internal data class TableRef(
     val columns: PMap<ColumnHeader, ColumnMeta> = PHashMap(),
     val columnCells: PMap<ColumnHeader, PSortedMap<Long, CellValue<*>>> = PHashMap(),
     val version: Long = Long.MIN_VALUE,
-    val columnCounter: AtomicInteger = AtomicInteger()
+    val columnCounter: AtomicLong = AtomicLong(Long.MIN_VALUE)
 ) {
     val headers: Sequence<Pair<ColumnHeader, ColumnMeta>> by lazy {
         columns

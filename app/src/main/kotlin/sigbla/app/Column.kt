@@ -61,7 +61,7 @@ abstract class Column internal constructor(
     val table: Table,
     // TODO Rename to header and order?
     val columnHeader: ColumnHeader,
-    val columnOrder: Int
+    val columnOrder: Long
 ) : Comparable<Column>, Iterable<Cell<*>> {
     abstract operator fun get(indexRelation: IndexRelation, index: Long): Cell<*>
 
@@ -169,7 +169,7 @@ abstract class Column internal constructor(
 class BaseColumn internal constructor(
     table: Table,
     columnHeader: ColumnHeader,
-    columnOrder: Int = table.tableRef.get().columns[columnHeader]?.columnOrder ?: table.tableRef.get().columnCounter.getAndIncrement()
+    columnOrder: Long = table.tableRef.get().columns[columnHeader]?.columnOrder ?: table.tableRef.get().columnCounter.getAndIncrement()
 ) : Column(
     table,
     columnHeader,
