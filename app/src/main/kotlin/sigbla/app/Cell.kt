@@ -46,10 +46,10 @@ internal class CellValue<T>(val value: T) {
     }
 }
 
-enum class CellRangeOrder { COLUMN, ROW }
+enum class CellOrder { COLUMN, ROW }
 
 // TODO change order input so it can be t[][]..t[][] by ORDER
-class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>, val order: CellRangeOrder = CellRangeOrder.COLUMN) : ClosedRange<Cell<*>>, Iterable<Cell<*>> {
+class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>, val order: CellOrder = CellOrder.COLUMN) : ClosedRange<Cell<*>>, Iterable<Cell<*>> {
     init {
         if (start.column.table != endInclusive.column.table) {
             throw InvalidTableException("Cell range much be within same table")
@@ -72,7 +72,7 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
 
         val output = mutableListOf<Cell<*>>()
 
-        if (order == CellRangeOrder.COLUMN) {
+        if (order == CellOrder.COLUMN) {
             columns.forEach { column ->
                 rows.forEach { row ->
                     output.add(column[row])
