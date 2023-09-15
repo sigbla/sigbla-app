@@ -54,7 +54,7 @@ The point of seed is to remove predictability around the short hash for columns
 
 internal fun load1(
     resources: Pair<File, Table>,
-    extension: String = "sigt",
+    extension: String,
     filter: Column.() -> Column?
 ) {
     val file = resources.first.let {
@@ -179,8 +179,8 @@ private fun readCell(prevRow: Long, inputStream: InputStream): Pair<Long, Any?>?
 
 internal fun save1(
     resources: Pair<Table, File>,
-    extension: String = "sigt",
-    compress: Boolean = true
+    extension: String,
+    compress: Boolean
 ) {
     val tableRef = resources.first.tableRef.get()
     val file = resources.second.let {
