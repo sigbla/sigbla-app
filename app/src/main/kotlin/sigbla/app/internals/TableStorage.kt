@@ -311,14 +311,18 @@ private fun serializeHeaderSection(headerSection: HeaderSection): ByteArray {
     ByteArrayOutputStream().use { baos ->
         if (headerSection.leaf) {
             baos.write(1)
-            baos.write(SerializationUtils.fromInt(headerSection.section.length))
-            if (headerSection.section.isNotEmpty()) baos.write(SerializationUtils.fromString(headerSection.section))
+            SerializationUtils.fromString(headerSection.section).apply {
+                baos.write(SerializationUtils.fromInt(this.size))
+                if (this.isNotEmpty()) baos.write(this)
+            }
             baos.write(SerializationUtils.fromLong(headerSection.parent))
             baos.write(SerializationUtils.fromLong(headerSection.location ?: throw InvalidStorageException("Missing header section location")))
         } else {
             baos.write(0)
-            baos.write(SerializationUtils.fromInt(headerSection.section.length))
-            if (headerSection.section.isNotEmpty()) baos.write(SerializationUtils.fromString(headerSection.section))
+            SerializationUtils.fromString(headerSection.section).apply {
+                baos.write(SerializationUtils.fromInt(this.size))
+                if (this.isNotEmpty()) baos.write(this)
+            }
             baos.write(SerializationUtils.fromLong(headerSection.parent))
         }
 

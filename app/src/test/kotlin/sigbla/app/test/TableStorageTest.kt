@@ -304,8 +304,12 @@ class TableStorageTest {
 
             for (c in 1..ThreadLocalRandom.current().nextInt(1, 2000)) {
                 val headers = generateSequence {
-                    val r = ThreadLocalRandom.current().nextInt(0, 11)
-                    if (r == 0) null else if (r == 1) "" else r.toString()
+                    val r = ThreadLocalRandom.current().nextInt(0, 21)
+                    if (r == 0) null else if (r == 1) "" else {
+                        val ba = ByteArray(r)
+                        ThreadLocalRandom.current().nextBytes(ba)
+                        String(ba)
+                    }
                 }.toList().take(49)
 
                 if (headers.isEmpty()) continue
