@@ -16,6 +16,7 @@ import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
 import java.security.MessageDigest
 import java.util.*
+import java.util.concurrent.ThreadLocalRandom
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.InflaterInputStream
 import kotlin.io.path.deleteIfExists
@@ -24,7 +25,7 @@ import kotlin.io.path.deleteIfExists
 
 High level storage format description (see code for all the details):
 
-<magic><version><options><index location>
+<magic><version><options><seed><index location>
 <... content ...>
 <... index ...>
 
@@ -42,6 +43,8 @@ cell content is <byte for type><type content>
 index is sequence of header sections with this prefixed by 8 bytes describing length
 
 If compression is enabled, each part of content/index is individually compressed
+
+The point of seed is to remove predictability around the short hash for columns
 
  */
 
@@ -72,6 +75,11 @@ internal fun load1(
         }
 
         val compressed = options[0] == 1.toByte()
+
+        val seed = ByteArray(Long.SIZE_BYTES).let {
+            if (sbc.read(ByteBuffer.wrap(it)) != it.size) throw InvalidStorageException("Unable to read seed")
+            SerializationUtils.toLong(it)
+        }
 
         val indexLocation = ByteArray(Long.SIZE_BYTES).let {
             if (sbc.read(ByteBuffer.wrap(it)) != it.size) throw InvalidStorageException("Unable to read index location")
@@ -189,6 +197,10 @@ internal fun save1(
         val options = if (compress) byteArrayOf(0x1) else byteArrayOf(0x0)
         if (sbc.write(ByteBuffer.wrap(options)) != options.size) throw InvalidStorageException("Unable to write options")
 
+        val seed = ThreadLocalRandom.current().nextLong()
+        val seedBuffer = SerializationUtils.fromLong(seed)
+        if (sbc.write(ByteBuffer.wrap(seedBuffer)) != seedBuffer.size) throw InvalidStorageException("Unable to write seed")
+
         // Placeholder for index location
         val indexLocation = sbc.position()
         if (sbc.write(ByteBuffer.wrap(ByteArray(Long.SIZE_BYTES))) != Long.SIZE_BYTES) throw InvalidStorageException("Unable to write index location")
@@ -202,7 +214,7 @@ internal fun save1(
             else if (o1.order != o2.order) {
                 o1.order.compareTo(o2.order)
             }
-            // If both leaf or not, sort by section next
+            // If order the same, sort by section next
             else if (o1.section != o2.section) {
                 o1.section.compareTo(o2.section)
             }
@@ -214,7 +226,7 @@ internal fun save1(
             val head = columnHeader.header.dropLast(1)
             val tail = columnHeader.header.last()
 
-            var parent = 0L
+            var parent = seed
 
             head.forEach {
                 headerSections.add(HeaderSection(it, parent, false))
