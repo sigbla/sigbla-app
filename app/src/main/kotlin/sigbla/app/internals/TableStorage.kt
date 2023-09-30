@@ -48,10 +48,6 @@ The point of seed is to remove predictability around the short hash for columns
 
  */
 
-// TODO Also support CellRange in addition to Table, allowing for storing subsections?
-
-// TODO Allow File to be a String
-
 internal fun load1(
     resources: Pair<File, Table>,
     extension: String,
@@ -99,8 +95,8 @@ internal fun load1(
             InflaterInputStream(SeekableByteChannelInputStream(sbc, indexLength))
         } else {
             SeekableByteChannelInputStream(sbc, indexLength)
-        }.use {
-            generateSequence { deserializeHeaderSection(it) }.forEach { headerSection ->
+        }.use { inputStream ->
+            generateSequence { deserializeHeaderSection(inputStream) }.forEach { headerSection ->
                 if (!headerSection.leaf) {
                     nonLeafSections[shortHash(headerSection.parent, headerSection.section)] = headerSection
                 } else {
@@ -248,6 +244,7 @@ internal fun save1(
                     val rowDiff = row - prevRow
 
                     val rowValue = when {
+                        // TODO prevRow + rowDiff != row -> row // Overflow case?
                         row == 0L -> row // Special case when row index is zero
                         rowDiff >= Byte.MIN_VALUE.toLong() && rowDiff <= Byte.MAX_VALUE.toLong() -> rowDiff.toByte()
                         rowDiff >= Int.MIN_VALUE.toLong() && rowDiff <= Int.MAX_VALUE.toLong() -> rowDiff.toInt()
@@ -290,13 +287,6 @@ internal fun save1(
     }
 
     Files.move(tmpFilePath, file.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE)
-}
-
-private fun shortHash(a: Long, b: String): Long {
-    val digest = MessageDigest.getInstance("SHA-256")
-    digest.update(SerializationUtils.fromLong(a))
-    val hash = digest.digest(SerializationUtils.fromString(b))
-    return SerializationUtils.toLong(hash)
 }
 
 private class HeaderSection(

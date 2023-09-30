@@ -109,9 +109,11 @@ internal data class TableViewRef(
     val columnViews: PMap<ColumnHeader, ViewMeta> = PHashMap(),
     val rowViews: PMap<Long, ViewMeta> = PHashMap(),
     val cellViews: PMap<Pair<ColumnHeader, Long>, ViewMeta> = PHashMap(),
+
     val resources: PMap<String, Pair<Long, suspend PipelineContext<*, ApplicationCall>.() -> Unit>> = PHashMap(),
     val cellTransformers: PMap<Pair<ColumnHeader, Long>, Cell<*>.() -> Any?> = PHashMap(),
     val table: Table? = null,
+
     val version: Long = Long.MIN_VALUE,
 )
 
@@ -124,7 +126,7 @@ class TableView internal constructor(
 ) : Iterable<DerivedCellView> {
     internal constructor(name: String?, table: Table?) : this(name, tableViewRef = AtomicReference(TableViewRef(table = table)))
     internal constructor(table: Table) : this(table.name, table)
-    internal constructor(name: String) : this(name, Registry.getTable(name))
+    internal constructor(name: String?) : this(name, if (name == null) null else Registry.getTable(name))
 
     init {
         if (name != null && onRegistry) Registry.setView(name, this)
@@ -461,6 +463,8 @@ class TableView internal constructor(
 
     operator fun get(column: Column, index: Long): CellView = this[column.columnHeader, index]
 
+    operator fun get(columnView: ColumnView, index: Long): CellView = this[columnView.columnHeader, index]
+
     operator fun get(columnHeader: ColumnHeader, index: Long): CellView = CellView(get(columnHeader), index)
 
     // -----
@@ -602,8 +606,10 @@ class TableView internal constructor(
 
     internal fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableViewRef = tableViewRef.get()) = TableView(name, onRegistry, AtomicReference(ref))
 
+    // TODO toString, hashCode, equals
+
     companion object {
-        operator fun get(name: String): TableView = TableView(name)
+        operator fun get(name: String?): TableView = TableView(name)
 
         operator fun get(table: Table): TableView = TableView(table)
 
@@ -880,7 +886,23 @@ class CellView(
         return "$columnView:$index"
     }
 
-    // TODO hashCode, equals
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CellView
+
+        if (columnView != other.columnView) return false
+        if (index != other.index) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = columnView.hashCode()
+        result = 31 * result + index.hashCode()
+        return result
+    }
 }
 
 internal fun createDerivedCellViewFromRef(ref: TableViewRef, columnView: ColumnView, index: Long): DerivedCellView {

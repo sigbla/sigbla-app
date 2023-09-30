@@ -1,7 +1,10 @@
 package sigbla.app
 
 import sigbla.app.internals.SigblaBackend
+import sigbla.app.internals.load1
 import sigbla.app.internals.refAction
+import sigbla.app.internals.save1
+import java.io.File
 import kotlin.reflect.KClass
 
 fun clear(columnView: ColumnView) {
@@ -181,3 +184,20 @@ fun on(derivedCellView: DerivedCellView, type: KClass<*> = Any::class, init: Tab
 fun off(reference: TableViewListenerReference) = reference.unsubscribe()
 
 fun off(tableViewEventReceiver: TableViewEventReceiver<*, *>) = off(tableViewEventReceiver.reference)
+
+// ---
+
+// TODO Allow File to be a String
+
+// TODO Allow for just save(table), taking name from table, same for load
+
+fun load(
+    resources: Pair<File, TableView>,
+    extension: String = "sigv",
+) = load1(resources, extension)
+
+fun save(
+    resources: Pair<TableView, File>,
+    extension: String = "sigv",
+    compress: Boolean = true
+) = save1(resources, extension, compress)

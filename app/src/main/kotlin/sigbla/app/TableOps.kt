@@ -2164,6 +2164,12 @@ fun off(tableEventReceiver: TableEventReceiver<*, *, *>) = off(tableEventReceive
 
 // ---
 
+// TODO Also support CellRange in addition to Table, allowing for storing subsections?
+
+// TODO Allow File to be a String
+
+// TODO Allow for just save(table), taking name from table, same for load
+
 fun load(
     resources: Pair<File, Table>,
     extension: String = "sigt",

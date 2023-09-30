@@ -6,6 +6,7 @@ import java.io.InputStream
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.nio.ByteBuffer
+import java.security.MessageDigest
 
 internal enum class SerializationType(val type: Int) {
     NULL(0),
@@ -222,4 +223,11 @@ internal object SerializationUtils {
             else -> throw IllegalArgumentException("Unsupported type $type")
         }
     }
+}
+
+internal fun shortHash(a: Long, b: String): Long {
+    val digest = MessageDigest.getInstance("SHA-256")
+    digest.update(SerializationUtils.fromLong(a))
+    val hash = digest.digest(SerializationUtils.fromString(b))
+    return SerializationUtils.toLong(hash)
 }
