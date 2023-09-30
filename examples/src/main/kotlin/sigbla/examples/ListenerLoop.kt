@@ -5,15 +5,11 @@ import sigbla.app.*
 fun main() {
     val table = Table["listener loop"]
 
-    val ref = on(table) {
-        allowLoop = true
-
-        events {
-            println(joinToString())
-            forEach {
-                if (valueOf<Number>(table["A", 1])?.toLong() ?: 1000 < 1000)
-                    table["A", 1] = table["A", 1] + 1
-            }
+    val ref = on(table, allowLoop = true) events {
+        println(joinToString())
+        forEach {
+            if (valueOf<Number>(table["A", 1])?.toLong() ?: 1000 < 1000)
+                table["A", 1] = table["A", 1] + 1
         }
     }
 

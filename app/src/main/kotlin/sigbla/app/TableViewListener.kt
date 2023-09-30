@@ -20,15 +20,14 @@ data class TableViewListenerEvent<T>(val oldValue: T, val newValue: T)
 class TableViewEventReceiver<S, T>(
     val source: S,
     val type: KClass<*> = Any::class,
+    var name: String? = null,
+    var order: Long = 0,
+    var allowLoop: Boolean = false,
+    var skipHistory: Boolean = false,
     private val typeFilter: Sequence<TableViewListenerEvent<Any>>.() -> Sequence<TableViewListenerEvent<T>>
 ) {
     lateinit var reference: TableViewListenerReference
         internal set
-
-    var name: String? = null
-    var order: Long = 0
-    var allowLoop: Boolean = false
-    var skipHistory: Boolean = false
 
     private var process: (Sequence<TableViewListenerEvent<T>>.() -> Unit) = {}
 

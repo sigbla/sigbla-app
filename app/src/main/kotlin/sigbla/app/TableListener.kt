@@ -17,15 +17,14 @@ data class TableListenerEvent<O, N>(val oldValue: Cell<O>, val newValue: Cell<N>
 
 class TableEventReceiver<S, O, N>(
     val source: S,
+    var name: String? = null,
+    var order: Long = 0,
+    var allowLoop: Boolean = false,
+    var skipHistory: Boolean = false,
     private val typeFilter: Sequence<TableListenerEvent<Any, Any>>.() -> Sequence<TableListenerEvent<Any, Any>>
 ) {
     lateinit var reference: TableListenerReference
         internal set
-
-    var name: String? = null
-    var order: Long = 0
-    var allowLoop: Boolean = false
-    var skipHistory: Boolean = false
 
     private var process: (Sequence<TableListenerEvent<O, N>>.() -> Unit) = {}
 

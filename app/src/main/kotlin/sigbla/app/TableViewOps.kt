@@ -87,14 +87,100 @@ fun show(tableView: TableView) = SigblaBackend.openView(tableView)
 
 // ---
 
-inline fun <reified T> on(tableView: TableView, noinline init: TableViewEventReceiver<TableView, T>.() -> Unit): TableViewListenerReference {
-    return on(tableView, T::class, init as TableViewEventReceiver<TableView, Any>.() -> Unit)
+interface OnTableView<T> {
+    infix fun events(process: Sequence<TableViewListenerEvent<out T>>.() -> Unit): TableViewListenerReference
 }
 
-fun on(tableView: TableView, type: KClass<*> = Any::class, init: TableViewEventReceiver<TableView, Any>.() -> Unit): TableViewListenerReference {
+inline fun <reified T : Any> on(
+    tableView: TableView,
+    type: KClass<T> = T::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false
+) = object : OnTableView<T> {
+    override fun events(process: Sequence<TableViewListenerEvent<out T>>.() -> Unit): TableViewListenerReference {
+        return on(
+            tableView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) events process as Sequence<TableViewListenerEvent<out Any>>.() -> Unit
+    }
+}
+
+@JvmName("onAny")
+fun on(
+    tableView: TableView,
+    type: KClass<*> = Any::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false
+) = object : OnTableView<Any> {
+    override fun events(process: Sequence<TableViewListenerEvent<out Any>>.() -> Unit): TableViewListenerReference {
+        return on(
+            tableView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) {
+            events {
+                process(this)
+            }
+        }
+    }
+}
+
+inline fun <reified T> on(
+    tableView: TableView,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false,
+    noinline init: TableViewEventReceiver<TableView, T>.() -> Unit
+): TableViewListenerReference {
+    return on(
+        tableView,
+        T::class,
+        name,
+        order,
+        allowLoop,
+        skipHistory,
+        init as TableViewEventReceiver<TableView, Any>.() -> Unit
+    )
+}
+
+fun on(
+    tableView: TableView,
+    type: KClass<*> = Any::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false,
+    init: TableViewEventReceiver<TableView, Any>.() -> Unit
+): TableViewListenerReference {
     val eventReceiver = when {
-        type == Any::class -> TableViewEventReceiver<TableView, Any>(tableView) { this }
-        else -> TableViewEventReceiver(tableView, type) {
+        type == Any::class -> TableViewEventReceiver<TableView, Any>(
+            tableView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) { this }
+        else -> TableViewEventReceiver(
+            tableView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) {
             this.filter {
                 type.isInstance(it.oldValue) || type.isInstance(it.newValue)
             }
@@ -105,14 +191,96 @@ fun on(tableView: TableView, type: KClass<*> = Any::class, init: TableViewEventR
 
 // ---
 
-inline fun <reified T> on(columnView: ColumnView, noinline init: TableViewEventReceiver<ColumnView, T>.() -> Unit): TableViewListenerReference {
-    return on(columnView, T::class, init as TableViewEventReceiver<ColumnView, Any>.() -> Unit)
+inline fun <reified T : Any> on(
+    columnView: ColumnView,
+    type: KClass<T> = T::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false
+) = object : OnTableView<T> {
+    override fun events(process: Sequence<TableViewListenerEvent<out T>>.() -> Unit): TableViewListenerReference {
+        return on(
+            columnView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) events process as Sequence<TableViewListenerEvent<out Any>>.() -> Unit
+    }
 }
 
-fun on(columnView: ColumnView, type: KClass<*> = Any::class, init: TableViewEventReceiver<ColumnView, Any>.() -> Unit): TableViewListenerReference {
+@JvmName("onAny")
+fun on(
+    columnView: ColumnView,
+    type: KClass<*> = Any::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false
+) = object : OnTableView<Any> {
+    override fun events(process: Sequence<TableViewListenerEvent<out Any>>.() -> Unit): TableViewListenerReference {
+        return on(
+            columnView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) {
+            events {
+                process(this)
+            }
+        }
+    }
+}
+
+inline fun <reified T> on(
+    columnView: ColumnView,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false,
+    noinline init: TableViewEventReceiver<ColumnView, T>.() -> Unit
+): TableViewListenerReference {
+    return on(
+        columnView,
+        T::class,
+        name,
+        order,
+        allowLoop,
+        skipHistory,
+        init as TableViewEventReceiver<ColumnView, Any>.() -> Unit
+    )
+}
+
+fun on(
+    columnView: ColumnView,
+    type: KClass<*> = Any::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false,
+    init: TableViewEventReceiver<ColumnView, Any>.() -> Unit
+): TableViewListenerReference {
     val eventReceiver = when {
-        type == Any::class -> TableViewEventReceiver<ColumnView, Any>(columnView) { this }
-        else -> TableViewEventReceiver(columnView, type) {
+        type == Any::class -> TableViewEventReceiver<ColumnView, Any>(
+            columnView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) { this }
+        else -> TableViewEventReceiver(
+            columnView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) {
             this.filter {
                 type.isInstance(it.oldValue) || type.isInstance(it.newValue)
             }
@@ -123,14 +291,96 @@ fun on(columnView: ColumnView, type: KClass<*> = Any::class, init: TableViewEven
 
 // ---
 
-inline fun <reified T> on(rowView: RowView, noinline init: TableViewEventReceiver<RowView, T>.() -> Unit): TableViewListenerReference {
-    return on(rowView, T::class, init as TableViewEventReceiver<RowView, Any>.() -> Unit)
+inline fun <reified T : Any> on(
+    rowView: RowView,
+    type: KClass<T> = T::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false
+) = object : OnTableView<T> {
+    override fun events(process: Sequence<TableViewListenerEvent<out T>>.() -> Unit): TableViewListenerReference {
+        return on(
+            rowView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) events process as Sequence<TableViewListenerEvent<out Any>>.() -> Unit
+    }
 }
 
-fun on(rowView: RowView, type: KClass<*> = Any::class, init: TableViewEventReceiver<RowView, Any>.() -> Unit): TableViewListenerReference {
+@JvmName("onAny")
+fun on(
+    rowView: RowView,
+    type: KClass<*> = Any::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false
+) = object : OnTableView<Any> {
+    override fun events(process: Sequence<TableViewListenerEvent<out Any>>.() -> Unit): TableViewListenerReference {
+        return on(
+            rowView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) {
+            events {
+                process(this)
+            }
+        }
+    }
+}
+
+inline fun <reified T> on(
+    rowView: RowView,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false,
+    noinline init: TableViewEventReceiver<RowView, T>.() -> Unit
+): TableViewListenerReference {
+    return on(
+        rowView,
+        T::class,
+        name,
+        order,
+        allowLoop,
+        skipHistory,
+        init as TableViewEventReceiver<RowView, Any>.() -> Unit
+    )
+}
+
+fun on(
+    rowView: RowView,
+    type: KClass<*> = Any::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false,
+    init: TableViewEventReceiver<RowView, Any>.() -> Unit
+): TableViewListenerReference {
     val eventReceiver = when {
-        type == Any::class -> TableViewEventReceiver<RowView, Any>(rowView) { this }
-        else -> TableViewEventReceiver(rowView, type) {
+        type == Any::class -> TableViewEventReceiver<RowView, Any>(
+            rowView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) { this }
+        else -> TableViewEventReceiver(
+            rowView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) {
             this.filter {
                 type.isInstance(it.oldValue) || type.isInstance(it.newValue)
             }
@@ -145,14 +395,96 @@ fun on(rowView: RowView, type: KClass<*> = Any::class, init: TableViewEventRecei
 
 // ---
 
-inline fun <reified T> on(cellView: CellView, noinline init: TableViewEventReceiver<CellView, T>.() -> Unit): TableViewListenerReference {
-    return on(cellView, T::class, init as TableViewEventReceiver<CellView, Any>.() -> Unit)
+inline fun <reified T : Any> on(
+    cellView: CellView,
+    type: KClass<T> = T::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false
+) = object : OnTableView<T> {
+    override fun events(process: Sequence<TableViewListenerEvent<out T>>.() -> Unit): TableViewListenerReference {
+        return on(
+            cellView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) events process as Sequence<TableViewListenerEvent<out Any>>.() -> Unit
+    }
 }
 
-fun on(cellView: CellView, type: KClass<*> = Any::class, init: TableViewEventReceiver<CellView, Any>.() -> Unit): TableViewListenerReference {
+@JvmName("onAny")
+fun on(
+    cellView: CellView,
+    type: KClass<*> = Any::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false
+) = object : OnTableView<Any> {
+    override fun events(process: Sequence<TableViewListenerEvent<out Any>>.() -> Unit): TableViewListenerReference {
+        return on(
+            cellView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) {
+            events {
+                process(this)
+            }
+        }
+    }
+}
+
+inline fun <reified T> on(
+    cellView: CellView,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false,
+    noinline init: TableViewEventReceiver<CellView, T>.() -> Unit
+): TableViewListenerReference {
+    return on(
+        cellView,
+        T::class,
+        name,
+        order,
+        allowLoop,
+        skipHistory,
+        init as TableViewEventReceiver<CellView, Any>.() -> Unit
+    )
+}
+
+fun on(
+    cellView: CellView,
+    type: KClass<*> = Any::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false,
+    init: TableViewEventReceiver<CellView, Any>.() -> Unit
+): TableViewListenerReference {
     val eventReceiver = when {
-        type == Any::class -> TableViewEventReceiver<CellView, Any>(cellView) { this }
-        else -> TableViewEventReceiver(cellView, type) {
+        type == Any::class -> TableViewEventReceiver<CellView, Any>(
+            cellView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) { this }
+        else -> TableViewEventReceiver(
+            cellView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) {
             this.filter {
                 type.isInstance(it.oldValue) || type.isInstance(it.newValue)
             }
@@ -163,14 +495,96 @@ fun on(cellView: CellView, type: KClass<*> = Any::class, init: TableViewEventRec
 
 // ---
 
-inline fun <reified T> on(derivedCellView: DerivedCellView, noinline init: TableViewEventReceiver<DerivedCellView, T>.() -> Unit): TableViewListenerReference {
-    return on(derivedCellView, T::class, init as TableViewEventReceiver<DerivedCellView, Any>.() -> Unit)
+inline fun <reified T : Any> on(
+    derivedCellView: DerivedCellView,
+    type: KClass<T> = T::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false
+) = object : OnTableView<T> {
+    override fun events(process: Sequence<TableViewListenerEvent<out T>>.() -> Unit): TableViewListenerReference {
+        return on(
+            derivedCellView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) events process as Sequence<TableViewListenerEvent<out Any>>.() -> Unit
+    }
 }
 
-fun on(derivedCellView: DerivedCellView, type: KClass<*> = Any::class, init: TableViewEventReceiver<DerivedCellView, Any>.() -> Unit): TableViewListenerReference {
+@JvmName("onAny")
+fun on(
+    derivedCellView: DerivedCellView,
+    type: KClass<*> = Any::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false
+) = object : OnTableView<Any> {
+    override fun events(process: Sequence<TableViewListenerEvent<out Any>>.() -> Unit): TableViewListenerReference {
+        return on(
+            derivedCellView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) {
+            events {
+                process(this)
+            }
+        }
+    }
+}
+
+inline fun <reified T> on(
+    derivedCellView: DerivedCellView,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false,
+    noinline init: TableViewEventReceiver<DerivedCellView, T>.() -> Unit
+): TableViewListenerReference {
+    return on(
+        derivedCellView,
+        T::class,
+        name,
+        order,
+        allowLoop,
+        skipHistory,
+        init as TableViewEventReceiver<DerivedCellView, Any>.() -> Unit
+    )
+}
+
+fun on(
+    derivedCellView: DerivedCellView,
+    type: KClass<*> = Any::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false,
+    init: TableViewEventReceiver<DerivedCellView, Any>.() -> Unit
+): TableViewListenerReference {
     val eventReceiver = when {
-        type == Any::class -> TableViewEventReceiver<DerivedCellView, Any>(derivedCellView) { this }
-        else -> TableViewEventReceiver(derivedCellView, type) {
+        type == Any::class -> TableViewEventReceiver<DerivedCellView, Any>(
+            derivedCellView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) { this }
+        else -> TableViewEventReceiver(
+            derivedCellView,
+            type,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) {
             this.filter {
                 type.isInstance(it.oldValue) || type.isInstance(it.newValue)
             }

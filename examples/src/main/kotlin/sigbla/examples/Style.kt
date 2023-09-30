@@ -255,23 +255,19 @@ fun main() {
 
     show(tableView)
 
-    on(tableView) {
-        events {
-            forEach {
-                println("onAny: " + it)
-            }
+    on(tableView, allowLoop = true) events {
+        forEach {
+            println("onAny: " + it)
         }
     }
 
-    on<CellView>(tableView) {
-        events {
-            forEach {
-                println("on: " + it)
-            }
+    on<CellView>(tableView) events {
+        forEach {
+            println("on: " + it)
         }
     }
 
-    on(tableView) {
+    on(tableView, allowLoop = true) {
         events {
             forEach {
                 println("on: " + it)
