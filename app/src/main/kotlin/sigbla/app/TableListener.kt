@@ -32,6 +32,7 @@ class TableEventReceiver<S, O, N>(
         this.process = process
     }
 
+    // TODO Shouldn't events be Sequence<TableListenerEvent<out Any, out Any>> ?
     internal operator fun invoke(events: Sequence<TableListenerEvent<Any, Any>>) {
         val seq = (events.typeFilter() as Sequence<TableListenerEvent<O, N>>)
         if (seq.any()) seq.process()

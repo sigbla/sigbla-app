@@ -298,37 +298,21 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
     val table: Table
         get() = start.table
 
-    /*
     override fun iterator(): Iterator<Column> {
-        // TODO This needs to use ref snapshot
-        return if (start.columnOrder <= endInclusive.columnOrder) {
-            start
-                .table
-                .columns
-                .dropWhile { it != start }
-                .reversed()
-                .dropWhile { it != endInclusive }
-                .reversed()
-                .iterator()
-        } else {
-            start
-                .table
-                .columns
-                .dropWhile { it != endInclusive }
-                .reversed()
-                .dropWhile { it != start }
-                .iterator()
-        }
-    }
-     */
-    override fun iterator(): Iterator<Column> {
-        // TODO This needs to use ref snapshot
-        val minOrder = min(start.columnOrder, endInclusive.columnOrder)
-        val maxOrder = max(start.columnOrder, endInclusive.columnOrder)
-        return start
-            .table
-            .columns
-            .filter { it.columnOrder in minOrder..maxOrder }
+        val ref = table.tableRef.get()
+
+        // Because columns might move around, get the latest order
+        val currentStart = ref.columns[start.columnHeader]?.columnOrder ?: throw InvalidColumnException("Unable to find column $start")
+        val currentEnd = ref.columns[endInclusive.columnHeader]?.columnOrder ?: throw InvalidColumnException("Unable to find column $endInclusive")
+
+        val minOrder = min(currentStart, currentEnd)
+        val maxOrder = max(currentStart, currentEnd)
+
+        return ref
+            .headers
+            .filter { !it.second.prenatal }
+            .filter { it.second.columnOrder in minOrder..maxOrder }
+            .map { BaseColumn(table, it.first, it.second.columnOrder) }
             .iterator()
     }
 
@@ -340,6 +324,7 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
         return true
     }
 
+    // TODO Consider what the return value here actually represents?
     override fun isEmpty() = false
 
     override fun toString(): String {

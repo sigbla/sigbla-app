@@ -11,7 +11,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class TableListenerTest {
+class ColumnListenerTest {
     @After
     fun cleanup() {
         Table.names.forEach { Table.delete(it) }
@@ -24,7 +24,7 @@ class TableListenerTest {
 
         var eventCount = 0
 
-        val ref = on(t1) {
+        val ref = on(t1["A"]) {
             events {
                 eventCount += count()
             }
@@ -41,14 +41,14 @@ class TableListenerTest {
         t1["A", 2] = "C"
         t1["B", 3] = "D"
 
-        assertEquals(4, eventCount)
+        assertEquals(3, eventCount)
 
         off(ref)
 
-        t1["B", 3] = "E"
+        t1["A", 3] = "E"
         t1["C", 4] = "F"
 
-        assertEquals(4, eventCount)
+        assertEquals(3, eventCount)
     }
 
     @Test
@@ -59,7 +59,7 @@ class TableListenerTest {
 
         t1["A", 1] = "A"
 
-        val ref = on(t1) {
+        val ref = on(t1["A"]) {
             events {
                 eventCount += count()
             }
@@ -74,14 +74,14 @@ class TableListenerTest {
         t1["A", 2] = "C"
         t1["B", 3] = "D"
 
-        assertEquals(4, eventCount)
+        assertEquals(3, eventCount)
 
         off(ref)
 
-        t1["B", 3] = "E"
+        t1["A", 3] = "E"
         t1["C", 4] = "F"
 
-        assertEquals(4, eventCount)
+        assertEquals(3, eventCount)
     }
 
     @Test
@@ -90,7 +90,7 @@ class TableListenerTest {
 
         var eventCount = 0
 
-        on(t1) {
+        on(t1["A"]) {
             off(this)
 
             events {
@@ -113,7 +113,7 @@ class TableListenerTest {
 
         t1["A", 1] = "A"
 
-        on(t1) {
+        on(t1["A"]) {
             off(this)
 
             events {
@@ -131,7 +131,7 @@ class TableListenerTest {
     @Test
     fun `listener ref with name and order`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
-        val ref = on(t) {
+        val ref = on(t["A"]) {
             name = "Name A"
             order = 123
         }
@@ -145,7 +145,7 @@ class TableListenerTest {
     @Test
     fun `listener ref without name and order`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
-        val ref = on(t) {}
+        val ref = on(t["A"]) {}
 
         assertNull(ref.name)
         assertEquals(0L, ref.order)
@@ -157,7 +157,7 @@ class TableListenerTest {
     fun `listener loop support`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 
-        val ref1 = on(t) {
+        val ref1 = on(t["A"]) {
             events {
                 t["A", 0] = 1
             }
@@ -171,7 +171,7 @@ class TableListenerTest {
 
         t["A", 0] = null
 
-        val ref2 = on(t) {
+        val ref2 = on(t["A"]) {
             allowLoop = true
 
             events {
@@ -196,7 +196,7 @@ class TableListenerTest {
         var t1EventCount = 0
         var t2EventCount = 0
 
-        on(t1) {
+        on(t1["A"]) {
             events {
                 t1EventCount += count()
             }
@@ -207,14 +207,14 @@ class TableListenerTest {
         for (c in listOf("A", "B", "C", "D")) {
             for (r in 1..100) {
                 t1[c][r] = "$c$r A1"
-                expectedT1EventCount++
+                if (c == "A") expectedT1EventCount++
             }
         }
 
         for (c in listOf("A", "B", "C", "D")) {
             for (r in 1..100) {
                 t1[c][r] = "$c$r A1"
-                expectedT1EventCount++
+                if (c == "A") expectedT1EventCount++
             }
         }
 
@@ -224,7 +224,7 @@ class TableListenerTest {
         // but when adding a listener we only reply current values
         var expectedT2EventCount = expectedT1EventCount / 2
 
-        on(t2) {
+        on(t2["A"]) {
             events {
                 t2EventCount += count()
             }
@@ -233,14 +233,14 @@ class TableListenerTest {
         for (c in listOf("A", "B", "C", "D")) {
             for (r in 1..100) {
                 t1[c][r] = "$c$r A2"
-                expectedT1EventCount++
+                if (c == "A") expectedT1EventCount++
             }
         }
 
         for (c in listOf("A", "B", "C", "D")) {
             for (r in 1..100) {
                 t2[c][r] = "$c$r B1"
-                expectedT2EventCount++
+                if (c == "A") expectedT2EventCount++
             }
         }
 
@@ -258,7 +258,7 @@ class TableListenerTest {
 
         var change: Number = 0
 
-        on(t) {
+        on(t["A"]) {
             skipHistory = true
 
             events {
@@ -283,7 +283,7 @@ class TableListenerTest {
         var id2: Int? = null
         var id3: Int? = null
 
-        on(t) {
+        on(t["A"]) {
             order = 3
             skipHistory = true
 
@@ -294,7 +294,7 @@ class TableListenerTest {
             }
         }
 
-        on(t) {
+        on(t["A"]) {
             order = 2
             skipHistory = true
 
@@ -305,7 +305,7 @@ class TableListenerTest {
             }
         }
 
-        on(t) {
+        on(t["A"]) {
             order = 1
             skipHistory = true
 
@@ -338,14 +338,14 @@ class TableListenerTest {
         var v2New: Any? = null
         var v3New: Any? = null
 
-        on(t) {
+        on(t["A"]) {
             order = 2
 
             events {
                 v2Old = valueOf<Any>(oldTable["A", 0])
                 v2New = valueOf<Any>(newTable["A", 0])
 
-                assertEquals(t["A", 0], source["A", 0])
+                assertEquals(t["A", 0], source[0])
 
                 if (newTable["A", 0].isNumeric())
                     newTable["A", 0] = newTable["A", 0] + 1
@@ -354,14 +354,14 @@ class TableListenerTest {
             }
         }
 
-        on(t) {
+        on(t["A"]) {
             order = 3
 
             events {
                 v3Old = valueOf<Any>(oldTable["A", 0])
                 v3New = valueOf<Any>(newTable["A", 0])
 
-                assertEquals(t["A", 0], source["A", 0])
+                assertEquals(t["A", 0], source[0])
 
                 if (newTable["A", 0].isNumeric())
                     newTable["A", 0] = newTable["A", 0] + 1
@@ -370,14 +370,14 @@ class TableListenerTest {
             }
         }
 
-        on(t) {
+        on(t["A"]) {
             order = 1
 
             events {
                 v1Old = valueOf<Any>(oldTable["A", 0])
                 v1New = valueOf<Any>(newTable["A", 0])
 
-                assertEquals(t["A", 0], source["A", 0])
+                assertEquals(t["A", 0], source[0])
 
                 if (newTable["A", 0].isNumeric())
                     newTable["A", 0] = newTable["A", 0] + 1
@@ -428,7 +428,7 @@ class TableListenerTest {
 
         var count = 0
 
-        on(t) {
+        on(t["A"]) {
             events {
                 assertEquals(0, oldTable.iterator().asSequence().count())
                 assertEquals(1, newTable.iterator().asSequence().count())
@@ -440,7 +440,7 @@ class TableListenerTest {
 
         assertEquals(1, count)
 
-        on(t) {
+        on(t["A"]) {
             skipHistory = true
 
             events {
@@ -463,13 +463,13 @@ class TableListenerTest {
 
         var count = 0
 
-        on(t) {
+        on(t["A"]) {
             events {
-                oldTable["A", 0] = source["A", 0] + 200
-                newTable["A", 0] = source["A", 0] + 300
+                oldTable["A", 0] = source[0] + 200
+                newTable["A", 0] = source[0] + 300
 
-                assertEquals<Any>(source["A", 0] + 200, oldTable["A", 0].toLong())
-                assertEquals<Any>(source["A", 0] + 300, newTable["A", 0].toLong())
+                assertEquals<Any>(source[0] + 200, oldTable["A", 0].toLong())
+                assertEquals<Any>(source[0] + 300, newTable["A", 0].toLong())
 
                 count += count()
             }
@@ -477,12 +477,12 @@ class TableListenerTest {
 
         // The second listener is executed after the first listener, and its
         // old/new table should reflect changes introduced by the first listener.
-        on(t) {
+        on(t["A"]) {
             skipHistory = true
 
             events {
-                assertEquals<Any>(source["A", 0] + 200, oldTable["A", 0].toLong())
-                assertEquals<Any>(source["A", 0] + 300, newTable["A", 0].toLong())
+                assertEquals<Any>(source[0] + 200, oldTable["A", 0].toLong())
+                assertEquals<Any>(source[0] + 300, newTable["A", 0].toLong())
 
                 count += count()
             }
@@ -508,27 +508,27 @@ class TableListenerTest {
         var eventCount5 = 0
         var eventCount6 = 0
 
-        on<Any, String>(t1) events {
+        on<Any, String>(t1["A"]) events {
             eventCount1 += count()
         }
 
-        on<Any, Long>(t1) events {
+        on<Any, Long>(t1["A"]) events {
             eventCount2 += count()
         }
 
-        on<String, Any>(t1) events {
+        on<String, Any>(t1["A"]) events {
             eventCount3 += count()
         }
 
-        on<Long, Any>(t1) events {
+        on<Long, Any>(t1["A"]) events {
             eventCount4 += count()
         }
 
-        on<String, Long>(t1) events {
+        on<String, Long>(t1["A"]) events {
             eventCount5 += count()
         }
 
-        on<Long, String>(t1) events {
+        on<Long, String>(t1["A"]) events {
             eventCount6 += count()
         }
 

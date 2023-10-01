@@ -580,10 +580,10 @@ class BaseTable internal constructor(
     }
 
     override val headers: Sequence<ColumnHeader>
-        get() = tableRef.get().headers.map { it.first }
+        get() = tableRef.get().headers.filter { !it.second.prenatal }.map { it.first }
 
     override val columns: Sequence<Column>
-        get() = tableRef.get().headers.map { BaseColumn(this, it.first, it.second.columnOrder) }
+        get() = tableRef.get().headers.filter { !it.second.prenatal }.map { BaseColumn(this, it.first, it.second.columnOrder) }
 
     override val indexes: Sequence<Long>
         get() = tableRef.get().indexes

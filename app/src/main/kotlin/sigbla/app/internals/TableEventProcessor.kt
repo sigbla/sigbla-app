@@ -2,6 +2,7 @@ package sigbla.app.internals
 
 import sigbla.app.*
 import sigbla.app.exceptions.InvalidListenerException
+import sigbla.app.exceptions.InvalidValueException
 import sigbla.app.exceptions.ListenerLoopException
 import java.util.*
 import java.util.concurrent.ConcurrentMap
@@ -131,15 +132,53 @@ internal class TableEventProcessor {
         }
     }
 
+    private class ListenerCellsRef(
+        val cells: Cells
+    ) : TableListenerReference() {
+        var haveUnsubscribed = false
+
+        var refs: List<TableListenerReference>? = null
+            set(value) {
+                field = value
+                if (haveUnsubscribed) off(this)
+            }
+
+        var lazyName: String? = null
+        var lazyOrder: Long? = null
+        var lazyAllowLoop: Boolean? = null
+
+        override val name: String? by lazy { lazyName }
+        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
+        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
+
+        override fun unsubscribe() {
+            haveUnsubscribed = true
+            for (ref in refs ?: return) {
+                ref.unsubscribe()
+            }
+        }
+    }
+
     // TODO Consider a mechanism to pause processing, buffering up events till no longer paused.
     //      Can be useful when we know that a single or a few cells are going to be updated many times
     //      but we don't want to fire for each of these updates individually?
     //      Potential example: table { // ops in here }
 
+    // TODO Synchronize these and other interactions with event processor (instead of the existing synchronization)
+    //      This to help with the above to do and also to help with the reasoning for tables, which should be:
+    //      Each write is single threaded, if two or more threads try to write to the same table concurrently,
+    //      they will wait for each other. Reading from a table is not synchronized, as it will operate on
+    //      stable snapshots. Because event listener from part of the write path, they need to complete before
+    //      any update returns. Also, when a new listener is added through subscribe, it will also block other
+    //      write operations.
+
+    // TODO Add rollback on any exception from publish?
+
     fun subscribe(
         table: Table,
         eventReceiver: TableEventReceiver<Table, Any, Any>,
-        init: TableEventReceiver<Table, Any, Any>.() -> Unit
+        init: TableEventReceiver<Table, Any, Any>.() -> Unit,
+        ref: TableRef = table.tableRef.get()
     ): TableListenerReference {
         val listenerRef = ListenerTableRef(
             tableListeners,
@@ -163,7 +202,6 @@ internal class TableEventProcessor {
             listenerRef.key = key
 
             if (!eventReceiver.skipHistory) {
-                val ref = table.tableRef.get()
                 val oldTable = table.makeClone(ref = TableRef())
                 val newTable = table.makeClone(ref = ref)
                 listenerRefEvent.version = ref.version
@@ -183,7 +221,8 @@ internal class TableEventProcessor {
     fun subscribe(
         column: Column,
         eventReceiver: TableEventReceiver<Column, Any, Any>,
-        init: TableEventReceiver<Column, Any, Any>.() -> Unit
+        init: TableEventReceiver<Column, Any, Any>.() -> Unit,
+        ref: TableRef = column.table.tableRef.get()
     ): TableListenerReference {
         val listenerRef = ListenerColumnRef(
             columnListeners,
@@ -207,7 +246,6 @@ internal class TableEventProcessor {
             listenerRef.key = key
 
             if (!eventReceiver.skipHistory) {
-                val ref = column.table.tableRef.get()
                 val oldTable = column.table.makeClone(ref = TableRef())
                 val newTable = column.table.makeClone(ref = ref)
                 listenerRefEvent.version = ref.version
@@ -227,7 +265,8 @@ internal class TableEventProcessor {
     fun subscribe(
         row: Row,
         eventReceiver: TableEventReceiver<Row, Any, Any>,
-        init: TableEventReceiver<Row, Any, Any>.() -> Unit
+        init: TableEventReceiver<Row, Any, Any>.() -> Unit,
+        ref: TableRef = row.table.tableRef.get()
     ): TableListenerReference {
         val listenerRef = ListenerRowRef(
             rowListeners,
@@ -251,7 +290,6 @@ internal class TableEventProcessor {
             listenerRef.key = key
 
             if (!eventReceiver.skipHistory) {
-                val ref = row.table.tableRef.get()
                 val oldTable = row.table.makeClone(ref = TableRef())
                 val newTable = row.table.makeClone(ref = ref)
                 listenerRefEvent.version = ref.version
@@ -273,7 +311,8 @@ internal class TableEventProcessor {
     fun subscribe(
         cellRange: CellRange,
         eventReceiver: TableEventReceiver<CellRange, Any, Any>,
-        init: TableEventReceiver<CellRange, Any, Any>.() -> Unit
+        init: TableEventReceiver<CellRange, Any, Any>.() -> Unit,
+        ref: TableRef = cellRange.table.tableRef.get()
     ): TableListenerReference {
         val listenerRef = ListenerCellRangeRef(
             cellRangeListeners,
@@ -297,7 +336,6 @@ internal class TableEventProcessor {
             listenerRef.key = key
 
             if (!eventReceiver.skipHistory) {
-                val ref = cellRange.table.tableRef.get()
                 val oldTable = cellRange.table.makeClone(ref = TableRef())
                 val newTable = cellRange.table.makeClone(ref = ref)
                 listenerRefEvent.version = ref.version
@@ -317,7 +355,8 @@ internal class TableEventProcessor {
     fun subscribe(
         cell: Cell<*>,
         eventReceiver: TableEventReceiver<Cell<*>, Any, Any>,
-        init: TableEventReceiver<Cell<*>, Any, Any>.() -> Unit
+        init: TableEventReceiver<Cell<*>, Any, Any>.() -> Unit,
+        ref: TableRef = cell.table.tableRef.get()
     ): TableListenerReference {
         val listenerRef = ListenerCellRef(
             cellListeners,
@@ -341,20 +380,97 @@ internal class TableEventProcessor {
             listenerRef.key = key
 
             if (!eventReceiver.skipHistory) {
-                val ref = cell.table.tableRef.get()
                 val oldTable = cell.table.makeClone(ref = TableRef())
                 val newTable = cell.table.makeClone(ref = ref)
                 listenerRefEvent.version = ref.version
-                listenerRefEvent.listenerEvent(newTable[cell].asSequence().map {
-                    val oldColumn = BaseColumn(
-                        oldTable,
-                        it.column.columnHeader,
-                        ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
-                    )
-                    TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
-                })
+                listenerRefEvent.listenerEvent(newTable[cell].asSequence()
+                    .filter { it !is UnitCell }
+                    .map {
+                        val oldColumn = BaseColumn(
+                            oldTable,
+                            it.column.columnHeader,
+                            ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                        )
+                        TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
+                    })
             }
         }
+        return listenerRef
+    }
+
+    fun subscribe(
+        cells: Cells,
+        eventReceiver: TableEventReceiver<Cells, Any, Any>,
+        init: TableEventReceiver<Cells, Any, Any>.() -> Unit,
+        ref: TableRef = cells.table.tableRef.get()
+    ): TableListenerReference {
+        val listenerRef = ListenerCellsRef(cells)
+
+        eventReceiver.reference = listenerRef
+        eventReceiver.init()
+
+        listenerRef.lazyName = eventReceiver.name
+        listenerRef.lazyOrder = eventReceiver.order
+        listenerRef.lazyAllowLoop = eventReceiver.allowLoop
+
+        val refs = mutableListOf<TableListenerReference>()
+        cells.sources.forEach {
+            when (it) {
+                is Cell<*> -> {
+                    val cellReceiver = TableEventReceiver<Cell<*>, Any, Any>(it, listenerRef.name, listenerRef.order, listenerRef.allowLoop, true) { this }
+                    cellReceiver.events {
+                        eventReceiver(this as Sequence<TableListenerEvent<Any, Any>>)
+                    }
+                    refs.add(subscribe(it, cellReceiver, {}, ref))
+                }
+                is Row -> {
+                    val rowReceiver = TableEventReceiver<Row, Any, Any>(it, listenerRef.name, listenerRef.order, listenerRef.allowLoop, true) { this }
+                    rowReceiver.events {
+                        eventReceiver(this as Sequence<TableListenerEvent<Any, Any>>)
+                    }
+                    refs.add(subscribe(it, rowReceiver, {}, ref))
+                }
+                is Column -> {
+                    val columnReceiver = TableEventReceiver<Column, Any, Any>(it, listenerRef.name, listenerRef.order, listenerRef.allowLoop, true) { this }
+                    columnReceiver.events {
+                        eventReceiver(this as Sequence<TableListenerEvent<Any, Any>>)
+                    }
+                    refs.add(subscribe(it, columnReceiver, {}, ref))
+                }
+                is CellRange -> {
+                    val cellRangeReceiver = TableEventReceiver<CellRange, Any, Any>(it, listenerRef.name, listenerRef.order, listenerRef.allowLoop, true) { this }
+                    cellRangeReceiver.events {
+                        eventReceiver(this as Sequence<TableListenerEvent<Any, Any>>)
+                    }
+                    refs.add(subscribe(it, cellRangeReceiver, {}, ref))
+                }
+                is Table -> {
+                    val tableReceiver = TableEventReceiver<Table, Any, Any>(it, listenerRef.name, listenerRef.order, listenerRef.allowLoop, true) { this }
+                    tableReceiver.events {
+                        eventReceiver(this as Sequence<TableListenerEvent<Any, Any>>)
+                    }
+                    refs.add(subscribe(it, tableReceiver, {}, ref))
+                }
+                else -> throw InvalidValueException("Unsupported source type: ${it::class}")
+            }
+        }
+
+        listenerRef.refs = refs
+
+        if (!eventReceiver.skipHistory) {
+            //val ref = cells.table.tableRef.get()
+            val oldTable = cells.table.makeClone(ref = TableRef())
+            val newTable = cells.table.makeClone(ref = ref)
+            eventReceiver(cells.asSequence().map { newTable[it] }.map {
+                val oldColumn = BaseColumn(
+                    oldTable,
+                    it.column.columnHeader,
+                    ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                )
+                TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
+            })
+        }
+
         return listenerRef
     }
 

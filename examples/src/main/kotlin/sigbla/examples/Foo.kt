@@ -24,6 +24,12 @@ fun main() {
             table["E"][1] = table["E"][1] + 1
     }
 
+    on(table["A"] or table["B"] or table["C", 1]..table["D", 2]) {
+        events {
+
+        }
+    }
+
     //val view = TableView[table]
     //view.show()
 

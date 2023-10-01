@@ -6,6 +6,7 @@ import kotlinx.html.consumers.onFinalizeMap
 import kotlinx.html.div
 import kotlinx.html.stream.HTMLStreamBuilder
 import sigbla.app.exceptions.InvalidCellException
+import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.exceptions.InvalidTableException
 import sigbla.app.exceptions.InvalidValueException
 import java.math.BigDecimal
@@ -51,7 +52,7 @@ enum class CellOrder { COLUMN, ROW }
 // TODO change order input so it can be t[][]..t[][] by ORDER
 class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>, val order: CellOrder = CellOrder.COLUMN) : ClosedRange<Cell<*>>, Iterable<Cell<*>> {
     init {
-        if (start.column.table != endInclusive.column.table) {
+        if (start.column.table !== endInclusive.column.table) {
             throw InvalidTableException("Cell range much be within same table")
         }
     }
@@ -60,33 +61,49 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
         get() = start.table
 
     override fun iterator(): Iterator<Cell<*>> {
-        // TODO: This needs to use ref snapshot
-        // TODO: This iterator implementation, as with the ColumnRange one could be more efficient!
+        val ref = table.tableRef.get()
 
-        val columns = (start.column..endInclusive.column).toList()
+        // Because columns might move around, get the latest order
+        val currentStart = ref.columns[start.column.columnHeader]?.columnOrder ?: throw InvalidColumnException("Unable to find column $start")
+        val currentEnd = ref.columns[endInclusive.column.columnHeader]?.columnOrder ?: throw InvalidColumnException("Unable to find column $endInclusive")
+
+        val minOrder = min(currentStart, currentEnd)
+        val maxOrder = max(currentStart, currentEnd)
+
+        val columns = ref
+            .headers
+            .filter { !it.second.prenatal }
+            .filter { it.second.columnOrder in minOrder..maxOrder }
+            .map { BaseColumn(table, it.first, it.second.columnOrder) }
+            .iterator()
+
         val rows = if (start.index <= endInclusive.index) {
-            (start.index..endInclusive.index).toList()
+            (start.index..endInclusive.index)
         } else {
-            (start.index downTo endInclusive.index).toList()
+            (start.index downTo endInclusive.index)
         }
 
-        val output = mutableListOf<Cell<*>>()
-
-        if (order == CellOrder.COLUMN) {
-            columns.forEach { column ->
-                rows.forEach { row ->
-                    output.add(column[row])
+        return if (order == CellOrder.COLUMN) {
+            columns.asSequence()
+                .map { c ->
+                    rows.asSequence().map { r ->
+                        c to r
+                    }
                 }
-            }
         } else {
-            rows.forEach { row ->
-                columns.forEach { column ->
-                    output.add(column[row])
+            rows.asSequence()
+                .map { r ->
+                    columns.asSequence().map { c ->
+                        c to r
+                    }
                 }
-            }
         }
-
-        return output.iterator()
+            .flatten()
+            .map {
+                ref.columnCells[it.first.columnHeader]?.get(it.second)?.toCell(it.first, it.second)
+            }
+            .filterNotNull()
+            .iterator()
     }
 
     operator fun contains(value: Any): Boolean {
@@ -118,8 +135,7 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
 //      Ex: table["A", 1] up 1 returns table["A", 0], or
 //          table["A", 1] left 1 returns table["B", 1] etc..
 //      But it would need to be able to cope with no-existing columns..
-// TODO Add Iterable<Cell<*>> for symmetry
-sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
+sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, Iterable<Cell<*>> {
     abstract val value: T
 
     // TODO Shouldn't this be internal with tableOf(..) function available?
@@ -347,6 +363,8 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?> {
             else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
         }
     }
+
+    override fun iterator(): Iterator<Cell<*>> = if (this is UnitCell) emptyList<Cell<*>>().iterator() else listOf(this).iterator()
 
     // TODO Add functionality to make this symmetric? Add to BasicMath?
     override fun equals(other: Any?) = this.compareTo(other) == 0
@@ -717,4 +735,62 @@ fun div(
         index,
         builder.div(classes, block).toWebContent()
     )
+}
+
+class Cells(sources: List<Iterable<Cell<*>>>): Iterable<Cell<*>> {
+    constructor(vararg sources: Iterable<Cell<*>>) : this(sources.toList())
+
+    val sources: List<Iterable<Cell<*>>> = sources.flatMap { if (it is Cells) it.sources else listOf(it) }
+    val table = sources.first().let {
+        when (it) {
+            is Cell<*> -> it.table
+            is Row -> it.table
+            is Column -> it.table
+            is CellRange -> it.table
+            is Table -> it
+            else -> throw InvalidValueException("Unsupported source type: ${it::class}")
+        }
+    }
+
+    init {
+        if (sources.isEmpty()) throw InvalidValueException("At least one source needed")
+
+        val tables = sources
+            .flatMap { if (it is Cells) it.sources else listOf(it) }
+            .map {
+                when (it) {
+                    is Cell<*> -> it.table
+                    is Row -> it.table
+                    is Column -> it.table
+                    is CellRange -> it.table
+                    is Table -> it
+                    else -> throw InvalidValueException("Unsupported source type: ${it::class}")
+                }
+            }
+            .toSet()
+
+        if (tables.isEmpty()) throw InvalidValueException("At least one source needed")
+
+        if (tables.size > 1) {
+            val t1 = tables.first()
+            tables.forEach {
+                if (t1 !== it) throw InvalidTableException("Only a single source table supported")
+            }
+        }
+    }
+
+    override fun iterator(): Iterator<Cell<*>> = sources.asSequence().flatten().iterator()
+}
+
+infix fun Iterable<Cell<*>>.or(source: Iterable<Cell<*>>): Cells {
+    return when {
+        this is Cells && source is Cells -> this.sources.toMutableList().apply {
+            addAll(source.sources)
+        }.let { Cells(it) }
+        this is Cells -> this.sources.toMutableList().apply {
+            add(source)
+        }.let { Cells(it) }
+        source is Cells -> source or this
+        else -> Cells(this, source)
+    }
 }

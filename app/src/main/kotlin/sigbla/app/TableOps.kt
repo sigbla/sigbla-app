@@ -2648,6 +2648,132 @@ fun on(
 
 // ---
 
+inline fun <reified O : Any, reified N : Any> on(
+    cells: Cells,
+    old: KClass<O> = O::class,
+    new: KClass<N> = N::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false
+) = object : OnTable<O, N> {
+    override fun events(process: Sequence<TableListenerEvent<out O, out N>>.() -> Unit): TableListenerReference {
+        return on(
+            cells,
+            old,
+            new,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) events process as Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit
+    }
+}
+
+@JvmName("onAny")
+fun on(
+    cells: Cells,
+    old: KClass<*> = Any::class,
+    new: KClass<*> = Any::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false
+) = object : OnTable<Any, Any> {
+    override fun events(process: Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit): TableListenerReference {
+        return on(
+            cells,
+            old,
+            new,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) {
+            events {
+                process(this)
+            }
+        }
+    }
+}
+
+inline fun <reified O, reified N> on(
+    cells: Cells,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false,
+    noinline init: TableEventReceiver<Cells, O, N>.() -> Unit
+): TableListenerReference {
+    return on(
+        cells,
+        O::class,
+        N::class,
+        name,
+        order,
+        allowLoop,
+        skipHistory,
+        init as TableEventReceiver<Cells, Any, Any>.() -> Unit
+    )
+}
+
+fun on(
+    cells: Cells,
+    old: KClass<*> = Any::class,
+    new: KClass<*> = Any::class,
+    name: String? = null,
+    order: Long = 0,
+    allowLoop: Boolean = false,
+    skipHistory: Boolean = false,
+    init: TableEventReceiver<Cells, Any, Any>.() -> Unit
+): TableListenerReference {
+    val eventReceiver = when {
+        old == Any::class && new == Any::class -> TableEventReceiver<Cells, Any, Any>(
+            cells,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) { this }
+        old == Any::class -> TableEventReceiver(
+            cells,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) {
+            this.filter {
+                new.isInstance(it.newValue.value)
+            }
+        }
+        new == Any::class -> TableEventReceiver(
+            cells,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) {
+            this.filter {
+                old.isInstance(it.oldValue.value)
+            }
+        }
+        else -> TableEventReceiver(
+            cells,
+            name,
+            order,
+            allowLoop,
+            skipHistory
+        ) {
+            this.filter {
+                old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value)
+            }
+        }
+    }
+    return cells.table.eventProcessor.subscribe(cells, eventReceiver, init)
+}
+
+// ---
+
 fun off(reference: TableListenerReference) = reference.unsubscribe()
 
 fun off(tableEventReceiver: TableEventReceiver<*, *, *>) = off(tableEventReceiver.reference)

@@ -6,7 +6,6 @@ import java.math.BigInteger
 import kotlin.math.min
 import kotlin.math.max
 
-// TODO Add Iterable<Cell<*>> and other operator functions as we have on Column
 // TODO Should the be sealed rather than abstract? Or just a normal class with no BaseRow?
 abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
     abstract val table: Table
@@ -89,9 +88,9 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
                     IndexRelation.AT_OR_AFTER -> at(columnHeader) ?: firstAfter(columnHeader)
                 }.let {
                     it?.toCell(BaseColumn(table, columnHeader, columnMeta.columnOrder), index)
-                        ?: UnitCell(BaseColumn(table, columnHeader, columnMeta.columnOrder), index)
                 }
             }
+            .filterNotNull()
             .iterator()
     }
 
@@ -124,7 +123,7 @@ class RowRange(override val start: Row, override val endInclusive: Row) : Closed
         get() = start.table
 
     override fun iterator(): Iterator<Row> {
-        // TODO This needs to use a ref to ensure a snapshot
+        // Note, a row range is fixed to the indexes used, so no need to worry about refs or prenatal
         return if (start.index <= endInclusive.index) {
             ((start.index)..(endInclusive.index))
                 .asSequence()
@@ -146,6 +145,7 @@ class RowRange(override val start: Row, override val endInclusive: Row) : Closed
         return true
     }
 
+    // TODO Consider what the return value here actually represents?
     override fun isEmpty() = false
 
     override fun toString(): String {
