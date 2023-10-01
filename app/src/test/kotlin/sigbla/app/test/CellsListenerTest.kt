@@ -52,6 +52,48 @@ class CellsListenerTest {
     }
 
     @Test
+    fun `expected duplicates on empty table`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount = 0
+
+        on(t1["A", 1] or t1["A"] or t1[1]) {
+            events {
+                eventCount += count()
+            }
+        }
+
+        t1["A", 1] = "A"
+
+        assertEquals(3, eventCount)
+
+        t1["A", 1] = "B"
+
+        assertEquals(6, eventCount)
+    }
+
+    @Test
+    fun `expected duplicates on prefilled table`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount = 0
+
+        t1["A", 1] = "A"
+
+        on(t1["A", 1] or t1["A"] or t1[1]) {
+            events {
+                eventCount += count()
+            }
+        }
+
+        assertEquals(3, eventCount)
+
+        t1["A", 1] = "B"
+
+        assertEquals(6, eventCount)
+    }
+
+    @Test
     fun `subscribe to filled table and unsubscribe`() {
         val t1 = Table[object {}.javaClass.enclosingMethod.name]
 
