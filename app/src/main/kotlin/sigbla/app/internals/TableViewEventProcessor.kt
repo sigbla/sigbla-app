@@ -134,6 +134,7 @@ internal class TableViewEventProcessor {
         }
     }
 
+    @Synchronized
     fun subscribe(
         tableView: TableView,
         eventReceiver: TableViewEventReceiver<TableView, Any>,
@@ -155,40 +156,41 @@ internal class TableViewEventProcessor {
             ListenerReferenceEvent(listenerRef) {
                 eventReceiver(it)
             }
-        synchronized(listenerRefEvent) {
-            val key = ListenerId(eventReceiver.order)
-            tableViewListeners[key] = listenerRefEvent
-            listenerRef.key = key
 
-            if (!eventReceiver.skipHistory) {
-                val ref = tableView.tableViewRef.get()
-                val oldTableView = tableView.makeClone(ref = TableViewRef())
-                val newTableView = tableView.makeClone(ref = ref)
-                listenerRefEvent.version = ref.version
-                // TODO TableView for on<TableView>(..) ? Note that we also have this as a BaseTableView for now..
-                val seq1 = (if (eventReceiver.type == Any::class || eventReceiver.type == ColumnView::class)
-                    newTableView.columnViews.map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<ColumnView>()) as Sequence<TableViewListenerEvent<Any>>
-                val seq2 = (if (eventReceiver.type == Any::class || eventReceiver.type == RowView::class)
-                    newTableView.rowViews.map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<RowView>()) as Sequence<TableViewListenerEvent<Any>>
-                val seq3 = (if (eventReceiver.type == Any::class || eventReceiver.type == CellView::class)
-                    newTableView.cellViews.map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<CellView>()) as Sequence<TableViewListenerEvent<Any>>
-                val seq4 = (if (eventReceiver.type == Any::class || eventReceiver.type == DerivedCellView::class)
-                    newTableView.asSequence().map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<DerivedCellView>()) as Sequence<TableViewListenerEvent<Any>>
+        val key = ListenerId(eventReceiver.order)
+        tableViewListeners[key] = listenerRefEvent
+        listenerRef.key = key
 
-                listenerRefEvent.listenerEvent(seq1 + seq2 + seq3 + seq4)
-            }
+        if (!eventReceiver.skipHistory) {
+            val ref = tableView.tableViewRef.get()
+            val oldTableView = tableView.makeClone(ref = TableViewRef())
+            val newTableView = tableView.makeClone(ref = ref)
+            listenerRefEvent.version = ref.version
+            // TODO TableView for on<TableView>(..) ? Note that we also have this as a BaseTableView for now..
+            val seq1 = (if (eventReceiver.type == Any::class || eventReceiver.type == ColumnView::class)
+                newTableView.columnViews.map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<ColumnView>()) as Sequence<TableViewListenerEvent<Any>>
+            val seq2 = (if (eventReceiver.type == Any::class || eventReceiver.type == RowView::class)
+                newTableView.rowViews.map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<RowView>()) as Sequence<TableViewListenerEvent<Any>>
+            val seq3 = (if (eventReceiver.type == Any::class || eventReceiver.type == CellView::class)
+                newTableView.cellViews.map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<CellView>()) as Sequence<TableViewListenerEvent<Any>>
+            val seq4 = (if (eventReceiver.type == Any::class || eventReceiver.type == DerivedCellView::class)
+                newTableView.asSequence().map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<DerivedCellView>()) as Sequence<TableViewListenerEvent<Any>>
+
+            listenerRefEvent.listenerEvent(seq1 + seq2 + seq3 + seq4)
         }
+
         return listenerRef
     }
 
+    @Synchronized
     fun subscribe(
         columnView: ColumnView,
         eventReceiver: TableViewEventReceiver<ColumnView, Any>,
@@ -210,40 +212,41 @@ internal class TableViewEventProcessor {
             ListenerReferenceEvent(listenerRef) {
                 eventReceiver(it)
             }
-        synchronized(listenerRefEvent) {
-            val key = ListenerId(eventReceiver.order)
-            columnViewListeners[key] = listenerRefEvent
-            listenerRef.key = key
 
-            if (!eventReceiver.skipHistory) {
-                val ref = columnView.tableView.tableViewRef.get()
-                val oldTableView = columnView.tableView.makeClone(ref = TableViewRef())
-                val newTableView = columnView.tableView.makeClone(ref = ref)
-                listenerRefEvent.version = ref.version
-                // TODO TableView for on<TableView>(..) ? Note that we also have this as a BaseTableView for now..
-                val seq1 = (if (eventReceiver.type == Any::class || eventReceiver.type == ColumnView::class)
-                    sequenceOf(newTableView[columnView]).map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<ColumnView>()) as Sequence<TableViewListenerEvent<Any>>
-                val seq2 = (if (eventReceiver.type == Any::class || eventReceiver.type == RowView::class)
-                    newTableView.rowViews.map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<RowView>()) as Sequence<TableViewListenerEvent<Any>>
-                val seq3 = (if (eventReceiver.type == Any::class || eventReceiver.type == CellView::class)
-                    newTableView[columnView].cellViews.map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<CellView>()) as Sequence<TableViewListenerEvent<Any>>
-                val seq4 = (if (eventReceiver.type == Any::class || eventReceiver.type == DerivedCellView::class)
-                    newTableView[columnView].asSequence().map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<DerivedCellView>()) as Sequence<TableViewListenerEvent<Any>>
+        val key = ListenerId(eventReceiver.order)
+        columnViewListeners[key] = listenerRefEvent
+        listenerRef.key = key
 
-                listenerRefEvent.listenerEvent(seq1 + seq2 + seq3 + seq4)
-            }
+        if (!eventReceiver.skipHistory) {
+            val ref = columnView.tableView.tableViewRef.get()
+            val oldTableView = columnView.tableView.makeClone(ref = TableViewRef())
+            val newTableView = columnView.tableView.makeClone(ref = ref)
+            listenerRefEvent.version = ref.version
+            // TODO TableView for on<TableView>(..) ? Note that we also have this as a BaseTableView for now..
+            val seq1 = (if (eventReceiver.type == Any::class || eventReceiver.type == ColumnView::class)
+                sequenceOf(newTableView[columnView]).map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<ColumnView>()) as Sequence<TableViewListenerEvent<Any>>
+            val seq2 = (if (eventReceiver.type == Any::class || eventReceiver.type == RowView::class)
+                newTableView.rowViews.map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<RowView>()) as Sequence<TableViewListenerEvent<Any>>
+            val seq3 = (if (eventReceiver.type == Any::class || eventReceiver.type == CellView::class)
+                newTableView[columnView].cellViews.map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<CellView>()) as Sequence<TableViewListenerEvent<Any>>
+            val seq4 = (if (eventReceiver.type == Any::class || eventReceiver.type == DerivedCellView::class)
+                newTableView[columnView].asSequence().map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<DerivedCellView>()) as Sequence<TableViewListenerEvent<Any>>
+
+            listenerRefEvent.listenerEvent(seq1 + seq2 + seq3 + seq4)
         }
+
         return listenerRef
     }
 
+    @Synchronized
     fun subscribe(
         rowView: RowView,
         eventReceiver: TableViewEventReceiver<RowView, Any>,
@@ -265,42 +268,43 @@ internal class TableViewEventProcessor {
             ListenerReferenceEvent(listenerRef) {
                 eventReceiver(it)
             }
-        synchronized(listenerRefEvent) {
-            val key = ListenerId(eventReceiver.order)
-            rowViewListeners[key] = listenerRefEvent
-            listenerRef.key = key
 
-            if (!eventReceiver.skipHistory) {
-                val ref = rowView.tableView.tableViewRef.get()
-                val oldTableView = rowView.tableView.makeClone(ref = TableViewRef())
-                val newTableView = rowView.tableView.makeClone(ref = ref)
-                listenerRefEvent.version = ref.version
-                // TODO TableView for on<TableView>(..) ? Note that we also have this as a BaseTableView for now..
-                val seq1 = (if (eventReceiver.type == Any::class || eventReceiver.type == ColumnView::class)
-                    newTableView.columnViews.map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<ColumnView>()) as Sequence<TableViewListenerEvent<Any>>
-                val seq2 = (if (eventReceiver.type == Any::class || eventReceiver.type == RowView::class)
-                    sequenceOf(newTableView[rowView]).map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<RowView>()) as Sequence<TableViewListenerEvent<Any>>
-                val seq3 = (if (eventReceiver.type == Any::class || eventReceiver.type == CellView::class)
-                    newTableView[rowView].cellViews.map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<CellView>()) as Sequence<TableViewListenerEvent<Any>>
-                val seq4 = (if (eventReceiver.type == Any::class || eventReceiver.type == DerivedCellView::class)
-                    newTableView[rowView].asSequence().map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<DerivedCellView>()) as Sequence<TableViewListenerEvent<Any>>
+        val key = ListenerId(eventReceiver.order)
+        rowViewListeners[key] = listenerRefEvent
+        listenerRef.key = key
 
-                listenerRefEvent.listenerEvent(seq1 + seq2 + seq3 + seq4)
-            }
+        if (!eventReceiver.skipHistory) {
+            val ref = rowView.tableView.tableViewRef.get()
+            val oldTableView = rowView.tableView.makeClone(ref = TableViewRef())
+            val newTableView = rowView.tableView.makeClone(ref = ref)
+            listenerRefEvent.version = ref.version
+            // TODO TableView for on<TableView>(..) ? Note that we also have this as a BaseTableView for now..
+            val seq1 = (if (eventReceiver.type == Any::class || eventReceiver.type == ColumnView::class)
+                newTableView.columnViews.map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<ColumnView>()) as Sequence<TableViewListenerEvent<Any>>
+            val seq2 = (if (eventReceiver.type == Any::class || eventReceiver.type == RowView::class)
+                sequenceOf(newTableView[rowView]).map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<RowView>()) as Sequence<TableViewListenerEvent<Any>>
+            val seq3 = (if (eventReceiver.type == Any::class || eventReceiver.type == CellView::class)
+                newTableView[rowView].cellViews.map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<CellView>()) as Sequence<TableViewListenerEvent<Any>>
+            val seq4 = (if (eventReceiver.type == Any::class || eventReceiver.type == DerivedCellView::class)
+                newTableView[rowView].asSequence().map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<DerivedCellView>()) as Sequence<TableViewListenerEvent<Any>>
+
+            listenerRefEvent.listenerEvent(seq1 + seq2 + seq3 + seq4)
         }
+
         return listenerRef
     }
 
     // TODO CellRange
 
+    @Synchronized
     fun subscribe(
         cellView: CellView,
         eventReceiver: TableViewEventReceiver<CellView, Any>,
@@ -322,40 +326,41 @@ internal class TableViewEventProcessor {
             ListenerReferenceEvent(listenerRef) {
                 eventReceiver(it)
             }
-        synchronized(listenerRefEvent) {
-            val key = ListenerId(eventReceiver.order)
-            cellViewListeners[key] = listenerRefEvent
-            listenerRef.key = key
 
-            if (!eventReceiver.skipHistory) {
-                val ref = cellView.tableView.tableViewRef.get()
-                val oldTableView = cellView.tableView.makeClone(ref = TableViewRef())
-                val newTableView = cellView.tableView.makeClone(ref = ref)
-                listenerRefEvent.version = ref.version
-                // TODO TableView for on<TableView>(..) ? Note that we also have this as a BaseTableView for now..
-                val seq1 = (if (eventReceiver.type == Any::class || eventReceiver.type == ColumnView::class)
-                    sequenceOf(newTableView[cellView.columnView]).map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<ColumnView>()) as Sequence<TableViewListenerEvent<Any>>
-                val seq2 = (if (eventReceiver.type == Any::class || eventReceiver.type == RowView::class)
-                    sequenceOf(newTableView[cellView.index]).map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<RowView>()) as Sequence<TableViewListenerEvent<Any>>
-                val seq3 = (if (eventReceiver.type == Any::class || eventReceiver.type == CellView::class)
-                    sequenceOf(newTableView[cellView]).map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<CellView>()) as Sequence<TableViewListenerEvent<Any>>
-                val seq4 = (if (eventReceiver.type == Any::class || eventReceiver.type == DerivedCellView::class)
-                    newTableView[cellView].asSequence().map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<DerivedCellView>()) as Sequence<TableViewListenerEvent<Any>>
+        val key = ListenerId(eventReceiver.order)
+        cellViewListeners[key] = listenerRefEvent
+        listenerRef.key = key
 
-                listenerRefEvent.listenerEvent(seq1 + seq2 + seq3 + seq4)
-            }
+        if (!eventReceiver.skipHistory) {
+            val ref = cellView.tableView.tableViewRef.get()
+            val oldTableView = cellView.tableView.makeClone(ref = TableViewRef())
+            val newTableView = cellView.tableView.makeClone(ref = ref)
+            listenerRefEvent.version = ref.version
+            // TODO TableView for on<TableView>(..) ? Note that we also have this as a BaseTableView for now..
+            val seq1 = (if (eventReceiver.type == Any::class || eventReceiver.type == ColumnView::class)
+                sequenceOf(newTableView[cellView.columnView]).map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<ColumnView>()) as Sequence<TableViewListenerEvent<Any>>
+            val seq2 = (if (eventReceiver.type == Any::class || eventReceiver.type == RowView::class)
+                sequenceOf(newTableView[cellView.index]).map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<RowView>()) as Sequence<TableViewListenerEvent<Any>>
+            val seq3 = (if (eventReceiver.type == Any::class || eventReceiver.type == CellView::class)
+                sequenceOf(newTableView[cellView]).map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<CellView>()) as Sequence<TableViewListenerEvent<Any>>
+            val seq4 = (if (eventReceiver.type == Any::class || eventReceiver.type == DerivedCellView::class)
+                newTableView[cellView].asSequence().map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<DerivedCellView>()) as Sequence<TableViewListenerEvent<Any>>
+
+            listenerRefEvent.listenerEvent(seq1 + seq2 + seq3 + seq4)
         }
+
         return listenerRef
     }
 
+    @Synchronized
     fun subscribe(
         derivedCellView: DerivedCellView,
         eventReceiver: TableViewEventReceiver<DerivedCellView, Any>,
@@ -377,37 +382,37 @@ internal class TableViewEventProcessor {
             ListenerReferenceEvent(listenerRef) {
                 eventReceiver(it)
             }
-        synchronized(listenerRefEvent) {
-            val key = ListenerId(eventReceiver.order)
-            derivedCellViewListeners[key] = listenerRefEvent
-            listenerRef.key = key
 
-            if (!eventReceiver.skipHistory) {
-                val ref = derivedCellView.tableView.tableViewRef.get()
-                val oldTableView = derivedCellView.tableView.makeClone(ref = TableViewRef())
-                val newTableView = derivedCellView.tableView.makeClone(ref = ref)
-                listenerRefEvent.version = ref.version
-                // TODO TableView for on<TableView>(..) ? Note that we also have this as a BaseTableView for now..
-                val seq1 = (if (eventReceiver.type == Any::class || eventReceiver.type == ColumnView::class)
-                    sequenceOf(newTableView[derivedCellView.columnView]).map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<ColumnView>()) as Sequence<TableViewListenerEvent<Any>>
-                val seq2 = (if (eventReceiver.type == Any::class || eventReceiver.type == RowView::class)
-                    sequenceOf(newTableView[derivedCellView.index]).map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<RowView>()) as Sequence<TableViewListenerEvent<Any>>
-                val seq3 = (if (eventReceiver.type == Any::class || eventReceiver.type == CellView::class)
-                    sequenceOf(newTableView[derivedCellView.cellView]).map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<CellView>()) as Sequence<TableViewListenerEvent<Any>>
-                val seq4 = (if (eventReceiver.type == Any::class || eventReceiver.type == DerivedCellView::class)
-                    newTableView[derivedCellView].asSequence().map {
-                        TableViewListenerEvent(oldTableView[it], it)
-                    } else emptySequence<DerivedCellView>()) as Sequence<TableViewListenerEvent<Any>>
+        val key = ListenerId(eventReceiver.order)
+        derivedCellViewListeners[key] = listenerRefEvent
+        listenerRef.key = key
 
-                listenerRefEvent.listenerEvent(seq1 + seq2 + seq3 + seq4)
-            }
+        if (!eventReceiver.skipHistory) {
+            val ref = derivedCellView.tableView.tableViewRef.get()
+            val oldTableView = derivedCellView.tableView.makeClone(ref = TableViewRef())
+            val newTableView = derivedCellView.tableView.makeClone(ref = ref)
+            listenerRefEvent.version = ref.version
+            // TODO TableView for on<TableView>(..) ? Note that we also have this as a BaseTableView for now..
+            val seq1 = (if (eventReceiver.type == Any::class || eventReceiver.type == ColumnView::class)
+                sequenceOf(newTableView[derivedCellView.columnView]).map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<ColumnView>()) as Sequence<TableViewListenerEvent<Any>>
+            val seq2 = (if (eventReceiver.type == Any::class || eventReceiver.type == RowView::class)
+                sequenceOf(newTableView[derivedCellView.index]).map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<RowView>()) as Sequence<TableViewListenerEvent<Any>>
+            val seq3 = (if (eventReceiver.type == Any::class || eventReceiver.type == CellView::class)
+                sequenceOf(newTableView[derivedCellView.cellView]).map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<CellView>()) as Sequence<TableViewListenerEvent<Any>>
+            val seq4 = (if (eventReceiver.type == Any::class || eventReceiver.type == DerivedCellView::class)
+                newTableView[derivedCellView].asSequence().map {
+                    TableViewListenerEvent(oldTableView[it], it)
+                } else emptySequence<DerivedCellView>()) as Sequence<TableViewListenerEvent<Any>>
+
+            listenerRefEvent.listenerEvent(seq1 + seq2 + seq3 + seq4)
         }
+
         return listenerRef
     }
 
@@ -421,7 +426,7 @@ internal class TableViewEventProcessor {
     }
 
     // TODO Look at changing cells and buffers to use seqs
-    // TODO There's a risk that this is called out of order compared to the ref updates
+    @Synchronized
     internal fun publish(views: List<TableViewListenerEvent<Any>>) {
         val buffer = eventBuffer.get()
 
@@ -447,12 +452,10 @@ internal class TableViewEventProcessor {
                 tableViewListeners
                     .values
                     .forEach { listenerRef ->
-                        synchronized(listenerRef) {
-                            loopCheck(listenerRef.listenerReference)
-                            listenerRef.listenerEvent(batch.asSequence().filter { refVersionFromViewRelated(it.newValue) > listenerRef.version })
-                            // TODO Do we really need to clear this here and below?
-                            if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
-                        }
+                        loopCheck(listenerRef.listenerReference)
+                        listenerRef.listenerEvent(batch.asSequence().filter { refVersionFromViewRelated(it.newValue) > listenerRef.version })
+                        // TODO Do we really need to clear this here and below?
+                        if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                     }
 
                 columnViewListeners
@@ -469,11 +472,9 @@ internal class TableViewEventProcessor {
                         }.filter { refVersionFromViewRelated(it.newValue) > listenerRef.version })
 
                         if (columnBatch.isNotEmpty()) {
-                            synchronized(listenerRef) {
-                                loopCheck(listenerRef.listenerReference)
-                                listenerRef.listenerEvent(columnBatch.asSequence())
-                                if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
-                            }
+                            loopCheck(listenerRef.listenerReference)
+                            listenerRef.listenerEvent(columnBatch.asSequence())
+                            if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                         }
                     }
 
@@ -490,11 +491,9 @@ internal class TableViewEventProcessor {
                         }.filter { refVersionFromViewRelated(it.newValue) > listenerRef.version })
 
                         if (rowBatch.isNotEmpty()) {
-                            synchronized(listenerRef) {
-                                loopCheck(listenerRef.listenerReference)
-                                listenerRef.listenerEvent(rowBatch.asSequence())
-                                if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
-                            }
+                            loopCheck(listenerRef.listenerReference)
+                            listenerRef.listenerEvent(rowBatch.asSequence())
+                            if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                         }
                     }
 
@@ -518,11 +517,9 @@ internal class TableViewEventProcessor {
                         }.filter { refVersionFromViewRelated(it.newValue) > listenerRef.version })
 
                         if (cellBatch.isNotEmpty()) {
-                            synchronized(listenerRef) {
-                                loopCheck(listenerRef.listenerReference)
-                                listenerRef.listenerEvent(cellBatch.asSequence())
-                                if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
-                            }
+                            loopCheck(listenerRef.listenerReference)
+                            listenerRef.listenerEvent(cellBatch.asSequence())
+                            if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                         }
                     }
 
@@ -544,11 +541,9 @@ internal class TableViewEventProcessor {
                         }.filter { refVersionFromViewRelated(it.newValue) > listenerRef.version })
 
                         if (cellBatch.isNotEmpty()) {
-                            synchronized(listenerRef) {
-                                loopCheck(listenerRef.listenerReference)
-                                listenerRef.listenerEvent(cellBatch.asSequence())
-                                if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
-                            }
+                            loopCheck(listenerRef.listenerReference)
+                            listenerRef.listenerEvent(cellBatch.asSequence())
+                            if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                         }
                     }
             }
@@ -567,6 +562,11 @@ internal class TableViewEventProcessor {
 
     internal fun shutdown() {
         tableViewListeners.clear()
+        columnViewListeners.clear()
+        rowViewListeners.clear()
+        // TODO cellRangeViewListeners.clear()
+        cellViewListeners.clear()
+        derivedCellViewListeners.clear()
     }
 
     companion object {

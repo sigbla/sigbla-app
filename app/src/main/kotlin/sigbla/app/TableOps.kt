@@ -1354,40 +1354,44 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
     val right = columnToColumnAction.right
     val order = columnToColumnAction.order
 
-    if (left.table === right.table) {
-        // Internal move
-        val newRight = BaseColumn(left.table, withName)
-        val (oldRef, newRef) = left.table.tableRef.refAction(
-            (::columnMove)(left.columnHeader, right.columnHeader, order, withName) {
-                copy(
-                    columns = this.columns.put(withName, ColumnMeta(newRight.columnOrder, this.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
-                    columnCells = this.columnCells.put(withName, this.columnCells[left.columnHeader] ?: PTreeMap())
+    synchronized(left.table.eventProcessor) {
+        synchronized(right.table.eventProcessor) {
+            if (left.table === right.table) {
+                // Internal move
+                val newRight = BaseColumn(left.table, withName)
+                val (oldRef, newRef) = left.table.tableRef.refAction(
+                    (::columnMove)(left.columnHeader, right.columnHeader, order, withName) {
+                        copy(
+                            columns = this.columns.put(withName, ColumnMeta(newRight.columnOrder, this.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
+                            columnCells = this.columnCells.put(withName, this.columnCells[left.columnHeader] ?: PTreeMap())
+                        )
+                    }
                 )
-            }
-        )
 
-        publishColumnMoveEvents(left, right, newRight, order, oldRef, newRef, oldRef, newRef)
-    } else {
-        // Move between tables
-        val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
-            ref.copy(
-                columns = ref.columns.remove(left.columnHeader),
-                columnCells = ref.columnCells.remove(left.columnHeader),
-                version = ref.version + 1L
-            )
+                publishColumnMoveEvents(left, right, newRight, order, oldRef, newRef, oldRef, newRef)
+            } else {
+                // Move between tables
+                val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
+                    ref.copy(
+                        columns = ref.columns.remove(left.columnHeader),
+                        columnCells = ref.columnCells.remove(left.columnHeader),
+                        version = ref.version + 1L
+                    )
+                }
+
+                val newRight = BaseColumn(right.table, withName)
+                val (oldRef2, newRef2) = right.table.tableRef.refAction(
+                    (::columnMove)(newRight.columnHeader, right.columnHeader, order, withName) {
+                        copy(
+                            columns = this.columns.put(withName, ColumnMeta(newRight.columnOrder, oldRef1.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
+                            columnCells = this.columnCells.put(withName, oldRef1.columnCells[left.columnHeader] ?: PTreeMap())
+                        )
+                    }
+                )
+
+                publishColumnMoveEvents(left, right, newRight, order, oldRef1, newRef1, oldRef2, newRef2)
+            }
         }
-
-        val newRight = BaseColumn(right.table, withName)
-        val (oldRef2, newRef2) = right.table.tableRef.refAction(
-            (::columnMove)(newRight.columnHeader, right.columnHeader, order, withName) {
-                copy(
-                    columns = this.columns.put(withName, ColumnMeta(newRight.columnOrder, oldRef1.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
-                    columnCells = this.columnCells.put(withName, oldRef1.columnCells[left.columnHeader] ?: PTreeMap())
-                )
-            }
-        )
-
-        publishColumnMoveEvents(left, right, newRight, order, oldRef1, newRef1, oldRef2, newRef2)
     }
 }
 
@@ -1439,40 +1443,44 @@ fun move(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
     val left = columnToTableAction.left
     val table = columnToTableAction.table
 
-    if (left.table === table) {
-        // Internal move
-        val newRight = BaseColumn(table, withName)
-        val (oldRef, newRef) = table.tableRef.refAction(
-            (::columnMove)(withName) {
-                copy(
-                    columns = this.columns.remove(left.columnHeader).put(withName, ColumnMeta(newRight.columnOrder, this.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
-                    columnCells = this.columnCells.remove(left.columnHeader).put(withName, this.columnCells[left.columnHeader] ?: PTreeMap()),
+    synchronized(left.table.eventProcessor) {
+        synchronized(table.eventProcessor) {
+            if (left.table === table) {
+                // Internal move
+                val newRight = BaseColumn(table, withName)
+                val (oldRef, newRef) = table.tableRef.refAction(
+                    (::columnMove)(withName) {
+                        copy(
+                            columns = this.columns.remove(left.columnHeader).put(withName, ColumnMeta(newRight.columnOrder, this.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
+                            columnCells = this.columnCells.remove(left.columnHeader).put(withName, this.columnCells[left.columnHeader] ?: PTreeMap()),
+                        )
+                    }
                 )
-            }
-        )
 
-        publishTableMoveEvents(left, table, newRight, oldRef, newRef, oldRef, newRef)
-    } else {
-        // Move between tables
-        val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
-            ref.copy(
-                columns = ref.columns.remove(left.columnHeader),
-                columnCells = ref.columnCells.remove(left.columnHeader),
-                version = ref.version + 1L
-            )
+                publishTableMoveEvents(left, table, newRight, oldRef, newRef, oldRef, newRef)
+            } else {
+                // Move between tables
+                val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
+                    ref.copy(
+                        columns = ref.columns.remove(left.columnHeader),
+                        columnCells = ref.columnCells.remove(left.columnHeader),
+                        version = ref.version + 1L
+                    )
+                }
+
+                val newRight = BaseColumn(table, withName)
+                val (oldRef2, newRef2) = table.tableRef.refAction(
+                    (::columnMove)(withName) {
+                        copy(
+                            columns = this.columns.put(withName, ColumnMeta(newRight.columnOrder, oldRef1.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
+                            columnCells = this.columnCells.put(withName, oldRef1.columnCells[left.columnHeader] ?: PTreeMap()),
+                        )
+                    }
+                )
+
+                publishTableMoveEvents(left, table, newRight, oldRef1, newRef1, oldRef2, newRef2)
+            }
         }
-
-        val newRight = BaseColumn(table, withName)
-        val (oldRef2, newRef2) = table.tableRef.refAction(
-            (::columnMove)(withName) {
-                copy(
-                    columns = this.columns.put(withName, ColumnMeta(newRight.columnOrder, oldRef1.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
-                    columnCells = this.columnCells.put(withName, oldRef1.columnCells[left.columnHeader] ?: PTreeMap()),
-                )
-            }
-        )
-
-        publishTableMoveEvents(left, table, newRight, oldRef1, newRef1, oldRef2, newRef2)
     }
 }
 
@@ -1547,33 +1555,37 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
     val right = columnToColumnAction.right
     val order = columnToColumnAction.order
 
-    if (left.table === right.table) {
-        // Internal copy
-        val newRight = BaseColumn(left.table, withName)
-        val (oldRef, newRef) = left.table.tableRef.refAction(
-            (::columnCopy)(left.columnHeader, right.columnHeader, order, withName) {
-                copy(
-                    columns = this.columns.put(withName, ColumnMeta(newRight.columnOrder, this.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
-                    columnCells = this.columnCells.put(withName, this.columnCells[left.columnHeader] ?: PTreeMap())
+    synchronized(left.table.eventProcessor) {
+        synchronized(right.table.eventProcessor) {
+            if (left.table === right.table) {
+                // Internal copy
+                val newRight = BaseColumn(left.table, withName)
+                val (oldRef, newRef) = left.table.tableRef.refAction(
+                    (::columnCopy)(left.columnHeader, right.columnHeader, order, withName) {
+                        copy(
+                            columns = this.columns.put(withName, ColumnMeta(newRight.columnOrder, this.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
+                            columnCells = this.columnCells.put(withName, this.columnCells[left.columnHeader] ?: PTreeMap())
+                        )
+                    }
                 )
-            }
-        )
 
-        publishColumnCopyEvents(left, right, newRight, order, oldRef, newRef)
-    } else {
-        // Copy between tables
-        val newRight = BaseColumn(right.table, withName)
-        val (oldRef, newRef) = right.table.tableRef.refAction(
-            (::columnCopy)(newRight.columnHeader, right.columnHeader, order, withName) {
-                val leftRef = left.table.tableRef.get()
-                copy(
-                    columns = this.columns.put(withName, ColumnMeta(newRight.columnOrder, leftRef.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
-                    columnCells = this.columnCells.put(withName, leftRef.columnCells[left.columnHeader] ?: PTreeMap())
+                publishColumnCopyEvents(left, right, newRight, order, oldRef, newRef)
+            } else {
+                // Copy between tables
+                val newRight = BaseColumn(right.table, withName)
+                val (oldRef, newRef) = right.table.tableRef.refAction(
+                    (::columnCopy)(newRight.columnHeader, right.columnHeader, order, withName) {
+                        val leftRef = left.table.tableRef.get()
+                        copy(
+                            columns = this.columns.put(withName, ColumnMeta(newRight.columnOrder, leftRef.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
+                            columnCells = this.columnCells.put(withName, leftRef.columnCells[left.columnHeader] ?: PTreeMap())
+                        )
+                    }
                 )
-            }
-        )
 
-        publishColumnCopyEvents(left, right, newRight, order, oldRef, newRef)
+                publishColumnCopyEvents(left, right, newRight, order, oldRef, newRef)
+            }
+        }
     }
 }
 
@@ -1624,33 +1636,37 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
     val left = columnToTableAction.left
     val table = columnToTableAction.table
 
-    if (left.table === table) {
-        // Internal copy
-        val newRight = BaseColumn(table, withName)
-        val (oldRef, newRef) = table.tableRef.refAction(
-            (::columnCopy)(withName) {
-                copy(
-                    columns = this.columns.put(withName, ColumnMeta(newRight.columnOrder, this.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
-                    columnCells = this.columnCells.put(withName, this.columnCells[left.columnHeader] ?: PTreeMap()),
+    synchronized(left.table.eventProcessor) {
+        synchronized(table.eventProcessor) {
+            if (left.table === table) {
+                // Internal copy
+                val newRight = BaseColumn(table, withName)
+                val (oldRef, newRef) = table.tableRef.refAction(
+                    (::columnCopy)(withName) {
+                        copy(
+                            columns = this.columns.put(withName, ColumnMeta(newRight.columnOrder, this.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
+                            columnCells = this.columnCells.put(withName, this.columnCells[left.columnHeader] ?: PTreeMap()),
+                        )
+                    }
                 )
-            }
-        )
 
-        publishTableCopyEvents(left, table, newRight, oldRef, newRef)
-    } else {
-        // Copy between tables
-        val newRight = BaseColumn(table, withName)
-        val (oldRef, newRef) = table.tableRef.refAction(
-            (::columnCopy)(withName) {
-                val leftRef = left.table.tableRef.get()
-                copy(
-                    columns = this.columns.put(withName, ColumnMeta(newRight.columnOrder, leftRef.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
-                    columnCells = this.columnCells.put(withName, left.table.tableRef.get().columnCells[left.columnHeader] ?: PTreeMap()),
+                publishTableCopyEvents(left, table, newRight, oldRef, newRef)
+            } else {
+                // Copy between tables
+                val newRight = BaseColumn(table, withName)
+                val (oldRef, newRef) = table.tableRef.refAction(
+                    (::columnCopy)(withName) {
+                        val leftRef = left.table.tableRef.get()
+                        copy(
+                            columns = this.columns.put(withName, ColumnMeta(newRight.columnOrder, leftRef.columns[left.columnHeader]?.prenatal ?: throw InvalidColumnException(left))),
+                            columnCells = this.columnCells.put(withName, left.table.tableRef.get().columnCells[left.columnHeader] ?: PTreeMap()),
+                        )
+                    }
                 )
-            }
-        )
 
-        publishTableCopyEvents(left, table, newRight, oldRef, newRef)
+                publishTableCopyEvents(left, table, newRight, oldRef, newRef)
+            }
+        }
     }
 }
 
@@ -1674,153 +1690,157 @@ fun move(rowToRowAction: RowToRowAction) {
     // TODO Handle index relation on right side..?
     if (right.indexRelation != IndexRelation.AT) throw UnsupportedOperationException("Only supporting IndexRelation.AT on right side")
 
-    if (order == RowActionOrder.TO) {
-        if (left.table === right.table) {
-            // Internal move
-            val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
-                ref.copy(
-                    columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
-                        val columnHeader = ccm.component1()
-                        getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (cell, index) ->
-                            acc.put(columnHeader, ccm.component2().remove(index).put(right.index, cell))
-                        } ?: acc
-                    },
-                    version = ref.version + 1L
-                )
-            }
-
-            publishRowMoveEvents(left, right, order, oldRef, newRef, oldRef, newRef)
-        } else {
-            // Move between tables
-            val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
-                ref.copy(
-                    columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
-                        val columnHeader = ccm.component1()
-                        getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (_, index) ->
-                            acc.put(columnHeader, ccm.component2().remove(index))
-                        } ?: acc
-                    },
-                    version = ref.version + 1L
-                )
-            }
-
-            val (oldRef2, newRef2) = right.table.tableRef.refAction { ref ->
-                val columnsMap = oldRef1
-                    .columns
-                    .sortedBy { it.component2().columnOrder }
-                    .fold(ref.columns) { acc, (c, cm) ->
-                        if (acc.containsKey(c)) acc else acc.put(c, ColumnMeta(BaseColumn(right.table, c).columnOrder, cm.prenatal))
+    synchronized(left.table.eventProcessor) {
+        synchronized(right.table.eventProcessor) {
+            if (order == RowActionOrder.TO) {
+                if (left.table === right.table) {
+                    // Internal move
+                    val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
+                        ref.copy(
+                            columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
+                                val columnHeader = ccm.component1()
+                                getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (cell, index) ->
+                                    acc.put(columnHeader, ccm.component2().remove(index).put(right.index, cell))
+                                } ?: acc
+                            },
+                            version = ref.version + 1L
+                        )
                     }
 
-                val columnCellMap = oldRef1.columnCells.fold(ref.columnCells) { acc, ccm ->
-                    val columnHeader = ccm.component1()
-                    getCellRaw(oldRef1, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
-                        acc.put(columnHeader, (acc.get(columnHeader) ?: PTreeMap()).put(right.index, cell))
-                    } ?: acc
-                }
-
-                ref.copy(
-                    columns = columnsMap,
-                    columnCells = columnCellMap,
-                    version = ref.version + 1L
-                )
-            }
-
-            publishRowMoveEvents(left, right, order, oldRef1, newRef1, oldRef2, newRef2)
-        }
-    } else {
-        if (left.table === right.table) {
-            // Internal move
-            val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
-                ref.copy(
-                    columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
-                        val columnHeader = ccm.component1()
-                        getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (cell, index) ->
-                            val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
-
-                            val withoutMoved = ccm.component2().remove(index)
-                            val headCells = withoutMoved.to(newIndex, order != RowActionOrder.AFTER)
-                            val tailCells = withoutMoved.from(newIndex, order == RowActionOrder.AFTER)
-
-                            val cells = if (order == RowActionOrder.AFTER) {
-                                tailCells.fold(headCells) { acc2, cell ->
-                                    // Shift down
-                                    acc2.put(cell.component1() + 1, cell.component2())
-                                }
-                            } else {
-                                headCells.fold(tailCells) { acc2, cell ->
-                                    // Shift up
-                                    acc2.put(cell.component1() - 1, cell.component2())
-                                }
-                            }
-
-                            acc.put(columnHeader, cells.put(newIndex, cell))
-                        } ?: acc
-                    },
-                    version = ref.version + 1L
-                )
-            }
-
-            publishRowMoveEvents(left, right, order, oldRef, newRef, oldRef, newRef)
-        } else {
-            // Move between tables
-            val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
-                ref.copy(
-                    columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
-                        val columnHeader = ccm.component1()
-                        getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (_, index) ->
-                            acc.put(columnHeader, ccm.component2().remove(index))
-                        } ?: acc
-                    },
-                    version = ref.version + 1L
-                )
-            }
-
-            val (oldRef2, newRef2) = right.table.tableRef.refAction { ref ->
-                val columnsMap = oldRef1
-                    .columns
-                    .sortedBy { it.component2().columnOrder }
-                    .fold(ref.columns) { acc, (c, cm) ->
-                        if (acc.containsKey(c)) {
-                            val existing = acc[c]!!
-                            acc.put(c, existing.copy(prenatal = existing.prenatal && cm.prenatal))
-                        } else acc.put(c, ColumnMeta(BaseColumn(right.table, c).columnOrder, cm.prenatal))
+                    publishRowMoveEvents(left, right, order, oldRef, newRef, oldRef, newRef)
+                } else {
+                    // Move between tables
+                    val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
+                        ref.copy(
+                            columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
+                                val columnHeader = ccm.component1()
+                                getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (_, index) ->
+                                    acc.put(columnHeader, ccm.component2().remove(index))
+                                } ?: acc
+                            },
+                            version = ref.version + 1L
+                        )
                     }
 
-                val columnCellMap = oldRef1.columnCells.fold(ref.columnCells) { acc, ccm ->
-                    val columnHeader = ccm.component1()
-                    getCellRaw(oldRef1, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
-                        val cm = acc.get(columnHeader) ?: PTreeMap()
-
-                        val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
-
-                        val headCells = cm.to(newIndex, order != RowActionOrder.AFTER)
-                        val tailCells = cm.from(newIndex, order == RowActionOrder.AFTER)
-
-                        val cells = if (order == RowActionOrder.AFTER) {
-                            tailCells.fold(headCells) { acc2, cell ->
-                                // Shift down
-                                acc2.put(cell.component1() + 1, cell.component2())
+                    val (oldRef2, newRef2) = right.table.tableRef.refAction { ref ->
+                        val columnsMap = oldRef1
+                            .columns
+                            .sortedBy { it.component2().columnOrder }
+                            .fold(ref.columns) { acc, (c, cm) ->
+                                if (acc.containsKey(c)) acc else acc.put(c, ColumnMeta(BaseColumn(right.table, c).columnOrder, cm.prenatal))
                             }
-                        } else {
-                            headCells.fold(tailCells) { acc2, cell ->
-                                // Shift up
-                                acc2.put(cell.component1() - 1, cell.component2())
-                            }
+
+                        val columnCellMap = oldRef1.columnCells.fold(ref.columnCells) { acc, ccm ->
+                            val columnHeader = ccm.component1()
+                            getCellRaw(oldRef1, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
+                                acc.put(columnHeader, (acc.get(columnHeader) ?: PTreeMap()).put(right.index, cell))
+                            } ?: acc
                         }
 
-                        acc.put(columnHeader, cells.put(newIndex, cell))
-                    } ?: acc
+                        ref.copy(
+                            columns = columnsMap,
+                            columnCells = columnCellMap,
+                            version = ref.version + 1L
+                        )
+                    }
+
+                    publishRowMoveEvents(left, right, order, oldRef1, newRef1, oldRef2, newRef2)
                 }
+            } else {
+                if (left.table === right.table) {
+                    // Internal move
+                    val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
+                        ref.copy(
+                            columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
+                                val columnHeader = ccm.component1()
+                                getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (cell, index) ->
+                                    val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
 
-                ref.copy(
-                    columns = columnsMap,
-                    columnCells = columnCellMap,
-                    version = ref.version + 1L
-                )
+                                    val withoutMoved = ccm.component2().remove(index)
+                                    val headCells = withoutMoved.to(newIndex, order != RowActionOrder.AFTER)
+                                    val tailCells = withoutMoved.from(newIndex, order == RowActionOrder.AFTER)
+
+                                    val cells = if (order == RowActionOrder.AFTER) {
+                                        tailCells.fold(headCells) { acc2, cell ->
+                                            // Shift down
+                                            acc2.put(cell.component1() + 1, cell.component2())
+                                        }
+                                    } else {
+                                        headCells.fold(tailCells) { acc2, cell ->
+                                            // Shift up
+                                            acc2.put(cell.component1() - 1, cell.component2())
+                                        }
+                                    }
+
+                                    acc.put(columnHeader, cells.put(newIndex, cell))
+                                } ?: acc
+                            },
+                            version = ref.version + 1L
+                        )
+                    }
+
+                    publishRowMoveEvents(left, right, order, oldRef, newRef, oldRef, newRef)
+                } else {
+                    // Move between tables
+                    val (oldRef1, newRef1) = left.table.tableRef.refAction { ref ->
+                        ref.copy(
+                            columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
+                                val columnHeader = ccm.component1()
+                                getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (_, index) ->
+                                    acc.put(columnHeader, ccm.component2().remove(index))
+                                } ?: acc
+                            },
+                            version = ref.version + 1L
+                        )
+                    }
+
+                    val (oldRef2, newRef2) = right.table.tableRef.refAction { ref ->
+                        val columnsMap = oldRef1
+                            .columns
+                            .sortedBy { it.component2().columnOrder }
+                            .fold(ref.columns) { acc, (c, cm) ->
+                                if (acc.containsKey(c)) {
+                                    val existing = acc[c]!!
+                                    acc.put(c, existing.copy(prenatal = existing.prenatal && cm.prenatal))
+                                } else acc.put(c, ColumnMeta(BaseColumn(right.table, c).columnOrder, cm.prenatal))
+                            }
+
+                        val columnCellMap = oldRef1.columnCells.fold(ref.columnCells) { acc, ccm ->
+                            val columnHeader = ccm.component1()
+                            getCellRaw(oldRef1, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
+                                val cm = acc.get(columnHeader) ?: PTreeMap()
+
+                                val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
+
+                                val headCells = cm.to(newIndex, order != RowActionOrder.AFTER)
+                                val tailCells = cm.from(newIndex, order == RowActionOrder.AFTER)
+
+                                val cells = if (order == RowActionOrder.AFTER) {
+                                    tailCells.fold(headCells) { acc2, cell ->
+                                        // Shift down
+                                        acc2.put(cell.component1() + 1, cell.component2())
+                                    }
+                                } else {
+                                    headCells.fold(tailCells) { acc2, cell ->
+                                        // Shift up
+                                        acc2.put(cell.component1() - 1, cell.component2())
+                                    }
+                                }
+
+                                acc.put(columnHeader, cells.put(newIndex, cell))
+                            } ?: acc
+                        }
+
+                        ref.copy(
+                            columns = columnsMap,
+                            columnCells = columnCellMap,
+                            version = ref.version + 1L
+                        )
+                    }
+
+                    publishRowMoveEvents(left, right, order, oldRef1, newRef1, oldRef2, newRef2)
+                }
             }
-
-            publishRowMoveEvents(left, right, order, oldRef1, newRef1, oldRef2, newRef2)
         }
     }
 }
@@ -1835,132 +1855,136 @@ fun copy(rowToRowAction: RowToRowAction) {
     // TODO Handle index relation on right side..?
     if (right.indexRelation != IndexRelation.AT) throw UnsupportedOperationException("Only supporting IndexRelation.AT on right side")
 
-    if (order == RowActionOrder.TO) {
-        if (left.table === right.table) {
-            // Internal copy
-            val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
-                ref.copy(
-                    columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
-                        val columnHeader = ccm.component1()
-                        getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
-                            acc.put(columnHeader, ccm.component2().put(right.index, cell))
-                        } ?: acc
-                    },
-                    version = ref.version + 1L
-                )
-            }
-
-            publishRowCopyEvents(left, right, order, oldRef, newRef)
-        } else {
-            // Copy between tables
-            val (oldRef, newRef) = right.table.tableRef.refAction { ref ->
-                val leftRef = left.table.tableRef.get()
-
-                val columnsMap = leftRef
-                    .columns
-                    .sortedBy { it.component2().columnOrder }
-                    .fold(ref.columns) { acc, (c, cm) ->
-                        if (acc.containsKey(c)) acc else acc.put(c, ColumnMeta(BaseColumn(right.table, c).columnOrder, cm.prenatal))
+    synchronized(left.table.eventProcessor) {
+        synchronized(right.table.eventProcessor) {
+            if (order == RowActionOrder.TO) {
+                if (left.table === right.table) {
+                    // Internal copy
+                    val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
+                        ref.copy(
+                            columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
+                                val columnHeader = ccm.component1()
+                                getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
+                                    acc.put(columnHeader, ccm.component2().put(right.index, cell))
+                                } ?: acc
+                            },
+                            version = ref.version + 1L
+                        )
                     }
 
-                val columnCellMap = leftRef.columnCells.fold(ref.columnCells) { acc, ccm ->
-                    val columnHeader = ccm.component1()
-                    getCellRaw(leftRef, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
-                        acc.put(columnHeader, (acc.get(columnHeader) ?: PTreeMap()).put(right.index, cell))
-                    } ?: acc
-                }
+                    publishRowCopyEvents(left, right, order, oldRef, newRef)
+                } else {
+                    // Copy between tables
+                    val (oldRef, newRef) = right.table.tableRef.refAction { ref ->
+                        val leftRef = left.table.tableRef.get()
 
-                ref.copy(
-                    columns = columnsMap,
-                    columnCells = columnCellMap,
-                    version = ref.version + 1L
-                )
-            }
-
-            publishRowCopyEvents(left, right, order, oldRef, newRef)
-        }
-    } else {
-        if (left.table === right.table) {
-            // Internal copy
-            val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
-                ref.copy(
-                    columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
-                        val columnHeader = ccm.component1()
-                        getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
-                            val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
-
-                            val headCells = ccm.component2().to(newIndex, order != RowActionOrder.AFTER)
-                            val tailCells = ccm.component2().from(newIndex, order == RowActionOrder.AFTER)
-
-                            val cells = if (order == RowActionOrder.AFTER) {
-                                tailCells.fold(headCells) { acc2, cell ->
-                                    // Shift down
-                                    acc2.put(cell.component1() + 1, cell.component2())
-                                }
-                            } else {
-                                headCells.fold(tailCells) { acc2, cell ->
-                                    // Shift up
-                                    acc2.put(cell.component1() - 1, cell.component2())
-                                }
+                        val columnsMap = leftRef
+                            .columns
+                            .sortedBy { it.component2().columnOrder }
+                            .fold(ref.columns) { acc, (c, cm) ->
+                                if (acc.containsKey(c)) acc else acc.put(c, ColumnMeta(BaseColumn(right.table, c).columnOrder, cm.prenatal))
                             }
 
-                            acc.put(columnHeader, cells.put(newIndex, cell))
-                        } ?: acc
-                    },
-                    version = ref.version + 1L
-                )
-            }
-
-            publishRowCopyEvents(left, right, order, oldRef, newRef)
-        } else {
-            // Copy between tables
-            val (oldRef, newRef) = right.table.tableRef.refAction { ref ->
-                val leftRef = left.table.tableRef.get()
-
-                val columnsMap = leftRef
-                    .columns
-                    .sortedBy { it.component2().columnOrder }
-                    .fold(ref.columns) { acc, (c, cm) ->
-                        if (acc.containsKey(c)) {
-                            val existing = acc[c]!!
-                            acc.put(c, existing.copy(prenatal = existing.prenatal && cm.prenatal))
-                        } else acc.put(c, ColumnMeta(BaseColumn(right.table, c).columnOrder, cm.prenatal))
-                    }
-
-                val columnCellMap = leftRef.columnCells.fold(ref.columnCells) { acc, ccm ->
-                    val columnHeader = ccm.component1()
-                    getCellRaw(leftRef, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
-                        val cm = acc.get(columnHeader) ?: PTreeMap()
-
-                        val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
-
-                        val headCells = cm.to(newIndex, order != RowActionOrder.AFTER)
-                        val tailCells = cm.from(newIndex, order == RowActionOrder.AFTER)
-
-                        val cells = if (order == RowActionOrder.AFTER) {
-                            tailCells.fold(headCells) { acc2, cell ->
-                                // Shift down
-                                acc2.put(cell.component1() + 1, cell.component2())
-                            }
-                        } else {
-                            headCells.fold(tailCells) { acc2, cell ->
-                                // Shift up
-                                acc2.put(cell.component1() - 1, cell.component2())
-                            }
+                        val columnCellMap = leftRef.columnCells.fold(ref.columnCells) { acc, ccm ->
+                            val columnHeader = ccm.component1()
+                            getCellRaw(leftRef, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
+                                acc.put(columnHeader, (acc.get(columnHeader) ?: PTreeMap()).put(right.index, cell))
+                            } ?: acc
                         }
 
-                        acc.put(columnHeader, cells.put(newIndex, cell))
-                    } ?: acc
+                        ref.copy(
+                            columns = columnsMap,
+                            columnCells = columnCellMap,
+                            version = ref.version + 1L
+                        )
+                    }
+
+                    publishRowCopyEvents(left, right, order, oldRef, newRef)
                 }
+            } else {
+                if (left.table === right.table) {
+                    // Internal copy
+                    val (oldRef, newRef) = left.table.tableRef.refAction { ref ->
+                        ref.copy(
+                            columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
+                                val columnHeader = ccm.component1()
+                                getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
+                                    val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
 
-                ref.copy(
-                    columns = columnsMap,
-                    columnCells = columnCellMap,
-                    version = ref.version + 1L
-                )
+                                    val headCells = ccm.component2().to(newIndex, order != RowActionOrder.AFTER)
+                                    val tailCells = ccm.component2().from(newIndex, order == RowActionOrder.AFTER)
+
+                                    val cells = if (order == RowActionOrder.AFTER) {
+                                        tailCells.fold(headCells) { acc2, cell ->
+                                            // Shift down
+                                            acc2.put(cell.component1() + 1, cell.component2())
+                                        }
+                                    } else {
+                                        headCells.fold(tailCells) { acc2, cell ->
+                                            // Shift up
+                                            acc2.put(cell.component1() - 1, cell.component2())
+                                        }
+                                    }
+
+                                    acc.put(columnHeader, cells.put(newIndex, cell))
+                                } ?: acc
+                            },
+                            version = ref.version + 1L
+                        )
+                    }
+
+                    publishRowCopyEvents(left, right, order, oldRef, newRef)
+                } else {
+                    // Copy between tables
+                    val (oldRef, newRef) = right.table.tableRef.refAction { ref ->
+                        val leftRef = left.table.tableRef.get()
+
+                        val columnsMap = leftRef
+                            .columns
+                            .sortedBy { it.component2().columnOrder }
+                            .fold(ref.columns) { acc, (c, cm) ->
+                                if (acc.containsKey(c)) {
+                                    val existing = acc[c]!!
+                                    acc.put(c, existing.copy(prenatal = existing.prenatal && cm.prenatal))
+                                } else acc.put(c, ColumnMeta(BaseColumn(right.table, c).columnOrder, cm.prenatal))
+                            }
+
+                        val columnCellMap = leftRef.columnCells.fold(ref.columnCells) { acc, ccm ->
+                            val columnHeader = ccm.component1()
+                            getCellRaw(leftRef, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
+                                val cm = acc.get(columnHeader) ?: PTreeMap()
+
+                                val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
+
+                                val headCells = cm.to(newIndex, order != RowActionOrder.AFTER)
+                                val tailCells = cm.from(newIndex, order == RowActionOrder.AFTER)
+
+                                val cells = if (order == RowActionOrder.AFTER) {
+                                    tailCells.fold(headCells) { acc2, cell ->
+                                        // Shift down
+                                        acc2.put(cell.component1() + 1, cell.component2())
+                                    }
+                                } else {
+                                    headCells.fold(tailCells) { acc2, cell ->
+                                        // Shift up
+                                        acc2.put(cell.component1() - 1, cell.component2())
+                                    }
+                                }
+
+                                acc.put(columnHeader, cells.put(newIndex, cell))
+                            } ?: acc
+                        }
+
+                        ref.copy(
+                            columns = columnsMap,
+                            columnCells = columnCellMap,
+                            version = ref.version + 1L
+                        )
+                    }
+
+                    publishRowCopyEvents(left, right, order, oldRef, newRef)
+                }
             }
-
-            publishRowCopyEvents(left, right, order, oldRef, newRef)
         }
     }
 }

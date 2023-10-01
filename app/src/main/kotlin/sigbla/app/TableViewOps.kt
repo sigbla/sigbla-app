@@ -8,72 +8,78 @@ import java.io.File
 import kotlin.reflect.KClass
 
 fun clear(columnView: ColumnView) {
-    val tableViewRef = columnView.tableView.tableViewRef
-    val columnHeader = columnView.columnHeader
-    val eventProcessor = columnView.tableView.eventProcessor
+    synchronized(columnView.tableView.eventProcessor) {
+        val tableViewRef = columnView.tableView.tableViewRef
+        val columnHeader = columnView.columnHeader
+        val eventProcessor = columnView.tableView.eventProcessor
 
-    val (oldRef, newRef) = tableViewRef.refAction {
-        it.copy(
-            columnViews = it.columnViews.remove(columnHeader),
-            version = it.version + 1L
-        )
+        val (oldRef, newRef) = tableViewRef.refAction {
+            it.copy(
+                columnViews = it.columnViews.remove(columnHeader),
+                version = it.version + 1L
+            )
+        }
+
+        if (!eventProcessor.haveListeners()) return
+
+        val oldView = columnView.tableView.makeClone(ref = oldRef)
+        val newView = columnView.tableView.makeClone(ref = newRef)
+
+        val old = oldView[columnView]
+        val new = newView[columnView]
+
+        eventProcessor.publish(listOf(TableViewListenerEvent<ColumnView>(old, new)) as List<TableViewListenerEvent<Any>>)
     }
-
-    if (!eventProcessor.haveListeners()) return
-
-    val oldView = columnView.tableView.makeClone(ref = oldRef)
-    val newView = columnView.tableView.makeClone(ref = newRef)
-
-    val old = oldView[columnView]
-    val new = newView[columnView]
-
-    eventProcessor.publish(listOf(TableViewListenerEvent<ColumnView>(old, new)) as List<TableViewListenerEvent<Any>>)
 }
 
 fun clear(rowView: RowView) {
-    val tableViewRef = rowView.tableView.tableViewRef
-    val eventProcessor = rowView.tableView.eventProcessor
+    synchronized(rowView.tableView.eventProcessor) {
+        val tableViewRef = rowView.tableView.tableViewRef
+        val eventProcessor = rowView.tableView.eventProcessor
 
-    val (oldRef, newRef) = tableViewRef.refAction {
-        it.copy(
-            rowViews = it.rowViews.remove(rowView.index),
-            version = it.version + 1L
-        )
+        val (oldRef, newRef) = tableViewRef.refAction {
+            it.copy(
+                rowViews = it.rowViews.remove(rowView.index),
+                version = it.version + 1L
+            )
+        }
+
+        if (!eventProcessor.haveListeners()) return
+
+        val oldView = rowView.tableView.makeClone(ref = oldRef)
+        val newView = rowView.tableView.makeClone(ref = newRef)
+
+        val old = oldView[rowView]
+        val new = newView[rowView]
+
+        eventProcessor.publish(listOf(TableViewListenerEvent<RowView>(old, new)) as List<TableViewListenerEvent<Any>>)
     }
-
-    if (!eventProcessor.haveListeners()) return
-
-    val oldView = rowView.tableView.makeClone(ref = oldRef)
-    val newView = rowView.tableView.makeClone(ref = newRef)
-
-    val old = oldView[rowView]
-    val new = newView[rowView]
-
-    eventProcessor.publish(listOf(TableViewListenerEvent<RowView>(old, new)) as List<TableViewListenerEvent<Any>>)
 }
 
 fun clear(cellView: CellView) {
-    val tableViewRef = cellView.tableView.tableViewRef
-    val columnHeader = cellView.columnView.columnHeader
-    val index = cellView.index
-    val eventProcessor = cellView.tableView.eventProcessor
+    synchronized(cellView.tableView.eventProcessor) {
+        val tableViewRef = cellView.tableView.tableViewRef
+        val columnHeader = cellView.columnView.columnHeader
+        val index = cellView.index
+        val eventProcessor = cellView.tableView.eventProcessor
 
-    val (oldRef, newRef) = tableViewRef.refAction {
-        it.copy(
-            cellViews = it.cellViews.remove(Pair(columnHeader, index)),
-            version = it.version + 1L
-        )
+        val (oldRef, newRef) = tableViewRef.refAction {
+            it.copy(
+                cellViews = it.cellViews.remove(Pair(columnHeader, index)),
+                version = it.version + 1L
+            )
+        }
+
+        if (!eventProcessor.haveListeners()) return
+
+        val oldView = cellView.tableView.makeClone(ref = oldRef)
+        val newView = cellView.tableView.makeClone(ref = newRef)
+
+        val old = oldView[cellView]
+        val new = newView[cellView]
+
+        eventProcessor.publish(listOf(TableViewListenerEvent<CellView>(old, new)) as List<TableViewListenerEvent<Any>>)
     }
-
-    if (!eventProcessor.haveListeners()) return
-
-    val oldView = cellView.tableView.makeClone(ref = oldRef)
-    val newView = cellView.tableView.makeClone(ref = newRef)
-
-    val old = oldView[cellView]
-    val new = newView[cellView]
-
-    eventProcessor.publish(listOf(TableViewListenerEvent<CellView>(old, new)) as List<TableViewListenerEvent<Any>>)
 }
 
 // ---

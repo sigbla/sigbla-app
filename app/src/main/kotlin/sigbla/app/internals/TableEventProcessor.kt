@@ -174,6 +174,7 @@ internal class TableEventProcessor {
 
     // TODO Add rollback on any exception from publish?
 
+    @Synchronized
     fun subscribe(
         table: Table,
         eventReceiver: TableEventReceiver<Table, Any, Any>,
@@ -196,28 +197,29 @@ internal class TableEventProcessor {
             ListenerReferenceEvent(listenerRef) {
                 eventReceiver(it)
             }
-        synchronized(listenerRefEvent) {
-            val key = ListenerId(eventReceiver.order)
-            tableListeners[key] = listenerRefEvent
-            listenerRef.key = key
 
-            if (!eventReceiver.skipHistory) {
-                val oldTable = table.makeClone(ref = TableRef())
-                val newTable = table.makeClone(ref = ref)
-                listenerRefEvent.version = ref.version
-                listenerRefEvent.listenerEvent(newTable.asSequence().map {
-                    val oldColumn = BaseColumn(
-                        oldTable,
-                        it.column.columnHeader,
-                        ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
-                    )
-                    TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
-                })
-            }
+        val key = ListenerId(eventReceiver.order)
+        tableListeners[key] = listenerRefEvent
+        listenerRef.key = key
+
+        if (!eventReceiver.skipHistory) {
+            val oldTable = table.makeClone(ref = TableRef())
+            val newTable = table.makeClone(ref = ref)
+            listenerRefEvent.version = ref.version
+            listenerRefEvent.listenerEvent(newTable.asSequence().map {
+                val oldColumn = BaseColumn(
+                    oldTable,
+                    it.column.columnHeader,
+                    ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                )
+                TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
+            })
         }
+
         return listenerRef
     }
 
+    @Synchronized
     fun subscribe(
         column: Column,
         eventReceiver: TableEventReceiver<Column, Any, Any>,
@@ -240,28 +242,29 @@ internal class TableEventProcessor {
             ListenerReferenceEvent(listenerRef) {
                 eventReceiver(it)
             }
-        synchronized(listenerRefEvent) {
-            val key = ListenerId(eventReceiver.order)
-            columnListeners[key] = listenerRefEvent
-            listenerRef.key = key
 
-            if (!eventReceiver.skipHistory) {
-                val oldTable = column.table.makeClone(ref = TableRef())
-                val newTable = column.table.makeClone(ref = ref)
-                listenerRefEvent.version = ref.version
-                listenerRefEvent.listenerEvent(newTable[column].asSequence().map {
-                    val oldColumn = BaseColumn(
-                        oldTable,
-                        it.column.columnHeader,
-                        ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
-                    )
-                    TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
-                })
-            }
+        val key = ListenerId(eventReceiver.order)
+        columnListeners[key] = listenerRefEvent
+        listenerRef.key = key
+
+        if (!eventReceiver.skipHistory) {
+            val oldTable = column.table.makeClone(ref = TableRef())
+            val newTable = column.table.makeClone(ref = ref)
+            listenerRefEvent.version = ref.version
+            listenerRefEvent.listenerEvent(newTable[column].asSequence().map {
+                val oldColumn = BaseColumn(
+                    oldTable,
+                    it.column.columnHeader,
+                    ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                )
+                TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
+            })
         }
+
         return listenerRef
     }
 
+    @Synchronized
     fun subscribe(
         row: Row,
         eventReceiver: TableEventReceiver<Row, Any, Any>,
@@ -284,30 +287,31 @@ internal class TableEventProcessor {
             ListenerReferenceEvent(listenerRef) {
                 eventReceiver(it)
             }
-        synchronized(listenerRefEvent) {
-            val key = ListenerId(eventReceiver.order)
-            rowListeners[key] = listenerRefEvent
-            listenerRef.key = key
 
-            if (!eventReceiver.skipHistory) {
-                val oldTable = row.table.makeClone(ref = TableRef())
-                val newTable = row.table.makeClone(ref = ref)
-                listenerRefEvent.version = ref.version
-                listenerRefEvent.listenerEvent(newTable[row].asSequence().map {
-                    val oldColumn = BaseColumn(
-                        oldTable,
-                        it.column.columnHeader,
-                        ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
-                    )
-                    // TODO While this will always be a UnitCell on the old table,
-                    //  still need to take into account the index relation..?
-                    TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
-                })
-            }
+        val key = ListenerId(eventReceiver.order)
+        rowListeners[key] = listenerRefEvent
+        listenerRef.key = key
+
+        if (!eventReceiver.skipHistory) {
+            val oldTable = row.table.makeClone(ref = TableRef())
+            val newTable = row.table.makeClone(ref = ref)
+            listenerRefEvent.version = ref.version
+            listenerRefEvent.listenerEvent(newTable[row].asSequence().map {
+                val oldColumn = BaseColumn(
+                    oldTable,
+                    it.column.columnHeader,
+                    ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                )
+                // TODO While this will always be a UnitCell on the old table,
+                //  still need to take into account the index relation..?
+                TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
+            })
         }
+
         return listenerRef
     }
 
+    @Synchronized
     fun subscribe(
         cellRange: CellRange,
         eventReceiver: TableEventReceiver<CellRange, Any, Any>,
@@ -330,28 +334,29 @@ internal class TableEventProcessor {
             ListenerReferenceEvent(listenerRef) {
                 eventReceiver(it)
             }
-        synchronized(listenerRefEvent) {
-            val key = ListenerId(eventReceiver.order)
-            cellRangeListeners[key] = listenerRefEvent
-            listenerRef.key = key
 
-            if (!eventReceiver.skipHistory) {
-                val oldTable = cellRange.table.makeClone(ref = TableRef())
-                val newTable = cellRange.table.makeClone(ref = ref)
-                listenerRefEvent.version = ref.version
-                listenerRefEvent.listenerEvent(newTable[cellRange].asSequence().map {
-                    val oldColumn = BaseColumn(
-                        oldTable,
-                        it.column.columnHeader,
-                        ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
-                    )
-                    TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
-                })
-            }
+        val key = ListenerId(eventReceiver.order)
+        cellRangeListeners[key] = listenerRefEvent
+        listenerRef.key = key
+
+        if (!eventReceiver.skipHistory) {
+            val oldTable = cellRange.table.makeClone(ref = TableRef())
+            val newTable = cellRange.table.makeClone(ref = ref)
+            listenerRefEvent.version = ref.version
+            listenerRefEvent.listenerEvent(newTable[cellRange].asSequence().map {
+                val oldColumn = BaseColumn(
+                    oldTable,
+                    it.column.columnHeader,
+                    ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                )
+                TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
+            })
         }
+
         return listenerRef
     }
 
+    @Synchronized
     fun subscribe(
         cell: Cell<*>,
         eventReceiver: TableEventReceiver<Cell<*>, Any, Any>,
@@ -374,30 +379,31 @@ internal class TableEventProcessor {
             ListenerReferenceEvent(listenerRef) {
                 eventReceiver(it)
             }
-        synchronized(listenerRefEvent) {
-            val key = ListenerId(eventReceiver.order)
-            cellListeners[key] = listenerRefEvent
-            listenerRef.key = key
 
-            if (!eventReceiver.skipHistory) {
-                val oldTable = cell.table.makeClone(ref = TableRef())
-                val newTable = cell.table.makeClone(ref = ref)
-                listenerRefEvent.version = ref.version
-                listenerRefEvent.listenerEvent(newTable[cell].asSequence()
-                    .filter { it !is UnitCell }
-                    .map {
-                        val oldColumn = BaseColumn(
-                            oldTable,
-                            it.column.columnHeader,
-                            ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
-                        )
-                        TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
-                    })
-            }
+        val key = ListenerId(eventReceiver.order)
+        cellListeners[key] = listenerRefEvent
+        listenerRef.key = key
+
+        if (!eventReceiver.skipHistory) {
+            val oldTable = cell.table.makeClone(ref = TableRef())
+            val newTable = cell.table.makeClone(ref = ref)
+            listenerRefEvent.version = ref.version
+            listenerRefEvent.listenerEvent(newTable[cell].asSequence()
+                .filter { it !is UnitCell }
+                .map {
+                    val oldColumn = BaseColumn(
+                        oldTable,
+                        it.column.columnHeader,
+                        ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                    )
+                    TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
+                })
         }
+
         return listenerRef
     }
 
+    @Synchronized
     fun subscribe(
         cells: Cells,
         eventReceiver: TableEventReceiver<Cells, Any, Any>,
@@ -484,7 +490,7 @@ internal class TableEventProcessor {
     }
 
     // TODO Look at changing cells and buffers to use seqs
-    // TODO There's a risk that this is called out of order compared to the ref updates
+    @Synchronized
     internal fun publish(cells: List<TableListenerEvent<Any, Any>>) {
         val buffer = eventBuffer.get()
 
@@ -510,12 +516,10 @@ internal class TableEventProcessor {
                 tableListeners
                     .values
                     .forEach { listenerRef ->
-                        synchronized(listenerRef) {
-                            loopCheck(listenerRef.listenerReference)
-                            listenerRef.listenerEvent(batch.asSequence().filter { it.newValue.table.tableRef.get().version > listenerRef.version })
-                            // TODO Do we really need to clear this here and below?
-                            if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
-                        }
+                        loopCheck(listenerRef.listenerReference)
+                        listenerRef.listenerEvent(batch.asSequence().filter { it.newValue.table.tableRef.get().version > listenerRef.version })
+                        // TODO Do we really need to clear this here and below?
+                        if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                     }
 
                 columnListeners
@@ -529,11 +533,9 @@ internal class TableEventProcessor {
                         }.filter { it.newValue.table.tableRef.get().version > listenerRef.version })
 
                         if (columnBatch.isNotEmpty()) {
-                            synchronized(listenerRef) {
-                                loopCheck(listenerRef.listenerReference)
-                                listenerRef.listenerEvent(columnBatch.asSequence())
-                                if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
-                            }
+                            loopCheck(listenerRef.listenerReference)
+                            listenerRef.listenerEvent(columnBatch.asSequence())
+                            if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                         }
                     }
 
@@ -547,11 +549,9 @@ internal class TableEventProcessor {
                         }.filter { it.newValue.table.tableRef.get().version > listenerRef.version })
 
                         if (rowBatch.isNotEmpty()) {
-                            synchronized(listenerRef) {
-                                loopCheck(listenerRef.listenerReference)
-                                listenerRef.listenerEvent(rowBatch.asSequence())
-                                if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
-                            }
+                            loopCheck(listenerRef.listenerReference)
+                            listenerRef.listenerEvent(rowBatch.asSequence())
+                            if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                         }
                     }
 
@@ -564,11 +564,9 @@ internal class TableEventProcessor {
                         }.filter { it.newValue.table.tableRef.get().version > listenerRef.version })
 
                         if (cellRangeBatch.isNotEmpty()) {
-                            synchronized(listenerRef) {
-                                loopCheck(listenerRef.listenerReference)
-                                listenerRef.listenerEvent(cellRangeBatch.asSequence())
-                                if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
-                            }
+                            loopCheck(listenerRef.listenerReference)
+                            listenerRef.listenerEvent(cellRangeBatch.asSequence())
+                            if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                         }
                     }
 
@@ -587,11 +585,9 @@ internal class TableEventProcessor {
                         }.filter { it.newValue.table.tableRef.get().version > listenerRef.version })
 
                         if (cellBatch.isNotEmpty()) {
-                            synchronized(listenerRef) {
-                                loopCheck(listenerRef.listenerReference)
-                                listenerRef.listenerEvent(cellBatch.asSequence())
-                                if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
-                            }
+                            loopCheck(listenerRef.listenerReference)
+                            listenerRef.listenerEvent(cellBatch.asSequence())
+                            if (!listenerRef.listenerReference.allowLoop) activeListener.remove()
                         }
                     }
             }

@@ -190,63 +190,77 @@ class BaseColumn internal constructor(
 
         val cellValue = value.toCellValue()
 
-        val (oldRef, newRef) = table.tableRef.refAction {
-            val meta = it.columns[this.columnHeader] ?: throw InvalidColumnException(this)
-            val values = it.columnCells[this.columnHeader] ?: throw InvalidColumnException(this)
+        synchronized(table.eventProcessor) {
+            val (oldRef, newRef) = table.tableRef.refAction {
+                val meta = it.columns[this.columnHeader] ?: throw InvalidColumnException(this)
+                val values = it.columnCells[this.columnHeader] ?: throw InvalidColumnException(this)
 
-            it.copy(
-                columns = if (meta.prenatal) it.columns.put(this.columnHeader, meta.copy(prenatal = false)) else it.columns,
-                columnCells = it.columnCells.put(this.columnHeader, values.put(index, cellValue)),
-                version = it.version + 1L
+                it.copy(
+                    columns = if (meta.prenatal) it.columns.put(
+                        this.columnHeader,
+                        meta.copy(prenatal = false)
+                    ) else it.columns,
+                    columnCells = it.columnCells.put(this.columnHeader, values.put(index, cellValue)),
+                    version = it.version + 1L
+                )
+            }
+
+            if (!table.eventProcessor.haveListeners()) return
+
+            val oldTable = this.table.makeClone(ref = oldRef)
+            val newTable = this.table.makeClone(ref = newRef)
+
+            // TODO This might create a column if it doesn't exist, which we don't want (see events in table ops)
+            val old = oldTable[this.columnHeader][index]
+            val new = newTable[this.columnHeader][index]
+
+            table.eventProcessor.publish(
+                listOf(
+                    TableListenerEvent(
+                        old,
+                        new
+                    )
+                ) as List<TableListenerEvent<Any, Any>>
             )
         }
-
-        if (!table.eventProcessor.haveListeners()) return
-
-        val oldTable = this.table.makeClone(ref = oldRef)
-        val newTable = this.table.makeClone(ref = newRef)
-
-        // TODO This might create a column if it doesn't exist, which we don't want (see events in table ops)
-        val old = oldTable[this.columnHeader][index]
-        val new = newTable[this.columnHeader][index]
-
-        table.eventProcessor.publish(listOf(
-            TableListenerEvent(
-                old,
-                new
-            )
-        ) as List<TableListenerEvent<Any, Any>>)
     }
 
     private fun clear(index: Long): Cell<*> {
-        val (oldRef, newRef) = table.tableRef.refAction {
-            val meta = it.columns[this.columnHeader] ?: throw InvalidColumnException(this)
-            val values = it.columnCells[this.columnHeader] ?: throw InvalidColumnException(this)
+        synchronized(table.eventProcessor) {
+            val (oldRef, newRef) = table.tableRef.refAction {
+                val meta = it.columns[this.columnHeader] ?: throw InvalidColumnException(this)
+                val values = it.columnCells[this.columnHeader] ?: throw InvalidColumnException(this)
 
-            it.copy(
-                columns = if (meta.prenatal) it.columns.put(this.columnHeader, meta.copy(prenatal = false)) else it.columns,
-                columnCells = it.columnCells.put(this.columnHeader, values.remove(index)),
-                version = it.version + 1L
+                it.copy(
+                    columns = if (meta.prenatal) it.columns.put(
+                        this.columnHeader,
+                        meta.copy(prenatal = false)
+                    ) else it.columns,
+                    columnCells = it.columnCells.put(this.columnHeader, values.remove(index)),
+                    version = it.version + 1L
+                )
+            }
+
+            val oldTable = this.table.makeClone(ref = oldRef)
+            val newTable = this.table.makeClone(ref = newRef)
+
+            val old = oldTable[this.columnHeader][index]
+            // TODO This will create a column if it doesn't exist, which we don't want (see events in table ops)
+            val new = newTable[this.columnHeader][index] // This will be a unit cell, but with new table and column refs
+
+            if (!table.eventProcessor.haveListeners()) return old
+
+            table.eventProcessor.publish(
+                listOf(
+                    TableListenerEvent(
+                        old,
+                        new
+                    )
+                ) as List<TableListenerEvent<Any, Any>>
             )
+
+            return old
         }
-
-        val oldTable = this.table.makeClone(ref = oldRef)
-        val newTable = this.table.makeClone(ref = newRef)
-
-        val old = oldTable[this.columnHeader][index]
-        // TODO This will create a column if it doesn't exist, which we don't want (see events in table ops)
-        val new = newTable[this.columnHeader][index] // This will be a unit cell, but with new table and column refs
-
-        if (!table.eventProcessor.haveListeners()) return old
-
-        table.eventProcessor.publish(listOf(
-            TableListenerEvent(
-                old,
-                new
-            )
-        ) as List<TableListenerEvent<Any, Any>>)
-
-        return old
     }
 
     override fun clear() {
