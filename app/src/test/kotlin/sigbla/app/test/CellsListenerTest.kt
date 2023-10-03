@@ -19,12 +19,45 @@ class CellsListenerTest {
 
     // TODO Ensure we test this subscribe and unsubscribe test below on all onAny functions
     @Test
-    fun `subscribe and unsubscribe`() {
+    fun `subscribe and unsubscribe 1`() {
         val t1 = Table[object {}.javaClass.enclosingMethod.name]
 
         var eventCount = 0
 
         val ref = on(t1["A", 1] or t1["A", 2] or t1["B", 3] or t1["C", 4]) {
+            events {
+                eventCount += count()
+            }
+        }
+
+        t1["A", 1] = "A"
+
+        assertEquals(1, eventCount)
+
+        t1["A", 1] = "B"
+
+        assertEquals(2, eventCount)
+
+        t1["A", 2] = "C"
+        t1["B", 3] = "D"
+
+        assertEquals(4, eventCount)
+
+        off(ref)
+
+        t1["B", 3] = "E"
+        t1["C", 4] = "F"
+
+        assertEquals(4, eventCount)
+    }
+    @Test
+    fun `subscribe and unsubscribe 2`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount = 0
+
+        val cells: List<Iterable<Cell<*>>> = listOf(t1["A", 1], t1["A", 2], t1["B", 3], t1["C", 4])
+        val ref = on(Cells(cells)) {
             events {
                 eventCount += count()
             }

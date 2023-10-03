@@ -742,8 +742,19 @@ fun div(
 class Cells(sources: List<Iterable<Cell<*>>>): Iterable<Cell<*>> {
     constructor(vararg sources: Iterable<Cell<*>>) : this(sources.toList())
 
-    val sources: List<Iterable<Cell<*>>> = sources.flatMap { if (it is Cells) it.sources else listOf(it) }
-    val table = sources.first().let {
+    val sources: List<Iterable<Cell<*>>> = sources.flatMap {
+        if (it is Cells) it.sources
+        else when (it) {
+            is Cell<*> -> listOf(it)
+            is Row -> listOf(it)
+            is Column -> listOf(it)
+            is CellRange -> listOf(it)
+            is Table -> listOf(it)
+            else -> it.toCollection(mutableListOf()) // make a copy
+        }
+    }
+
+    val table = this.sources.first().let {
         when (it) {
             is Cell<*> -> it.table
             is Row -> it.table
@@ -759,16 +770,17 @@ class Cells(sources: List<Iterable<Cell<*>>>): Iterable<Cell<*>> {
 
         val tables = sources
             .flatMap { if (it is Cells) it.sources else listOf(it) }
-            .map {
-                when (it) {
-                    is Cell<*> -> it.table
-                    is Row -> it.table
-                    is Column -> it.table
-                    is CellRange -> it.table
-                    is Table -> it
-                    else -> throw InvalidValueException("Unsupported source type: ${it::class}")
+            .map { iterable ->
+                when (iterable) {
+                    is Cell<*> -> listOf(iterable.table)
+                    is Row -> listOf(iterable.table)
+                    is Column -> listOf(iterable.table)
+                    is CellRange -> listOf(iterable.table)
+                    is Table -> listOf(iterable)
+                    else -> iterable.map { it.table }.toSet()
                 }
             }
+            .flatten()
             .toSet()
 
         if (tables.isEmpty()) throw InvalidValueException("At least one source needed")
