@@ -530,6 +530,8 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
         fun fromRegistry(name: String): Table = Registry.getTable(name) ?: throw InvalidTableException("No table by name $name")
 
+        fun fromRegistry(name: String, init: (name: String) -> Table) = Registry.getTable(name, init)
+
         val names: SortedSet<String> get() = Registry.tableNames()
 
         fun delete(name: String) = Registry.deleteTable(name)

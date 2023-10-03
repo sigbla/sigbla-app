@@ -15,6 +15,8 @@ internal object Registry {
 
     fun getTable(name: String): Table? = tables[name]
 
+    fun getTable(name: String, init: (String) -> Table): Table = tables.computeIfAbsent(name, init)
+
     fun tableNames(): SortedSet<String> = Collections.unmodifiableSortedSet(tables.keys.toSortedSet())
 
     fun deleteTable(name: String) = deleteTable(tables.remove(name))
@@ -33,6 +35,8 @@ internal object Registry {
     fun setView(name: String, view: TableView) = deleteView(views.put(name, view))
 
     fun getView(name: String): TableView? = views[name]
+
+    fun getView(name: String, init: (String) -> TableView): TableView = views.computeIfAbsent(name, init)
 
     fun viewNames(): SortedSet<String> = Collections.unmodifiableSortedSet(views.keys.toSortedSet())
 
