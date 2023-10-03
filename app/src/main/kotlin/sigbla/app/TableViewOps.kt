@@ -89,6 +89,8 @@ fun clone(tableView: TableView): TableView = tableView.makeClone()
 fun clone(tableView: TableView, name: String): TableView = tableView.makeClone(name, true)
 
 // TODO Add a fun show(table: Table) that would automatically create a view or reuse existing view on same name
+// TODO Have show return the URL
+// TODO Consider logging the URL rather than println, or some other mechanism to allow users to turn it off
 fun show(tableView: TableView) = SigblaBackend.openView(tableView)
 
 // ---

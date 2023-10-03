@@ -331,6 +331,8 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
     }
 
     override fun contains(value: Column): Boolean {
+        // TODO Because columns might move around, get the latest order
+        //      See iterator above..
         if (value.columnOrder < min(start.columnOrder, endInclusive.columnOrder) || value.columnOrder > max(start.columnOrder, endInclusive.columnOrder)) {
             return false
         }

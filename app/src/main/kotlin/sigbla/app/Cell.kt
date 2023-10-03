@@ -119,6 +119,8 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
             return false
         }
 
+        // TODO Because columns might move around, get the latest order
+        //      See iterator above.. There also no need to check if start is <= endm just use contains from columnrange..
         return if (start.column.columnOrder <= endInclusive.column.columnOrder) {
             (start.column..endInclusive.column).contains(value.column)
         } else {

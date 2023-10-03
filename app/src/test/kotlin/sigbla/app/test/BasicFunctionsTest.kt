@@ -12,6 +12,8 @@ class BasicFunctionsTest {
         Table.names.forEach { Table.delete(it) }
     }
 
+    // TODO Also need to test the various params on these functions, such as init, empty, etc..
+
     @Test
     fun `sum with defaults`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
