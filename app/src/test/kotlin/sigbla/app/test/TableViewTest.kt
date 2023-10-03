@@ -7,13 +7,40 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Test
 import sigbla.app.*
+import sigbla.app.exceptions.InvalidTableViewException
 import java.io.File
+import kotlin.test.assertFailsWith
 
 class TableViewTest {
     @After
     fun cleanup() {
         TableView.names.forEach { TableView.delete(it) }
         Table.names.forEach { Table.delete(it) }
+    }
+
+    @Test
+    fun `registry test`() {
+        val t1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val t2 = TableView.fromRegistry(t1.name!!)
+        assertEquals(t1, t2)
+        assertTrue(t1 === t2)
+
+        TableView.delete(t1.name!!)
+
+        assertFailsWith(InvalidTableViewException::class) {
+            TableView.fromRegistry(t1.name!!)
+        }
+
+        val t3 = TableView.fromRegistry(t1.name!!) {
+            TableView[t1.name]
+        }
+
+        assertNotEquals(t1, t3)
+        assertFalse(t1 === t3)
+        assertEquals(t1.name, t3.name)
+
+        assertEquals(1, TableView.names.size)
+        assertEquals(t1.name, TableView.names.first())
     }
 
     @Test

@@ -4,13 +4,40 @@ import sigbla.app.*
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.After
+import sigbla.app.exceptions.InvalidTableException
 import java.math.BigDecimal
 import java.math.BigInteger
+import kotlin.test.assertFailsWith
 
 class TableTest {
     @After
     fun cleanup() {
         Table.names.forEach { Table.delete(it) }
+    }
+
+    @Test
+    fun `registry test`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t2 = Table.fromRegistry(t1.name!!)
+        assertEquals(t1, t2)
+        assertTrue(t1 === t2)
+
+        Table.delete(t1.name!!)
+
+        assertFailsWith(InvalidTableException::class) {
+            Table.fromRegistry(t1.name!!)
+        }
+
+        val t3 = Table.fromRegistry(t1.name!!) {
+            Table[t1.name]
+        }
+
+        assertNotEquals(t1, t3)
+        assertFalse(t1 === t3)
+        assertEquals(t1.name, t3.name)
+
+        assertEquals(1, Table.names.size)
+        assertEquals(t1.name, Table.names.first())
     }
 
     @Test
