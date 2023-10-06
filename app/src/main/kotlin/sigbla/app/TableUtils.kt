@@ -27,9 +27,9 @@ fun valuesOf(cells: Iterable<Cell<*>>, typeFilter: KClass<*>): Sequence<Any> = c
     .asSequence()
     .mapNotNull { valueOf(it, typeFilter) }
 
-fun headerOf(cell: Cell<*>) = cell.column.columnHeader
+fun headerOf(cell: Cell<*>) = cell.column.header
 
-fun headerOf(column: Column) = column.columnHeader
+fun headerOf(column: Column) = column.header
 
 fun headersOf(row: Row) = row.headers.asSequence()
 
@@ -38,7 +38,7 @@ fun headersOf(cells: Iterable<Cell<*>>) = cells
     .map { it.column }
     .toSortedSet()
     .asSequence()
-    .map { it.columnHeader }
+    .map { it.header }
 
 fun columnOf(cell: Cell<*>) = cell.column
 
@@ -77,7 +77,7 @@ fun print(table: Table, writer: Writer) {
     val headerTable = Table[null].let { headerTable ->
         for ((index, header) in headers.withIndex()) {
             headerTable[index.toString()].let { headerColumn ->
-                for ((index, headerCell) in header.header.withIndex()) {
+                for ((index, headerCell) in header.labels.withIndex()) {
                     headerColumn[index] = headerCell
                     if (headerCell.length > maxCellWidth) maxCellWidth = headerCell.length
                 }

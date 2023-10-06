@@ -128,7 +128,7 @@ class TableStorageTest {
         load(tmpFile to table2) {
             println("$this -> ${this.joinToString { "${it.index}:${it.value}" }}")
             val table1Column = table1Columns.next()
-            assertEquals(table1Column.columnHeader, columnHeader)
+            assertEquals(table1Column.header, header)
             assertEquals(table1Column[0], this[0])
             return@load this
         }
@@ -186,7 +186,7 @@ class TableStorageTest {
         load(tmpFile to table2) {
             println("$this -> ${this.joinToString { "${it.index}:${it.value}" }}")
             val table1Column = table1Columns.next()
-            assertEquals(table1Column.columnHeader, columnHeader)
+            assertEquals(table1Column.header, header)
             assertEquals(table1Column[0], this[0])
             return@load this
         }
@@ -286,7 +286,7 @@ class TableStorageTest {
             while (it1.hasNext() && it2.hasNext()) {
                 val c1 = it1.next()
                 val c2 = it2.next()
-                assertEquals(c1.column.columnHeader, c2.column.columnHeader)
+                assertEquals(c1.column.header, c2.column.header)
                 assertEquals(c1.index, c2.index)
                 assertEquals(c1, c2)
             }

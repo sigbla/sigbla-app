@@ -450,7 +450,7 @@ class TableView internal constructor(
 
     // -----
 
-    operator fun get(cell: Cell<*>): CellView = this[cell.column.columnHeader][cell.index]
+    operator fun get(cell: Cell<*>): CellView = this[cell.column.header][cell.index]
 
     operator fun get(cellView: CellView) = this[cellView.columnView][cellView.index]
 
@@ -458,7 +458,7 @@ class TableView internal constructor(
 
     // -----
 
-    operator fun get(column: Column): ColumnView = this[column.columnHeader]
+    operator fun get(column: Column): ColumnView = this[column.header]
 
     operator fun get(columnView: ColumnView): ColumnView = this[columnView.columnHeader]
 
@@ -475,7 +475,7 @@ class TableView internal constructor(
 
     // -----
 
-    operator fun get(column: Column, index: Long): CellView = this[column.columnHeader, index]
+    operator fun get(column: Column, index: Long): CellView = this[column.header, index]
 
     operator fun get(columnView: ColumnView, index: Long): CellView = this[columnView.columnHeader, index]
 
@@ -521,7 +521,7 @@ class TableView internal constructor(
         }
     }
 
-    operator fun set(column: Column, view: ColumnView?) = set(column.columnHeader, view)
+    operator fun set(column: Column, view: ColumnView?) = set(column.header, view)
 
     operator fun set(columnView: ColumnView, view: ColumnView?) = set(columnView.columnHeader, view)
 
@@ -618,7 +618,7 @@ class TableView internal constructor(
             override fun hasNext() = tableIterator.hasNext()
             override fun next(): DerivedCellView {
                 val cell = tableIterator.next()
-                val columnView = ColumnView(this@TableView, cell.column.columnHeader)
+                val columnView = ColumnView(this@TableView, cell.column.header)
                 return createDerivedCellViewFromRef(ref, columnView, cell.index)
             }
         }
@@ -1203,7 +1203,7 @@ class ColumnView internal constructor(
             override fun hasNext() = columnIterator.hasNext()
             override fun next(): DerivedCellView {
                 val cell = columnIterator.next()
-                val columnView = ColumnView(this@ColumnView.tableView, cell.column.columnHeader)
+                val columnView = ColumnView(this@ColumnView.tableView, cell.column.header)
                 return createDerivedCellViewFromRef(ref, columnView, cell.index)
             }
         }
@@ -1423,7 +1423,7 @@ class RowView internal constructor(
 
     operator fun get(columnView: ColumnView): CellView = tableView[columnView.columnHeader, index]
 
-    operator fun get(column: Column): CellView = tableView[column.columnHeader, index]
+    operator fun get(column: Column): CellView = tableView[column.header, index]
 
     operator fun set(vararg header: String, view: CellView?) { tableView[ColumnHeader(*header), index] = view }
 
@@ -1431,7 +1431,7 @@ class RowView internal constructor(
 
     operator fun set(columnView: ColumnView, view: CellView?) { tableView[columnView.columnHeader, index] = view }
 
-    operator fun set(column: Column, view: CellView?) { tableView[column.columnHeader, index] = view }
+    operator fun set(column: Column, view: CellView?) { tableView[column.header, index] = view }
 
     override fun iterator(): Iterator<DerivedCellView> {
         val ref = tableView.tableViewRef.get()
@@ -1447,7 +1447,7 @@ class RowView internal constructor(
             override fun hasNext() = rowIterator.hasNext()
             override fun next(): DerivedCellView {
                 val cell = rowIterator.next()
-                val columnView = ColumnView(this@RowView.tableView, cell.column.columnHeader)
+                val columnView = ColumnView(this@RowView.tableView, cell.column.header)
                 return createDerivedCellViewFromRef(ref, columnView, cell.index)
             }
         }

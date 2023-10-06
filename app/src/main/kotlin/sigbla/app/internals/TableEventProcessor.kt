@@ -209,8 +209,8 @@ internal class TableEventProcessor {
             listenerRefEvent.listenerEvent(newTable.asSequence().map {
                 val oldColumn = BaseColumn(
                     oldTable,
-                    it.column.columnHeader,
-                    ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                    it.column.header,
+                    ref.columns[it.column.header]?.columnOrder ?: it.column.order
                 )
                 TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
             })
@@ -254,8 +254,8 @@ internal class TableEventProcessor {
             listenerRefEvent.listenerEvent(newTable[column].asSequence().map {
                 val oldColumn = BaseColumn(
                     oldTable,
-                    it.column.columnHeader,
-                    ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                    it.column.header,
+                    ref.columns[it.column.header]?.columnOrder ?: it.column.order
                 )
                 TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
             })
@@ -299,8 +299,8 @@ internal class TableEventProcessor {
             listenerRefEvent.listenerEvent(newTable[row].asSequence().map {
                 val oldColumn = BaseColumn(
                     oldTable,
-                    it.column.columnHeader,
-                    ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                    it.column.header,
+                    ref.columns[it.column.header]?.columnOrder ?: it.column.order
                 )
                 // TODO While this will always be a UnitCell on the old table,
                 //  still need to take into account the index relation..?
@@ -346,8 +346,8 @@ internal class TableEventProcessor {
             listenerRefEvent.listenerEvent(newTable[cellRange].asSequence().map {
                 val oldColumn = BaseColumn(
                     oldTable,
-                    it.column.columnHeader,
-                    ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                    it.column.header,
+                    ref.columns[it.column.header]?.columnOrder ?: it.column.order
                 )
                 TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
             })
@@ -393,8 +393,8 @@ internal class TableEventProcessor {
                 .map {
                     val oldColumn = BaseColumn(
                         oldTable,
-                        it.column.columnHeader,
-                        ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                        it.column.header,
+                        ref.columns[it.column.header]?.columnOrder ?: it.column.order
                     )
                     TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
                 })
@@ -470,8 +470,8 @@ internal class TableEventProcessor {
             eventReceiver(cells.asSequence().map { newTable[it] }.map {
                 val oldColumn = BaseColumn(
                     oldTable,
-                    it.column.columnHeader,
-                    ref.columns[it.column.columnHeader]?.columnOrder ?: it.column.columnOrder
+                    it.column.header,
+                    ref.columns[it.column.header]?.columnOrder ?: it.column.order
                 )
                 TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
             })
@@ -527,9 +527,9 @@ internal class TableEventProcessor {
                     .forEach { listenerRef ->
                         val columnBatch = Collections.unmodifiableList(batch.filter {
                             return@filter it.newValue.column == listenerRef.listenerReference.column
-                                    || it.newValue.column.columnHeader == listenerRef.listenerReference.column.columnHeader // TODO Might not need this?
+                                    || it.newValue.column.header == listenerRef.listenerReference.column.header // TODO Might not need this?
                                     || it.oldValue.column == listenerRef.listenerReference.column
-                                    || it.oldValue.column.columnHeader == listenerRef.listenerReference.column.columnHeader // TODO Might not need this?
+                                    || it.oldValue.column.header == listenerRef.listenerReference.column.header // TODO Might not need this?
                         }.filter { it.newValue.table.tableRef.get().version > listenerRef.version })
 
                         if (columnBatch.isNotEmpty()) {
@@ -578,10 +578,10 @@ internal class TableEventProcessor {
                         val cellBatch = Collections.unmodifiableList(batch.filter {
                             return@filter (listenerRef.listenerReference.cell.index == it.newValue.index
                                             && (listenerRef.listenerReference.cell.column == it.newValue.column
-                                            || listenerRef.listenerReference.cell.column.columnHeader == it.newValue.column.columnHeader)) // TODO Is the columnHeader check really needed?
+                                            || listenerRef.listenerReference.cell.column.header == it.newValue.column.header)) // TODO Is the columnHeader check really needed?
                                         || (listenerRef.listenerReference.cell.index == it.oldValue.index
                                             && (listenerRef.listenerReference.cell.column == it.oldValue.column
-                                            || listenerRef.listenerReference.cell.column.columnHeader == it.oldValue.column.columnHeader)) // TODO Is the columnHeader check really needed?
+                                            || listenerRef.listenerReference.cell.column.header == it.oldValue.column.header)) // TODO Is the columnHeader check really needed?
                         }.filter { it.newValue.table.tableRef.get().version > listenerRef.version })
 
                         if (cellBatch.isNotEmpty()) {

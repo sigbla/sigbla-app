@@ -184,7 +184,7 @@ fun main() {
     move(table["A"], ColumnActionOrder.AFTER, table["B"])
 
     (columnsOf(table).first()..columnsOf(table).last()).forEach {
-        println("Column range first to last: " + it.columnHeader)
+        println("Column range first to last: " + it.header)
     }
 
     println()
@@ -192,7 +192,7 @@ fun main() {
     println()
 
     (columnsOf(table).last()..columnsOf(table).first()).forEach {
-        println("Column range last to first: " + it.columnHeader)
+        println("Column range last to first: " + it.header)
     }
 
     println()
@@ -308,7 +308,7 @@ fun main() {
             map {
                 it.newValue
             }.forEach {
-                if (it.column.columnHeader[0] == "Sums") return@forEach
+                if (it.column.header[0] == "Sums") return@forEach
                 // TODO Implement plusAssign and similar: https://kotlinlang.org/docs/reference/operator-overloading.html
                 //source["Sums", 0] += it
                 source["Sums", 0] = source["Sums", 0] + it
@@ -409,7 +409,7 @@ fun main() {
 
             events {
                 val c = count {
-                    it.newValue.column.columnHeader != destination.column.columnHeader && it.newValue.index != destination.index
+                    it.newValue.column.header != destination.column.header && it.newValue.index != destination.index
                 }
 
                 if (c > 0) destination.table[destination] = c

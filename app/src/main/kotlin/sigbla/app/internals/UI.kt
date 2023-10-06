@@ -173,7 +173,7 @@ internal object SigblaBackend {
     private fun areaContent(view: TableView, x: Long, y: Long, h: Long, w: Long, dims: Dimensions, dirtyCells: List<Cell<*>>? = null): List<PositionedContent> {
         val table = view[Table]
 
-        val dirtyColumnHeaders = dirtyCells?.map { it.column.columnHeader }?.toSet()
+        val dirtyColumnHeaders = dirtyCells?.map { it.column.header }?.toSet()
         val dirtyRowIndices = dirtyCells?.map { it.index }?.toSet()
 
         val applicableColumns = mutableListOf<Pair<Column, Long>>()
@@ -187,9 +187,9 @@ internal object SigblaBackend {
             if (x <= runningWidth && runningWidth <= x + w) applicableColumns.add(Pair(column, runningWidth))
             runningWidth += view[column].derived.cellWidth
 
-            val yOffset = column.columnHeader.header.mapIndexed { i, _ -> view[(-(column.columnHeader.header.size) + i).toLong()].derived.cellHeight }.sum()
+            val yOffset = column.header.labels.mapIndexed { i, _ -> view[(-(column.header.labels.size) + i).toLong()].derived.cellHeight }.sum()
             if (yOffset > maxHeaderOffset) maxHeaderOffset = yOffset
-            if (column.columnHeader.header.size > maxHeaderCells) maxHeaderCells = column.columnHeader.header.size
+            if (column.header.labels.size > maxHeaderCells) maxHeaderCells = column.header.labels.size
         }
 
         val colHeaderZ = Integer.MAX_VALUE.toLong()
@@ -199,14 +199,14 @@ internal object SigblaBackend {
 
         // This is for the column headers
         for ((applicableColumn, applicableX) in applicableColumns) {
-            if (dirtyColumnHeaders != null && !dirtyColumnHeaders.contains(applicableColumn.columnHeader)) continue
+            if (dirtyColumnHeaders != null && !dirtyColumnHeaders.contains(applicableColumn.header)) continue
 
             for (idx in 0 until maxHeaderCells) {
-                val headerText = applicableColumn.columnHeader[idx]
-                val yOffset = applicableColumn.columnHeader.header.mapIndexed { i, _ -> if (i < idx) view[(-maxHeaderCells + i).toLong()].derived.cellHeight else 0L }.sum()
+                val headerText = applicableColumn.header[idx]
+                val yOffset = applicableColumn.header.labels.mapIndexed { i, _ -> if (i < idx) view[(-maxHeaderCells + i).toLong()].derived.cellHeight else 0L }.sum()
 
                 output.add(PositionedContent(
-                    applicableColumn.columnHeader,
+                    applicableColumn.header,
                     (-maxHeaderCells + idx).toLong(),
                     headerText,
                     view[(-maxHeaderCells + idx).toLong()].derived.cellHeight,
@@ -260,7 +260,7 @@ internal object SigblaBackend {
 
         // This is for the cells
         for ((applicableColumn, applicableX) in applicableColumns) {
-            if (dirtyColumnHeaders != null && !dirtyColumnHeaders.contains(applicableColumn.columnHeader)) continue
+            if (dirtyColumnHeaders != null && !dirtyColumnHeaders.contains(applicableColumn.header)) continue
             for ((applicableRow, applicableY) in applicableRows) {
                 if (dirtyRowIndices != null && !dirtyRowIndices.contains(applicableRow)) continue
 
@@ -270,7 +270,7 @@ internal object SigblaBackend {
                 //if (cell is UnitCell) continue
 
                 output.add(PositionedContent(
-                    applicableColumn.columnHeader,
+                    applicableColumn.header,
                     applicableRow,
                     if (cell is UnitCell) null else cell.toString(),
                     view[applicableRow].derived.cellHeight,
@@ -299,7 +299,7 @@ internal object SigblaBackend {
         for (column in table.columns) {
             runningWidth += view[column].derived.cellWidth
 
-            val yOffset = column.columnHeader.header.mapIndexed { i, _ -> view[(-(column.columnHeader.header.size) + i).toLong()].derived.cellHeight }.sum()
+            val yOffset = column.header.labels.mapIndexed { i, _ -> view[(-(column.header.labels.size) + i).toLong()].derived.cellHeight }.sum()
             if (yOffset > maxHeaderOffset) maxHeaderOffset = yOffset
         }
 

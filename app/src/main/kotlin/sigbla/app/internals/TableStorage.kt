@@ -14,7 +14,6 @@ import java.nio.channels.Channels
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
-import java.security.MessageDigest
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import java.util.zip.DeflaterOutputStream
@@ -219,8 +218,8 @@ internal fun save1(
         }
 
         tableRef.columns.sortedBy { it.component2().columnOrder }.forEach { (columnHeader, columnMeta) ->
-            val head = columnHeader.header.dropLast(1)
-            val tail = columnHeader.header.last()
+            val head = columnHeader.labels.dropLast(1)
+            val tail = columnHeader.labels.last()
 
             var parent = seed
 

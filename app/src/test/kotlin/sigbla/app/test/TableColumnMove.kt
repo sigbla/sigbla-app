@@ -29,7 +29,7 @@ class TableColumnMove {
             }
         }
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("First", "Middle", "Last"), t[0].map { valueOf<Any>(it) })
 
         // TODO No op test?
@@ -38,13 +38,13 @@ class TableColumnMove {
         move(t["A"] after t["B"])
 
         assertEquals(1, events.size)
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(events.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(events.first().newValue.table).toList().map { it.labels })
 
         assertEquals("First", valueOf<Any>(events.first().oldValue))
         assertEquals("First", valueOf<Any>(events.first().newValue))
-        assertEquals(listOf("A"), headerOf(events.first().oldValue).header)
-        assertEquals(listOf("A"), headerOf(events.first().newValue).header)
+        assertEquals(listOf("A"), headerOf(events.first().oldValue).labels)
+        assertEquals(listOf("A"), headerOf(events.first().newValue).labels)
         assertEquals(0, indexOf(events.first().oldValue))
         assertEquals(0, indexOf(events.first().newValue))
 
@@ -53,20 +53,20 @@ class TableColumnMove {
 
         events = emptyList()
 
-        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(t).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("Middle", "First", "Last"), t[0].map { valueOf<Any>(it) })
 
         // Move to last
         move(t["B"] after t["C"])
 
         assertEquals(1, events.size)
-        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(events.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("A"), listOf("C"), listOf("B")), headersOf(events.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(events.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("A"), listOf("C"), listOf("B")), headersOf(events.first().newValue.table).toList().map { it.labels })
 
         assertEquals("Middle", valueOf<Any>(events.first().oldValue))
         assertEquals("Middle", valueOf<Any>(events.first().newValue))
-        assertEquals(listOf("B"), headerOf(events.first().oldValue).header)
-        assertEquals(listOf("B"), headerOf(events.first().newValue).header)
+        assertEquals(listOf("B"), headerOf(events.first().oldValue).labels)
+        assertEquals(listOf("B"), headerOf(events.first().newValue).labels)
         assertEquals(0, indexOf(events.first().oldValue))
         assertEquals(0, indexOf(events.first().newValue))
 
@@ -75,29 +75,29 @@ class TableColumnMove {
 
         events = emptyList()
 
-        assertEquals(listOf(listOf("A"), listOf("C"), listOf("B")), headersOf(t).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("C"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("First", "Last", "Middle"), t[0].map { valueOf<Any>(it) })
 
         // Move to first
         move(t["C"] before t["A"], "C2")
 
         assertEquals(2, events.size)
-        assertEquals(listOf(listOf("A"), listOf("C"), listOf("B")), headersOf(events.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("C2"), listOf("A"), listOf("B")), headersOf(events.first().newValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("A"), listOf("C"), listOf("B")), headersOf(events.last().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("C2"), listOf("A"), listOf("B")), headersOf(events.last().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("C"), listOf("B")), headersOf(events.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("C2"), listOf("A"), listOf("B")), headersOf(events.first().newValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("A"), listOf("C"), listOf("B")), headersOf(events.last().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("C2"), listOf("A"), listOf("B")), headersOf(events.last().newValue.table).toList().map { it.labels })
 
         assertEquals("Last", valueOf<Any>(events.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events.first().newValue))
-        assertEquals(listOf("C"), headerOf(events.first().oldValue).header)
-        assertEquals(listOf("C"), headerOf(events.first().newValue).header)
+        assertEquals(listOf("C"), headerOf(events.first().oldValue).labels)
+        assertEquals(listOf("C"), headerOf(events.first().newValue).labels)
         assertEquals(0, indexOf(events.first().oldValue))
         assertEquals(0, indexOf(events.first().newValue))
 
         assertEquals(Unit, valueOf<Any>(events.last().oldValue))
         assertEquals("Last", valueOf<Any>(events.last().newValue))
-        assertEquals(listOf("C2"), headerOf(events.last().oldValue).header)
-        assertEquals(listOf("C2"), headerOf(events.last().newValue).header)
+        assertEquals(listOf("C2"), headerOf(events.last().oldValue).labels)
+        assertEquals(listOf("C2"), headerOf(events.last().newValue).labels)
         assertEquals(0, indexOf(events.last().oldValue))
         assertEquals(0, indexOf(events.last().newValue))
 
@@ -109,7 +109,7 @@ class TableColumnMove {
 
         events = emptyList()
 
-        assertEquals(listOf(listOf("C2"), listOf("A"), listOf("B")), headersOf(t).toList().map { it.header })
+        assertEquals(listOf(listOf("C2"), listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("Last", "First", "Middle"), t[0].map { valueOf<Any>(it) })
     }
 
@@ -132,20 +132,20 @@ class TableColumnMove {
             }
         }
 
-        assertEquals(listOf(listOf("A0"), listOf("B"), listOf("C"), listOf("D")), headersOf(t).toList().map { it.header })
+        assertEquals(listOf(listOf("A0"), listOf("B"), listOf("C"), listOf("D")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("First", "Middle 1", "Middle 2", "Last"), t[0].map { valueOf<Any>(it) })
 
         // No-op
         move(t["A0"] to t["A0"])
 
         assertEquals(1, events.size)
-        assertEquals(listOf(listOf("A0"), listOf("B"), listOf("C"), listOf("D")), headersOf(events.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("A0"), listOf("B"), listOf("C"), listOf("D")), headersOf(events.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A0"), listOf("B"), listOf("C"), listOf("D")), headersOf(events.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("A0"), listOf("B"), listOf("C"), listOf("D")), headersOf(events.first().newValue.table).toList().map { it.labels })
 
         assertEquals("First", valueOf<Any>(events.first().oldValue))
         assertEquals("First", valueOf<Any>(events.first().newValue))
-        assertEquals(listOf("A0"), headerOf(events.first().oldValue).header)
-        assertEquals(listOf("A0"), headerOf(events.first().newValue).header)
+        assertEquals(listOf("A0"), headerOf(events.first().oldValue).labels)
+        assertEquals(listOf("A0"), headerOf(events.first().newValue).labels)
         assertEquals(0, indexOf(events.first().oldValue))
         assertEquals(0, indexOf(events.first().newValue))
 
@@ -154,30 +154,30 @@ class TableColumnMove {
 
         events = emptyList()
 
-        assertEquals(listOf(listOf("A0"), listOf("B"), listOf("C"), listOf("D")), headersOf(t).toList().map { it.header })
+        assertEquals(listOf(listOf("A0"), listOf("B"), listOf("C"), listOf("D")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("First", "Middle 1", "Middle 2", "Last"), t[0].map { valueOf<Any>(it) })
 
         // Rename
         move(t["A0"] to t["A0"], "A")
 
         assertEquals(2, events.size)
-        assertEquals(listOf(listOf("A0"), listOf("B"), listOf("C"), listOf("D")), headersOf(events.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headersOf(events.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A0"), listOf("B"), listOf("C"), listOf("D")), headersOf(events.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headersOf(events.first().newValue.table).toList().map { it.labels })
 
-        assertEquals(listOf(listOf("A0"), listOf("B"), listOf("C"), listOf("D")), headersOf(events.last().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headersOf(events.last().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A0"), listOf("B"), listOf("C"), listOf("D")), headersOf(events.last().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headersOf(events.last().newValue.table).toList().map { it.labels })
 
         assertEquals("First", valueOf<Any>(events.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events.first().newValue))
-        assertEquals(listOf("A0"), headerOf(events.first().oldValue).header)
-        assertEquals(listOf("A0"), headerOf(events.first().newValue).header)
+        assertEquals(listOf("A0"), headerOf(events.first().oldValue).labels)
+        assertEquals(listOf("A0"), headerOf(events.first().newValue).labels)
         assertEquals(0, indexOf(events.first().oldValue))
         assertEquals(0, indexOf(events.first().newValue))
 
         assertEquals(Unit, valueOf<Any>(events.last().oldValue))
         assertEquals("First", valueOf<Any>(events.last().newValue))
-        assertEquals(listOf("A"), headerOf(events.last().oldValue).header)
-        assertEquals(listOf("A"), headerOf(events.last().newValue).header)
+        assertEquals(listOf("A"), headerOf(events.last().oldValue).labels)
+        assertEquals(listOf("A"), headerOf(events.last().newValue).labels)
         assertEquals(0, indexOf(events.last().oldValue))
         assertEquals(0, indexOf(events.last().newValue))
 
@@ -189,30 +189,30 @@ class TableColumnMove {
 
         events = emptyList()
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headersOf(t).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("First", "Middle 1", "Middle 2", "Last"), t[0].map { valueOf<Any>(it) })
 
         // Move to in between
         move(t["A"] to t["C"])
 
         assertEquals(2, events.size)
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headersOf(events.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("B"), listOf("C"), listOf("D")), headersOf(events.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headersOf(events.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("B"), listOf("C"), listOf("D")), headersOf(events.first().newValue.table).toList().map { it.labels })
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headersOf(events.last().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("B"), listOf("C"), listOf("D")), headersOf(events.last().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headersOf(events.last().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("B"), listOf("C"), listOf("D")), headersOf(events.last().newValue.table).toList().map { it.labels })
 
         assertEquals("First", valueOf<Any>(events.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events.first().newValue))
-        assertEquals(listOf("A"), headerOf(events.first().oldValue).header)
-        assertEquals(listOf("A"), headerOf(events.first().newValue).header)
+        assertEquals(listOf("A"), headerOf(events.first().oldValue).labels)
+        assertEquals(listOf("A"), headerOf(events.first().newValue).labels)
         assertEquals(0, indexOf(events.first().oldValue))
         assertEquals(0, indexOf(events.first().newValue))
 
         assertEquals("Middle 2", valueOf<Any>(events.last().oldValue))
         assertEquals("First", valueOf<Any>(events.last().newValue))
-        assertEquals(listOf("C"), headerOf(events.last().oldValue).header)
-        assertEquals(listOf("C"), headerOf(events.last().newValue).header)
+        assertEquals(listOf("C"), headerOf(events.last().oldValue).labels)
+        assertEquals(listOf("C"), headerOf(events.last().newValue).labels)
         assertEquals(0, indexOf(events.last().oldValue))
         assertEquals(0, indexOf(events.last().newValue))
 
@@ -224,40 +224,40 @@ class TableColumnMove {
 
         events = emptyList()
 
-        assertEquals(listOf(listOf("B"), listOf("C"), listOf("D")), headersOf(t).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("C"), listOf("D")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("Middle 1", "First", "Last"), t[0].map { valueOf<Any>(it) })
 
         // Move to last
         move(t["B"] to t["D"], "D2")
 
         assertEquals(3, events.size)
-        assertEquals(listOf(listOf("B"), listOf("C"), listOf("D")), headersOf(events.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("C"), listOf("D2")), headersOf(events.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("C"), listOf("D")), headersOf(events.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("C"), listOf("D2")), headersOf(events.first().newValue.table).toList().map { it.labels })
 
-        assertEquals(listOf(listOf("B"), listOf("C"), listOf("D")), headersOf(events[1].oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("C"), listOf("D2")), headersOf(events[1].newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("C"), listOf("D")), headersOf(events[1].oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("C"), listOf("D2")), headersOf(events[1].newValue.table).toList().map { it.labels })
 
-        assertEquals(listOf(listOf("B"), listOf("C"), listOf("D")), headersOf(events.last().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("C"), listOf("D2")), headersOf(events.last().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("C"), listOf("D")), headersOf(events.last().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("C"), listOf("D2")), headersOf(events.last().newValue.table).toList().map { it.labels })
 
         assertEquals("Middle 1", valueOf<Any>(events.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events.first().newValue))
-        assertEquals(listOf("B"), headerOf(events.first().oldValue).header)
-        assertEquals(listOf("B"), headerOf(events.first().newValue).header)
+        assertEquals(listOf("B"), headerOf(events.first().oldValue).labels)
+        assertEquals(listOf("B"), headerOf(events.first().newValue).labels)
         assertEquals(0, indexOf(events.first().oldValue))
         assertEquals(0, indexOf(events.first().newValue))
 
         assertEquals("Last", valueOf<Any>(events[1].oldValue))
         assertEquals(Unit, valueOf<Any>(events[1].newValue))
-        assertEquals(listOf("D"), headerOf(events[1].oldValue).header)
-        assertEquals(listOf("D"), headerOf(events[1].newValue).header)
+        assertEquals(listOf("D"), headerOf(events[1].oldValue).labels)
+        assertEquals(listOf("D"), headerOf(events[1].newValue).labels)
         assertEquals(0, indexOf(events[1].oldValue))
         assertEquals(0, indexOf(events[1].newValue))
 
         assertEquals(Unit, valueOf<Any>(events.last().oldValue))
         assertEquals("Middle 1", valueOf<Any>(events.last().newValue))
-        assertEquals(listOf("D2"), headerOf(events.last().oldValue).header)
-        assertEquals(listOf("D2"), headerOf(events.last().newValue).header)
+        assertEquals(listOf("D2"), headerOf(events.last().oldValue).labels)
+        assertEquals(listOf("D2"), headerOf(events.last().newValue).labels)
         assertEquals(0, indexOf(events.last().oldValue))
         assertEquals(0, indexOf(events.last().newValue))
 
@@ -272,20 +272,20 @@ class TableColumnMove {
 
         events = emptyList()
 
-        assertEquals(listOf(listOf("C"), listOf("D2")), headersOf(t).toList().map { it.header })
+        assertEquals(listOf(listOf("C"), listOf("D2")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("First", "Middle 1"), t[0].map { valueOf<Any>(it) })
 
         // Move to first
         t["E", 0] = "New First"
 
         assertEquals(1, events.size)
-        assertEquals(listOf(listOf("C"), listOf("D2")), headersOf(events.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("C"), listOf("D2"), listOf("E")), headersOf(events.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("C"), listOf("D2")), headersOf(events.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("C"), listOf("D2"), listOf("E")), headersOf(events.first().newValue.table).toList().map { it.labels })
 
         assertEquals(Unit, valueOf<Any>(events.first().oldValue))
         assertEquals("New First", valueOf<Any>(events.first().newValue))
-        assertEquals(listOf("E"), headerOf(events.first().oldValue).header)
-        assertEquals(listOf("E"), headerOf(events.first().newValue).header)
+        assertEquals(listOf("E"), headerOf(events.first().oldValue).labels)
+        assertEquals(listOf("E"), headerOf(events.first().newValue).labels)
         assertEquals(0, indexOf(events.first().oldValue))
         assertEquals(0, indexOf(events.first().newValue))
 
@@ -297,33 +297,33 @@ class TableColumnMove {
         move(t["E"] to t["C"], "A")
 
         assertEquals(3, events.size)
-        assertEquals(listOf(listOf("C"), listOf("D2"), listOf("E")), headersOf(events.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("A"), listOf("D2")), headersOf(events.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("C"), listOf("D2"), listOf("E")), headersOf(events.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("A"), listOf("D2")), headersOf(events.first().newValue.table).toList().map { it.labels })
 
-        assertEquals(listOf(listOf("C"), listOf("D2"), listOf("E")), headersOf(events[1].oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("A"), listOf("D2")), headersOf(events[1].newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("C"), listOf("D2"), listOf("E")), headersOf(events[1].oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("A"), listOf("D2")), headersOf(events[1].newValue.table).toList().map { it.labels })
 
-        assertEquals(listOf(listOf("C"), listOf("D2"), listOf("E")), headersOf(events.last().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("A"), listOf("D2")), headersOf(events.last().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("C"), listOf("D2"), listOf("E")), headersOf(events.last().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("A"), listOf("D2")), headersOf(events.last().newValue.table).toList().map { it.labels })
 
         assertEquals("New First", valueOf<Any>(events.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events.first().newValue))
-        assertEquals(listOf("E"), headerOf(events.first().oldValue).header)
-        assertEquals(listOf("E"), headerOf(events.first().newValue).header)
+        assertEquals(listOf("E"), headerOf(events.first().oldValue).labels)
+        assertEquals(listOf("E"), headerOf(events.first().newValue).labels)
         assertEquals(0, indexOf(events.first().oldValue))
         assertEquals(0, indexOf(events.first().newValue))
 
         assertEquals("First", valueOf<Any>(events[1].oldValue))
         assertEquals(Unit, valueOf<Any>(events[1].newValue))
-        assertEquals(listOf("C"), headerOf(events[1].oldValue).header)
-        assertEquals(listOf("C"), headerOf(events[1].newValue).header)
+        assertEquals(listOf("C"), headerOf(events[1].oldValue).labels)
+        assertEquals(listOf("C"), headerOf(events[1].newValue).labels)
         assertEquals(0, indexOf(events[1].oldValue))
         assertEquals(0, indexOf(events[1].newValue))
 
         assertEquals(Unit, valueOf<Any>(events.last().oldValue))
         assertEquals("New First", valueOf<Any>(events.last().newValue))
-        assertEquals(listOf("A"), headerOf(events.last().oldValue).header)
-        assertEquals(listOf("A"), headerOf(events.last().newValue).header)
+        assertEquals(listOf("A"), headerOf(events.last().oldValue).labels)
+        assertEquals(listOf("A"), headerOf(events.last().newValue).labels)
         assertEquals(0, indexOf(events.last().oldValue))
         assertEquals(0, indexOf(events.last().newValue))
 
@@ -338,7 +338,7 @@ class TableColumnMove {
 
         events = emptyList()
 
-        assertEquals(listOf(listOf("A"), listOf("D2")), headersOf(t).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("D2")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("New First", "Middle 1"), t[0].map { valueOf<Any>(it) })
     }
 
@@ -372,20 +372,20 @@ class TableColumnMove {
             }
         }
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t1).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("First", "Middle", "Last"), t1[0].map { valueOf<Any>(it) })
 
         // Move to after T2
         move(t1["A"] after t2["T2"])
 
         assertEquals(1, events1.size)
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("B"), listOf("C")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("B"), listOf("C")), headersOf(events1.first().newValue.table).toList().map { it.labels })
 
         assertEquals("First", valueOf<Any>(events1.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events1.first().newValue))
-        assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
-        assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        assertEquals(listOf("A"), headerOf(events1.first().oldValue).labels)
+        assertEquals(listOf("A"), headerOf(events1.first().newValue).labels)
         assertEquals(0, indexOf(events1.first().oldValue))
         assertEquals(0, indexOf(events1.first().newValue))
 
@@ -395,13 +395,13 @@ class TableColumnMove {
         events1 = emptyList()
 
         assertEquals(1, events2.size)
-        assertEquals(listOf(listOf("T2")), headersOf(events2.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("T2"), listOf("A")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("T2")), headersOf(events2.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("T2"), listOf("A")), headersOf(events2.first().newValue.table).toList().map { it.labels })
 
         assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
         assertEquals("First", valueOf<Any>(events2.first().newValue))
-        assertEquals(listOf("A"), headerOf(events2.first().oldValue).header)
-        assertEquals(listOf("A"), headerOf(events2.first().newValue).header)
+        assertEquals(listOf("A"), headerOf(events2.first().oldValue).labels)
+        assertEquals(listOf("A"), headerOf(events2.first().newValue).labels)
         assertEquals(0, indexOf(events2.first().oldValue))
         assertEquals(0, indexOf(events2.first().newValue))
 
@@ -410,23 +410,23 @@ class TableColumnMove {
 
         events2 = emptyList()
 
-        assertEquals(listOf(listOf("B"), listOf("C")), headersOf(t1).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("C")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("Middle", "Last"), t1[0].map { valueOf<Any>(it) })
 
-        assertEquals(listOf(listOf("T2"), listOf("A")), headersOf(t2).toList().map { it.header })
+        assertEquals(listOf(listOf("T2"), listOf("A")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("T2 cell", "First"), t2[0].map { valueOf<Any>(it) })
 
         // Move to before T2
         move(t1["B"] before t2["T2"])
 
         assertEquals(1, events1.size)
-        assertEquals(listOf(listOf("B"), listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("C")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("C")), headersOf(events1.first().newValue.table).toList().map { it.labels })
 
         assertEquals("Middle", valueOf<Any>(events1.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events1.first().newValue))
-        assertEquals(listOf("B"), headerOf(events1.first().oldValue).header)
-        assertEquals(listOf("B"), headerOf(events1.first().newValue).header)
+        assertEquals(listOf("B"), headerOf(events1.first().oldValue).labels)
+        assertEquals(listOf("B"), headerOf(events1.first().newValue).labels)
         assertEquals(0, indexOf(events1.first().oldValue))
         assertEquals(0, indexOf(events1.first().newValue))
 
@@ -436,13 +436,13 @@ class TableColumnMove {
         events1 = emptyList()
 
         assertEquals(1, events2.size)
-        assertEquals(listOf(listOf("T2"), listOf("A")), headersOf(events2.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("B"), listOf("T2"), listOf("A")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("T2"), listOf("A")), headersOf(events2.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("B"), listOf("T2"), listOf("A")), headersOf(events2.first().newValue.table).toList().map { it.labels })
 
         assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
         assertEquals("Middle", valueOf<Any>(events2.first().newValue))
-        assertEquals(listOf("B"), headerOf(events2.first().oldValue).header)
-        assertEquals(listOf("B"), headerOf(events2.first().newValue).header)
+        assertEquals(listOf("B"), headerOf(events2.first().oldValue).labels)
+        assertEquals(listOf("B"), headerOf(events2.first().newValue).labels)
         assertEquals(0, indexOf(events2.first().oldValue))
         assertEquals(0, indexOf(events2.first().newValue))
 
@@ -451,23 +451,23 @@ class TableColumnMove {
 
         events2 = emptyList()
 
-        assertEquals(listOf(listOf("C")), headersOf(t1).toList().map { it.header })
+        assertEquals(listOf(listOf("C")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("Last"), t1[0].map { valueOf<Any>(it) })
 
-        assertEquals(listOf(listOf("B"), listOf("T2"), listOf("A")), headersOf(t2).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("T2"), listOf("A")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("Middle", "T2 cell", "First"), t2[0].map { valueOf<Any>(it) })
 
         // Move to in between
         move(t1["C"] after t2["B"], "C2")
 
         assertEquals(1, events1.size)
-        assertEquals(listOf(listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.header })
-        assertEquals(emptyList<List<String>>(), headersOf(events1.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.labels })
+        assertEquals(emptyList<List<String>>(), headersOf(events1.first().newValue.table).toList().map { it.labels })
 
         assertEquals("Last", valueOf<Any>(events1.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events1.first().newValue))
-        assertEquals(listOf("C"), headerOf(events1.first().oldValue).header)
-        assertEquals(listOf("C"), headerOf(events1.first().newValue).header)
+        assertEquals(listOf("C"), headerOf(events1.first().oldValue).labels)
+        assertEquals(listOf("C"), headerOf(events1.first().newValue).labels)
         assertEquals(0, indexOf(events1.first().oldValue))
         assertEquals(0, indexOf(events1.first().newValue))
 
@@ -477,13 +477,13 @@ class TableColumnMove {
         events1 = emptyList()
 
         assertEquals(1, events2.size)
-        assertEquals(listOf(listOf("B"), listOf("T2"), listOf("A")), headersOf(events2.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("B"), listOf("C2"), listOf("T2"), listOf("A")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("T2"), listOf("A")), headersOf(events2.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("B"), listOf("C2"), listOf("T2"), listOf("A")), headersOf(events2.first().newValue.table).toList().map { it.labels })
 
         assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
         assertEquals("Last", valueOf<Any>(events2.first().newValue))
-        assertEquals(listOf("C2"), headerOf(events2.first().oldValue).header)
-        assertEquals(listOf("C2"), headerOf(events2.first().newValue).header)
+        assertEquals(listOf("C2"), headerOf(events2.first().oldValue).labels)
+        assertEquals(listOf("C2"), headerOf(events2.first().newValue).labels)
         assertEquals(0, indexOf(events2.first().oldValue))
         assertEquals(0, indexOf(events2.first().newValue))
 
@@ -492,10 +492,10 @@ class TableColumnMove {
 
         events2 = emptyList()
 
-        assertEquals(emptyList<List<String>>(), headersOf(t1).toList().map { it.header })
+        assertEquals(emptyList<List<String>>(), headersOf(t1).toList().map { it.labels })
         assertEquals(emptyList<List<String>>(), t1[0].map { valueOf<Any>(it) })
 
-        assertEquals(listOf(listOf("B"), listOf("C2"), listOf("T2"), listOf("A")), headersOf(t2).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("C2"), listOf("T2"), listOf("A")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("Middle", "Last", "T2 cell", "First"), t2[0].map { valueOf<Any>(it) })
     }
 
@@ -531,23 +531,23 @@ class TableColumnMove {
             }
         }
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t1).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("First 1", "Middle 1", "Last 1"), t1[0].map { valueOf<Any>(it) })
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t2).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("First 2", "Middle 2", "Last 2"), t2[0].map { valueOf<Any>(it) })
 
         // Move T1["A"] to T2
         move(t1["A"] to t2["A"])
 
         assertEquals(1, events1.size)
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("B"), listOf("C")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("B"), listOf("C")), headersOf(events1.first().newValue.table).toList().map { it.labels })
 
         assertEquals("First 1", valueOf<Any>(events1.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events1.first().newValue))
-        assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
-        assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        assertEquals(listOf("A"), headerOf(events1.first().oldValue).labels)
+        assertEquals(listOf("A"), headerOf(events1.first().newValue).labels)
         assertEquals(0, indexOf(events1.first().oldValue))
         assertEquals(0, indexOf(events1.first().newValue))
 
@@ -557,13 +557,13 @@ class TableColumnMove {
         events1 = emptyList()
 
         assertEquals(1, events2.size)
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events2.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events2.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events2.first().newValue.table).toList().map { it.labels })
 
         assertEquals("First 2", valueOf<Any>(events2.first().oldValue))
         assertEquals("First 1", valueOf<Any>(events2.first().newValue))
-        assertEquals(listOf("A"), headerOf(events2.first().oldValue).header)
-        assertEquals(listOf("A"), headerOf(events2.first().newValue).header)
+        assertEquals(listOf("A"), headerOf(events2.first().oldValue).labels)
+        assertEquals(listOf("A"), headerOf(events2.first().newValue).labels)
         assertEquals(0, indexOf(events2.first().oldValue))
         assertEquals(0, indexOf(events2.first().newValue))
 
@@ -572,23 +572,23 @@ class TableColumnMove {
 
         events2 = emptyList()
 
-        assertEquals(listOf(listOf("B"), listOf("C")), headersOf(t1).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("C")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("Middle 1", "Last 1"), t1[0].map { valueOf<Any>(it) })
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t2).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("First 1", "Middle 2", "Last 2"), t2[0].map { valueOf<Any>(it) })
 
         // Move T1["C"] to T2 with new name
         move(t1["C"] to t2["C"], "C2")
 
         assertEquals(1, events1.size)
-        assertEquals(listOf(listOf("B"), listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("B")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("B")), headersOf(events1.first().newValue.table).toList().map { it.labels })
 
         assertEquals("Last 1", valueOf<Any>(events1.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events1.first().newValue))
-        assertEquals(listOf("C"), headerOf(events1.first().oldValue).header)
-        assertEquals(listOf("C"), headerOf(events1.first().newValue).header)
+        assertEquals(listOf("C"), headerOf(events1.first().oldValue).labels)
+        assertEquals(listOf("C"), headerOf(events1.first().newValue).labels)
         assertEquals(0, indexOf(events1.first().oldValue))
         assertEquals(0, indexOf(events1.first().newValue))
 
@@ -598,23 +598,23 @@ class TableColumnMove {
         events1 = emptyList()
 
         assertEquals(2, events2.size)
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events2.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C2")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events2.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C2")), headersOf(events2.first().newValue.table).toList().map { it.labels })
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events2.last().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C2")), headersOf(events2.last().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events2.last().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C2")), headersOf(events2.last().newValue.table).toList().map { it.labels })
 
         assertEquals("Last 2", valueOf<Any>(events2.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events2.first().newValue))
-        assertEquals(listOf("C"), headerOf(events2.first().oldValue).header)
-        assertEquals(listOf("C"), headerOf(events2.first().newValue).header)
+        assertEquals(listOf("C"), headerOf(events2.first().oldValue).labels)
+        assertEquals(listOf("C"), headerOf(events2.first().newValue).labels)
         assertEquals(0, indexOf(events2.first().oldValue))
         assertEquals(0, indexOf(events2.first().newValue))
 
         assertEquals(Unit, valueOf<Any>(events2.last().oldValue))
         assertEquals("Last 1", valueOf<Any>(events2.last().newValue))
-        assertEquals(listOf("C2"), headerOf(events2.last().oldValue).header)
-        assertEquals(listOf("C2"), headerOf(events2.last().newValue).header)
+        assertEquals(listOf("C2"), headerOf(events2.last().oldValue).labels)
+        assertEquals(listOf("C2"), headerOf(events2.last().newValue).labels)
         assertEquals(0, indexOf(events2.last().oldValue))
         assertEquals(0, indexOf(events2.last().newValue))
 
@@ -626,23 +626,23 @@ class TableColumnMove {
 
         events2 = emptyList()
 
-        assertEquals(listOf(listOf("B")), headersOf(t1).toList().map { it.header })
+        assertEquals(listOf(listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("Middle 1"), t1[0].map { valueOf<Any>(it) })
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C2")), headersOf(t2).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C2")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("First 1", "Middle 2", "Last 1"), t2[0].map { valueOf<Any>(it) })
 
         // Move T1["B"] to T2 with same name
         move(t1["B"] to t2["B"], "B")
 
         assertEquals(1, events1.size)
-        assertEquals(listOf(listOf("B")), headersOf(events1.first().oldValue.table).toList().map { it.header })
-        assertEquals(emptyList<List<String>>(), headersOf(events1.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B")), headersOf(events1.first().oldValue.table).toList().map { it.labels })
+        assertEquals(emptyList<List<String>>(), headersOf(events1.first().newValue.table).toList().map { it.labels })
 
         assertEquals("Middle 1", valueOf<Any>(events1.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events1.first().newValue))
-        assertEquals(listOf("B"), headerOf(events1.first().oldValue).header)
-        assertEquals(listOf("B"), headerOf(events1.first().newValue).header)
+        assertEquals(listOf("B"), headerOf(events1.first().oldValue).labels)
+        assertEquals(listOf("B"), headerOf(events1.first().newValue).labels)
         assertEquals(0, indexOf(events1.first().oldValue))
         assertEquals(0, indexOf(events1.first().newValue))
 
@@ -652,13 +652,13 @@ class TableColumnMove {
         events1 = emptyList()
 
         assertEquals(1, events2.size)
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C2")), headersOf(events2.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C2")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C2")), headersOf(events2.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C2")), headersOf(events2.first().newValue.table).toList().map { it.labels })
 
         assertEquals("Middle 2", valueOf<Any>(events2.first().oldValue))
         assertEquals("Middle 1", valueOf<Any>(events2.first().newValue))
-        assertEquals(listOf("B"), headerOf(events2.first().oldValue).header)
-        assertEquals(listOf("B"), headerOf(events2.first().newValue).header)
+        assertEquals(listOf("B"), headerOf(events2.first().oldValue).labels)
+        assertEquals(listOf("B"), headerOf(events2.first().newValue).labels)
         assertEquals(0, indexOf(events2.first().oldValue))
         assertEquals(0, indexOf(events2.first().newValue))
 
@@ -667,10 +667,10 @@ class TableColumnMove {
 
         events2 = emptyList()
 
-        assertEquals(emptyList<List<String>>(), headersOf(t1).toList().map { it.header })
+        assertEquals(emptyList<List<String>>(), headersOf(t1).toList().map { it.labels })
         assertEquals(emptyList<List<String>>(), t1[0].map { valueOf<Any>(it) })
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C2")), headersOf(t2).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C2")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("First 1", "Middle 1", "Last 1"), t2[0].map { valueOf<Any>(it) })
     }
 
@@ -692,20 +692,20 @@ class TableColumnMove {
             }
         }
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("First", "Middle", "Last"), t[0].map { valueOf<Any>(it) })
 
         // Move first
         move(t["A"] to t)
 
         assertEquals(1, events.size)
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("B"), listOf("C"), listOf("A")), headersOf(events.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("B"), listOf("C"), listOf("A")), headersOf(events.first().newValue.table).toList().map { it.labels })
 
         assertEquals("First", valueOf<Any>(events.first().oldValue))
         assertEquals("First", valueOf<Any>(events.first().newValue))
-        assertEquals(listOf("A"), headerOf(events.first().oldValue).header)
-        assertEquals(listOf("A"), headerOf(events.first().newValue).header)
+        assertEquals(listOf("A"), headerOf(events.first().oldValue).labels)
+        assertEquals(listOf("A"), headerOf(events.first().newValue).labels)
         assertEquals(0, indexOf(events.first().oldValue))
         assertEquals(0, indexOf(events.first().newValue))
 
@@ -714,20 +714,20 @@ class TableColumnMove {
 
         events = emptyList()
 
-        assertEquals(listOf(listOf("B"), listOf("C"), listOf("A")), headersOf(t).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("C"), listOf("A")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("Middle", "Last", "First"), t[0].map { valueOf<Any>(it) })
 
         // Move last
         move(t["C"] to t)
 
         assertEquals(1, events.size)
-        assertEquals(listOf(listOf("B"), listOf("C"), listOf("A")), headersOf(events.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(events.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("C"), listOf("A")), headersOf(events.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(events.first().newValue.table).toList().map { it.labels })
 
         assertEquals("Last", valueOf<Any>(events.first().oldValue))
         assertEquals("Last", valueOf<Any>(events.first().newValue))
-        assertEquals(listOf("C"), headerOf(events.first().oldValue).header)
-        assertEquals(listOf("C"), headerOf(events.first().newValue).header)
+        assertEquals(listOf("C"), headerOf(events.first().oldValue).labels)
+        assertEquals(listOf("C"), headerOf(events.first().newValue).labels)
         assertEquals(0, indexOf(events.first().oldValue))
         assertEquals(0, indexOf(events.first().newValue))
 
@@ -736,30 +736,30 @@ class TableColumnMove {
 
         events = emptyList()
 
-        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(t).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("Middle", "First", "Last"), t[0].map { valueOf<Any>(it) })
 
         // Move middle
         move(t["B"] to t, "B2")
 
         assertEquals(2, events.size)
-        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(events.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("A"), listOf("C"), listOf("B2")), headersOf(events.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(events.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("A"), listOf("C"), listOf("B2")), headersOf(events.first().newValue.table).toList().map { it.labels })
 
-        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(events.last().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("A"), listOf("C"), listOf("B2")), headersOf(events.last().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(events.last().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("A"), listOf("C"), listOf("B2")), headersOf(events.last().newValue.table).toList().map { it.labels })
 
         assertEquals("Middle", valueOf<Any>(events.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events.first().newValue))
-        assertEquals(listOf("B"), headerOf(events.first().oldValue).header)
-        assertEquals(listOf("B"), headerOf(events.first().newValue).header)
+        assertEquals(listOf("B"), headerOf(events.first().oldValue).labels)
+        assertEquals(listOf("B"), headerOf(events.first().newValue).labels)
         assertEquals(0, indexOf(events.first().oldValue))
         assertEquals(0, indexOf(events.first().newValue))
 
         assertEquals(Unit, valueOf<Any>(events.last().oldValue))
         assertEquals("Middle", valueOf<Any>(events.last().newValue))
-        assertEquals(listOf("B2"), headerOf(events.last().oldValue).header)
-        assertEquals(listOf("B2"), headerOf(events.last().newValue).header)
+        assertEquals(listOf("B2"), headerOf(events.last().oldValue).labels)
+        assertEquals(listOf("B2"), headerOf(events.last().newValue).labels)
         assertEquals(0, indexOf(events.last().oldValue))
         assertEquals(0, indexOf(events.last().newValue))
 
@@ -771,7 +771,7 @@ class TableColumnMove {
 
         events = emptyList()
 
-        assertEquals(listOf(listOf("A"), listOf("C"), listOf("B2")), headersOf(t).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("C"), listOf("B2")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("First", "Last", "Middle"), t[0].map { valueOf<Any>(it) })
     }
 
@@ -805,20 +805,20 @@ class TableColumnMove {
             }
         }
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t1).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("First", "Middle", "Last"), t1[0].map { valueOf<Any>(it) })
 
         // Move middle to T2
         move(t1["B"] to t2)
 
         assertEquals(1, events1.size)
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("A"), listOf("C")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("A"), listOf("C")), headersOf(events1.first().newValue.table).toList().map { it.labels })
 
         assertEquals("Middle", valueOf<Any>(events1.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events1.first().newValue))
-        assertEquals(listOf("B"), headerOf(events1.first().oldValue).header)
-        assertEquals(listOf("B"), headerOf(events1.first().newValue).header)
+        assertEquals(listOf("B"), headerOf(events1.first().oldValue).labels)
+        assertEquals(listOf("B"), headerOf(events1.first().newValue).labels)
         assertEquals(0, indexOf(events1.first().oldValue))
         assertEquals(0, indexOf(events1.first().newValue))
 
@@ -828,13 +828,13 @@ class TableColumnMove {
         events1 = emptyList()
 
         assertEquals(1, events2.size)
-        assertEquals(listOf(listOf("T2")), headersOf(events2.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("T2"), listOf("B")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("T2")), headersOf(events2.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("T2"), listOf("B")), headersOf(events2.first().newValue.table).toList().map { it.labels })
 
         assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
         assertEquals("Middle", valueOf<Any>(events2.first().newValue))
-        assertEquals(listOf("B"), headerOf(events2.first().oldValue).header)
-        assertEquals(listOf("B"), headerOf(events2.first().newValue).header)
+        assertEquals(listOf("B"), headerOf(events2.first().oldValue).labels)
+        assertEquals(listOf("B"), headerOf(events2.first().newValue).labels)
         assertEquals(0, indexOf(events2.first().oldValue))
         assertEquals(0, indexOf(events2.first().newValue))
 
@@ -843,23 +843,23 @@ class TableColumnMove {
 
         events2 = emptyList()
 
-        assertEquals(listOf(listOf("A"), listOf("C")), headersOf(t1).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("C")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("First", "Last"), t1[0].map { valueOf<Any>(it) })
 
-        assertEquals(listOf(listOf("T2"), listOf("B")), headersOf(t2).toList().map { it.header })
+        assertEquals(listOf(listOf("T2"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("T2 cell", "Middle"), t2[0].map { valueOf<Any>(it) })
 
         // Move first to T2
         move(t1["A"] to t2)
 
         assertEquals(1, events1.size)
-        assertEquals(listOf(listOf("A"), listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("C")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("C")), headersOf(events1.first().newValue.table).toList().map { it.labels })
 
         assertEquals("First", valueOf<Any>(events1.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events1.first().newValue))
-        assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
-        assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        assertEquals(listOf("A"), headerOf(events1.first().oldValue).labels)
+        assertEquals(listOf("A"), headerOf(events1.first().newValue).labels)
         assertEquals(0, indexOf(events1.first().oldValue))
         assertEquals(0, indexOf(events1.first().newValue))
 
@@ -869,13 +869,13 @@ class TableColumnMove {
         events1 = emptyList()
 
         assertEquals(1, events2.size)
-        assertEquals(listOf(listOf("T2"), listOf("B")), headersOf(events2.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("T2"), listOf("B"), listOf("A")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("T2"), listOf("B")), headersOf(events2.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("T2"), listOf("B"), listOf("A")), headersOf(events2.first().newValue.table).toList().map { it.labels })
 
         assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
         assertEquals("First", valueOf<Any>(events2.first().newValue))
-        assertEquals(listOf("A"), headerOf(events2.first().oldValue).header)
-        assertEquals(listOf("A"), headerOf(events2.first().newValue).header)
+        assertEquals(listOf("A"), headerOf(events2.first().oldValue).labels)
+        assertEquals(listOf("A"), headerOf(events2.first().newValue).labels)
         assertEquals(0, indexOf(events2.first().oldValue))
         assertEquals(0, indexOf(events2.first().newValue))
 
@@ -884,23 +884,23 @@ class TableColumnMove {
 
         events2 = emptyList()
 
-        assertEquals(listOf(listOf("C")), headersOf(t1).toList().map { it.header })
+        assertEquals(listOf(listOf("C")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("Last"), t1[0].map { valueOf<Any>(it) })
 
-        assertEquals(listOf(listOf("T2"), listOf("B"), listOf("A")), headersOf(t2).toList().map { it.header })
+        assertEquals(listOf(listOf("T2"), listOf("B"), listOf("A")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("T2 cell", "Middle", "First"), t2[0].map { valueOf<Any>(it) })
 
         // Move last to T2
         move(t1["C"] to t2)
 
         assertEquals(1, events1.size)
-        assertEquals(listOf(listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.header })
-        assertEquals(emptyList<List<String>>(), headersOf(events1.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.labels })
+        assertEquals(emptyList<List<String>>(), headersOf(events1.first().newValue.table).toList().map { it.labels })
 
         assertEquals("Last", valueOf<Any>(events1.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events1.first().newValue))
-        assertEquals(listOf("C"), headerOf(events1.first().oldValue).header)
-        assertEquals(listOf("C"), headerOf(events1.first().newValue).header)
+        assertEquals(listOf("C"), headerOf(events1.first().oldValue).labels)
+        assertEquals(listOf("C"), headerOf(events1.first().newValue).labels)
         assertEquals(0, indexOf(events1.first().oldValue))
         assertEquals(0, indexOf(events1.first().newValue))
 
@@ -910,13 +910,13 @@ class TableColumnMove {
         events1 = emptyList()
 
         assertEquals(1, events2.size)
-        assertEquals(listOf(listOf("T2"), listOf("B"), listOf("A")), headersOf(events2.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("T2"), listOf("B"), listOf("A"), listOf("C")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("T2"), listOf("B"), listOf("A")), headersOf(events2.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("T2"), listOf("B"), listOf("A"), listOf("C")), headersOf(events2.first().newValue.table).toList().map { it.labels })
 
         assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
         assertEquals("Last", valueOf<Any>(events2.first().newValue))
-        assertEquals(listOf("C"), headerOf(events2.first().oldValue).header)
-        assertEquals(listOf("C"), headerOf(events2.first().newValue).header)
+        assertEquals(listOf("C"), headerOf(events2.first().oldValue).labels)
+        assertEquals(listOf("C"), headerOf(events2.first().newValue).labels)
         assertEquals(0, indexOf(events2.first().oldValue))
         assertEquals(0, indexOf(events2.first().newValue))
 
@@ -925,10 +925,10 @@ class TableColumnMove {
 
         events2 = emptyList()
 
-        assertEquals(emptyList<List<String>>(), headersOf(t1).toList().map { it.header })
+        assertEquals(emptyList<List<String>>(), headersOf(t1).toList().map { it.labels })
         assertEquals(emptyList<List<String>>(), t1[0].map { valueOf<Any>(it) })
 
-        assertEquals(listOf(listOf("T2"), listOf("B"), listOf("A"), listOf("C")), headersOf(t2).toList().map { it.header })
+        assertEquals(listOf(listOf("T2"), listOf("B"), listOf("A"), listOf("C")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("T2 cell", "Middle", "First", "Last"), t2[0].map { valueOf<Any>(it) })
     }
 
@@ -960,20 +960,20 @@ class TableColumnMove {
             }
         }
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t1).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("First", "Middle", "Last"), t1[0].map { valueOf<Any>(it) })
 
         // Move middle to T2
         move(t1["B"] to t2)
 
         assertEquals(1, events1.size)
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("A"), listOf("C")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("A"), listOf("C")), headersOf(events1.first().newValue.table).toList().map { it.labels })
 
         assertEquals("Middle", valueOf<Any>(events1.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events1.first().newValue))
-        assertEquals(listOf("B"), headerOf(events1.first().oldValue).header)
-        assertEquals(listOf("B"), headerOf(events1.first().newValue).header)
+        assertEquals(listOf("B"), headerOf(events1.first().oldValue).labels)
+        assertEquals(listOf("B"), headerOf(events1.first().newValue).labels)
         assertEquals(0, indexOf(events1.first().oldValue))
         assertEquals(0, indexOf(events1.first().newValue))
 
@@ -983,13 +983,13 @@ class TableColumnMove {
         events1 = emptyList()
 
         assertEquals(1, events2.size)
-        assertEquals(emptyList<List<String>>(), headersOf(events2.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("B")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        assertEquals(emptyList<List<String>>(), headersOf(events2.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("B")), headersOf(events2.first().newValue.table).toList().map { it.labels })
 
         assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
         assertEquals("Middle", valueOf<Any>(events2.first().newValue))
-        assertEquals(listOf("B"), headerOf(events2.first().oldValue).header)
-        assertEquals(listOf("B"), headerOf(events2.first().newValue).header)
+        assertEquals(listOf("B"), headerOf(events2.first().oldValue).labels)
+        assertEquals(listOf("B"), headerOf(events2.first().newValue).labels)
         assertEquals(0, indexOf(events2.first().oldValue))
         assertEquals(0, indexOf(events2.first().newValue))
 
@@ -998,23 +998,23 @@ class TableColumnMove {
 
         events2 = emptyList()
 
-        assertEquals(listOf(listOf("A"), listOf("C")), headersOf(t1).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("C")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("First", "Last"), t1[0].map { valueOf<Any>(it) })
 
-        assertEquals(listOf(listOf("B")), headersOf(t2).toList().map { it.header })
+        assertEquals(listOf(listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("Middle"), t2[0].map { valueOf<Any>(it) })
 
         // Move first to T2
         move(t1["A"] to t2)
 
         assertEquals(1, events1.size)
-        assertEquals(listOf(listOf("A"), listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("C")), headersOf(events1.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("A"), listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("C")), headersOf(events1.first().newValue.table).toList().map { it.labels })
 
         assertEquals("First", valueOf<Any>(events1.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events1.first().newValue))
-        assertEquals(listOf("A"), headerOf(events1.first().oldValue).header)
-        assertEquals(listOf("A"), headerOf(events1.first().newValue).header)
+        assertEquals(listOf("A"), headerOf(events1.first().oldValue).labels)
+        assertEquals(listOf("A"), headerOf(events1.first().newValue).labels)
         assertEquals(0, indexOf(events1.first().oldValue))
         assertEquals(0, indexOf(events1.first().newValue))
 
@@ -1024,13 +1024,13 @@ class TableColumnMove {
         events1 = emptyList()
 
         assertEquals(1, events2.size)
-        assertEquals(listOf(listOf("B")), headersOf(events2.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("B"), listOf("A")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B")), headersOf(events2.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("B"), listOf("A")), headersOf(events2.first().newValue.table).toList().map { it.labels })
 
         assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
         assertEquals("First", valueOf<Any>(events2.first().newValue))
-        assertEquals(listOf("A"), headerOf(events2.first().oldValue).header)
-        assertEquals(listOf("A"), headerOf(events2.first().newValue).header)
+        assertEquals(listOf("A"), headerOf(events2.first().oldValue).labels)
+        assertEquals(listOf("A"), headerOf(events2.first().newValue).labels)
         assertEquals(0, indexOf(events2.first().oldValue))
         assertEquals(0, indexOf(events2.first().newValue))
 
@@ -1039,23 +1039,23 @@ class TableColumnMove {
 
         events2 = emptyList()
 
-        assertEquals(listOf(listOf("C")), headersOf(t1).toList().map { it.header })
+        assertEquals(listOf(listOf("C")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("Last"), t1[0].map { valueOf<Any>(it) })
 
-        assertEquals(listOf(listOf("B"), listOf("A")), headersOf(t2).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("A")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("Middle", "First"), t2[0].map { valueOf<Any>(it) })
 
         // Move last to T2
         move(t1["C"] to t2)
 
         assertEquals(1, events1.size)
-        assertEquals(listOf(listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.header })
-        assertEquals(emptyList<List<String>>(), headersOf(events1.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("C")), headersOf(events1.first().oldValue.table).toList().map { it.labels })
+        assertEquals(emptyList<List<String>>(), headersOf(events1.first().newValue.table).toList().map { it.labels })
 
         assertEquals("Last", valueOf<Any>(events1.first().oldValue))
         assertEquals(Unit, valueOf<Any>(events1.first().newValue))
-        assertEquals(listOf("C"), headerOf(events1.first().oldValue).header)
-        assertEquals(listOf("C"), headerOf(events1.first().newValue).header)
+        assertEquals(listOf("C"), headerOf(events1.first().oldValue).labels)
+        assertEquals(listOf("C"), headerOf(events1.first().newValue).labels)
         assertEquals(0, indexOf(events1.first().oldValue))
         assertEquals(0, indexOf(events1.first().newValue))
 
@@ -1065,13 +1065,13 @@ class TableColumnMove {
         events1 = emptyList()
 
         assertEquals(1, events2.size)
-        assertEquals(listOf(listOf("B"), listOf("A")), headersOf(events2.first().oldValue.table).toList().map { it.header })
-        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(events2.first().newValue.table).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("A")), headersOf(events2.first().oldValue.table).toList().map { it.labels })
+        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(events2.first().newValue.table).toList().map { it.labels })
 
         assertEquals(Unit, valueOf<Any>(events2.first().oldValue))
         assertEquals("Last", valueOf<Any>(events2.first().newValue))
-        assertEquals(listOf("C"), headerOf(events2.first().oldValue).header)
-        assertEquals(listOf("C"), headerOf(events2.first().newValue).header)
+        assertEquals(listOf("C"), headerOf(events2.first().oldValue).labels)
+        assertEquals(listOf("C"), headerOf(events2.first().newValue).labels)
         assertEquals(0, indexOf(events2.first().oldValue))
         assertEquals(0, indexOf(events2.first().newValue))
 
@@ -1080,10 +1080,10 @@ class TableColumnMove {
 
         events2 = emptyList()
 
-        assertEquals(emptyList<List<String>>(), headersOf(t1).toList().map { it.header })
+        assertEquals(emptyList<List<String>>(), headersOf(t1).toList().map { it.labels })
         assertEquals(emptyList<List<String>>(), t1[0].map { valueOf<Any>(it) })
 
-        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(t2).toList().map { it.header })
+        assertEquals(listOf(listOf("B"), listOf("A"), listOf("C")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("Middle", "First", "Last"), t2[0].map { valueOf<Any>(it) })
     }
 

@@ -10,37 +10,37 @@ import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
-class ColumnHeader(vararg header: String) : Comparable<ColumnHeader> {
-    val header: List<String> = Collections.unmodifiableList(header.asList())
+class ColumnHeader(vararg labels: String) : Comparable<ColumnHeader> {
+    val labels: List<String> = Collections.unmodifiableList(labels.asList())
 
-    constructor(header: List<String>) : this(*header.toTypedArray())
+    constructor(labels: List<String>) : this(*labels.toTypedArray())
 
     operator fun get(index: Int): String {
         return when {
-            index < header.size -> header[index]
+            index < labels.size -> labels[index]
             else -> ""
         }
     }
 
     override fun equals(other: Any?): Boolean {
         return if (other is ColumnHeader)
-            this.header == other.header
+            this.labels == other.labels
         else
             false
     }
 
     override fun hashCode(): Int {
-        return this.header.hashCode()
+        return this.labels.hashCode()
     }
 
     override fun toString(): String {
-        return this.header.toString()
+        return this.labels.toString()
     }
 
     override fun compareTo(other: ColumnHeader): Int {
-        for (i in 0 until max(this.header.size, other.header.size)) {
-            val thisItem = if (i < this.header.size) this.header[i] else ""
-            val otherItem = if (i < other.header.size) other.header[i] else ""
+        for (i in 0 until max(this.labels.size, other.labels.size)) {
+            val thisItem = if (i < this.labels.size) this.labels[i] else ""
+            val otherItem = if (i < other.labels.size) other.labels[i] else ""
             val cmp = thisItem.compareTo(otherItem)
 
             if (cmp != 0) return cmp
@@ -59,9 +59,8 @@ class ColumnHeader(vararg header: String) : Comparable<ColumnHeader> {
 // TODO Should the be sealed rather than abstract? Or just a normal class with no BaseColumn?
 abstract class Column internal constructor(
     val table: Table,
-    // TODO Rename to header and order?
-    val columnHeader: ColumnHeader,
-    val columnOrder: Long
+    val header: ColumnHeader,
+    val order: Long
 ) : Comparable<Column>, Iterable<Cell<*>> {
     abstract operator fun get(indexRelation: IndexRelation, index: Long): Cell<*>
 
@@ -147,7 +146,7 @@ abstract class Column internal constructor(
     }
 
     override fun compareTo(other: Column): Int {
-        return columnOrder.compareTo(other.columnOrder)
+        return order.compareTo(other.order)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -156,14 +155,14 @@ abstract class Column internal constructor(
 
         other as Column
 
-        if (columnHeader != other.columnHeader) return false
+        if (header != other.header) return false
 
         return true
     }
 
-    override fun hashCode() = columnHeader.hashCode()
+    override fun hashCode() = header.hashCode()
 
-    override fun toString() = columnHeader.toString()
+    override fun toString() = header.toString()
 }
 
 class BaseColumn internal constructor(
@@ -176,7 +175,7 @@ class BaseColumn internal constructor(
     columnOrder
 ) {
     override fun get(indexRelation: IndexRelation, index: Long): Cell<*> {
-        return getCellRaw(table.tableRef.get(), columnHeader, index, indexRelation)?.first?.toCell(this, index) ?: UnitCell(
+        return getCellRaw(table.tableRef.get(), header, index, indexRelation)?.first?.toCell(this, index) ?: UnitCell(
             this,
             index
         )
@@ -192,15 +191,15 @@ class BaseColumn internal constructor(
 
         synchronized(table.eventProcessor) {
             val (oldRef, newRef) = table.tableRef.refAction {
-                val meta = it.columns[this.columnHeader] ?: throw InvalidColumnException(this)
-                val values = it.columnCells[this.columnHeader] ?: throw InvalidColumnException(this)
+                val meta = it.columns[this.header] ?: throw InvalidColumnException(this)
+                val values = it.columnCells[this.header] ?: throw InvalidColumnException(this)
 
                 it.copy(
                     columns = if (meta.prenatal) it.columns.put(
-                        this.columnHeader,
+                        this.header,
                         meta.copy(prenatal = false)
                     ) else it.columns,
-                    columnCells = it.columnCells.put(this.columnHeader, values.put(index, cellValue)),
+                    columnCells = it.columnCells.put(this.header, values.put(index, cellValue)),
                     version = it.version + 1L
                 )
             }
@@ -211,8 +210,8 @@ class BaseColumn internal constructor(
             val newTable = this.table.makeClone(ref = newRef)
 
             // TODO This might create a column if it doesn't exist, which we don't want (see events in table ops)
-            val old = oldTable[this.columnHeader][index]
-            val new = newTable[this.columnHeader][index]
+            val old = oldTable[this.header][index]
+            val new = newTable[this.header][index]
 
             table.eventProcessor.publish(
                 listOf(
@@ -228,15 +227,15 @@ class BaseColumn internal constructor(
     private fun clear(index: Long): Cell<*> {
         synchronized(table.eventProcessor) {
             val (oldRef, newRef) = table.tableRef.refAction {
-                val meta = it.columns[this.columnHeader] ?: throw InvalidColumnException(this)
-                val values = it.columnCells[this.columnHeader] ?: throw InvalidColumnException(this)
+                val meta = it.columns[this.header] ?: throw InvalidColumnException(this)
+                val values = it.columnCells[this.header] ?: throw InvalidColumnException(this)
 
                 it.copy(
                     columns = if (meta.prenatal) it.columns.put(
-                        this.columnHeader,
+                        this.header,
                         meta.copy(prenatal = false)
                     ) else it.columns,
-                    columnCells = it.columnCells.put(this.columnHeader, values.remove(index)),
+                    columnCells = it.columnCells.put(this.header, values.remove(index)),
                     version = it.version + 1L
                 )
             }
@@ -244,9 +243,9 @@ class BaseColumn internal constructor(
             val oldTable = this.table.makeClone(ref = oldRef)
             val newTable = this.table.makeClone(ref = newRef)
 
-            val old = oldTable[this.columnHeader][index]
+            val old = oldTable[this.header][index]
             // TODO This will create a column if it doesn't exist, which we don't want (see events in table ops)
-            val new = newTable[this.columnHeader][index] // This will be a unit cell, but with new table and column refs
+            val new = newTable[this.header][index] // This will be a unit cell, but with new table and column refs
 
             if (!table.eventProcessor.haveListeners()) return old
 
@@ -266,7 +265,7 @@ class BaseColumn internal constructor(
     override fun clear() {
         table.tableRef.updateAndGet {
             it.copy(
-                columnCells = it.columnCells.put(this.columnHeader, PTreeMap()),
+                columnCells = it.columnCells.put(this.header, PTreeMap()),
                 version = it.version + 1L
             )
         }
@@ -275,7 +274,7 @@ class BaseColumn internal constructor(
     }
 
     override fun iterator(): Iterator<Cell<*>> {
-        val values = table.tableRef.get().columnCells[this.columnHeader] ?: throw InvalidColumnException(this)
+        val values = table.tableRef.get().columnCells[this.header] ?: throw InvalidColumnException(this)
         return values.asSequence().map { it.component2().toCell(this, it.component1()) }.iterator()
     }
 }
@@ -316,8 +315,8 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
         val ref = table.tableRef.get()
 
         // Because columns might move around, get the latest order
-        val currentStart = ref.columns[start.columnHeader]?.columnOrder ?: throw InvalidColumnException("Unable to find column $start")
-        val currentEnd = ref.columns[endInclusive.columnHeader]?.columnOrder ?: throw InvalidColumnException("Unable to find column $endInclusive")
+        val currentStart = ref.columns[start.header]?.columnOrder ?: throw InvalidColumnException("Unable to find column $start")
+        val currentEnd = ref.columns[endInclusive.header]?.columnOrder ?: throw InvalidColumnException("Unable to find column $endInclusive")
 
         val minOrder = min(currentStart, currentEnd)
         val maxOrder = max(currentStart, currentEnd)
@@ -335,7 +334,7 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
     override fun contains(value: Column): Boolean {
         // TODO Because columns might move around, get the latest order
         //      See iterator above..
-        if (value.columnOrder < min(start.columnOrder, endInclusive.columnOrder) || value.columnOrder > max(start.columnOrder, endInclusive.columnOrder)) {
+        if (value.order < min(start.order, endInclusive.order) || value.order > max(start.order, endInclusive.order)) {
             return false
         }
 

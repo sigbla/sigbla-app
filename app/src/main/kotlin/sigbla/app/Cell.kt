@@ -63,8 +63,8 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
         val ref = table.tableRef.get()
 
         // Because columns might move around, get the latest order
-        val currentStart = ref.columns[start.column.columnHeader]?.columnOrder ?: throw InvalidColumnException("Unable to find column $start")
-        val currentEnd = ref.columns[endInclusive.column.columnHeader]?.columnOrder ?: throw InvalidColumnException("Unable to find column $endInclusive")
+        val currentStart = ref.columns[start.column.header]?.columnOrder ?: throw InvalidColumnException("Unable to find column $start")
+        val currentEnd = ref.columns[endInclusive.column.header]?.columnOrder ?: throw InvalidColumnException("Unable to find column $endInclusive")
 
         val minOrder = min(currentStart, currentEnd)
         val maxOrder = max(currentStart, currentEnd)
@@ -101,7 +101,7 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
         }
             .flatten()
             .map {
-                ref.columnCells[it.first.columnHeader]?.get(it.second)?.toCell(it.first, it.second)
+                ref.columnCells[it.first.header]?.get(it.second)?.toCell(it.first, it.second)
             }
             .filterNotNull()
             .iterator()
@@ -122,7 +122,7 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
 
         // TODO Because columns might move around, get the latest order
         //      See iterator above.. There also no need to check if start is <= endm just use contains from columnrange..
-        return if (start.column.columnOrder <= endInclusive.column.columnOrder) {
+        return if (start.column.order <= endInclusive.column.order) {
             (start.column..endInclusive.column).contains(value.column)
         } else {
             (endInclusive.column..start.column).contains(value.column)

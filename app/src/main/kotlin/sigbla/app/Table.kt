@@ -92,11 +92,11 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
     // -----
 
     operator fun get(cell: Cell<*>): Cell<*> {
-        return this[cell.column.columnHeader][cell.index]
+        return this[cell.column.header][cell.index]
     }
 
     operator fun get(column: Column): Column {
-        return this[column.columnHeader]
+        return this[column.header]
     }
 
     operator fun get(cellRange: CellRange): CellRange {
@@ -501,7 +501,7 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
             private fun nextCellIterator(): Iterator<Cell<*>> {
                 while (columnIterator.hasNext()) {
                     val column = columnIterator.next()
-                    val values = ref.columnCells[column.columnHeader] ?: throw InvalidColumnException(column.columnHeader)
+                    val values = ref.columnCells[column.header] ?: throw InvalidColumnException(column.header)
                     val itr = values.asSequence().map { it.component2().toCell(column, it.component1()) }.iterator()
                     if (itr.hasNext()) return itr
                 }
@@ -592,7 +592,7 @@ class BaseTable internal constructor(
 
     override fun get(header: ColumnHeader): Column {
         if (closed) throw InvalidTableException("Table is closed")
-        if (header.header.isEmpty()) throw InvalidColumnException("Empty header")
+        if (header.labels.isEmpty()) throw InvalidColumnException("Empty header")
 
         val columnMeta = tableRef.get().columns[header] ?: tableRef.updateAndGet {
             if (it.columns.containsKey(header)) return@updateAndGet it

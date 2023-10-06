@@ -303,8 +303,8 @@ internal fun save1(
 
         // Save column views next
         tableViewRef.columnViews.forEach { (columnHeader, viewMeta) ->
-            val head = columnHeader.header.dropLast(1)
-            val tail = columnHeader.header.last()
+            val head = columnHeader.labels.dropLast(1)
+            val tail = columnHeader.labels.last()
 
             var parent = seed
 
@@ -376,7 +376,7 @@ internal fun save1(
 
             var parent = seed
 
-            columnHeader.header.forEach {
+            columnHeader.labels.forEach {
                 viewSections.add(ViewSection(it, parent, false))
                 parent = shortHash(parent, it)
             }

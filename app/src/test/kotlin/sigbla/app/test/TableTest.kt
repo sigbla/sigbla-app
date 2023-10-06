@@ -508,8 +508,8 @@ class TableTest {
         t["D", 0] = "D0"
 
         headersOf(t).apply {
-            assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), map { it.header }.toList())
-            assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), map { it.header }.toList())
+            assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), map { it.labels }.toList())
+            assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), map { it.labels }.toList())
         }
     }
 
@@ -522,19 +522,19 @@ class TableTest {
 
         val headers1 = t.headers
 
-        assertEquals(listOf(listOf("A"), listOf("B")), headers1.map { it.header }.toList())
-        assertEquals(listOf(listOf("A"), listOf("B")), headers1.map { it.header }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B")), headers1.map { it.labels }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B")), headers1.map { it.labels }.toList())
 
         t["C", 0] = "C0"
         t["D", 0] = "D0"
 
         val headers2 = t.headers
 
-        assertEquals(listOf(listOf("A"), listOf("B")), headers1.map { it.header }.toList())
-        assertEquals(listOf(listOf("A"), listOf("B")), headers1.map { it.header }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B")), headers1.map { it.labels }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B")), headers1.map { it.labels }.toList())
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headers2.map { it.header }.toList())
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headers2.map { it.header }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headers2.map { it.labels }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headers2.map { it.labels }.toList())
     }
 
     @Test
