@@ -19,6 +19,8 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
 
     operator fun get(header: ColumnHeader): Cell<*> = table[header][indexRelation, index]
 
+    operator fun get(column: Column): Cell<*> = table[column][indexRelation, index]
+
     operator fun get(vararg columnHeader: String): Cell<*> = get(
         ColumnHeader(
             *columnHeader
@@ -35,6 +37,17 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
     operator fun set(header: ColumnHeader, value: BigDecimal) = table[header].set(index, value)
     operator fun set(header: ColumnHeader, value: Number) = table[header].set(index, value)
     operator fun set(header: ColumnHeader, init: Cell<*>.() -> Any?) = table[header][index] { init() }
+
+    operator fun set(column: Column, value: Cell<*>?) = table[column].set(index, value)
+    operator fun set(column: Column, value: String) = table[column].set(index, value)
+    operator fun set(column: Column, value: Double) = table[column].set(index, value)
+    operator fun set(column: Column, value: Float) = table[column].set(index, value)
+    operator fun set(column: Column, value: Long) = table[column].set(index, value)
+    operator fun set(column: Column, value: Int) = table[column].set(index, value)
+    operator fun set(column: Column, value: BigInteger) = table[column].set(index, value)
+    operator fun set(column: Column, value: BigDecimal) = table[column].set(index, value)
+    operator fun set(column: Column, value: Number) = table[column].set(index, value)
+    operator fun set(column: Column, init: Cell<*>.() -> Any?) = table[column][index] { init() }
 
     operator fun set(vararg header: String, value: Cell<*>?) = table[ColumnHeader(*header)].set(index, value)
     operator fun set(vararg header: String, value: String) = table[ColumnHeader(*header)].set(index, value)

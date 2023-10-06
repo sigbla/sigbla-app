@@ -101,6 +101,10 @@ abstract class Column internal constructor(
 
     operator fun get(row: Row) = get(row.indexRelation, row.index)
 
+    operator fun get(indexRelation: IndexRelation, row: Row) = get(indexRelation, row.index)
+
+    // ---
+
     operator fun set(index: Long, value: String) = set(index, value.toCell(this, index))
 
     operator fun set(index: Long, value: Double) = set(index, value.toCell(this, index))
@@ -123,6 +127,10 @@ abstract class Column internal constructor(
         }
     }
 
+    operator fun set(index: Long, init: Cell<*>.() -> Any?) = this[index] { init() }
+
+    // ---
+
     operator fun set(index: Int, cell: Cell<*>?) = set(index.toLong(), cell)
 
     operator fun set(index: Int, value: String) = set(index.toLong(), value)
@@ -137,9 +145,27 @@ abstract class Column internal constructor(
 
     operator fun set(index: Int, value: Number) = set(index.toLong(), value)
 
-    operator fun set(index: Long, init: Cell<*>.() -> Any?) = this[index] { init() }
-
     operator fun set(index: Int, init: Cell<*>.() -> Any?) = this[index] { init() }
+
+    // ---
+
+    operator fun set(row: Row, cell: Cell<*>?) = set(row.index, cell)
+
+    operator fun set(row: Row, value: String) = set(row.index, value)
+
+    operator fun set(row: Row, value: Double) = set(row.index, value)
+
+    operator fun set(row: Row, value: Long) = set(row.index, value)
+
+    operator fun set(row: Row, value: BigInteger) = set(row.index, value)
+
+    operator fun set(row: Row, value: BigDecimal) = set(row.index, value)
+
+    operator fun set(row: Row, value: Number) = set(row.index, value)
+
+    operator fun set(row: Row, init: Cell<*>.() -> Any?) = this[row.index] { init() }
+
+    // ---
 
     // TODO: Look at adding a add(..) function.
     //       Add would just insert a cell at first available location.
