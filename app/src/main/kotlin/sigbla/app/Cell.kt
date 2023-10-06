@@ -49,7 +49,6 @@ internal class CellValue<T>(val value: T) {
 
 enum class CellOrder { COLUMN, ROW }
 
-// TODO change order input so it can be t[][]..t[][] by ORDER
 class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>, val order: CellOrder = CellOrder.COLUMN) : ClosedRange<Cell<*>>, Iterable<Cell<*>> {
     init {
         if (start.column.table !== endInclusive.column.table) {
@@ -72,10 +71,12 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
 
         val columns = ref
             .headers
-            .filter { !it.second.prenatal }
             .filter { it.second.columnOrder in minOrder..maxOrder }
+            .let {
+                if (currentStart > currentEnd) it.toList().reversed().asSequence() else it
+            }
             .map { BaseColumn(table, it.first, it.second.columnOrder) }
-            .iterator()
+            .toList()
 
         val rows = if (start.index <= endInclusive.index) {
             (start.index..endInclusive.index)
@@ -132,6 +133,8 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
 
     // TODO: Implement assignment ops?
 }
+
+infix fun CellRange.by(cellOrder: CellOrder) = CellRange(this.start, this.endInclusive, cellOrder)
 
 // TODO Implement something that allows us to navigate relative to a cell?
 //      Ex: table["A", 1] up 1 returns table["A", 0], or

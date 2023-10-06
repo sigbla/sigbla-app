@@ -41,6 +41,87 @@ class TableTest {
     }
 
     @Test
+    fun `cell range`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        for (c in listOf("D", "A", "B", "C", "E")) {
+            for (r in -100..100) {
+                t1[c][r] = "$c$r"
+            }
+        }
+
+        assertEquals(listOf("A1", "A2", "B1", "B2"), (t1["A", 1]..t1["B", 2]).map { it.toString() }.toList())
+        assertEquals(listOf("A1", "A2", "B1", "B2"), (t1["A", 1]..t1["B", 2] by CellOrder.COLUMN).map { it.toString() }.toList())
+        assertEquals(listOf("A1", "B1", "A2", "B2"), (t1["A", 1]..t1["B", 2] by CellOrder.ROW).map { it.toString() }.toList())
+
+        assertEquals(listOf("B2", "B1", "A2", "A1"), (t1["B", 2]..t1["A", 1]).map { it.toString() }.toList())
+        assertEquals(listOf("B2", "B1", "A2", "A1"), (t1["B", 2]..t1["A", 1] by CellOrder.COLUMN).map { it.toString() }.toList())
+        assertEquals(listOf("B2", "A2", "B1", "A1"), (t1["B", 2]..t1["A", 1] by CellOrder.ROW).map { it.toString() }.toList())
+
+        // This introduces D between A and B
+        move(t1["D"] after t1["A"])
+
+        assertEquals(listOf("A1", "A2", "D1", "D2", "B1", "B2"), (t1["A", 1]..t1["B", 2]).map { it.toString() }.toList())
+        assertEquals(listOf("A1", "A2", "D1", "D2", "B1", "B2"), (t1["A", 1]..t1["B", 2] by CellOrder.COLUMN).map { it.toString() }.toList())
+        assertEquals(listOf("A1", "D1", "B1", "A2", "D2", "B2"), (t1["A", 1]..t1["B", 2] by CellOrder.ROW).map { it.toString() }.toList())
+
+        assertEquals(listOf("B2", "B1", "D2", "D1", "A2", "A1"), (t1["B", 2]..t1["A", 1]).map { it.toString() }.toList())
+        assertEquals(listOf("B2", "B1", "D2", "D1", "A2", "A1"), (t1["B", 2]..t1["A", 1] by CellOrder.COLUMN).map { it.toString() }.toList())
+        assertEquals(listOf("B2", "D2", "A2", "B1", "D1", "A1"), (t1["B", 2]..t1["A", 1] by CellOrder.ROW).map { it.toString() }.toList())
+
+        // This removes D, and returns us to the original sequences, because order is defined by the range
+        move(t1["A"] after t1["B"])
+
+        assertEquals(listOf("A1", "A2", "B1", "B2"), (t1["A", 1]..t1["B", 2]).map { it.toString() }.toList())
+        assertEquals(listOf("A1", "A2", "B1", "B2"), (t1["A", 1]..t1["B", 2] by CellOrder.COLUMN).map { it.toString() }.toList())
+        assertEquals(listOf("A1", "B1", "A2", "B2"), (t1["A", 1]..t1["B", 2] by CellOrder.ROW).map { it.toString() }.toList())
+
+        assertEquals(listOf("B2", "B1", "A2", "A1"), (t1["B", 2]..t1["A", 1]).map { it.toString() }.toList())
+        assertEquals(listOf("B2", "B1", "A2", "A1"), (t1["B", 2]..t1["A", 1] by CellOrder.COLUMN).map { it.toString() }.toList())
+        assertEquals(listOf("B2", "A2", "B1", "A1"), (t1["B", 2]..t1["A", 1] by CellOrder.ROW).map { it.toString() }.toList())
+    }
+
+    @Test
+    fun `column range`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        for (c in listOf("D", "A", "B", "C")) {
+            for (r in -100..100) {
+                t1[c][r] = "$c$r"
+            }
+        }
+
+        assertEquals(listOf("[A]", "[B]", "[C]"), (t1["A"]..t1["C"]).map { it.toString() }.toList())
+        assertEquals(listOf("[C]", "[B]", "[A]"), (t1["C"]..t1["A"]).map { it.toString() }.toList())
+
+        // This introduces D between A and B
+        move(t1["D"] after t1["A"])
+
+        assertEquals(listOf("[A]", "[D]", "[B]", "[C]"), (t1["A"]..t1["C"]).map { it.toString() }.toList())
+        assertEquals(listOf("[C]", "[B]", "[D]", "[A]"), (t1["C"]..t1["A"]).map { it.toString() }.toList())
+
+        // This removes D and B
+        move(t1["A"] after t1["C"])
+
+        assertEquals(listOf("[A]", "[C]"), (t1["A"]..t1["C"]).map { it.toString() }.toList())
+        assertEquals(listOf("[C]", "[A]"), (t1["C"]..t1["A"]).map { it.toString() }.toList())
+    }
+
+    @Test
+    fun `row range`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        for (c in listOf("D", "A", "B", "C")) {
+            for (r in -100..100) {
+                t1[c][r] = "$c$r"
+            }
+        }
+
+        assertEquals(listOf("-1", "0", "1", "2"), (t1[-1]..t1[2]).map { it.toString() }.toList())
+        assertEquals(listOf("2", "1", "0", "-1"), (t1[2]..t1[-1]).map { it.toString() }.toList())
+    }
+
+    @Test
     fun `clone table values`() {
         val t1 = Table[object {}.javaClass.enclosingMethod.name]
 
@@ -301,6 +382,24 @@ class TableTest {
     }
 
     @Test
+    fun `table iterator`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "A0"
+        t["A", 1] = "A1"
+        t["A", 2] = "A2"
+        t["A", 3] = "A3"
+
+        t["B", 0] = "B0"
+        t["B", 1] = "B1"
+        t["B", 2] = "B2"
+        t["B", 3] = "B3"
+
+        assertEquals(listOf("A0", "A1", "A2", "A3", "B0", "B1", "B2", "B3"), t.map { valueOf<Any>(it) })
+        assertEquals(listOf("A0", "A1", "A2", "A3", "B0", "B1", "B2", "B3"), t.iterator().asSequence().map { valueOf<Any>(it) }.toList())
+    }
+
+    @Test
     fun `column iterator`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 
@@ -334,6 +433,24 @@ class TableTest {
 
         assertEquals(listOf("A0", "B0", "C0", "D0"), t[0].map { valueOf<Any>(it) })
         assertEquals(listOf("A1", "B1", "C1", "D1"), t[1].iterator().asSequence().map { valueOf<Any>(it) }.toList())
+    }
+
+    @Test
+    fun `cell iterator`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "A0"
+        t["B", 0] = "B0"
+        t["C", 0] = "C0"
+        t["D", 0] = "D0"
+
+        t["A", 1] = "A1"
+        t["B", 1] = "B1"
+        t["C", 1] = "C1"
+        t["D", 1] = "D1"
+
+        assertEquals(listOf("A0"), t["A", 0].map { valueOf<Any>(it) })
+        assertEquals(listOf("A1"), t["A", 1].iterator().asSequence().map { valueOf<Any>(it) }.toList())
     }
 
     @Test

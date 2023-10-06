@@ -130,7 +130,7 @@ class RowRange(override val start: Row, override val endInclusive: Row) : Closed
                 .map { table[it] }
                 .iterator()
         } else {
-            ((endInclusive.index)..(start.index))
+            ((start.index) downTo (endInclusive.index))
                 .asSequence()
                 .map { table[it] }
                 .iterator()

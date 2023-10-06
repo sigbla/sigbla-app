@@ -644,6 +644,8 @@ class TableView internal constructor(
         fun delete(name: String) = Registry.deleteView(name)
 
         // TODO Consider a operator get/set(resources: Resources, ..) on this level as well to allow for global resources
+
+        // TODO Add a way to control the port used, allowing for TableView[PORT] = port number. This can only be defined before showing a table
     }
 }
 
