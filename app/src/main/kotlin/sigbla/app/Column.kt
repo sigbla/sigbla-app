@@ -15,10 +15,17 @@ class ColumnHeader(vararg labels: String) : Comparable<ColumnHeader> {
 
     constructor(labels: List<String>) : this(*labels.toTypedArray())
 
-    operator fun get(index: Int): String {
+    init {
+        labels.forEach {
+            // This can happen because we allow a list in the secondary constructor
+            if (it == null) throw InvalidColumnException("Null values not allowed")
+        }
+    }
+
+    operator fun get(index: Int): String? {
         return when {
             index < labels.size -> labels[index]
-            else -> ""
+            else -> null
         }
     }
 

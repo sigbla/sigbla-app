@@ -202,7 +202,7 @@ internal object SigblaBackend {
             if (dirtyColumnHeaders != null && !dirtyColumnHeaders.contains(applicableColumn.header)) continue
 
             for (idx in 0 until maxHeaderCells) {
-                val headerText = applicableColumn.header[idx]
+                val headerText = applicableColumn.header[idx] ?: ""
                 val yOffset = applicableColumn.header.labels.mapIndexed { i, _ -> if (i < idx) view[(-maxHeaderCells + i).toLong()].derived.cellHeight else 0L }.sum()
 
                 output.add(PositionedContent(
