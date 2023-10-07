@@ -67,7 +67,6 @@ fun print(table: Table) {
 }
 
 fun print(table: Table, writer: Writer) {
-    // TODO Use snapshot rather than clone?
     val table = clone(table)
 
     val headers = table.headers
@@ -94,25 +93,25 @@ fun print(table: Table, writer: Writer) {
         if (it > maxCellWidth) maxCellWidth = it
     }
 
-    fun write(input: String) {
+    fun write(input: String, width: Int) {
         writer.append(input)
-        for (i in input.length until maxCellWidth) {
+        for (i in input.length .. width) {
             writer.append(" ")
         }
     }
 
     for (index in headerTable.indexes) {
-        write("")
+        write("", maxCellWidth)
         for (header in headerTable.headers) {
-            write("\t${headerTable[index][header]}")
+            write("|${headerTable[index][header]}", maxCellWidth + 1)
         }
         writer.append(System.lineSeparator())
     }
 
     for (index in indexes) {
-        write(index.toString())
+        write(index.toString(), maxCellWidth)
         for (header in headers) {
-            write("\t${table[index][header]}")
+            write("|${table[index][header]}", maxCellWidth + 1)
         }
         writer.append(System.lineSeparator())
     }
