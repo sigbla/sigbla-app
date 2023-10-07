@@ -454,6 +454,82 @@ class TableTest {
     }
 
     @Test
+    fun `table clear`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "A0"
+        t["B", 0] = "B0"
+        t["C", 0] = "C0"
+        t["D", 0] = "D0"
+
+        t["A", 1] = "A1"
+        t["B", 1] = "B1"
+        t["C", 1] = "C1"
+        t["D", 1] = "D1"
+
+        clear(t)
+
+        assertFalse(t.iterator().hasNext())
+        assertEquals(listOf("[A]", "[B]", "[C]", "[D]"), t.headers.map { it.toString() }.toList())
+        assertFalse(t.indexes.iterator().hasNext())
+
+        remove(t["A"])
+        remove(t["B"])
+        remove(t["C"])
+        remove(t["D"])
+
+        assertFalse(t.iterator().hasNext())
+        assertFalse(t.headers.iterator().hasNext())
+        assertFalse(t.indexes.iterator().hasNext())
+    }
+
+    @Test
+    fun `column clear`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "A0"
+        t["B", 0] = "B0"
+        t["C", 0] = "C0"
+        t["D", 0] = "D0"
+
+        t["A", 1] = "A1"
+        t["B", 1] = "B1"
+        t["C", 1] = "C1"
+        t["D", 1] = "D1"
+
+        clear(t["B"])
+
+        assertFalse(t["B"].iterator().hasNext())
+        assertTrue(t.iterator().hasNext())
+        assertEquals(listOf("[A]", "[B]", "[C]", "[D]"), t.headers.map { it.toString() }.toList())
+        assertTrue(t.indexes.iterator().hasNext())
+    }
+
+    @Test
+    fun `row clear`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "A0"
+        t["B", 0] = "B0"
+        t["C", 0] = "C0"
+        t["D", 0] = "D0"
+
+        t["A", 1] = "A1"
+        t["B", 1] = "B1"
+        t["C", 1] = "C1"
+        t["D", 1] = "D1"
+
+        clear(t[1])
+
+        assertFalse(t[1].iterator().hasNext())
+        assertTrue(t.iterator().hasNext())
+        assertEquals(listOf("[A]", "[B]", "[C]", "[D]"), t.headers.map { it.toString() }.toList())
+        assertTrue(t.indexes.iterator().hasNext())
+
+        assertEquals(listOf(0L), t.indexes.toList())
+    }
+
+    @Test
     fun `valuesOf sequence`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 

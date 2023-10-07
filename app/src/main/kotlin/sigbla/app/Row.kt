@@ -192,4 +192,6 @@ infix fun Row.to(other: Row): RowToRowAction {
 
 class RowToRowAction internal constructor(val left: Row, val right: Row, val order: RowActionOrder)
 
+// TODO Consider a RowToTableAction, which would be functionally the same as row to row
+
 enum class RowActionOrder { BEFORE, AFTER, TO }

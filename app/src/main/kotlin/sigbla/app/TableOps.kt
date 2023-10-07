@@ -2008,25 +2008,18 @@ fun rename(column: Column, vararg withName: String): Unit = move(column to colum
 
 fun remove(table: Table) = Registry.deleteTable(table)
 
-fun remove(column: Column) {
-    // TODO Column remove event
-    column.table.tableRef.updateAndGet {
-        it.copy(
-            columns = it.columns.remove(column.header),
-            columnCells = it.columnCells.remove(column.header),
-            version = it.version + 1L
-        )
-    }
-}
+fun remove(column: Column) = move(column to Table[null])
 
 // Note: We don't have remove(row) because that would imply shifting rows below up, same for cells
 // TODO When move(t[1] after|before t[2]) is available, should have remove(row) too
+//fun remove(row: Row) = move(row to Table[null][0])
 
-fun clear(table: Table): Unit = TODO()
+// TODO These can be more efficient, especially if there are no listeners
+fun clear(table: Table): Unit = table.forEach { clear(it) }
 
-fun clear(column: Column): Unit = TODO()
+fun clear(column: Column): Unit = column.forEach { clear(it) }
 
-fun clear(row: Row): Unit = TODO()
+fun clear(row: Row): Unit = row.forEach { clear(it) }
 
 fun clear(cell: Cell<*>) = cell { null }
 
