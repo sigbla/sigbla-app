@@ -13,10 +13,10 @@ But they've got some issues, such as:
 
 These issues make them difficult to maintain and understand, and limits how much we sanely want to do with them.
 
-Sigbla fixes this by letting:
+Sigbla fixes this by:
 
-* The code resides in source code files
-* Providing a table structure for data
+* Providing an easy to use table structure for data
+* With programming residing in source code files
 * And letting you view the data through views
 
 Sigbla also provides other things, like extending and making easier how we can do math in Kotlin,
@@ -39,8 +39,8 @@ Assuming you have kscript installed, here's a quick example:
 ``` kotlin
 #!/usr/bin/env kscript
 
-@file:Repository("https://todo/content/repositories/releases")
-@file:DependsOn("sigbla.app:sigbla:1.2023.1")
+@file:Repository("TODO")
+@file:DependsOn("TODO")
 
 import sigbla.app.*
 
@@ -124,6 +124,19 @@ show(tableView)
 
 Please note that the port in your URL is unlikely to be the same as shown in the above screenshot, so look for
 your particular URL printed to the console when executing `show(tableView)`.
+
+Also worth being aware of is that you can do `print(table)` if you just need a quick console output:
+
+``` kotlin
+print(table)
+
+// Output:
+//          |Column A |Sum      
+// 0        |100      |         
+// 1        |200      |         
+// 2        |         |300      
+```
+
 
 We've just scratched the surface of what's possible. Continue learning about [tables](tables.md) and [views](views.md) next.
 

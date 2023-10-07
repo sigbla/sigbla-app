@@ -6,7 +6,16 @@ docs_dir: content
 nav:
   - 'index.md'
   - 'tables.md'
+  - 'columns.md'
+  - 'rows.md'
+  - 'cells.md'
   - 'views.md'
+  - 'subscriptions.md'
+  - 'concurrency.md'
+  - 'charts.md'
+  - 'user_input.md'
+  - 'math.md'
+  - 'utils.md'
 
 theme:
   name: material
