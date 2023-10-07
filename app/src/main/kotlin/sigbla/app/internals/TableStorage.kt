@@ -182,6 +182,8 @@ internal fun save1(
         if (it.name.endsWith(".$extension", ignoreCase = true)) it else File(it.parent, it.name + ".$extension")
     }
 
+    file.parentFile?.mkdirs()
+
     val tmpFilePath = File(file.parent, file.name + ".tmp").toPath()
     tmpFilePath.deleteIfExists()
 

@@ -1,6 +1,7 @@
 package sigbla.app
 
 import sigbla.app.exceptions.InvalidColumnException
+import sigbla.app.exceptions.InvalidTableException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.load1
 import sigbla.app.internals.refAction
@@ -2806,9 +2807,25 @@ fun off(tableEventReceiver: TableEventReceiver<*, *, *>) = off(tableEventReceive
 
 // TODO Also support CellRange in addition to Table, allowing for storing subsections?
 
-// TODO Allow File to be a String
+fun load(
+    table: Table,
+    extension: String = "sigt",
+    filter: Column.() -> Column? = { this }
+) = load1(
+    File(table.name ?: throw InvalidTableException("No table name")) to table,
+    extension,
+    filter
+)
 
-// TODO Allow for just save(table), taking name from table, same for load
+fun save(
+    table: Table,
+    extension: String = "sigt",
+    compress: Boolean = true
+) = save1(
+    table to File(table.name ?: throw InvalidTableException("No table name")),
+    extension,
+    compress
+)
 
 fun load(
     resources: Pair<File, Table>,
@@ -2821,3 +2838,25 @@ fun save(
     extension: String = "sigt",
     compress: Boolean = true
 ) = save1(resources, extension, compress)
+
+@JvmName("loadString")
+fun load(
+    resources: Pair<String, Table>,
+    extension: String = "sigt",
+    filter: Column.() -> Column? = { this }
+) = load1(
+    resources.let { File(it.first) to it.second },
+    extension,
+    filter
+)
+
+@JvmName("saveString")
+fun save(
+    resources: Pair<Table, String>,
+    extension: String = "sigt",
+    compress: Boolean = true
+) = save1(
+    resources.let { it.first to File(it.second) },
+    extension,
+    compress
+)
