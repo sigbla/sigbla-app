@@ -353,18 +353,39 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     // TODO Can remove this after adding iterator functionality
     fun asSequence(): Sequence<Cell<*>> = sequenceOf(this)
 
-    operator fun <T> invoke(function: Cell<*>.() -> T): T {
+    operator fun invoke(function: Cell<*>.() -> Any?): Any? {
         return when (val value = function()) {
-            is BigDecimal -> { table[this] = value; value }
-            is BigInteger -> { table[this] = value; value }
-            is Double -> { table[this] = value; value }
-            is Long -> { table[this] = value; value }
-            is Number -> { table[this] = value; value }
-            is String -> { table[this] = value; value }
-            is Cell<*> -> { table[this] = value; value }
-            is Unit -> { /* no assignment */ Unit as T }
-            is Function1<*, *> -> { invoke(value as Cell<*>.() -> T?) as T }
-            null -> { table[this] = null; null as T }
+            is BigDecimal -> {
+                table[this] = value; value
+            }
+            is BigInteger -> {
+                table[this] = value; value
+            }
+            is Double -> {
+                table[this] = value; value
+            }
+            is Long -> {
+                table[this] = value; value
+            }
+            is Number -> {
+                table[this] = value; value
+            }
+            is String -> {
+                table[this] = value; value
+            }
+            is Cell<*> -> {
+                table[this] = value; value
+            }
+            is Unit -> {
+                /* no assignment */
+                Unit
+            }
+            is Function1<*, *> -> {
+                invoke(value as Cell<*>.() -> Any?)
+            }
+            null -> {
+                table[this] = null; null
+            }
             else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
         }
     }
