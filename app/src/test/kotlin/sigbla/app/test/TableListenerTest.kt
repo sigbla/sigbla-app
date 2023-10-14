@@ -586,4 +586,39 @@ class TableListenerTest {
         assertEquals(1, eventCount5)
         assertEquals(1, eventCount6)
     }
+
+    @Test
+    fun `type filtering for chained subscriptions`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount1 = 0
+        var eventCount2 = 0
+
+        on<Any, String>(t1, name = "Listener 1") events {
+            eventCount1 += count()
+            forEach {
+                oldTable[it.oldValue] { it.oldValue.value.toString().toLongOrNull() }
+                newTable[it.newValue] = it.newValue.value.toLong()
+            }
+        }
+
+        on<Long, Long>(t1["A"], name = "Listener 2") events {
+            eventCount2 += count()
+            forEach {
+                t1["B", it.newValue.index] = it.newValue - it.oldValue
+            }
+        }
+
+        t1["A", 1] = "100"
+        t1["A", 2] = "110"
+
+        t1["A", 1] = "105"
+        t1["A", 2] = "120"
+
+        assertEquals(4, eventCount1)
+        assertEquals(2, eventCount2)
+
+        assertEquals(5L, t1["B", 1].toLong())
+        assertEquals(10L, t1["B", 2].toLong())
+    }
 }

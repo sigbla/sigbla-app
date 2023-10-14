@@ -40,6 +40,7 @@ class TableEventReceiver<S, O, N>(
 }
 
 // TODO Can these be lazy? I.e., reuse same value?
+//      Can probably do something with WeakHashMap..
 val Sequence<TableListenerEvent<*, *>>.newTable: Table
     get() = this.firstOrNull()?.let {
         return it.newValue.column.table

@@ -391,6 +391,8 @@ fun on(
             skipHistory
         ) {
             this.filter {
+                // TODO Like fixed in TableOps, these (here and below) should likely be
+                //      type.isInstance(oldView[it.oldValue]) || type.isInstance(newView[it.newValue]) ?
                 type.isInstance(it.oldValue) || type.isInstance(it.newValue)
             }
         }

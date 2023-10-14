@@ -2130,7 +2130,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                new.isInstance(it.newValue.value)
+                new.isInstance(newTable[it.newValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
         new == Any::class -> TableEventReceiver(
@@ -2141,7 +2143,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                old.isInstance(it.oldValue.value)
+                old.isInstance(oldTable[it.oldValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
         else -> TableEventReceiver(
@@ -2152,7 +2156,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value)
+                old.isInstance(oldTable[it.oldValue].value) && new.isInstance(newTable[it.newValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
     }
@@ -2256,7 +2262,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                new.isInstance(it.newValue.value)
+                new.isInstance(newTable[it.newValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
         new == Any::class -> TableEventReceiver(
@@ -2267,7 +2275,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                old.isInstance(it.oldValue.value)
+                old.isInstance(oldTable[it.oldValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
         else -> TableEventReceiver(
@@ -2278,7 +2288,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value)
+                old.isInstance(oldTable[it.oldValue].value) && new.isInstance(newTable[it.newValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
     }
@@ -2382,7 +2394,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                new.isInstance(it.newValue.value)
+                new.isInstance(newTable[it.newValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
         new == Any::class -> TableEventReceiver(
@@ -2393,7 +2407,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                old.isInstance(it.oldValue.value)
+                old.isInstance(oldTable[it.oldValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
         else -> TableEventReceiver(
@@ -2404,7 +2420,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value)
+                old.isInstance(oldTable[it.oldValue].value) && new.isInstance(newTable[it.newValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
     }
@@ -2508,7 +2526,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                new.isInstance(it.newValue.value)
+                new.isInstance(newTable[it.newValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
         new == Any::class -> TableEventReceiver(
@@ -2519,7 +2539,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                old.isInstance(it.oldValue.value)
+                old.isInstance(oldTable[it.oldValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
         else -> TableEventReceiver(
@@ -2530,7 +2552,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value)
+                old.isInstance(oldTable[it.oldValue].value) && new.isInstance(newTable[it.newValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
     }
@@ -2634,7 +2658,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                new.isInstance(it.newValue.value)
+                new.isInstance(newTable[it.newValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
         new == Any::class -> TableEventReceiver(
@@ -2645,7 +2671,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                old.isInstance(it.oldValue.value)
+                old.isInstance(oldTable[it.oldValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
         else -> TableEventReceiver(
@@ -2656,7 +2684,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value)
+                old.isInstance(oldTable[it.oldValue].value) && new.isInstance(newTable[it.newValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
     }
@@ -2760,7 +2790,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                new.isInstance(it.newValue.value)
+                new.isInstance(newTable[it.newValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
         new == Any::class -> TableEventReceiver(
@@ -2771,7 +2803,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                old.isInstance(it.oldValue.value)
+                old.isInstance(oldTable[it.oldValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
         else -> TableEventReceiver(
@@ -2782,7 +2816,9 @@ fun on(
             skipHistory
         ) {
             this.filter {
-                old.isInstance(it.oldValue.value) && new.isInstance(it.newValue.value)
+                old.isInstance(oldTable[it.oldValue].value) && new.isInstance(newTable[it.newValue].value)
+            }.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
             }
         }
     }
