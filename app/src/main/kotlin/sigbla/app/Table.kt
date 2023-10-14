@@ -525,6 +525,11 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
         return "Table[$name]"
     }
 
+    override fun equals(other: Any?): Boolean {
+        // Implemented to ensure expected equality check to always just be a reference compare, that's what we want
+        return this === other
+    }
+
     companion object {
         operator fun get(name: String?): Table = BaseTable(name, null)
 

@@ -718,4 +718,33 @@ class TableTest {
         assertEquals(56L, t["A", 2L].value)
         assertEquals(t["A", 1L], t["A", 2L])
     }
+
+    @Test
+    fun `equality checks`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        t1["A", 1] = "A1"
+        t1["A", 2] = "A2"
+        t1["B", 1] = "B1"
+        t1["B", 2] = "B2"
+
+        val t2 = clone(t1)
+
+        assertEquals(t1, Table.fromRegistry(t1.name!!))
+        assertTrue(t1 === Table.fromRegistry(t1.name!!))
+        assertNotEquals(t1, t2)
+        assertNotEquals(t2, Table.fromRegistry(t1.name!!))
+
+        assertEquals(t1["A"], Table.fromRegistry(t1.name!!)["A"])
+        assertNotEquals(t1["A"], t1["B"])
+        assertNotEquals(t1["A"], t2["A"])
+
+        assertEquals(t1["A"].header, t2["A"].header)
+        assertNotEquals(t1["A"].header, t1["B"].header)
+
+        assertEquals(t1[1], Table.fromRegistry(t1.name!!)[1])
+        assertNotEquals(t1[1], t1[2])
+        assertNotEquals(t1[1], t2[1])
+        assertEquals(t1[1].index, t2[1].index)
+    }
 }

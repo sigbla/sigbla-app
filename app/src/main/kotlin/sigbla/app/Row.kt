@@ -118,6 +118,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
 
         other as Row
 
+        if (table != other.table) return false
         if (index != other.index) return false
         if (indexRelation != other.indexRelation) return false
 

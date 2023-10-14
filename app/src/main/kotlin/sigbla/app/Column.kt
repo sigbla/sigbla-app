@@ -188,6 +188,7 @@ abstract class Column internal constructor(
 
         other as Column
 
+        if (table != other.table) return false
         if (header != other.header) return false
 
         return true
