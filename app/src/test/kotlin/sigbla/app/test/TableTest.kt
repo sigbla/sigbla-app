@@ -656,6 +656,165 @@ class TableTest {
     }
 
     @Test
+    fun `index relation get`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        assertEquals(UnitCell::class, (t["A"] before -100)::class)
+        assertEquals(UnitCell::class, (t["A"] atOrBefore -100)::class)
+        assertEquals(UnitCell::class, (t["A"] at -100)::class)
+        assertEquals(UnitCell::class, (t["A"] atOrAfter -100)::class)
+        assertEquals(UnitCell::class, (t["A"] after -100)::class)
+
+        assertEquals(UnitCell::class, (t["A"] before 0)::class)
+        assertEquals(UnitCell::class, (t["A"] atOrBefore 0)::class)
+        assertEquals(UnitCell::class, (t["A"] at 0)::class)
+        assertEquals(UnitCell::class, (t["A"] atOrAfter 0)::class)
+        assertEquals(UnitCell::class, (t["A"] after 0)::class)
+
+        assertEquals(UnitCell::class, (t["A"] before 100)::class)
+        assertEquals(UnitCell::class, (t["A"] atOrBefore 100)::class)
+        assertEquals(UnitCell::class, (t["A"] at 100)::class)
+        assertEquals(UnitCell::class, (t["A"] atOrAfter 100)::class)
+        assertEquals(UnitCell::class, (t["A"] after 100)::class)
+
+        assertEquals(-100L, (t["A"] before -100).index)
+        assertEquals(-100L, (t["A"] atOrBefore -100).index)
+        assertEquals(-100L, (t["A"] at -100).index)
+        assertEquals(-100L, (t["A"] atOrAfter -100).index)
+        assertEquals(-100L, (t["A"] after -100).index)
+
+        assertEquals(0L, (t["A"] before 0).index)
+        assertEquals(0L, (t["A"] atOrBefore 0).index)
+        assertEquals(0L, (t["A"] at 0).index)
+        assertEquals(0L, (t["A"] atOrAfter 0).index)
+        assertEquals(0L, (t["A"] after 0).index)
+
+        assertEquals(100L, (t["A"] before 100).index)
+        assertEquals(100L, (t["A"] atOrBefore 100).index)
+        assertEquals(100L, (t["A"] at 100).index)
+        assertEquals(100L, (t["A"] atOrAfter 100).index)
+        assertEquals(100L, (t["A"] after 100).index)
+
+        assertEquals("A", (t["A"] before -100).column.header[0])
+        assertEquals("A", (t["A"] atOrBefore -100).column.header[0])
+        assertEquals("A", (t["A"] at -100).column.header[0])
+        assertEquals("A", (t["A"] atOrAfter -100).column.header[0])
+        assertEquals("A", (t["A"] after -100).column.header[0])
+
+        assertEquals("A", (t["A"] before 0).column.header[0])
+        assertEquals("A", (t["A"] atOrBefore 0).column.header[0])
+        assertEquals("A", (t["A"] at 0).column.header[0])
+        assertEquals("A", (t["A"] atOrAfter 0).column.header[0])
+        assertEquals("A", (t["A"] after 0).column.header[0])
+
+        assertEquals("A", (t["A"] before 100).column.header[0])
+        assertEquals("A", (t["A"] atOrBefore 100).column.header[0])
+        assertEquals("A", (t["A"] at 100).column.header[0])
+        assertEquals("A", (t["A"] atOrAfter 100).column.header[0])
+        assertEquals("A", (t["A"] after 100).column.header[0])
+
+        t["A", -100] = "A-100"
+        t["A", 0] = "A0"
+        t["A", 100] = "A100"
+
+        assertEquals(UnitCell::class, (t["A"] before -100)::class)
+        assertEquals(StringCell::class, (t["A"] atOrBefore -100)::class)
+        assertEquals(StringCell::class, (t["A"] at -100)::class)
+        assertEquals(StringCell::class, (t["A"] atOrAfter -100)::class)
+        assertEquals(StringCell::class, (t["A"] after -100)::class)
+
+        assertEquals(StringCell::class, (t["A"] before 0)::class)
+        assertEquals(StringCell::class, (t["A"] atOrBefore 0)::class)
+        assertEquals(StringCell::class, (t["A"] at 0)::class)
+        assertEquals(StringCell::class, (t["A"] atOrAfter 0)::class)
+        assertEquals(StringCell::class, (t["A"] after 0)::class)
+
+        assertEquals(StringCell::class, (t["A"] before 100)::class)
+        assertEquals(StringCell::class, (t["A"] atOrBefore 100)::class)
+        assertEquals(StringCell::class, (t["A"] at 100)::class)
+        assertEquals(StringCell::class, (t["A"] atOrAfter 100)::class)
+        assertEquals(UnitCell::class, (t["A"] after 100)::class)
+
+        assertEquals(-101L, (t["A"] before -101).index)
+
+        assertEquals(-101L, (t["A"] atOrBefore -101).index)
+        assertEquals(-101L, (t["A"] at -101).index)
+        assertEquals(-100L, (t["A"] atOrAfter -101).index)
+        assertEquals(-100L, (t["A"] after -101).index)
+
+        assertEquals(-100L, (t["A"] before -100).index)
+        assertEquals(-100L, (t["A"] atOrBefore -100).index)
+        assertEquals(-100L, (t["A"] at -100).index)
+        assertEquals(-100L, (t["A"] atOrAfter -100).index)
+        assertEquals(0L, (t["A"] after -100).index)
+
+        assertEquals(-100L, (t["A"] before -1).index)
+        assertEquals(-100L, (t["A"] atOrBefore -1).index)
+        assertEquals(-1L, (t["A"] at -1).index)
+        assertEquals(0L, (t["A"] atOrAfter -1).index)
+        assertEquals(0L, (t["A"] after -1).index)
+
+        assertEquals(-100L, (t["A"] before 0).index)
+        assertEquals(0L, (t["A"] atOrBefore 0).index)
+        assertEquals(0L, (t["A"] at 0).index)
+        assertEquals(0L, (t["A"] atOrAfter 0).index)
+        assertEquals(100L, (t["A"] after 0).index)
+
+        assertEquals(0L, (t["A"] before 1).index)
+        assertEquals(0L, (t["A"] atOrBefore 1).index)
+        assertEquals(1L, (t["A"] at 1).index)
+        assertEquals(100L, (t["A"] atOrAfter 1).index)
+        assertEquals(100L, (t["A"] after 1).index)
+
+        assertEquals(0L, (t["A"] before 100).index)
+        assertEquals(100L, (t["A"] atOrBefore 100).index)
+        assertEquals(100L, (t["A"] at 100).index)
+        assertEquals(100L, (t["A"] atOrAfter 100).index)
+        assertEquals(100L, (t["A"] after 100).index)
+
+        assertEquals(101L, (t["A"] after 101).index)
+
+        assertEquals("A", (t["A"] before -101).column.header[0])
+
+        assertEquals("A", (t["A"] atOrBefore -101).column.header[0])
+        assertEquals("A", (t["A"] at -101).column.header[0])
+        assertEquals("A", (t["A"] atOrAfter -101).column.header[0])
+        assertEquals("A", (t["A"] after -101).column.header[0])
+
+        assertEquals("A", (t["A"] before -100).column.header[0])
+        assertEquals("A", (t["A"] atOrBefore -100).column.header[0])
+        assertEquals("A", (t["A"] at -100).column.header[0])
+        assertEquals("A", (t["A"] atOrAfter -100).column.header[0])
+        assertEquals("A", (t["A"] after -100).column.header[0])
+
+        assertEquals("A", (t["A"] before -1).column.header[0])
+        assertEquals("A", (t["A"] atOrBefore -1).column.header[0])
+        assertEquals("A", (t["A"] at -1).column.header[0])
+        assertEquals("A", (t["A"] atOrAfter -1).column.header[0])
+        assertEquals("A", (t["A"] after -1).column.header[0])
+
+        assertEquals("A", (t["A"] before 0).column.header[0])
+        assertEquals("A", (t["A"] atOrBefore 0).column.header[0])
+        assertEquals("A", (t["A"] at 0).column.header[0])
+        assertEquals("A", (t["A"] atOrAfter 0).column.header[0])
+        assertEquals("A", (t["A"] after 0).column.header[0])
+
+        assertEquals("A", (t["A"] before 1).column.header[0])
+        assertEquals("A", (t["A"] atOrBefore 1).column.header[0])
+        assertEquals("A", (t["A"] at 1).column.header[0])
+        assertEquals("A", (t["A"] atOrAfter 1).column.header[0])
+        assertEquals("A", (t["A"] after 1).column.header[0])
+
+        assertEquals("A", (t["A"] before 100).column.header[0])
+        assertEquals("A", (t["A"] atOrBefore 100).column.header[0])
+        assertEquals("A", (t["A"] at 100).column.header[0])
+        assertEquals("A", (t["A"] atOrAfter 100).column.header[0])
+        assertEquals("A", (t["A"] after 100).column.header[0])
+
+        assertEquals("A", (t["A"] after 101).column.header[0])
+    }
+
+    @Test
     fun `cell invoke`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 

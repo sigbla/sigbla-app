@@ -208,11 +208,11 @@ class BaseColumn internal constructor(
     columnHeader,
     columnOrder
 ) {
+    // TODO At an optimized version for get(index)
     override fun get(indexRelation: IndexRelation, index: Long): Cell<*> {
-        return getCellRaw(table.tableRef.get(), header, index, indexRelation)?.first?.toCell(this, index) ?: UnitCell(
-            this,
-            index
-        )
+        return getCellRaw(table.tableRef.get(), header, index, indexRelation)?.let {
+            it.first.toCell(this, it.second)
+        } ?: UnitCell(this, index)
     }
 
     override fun set(index: Long, value: Cell<*>?) {
