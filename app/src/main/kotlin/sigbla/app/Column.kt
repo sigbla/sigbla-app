@@ -93,6 +93,9 @@ abstract class Column internal constructor(
 
     infix fun after(index: Int) = get(AFTER, index)
 
+    // TODO Look to add a left and a right infix function, like column left|right X, to navigate X columns left|right
+    //      Similar to do exists for cells, but including up|down..?
+
     operator fun get(index: Long) = get(AT, index)
 
     operator fun get(index: Int) = get(AT, index.toLong())

@@ -2010,9 +2010,8 @@ fun remove(table: Table) = Registry.deleteTable(table)
 
 fun remove(column: Column) = move(column to Table[null])
 
-// Note: We don't have remove(row) because that would imply shifting rows below up, same for cells
-// TODO When move(t[1] after|before t[2]) is available, should have remove(row) too
-//fun remove(row: Row) = move(row to Table[null][0])
+// TODO Add some ability to shift up or down, like remove(row, shift = UP), or something like that
+fun remove(row: Row) = move(row to Table[null][0])
 
 // TODO These can be more efficient, especially if there are no listeners
 fun clear(table: Table): Unit = table.forEach { clear(it) }
@@ -2853,3 +2852,6 @@ fun save(
     extension,
     compress
 )
+
+// TODO Add functions for sorting, like sort(table by table["A"]) or sort(table by table[1]) etc..
+//      Also look at supporting sort of a subsection of a table through cell ranges, columns, etc
