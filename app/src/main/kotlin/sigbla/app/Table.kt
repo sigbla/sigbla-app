@@ -91,23 +91,37 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     // -----
 
-    operator fun get(cell: Cell<*>): Cell<*> {
-        return this[cell.column.header][cell.index]
-    }
+    operator fun get(cell: Cell<*>): Cell<*> = this[cell.column.header][cell.index]
 
-    operator fun get(column: Column): Column {
-        return this[column.header]
-    }
+    operator fun get(column: Column): Column = this[column.header]
 
-    operator fun get(cellRange: CellRange): CellRange {
-        return CellRange(this[cellRange.start], this[cellRange.endInclusive], cellRange.order)
-    }
+    operator fun get(cellRange: CellRange): CellRange = CellRange(this[cellRange.start], this[cellRange.endInclusive], cellRange.order)
 
-    // TODO Row related
+    operator fun get(column: Column, index: Long) = this[column][index]
 
-    // TODO get(columnHeader/column, index)
+    operator fun get(column: Column, index: Int) = this[column][index]
 
-    // TODO get(index, columnHeader/column)
+    operator fun get(columnHeader: ColumnHeader, index: Long) = this[columnHeader][index]
+
+    operator fun get(columnHeader: ColumnHeader, index: Int) = this[columnHeader][index]
+
+    operator fun get(index: Long, column: Column) = this[column][index]
+
+    operator fun get(index: Int, column: Column) = this[column][index]
+
+    operator fun get(index: Long, columnHeader: ColumnHeader) = this[columnHeader][index]
+
+    operator fun get(index: Int, columnHeader: ColumnHeader) = this[columnHeader][index]
+
+    operator fun get(column: Column, row: Row) = this[column][row]
+
+    operator fun get(columnHeader: ColumnHeader, row: Row) = this[columnHeader][row]
+
+    operator fun get(row: Row, column: Column) = this[column][row]
+
+    operator fun get(row: Row, columnHeader: ColumnHeader) = this[columnHeader][row]
+
+    // TODO Check for missing shorthand convenience functions on get/set
 
     // TODO Consider if get(table: Table) and set(..: Table, ..) should be included for symmetry?
 
@@ -118,6 +132,390 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
     operator fun get(table: Table.Companion): Table {
         return this
     }
+
+    // -----
+
+    operator fun set(column: Column, index: Long, value: Cell<*>?) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Long, value: String) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Long, value: Long) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Long, value: Double) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Long, value: BigInteger) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Long, value: BigDecimal) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Long, value: Number) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Long, init: Cell<*>.() -> Any?) = this[column][index] { init() }
+
+    // -----
+
+    operator fun set(column: Column, index: Int, value: Cell<*>?) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Int, value: String) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Int, value: Long) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Int, value: Double) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Int, value: BigInteger) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Int, value: BigDecimal) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Int, value: Number) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Int, init: Cell<*>.() -> Any?) = this[column][index] { init() }
+
+    // -----
+
+    operator fun set(columnHeader: ColumnHeader, index: Long, value: Cell<*>?) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, index: Long, value: String) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, index: Long, value: Long) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, index: Long, value: Double) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, index: Long, value: BigInteger) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, index: Long, value: BigDecimal) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, index: Long, value: Number) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, index: Long, init: Cell<*>.() -> Any?) = this[columnHeader][index] { init() }
+
+    // -----
+
+    operator fun set(columnHeader: ColumnHeader, index: Int, value: Cell<*>?) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, index: Int, value: String) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, index: Int, value: Long) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, index: Int, value: Double) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, index: Int, value: BigInteger) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, index: Int, value: BigDecimal) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, index: Int, value: Number) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, index: Int, init: Cell<*>.() -> Any?) = this[columnHeader][index] { init() }
+
+    // -----
+
+    operator fun set(column: Column, row: Row, value: Cell<*>?) {
+        this[column][row] = value
+    }
+
+    operator fun set(column: Column, row: Row, value: String) {
+        this[column][row] = value
+    }
+
+    operator fun set(column: Column, row: Row, value: Long) {
+        this[column][row] = value
+    }
+
+    operator fun set(column: Column, row: Row, value: Double) {
+        this[column][row] = value
+    }
+
+    operator fun set(column: Column, row: Row, value: BigInteger) {
+        this[column][row] = value
+    }
+
+    operator fun set(column: Column, row: Row, value: BigDecimal) {
+        this[column][row] = value
+    }
+
+    operator fun set(column: Column, row: Row, value: Number) {
+        this[column][row] = value
+    }
+
+    operator fun set(column: Column, row: Row, init: Cell<*>.() -> Any?) = this[column][row] { init() }
+
+    // -----
+
+    operator fun set(columnHeader: ColumnHeader, row: Row, value: Cell<*>?) {
+        this[columnHeader][row] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, row: Row, value: String) {
+        this[columnHeader][row] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, row: Row, value: Long) {
+        this[columnHeader][row] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, row: Row, value: Double) {
+        this[columnHeader][row] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, row: Row, value: BigInteger) {
+        this[columnHeader][row] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, row: Row, value: BigDecimal) {
+        this[columnHeader][row] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, row: Row, value: Number) {
+        this[columnHeader][row] = value
+    }
+
+    operator fun set(columnHeader: ColumnHeader, row: Row, init: Cell<*>.() -> Any?) = this[columnHeader][row] { init() }
+
+    // -----
+
+    operator fun set(index: Long, column: Column, value: Cell<*>?) {
+        this[column][index] = value
+    }
+
+    operator fun set(index: Long, column: Column, value: String) {
+        this[column][index] = value
+    }
+
+    operator fun set(index: Long, column: Column, value: Long) {
+        this[column][index] = value
+    }
+
+    operator fun set(index: Long, column: Column, value: Double) {
+        this[column][index] = value
+    }
+
+    operator fun set(index: Long, column: Column, value: BigInteger) {
+        this[column][index] = value
+    }
+
+    operator fun set(index: Long, column: Column, value: BigDecimal) {
+        this[column][index] = value
+    }
+
+    operator fun set(index: Long, column: Column, value: Number) {
+        this[column][index] = value
+    }
+
+    operator fun set(index: Long, column: Column, init: Cell<*>.() -> Any?) = this[column][index] { init() }
+
+    // -----
+
+    operator fun set(index: Int, column: Column, value: Cell<*>?) {
+        this[column][index] = value
+    }
+
+    operator fun set(index: Int, column: Column, value: String) {
+        this[column][index] = value
+    }
+
+    operator fun set(index: Int, column: Column, value: Long) {
+        this[column][index] = value
+    }
+
+    operator fun set(index: Int, column: Column, value: Double) {
+        this[column][index] = value
+    }
+
+    operator fun set(index: Int, column: Column, value: BigInteger) {
+        this[column][index] = value
+    }
+
+    operator fun set(index: Int, column: Column, value: BigDecimal) {
+        this[column][index] = value
+    }
+
+    operator fun set(index: Int, column: Column, value: Number) {
+        this[column][index] = value
+    }
+
+    operator fun set(index: Int, column: Column, init: Cell<*>.() -> Any?) = this[column][index] { init() }
+
+    // -----
+
+    operator fun set(index: Long, columnHeader: ColumnHeader, value: Cell<*>?) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(index: Long, columnHeader: ColumnHeader, value: String) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(index: Long, columnHeader: ColumnHeader, value: Long) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(index: Long, columnHeader: ColumnHeader, value: Double) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(index: Long, columnHeader: ColumnHeader, value: BigInteger) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(index: Long, columnHeader: ColumnHeader, value: BigDecimal) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(index: Long, columnHeader: ColumnHeader, value: Number) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(index: Long, columnHeader: ColumnHeader, init: Cell<*>.() -> Any?) = this[columnHeader][index] { init() }
+
+    // -----
+
+    operator fun set(index: Int, columnHeader: ColumnHeader, value: Cell<*>?) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(index: Int, columnHeader: ColumnHeader, value: String) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(index: Int, columnHeader: ColumnHeader, value: Long) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(index: Int, columnHeader: ColumnHeader, value: Double) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(index: Int, columnHeader: ColumnHeader, value: BigInteger) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(index: Int, columnHeader: ColumnHeader, value: BigDecimal) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(index: Int, columnHeader: ColumnHeader, value: Number) {
+        this[columnHeader][index] = value
+    }
+
+    operator fun set(index: Int, columnHeader: ColumnHeader, init: Cell<*>.() -> Any?) = this[columnHeader][index] { init() }
+
+    // -----
+
+    operator fun set(row: Row, column: Column, value: Cell<*>?) {
+        this[column][row] = value
+    }
+
+    operator fun set(row: Row, column: Column, value: String) {
+        this[column][row] = value
+    }
+
+    operator fun set(row: Row, column: Column, value: Long) {
+        this[column][row] = value
+    }
+
+    operator fun set(row: Row, column: Column, value: Double) {
+        this[column][row] = value
+    }
+
+    operator fun set(row: Row, column: Column, value: BigInteger) {
+        this[column][row] = value
+    }
+
+    operator fun set(row: Row, column: Column, value: BigDecimal) {
+        this[column][row] = value
+    }
+
+    operator fun set(row: Row, column: Column, value: Number) {
+        this[column][row] = value
+    }
+
+    operator fun set(row: Row, column: Column, init: Cell<*>.() -> Any?) = this[column][row] { init() }
+
+    // -----
+
+    operator fun set(row: Row, columnHeader: ColumnHeader, value: Cell<*>?) {
+        this[columnHeader][row] = value
+    }
+
+    operator fun set(row: Row, columnHeader: ColumnHeader, value: String) {
+        this[columnHeader][row] = value
+    }
+
+    operator fun set(row: Row, columnHeader: ColumnHeader, value: Long) {
+        this[columnHeader][row] = value
+    }
+
+    operator fun set(row: Row, columnHeader: ColumnHeader, value: Double) {
+        this[columnHeader][row] = value
+    }
+
+    operator fun set(row: Row, columnHeader: ColumnHeader, value: BigInteger) {
+        this[columnHeader][row] = value
+    }
+
+    operator fun set(row: Row, columnHeader: ColumnHeader, value: BigDecimal) {
+        this[columnHeader][row] = value
+    }
+
+    operator fun set(row: Row, columnHeader: ColumnHeader, value: Number) {
+        this[columnHeader][row] = value
+    }
+
+    operator fun set(row: Row, columnHeader: ColumnHeader, init: Cell<*>.() -> Any?) = this[columnHeader][row] { init() }
 
     // -----
 
