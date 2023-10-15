@@ -994,5 +994,136 @@ class CellsListenerTest {
         assertEquals(1, eventCount6)
     }
 
+    @Test
+    fun `type filtering for chained subscriptions 1`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount1 = 0
+        var eventCount2 = 0
+
+        on<Any, String>(t1["A", 1] or t1["A", 2], name = "Listener 1") events {
+            eventCount1 += count()
+            forEach {
+                oldTable[it.oldValue] { it.oldValue.value.toString().toLongOrNull() }
+                newTable[it.newValue] = it.newValue.value.toLong()
+            }
+        }
+
+        on<Long, Long>(t1["A", 1] or t1["A", 2], name = "Listener 2") events {
+            eventCount2 += count()
+            forEach {
+                t1["B", it.newValue.index] = it.newValue - it.oldValue
+            }
+        }
+
+        t1["A", 1] = "100"
+        t1["A", 2] = "110"
+
+        t1["A", 1] = "105"
+        t1["A", 2] = "120"
+
+        assertEquals(4, eventCount1)
+        assertEquals(2, eventCount2)
+
+        assertEquals(5L, t1["B", 1].toLong())
+        assertEquals(10L, t1["B", 2].toLong())
+    }
+
+    @Test
+    fun `type filtering for chained subscriptions without type filter 1`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount1 = 0
+        var eventCount2 = 0
+
+        on(t1["A", 1] or t1["A", 2], name = "Listener 1") events {
+            eventCount1 += count()
+            forEach {
+                oldTable[it.oldValue] = "L1 old"
+                newTable[it.newValue] = "L1 new"
+            }
+        }
+
+        on(t1["A", 1] or t1["A", 2], name = "Listener 2") events {
+            eventCount2 += count()
+            forEach {
+                assertEquals("L1 old", it.oldValue.value)
+                assertEquals("L1 new", it.newValue.value)
+            }
+        }
+
+        t1["A", 1] = "Original value A1"
+        t1["A", 2] = "Original value A2"
+
+        assertEquals(2, eventCount1)
+        assertEquals(2, eventCount2)
+
+        assertEquals("Original value A1", t1["A", 1].value)
+        assertEquals("Original value A2", t1["A", 2].value)
+    }
+
+    @Test
+    fun `type filtering for chained subscriptions 2`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount1 = 0
+        var eventCount2 = 0
+
+        on<Any, String>(t1["A", 1], name = "Listener 1") events {
+            eventCount1 += count()
+            forEach {
+                oldTable[it.oldValue] { it.oldValue.value.toString().toLongOrNull() }
+                newTable[it.newValue] = it.newValue.value.toLong()
+            }
+        }
+
+        on<Long, Long>(t1["A", 1], name = "Listener 2") events {
+            eventCount2 += count()
+            forEach {
+                t1["B", it.newValue.index] = it.newValue - it.oldValue
+            }
+        }
+
+        t1["A", 1] = "100"
+
+        t1["A", 1] = "105"
+
+        assertEquals(2, eventCount1)
+        assertEquals(1, eventCount2)
+
+        assertEquals(5L, t1["B", 1].toLong())
+    }
+
+    @Test
+    fun `type filtering for chained subscriptions without type filter 2`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount1 = 0
+        var eventCount2 = 0
+
+        on(t1["A", 1], name = "Listener 1") events {
+            eventCount1 += count()
+            forEach {
+                oldTable[it.oldValue] = "L1 old"
+                newTable[it.newValue] = "L1 new"
+            }
+        }
+
+        on(t1["A", 1], name = "Listener 2") events {
+            eventCount2 += count()
+            forEach {
+                assertEquals("L1 old", it.oldValue.value)
+                assertEquals("L1 new", it.newValue.value)
+            }
+        }
+
+        t1["A", 1] = "Original value A1"
+
+        assertEquals(1, eventCount1)
+        assertEquals(1, eventCount2)
+
+        assertEquals("Original value A1", t1["A", 1].value)
+    }
+
     // TODO Add more combinations between cells, table, columns, rows, cellrange, etc..
 }

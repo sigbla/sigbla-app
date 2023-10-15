@@ -2121,7 +2121,11 @@ fun on(
             order,
             allowLoop,
             skipHistory
-        ) { this }
+        ) {
+            this.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
+            }
+        }
         old == Any::class -> TableEventReceiver(
             table,
             name,
@@ -2253,7 +2257,11 @@ fun on(
             order,
             allowLoop,
             skipHistory
-        ) { this }
+        ) {
+            this.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
+            }
+        }
         old == Any::class -> TableEventReceiver(
             column,
             name,
@@ -2385,7 +2393,11 @@ fun on(
             order,
             allowLoop,
             skipHistory
-        ) { this }
+        ) {
+            this.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
+            }
+        }
         old == Any::class -> TableEventReceiver(
             row,
             name,
@@ -2517,7 +2529,11 @@ fun on(
             order,
             allowLoop,
             skipHistory
-        ) { this }
+        ) {
+            this.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
+            }
+        }
         old == Any::class -> TableEventReceiver(
             cellRange,
             name,
@@ -2649,7 +2665,11 @@ fun on(
             order,
             allowLoop,
             skipHistory
-        ) { this }
+        ) {
+            this.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
+            }
+        }
         old == Any::class -> TableEventReceiver(
             cell,
             name,
@@ -2781,7 +2801,11 @@ fun on(
             order,
             allowLoop,
             skipHistory
-        ) { this }
+        ) {
+            this.map {
+                TableListenerEvent(oldTable[it.oldValue], newTable[it.newValue]) as TableListenerEvent<Any, Any>
+            }
+        }
         old == Any::class -> TableEventReceiver(
             cells,
             name,

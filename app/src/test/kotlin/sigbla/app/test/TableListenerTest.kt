@@ -587,6 +587,7 @@ class TableListenerTest {
         assertEquals(1, eventCount6)
     }
 
+    // TODO This should be for just table, copy over to the other *ListenerTest classes as well
     @Test
     fun `type filtering for chained subscriptions`() {
         val t1 = Table[object {}.javaClass.enclosingMethod.name]
@@ -602,10 +603,11 @@ class TableListenerTest {
             }
         }
 
-        on<Long, Long>(t1["A"], name = "Listener 2") events {
+        on<Long, Long>(t1, name = "Listener 2", allowLoop = true) events {
             eventCount2 += count()
             forEach {
-                t1["B", it.newValue.index] = it.newValue - it.oldValue
+                if (it.newValue.column.header[0] == "A")
+                    t1["B", it.newValue.index] = it.newValue - it.oldValue
             }
         }
 
@@ -620,5 +622,38 @@ class TableListenerTest {
 
         assertEquals(5L, t1["B", 1].toLong())
         assertEquals(10L, t1["B", 2].toLong())
+    }
+
+    @Test
+    fun `type filtering for chained subscriptions without type filter`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount1 = 0
+        var eventCount2 = 0
+
+        on(t1, name = "Listener 1") events {
+            eventCount1 += count()
+            forEach {
+                oldTable[it.oldValue] = "L1 old"
+                newTable[it.newValue] = "L1 new"
+            }
+        }
+
+        on(t1, name = "Listener 2") events {
+            eventCount2 += count()
+            forEach {
+                assertEquals("L1 old", it.oldValue.value)
+                assertEquals("L1 new", it.newValue.value)
+            }
+        }
+
+        t1["A", 1] = "Original value A1"
+        t1["A", 2] = "Original value A2"
+
+        assertEquals(2, eventCount1)
+        assertEquals(2, eventCount2)
+
+        assertEquals("Original value A1", t1["A", 1].value)
+        assertEquals("Original value A2", t1["A", 2].value)
     }
 }

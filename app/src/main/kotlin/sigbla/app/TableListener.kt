@@ -1,6 +1,7 @@
 package sigbla.app
 
 import sigbla.app.exceptions.InvalidSequenceException
+import java.util.*
 
 abstract class TableListenerReference {
     abstract val name: String?
@@ -39,14 +40,29 @@ class TableEventReceiver<S, O, N>(
     }
 }
 
-// TODO Can these be lazy? I.e., reuse same value?
-//      Can probably do something with WeakHashMap..
+internal val newTableRefs = Collections.synchronizedMap(WeakHashMap<Sequence<TableListenerEvent<*, *>>, Table>())
+internal val oldTableRefs = Collections.synchronizedMap(WeakHashMap<Sequence<TableListenerEvent<*, *>>, Table>())
+
 val Sequence<TableListenerEvent<*, *>>.newTable: Table
-    get() = this.firstOrNull()?.let {
-        return it.newValue.column.table
-    } ?: throw InvalidSequenceException()
+    get() {
+        val table = newTableRefs[this]
+        if (table != null) return table
+
+        this.firstOrNull()?.let {
+            val table = it.newValue.column.table
+            newTableRefs[this] = table
+            return table
+        } ?: throw InvalidSequenceException()
+    }
 
 val Sequence<TableListenerEvent<*, *>>.oldTable: Table
-    get() = this.firstOrNull()?.let {
-        return it.oldValue.column.table
-    } ?: throw InvalidSequenceException()
+    get() {
+        val table = oldTableRefs[this]
+        if (table != null) return table
+
+        this.firstOrNull()?.let {
+            val table = it.oldValue.column.table
+            oldTableRefs[this] = table
+            return table
+        } ?: throw InvalidSequenceException()
+    }
