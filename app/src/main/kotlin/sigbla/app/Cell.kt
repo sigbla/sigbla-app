@@ -143,7 +143,6 @@ infix fun CellRange.by(cellOrder: CellOrder) = CellRange(this.start, this.endInc
 sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, Iterable<Cell<*>> {
     abstract val value: T
 
-    // TODO Shouldn't this be internal with tableOf(..) function available?
     val table: Table
         get() = column.table
 
@@ -151,25 +150,22 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
 
     internal fun toCellValue() = CellValue(value)
 
-    // TODO Look at making these internal and introduce a CellOps
-    open fun isNumeric(): Boolean = false
-    open fun isText(): Boolean = false
+    open val isNumeric: Boolean = false
+    open val isText: Boolean = false
 
-    // TODO? Look at making these internal and introduce a CellOps
-    // TODO Make these return null instead of throwing exception
-    open fun toLong(): Long = throw InvalidCellException("Cell not numeric at $column:$index")
-    open fun toDouble(): Double = throw InvalidCellException("Cell not numeric at $column:$index")
-    open fun toBigInteger(): BigInteger = throw InvalidCellException("Cell not numeric at $column:$index")
-    open fun toBigDecimal(): BigDecimal = toBigDecimal(DefaultBigDecimalPrecision.mathContext)
-    open fun toBigDecimal(mathContext: MathContext): BigDecimal = throw InvalidCellException("Cell not numeric at $column:$index")
-    open fun toNumber(): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+    open val asLong: Long? = null
+    open val asDouble: Double? = null
+    open val asBigInteger: BigInteger? = null
+    open val asBigDecimal: BigDecimal? by lazy { asBigDecimal(DefaultBigDecimalPrecision.mathContext) }
+    open fun asBigDecimal(mathContext: MathContext): BigDecimal? = null
+    open val asNumber: Number? = null
 
     operator fun plus(that: Cell<*>): Number {
-        return when (that.value) {
-            is Long -> plus(that.toLong())
-            is Double -> plus(that.toDouble())
-            is BigInteger -> plus(that.toBigInteger())
-            is BigDecimal -> plus(that.toBigDecimal())
+        return when (val v = that.value) {
+            is Long -> plus(v)
+            is Double -> plus(v)
+            is BigInteger -> plus(v)
+            is BigDecimal -> plus(v)
             else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
         }
     }
@@ -194,11 +190,11 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     open operator fun plus(that: BigDecimal): Number = throw InvalidCellException("Cell not numeric at $column:$index")
 
     operator fun minus(that: Cell<*>): Number {
-        return when (that.value) {
-            is Long -> minus(that.toLong())
-            is Double -> minus(that.toDouble())
-            is BigInteger -> minus(that.toBigInteger())
-            is BigDecimal -> minus(that.toBigDecimal())
+        return when (val v = that.value) {
+            is Long -> minus(v)
+            is Double -> minus(v)
+            is BigInteger -> minus(v)
+            is BigDecimal -> minus(v)
             else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
         }
     }
@@ -223,11 +219,11 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     open operator fun minus(that: BigDecimal): Number = throw InvalidCellException("Cell not numeric at $column:$index")
 
     operator fun times(that: Cell<*>): Number {
-        return when (that.value) {
-            is Long -> times(that.toLong())
-            is Double -> times(that.toDouble())
-            is BigInteger -> times(that.toBigInteger())
-            is BigDecimal -> times(that.toBigDecimal())
+        return when (val v = that.value) {
+            is Long -> times(v)
+            is Double -> times(v)
+            is BigInteger -> times(v)
+            is BigDecimal -> times(v)
             else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
         }
     }
@@ -252,11 +248,11 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     open operator fun times(that: BigDecimal): Number = throw InvalidCellException("Cell not numeric at $column:$index")
 
     operator fun div(that: Cell<*>): Number {
-        return when (that.value) {
-            is Long -> div(that.toLong())
-            is Double -> div(that.toDouble())
-            is BigInteger -> div(that.toBigInteger())
-            is BigDecimal -> div(that.toBigDecimal())
+        return when (val v = that.value) {
+            is Long -> div(v)
+            is Double -> div(v)
+            is BigInteger -> div(v)
+            is BigDecimal -> div(v)
             else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
         }
     }
@@ -281,11 +277,11 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     open operator fun div(that: BigDecimal): Number = throw InvalidCellException("Cell not numeric at $column:$index")
 
     operator fun rem(that: Cell<*>): Number {
-        return when (that.value) {
-            is Long -> rem(that.toLong())
-            is Double -> rem(that.toDouble())
-            is BigInteger -> rem(that.toBigInteger())
-            is BigDecimal -> rem(that.toBigDecimal())
+        return when (val v = that.value) {
+            is Long -> rem(v)
+            is Double -> rem(v)
+            is BigInteger -> rem(v)
+            is BigDecimal -> rem(v)
             else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
         }
     }
@@ -413,24 +409,24 @@ class StringCell internal constructor(column: Column, index: Long, override val 
     override fun toCell(column: Column, index: Long): Cell<String> =
         StringCell(column, index, this.value)
 
-    override fun isText() = true
+    override val isText = true
 }
 
 class LongCell internal constructor(column: Column, index: Long, override val value: Long) : Cell<Long>(column, index) {
     override fun toCell(column: Column, index: Long): Cell<Long> =
         LongCell(column, index, this.value)
 
-    override fun isNumeric() = true
+    override val isNumeric = true
 
-    override fun toLong() = value
+    override val asLong: Long = value
 
-    override fun toDouble() = value.toDouble()
+    override val asDouble: Double by lazy { value.toDouble() }
 
-    override fun toBigInteger() = value.toBigInteger()
+    override val asBigInteger: BigInteger by lazy { value.toBigInteger() }
 
-    override fun toBigDecimal(mathContext: MathContext) = value.toBigDecimal(mathContext)
+    override fun asBigDecimal(mathContext: MathContext): BigDecimal = value.toBigDecimal(mathContext)
 
-    override fun toNumber(): Number = value
+    override val asNumber: Number = value
 
     override fun plus(that: Int) = plus(that.toLong())
 
@@ -497,17 +493,17 @@ class DoubleCell internal constructor(column: Column, index: Long, override val 
     override fun toCell(column: Column, index: Long): Cell<Double> =
         DoubleCell(column, index, this.value)
 
-    override fun isNumeric() = true
+    override val isNumeric = true
 
-    override fun toLong() = value.toLong()
+    override val asLong: Long by lazy { value.toLong() }
 
-    override fun toDouble() = value
+    override val asDouble: Double = value
 
-    override fun toBigInteger(): BigInteger = BigInteger.valueOf(value.toLong())
+    override val asBigInteger: BigInteger by lazy { BigInteger.valueOf(value.toLong()) }
 
-    override fun toBigDecimal(mathContext: MathContext) = value.toBigDecimal(mathContext)
+    override fun asBigDecimal(mathContext: MathContext): BigDecimal = value.toBigDecimal(mathContext)
 
-    override fun toNumber(): Number = value
+    override val asNumber: Number = value
 
     override fun plus(that: Int) = plus(that.toLong())
 
@@ -574,17 +570,17 @@ class BigIntegerCell internal constructor(column: Column, index: Long, override 
     override fun toCell(column: Column, index: Long): Cell<BigInteger> =
         BigIntegerCell(column, index, this.value)
 
-    override fun isNumeric() = true
+    override val isNumeric = true
 
-    override fun toLong() = value.toLong()
+    override val asLong: Long by lazy { value.toLong() }
 
-    override fun toDouble() = value.toDouble()
+    override val asDouble: Double by lazy { value.toDouble() }
 
-    override fun toBigInteger() = value
+    override val asBigInteger: BigInteger = value
 
-    override fun toBigDecimal(mathContext: MathContext) = value.toBigDecimal(mathContext = mathContext)
+    override fun asBigDecimal(mathContext: MathContext): BigDecimal = value.toBigDecimal(mathContext = mathContext)
 
-    override fun toNumber(): Number = value
+    override val asNumber: Number = value
 
     override fun plus(that: Int) = plus(that.toLong())
 
@@ -651,19 +647,17 @@ class BigDecimalCell internal constructor(column: Column, index: Long, override 
     override fun toCell(column: Column, index: Long): Cell<BigDecimal> =
         BigDecimalCell(column, index, this.value)
 
-    override fun isNumeric() = true
+    override val isNumeric = true
 
-    override fun toLong() = value.toLong()
+    override val asLong: Long by lazy { value.toLong() }
 
-    override fun toDouble() = value.toDouble()
+    override val asDouble: Double by lazy { value.toDouble() }
 
-    override fun toBigInteger(): BigInteger = value.toBigInteger()
+    override val asBigInteger: BigInteger by lazy { value.toBigInteger() }
 
-    override fun toBigDecimal() = value
+    override fun asBigDecimal(mathContext: MathContext): BigDecimal = value.round(mathContext)!!
 
-    override fun toBigDecimal(mathContext: MathContext) = value.round(mathContext)!!
-
-    override fun toNumber(): Number = value
+    override val asNumber: Number = value
 
     override fun plus(that: Int) = plus(that.toLong())
 

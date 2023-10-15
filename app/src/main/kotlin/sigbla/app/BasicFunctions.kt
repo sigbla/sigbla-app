@@ -10,7 +10,7 @@ fun sum(
     order: Long = 0L,
     predicate: (Cell<*>) -> Boolean = { true }
 ): Cell<*>.() -> Unit = cellFunction<Any, Number>(cells = cells, init, empty, name, order) {
-    filter { it.isNumeric() && predicate(it) }
+    filter { it.isNumeric && predicate(it) }
         .fold(null as Number?) { sum, num -> num + (sum ?: 0) }
 }
 
@@ -22,8 +22,8 @@ fun max(
     order: Long = 0L,
     predicate: (Cell<*>) -> Boolean = { true }
 ): Cell<*>.() -> Unit = cellFunction<Any, Number>(cells = cells, init, empty, name, order) {
-    filter { it.isNumeric() && predicate(it) }
-        .fold(null as Number?) { max, num -> if (max == null || num > max) num.toNumber() else max }
+    filter { it.isNumeric && predicate(it) }
+        .fold(null as Number?) { max, num -> if (max == null || num > max) num.asNumber else max }
 }
 
 fun min(
@@ -34,8 +34,8 @@ fun min(
     order: Long = 0L,
     predicate: (Cell<*>) -> Boolean = { true }
 ): Cell<*>.() -> Unit = cellFunction<Any, Number>(cells = cells, init, empty, name, order) {
-    filter { it.isNumeric() && predicate(it) }
-        .fold(null as Number?) { min, num -> if (min == null || num < min) num.toNumber() else min }
+    filter { it.isNumeric && predicate(it) }
+        .fold(null as Number?) { min, num -> if (min == null || num < min) num.asNumber else min }
 }
 
 fun count(

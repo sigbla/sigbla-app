@@ -4,6 +4,7 @@ import sigbla.app.*
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Test
+import sigbla.app.exceptions.InvalidCellException
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.reflect.KClass
@@ -113,56 +114,56 @@ class BasicMathTest {
             idx = 0
 
             assertEquals(LongCell::class, t["Val2"][idx]::class)
-            assertEquals(val1 + t["Val2"][idx].toLong(), val1 + t["Val2"][idx])
-            assertEquals(val1 - t["Val2"][idx].toLong(), val1 - t["Val2"][idx])
-            assertEquals(val1 * t["Val2"][idx].toLong(), val1 * t["Val2"][idx])
-            assertEquals(val1 / t["Val2"][idx].toLong(), val1 / t["Val2"][idx])
-            assertEquals(val1 % t["Val2"][idx].toLong(), val1 % t["Val2"][idx])
+            assertEquals(val1 + (t["Val2"][idx].asLong ?: throw InvalidCellException("")), val1 + t["Val2"][idx])
+            assertEquals(val1 - (t["Val2"][idx].asLong ?: throw InvalidCellException("")), val1 - t["Val2"][idx])
+            assertEquals(val1 * (t["Val2"][idx].asLong ?: throw InvalidCellException("")), val1 * t["Val2"][idx])
+            assertEquals(val1 / (t["Val2"][idx].asLong ?: throw InvalidCellException("")), val1 / t["Val2"][idx])
+            assertEquals(val1 % (t["Val2"][idx].asLong ?: throw InvalidCellException("")), val1 % t["Val2"][idx])
 
             idx = 1
 
             assertEquals(LongCell::class, t["Val2"][idx]::class)
-            assertEquals(val1 + t["Val2"][idx].toLong(), val1 + t["Val2"][idx])
-            assertEquals(val1 - t["Val2"][idx].toLong(), val1 - t["Val2"][idx])
-            assertEquals(val1 * t["Val2"][idx].toLong(), val1 * t["Val2"][idx])
-            assertEquals(val1 / t["Val2"][idx].toLong(), val1 / t["Val2"][idx])
-            assertEquals(val1 % t["Val2"][idx].toLong(), val1 % t["Val2"][idx])
+            assertEquals(val1 + (t["Val2"][idx].asLong ?: throw InvalidCellException("")), val1 + t["Val2"][idx])
+            assertEquals(val1 - (t["Val2"][idx].asLong ?: throw InvalidCellException("")), val1 - t["Val2"][idx])
+            assertEquals(val1 * (t["Val2"][idx].asLong ?: throw InvalidCellException("")), val1 * t["Val2"][idx])
+            assertEquals(val1 / (t["Val2"][idx].asLong ?: throw InvalidCellException("")), val1 / t["Val2"][idx])
+            assertEquals(val1 % (t["Val2"][idx].asLong ?: throw InvalidCellException("")), val1 % t["Val2"][idx])
 
             idx = 2
 
             assertEquals(DoubleCell::class, t["Val2"][idx]::class)
-            assertEquals(val1 + t["Val2"][idx].toDouble(), val1 + t["Val2"][idx])
-            assertEquals(val1 - t["Val2"][idx].toDouble(), val1 - t["Val2"][idx])
-            assertEquals(val1 * t["Val2"][idx].toDouble(), val1 * t["Val2"][idx])
-            assertEquals(val1 / t["Val2"][idx].toDouble(), val1 / t["Val2"][idx])
-            assertEquals(val1 % t["Val2"][idx].toDouble(), val1 % t["Val2"][idx])
+            assertEquals(val1 + (t["Val2"][idx].asDouble ?: throw InvalidCellException("")), val1 + t["Val2"][idx])
+            assertEquals(val1 - (t["Val2"][idx].asDouble ?: throw InvalidCellException("")), val1 - t["Val2"][idx])
+            assertEquals(val1 * (t["Val2"][idx].asDouble ?: throw InvalidCellException("")), val1 * t["Val2"][idx])
+            assertEquals(val1 / (t["Val2"][idx].asDouble ?: throw InvalidCellException("")), val1 / t["Val2"][idx])
+            assertEquals(val1 % (t["Val2"][idx].asDouble ?: throw InvalidCellException("")), val1 % t["Val2"][idx])
 
             idx = 3
 
             assertEquals(DoubleCell::class, t["Val2"][idx]::class)
-            assertEquals(val1 + t["Val2"][idx].toDouble(), val1 + t["Val2"][idx])
-            assertEquals(val1 - t["Val2"][idx].toDouble(), val1 - t["Val2"][idx])
-            assertEquals(val1 * t["Val2"][idx].toDouble(), val1 * t["Val2"][idx])
-            assertEquals(val1 / t["Val2"][idx].toDouble(), val1 / t["Val2"][idx])
-            assertEquals(val1 % t["Val2"][idx].toDouble(), val1 % t["Val2"][idx])
+            assertEquals(val1 + (t["Val2"][idx].asDouble ?: throw InvalidCellException("")), val1 + t["Val2"][idx])
+            assertEquals(val1 - (t["Val2"][idx].asDouble ?: throw InvalidCellException("")), val1 - t["Val2"][idx])
+            assertEquals(val1 * (t["Val2"][idx].asDouble ?: throw InvalidCellException("")), val1 * t["Val2"][idx])
+            assertEquals(val1 / (t["Val2"][idx].asDouble ?: throw InvalidCellException("")), val1 / t["Val2"][idx])
+            assertEquals(val1 % (t["Val2"][idx].asDouble ?: throw InvalidCellException("")), val1 % t["Val2"][idx])
 
             idx = 4
 
             assertEquals(BigIntegerCell::class, t["Val2"][idx]::class)
-            assertEquals(val1 + t["Val2"][idx].toBigInteger(), val1 + t["Val2"][idx])
-            assertEquals(val1 - t["Val2"][idx].toBigInteger(), val1 - t["Val2"][idx])
-            assertEquals(val1 * t["Val2"][idx].toBigInteger(), val1 * t["Val2"][idx])
-            assertEquals(val1 / t["Val2"][idx].toBigInteger(), val1 / t["Val2"][idx])
-            assertEquals(val1 % t["Val2"][idx].toBigInteger(), val1 % t["Val2"][idx])
+            assertEquals(val1 + (t["Val2"][idx].asBigInteger ?: throw InvalidCellException("")), val1 + t["Val2"][idx])
+            assertEquals(val1 - (t["Val2"][idx].asBigInteger ?: throw InvalidCellException("")), val1 - t["Val2"][idx])
+            assertEquals(val1 * (t["Val2"][idx].asBigInteger ?: throw InvalidCellException("")), val1 * t["Val2"][idx])
+            assertEquals(val1 / (t["Val2"][idx].asBigInteger ?: throw InvalidCellException("")), val1 / t["Val2"][idx])
+            assertEquals(val1 % (t["Val2"][idx].asBigInteger ?: throw InvalidCellException("")), val1 % t["Val2"][idx])
 
             idx = 5
 
             assertEquals(BigDecimalCell::class, t["Val2"][idx]::class)
-            assertEquals(val1 + t["Val2"][idx].toBigDecimal(), val1 + t["Val2"][idx])
-            assertEquals(val1 - t["Val2"][idx].toBigDecimal(), val1 - t["Val2"][idx])
-            assertEquals(val1 * t["Val2"][idx].toBigDecimal(), val1 * t["Val2"][idx])
-            assertEquals(val1 / t["Val2"][idx].toBigDecimal(), val1 / t["Val2"][idx])
-            assertEquals(val1 % t["Val2"][idx].toBigDecimal(), val1 % t["Val2"][idx])
+            assertEquals(val1 + (t["Val2"][idx].asBigDecimal ?: throw InvalidCellException("")), val1 + t["Val2"][idx])
+            assertEquals(val1 - (t["Val2"][idx].asBigDecimal ?: throw InvalidCellException("")), val1 - t["Val2"][idx])
+            assertEquals(val1 * (t["Val2"][idx].asBigDecimal ?: throw InvalidCellException("")), val1 * t["Val2"][idx])
+            assertEquals(val1 / (t["Val2"][idx].asBigDecimal ?: throw InvalidCellException("")), val1 / t["Val2"][idx])
+            assertEquals(val1 % (t["Val2"][idx].asBigDecimal ?: throw InvalidCellException("")), val1 % t["Val2"][idx])
         }
     }
 }

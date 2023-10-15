@@ -247,7 +247,7 @@ class BasicFunctionsTest {
         t["B", 0] = 200
         t["A", 1] = 100
 
-        t["Count", 0] = count(t["A", 0]..t["B", 10]) { it.isText() }
+        t["Count", 0] = count(t["A", 0]..t["B", 10]) { it.isText }
 
         assertTrue(0 in t["Count", 0])
 

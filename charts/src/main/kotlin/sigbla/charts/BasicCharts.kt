@@ -79,7 +79,7 @@ fun line(
             val labelStrings = labels.table[labels].map(Cell<*>::toString)
 
             val datasetValues = datasets.map {
-                it.first to it.second.table[it.second].map(Cell<*>::toDouble)
+                it.first to it.second.table[it.second].mapNotNull(Cell<*>::asDouble)
             }
 
             line(titleString, labelStrings, *datasetValues.toTypedArray())()
@@ -201,7 +201,7 @@ fun bar(
             val labelStrings = labels.table[labels].map(Cell<*>::toString)
 
             val datasetValues = datasets.map {
-                it.first to it.second.table[it.second].map(Cell<*>::toDouble)
+                it.first to it.second.table[it.second].mapNotNull(Cell<*>::asDouble)
             }
 
             bar(titleString, labelStrings, *datasetValues.toTypedArray())()

@@ -22,11 +22,12 @@ operator fun Int.plus(that: BigDecimal): Number {
 }
 
 operator fun Int.plus(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this + that.toLong()
-        is Double -> this + that.toDouble()
-        is BigInteger -> this + that.toBigInteger()
-        is BigDecimal -> this + that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this + v
+        is Double -> this + v
+        is BigInteger -> this + v
+        is BigDecimal -> this + v
+        // TODO Update exception text to include column here and below
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -40,11 +41,11 @@ operator fun Int.minus(that: BigDecimal): Number {
 }
 
 operator fun Int.minus(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this - that.toLong()
-        is Double -> this - that.toDouble()
-        is BigInteger -> this - that.toBigInteger()
-        is BigDecimal -> this - that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this - v
+        is Double -> this - v
+        is BigInteger -> this - v
+        is BigDecimal -> this - v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -58,11 +59,11 @@ operator fun Int.times(that: BigDecimal): Number {
 }
 
 operator fun Int.times(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this * that.toLong()
-        is Double -> this * that.toDouble()
-        is BigInteger -> this * that.toBigInteger()
-        is BigDecimal -> this * that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this * v
+        is Double -> this * v
+        is BigInteger -> this * v
+        is BigDecimal -> this * v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -78,11 +79,11 @@ operator fun Int.div(that: BigDecimal): Number {
 }
 
 operator fun Int.div(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this / that.toLong()
-        is Double -> this / that.toDouble()
-        is BigInteger -> this / that.toBigInteger()
-        is BigDecimal -> this / that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this / v
+        is Double -> this / v
+        is BigInteger -> this / v
+        is BigDecimal -> this / v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -96,11 +97,11 @@ operator fun Int.rem(that: BigDecimal): Number {
 }
 
 operator fun Int.rem(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this % that.toLong()
-        is Double -> this % that.toDouble()
-        is BigInteger -> this % that.toBigInteger()
-        is BigDecimal -> this % that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this % v
+        is Double -> this % v
+        is BigInteger -> this % v
+        is BigDecimal -> this % v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -114,11 +115,11 @@ operator fun Long.plus(that: BigDecimal): Number {
 }
 
 operator fun Long.plus(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this + that.toLong()
-        is Double -> this + that.toDouble()
-        is BigInteger -> this + that.toBigInteger()
-        is BigDecimal -> this + that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this + v
+        is Double -> this + v
+        is BigInteger -> this + v
+        is BigDecimal -> this + v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -132,11 +133,11 @@ operator fun Long.minus(that: BigDecimal): Number {
 }
 
 operator fun Long.minus(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this - that.toLong()
-        is Double -> this - that.toDouble()
-        is BigInteger -> this - that.toBigInteger()
-        is BigDecimal -> this - that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this - v
+        is Double -> this - v
+        is BigInteger -> this - v
+        is BigDecimal -> this - v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -150,11 +151,11 @@ operator fun Long.times(that: BigDecimal): Number {
 }
 
 operator fun Long.times(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this * that.toLong()
-        is Double -> this * that.toDouble()
-        is BigInteger -> this * that.toBigInteger()
-        is BigDecimal -> this * that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this * v
+        is Double -> this * v
+        is BigInteger -> this * v
+        is BigDecimal -> this * v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -170,11 +171,11 @@ operator fun Long.div(that: BigDecimal): Number {
 }
 
 operator fun Long.div(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this / that.toLong()
-        is Double -> this / that.toDouble()
-        is BigInteger -> this / that.toBigInteger()
-        is BigDecimal -> this / that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this / v
+        is Double -> this / v
+        is BigInteger -> this / v
+        is BigDecimal -> this / v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -188,11 +189,11 @@ operator fun Long.rem(that: BigDecimal): Number {
 }
 
 operator fun Long.rem(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this % that.toLong()
-        is Double -> this % that.toDouble()
-        is BigInteger -> this % that.toBigInteger()
-        is BigDecimal -> this % that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this % v
+        is Double -> this % v
+        is BigInteger -> this % v
+        is BigDecimal -> this % v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -206,11 +207,11 @@ operator fun Float.plus(that: BigDecimal): Number {
 }
 
 operator fun Float.plus(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this + that.toLong()
-        is Double -> this + that.toDouble()
-        is BigInteger -> this + that.toBigInteger()
-        is BigDecimal -> this + that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this + v
+        is Double -> this + v
+        is BigInteger -> this + v
+        is BigDecimal -> this + v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -224,11 +225,11 @@ operator fun Float.minus(that: BigDecimal): Number {
 }
 
 operator fun Float.minus(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this - that.toLong()
-        is Double -> this - that.toDouble()
-        is BigInteger -> this - that.toBigInteger()
-        is BigDecimal -> this - that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this - v
+        is Double -> this - v
+        is BigInteger -> this - v
+        is BigDecimal -> this - v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -242,11 +243,11 @@ operator fun Float.times(that: BigDecimal): Number {
 }
 
 operator fun Float.times(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this * that.toLong()
-        is Double -> this * that.toDouble()
-        is BigInteger -> this * that.toBigInteger()
-        is BigDecimal -> this * that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this * v
+        is Double -> this * v
+        is BigInteger -> this * v
+        is BigDecimal -> this * v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -264,11 +265,11 @@ operator fun Float.div(that: BigDecimal): Number {
 }
 
 operator fun Float.div(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this / that.toLong()
-        is Double -> this / that.toDouble()
-        is BigInteger -> this / that.toBigInteger()
-        is BigDecimal -> this / that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this / v
+        is Double -> this / v
+        is BigInteger -> this / v
+        is BigDecimal -> this / v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -282,11 +283,11 @@ operator fun Float.rem(that: BigDecimal): Number {
 }
 
 operator fun Float.rem(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this % that.toLong()
-        is Double -> this % that.toDouble()
-        is BigInteger -> this % that.toBigInteger()
-        is BigDecimal -> this % that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this % v
+        is Double -> this % v
+        is BigInteger -> this % v
+        is BigDecimal -> this % v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -300,11 +301,11 @@ operator fun Double.plus(that: BigDecimal): Number {
 }
 
 operator fun Double.plus(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this + that.toLong()
-        is Double -> this + that.toDouble()
-        is BigInteger -> this + that.toBigInteger()
-        is BigDecimal -> this + that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this + v
+        is Double -> this + v
+        is BigInteger -> this + v
+        is BigDecimal -> this + v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -318,11 +319,11 @@ operator fun Double.minus(that: BigDecimal): Number {
 }
 
 operator fun Double.minus(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this - that.toLong()
-        is Double -> this - that.toDouble()
-        is BigInteger -> this - that.toBigInteger()
-        is BigDecimal -> this - that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this - v
+        is Double -> this - v
+        is BigInteger -> this - v
+        is BigDecimal -> this - v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -336,11 +337,11 @@ operator fun Double.times(that: BigDecimal): Number {
 }
 
 operator fun Double.times(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this * that.toLong()
-        is Double -> this * that.toDouble()
-        is BigInteger -> this * that.toBigInteger()
-        is BigDecimal -> this * that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this * v
+        is Double -> this * v
+        is BigInteger -> this * v
+        is BigDecimal -> this * v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -358,11 +359,11 @@ operator fun Double.div(that: BigDecimal): Number {
 }
 
 operator fun Double.div(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this / that.toLong()
-        is Double -> this / that.toDouble()
-        is BigInteger -> this / that.toBigInteger()
-        is BigDecimal -> this / that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this / v
+        is Double -> this / v
+        is BigInteger -> this / v
+        is BigDecimal -> this / v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -376,11 +377,11 @@ operator fun Double.rem(that: BigDecimal): Number {
 }
 
 operator fun Double.rem(that: Cell<*>): Number {
-    return when (that.value) {
-        is Long -> this % that.toLong()
-        is Double -> this % that.toDouble()
-        is BigInteger -> this % that.toBigInteger()
-        is BigDecimal -> this % that.toBigDecimal()
+    return when (val v = that.value) {
+        is Long -> this % v
+        is Double -> this % v
+        is BigInteger -> this % v
+        is BigDecimal -> this % v
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -391,10 +392,10 @@ operator fun BigInteger.plus(that: BigDecimal): Number {
 
 operator fun BigInteger.plus(that: Cell<*>): Number {
     return when (that.value) {
-        is Long -> this.add(that.toBigInteger())
-        is Double -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).add(that.toBigDecimal())
-        is BigInteger -> this.add(that.toBigInteger())
-        is BigDecimal -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).add(that.toBigDecimal())
+        is Long -> this.add(that.asBigInteger)
+        is Double -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).add(that.asBigDecimal)
+        is BigInteger -> this.add(that.asBigInteger)
+        is BigDecimal -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).add(that.asBigDecimal)
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -405,10 +406,10 @@ operator fun BigInteger.minus(that: BigDecimal): Number {
 
 operator fun BigInteger.minus(that: Cell<*>): Number {
     return when (that.value) {
-        is Long -> this.subtract(that.toBigInteger())
-        is Double -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).subtract(that.toBigDecimal())
-        is BigInteger -> this.subtract(that.toBigInteger())
-        is BigDecimal -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).subtract(that.toBigDecimal())
+        is Long -> this.subtract(that.asBigInteger)
+        is Double -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).subtract(that.asBigDecimal)
+        is BigInteger -> this.subtract(that.asBigInteger)
+        is BigDecimal -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).subtract(that.asBigDecimal)
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -419,10 +420,10 @@ operator fun BigInteger.times(that: BigDecimal): Number {
 
 operator fun BigInteger.times(that: Cell<*>): Number {
     return when (that.value) {
-        is Long -> this.multiply(that.toBigInteger())
-        is Double -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).multiply(that.toBigDecimal())
-        is BigInteger -> this.multiply(that.toBigInteger())
-        is BigDecimal -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).multiply(that.toBigDecimal())
+        is Long -> this.multiply(that.asBigInteger)
+        is Double -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).multiply(that.asBigDecimal)
+        is BigInteger -> this.multiply(that.asBigInteger)
+        is BigDecimal -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).multiply(that.asBigDecimal)
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -435,12 +436,12 @@ operator fun BigInteger.div(that: BigDecimal): Number {
 
 operator fun BigInteger.div(that: Cell<*>): Number {
     return when (that.value) {
-        is Long -> this.divide(that.toBigInteger())
-        is Double -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).divide(that.toBigDecimal(),
+        is Long -> this.divide(that.asBigInteger)
+        is Double -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).divide(that.asBigDecimal,
             DefaultBigDecimalPrecision.divRoundingMode
         )
-        is BigInteger -> this.divide(that.toBigInteger())
-        is BigDecimal -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).divide(that.toBigDecimal(),
+        is BigInteger -> this.divide(that.asBigInteger)
+        is BigDecimal -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).divide(that.asBigDecimal,
             DefaultBigDecimalPrecision.divRoundingMode
         )
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
@@ -453,10 +454,10 @@ operator fun BigInteger.rem(that: BigDecimal): Number {
 
 operator fun BigInteger.rem(that: Cell<*>): Number {
     return when (that.value) {
-        is Long -> this.remainder(that.toBigInteger())
-        is Double -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).remainder(that.toBigDecimal())
-        is BigInteger -> this.remainder(that.toBigInteger())
-        is BigDecimal -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).remainder(that.toBigDecimal())
+        is Long -> this.remainder(that.asBigInteger)
+        is Double -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).remainder(that.asBigDecimal)
+        is BigInteger -> this.remainder(that.asBigInteger)
+        is BigDecimal -> this.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).remainder(that.asBigDecimal)
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -467,10 +468,10 @@ operator fun BigDecimal.plus(that: BigInteger): Number {
 
 operator fun BigDecimal.plus(that: Cell<*>): Number {
     return when (that.value) {
-        is Long -> this.add(that.toBigDecimal())
-        is Double -> this.add(that.toBigDecimal())
-        is BigInteger -> this.add(that.toBigDecimal())
-        is BigDecimal -> this.add(that.toBigDecimal())
+        is Long -> this.add(that.asBigDecimal)
+        is Double -> this.add(that.asBigDecimal)
+        is BigInteger -> this.add(that.asBigDecimal)
+        is BigDecimal -> this.add(that.asBigDecimal)
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -481,10 +482,10 @@ operator fun BigDecimal.minus(that: BigInteger): Number {
 
 operator fun BigDecimal.minus(that: Cell<*>): Number {
     return when (that.value) {
-        is Long -> this.subtract(that.toBigDecimal())
-        is Double -> this.subtract(that.toBigDecimal())
-        is BigInteger -> this.subtract(that.toBigDecimal())
-        is BigDecimal -> this.subtract(that.toBigDecimal())
+        is Long -> this.subtract(that.asBigDecimal)
+        is Double -> this.subtract(that.asBigDecimal)
+        is BigInteger -> this.subtract(that.asBigDecimal)
+        is BigDecimal -> this.subtract(that.asBigDecimal)
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -495,10 +496,10 @@ operator fun BigDecimal.times(that: BigInteger): Number {
 
 operator fun BigDecimal.times(that: Cell<*>): Number {
     return when (that.value) {
-        is Long -> this * that.toBigInteger()
-        is Double -> this * that.toBigDecimal()
-        is BigInteger -> this * that.toBigInteger()
-        is BigDecimal -> this * that.toBigDecimal()
+        is Long -> this * (that.asBigInteger ?: throw InvalidCellException("Cell not numeric at ${that.index}"))
+        is Double -> this * (that.asBigDecimal ?: throw InvalidCellException("Cell not numeric at ${that.index}"))
+        is BigInteger -> this * (that.asBigInteger ?: throw InvalidCellException("Cell not numeric at ${that.index}"))
+        is BigDecimal -> this * (that.asBigDecimal ?: throw InvalidCellException("Cell not numeric at ${that.index}"))
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -511,16 +512,16 @@ operator fun BigDecimal.div(that: BigInteger): Number {
 
 operator fun BigDecimal.div(that: Cell<*>): Number {
     return when (that.value) {
-        is Long -> this.divide(that.toBigDecimal(),
+        is Long -> this.divide(that.asBigDecimal,
             DefaultBigDecimalPrecision.divRoundingMode
         )
-        is Double -> this.divide(that.toBigDecimal(),
+        is Double -> this.divide(that.asBigDecimal,
             DefaultBigDecimalPrecision.divRoundingMode
         )
-        is BigInteger -> this.divide(that.toBigDecimal(),
+        is BigInteger -> this.divide(that.asBigDecimal,
             DefaultBigDecimalPrecision.divRoundingMode
         )
-        is BigDecimal -> this.divide(that.toBigDecimal(),
+        is BigDecimal -> this.divide(that.asBigDecimal,
             DefaultBigDecimalPrecision.divRoundingMode
         )
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
@@ -533,10 +534,10 @@ operator fun BigDecimal.rem(that: BigInteger): Number {
 
 operator fun BigDecimal.rem(that: Cell<*>): Number {
     return when (that.value) {
-        is Long -> this.remainder(that.toBigDecimal())
-        is Double -> this.remainder(that.toBigDecimal())
-        is BigInteger -> this.remainder(that.toBigDecimal())
-        is BigDecimal -> this.remainder(that.toBigDecimal())
+        is Long -> this.remainder(that.asBigDecimal)
+        is Double -> this.remainder(that.asBigDecimal)
+        is BigInteger -> this.remainder(that.asBigDecimal)
+        is BigDecimal -> this.remainder(that.asBigDecimal)
         else -> throw InvalidCellException("Cell not numeric at ${that.index}")
     }
 }
@@ -549,7 +550,7 @@ operator fun Number.plus(that: Cell<*>): Number {
         is Double -> this + that
         is BigInteger -> this + that
         is BigDecimal -> this + that
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw UnsupportedOperationException()
     }
 }
 
@@ -637,7 +638,7 @@ operator fun Number.minus(that: Cell<*>): Number {
         is Double -> this - that
         is BigInteger -> this - that
         is BigDecimal -> this - that
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw UnsupportedOperationException()
     }
 }
 

@@ -20,7 +20,7 @@ fun main() {
     on(table["C"][1]..table["D"][10]) {
         name = "A"
 
-        if (table["E"][1].isNumeric())
+        if (table["E"][1].isNumeric)
             table["E"][1] = table["E"][1] + 1
     }
 
@@ -75,8 +75,8 @@ fun main() {
 
     //Thread.sleep(Long.MAX_VALUE)
 
-    table["B"][1].isNumeric()
-    table["B"][1].isText()
+    table["B"][1].isNumeric
+    table["B"][1].isText
 
     table["B"][3] = table["B"][1] + table["B"][2]
     table[1]["B"] = table["A"][1]

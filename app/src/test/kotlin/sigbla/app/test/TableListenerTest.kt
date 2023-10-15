@@ -5,6 +5,7 @@ import sigbla.app.exceptions.ListenerLoopException
 import org.junit.After
 import org.junit.Assert
 import org.junit.Test
+import sigbla.app.exceptions.InvalidCellException
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -176,7 +177,7 @@ class TableListenerTest {
 
             events {
                 forEach { _ ->
-                    if (t["A", 1].isNumeric() && valueOf<Number>(t["A", 1])?.toLong() ?: 1000 < 1000)
+                    if (t["A", 1].isNumeric && valueOf<Number>(t["A", 1])?.toLong() ?: 1000 < 1000)
                         t["A", 1] = t["A", 1] + 1
                 }
             }
@@ -347,9 +348,9 @@ class TableListenerTest {
 
                 assertEquals(t["A", 0], source["A", 0])
 
-                if (newTable["A", 0].isNumeric())
+                if (newTable["A", 0].isNumeric)
                     newTable["A", 0] = newTable["A", 0] + 1
-                if (oldTable["A", 0].isNumeric())
+                if (oldTable["A", 0].isNumeric)
                     oldTable["A", 0] = oldTable["A", 0] - 1
             }
         }
@@ -363,9 +364,9 @@ class TableListenerTest {
 
                 assertEquals(t["A", 0], source["A", 0])
 
-                if (newTable["A", 0].isNumeric())
+                if (newTable["A", 0].isNumeric)
                     newTable["A", 0] = newTable["A", 0] + 1
-                if (oldTable["A", 0].isNumeric())
+                if (oldTable["A", 0].isNumeric)
                     oldTable["A", 0] = oldTable["A", 0] - 1
             }
         }
@@ -379,9 +380,9 @@ class TableListenerTest {
 
                 assertEquals(t["A", 0], source["A", 0])
 
-                if (newTable["A", 0].isNumeric())
+                if (newTable["A", 0].isNumeric)
                     newTable["A", 0] = newTable["A", 0] + 1
-                if (oldTable["A", 0].isNumeric())
+                if (oldTable["A", 0].isNumeric)
                     oldTable["A", 0] = oldTable["A", 0] - 1
             }
         }
@@ -468,8 +469,8 @@ class TableListenerTest {
                 oldTable["A", 0] = source["A", 0] + 200
                 newTable["A", 0] = source["A", 0] + 300
 
-                assertEquals<Any>(source["A", 0] + 200, oldTable["A", 0].toLong())
-                assertEquals<Any>(source["A", 0] + 300, newTable["A", 0].toLong())
+                assertEquals<Any>(source["A", 0] + 200, (oldTable["A", 0].asLong ?: throw InvalidCellException("")))
+                assertEquals<Any>(source["A", 0] + 300, (newTable["A", 0].asLong ?: throw InvalidCellException("")))
 
                 count += count()
             }
@@ -481,18 +482,18 @@ class TableListenerTest {
             skipHistory = true
 
             events {
-                assertEquals<Any>(source["A", 0] + 200, oldTable["A", 0].toLong())
-                assertEquals<Any>(source["A", 0] + 300, newTable["A", 0].toLong())
+                assertEquals<Any>(source["A", 0] + 200, (oldTable["A", 0].asLong ?: throw InvalidCellException("")))
+                assertEquals<Any>(source["A", 0] + 300, (newTable["A", 0].asLong ?: throw InvalidCellException("")))
 
                 count += count()
             }
         }
 
-        assertEquals<Any>(100L, t["A", 0].toLong())
+        assertEquals<Any>(100L, (t["A", 0].asLong ?: throw InvalidCellException("")))
 
         t["A", 0] = 50
 
-        assertEquals<Any>(50L, t["A", 0].toLong())
+        assertEquals<Any>(50L, (t["A", 0].asLong ?: throw InvalidCellException("")))
 
         assertEquals(3, count)
     }
@@ -620,8 +621,8 @@ class TableListenerTest {
         assertEquals(4, eventCount1)
         assertEquals(2, eventCount2)
 
-        assertEquals(5L, t1["B", 1].toLong())
-        assertEquals(10L, t1["B", 2].toLong())
+        assertEquals(5L, t1["B", 1].asLong)
+        assertEquals(10L, t1["B", 2].asLong)
     }
 
     @Test

@@ -1516,6 +1516,7 @@ sealed class CellHeight<S, T> {
     abstract val source: S
     abstract val height: T
 
+    // TODO Make these match Cell
     open fun isNumeric(): Boolean = false
     open fun toLong(): Long? = null
 
@@ -1701,6 +1702,7 @@ sealed class CellWidth<S, T> {
     abstract val source: S
     abstract val width: T
 
+    // TODO Make these match Cell
     open fun isNumeric(): Boolean = false
     open fun toLong(): Long? = null
 
