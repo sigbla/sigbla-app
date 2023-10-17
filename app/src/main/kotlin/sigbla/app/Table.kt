@@ -40,8 +40,7 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     operator fun get(index: Long): Row = get(IndexRelation.AT, index)
 
-    operator fun get(indexRelation: IndexRelation, index: Long): Row =
-        BaseRow(this, indexRelation, index)
+    operator fun get(indexRelation: IndexRelation, index: Long): Row = BaseRow(this, indexRelation, index)
 
     operator fun get(header1: String, index: Long): Cell<*> = this[header1][index]
 
@@ -881,6 +880,28 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
     operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, value: Number) {
         this[header1, header2, header3, header4, header5][index] = value
     }
+
+    // -----
+
+    infix fun at(index: Long) = get(IndexRelation.AT, index)
+
+    infix fun atOrBefore(index: Long) = get(IndexRelation.AT_OR_BEFORE, index)
+
+    infix fun atOrAfter(index: Long) = get(IndexRelation.AT_OR_AFTER, index)
+
+    infix fun before(index: Long) = get(IndexRelation.BEFORE, index)
+
+    infix fun after(index: Long) = get(IndexRelation.AFTER, index)
+
+    infix fun at(index: Int) = get(IndexRelation.AT, index)
+
+    infix fun atOrBefore(index: Int) = get(IndexRelation.AT_OR_BEFORE, index)
+
+    infix fun atOrAfter(index: Int) = get(IndexRelation.AT_OR_AFTER, index)
+
+    infix fun before(index: Int) = get(IndexRelation.BEFORE, index)
+
+    infix fun after(index: Int) = get(IndexRelation.AFTER, index)
 
     // -----
 
