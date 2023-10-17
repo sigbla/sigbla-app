@@ -19,7 +19,7 @@ Sigbla fixes this by:
 * With programming residing in source code files
 * And letting you view the data through views
 
-Sigbla also provides other things, like extending and making easier how we can do math in Kotlin,
+Sigbla also provide other things, like extending and making easier how we can do math in Kotlin,
 and, as mentioned, allows us to wire together relationships between cells through reactive programming.
 
 ## Getting started

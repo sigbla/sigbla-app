@@ -41,8 +41,8 @@ a negative row index. Negative row indexes are like any other row index, but if 
 `TableView`) only those rows from zero onwards are visible. This is helpful as a hidden area for temporary or
 intermediate values, for example.
 
-The second assignment clearly illustrates that column can have names we couldn't use in traditional spreadsheets, and
-also shows how we can use a `Long` as the type for the row.
+The second assignment clearly illustrates that columns can have names we couldn't use in traditional spreadsheets, and
+also show how we can use a `Long` as the type for the row.
 
 Moving on from this, another feature of columns in Sigbla is that they can have nested labels. This is helpful when we
 want to describe more complex data, especially data that can be assumed hierarchical.
@@ -180,7 +180,7 @@ range and a row range by using `table["A"]..table["B"]` or `table[0]..table[1]`.
 
 ## Storing tables to disk
 
-You and save and load tables to disk, using the `save(..)` and `load(..)` functions.
+You can save and load tables to disk, using the `save(..)` and `load(..)` functions.
 
 The next example shows how we can use the save functions available to us:
 
@@ -223,7 +223,7 @@ Moving on to load next:
 val table = Table["MyTable"]
 
 // Like with save(table), this will attempt to load a table
-// in the current working directly called "MyTable.sigt".
+// in the current working directory called "MyTable.sigt".
 // The content is loaded into the provided table, allowing
 // you to merge content with any existing content. The load
 // function will automatically figure out if the content is
@@ -246,7 +246,7 @@ clear(table)
 
 load("MyTable" to table) {
     apply {
-        filter { it.isNumeric() }.forEach { it { it * 2 } }
+        filter { it.isNumeric }.forEach { it { it * 2 } }
     }
 }
 
@@ -262,7 +262,7 @@ print(table)
 //    2   |    |400
 ```
 
-The `filter { it.isNumeric() }.forEach { it { it * 2 } }` operation might not make much sense to you yet, but will
+The `filter { it.isNumeric }.forEach { it { it * 2 } }` operation might not make much sense to you yet, but will
 after you've covered the chapter on cells, so for now, just understand that it will multiply all cells that contain
 a number with two and update the table value with the result.
 
@@ -281,3 +281,32 @@ the original table, but is not put on the registry. If you give it a new name, w
 be placed on the registry.
 
 The original table remains as is, unchanged.
+
+``` kotlin
+val table1 = Table["MyTable"]
+
+table1["A", 1] = 100
+table1["B", 2] = 200
+
+val table2 = clone(table1)
+
+// Changing a value on table2 does not impact the original table
+
+table2["A", 1] = 300
+
+print(table1)
+
+// Output:
+//     |A   |B
+// 1   |100 |
+// 2   |    |200
+
+// But as expected did change table2..
+
+print(table2)
+
+// Output:
+//     |A   |B   
+// 1   |300 |    
+// 2   |    |200 
+```
