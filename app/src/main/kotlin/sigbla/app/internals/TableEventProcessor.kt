@@ -49,10 +49,12 @@ internal class TableEventProcessor {
         var lazyName: String? = null
         var lazyOrder: Long? = null
         var lazyAllowLoop: Boolean? = null
+        var lazySkipHistory: Boolean? = null
 
         override val name: String? by lazy { lazyName }
         override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
         override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
+        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException() }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -67,10 +69,12 @@ internal class TableEventProcessor {
         var lazyName: String? = null
         var lazyOrder: Long? = null
         var lazyAllowLoop: Boolean? = null
+        var lazySkipHistory: Boolean? = null
 
         override val name: String? by lazy { lazyName }
         override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
         override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
+        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException() }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -85,10 +89,12 @@ internal class TableEventProcessor {
         var lazyName: String? = null
         var lazyOrder: Long? = null
         var lazyAllowLoop: Boolean? = null
+        var lazySkipHistory: Boolean? = null
 
         override val name: String? by lazy { lazyName }
         override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
         override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
+        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException() }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -103,10 +109,12 @@ internal class TableEventProcessor {
         var lazyName: String? = null
         var lazyOrder: Long? = null
         var lazyAllowLoop: Boolean? = null
+        var lazySkipHistory: Boolean? = null
 
         override val name: String? by lazy { lazyName }
         override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
         override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
+        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException() }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -121,10 +129,12 @@ internal class TableEventProcessor {
         var lazyName: String? = null
         var lazyOrder: Long? = null
         var lazyAllowLoop: Boolean? = null
+        var lazySkipHistory: Boolean? = null
 
         override val name: String? by lazy { lazyName }
         override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
         override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
+        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException() }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -146,10 +156,12 @@ internal class TableEventProcessor {
         var lazyName: String? = null
         var lazyOrder: Long? = null
         var lazyAllowLoop: Boolean? = null
+        var lazySkipHistory: Boolean? = null
 
         override val name: String? by lazy { lazyName }
         override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
         override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
+        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException() }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -192,6 +204,7 @@ internal class TableEventProcessor {
         listenerRef.lazyName = eventReceiver.name
         listenerRef.lazyOrder = eventReceiver.order
         listenerRef.lazyAllowLoop = eventReceiver.allowLoop
+        listenerRef.lazySkipHistory = eventReceiver.skipHistory
 
         val listenerRefEvent =
             ListenerReferenceEvent(listenerRef) {
@@ -237,6 +250,7 @@ internal class TableEventProcessor {
         listenerRef.lazyName = eventReceiver.name
         listenerRef.lazyOrder = eventReceiver.order
         listenerRef.lazyAllowLoop = eventReceiver.allowLoop
+        listenerRef.lazySkipHistory = eventReceiver.skipHistory
 
         val listenerRefEvent =
             ListenerReferenceEvent(listenerRef) {
@@ -282,6 +296,7 @@ internal class TableEventProcessor {
         listenerRef.lazyName = eventReceiver.name
         listenerRef.lazyOrder = eventReceiver.order
         listenerRef.lazyAllowLoop = eventReceiver.allowLoop
+        listenerRef.lazySkipHistory = eventReceiver.skipHistory
 
         val listenerRefEvent =
             ListenerReferenceEvent(listenerRef) {
@@ -329,6 +344,7 @@ internal class TableEventProcessor {
         listenerRef.lazyName = eventReceiver.name
         listenerRef.lazyOrder = eventReceiver.order
         listenerRef.lazyAllowLoop = eventReceiver.allowLoop
+        listenerRef.lazySkipHistory = eventReceiver.skipHistory
 
         val listenerRefEvent =
             ListenerReferenceEvent(listenerRef) {
@@ -374,6 +390,7 @@ internal class TableEventProcessor {
         listenerRef.lazyName = eventReceiver.name
         listenerRef.lazyOrder = eventReceiver.order
         listenerRef.lazyAllowLoop = eventReceiver.allowLoop
+        listenerRef.lazySkipHistory = eventReceiver.skipHistory
 
         val listenerRefEvent =
             ListenerReferenceEvent(listenerRef) {
@@ -418,6 +435,7 @@ internal class TableEventProcessor {
         listenerRef.lazyName = eventReceiver.name
         listenerRef.lazyOrder = eventReceiver.order
         listenerRef.lazyAllowLoop = eventReceiver.allowLoop
+        listenerRef.lazySkipHistory = eventReceiver.skipHistory
 
         val refs = mutableListOf<TableListenerReference>()
         cells.sources.forEach {
