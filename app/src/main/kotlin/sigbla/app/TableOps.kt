@@ -1755,6 +1755,9 @@ fun move(rowToRowAction: RowToRowAction) {
                             columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
                                 val columnHeader = ccm.component1()
                                 getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (cell, index) ->
+                                    // TODO Need to deal with overflow/underflow at edge of tables here and below
+                                    //      It would currently wrap around but then impact whatever is there already..
+                                    //      Just remove rows that get pushed out? Better to throw an exception..
                                     val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
 
                                     val withoutMoved = ccm.component2().remove(index)

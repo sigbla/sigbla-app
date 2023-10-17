@@ -386,6 +386,10 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
     }
 }
 
+// TODO Think about including a RELATIVE_TO option:
+//      If I have a row relative to index 10, and I move row 10 to row 9, then my existing
+//      Row instance relative to index 10 would then point to the new location at row 9.
+//      The same would need to apply to other rows part of the cascading effect..
 enum class IndexRelation {
     BEFORE, AT_OR_BEFORE, AT, AT_OR_AFTER, AFTER
 }
