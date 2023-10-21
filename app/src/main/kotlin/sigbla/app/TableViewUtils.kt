@@ -18,6 +18,10 @@ fun staticResource(resource: String): suspend PipelineContext<*, ApplicationCall
     }
 }
 
+fun staticText(contentType: ContentType, text: String): suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
+    call.respondText(contentType = contentType, text = text)
+}
+
 internal val jsHandlers = Collections.newSetFromMap(Collections.synchronizedMap(WeakHashMap<suspend PipelineContext<*, ApplicationCall>.() -> Unit, Boolean>()))
 
 fun jsFile(file: File): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
@@ -34,6 +38,12 @@ fun jsResource(resource: String): suspend PipelineContext<*, ApplicationCall>.()
     return handler
 }
 
+fun js(resource: () -> String): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
+    val handler = staticText(ContentType.Text.JavaScript, resource())
+    jsHandlers.add(handler)
+    return handler
+}
+
 internal val cssHandlers = Collections.newSetFromMap(Collections.synchronizedMap(WeakHashMap<suspend PipelineContext<*, ApplicationCall>.() -> Unit, Boolean>()))
 
 fun cssFile(file: File): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
@@ -46,6 +56,12 @@ fun cssFile(file: File): suspend PipelineContext<*, ApplicationCall>.() -> Unit 
 fun cssResource(resource: String): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
     if (!resource.endsWith(".css")) throw InvalidValueException("File extension must be .css")
     val handler = staticResource(resource)
+    cssHandlers.add(handler)
+    return handler
+}
+
+fun css(resource: () -> String): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
+    val handler = staticText(ContentType.Text.CSS, resource())
     cssHandlers.add(handler)
     return handler
 }
