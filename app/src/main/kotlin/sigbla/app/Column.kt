@@ -174,9 +174,6 @@ abstract class Column internal constructor(
     //       Add would just insert a cell at first available location.
     //       Maybe that can be a plus operator function?
 
-    // TODO: Move these out (remove, rename, clear) like with on
-    abstract fun clear()
-
     operator fun rangeTo(other: Column): ColumnRange {
         return ColumnRange(this, other)
     }
@@ -297,17 +294,6 @@ class BaseColumn internal constructor(
 
             return old
         }
-    }
-
-    override fun clear() {
-        table.tableRef.updateAndGet {
-            it.copy(
-                columnCells = it.columnCells.put(this.header, PTreeMap()),
-                version = it.version + 1L
-            )
-        }
-
-        // TODO Event processor..
     }
 
     override fun iterator(): Iterator<Cell<*>> {
