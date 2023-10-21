@@ -309,7 +309,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
         val value = this.value
 
         // Rules:
-        // Null is less than everything else
+        // Null/Unit is less than everything else
         // Numbers are compared to each other
         // A non-number is greater than a number
         // Everything else compared as strings
@@ -318,9 +318,13 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
             // Cell case
             other is Cell<*> -> compareTo(other.value)
 
-            // Null cases
+            // Null cases (TODO value is never null?)
             other == null -> if (value == null) 0 else 1
             value == null -> -1
+
+            // Unit cases
+            other == Unit -> if (value == Unit) 0 else 1
+            value == Unit -> -1
 
             // Number case
             other is Number -> if (value is Number) {
