@@ -815,7 +815,14 @@ class Cells(sources: List<Iterable<Cell<*>>>): Iterable<Cell<*>> {
         }
     }
 
-    override fun iterator(): Iterator<Cell<*>> = sources.asSequence().flatten().iterator()
+    override fun iterator(): Iterator<Cell<*>> {
+        val ref = table.tableRef.get()
+        return sources.asSequence().flatten().mapNotNull {
+            val meta = ref.columns[it.column.header] ?: return@mapNotNull null
+            val column = BaseColumn(table, it.column.header, meta.columnOrder)
+            ref.columnCells[it.column.header]?.get(it.index)?.toCell(column, it.index)
+        }.iterator()
+    }
 }
 
 infix fun Iterable<Cell<*>>.or(source: Iterable<Cell<*>>): Cells {
