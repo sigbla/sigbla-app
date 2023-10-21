@@ -137,6 +137,7 @@ class RowRange(override val start: Row, override val endInclusive: Row) : Closed
         get() = start.table
 
     override fun iterator(): Iterator<Row> {
+        // TODO Revisit the below comment..
         // Note, a row range is fixed to the indexes used, so no need to worry about refs or prenatal
         return if (start.index <= endInclusive.index) {
             ((start.index)..(endInclusive.index))
