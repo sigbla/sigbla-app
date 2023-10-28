@@ -104,6 +104,7 @@ internal data class ViewMeta(
     val cellTopics: PSet<String>? = null
 )
 
+// TODO Consider if this shouldn't be a data class?
 internal data class TableViewRef(
     val defaultCellView: ViewMeta = ViewMeta(),
     val columnViews: PMap<ColumnHeader, ViewMeta> = PHashMap(),

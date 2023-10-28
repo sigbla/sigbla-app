@@ -772,6 +772,7 @@ class Cells(sources: List<Iterable<Cell<*>>>): Iterable<Cell<*>> {
             is Column -> listOf(it)
             is CellRange -> listOf(it)
             is Table -> listOf(it)
+            // TODO Probably doesn't make sense to have this, since table property doesn't support it?
             else -> it.toCollection(mutableListOf()) // make a copy
         }
     }
@@ -799,6 +800,7 @@ class Cells(sources: List<Iterable<Cell<*>>>): Iterable<Cell<*>> {
                     is Column -> listOf(iterable.table)
                     is CellRange -> listOf(iterable.table)
                     is Table -> listOf(iterable)
+                    // TODO Probably doesn't make sense to have this, since table property doesn't support it?
                     else -> iterable.map { it.table }.toSet()
                 }
             }
@@ -817,6 +819,7 @@ class Cells(sources: List<Iterable<Cell<*>>>): Iterable<Cell<*>> {
 
     override fun iterator(): Iterator<Cell<*>> {
         val ref = table.tableRef.get()
+        // TODO Each iterator should make use of the same reference..
         return sources.asSequence().flatten().mapNotNull {
             val meta = ref.columns[it.column.header] ?: return@mapNotNull null
             val column = BaseColumn(table, it.column.header, meta.columnOrder)

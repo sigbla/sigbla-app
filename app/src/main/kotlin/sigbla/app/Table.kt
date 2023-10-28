@@ -2,13 +2,13 @@ package sigbla.app
 
 import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.exceptions.InvalidTableException
+import sigbla.app.internals.RefHolder
 import sigbla.app.internals.Registry
 import sigbla.app.internals.TableEventProcessor
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
-import java.util.concurrent.atomic.AtomicReference
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 import com.github.andrewoma.dexx.collection.Map as PMap
 import com.github.andrewoma.dexx.collection.SortedMap as PSortedMap
@@ -26,7 +26,7 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     abstract val indexes: Sequence<Long>
 
-    internal abstract val tableRef: AtomicReference<TableRef>
+    internal abstract val tableRef: RefHolder<TableRef>
 
     internal abstract val eventProcessor: TableEventProcessor
 
@@ -938,6 +938,8 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
         }
     }
 
+    abstract operator fun <R> invoke(batch: Table.() -> R): R
+
     internal abstract fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableRef = tableRef.get()!!): Table
 
     override fun toString(): String {
@@ -967,6 +969,7 @@ internal data class ColumnMeta(
     val prenatal: Boolean
 )
 
+// TODO Consider if this shouldn't be a data class?
 internal data class TableRef(
     val columns: PMap<ColumnHeader, ColumnMeta> = PHashMap(),
     val columnCells: PMap<ColumnHeader, PSortedMap<Long, CellValue<*>>> = PHashMap(),
@@ -998,7 +1001,7 @@ class BaseTable internal constructor(
     name: String?,
     source: Table?,
     onRegistry: Boolean = true,
-    override val tableRef: AtomicReference<TableRef> = AtomicReference(TableRef()),
+    override val tableRef: RefHolder<TableRef> = RefHolder(TableRef()),
     override val eventProcessor: TableEventProcessor = TableEventProcessor()
 ) : Table(name, source) {
     init {
@@ -1035,7 +1038,26 @@ class BaseTable internal constructor(
 
     override fun contains(header: ColumnHeader): Boolean = tableRef.get().columns[header]?.prenatal == false
 
-    override fun makeClone(name: String?, onRegistry: Boolean, ref: TableRef): Table = BaseTable(name, this, onRegistry, AtomicReference(ref))
+    override operator fun <R> invoke(batch: Table.() -> R): R {
+        synchronized(eventProcessor) {
+            if (eventProcessor.pauseEvents()) {
+                try {
+                    tableRef.useLocal()
+                    val r = this.batch()
+                    eventProcessor.publish(true)
+                    tableRef.commitLocal()
+                    return r
+                } finally {
+                    eventProcessor.clearBuffer()
+                    tableRef.clearLocal()
+                }
+            } else {
+                return this.batch()
+            }
+        }
+    }
+
+    override fun makeClone(name: String?, onRegistry: Boolean, ref: TableRef): Table = BaseTable(name, this, onRegistry, RefHolder(ref))
 
     companion object
 }

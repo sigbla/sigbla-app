@@ -7,6 +7,8 @@ import org.junit.After
 import sigbla.app.exceptions.InvalidTableException
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.util.concurrent.atomic.AtomicReference
+import kotlin.concurrent.thread
 import kotlin.test.assertFailsWith
 
 class TableTest {
@@ -905,5 +907,188 @@ class TableTest {
         assertNotEquals(t1[1], t1[2])
         assertNotEquals(t1[1], t2[1])
         assertEquals(t1[1].index, t2[1].index)
+    }
+
+    @Test
+    fun `batching commit`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        val t2 = t1 {
+            t1["A", 1] = "A1"
+            t1["A", 2] = "A2"
+            t1["B", 1] = "B1"
+            t1["B", 2] = "B2"
+
+            return@t1 clone(t1)
+        }
+
+        assertEquals("A1", t1["A", 1].value)
+        assertEquals("A2", t1["A", 2].value)
+        assertEquals("B1", t1["B", 1].value)
+        assertEquals("B2", t1["B", 2].value)
+
+        val it1 = t1.iterator()
+        val it2 = t2.iterator()
+
+        assertTrue(it1.hasNext())
+        assertTrue(it2.hasNext())
+
+        while (it1.hasNext() && it2.hasNext()) {
+            assertEquals(it1.next(), it2.next())
+        }
+
+        assertFalse(it1.hasNext())
+        assertFalse(it2.hasNext())
+    }
+
+    @Test
+    fun `nested batching`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        var count = 0
+
+        val t2 = t1 {
+            on(this) events {
+                count += count()
+            }
+
+            this {
+                assertTrue(this === this@t1)
+                assertTrue(this === t1)
+                assertTrue(this == this@t1)
+                assertTrue(this == t1)
+
+                t1["A", 1] = "A1"
+                t1["A", 2] = "A2"
+                t1["B", 1] = "B1"
+                t1["B", 2] = "B2"
+            }
+
+            assertEquals(0, count)
+
+            return@t1 clone(t1)
+        }
+
+        assertEquals(4, count)
+
+        assertEquals("A1", t1["A", 1].value)
+        assertEquals("A2", t1["A", 2].value)
+        assertEquals("B1", t1["B", 1].value)
+        assertEquals("B2", t1["B", 2].value)
+
+        val it1 = t1.iterator()
+        val it2 = t2.iterator()
+
+        assertTrue(it1.hasNext())
+        assertTrue(it2.hasNext())
+
+        while (it1.hasNext() && it2.hasNext()) {
+            assertEquals(it1.next(), it2.next())
+        }
+
+        assertFalse(it1.hasNext())
+        assertFalse(it2.hasNext())
+    }
+
+    @Test
+    fun `batching abort`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        var t2: Table? = null
+
+        assertFailsWith(RuntimeException::class) {
+            t1 {
+                t1["A", 1] = "A1"
+                t1["A", 2] = "A2"
+                t1["B", 1] = "B1"
+                t1["B", 2] = "B2"
+
+                t2 = clone(t1)
+
+                throw RuntimeException()
+            }
+        }
+
+        assertNotNull(t2)
+        assertFalse(t1.iterator().hasNext())
+
+        assertEquals("A1", t2!!["A", 1].value)
+        assertEquals("A2", t2!!["A", 2].value)
+        assertEquals("B1", t2!!["B", 1].value)
+        assertEquals("B2", t2!!["B", 2].value)
+    }
+
+    @Test
+    fun `batching threads`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        t1["A", 1] = "A1"
+        t1["A", 2] = "A2"
+        t1["B", 1] = "B1"
+        t1["B", 2] = "B2"
+
+        val flag1 = AtomicReference(true)
+        val flag2 = AtomicReference(true)
+        val flag3 = AtomicReference(true)
+        val flag4 = AtomicReference(true)
+        val flag5 = AtomicReference(true)
+
+        val thread1 = thread {
+            t1 {
+                flag1.set(false)
+                while(flag2.get()) Thread.sleep(1)
+
+                assertEquals("A1", t1["A", 1].value)
+                assertEquals("A2", this["A", 2].value)
+                assertEquals("B1", t1["B", 1].value)
+                assertEquals("B2", this["B", 2].value)
+
+                this {
+                    this["A", 1] = "A1 T"
+                    t1["A", 2] = "A2 T"
+                    this["B", 1] = "B1 T"
+                    t1["B", 2] = "B2 T"
+                }
+
+                flag3.set(false)
+
+                while(flag4.get()) Thread.sleep(1)
+            }
+        }
+
+        while (flag1.get()) Thread.sleep(1)
+
+        val thread2 = thread {
+            t1 {
+                assertEquals("A1 T", t1["A", 1].value)
+                assertEquals("A2 T", t1["A", 2].value)
+                assertEquals("B1 T", t1["B", 1].value)
+                assertEquals("B2 T", t1["B", 2].value)
+
+                flag5.set(false)
+            }
+        }
+
+        Thread.sleep(100)
+
+        flag2.set(false)
+        while (flag3.get()) Thread.sleep(1)
+
+        assertEquals("A1", t1["A", 1].value)
+        assertEquals("A2", t1["A", 2].value)
+        assertEquals("B1", t1["B", 1].value)
+        assertEquals("B2", t1["B", 2].value)
+
+        assertTrue(flag5.get())
+
+        flag4.set(false)
+        thread1.join()
+        thread2.join()
+
+        assertFalse(flag5.get())
+
+        assertEquals("A1 T", t1["A", 1].value)
+        assertEquals("A2 T", t1["A", 2].value)
+        assertEquals("B1 T", t1["B", 1].value)
+        assertEquals("B2 T", t1["B", 2].value)
     }
 }

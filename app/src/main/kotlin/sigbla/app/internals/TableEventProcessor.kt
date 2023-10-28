@@ -8,6 +8,7 @@ import java.util.*
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.ConcurrentSkipListMap
 import java.util.concurrent.atomic.AtomicLong
+import kotlin.collections.LinkedHashMap
 
 internal class TableEventProcessor {
     private class ListenerReferenceEvent<R>(
@@ -507,6 +508,18 @@ internal class TableEventProcessor {
                 cellListeners.size > 0
     }
 
+    @Synchronized
+    internal fun pauseEvents(): Boolean {
+        if (eventBuffer.get() != null) return false
+        eventBuffer.set(mutableListOf())
+        return true
+    }
+
+    @Synchronized
+    internal fun clearBuffer() {
+        eventBuffer.set(null)
+    }
+
     // TODO Look at changing cells and buffers to use seqs
     @Synchronized
     internal fun publish(cells: List<TableListenerEvent<Any, Any>>) {
@@ -523,6 +536,36 @@ internal class TableEventProcessor {
         }
 
         eventBuffer.set(cells.toMutableList())
+
+        publish(false)
+    }
+
+    @Synchronized
+    internal fun publish(rebase: Boolean) {
+        if (rebase) {
+            eventBuffer.get()?.apply {
+                if (this.isEmpty()) return@apply
+
+                val oldTable = this.first().oldValue.table
+                val newTable = this.last().newValue.table
+
+                val locations = LinkedHashMap<Pair<ColumnHeader, Long>, Boolean>()
+
+                this.forEach {
+                    val location = it.newValue.column.header to it.newValue.index
+                    if (locations[location] == true) locations.remove(location)
+                    locations[location] = true
+                }
+
+                val updated = mutableListOf<TableListenerEvent<Any, Any>>()
+
+                locations.keys.forEach {
+                    updated.add(TableListenerEvent(oldTable[it.first, it.second], newTable[it.first, it.second]) as TableListenerEvent<Any, Any>)
+                }
+
+                eventBuffer.set(updated)
+            }
+        }
 
         try {
             while (true) {

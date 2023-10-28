@@ -51,6 +51,7 @@ class CellsListenerTest {
 
         assertEquals(4, eventCount)
     }
+
     @Test
     fun `subscribe and unsubscribe 2`() {
         val t1 = Table[object {}.javaClass.enclosingMethod.name]

@@ -15,7 +15,11 @@ abstract class TableListenerReference {
     }
 }
 
-data class TableListenerEvent<O, N>(val oldValue: Cell<O>, val newValue: Cell<N>)
+class TableListenerEvent<O, N>(val oldValue: Cell<O>, val newValue: Cell<N>) {
+    override fun toString(): String {
+        return "TableListenerEvent(oldValue=$oldValue, newValue=$newValue)"
+    }
+}
 
 class TableEventReceiver<S, O, N>(
     val source: S,

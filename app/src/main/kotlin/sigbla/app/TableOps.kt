@@ -2017,11 +2017,11 @@ fun remove(column: Column) = move(column to Table[null])
 fun remove(row: Row) = move(row to Table[null][0])
 
 // TODO These can be more efficient, especially if there are no listeners
-fun clear(table: Table): Unit = table.forEach { clear(it) }
+fun clear(table: Table): Unit = table { table.forEach { clear(it) } }
 
-fun clear(column: Column): Unit = column.forEach { clear(it) }
+fun clear(column: Column): Unit = column.table { column.forEach { clear(it) } }
 
-fun clear(row: Row): Unit = row.forEach { clear(it) }
+fun clear(row: Row): Unit = row.table { row.forEach { clear(it) } }
 
 fun clear(cell: Cell<*>) = cell { null }
 
