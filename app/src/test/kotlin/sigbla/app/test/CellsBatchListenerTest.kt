@@ -433,13 +433,17 @@ class CellsBatchListenerTest {
             }
         }
 
-        var expectedT2EventCount = 0
+        var expectedT2EventCount = expectedT1EventCount
 
         on(cells2) {
             events {
                 t2EventCount += count()
             }
         }
+
+        // Testing event separation between t1/t2
+        t1["A", 1] = t1["A", 1]
+        expectedT1EventCount++
 
         t1 {
             t2 {

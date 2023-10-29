@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicLong
 import kotlin.collections.LinkedHashMap
 
 internal class TableEventProcessor {
+    private var eventBuffer: MutableList<TableListenerEvent<Any, Any>>? = null
+
     private class ListenerReferenceEvent<R>(
         val listenerReference: R,
         val listenerEvent: (event: Sequence<TableListenerEvent<Any, Any>>) -> Unit
@@ -510,20 +512,20 @@ internal class TableEventProcessor {
 
     @Synchronized
     internal fun pauseEvents(): Boolean {
-        if (eventBuffer.get() != null) return false
-        eventBuffer.set(mutableListOf())
+        if (eventBuffer != null) return false
+        eventBuffer = mutableListOf()
         return true
     }
 
     @Synchronized
     internal fun clearBuffer() {
-        eventBuffer.set(null)
+        eventBuffer = null
     }
 
     // TODO Look at changing cells and buffers to use seqs
     @Synchronized
     internal fun publish(cells: List<TableListenerEvent<Any, Any>>) {
-        val buffer = eventBuffer.get()
+        val buffer = eventBuffer
 
         if (buffer != null) {
             buffer.addAll(cells)
@@ -535,7 +537,7 @@ internal class TableEventProcessor {
             return
         }
 
-        eventBuffer.set(cells.toMutableList())
+        eventBuffer = cells.toMutableList()
 
         publish(false)
     }
@@ -543,7 +545,7 @@ internal class TableEventProcessor {
     @Synchronized
     internal fun publish(rebase: Boolean) {
         if (rebase) {
-            eventBuffer.get()?.apply {
+            eventBuffer?.apply {
                 if (this.isEmpty()) return@apply
 
                 val oldTable = this.first().oldValue.table
@@ -563,16 +565,16 @@ internal class TableEventProcessor {
                     updated.add(TableListenerEvent(oldTable[it.first, it.second], newTable[it.first, it.second]) as TableListenerEvent<Any, Any>)
                 }
 
-                eventBuffer.set(updated)
+                eventBuffer = updated
             }
         }
 
         try {
             while (true) {
-                val batch = Collections.unmodifiableList(eventBuffer.get() ?: break)
+                val batch = Collections.unmodifiableList(eventBuffer ?: break)
                 if (batch.isEmpty()) break
 
-                eventBuffer.set(mutableListOf())
+                eventBuffer = mutableListOf()
 
                 tableListeners
                     .values
@@ -653,7 +655,7 @@ internal class TableEventProcessor {
                     }
             }
         } finally {
-            eventBuffer.set(null)
+            eventBuffer = null
             activeListener.remove()
             activeListeners.remove()
         }
@@ -675,7 +677,6 @@ internal class TableEventProcessor {
 
     companion object {
         private val idGenerator = AtomicLong()
-        private val eventBuffer = ThreadLocal<MutableList<TableListenerEvent<Any, Any>>?>()
         private val activeListener = ThreadLocal<TableListenerReference?>()
         private val activeListeners = ThreadLocal<MutableSet<TableListenerReference>?>()
     }
