@@ -1008,6 +1008,7 @@ class DerivedCellView internal constructor(
         get() = columnView[index]
 
     // Note: This is assigned on init to preserve the derived nature of the class
+    // TODO: This should use a ref to ensure snapshot across multiple derived cell views
     val cell: Cell<*>? = tableView[Table]?.let { it[columnView.columnHeader][index] }
 
     val cellClasses: CellClasses<DerivedCellView> by lazy {
@@ -1031,7 +1032,11 @@ class DerivedCellView internal constructor(
         return listOf(derivedCellView).iterator()
     }
 
-    // TODO toString, hashCode, equals
+    override fun toString(): String {
+        return "DerivedCellView(columnView=$columnView, index=$index, cellHeight=$cellHeight, cellWidth=$cellWidth, tableView=$tableView, cellView=$cellView, cell=$cell, cellClasses=$cellClasses, cellTopics=$cellTopics)"
+    }
+
+    // TODO hashCode, equals
 }
 
 class ColumnView internal constructor(
