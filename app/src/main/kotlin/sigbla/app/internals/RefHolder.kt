@@ -31,6 +31,11 @@ internal class RefHolder<V>(@Volatile private var ref: V) {
         // We assume this is synchronized externally
         val prev = get()
         val next = updateFunction(prev)
+
+        // Dev testing
+        //if (prev is sigbla.app.TableRef && next is sigbla.app.TableRef && prev.version >= next.version) throw sigbla.app.exceptions.SigblaAppException()
+        // TODO Consider if we want some kind of testing mode for the above..?
+
         set(next)
         return Pair(prev, next)
     }

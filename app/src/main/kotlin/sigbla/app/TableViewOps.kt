@@ -2,7 +2,6 @@ package sigbla.app
 
 import sigbla.app.internals.SigblaBackend
 import sigbla.app.internals.load1
-import sigbla.app.internals.refAction
 import sigbla.app.internals.save1
 import java.io.File
 import kotlin.reflect.KClass

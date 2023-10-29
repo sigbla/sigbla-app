@@ -4,7 +4,6 @@ import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.exceptions.InvalidTableException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.load1
-import sigbla.app.internals.refAction
 import sigbla.app.internals.save1
 import java.io.File
 import java.util.*
