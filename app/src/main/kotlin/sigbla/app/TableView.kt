@@ -624,7 +624,14 @@ class TableView internal constructor(
 
     internal fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableViewRef = tableViewRef.get()) = TableView(name, onRegistry, RefHolder(ref))
 
-    // TODO toString, hashCode, equals
+    override fun toString(): String {
+        return "TableView[$name]"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        // Implemented to ensure expected equality check to always just be a reference compare, that's what we want
+        return this === other
+    }
 
     companion object {
         operator fun get(name: String?): TableView = TableView(name)
