@@ -23,34 +23,26 @@ fun main() {
         }
     }
 
-    /*
-    tableView[DEFAULT_COLUMN_VIEW] = {
-        width = 10
+    tableView {
+        tableView[CellWidth] = 10
+        tableView[CellHeight] = 10
     }
-    tableView[DEFAULT_ROW_VIEW] = {
-        height = 10
-    }
-     */
-    /*
-    tableView[TableView] = {
-        cellWidth = 10
-        cellHeight = 10
-    }
-     */
-    tableView[CellWidth] = 10
-    tableView[CellHeight] = 10
 
     show(tableView)
     Thread.sleep(15000)
 
     while (true) {
-        cell(
-            ThreadLocalRandom.current().nextInt(0, 100),
-            ThreadLocalRandom.current().nextInt(0, 100),
-            ThreadLocalRandom.current().nextBoolean()
-        )
+        table {
+            for (i in 1..10) {
+                cell(
+                    ThreadLocalRandom.current().nextInt(0, 100),
+                    ThreadLocalRandom.current().nextInt(0, 100),
+                    ThreadLocalRandom.current().nextBoolean()
+                )
+            }
+        }
 
-        Thread.sleep(100)
+        Thread.sleep(1000)
     }
 
     println("END")

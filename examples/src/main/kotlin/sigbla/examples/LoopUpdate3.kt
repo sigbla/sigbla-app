@@ -28,22 +28,10 @@ fun main() {
     val tableView = TableView[table]
     show(tableView)
 
-    /*
-    tableView[DEFAULT_COLUMN_VIEW] = {
-        width = 10
+    tableView {
+        tableView[CellWidth] = 10
+        tableView[CellHeight] = 10
     }
-    tableView[DEFAULT_ROW_VIEW] = {
-        height = 10
-    }
-     */
-    /*
-    tableView[TableView] = {
-        cellWidth = 10
-        cellHeight = 10
-    }
-     */
-    tableView[CellWidth] = 10
-    tableView[CellHeight] = 10
 
     Thread.sleep(15000)
 
