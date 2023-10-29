@@ -7,8 +7,11 @@ import java.util.*
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.ConcurrentSkipListMap
 import java.util.concurrent.atomic.AtomicLong
+import kotlin.reflect.KClass
 
 internal class TableViewEventProcessor {
+    private var eventBuffer: MutableList<TableViewListenerEvent<Any>>? = null
+
     private class ListenerReferenceEvent<R>(
         val listenerReference: R,
         val listenerEvent: (event: Sequence<TableViewListenerEvent<Any>>) -> Unit
@@ -425,10 +428,22 @@ internal class TableViewEventProcessor {
                 cellViewListeners.size > 0
     }
 
+    @Synchronized
+    internal fun pauseEvents(): Boolean {
+        if (eventBuffer != null) return false
+        eventBuffer = mutableListOf()
+        return true
+    }
+
+    @Synchronized
+    internal fun clearBuffer() {
+        eventBuffer = null
+    }
+
     // TODO Look at changing cells and buffers to use seqs
     @Synchronized
     internal fun publish(views: List<TableViewListenerEvent<Any>>) {
-        val buffer = eventBuffer.get()
+        val buffer = eventBuffer
 
         if (buffer != null) {
             buffer.addAll(views)
@@ -440,14 +455,44 @@ internal class TableViewEventProcessor {
             return
         }
 
-        eventBuffer.set(views.toMutableList())
+        eventBuffer = views.toMutableList()
+
+        publish(false)
+    }
+
+    @Synchronized
+    internal fun publish(rebase: Boolean) {
+        if (rebase) {
+            eventBuffer?.apply {
+                if (this.isEmpty()) return@apply
+
+                val oldView = tableViewFromViewRelated(this.first().oldValue)
+                val newView = tableViewFromViewRelated(this.last().newValue)
+
+                val locations = LinkedHashMap<Triple<ColumnHeader?, Long?, KClass<*>>, Any>()
+
+                this.forEach {
+                    val location = Triple(columnViewFromViewRelated(it.newValue)?.columnHeader, indexFromViewRelated(it.newValue), it.newValue::class)
+                    if (locations[location] != null) locations.remove(location)
+                    locations[location] = it.newValue
+                }
+
+                val updated = mutableListOf<TableViewListenerEvent<Any>>()
+
+                locations.values.forEach {
+                    updated.add(TableViewListenerEvent(relatedFromViewRelated(oldView, it), relatedFromViewRelated(newView, it)) as TableViewListenerEvent<Any>)
+                }
+
+                eventBuffer = updated
+            }
+        }
 
         try {
             while (true) {
-                val batch = Collections.unmodifiableList(eventBuffer.get() ?: break)
+                val batch = Collections.unmodifiableList(eventBuffer ?: break)
                 if (batch.isEmpty()) break
 
-                eventBuffer.set(mutableListOf())
+                eventBuffer = mutableListOf()
 
                 tableViewListeners
                     .values
@@ -548,7 +593,7 @@ internal class TableViewEventProcessor {
                     }
             }
         } finally {
-            eventBuffer.set(null)
+            eventBuffer = null
             activeListener.remove()
             activeListeners.remove()
         }
@@ -571,7 +616,6 @@ internal class TableViewEventProcessor {
 
     companion object {
         private val idGenerator = AtomicLong()
-        private val eventBuffer = ThreadLocal<MutableList<TableViewListenerEvent<Any>>?>()
         private val activeListener = ThreadLocal<TableViewListenerReference?>()
         private val activeListeners = ThreadLocal<MutableSet<TableViewListenerReference>?>()
     }

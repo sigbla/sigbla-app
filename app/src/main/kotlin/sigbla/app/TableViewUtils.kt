@@ -111,6 +111,43 @@ fun indexFromViewRelated(value: Any?): Long? = when (value) {
     else -> throw InvalidValueException("Unsupported type: ${value?.javaClass}")
 }
 
+fun relatedFromViewRelated(tableView: TableView, value: Any): Any = when (value) {
+    is TableView -> tableView
+    is ColumnView -> tableView[value]
+    is RowView -> tableView[value]
+    is CellView -> tableView[value]
+    is DerivedCellView -> tableView[value]
+    is CellHeight<*, *> -> when (val source = value.source) {
+        is TableView -> tableView[CellHeight]
+        is RowView -> tableView[source][CellHeight]
+        is CellView -> tableView[source][CellHeight]
+        else -> throw InvalidValueException("Unsupported source: ${source?.javaClass}")
+    }
+    is CellWidth<*, *> -> when (val source = value.source) {
+        is TableView -> tableView[CellWidth]
+        is ColumnView -> tableView[source][CellWidth]
+        is CellView -> tableView[source][CellWidth]
+        else -> throw InvalidValueException("Unsupported source: ${source?.javaClass}")
+    }
+    is CellClasses<*> -> when (val source = value.source) {
+        is TableView -> tableView[CellClasses]
+        is ColumnView -> tableView[source][CellClasses]
+        is RowView -> tableView[source][CellClasses]
+        is CellView -> tableView[source][CellClasses]
+        else -> throw InvalidValueException("Unsupported source: ${source?.javaClass}")
+    }
+    is CellTopics<*> -> when (val source = value.source) {
+        is TableView -> tableView[CellTopics]
+        is ColumnView -> tableView[source][CellTopics]
+        is RowView -> tableView[source][CellTopics]
+        is CellView -> tableView[source][CellTopics]
+        else -> throw InvalidValueException("Unsupported source: ${source?.javaClass}")
+    }
+    is CellTransformer<*> -> tableView[value.source][CellTransformer]
+    is Resources -> tableView[Resources]
+    else -> throw InvalidValueException("Unknown type: ${value?.javaClass}")
+}
+
 internal fun refVersionFromViewRelated(value: Any?): Long = when (value) {
     is TableView -> value.tableViewRef.get().version
     is ColumnView -> value.tableView.tableViewRef.get().version

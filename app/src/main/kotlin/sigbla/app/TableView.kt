@@ -7,15 +7,14 @@ import sigbla.app.exceptions.InvalidCellWidthException
 import sigbla.app.exceptions.InvalidValueException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.TableViewEventProcessor
-import sigbla.app.internals.refAction
 import kotlin.collections.LinkedHashMap
 import io.ktor.server.application.*
 import io.ktor.util.pipeline.*
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
-import java.util.concurrent.atomic.AtomicReference
 import com.github.andrewoma.dexx.kollection.toImmutableSet
 import com.github.andrewoma.dexx.kollection.immutableSetOf
+import sigbla.app.internals.RefHolder
 import com.github.andrewoma.dexx.collection.Map as PMap
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 import com.github.andrewoma.dexx.kollection.ImmutableSet as PSet
@@ -23,28 +22,7 @@ import com.github.andrewoma.dexx.kollection.ImmutableSet as PSet
 // A table view is associated with one table, and holds metadata related on how to view a table.
 // This includes among other things column widths, row heights, individual cell dimensions, styling, etc..
 
-// TODO Introduce a concept of a view transformer. As with views, this can be on column, row or cell.
-//      Some priority ordering might be needed between these, but the transformer would take a value
-//      and convert this into another value. This only affects the view, and is done on demand (i.e.,
-//      when the cell is being rendered), and is used to perform things like formatting etc..
-//      .
-//      Look at having this in the form of view["column"] = { .. } where this is given a cell and
-//      expected to return a cell.
-//      .
-//      Should also allow for view[row number] = { .. } and view[headers.., row] = { .. }, and
-//      view[cell] = { .. }, etc..
-//      .
-//      Also need a way to obtain a transformed cell, maybe with view[cell] returning cell?
-//      Probably should return a special type of cell associated with the view, as this would
-//      also allow for things like move(view[..] before|after|to view[..]) type ops.. like CellView
-//      But, this should also work for RowView, ColumnView, etc.. maybe have a TableViewOps function
-//      called materialize, which takes these and returns a table/column/row/cell transformed
-//      according to the view transformations, ex: materialize(view) returns table or
-//      materialize(view["column"]) returns a column, etc...
-//      .
-//      Potentially reuse DestinationOsmosis on a table clone. That way we can make any changes we
-//      want to the clone, which impacts the view only.. On a change a new table clone is used..
-//      (Maybe have ViewBuilder extend DestinationOsmosis? - not a bad idea as it allows h/w to be adjusted too)
+// TODO Add transformers outside just CellView?
 
 // TODO Event model:
 //      .
@@ -91,6 +69,7 @@ import com.github.andrewoma.dexx.kollection.ImmutableSet as PSet
 //      }
 //      This would allow for views with no clients to be cleaned up..
 //      Might want on<NO_CLIENT>(tableView) { .. } rather than INACTIVE?
+//      Allow for setting the time out value.. on<NO_CLIENT>(tableView) { timeout = .. }
 
 private val EMPTY_IMMUTABLE_STRING_SET = immutableSetOf<String>()
 
@@ -122,18 +101,16 @@ internal data class TableViewRef(
 class TableView internal constructor(
     val name: String?,
     onRegistry: Boolean = true,
-    internal val tableViewRef: AtomicReference<TableViewRef>,
+    internal val tableViewRef: RefHolder<TableViewRef>,
     internal val eventProcessor: TableViewEventProcessor = TableViewEventProcessor()
 ) : Iterable<DerivedCellView> {
-    internal constructor(name: String?, table: Table?) : this(name, tableViewRef = AtomicReference(TableViewRef(table = table)))
+    internal constructor(name: String?, table: Table?) : this(name, tableViewRef = RefHolder(TableViewRef(table = table)))
     internal constructor(table: Table) : this(table.name, table)
     internal constructor(name: String?) : this(name, if (name == null) null else Registry.getTable(name))
 
     init {
         if (name != null && onRegistry) Registry.setView(name, this)
     }
-
-    // TODO? val materializedTable (and materializedColumn/Row elsewhere?)
 
     val columnViews: Sequence<ColumnView>
         get() = tableViewRef.get()
@@ -625,7 +602,26 @@ class TableView internal constructor(
         }
     }
 
-    internal fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableViewRef = tableViewRef.get()) = TableView(name, onRegistry, AtomicReference(ref))
+    operator fun <R> invoke(batch: TableView.() -> R): R {
+        synchronized(eventProcessor) {
+            if (eventProcessor.pauseEvents()) {
+                try {
+                    tableViewRef.useLocal()
+                    val r = this.batch()
+                    eventProcessor.publish(true)
+                    tableViewRef.commitLocal()
+                    return r
+                } finally {
+                    eventProcessor.clearBuffer()
+                    tableViewRef.clearLocal()
+                }
+            } else {
+                return this.batch()
+            }
+        }
+    }
+
+    internal fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableViewRef = tableViewRef.get()) = TableView(name, onRegistry, RefHolder(ref))
 
     // TODO toString, hashCode, equals
 
@@ -649,13 +645,6 @@ class TableView internal constructor(
         // TODO Add a way to control the port used, allowing for TableView[PORT] = port number. This can only be defined before showing a table
     }
 }
-
-/* TODO Introduce a way to make atomic updates across several properties, with
-        view = {
-            it[..] = ..
-            it[..] = ..
-        }
-*/
 
 class CellView(
     val columnView: ColumnView,
