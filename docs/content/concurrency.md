@@ -67,6 +67,9 @@ The above code is valid and safe, with one thread waiting for the other. From th
 just before thread 2, event processing taking place before thread 1 ends, with event processing continuing thereafter
 for thread 2.
 
+Note that with multiple threads, you can't always guarantee that thread 1 will start before thread 2, but in either
+case, one writing thread will need to wait for the other.
+
 ## Reading table data
 
 We've already covered that cells are immutable. At no point will the content of a particular cell instance change,
@@ -157,3 +160,73 @@ haven't been pushed back to main memory.
 
 There is no synchronization between tables. Writing to one table does not block other threads from writing to other
 tables. If this is something you need in your code you will need to manage this yourself.
+
+## Synchronizing between readers and writers
+
+We've already said that reader threads are not synchronized, but cells are immutable and iterators provide stable
+snapshots. If you have writer threads making multiple updates, and you need your reader threads to wait for these
+updates, you have a couple of options to manage this.
+
+In the next chapter we'll cover what's known as batching. But before getting to that we'll look at how you can manually
+synchronize writer and reader threads.
+
+Below is an example of a reader thread only getting the first update from a writer thread, using `Thread.sleep` to make
+the example obvious:
+
+``` kotlin
+val table = Table[null]
+
+on(table, allowLoop = true) events {
+    Thread.sleep(TimeUnit.SECONDS.toMillis(2))
+    if (table["A", 1].value == "First value")
+        table["A", 1] = "Second value"
+}
+
+thread {
+    table["A", 1] = "First value"
+}
+
+Thread.sleep(TimeUnit.SECONDS.toMillis(1))
+
+println(table["A", 1])
+
+// Output:
+// First value
+```
+
+You'll notice that when we read from the table, we get "First value" as the output. This then misses out on the update
+coming from the listener a little later.
+
+We could manage this by having the reader thread wait for the writer thread to finish:
+
+``` kotlin
+val table = Table[null]
+
+on(table, allowLoop = true) events {
+    Thread.sleep(TimeUnit.SECONDS.toMillis(2))
+    if (table["A", 1].value == "First value")
+        table["A", 1] = "Second value"
+}
+
+thread {
+    synchronized(table) {
+        table["A", 1] = "First value"
+    }
+}
+
+Thread.sleep(TimeUnit.SECONDS.toMillis(1))
+
+synchronized(table) {
+    println(table["A", 1])
+}
+
+// Output:
+// Second value
+```
+
+The table reference is a good candidate to synchronize on as we always have the same table point to the same table
+reference. You should not synchronize on columns, rows, or cells, as these often get recreated, meaning they might not
+point to the same reference while being otherwise equal.
+
+The same applies for table views, where the table view reference is a good candidate to synchronize on, while other
+view related instances should be avoided as they are frequently recreated.
