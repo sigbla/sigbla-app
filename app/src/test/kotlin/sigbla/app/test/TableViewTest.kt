@@ -44,6 +44,15 @@ class TableViewTest {
     }
 
     @Test
+    fun `define port`() {
+        TableView[PORT] = 8088
+        assertEquals(8088, TableView[PORT])
+
+        TableView[PORT] = 9090
+        assertEquals(8088, TableView[PORT])
+    }
+
+    @Test
     fun `table view params`() {
         val t1 = Table[object {}.javaClass.enclosingMethod.name]
         val tv1 = TableView[t1]

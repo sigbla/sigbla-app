@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicLong
 import com.github.andrewoma.dexx.kollection.toImmutableSet
 import com.github.andrewoma.dexx.kollection.immutableSetOf
 import sigbla.app.internals.RefHolder
+import java.util.concurrent.ThreadLocalRandom
 import com.github.andrewoma.dexx.collection.Map as PMap
 import com.github.andrewoma.dexx.collection.HashMap as PHashMap
 import com.github.andrewoma.dexx.kollection.ImmutableSet as PSet
@@ -642,8 +643,33 @@ class TableView internal constructor(
 
         // TODO Consider a operator get/set(resources: Resources, ..) on this level as well to allow for global resources
 
-        // TODO Add a way to control the port used, allowing for TableView[PORT] = port number. This can only be defined before showing a table
+        operator fun get(port: PORT): Int = PORT.port
+
+        operator fun set(_port: PORT, port: Int) {
+            PORT.port = port
+        }
     }
+}
+
+object PORT {
+    private var _port: Int? = null
+
+    init {
+        val envPort = System.getenv("SIGBLA_PORT")
+        (envPort ?: "").toIntOrNull()?.apply {
+            _port = this
+        }
+    }
+
+    internal var port: Int
+        get() {
+            if (_port == null) _port = ThreadLocalRandom.current().nextInt(1024, 65535)
+            return _port!!
+        }
+        set(port) {
+            if (_port != null) return
+            this._port = port
+        }
 }
 
 class CellView(

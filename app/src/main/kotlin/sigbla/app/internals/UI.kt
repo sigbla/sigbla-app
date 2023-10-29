@@ -52,7 +52,7 @@ internal object SigblaBackend {
 
     private fun start(n: Int): Pair<ApplicationEngine, Int> {
         return try {
-            val port = ThreadLocalRandom.current().nextInt(1024, 65535)
+            val port = TableView[PORT]
             val engine = embeddedServer(Netty, port) {
                 install(WebSockets)
 
