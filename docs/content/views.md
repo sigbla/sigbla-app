@@ -401,15 +401,15 @@ By default, when doing `show(tableView)`, Sigbla will pick a random port. It's a
 assumption that you might run multiple Sigbla apps at the same time, and a random port helps avoid port collisions.
 
 However, you might want to control the port used yourself and there's two ways to do that. You can, as shown in the
-example, do `TableView[PORT] = <port number>`. Or, you can define an environment variable called `SIGBLA_PORT`.
+example, do `TableView[Port] = <port number>`. Or, you can define an environment variable called `SIGBLA_PORT`.
 
 The port can only be set once, with any subsequent attempts ignored. If the environment variable is defined, this will
 take precedence over any port set by the source code. 
 
 ```
-TableView[PORT] = 8080
+TableView[Port] = 8080
 
-println("Using port ${TableView[PORT]}")
+println("Using port ${TableView[Port]}")
 
 val table = Table["Table"]
 
