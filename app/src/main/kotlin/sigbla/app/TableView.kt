@@ -650,15 +650,15 @@ class TableView internal constructor(
 
         // TODO Consider a operator get/set(resources: Resources, ..) on this level as well to allow for global resources
 
-        operator fun get(port: PORT): Int = PORT.port
+        operator fun get(port: Port): Int = Port.port
 
-        operator fun set(_port: PORT, port: Int) {
-            PORT.port = port
+        operator fun set(_port: Port, port: Int) {
+            Port.port = port
         }
     }
 }
 
-object PORT {
+object Port {
     private var _port: Int? = null
 
     init {

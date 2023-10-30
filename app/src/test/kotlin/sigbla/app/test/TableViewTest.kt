@@ -45,11 +45,11 @@ class TableViewTest {
 
     @Test
     fun `define port`() {
-        TableView[PORT] = 8088
-        assertEquals(8088, TableView[PORT])
+        TableView[Port] = 8088
+        assertEquals(8088, TableView[Port])
 
-        TableView[PORT] = 9090
-        assertEquals(8088, TableView[PORT])
+        TableView[Port] = 9090
+        assertEquals(8088, TableView[Port])
     }
 
     @Test

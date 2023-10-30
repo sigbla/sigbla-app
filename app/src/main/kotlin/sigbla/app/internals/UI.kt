@@ -19,7 +19,6 @@ import sigbla.app.*
 import sigbla.app.exceptions.SigblaAppException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
-import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.collections.MutableList
 import kotlin.collections.Set
@@ -52,7 +51,7 @@ internal object SigblaBackend {
 
     private fun start(n: Int): Pair<ApplicationEngine, Int> {
         return try {
-            val port = TableView[PORT]
+            val port = TableView[Port]
             val engine = embeddedServer(Netty, port) {
                 install(WebSockets)
 
