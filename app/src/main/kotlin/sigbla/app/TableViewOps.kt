@@ -9,7 +9,7 @@ import kotlin.reflect.KClass
 fun clear(columnView: ColumnView) {
     synchronized(columnView.tableView.eventProcessor) {
         val tableViewRef = columnView.tableView.tableViewRef
-        val columnHeader = columnView.columnHeader
+        val columnHeader = columnView.header
         val eventProcessor = columnView.tableView.eventProcessor
 
         val (oldRef, newRef) = tableViewRef.refAction {
@@ -58,7 +58,7 @@ fun clear(rowView: RowView) {
 fun clear(cellView: CellView) {
     synchronized(cellView.tableView.eventProcessor) {
         val tableViewRef = cellView.tableView.tableViewRef
-        val columnHeader = cellView.columnView.columnHeader
+        val columnHeader = cellView.columnView.header
         val index = cellView.index
         val eventProcessor = cellView.tableView.eventProcessor
 

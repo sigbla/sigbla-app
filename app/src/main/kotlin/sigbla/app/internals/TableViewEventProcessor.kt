@@ -472,7 +472,7 @@ internal class TableViewEventProcessor {
                 val locations = LinkedHashMap<Triple<ColumnHeader?, Long?, KClass<*>>, Any>()
 
                 this.forEach {
-                    val location = Triple(columnViewFromViewRelated(it.newValue)?.columnHeader, indexFromViewRelated(it.newValue), it.newValue::class)
+                    val location = Triple(columnViewFromViewRelated(it.newValue)?.header, indexFromViewRelated(it.newValue), it.newValue::class)
                     if (locations[location] != null) locations.remove(location)
                     locations[location] = it.newValue
                 }
@@ -511,9 +511,9 @@ internal class TableViewEventProcessor {
                             val oldValueColumn = columnViewFromViewRelated(it.oldValue)
                             return@filter newValueColumn == null || oldValueColumn == null
                                     || newValueColumn == listenerRef.listenerReference.columnView
-                                    || newValueColumn.columnHeader == listenerRef.listenerReference.columnView.columnHeader // TODO Might not need this?
+                                    || newValueColumn.header == listenerRef.listenerReference.columnView.header // TODO Might not need this?
                                     || oldValueColumn == listenerRef.listenerReference.columnView
-                                    || oldValueColumn.columnHeader == listenerRef.listenerReference.columnView.columnHeader // TODO Might not need this?
+                                    || oldValueColumn.header == listenerRef.listenerReference.columnView.header // TODO Might not need this?
                         }.filter { refVersionFromViewRelated(it.newValue) > listenerRef.version })
 
                         if (columnBatch.isNotEmpty()) {
@@ -555,10 +555,10 @@ internal class TableViewEventProcessor {
                             return@filter (newValueColumn == null || newValueIndex == null || oldValueColumn == null || oldValueIndex == null)
                                     || (listenerRef.listenerReference.cellView.index == newValueIndex
                                         && (listenerRef.listenerReference.cellView.columnView == newValueColumn
-                                        || listenerRef.listenerReference.cellView.columnView.columnHeader == newValueColumn.columnHeader)) // TODO Is the columnHeader check really needed?
+                                        || listenerRef.listenerReference.cellView.columnView.header == newValueColumn.header)) // TODO Is the columnHeader check really needed?
                                     || (listenerRef.listenerReference.cellView.index == oldValueIndex
                                         && (listenerRef.listenerReference.cellView.columnView == oldValueColumn
-                                        || listenerRef.listenerReference.cellView.columnView.columnHeader == oldValueColumn.columnHeader)) // TODO Is the columnHeader check really needed?
+                                        || listenerRef.listenerReference.cellView.columnView.header == oldValueColumn.header)) // TODO Is the columnHeader check really needed?
                         }.filter { refVersionFromViewRelated(it.newValue) > listenerRef.version })
 
                         if (cellBatch.isNotEmpty()) {
@@ -579,10 +579,10 @@ internal class TableViewEventProcessor {
                             return@filter (newValueColumn == null || newValueIndex == null || oldValueColumn == null || oldValueIndex == null)
                                     || (listenerRef.listenerReference.derivedCellView.index == newValueIndex
                                     && (listenerRef.listenerReference.derivedCellView.columnView == newValueColumn
-                                    || listenerRef.listenerReference.derivedCellView.columnView.columnHeader == newValueColumn.columnHeader)) // TODO Is the columnHeader check really needed?
+                                    || listenerRef.listenerReference.derivedCellView.columnView.header == newValueColumn.header)) // TODO Is the columnHeader check really needed?
                                     || (listenerRef.listenerReference.derivedCellView.index == oldValueIndex
                                     && (listenerRef.listenerReference.derivedCellView.columnView == oldValueColumn
-                                    || listenerRef.listenerReference.derivedCellView.columnView.columnHeader == oldValueColumn.columnHeader)) // TODO Is the columnHeader check really needed?
+                                    || listenerRef.listenerReference.derivedCellView.columnView.header == oldValueColumn.header)) // TODO Is the columnHeader check really needed?
                         }.filter { refVersionFromViewRelated(it.newValue) > listenerRef.version })
 
                         if (cellBatch.isNotEmpty()) {

@@ -495,14 +495,14 @@ class TableViewStorageTest {
             assertEquals(tableView1[CellClasses], tableView2[CellClasses])
             assertEquals(tableView1[CellTopics], tableView2[CellTopics])
 
-            val it1 = tableView1.columnViews.sortedBy { it.columnHeader }.iterator()
-            val it2 = tableView2.columnViews.sortedBy { it.columnHeader }.iterator()
+            val it1 = tableView1.columnViews.sortedBy { it.header }.iterator()
+            val it2 = tableView2.columnViews.sortedBy { it.header }.iterator()
 
             while (it1.hasNext() && it2.hasNext()) {
                 val v1 = it1.next()
                 val v2 = it2.next()
 
-                assertEquals(v1.columnHeader, v2.columnHeader)
+                assertEquals(v1.header, v2.header)
                 assertEquals(v1[CellWidth], v2[CellWidth])
                 assertEquals(v1[CellClasses], v2[CellClasses])
                 assertEquals(v1[CellTopics], v2[CellTopics])
@@ -528,11 +528,11 @@ class TableViewStorageTest {
             assertFalse(it4.hasNext())
 
             val it5 = tableView1.cellViews.sortedWith { o1, o2 ->
-                val cmp = o1.columnView.columnHeader.compareTo(o2.columnView.columnHeader)
+                val cmp = o1.columnView.header.compareTo(o2.columnView.header)
                 if (cmp == 0) o1.index.compareTo(o2.index) else cmp
             }.iterator()
             val it6 = tableView2.cellViews.sortedWith { o1, o2 ->
-                val cmp = o1.columnView.columnHeader.compareTo(o2.columnView.columnHeader)
+                val cmp = o1.columnView.header.compareTo(o2.columnView.header)
                 if (cmp == 0) o1.index.compareTo(o2.index) else cmp
             }.iterator()
 
@@ -540,7 +540,7 @@ class TableViewStorageTest {
                 val v1 = it5.next()
                 val v2 = it6.next()
 
-                assertEquals(v1.columnView.columnHeader, v2.columnView.columnHeader)
+                assertEquals(v1.columnView.header, v2.columnView.header)
                 assertEquals(v1.index, v2.index)
                 assertEquals(v1[CellHeight], v2[CellHeight])
                 assertEquals(v1[CellWidth], v2[CellWidth])
