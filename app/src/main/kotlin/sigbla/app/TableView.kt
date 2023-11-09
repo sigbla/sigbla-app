@@ -466,10 +466,18 @@ class TableView internal constructor(
         this[cell.column][cell.index] = view
     }
 
+    operator fun set(cell: Cell<*>, function: CellView.() -> Any?) {
+        this[cell.column][cell.index] { function() }
+    }
+
     // -----
 
     operator fun set(cellView: CellView, view: CellView?) {
         this[cellView.columnView][cellView.index] = view
+    }
+
+    operator fun set(cellView: CellView, function: CellView.() -> Any?) {
+        this[cellView.columnView][cellView.index] { function() }
     }
 
     // -----
@@ -538,9 +546,13 @@ class TableView internal constructor(
 
     // -----
 
-    operator fun set(columnHeader: ColumnHeader, row: Long, view: CellView?) {
+    operator fun set(columnHeader: ColumnHeader, index: Int, view: CellView?) {
+        this[columnHeader, index.toLong()] = view
+    }
+
+    operator fun set(columnHeader: ColumnHeader, index: Long, view: CellView?) {
         synchronized(eventProcessor) {
-            val cell = Pair(columnHeader, row)
+            val cell = Pair(columnHeader, index)
             val (oldRef, newRef) = tableViewRef.refAction {
                 val viewMeta = if (view == null) null else view.tableView.tableViewRef.get().cellViews[cell]
 
@@ -558,11 +570,21 @@ class TableView internal constructor(
             val oldView = makeClone(ref = oldRef)
             val newView = makeClone(ref = newRef)
 
-            val old = oldView[columnHeader][row]
-            val new = newView[columnHeader][row]
+            val old = oldView[columnHeader][index]
+            val new = newView[columnHeader][index]
 
             eventProcessor.publish(listOf(TableViewListenerEvent(old, new)))
         }
+    }
+
+    // -----
+
+    operator fun set(columnHeader: ColumnHeader, index: Int, function: CellView.() -> Any?) {
+        this[columnHeader][index] { function() }
+    }
+
+    operator fun set(columnHeader: ColumnHeader, index: Long, function: CellView.() -> Any?) {
+        this[columnHeader][index] { function() }
     }
 
     // -----
@@ -573,15 +595,93 @@ class TableView internal constructor(
 
     // -----
 
-    operator fun set(vararg header: String, index: Long, view: CellView?) {
-        this[ColumnHeader(*header)][index] = view
+    operator fun set(header1: String, index: Long, view: CellView?) {
+        this[header1][index] = view
+    }
+
+    operator fun set(header1: String, header2: String, index: Long, view: CellView?) {
+        this[header1, header2][index] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Long, view: CellView?) {
+        this[header1, header2, header3][index] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, view: CellView?) {
+        this[header1, header2, header3, header4][index] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, view: CellView?) {
+        this[header1, header2, header3, header4, header5][index] = view
     }
 
     // -----
 
-    operator fun set(vararg header: String, index: Int, view: CellView?) {
-        this[ColumnHeader(*header)][index] = view
+    operator fun set(header1: String, index: Long, function: CellView.() -> Any?) {
+        this[header1][index] { function() }
     }
+
+    operator fun set(header1: String, header2: String, index: Long, function: CellView.() -> Any?) {
+        this[header1, header2][index] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Long, function: CellView.() -> Any?) {
+        this[header1, header2, header3][index] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, function: CellView.() -> Any?) {
+        this[header1, header2, header3, header4][index] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, function: CellView.() -> Any?) {
+        this[header1, header2, header3, header4, header5][index] { function() }
+    }
+
+    // -----
+
+    operator fun set(header1: String, index: Int, view: CellView?) {
+        this[header1][index] = view
+    }
+
+    operator fun set(header1: String, header2: String, index: Int, view: CellView?) {
+        this[header1, header2][index] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Int, view: CellView?) {
+        this[header1, header2, header3][index] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, view: CellView?) {
+        this[header1, header2, header3, header4][index] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, view: CellView?) {
+        this[header1, header2, header3, header4, header5][index] = view
+    }
+
+    // -----
+
+    operator fun set(header1: String, index: Int, function: CellView.() -> Any?) {
+        this[header1][index] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, index: Int, function: CellView.() -> Any?) {
+        this[header1, header2][index] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Int, function: CellView.() -> Any?) {
+        this[header1, header2, header3][index] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, function: CellView.() -> Any?) {
+        this[header1, header2, header3, header4][index] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, function: CellView.() -> Any?) {
+        this[header1, header2, header3, header4, header5][index] { function() }
+    }
+
+    // -----
 
     override fun iterator(): Iterator<DerivedCellView> {
         val ref = tableViewRef.get()
@@ -1207,7 +1307,13 @@ class ColumnView internal constructor(
 
     operator fun set(index: Int, view: CellView?) { this[index.toLong()] = view }
 
-    operator fun set(row: Row, view: CellView?) = set(row.index, view)
+    operator fun set(row: Row, view: CellView?) = { this[row.index] = view }
+
+    operator fun set(index: Long, function: CellView.() -> Any?) { this[index] { function() } }
+
+    operator fun set(index: Int, function: CellView.() -> Any?) { this[index] { function() } }
+
+    operator fun set(row: Row, function: CellView.() -> Any?) { this[row.index] { function() } }
 
     override fun iterator(): Iterator<DerivedCellView> {
         val ref = tableView.tableViewRef.get()
@@ -1462,6 +1568,14 @@ class RowView internal constructor(
     operator fun set(columnView: ColumnView, view: CellView?) { tableView[columnView.header, index] = view }
 
     operator fun set(column: Column, view: CellView?) { tableView[column.header, index] = view }
+
+    operator fun set(vararg header: String, function: CellView.() -> Any?) { tableView[ColumnHeader(*header), index] { function() } }
+
+    operator fun set(columnHeader: ColumnHeader, function: CellView.() -> Any?) { tableView[columnHeader, index] { function() } }
+
+    operator fun set(columnView: ColumnView, function: CellView.() -> Any?) { tableView[columnView.header, index] { function() } }
+
+    operator fun set(column: Column, function: CellView.() -> Any?) { tableView[column.header, index] { function() } }
 
     override fun iterator(): Iterator<DerivedCellView> {
         val ref = tableView.tableViewRef.get()

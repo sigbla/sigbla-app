@@ -550,7 +550,6 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     // -----
 
-    // TODO Can't we just replace these and similar with vararg?
     operator fun set(header1: String, index: Long, init: Cell<*>.() -> Any?) = this[header1][index] { init() }
 
     operator fun set(header1: String, header2: String, index: Long, init: Cell<*>.() -> Any?) = this[header1, header2][index] { init() }

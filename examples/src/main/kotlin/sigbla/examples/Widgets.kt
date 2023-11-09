@@ -9,12 +9,10 @@ fun main() {
 
     table["B", 0] = 0
 
-    tableView["A", 0] {
-        button("Click me!") {
-            println("Button click!")
-            table["B", 0] = table["B", 0] + 1
-            text = table["B", 0].toString()
-        }
+    tableView["A", 0] = button("Click me!") {
+        println("Button click!")
+        table["B", 0] = table["B", 0] + 1
+        text = table["B", 0].toString()
     }
 
     tableView["A", 1] {
@@ -38,11 +36,9 @@ fun main() {
     radioMaker(3, 4, null)
     radioMaker(4, 3, null)
 
-    tableView["A", 6] {
-        textField {
-            println("Text field action: ${text}")
-            if (!text.startsWith("*")) text = "* $text"
-        }
+    tableView["A", 6] = textField {
+        println("Text field action: ${text}")
+        if (!text.startsWith("*")) text = "* $text"
     }
 
     move(table["A"] before table["B"])
