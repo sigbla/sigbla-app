@@ -976,7 +976,7 @@ class CellView(
         setCellTransformer(if (cellTransformer == null) null else cellTransformer.function as (Cell<*>.() -> Any?)?)
     }
 
-    operator fun set(cell: CellTransformer.Companion, cellTransformer: (Cell<*>.() -> Any?)?) {
+    operator fun set(cell: CellTransformer.Companion, cellTransformer: Cell<*>.() -> Any?) {
         setCellTransformer(cellTransformer)
     }
 
