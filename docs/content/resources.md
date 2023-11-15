@@ -4,8 +4,8 @@ Because the UI runs in the browser, it doesn't take much imagination to think th
 add extensions to the frontend. As we'll see in later chapters, this is how we're able to add charts and user input
 to table views.
 
-First step in allowing for such extensions is to be able to extend the HTTP endpoints exposed, something we'll cover next,
-before moving on to describing some helper functions making it easier to add custom JavaScript and CSS.
+First step in allowing for such extensions is to be able to extend the HTTP endpoints exposed, something we'll cover
+next. We then move on to describing some helper functions making it easier to add custom JavaScript and CSS.
 
 ## Adding HTTP endpoints
 
@@ -151,7 +151,8 @@ tableView[Resources] = tableView[Resources] + listOf(
 ```
 
 For the first resource, we use `staticResource` to pass the path to a file within our resources. Resources are usually
-packaged together with your code in a jar file, making it easy to include these without needing separate files.
+packaged together with your code in a jar file, located within the project `resources` folder, making it easy to
+include these without needing separate files.
 
 The second example uses `staticFile`, which instead looks for the file somewhere on your filesystem.
 
