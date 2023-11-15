@@ -78,6 +78,7 @@ fun tableViewFromViewRelated(value: Any?): TableView = when (value) {
     is CellTopics<*> -> tableViewFromViewRelated(value.source)
     is CellTransformer<*> -> tableViewFromViewRelated(value.source)
     is Resources -> tableViewFromViewRelated(value.source)
+    is SourceTable -> value.source
     else -> throw InvalidValueException("Unknown type: ${value?.javaClass}")
 }
 
@@ -93,6 +94,7 @@ fun columnViewFromViewRelated(value: Any?): ColumnView? = when (value) {
     is CellTopics<*> -> columnViewFromViewRelated(value.source)
     is CellTransformer<*> -> columnViewFromViewRelated(value.source)
     is Resources -> columnViewFromViewRelated(value.source)
+    is SourceTable -> null
     else -> throw InvalidValueException("Unsupported type: ${value?.javaClass}")
 }
 
@@ -108,6 +110,7 @@ fun indexFromViewRelated(value: Any?): Long? = when (value) {
     is CellTopics<*> -> indexFromViewRelated(value.source)
     is CellTransformer<*> -> indexFromViewRelated(value.source)
     is Resources -> indexFromViewRelated(value.source)
+    is SourceTable -> null
     else -> throw InvalidValueException("Unsupported type: ${value?.javaClass}")
 }
 
@@ -145,6 +148,7 @@ fun relatedFromViewRelated(tableView: TableView, value: Any): Any = when (value)
     }
     is CellTransformer<*> -> tableView[value.source][CellTransformer]
     is Resources -> tableView[Resources]
+    is SourceTable -> SourceTable(tableView, tableView.tableViewRef.get().table)
     else -> throw InvalidValueException("Unknown type: ${value?.javaClass}")
 }
 
@@ -160,6 +164,7 @@ internal fun refVersionFromViewRelated(value: Any?): Long = when (value) {
     is CellTopics<*> -> refVersionFromViewRelated(value.source)
     is CellTransformer<*> -> refVersionFromViewRelated(value.source)
     is Resources -> refVersionFromViewRelated(value.source)
+    is SourceTable -> refVersionFromViewRelated(value.source)
     else -> throw InvalidValueException("Unsupported type: ${value?.javaClass}")
 }
 

@@ -24,10 +24,14 @@ fun clear(columnView: ColumnView) {
         val oldView = columnView.tableView.makeClone(ref = oldRef)
         val newView = columnView.tableView.makeClone(ref = newRef)
 
-        val old = oldView[columnView]
-        val new = newView[columnView]
+        val oldColumnView = oldView[columnView]
+        val newColumnView = newView[columnView]
 
-        eventProcessor.publish(listOf(TableViewListenerEvent<ColumnView>(old, new)) as List<TableViewListenerEvent<Any>>)
+        eventProcessor.publish(listOf(
+            TableViewListenerEvent(oldColumnView[CellClasses], newColumnView[CellClasses]),
+            TableViewListenerEvent(oldColumnView[CellTopics], newColumnView[CellTopics]),
+            TableViewListenerEvent(oldColumnView[CellWidth], newColumnView[CellWidth])
+        ))
     }
 }
 
@@ -48,10 +52,14 @@ fun clear(rowView: RowView) {
         val oldView = rowView.tableView.makeClone(ref = oldRef)
         val newView = rowView.tableView.makeClone(ref = newRef)
 
-        val old = oldView[rowView]
-        val new = newView[rowView]
+        val oldRowView = oldView[rowView]
+        val newRowView = newView[rowView]
 
-        eventProcessor.publish(listOf(TableViewListenerEvent<RowView>(old, new)) as List<TableViewListenerEvent<Any>>)
+        eventProcessor.publish(listOf(
+            TableViewListenerEvent(oldRowView[CellClasses], newRowView[CellClasses]),
+            TableViewListenerEvent(oldRowView[CellHeight], newRowView[CellHeight]),
+            TableViewListenerEvent(oldRowView[CellTopics], newRowView[CellTopics])
+        ))
     }
 }
 
@@ -65,6 +73,7 @@ fun clear(cellView: CellView) {
         val (oldRef, newRef) = tableViewRef.refAction {
             it.copy(
                 cellViews = it.cellViews.remove(Pair(columnHeader, index)),
+                cellTransformers = it.cellTransformers.remove(Pair(columnHeader, index)),
                 version = it.version + 1L
             )
         }
@@ -74,10 +83,16 @@ fun clear(cellView: CellView) {
         val oldView = cellView.tableView.makeClone(ref = oldRef)
         val newView = cellView.tableView.makeClone(ref = newRef)
 
-        val old = oldView[cellView]
-        val new = newView[cellView]
+        val oldCellView = oldView[cellView]
+        val newCellView = newView[cellView]
 
-        eventProcessor.publish(listOf(TableViewListenerEvent<CellView>(old, new)) as List<TableViewListenerEvent<Any>>)
+        eventProcessor.publish(listOf(
+            TableViewListenerEvent(oldCellView[CellClasses], newCellView[CellClasses]),
+            TableViewListenerEvent(oldCellView[CellHeight], newCellView[CellHeight]),
+            TableViewListenerEvent(oldCellView[CellTopics], newCellView[CellTopics]),
+            TableViewListenerEvent(oldCellView[CellTransformer], newCellView[CellTransformer]),
+            TableViewListenerEvent(oldCellView[CellWidth], newCellView[CellWidth])
+        ))
     }
 }
 
@@ -180,7 +195,11 @@ fun on(
             order,
             allowLoop,
             skipHistory
-        ) { this }
+        ) {
+            this.map {
+                TableViewListenerEvent(relatedFromViewRelated(oldView, it.oldValue), relatedFromViewRelated(newView, it.newValue))
+            }
+        }
         else -> TableViewEventReceiver(
             tableView,
             type,
@@ -189,7 +208,9 @@ fun on(
             allowLoop,
             skipHistory
         ) {
-            this.filter {
+            this.map {
+                TableViewListenerEvent(relatedFromViewRelated(oldView, it.oldValue), relatedFromViewRelated(newView, it.newValue))
+            }.filter {
                 type.isInstance(it.oldValue) || type.isInstance(it.newValue)
             }
         }
@@ -280,7 +301,11 @@ fun on(
             order,
             allowLoop,
             skipHistory
-        ) { this }
+        ) {
+            this.map {
+                TableViewListenerEvent(relatedFromViewRelated(oldView, it.oldValue), relatedFromViewRelated(newView, it.newValue))
+            }
+        }
         else -> TableViewEventReceiver(
             columnView,
             type,
@@ -289,7 +314,9 @@ fun on(
             allowLoop,
             skipHistory
         ) {
-            this.filter {
+            this.map {
+                TableViewListenerEvent(relatedFromViewRelated(oldView, it.oldValue), relatedFromViewRelated(newView, it.newValue))
+            }.filter {
                 type.isInstance(it.oldValue) || type.isInstance(it.newValue)
             }
         }
@@ -380,7 +407,11 @@ fun on(
             order,
             allowLoop,
             skipHistory
-        ) { this }
+        ) {
+            this.map {
+                TableViewListenerEvent(relatedFromViewRelated(oldView, it.oldValue), relatedFromViewRelated(newView, it.newValue))
+            }
+        }
         else -> TableViewEventReceiver(
             rowView,
             type,
@@ -389,9 +420,9 @@ fun on(
             allowLoop,
             skipHistory
         ) {
-            this.filter {
-                // TODO Like fixed in TableOps, these (here and below) should likely be
-                //      type.isInstance(oldView[it.oldValue]) || type.isInstance(newView[it.newValue]) ?
+            this.map {
+                TableViewListenerEvent(relatedFromViewRelated(oldView, it.oldValue), relatedFromViewRelated(newView, it.newValue))
+            }.filter {
                 type.isInstance(it.oldValue) || type.isInstance(it.newValue)
             }
         }
@@ -486,7 +517,11 @@ fun on(
             order,
             allowLoop,
             skipHistory
-        ) { this }
+        ) {
+            this.map {
+                TableViewListenerEvent(relatedFromViewRelated(oldView, it.oldValue), relatedFromViewRelated(newView, it.newValue))
+            }
+        }
         else -> TableViewEventReceiver(
             cellView,
             type,
@@ -495,7 +530,9 @@ fun on(
             allowLoop,
             skipHistory
         ) {
-            this.filter {
+            this.map {
+                TableViewListenerEvent(relatedFromViewRelated(oldView, it.oldValue), relatedFromViewRelated(newView, it.newValue))
+            }.filter {
                 type.isInstance(it.oldValue) || type.isInstance(it.newValue)
             }
         }
@@ -505,6 +542,8 @@ fun on(
 
 // ---
 
+/*
+// TODO Remove?
 inline fun <reified T : Any> on(
     derivedCellView: DerivedCellView,
     type: KClass<T> = T::class,
@@ -602,6 +641,9 @@ fun on(
     }
     return derivedCellView.tableView.eventProcessor.subscribe(derivedCellView, eventReceiver, init)
 }
+ */
+
+// TODO Something like Cells for views too?
 
 // ---
 

@@ -88,12 +88,12 @@ class TableViewBatchListenerTest {
         }
 
         tv1 {
-            assertEquals(1, eventCount)
+            assertEquals(2, eventCount)
 
             tv1["A", 1][CellHeight] = 50
             tv1["A", 1][CellWidth] = 50
 
-            assertEquals(1, eventCount)
+            assertEquals(2, eventCount)
 
             tv1["A", 2][CellHeight] = 75
             tv1["A", 2][CellWidth] = 75
@@ -101,7 +101,7 @@ class TableViewBatchListenerTest {
             tv1["B", 3][CellHeight] = 100
             tv1["B", 3][CellWidth] = 100
 
-            assertEquals(1, eventCount)
+            assertEquals(2, eventCount)
 
             off(ref)
 
@@ -111,10 +111,10 @@ class TableViewBatchListenerTest {
             tv1["C", 4][CellHeight] = 150
             tv1["C", 4][CellWidth] = 150
 
-            assertEquals(1, eventCount)
+            assertEquals(2, eventCount)
         }
 
-        assertEquals(1, eventCount)
+        assertEquals(2, eventCount)
     }
 
     @Test
@@ -161,15 +161,15 @@ class TableViewBatchListenerTest {
                 }
             }
 
-            assertEquals(1, eventCount)
+            assertEquals(2, eventCount)
 
             tv1["A", 1][CellHeight] = 50
             tv1["A", 1][CellWidth] = 50
 
-            assertEquals(1, eventCount)
+            assertEquals(2, eventCount)
         }
 
-        assertEquals(1, eventCount)
+        assertEquals(2, eventCount)
     }
 
     @Test
@@ -277,7 +277,7 @@ class TableViewBatchListenerTest {
             return@t1 clone(t1, "tableClone2")
         }
 
-        var expectedT2EventCount = expectedT1EventCount / 2
+        var expectedT2EventCount = expectedT1EventCount
 
         on(t2) {
             events {

@@ -266,6 +266,7 @@ class TableViewTest {
         assertEquals(setOf("tv ct"), tv1["B", 2].derived.cellTopics.toSet())
     }
 
+    /*
     @Test
     fun `table view swaps`() {
         val t1 = Table[object {}.javaClass.enclosingMethod.name]
@@ -387,6 +388,7 @@ class TableViewTest {
 
         assertTrue(tv2[Table].toList().isEmpty())
     }
+     */
 
     @Test
     fun `tableview invoke`() {

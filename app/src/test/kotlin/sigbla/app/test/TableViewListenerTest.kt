@@ -3,17 +3,8 @@ package sigbla.app.test
 import org.junit.After
 import org.junit.Assert
 import org.junit.Test
-import sigbla.app.CellHeight
-import sigbla.app.CellWidth
-import sigbla.app.DEFAULT_CELL_WIDTH
-import sigbla.app.Table
-import sigbla.app.TableView
-import sigbla.app.clone
+import sigbla.app.*
 import sigbla.app.exceptions.ListenerLoopException
-import sigbla.app.newView
-import sigbla.app.off
-import sigbla.app.oldView
-import sigbla.app.on
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -35,7 +26,11 @@ class TableViewListenerTest {
 
         val ref = on(tv1) {
             events {
-                eventCount += count()
+                eventCount += map { it.newValue }
+                    .filter { it is CellWidth<*, *> || it is CellHeight<*, *> }
+                    .mapNotNull { if (it is CellWidth<*, *>) it.source else if (it is CellHeight<*, *>) it.source else null }
+                    .filterIsInstance<CellView>()
+                    .count()
             }
         }
 
@@ -83,12 +78,12 @@ class TableViewListenerTest {
             }
         }
 
-        assertEquals(1, eventCount)
+        assertEquals(2, eventCount)
 
         tv1["A", 1][CellHeight] = 50
         tv1["A", 1][CellWidth] = 50
 
-        assertEquals(3, eventCount)
+        assertEquals(4, eventCount)
 
         tv1["A", 2][CellHeight] = 75
         tv1["A", 2][CellWidth] = 75
@@ -96,7 +91,7 @@ class TableViewListenerTest {
         tv1["B", 3][CellHeight] = 100
         tv1["B", 3][CellWidth] = 100
 
-        assertEquals(7, eventCount)
+        assertEquals(8, eventCount)
 
         off(ref)
 
@@ -106,7 +101,7 @@ class TableViewListenerTest {
         tv1["C", 4][CellHeight] = 150
         tv1["C", 4][CellWidth] = 150
 
-        assertEquals(7, eventCount)
+        assertEquals(8, eventCount)
     }
 
     @Test
@@ -148,12 +143,12 @@ class TableViewListenerTest {
             }
         }
 
-        assertEquals(1, eventCount)
+        assertEquals(2, eventCount)
 
         tv1["A", 1][CellHeight] = 50
         tv1["A", 1][CellWidth] = 50
 
-        assertEquals(1, eventCount)
+        assertEquals(2, eventCount)
     }
 
     @Test
@@ -185,7 +180,7 @@ class TableViewListenerTest {
     fun `listener loop support`() {
         val t = TableView[object {}.javaClass.enclosingMethod.name]
 
-        val ref1 = on(t) {
+        val ref1 = on(t, skipHistory = true) {
             events {
                 t["A", 0][CellWidth] = 25
             }
@@ -250,9 +245,9 @@ class TableViewListenerTest {
 
         val t2 = clone(t1, "tableClone2")
 
-        // We divide by 4 because we overwrite cells above,
+        // We divide by 2 because we overwrite cells above,
         // but when adding a listener we only reply current values
-        var expectedT2EventCount = expectedT1EventCount / 4
+        var expectedT2EventCount = expectedT1EventCount / 2
 
         on(t2) {
             events {
@@ -524,10 +519,14 @@ class TableViewListenerTest {
                 oldView["A", 0][CellWidth] = source["A", 0].derived.cellWidth + 200
                 newView["A", 0][CellWidth] = source["A", 0].derived.cellWidth + 300
 
-                assertEquals<Any?>(source["A", 0].derived.cellWidth + 200, oldView["A", 0][CellWidth].width)
-                assertEquals<Any?>(source["A", 0].derived.cellWidth + 300, newView["A", 0][CellWidth].width)
+                assertEquals(source["A", 0].derived.cellWidth + 200, oldView["A", 0][CellWidth].width)
+                assertEquals(source["A", 0].derived.cellWidth + 300, newView["A", 0][CellWidth].width)
 
-                count += count()
+                count += map { it.newValue }
+                    .filterIsInstance<CellWidth<*,*>>()
+                    .map { it.source }
+                    .filterIsInstance<CellView>()
+                    .count()
             }
         }
 
@@ -537,18 +536,18 @@ class TableViewListenerTest {
             skipHistory = true
 
             events {
-                assertEquals<Any?>(source["A", 0].derived.cellWidth + 200, oldView["A", 0][CellWidth].width)
-                assertEquals<Any?>(source["A", 0].derived.cellWidth + 300, newView["A", 0][CellWidth].width)
+                assertEquals(source["A", 0].derived.cellWidth + 200, oldView["A", 0][CellWidth].width)
+                assertEquals(source["A", 0].derived.cellWidth + 300, newView["A", 0][CellWidth].width)
 
                 count += count()
             }
         }
 
-        assertEquals<Any?>(DEFAULT_CELL_WIDTH, t["A", 0][CellWidth].width)
+        assertEquals(DEFAULT_CELL_WIDTH, t["A", 0][CellWidth].width)
 
         t["A", 0][CellWidth] = DEFAULT_CELL_WIDTH / 2
 
-        assertEquals<Any?>(DEFAULT_CELL_WIDTH / 2, t["A", 0][CellWidth].width)
+        assertEquals(DEFAULT_CELL_WIDTH / 2, t["A", 0][CellWidth].width)
 
         assertEquals(3, count)
     }

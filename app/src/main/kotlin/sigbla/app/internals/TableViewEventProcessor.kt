@@ -169,25 +169,67 @@ internal class TableViewEventProcessor {
             val oldTableView = tableView.makeClone(ref = TableViewRef())
             val newTableView = tableView.makeClone(ref = ref)
             listenerRefEvent.version = ref.version
-            // TODO TableView for on<TableView>(..) ? Note that we also have this as a BaseTableView for now..
-            val seq1 = (if (eventReceiver.type == Any::class || eventReceiver.type == ColumnView::class)
-                newTableView.columnViews.map {
-                    TableViewListenerEvent(oldTableView[it], it)
-                } else emptySequence<ColumnView>()) as Sequence<TableViewListenerEvent<Any>>
-            val seq2 = (if (eventReceiver.type == Any::class || eventReceiver.type == RowView::class)
-                newTableView.rowViews.map {
-                    TableViewListenerEvent(oldTableView[it], it)
-                } else emptySequence<RowView>()) as Sequence<TableViewListenerEvent<Any>>
-            val seq3 = (if (eventReceiver.type == Any::class || eventReceiver.type == CellView::class)
-                newTableView.cellViews.map {
-                    TableViewListenerEvent(oldTableView[it], it)
-                } else emptySequence<CellView>()) as Sequence<TableViewListenerEvent<Any>>
-            val seq4 = (if (eventReceiver.type == Any::class || eventReceiver.type == DerivedCellView::class)
-                newTableView.asSequence().map {
-                    TableViewListenerEvent(oldTableView[it], it)
-                } else emptySequence<DerivedCellView>()) as Sequence<TableViewListenerEvent<Any>>
 
-            listenerRefEvent.listenerEvent(seq1 + seq2 + seq3 + seq4)
+            val tableEvents = listOfNotNull(
+                if (ref.table == null) null else TableViewListenerEvent(SourceTable(oldTableView, null), SourceTable(newTableView, ref.table)),
+                if (ref.resources.isEmpty) null else TableViewListenerEvent(oldTableView[Resources], newTableView[Resources]),
+                if (ref.defaultCellView.cellClasses?.isEmpty() != false) null else TableViewListenerEvent(oldTableView[CellClasses], newTableView[CellClasses]),
+                if (ref.defaultCellView.cellHeight == null) null else TableViewListenerEvent(oldTableView[CellHeight], newTableView[CellHeight]),
+                if (ref.defaultCellView.cellTopics?.isEmpty() != false) null else TableViewListenerEvent(oldTableView[CellTopics], newTableView[CellTopics]),
+                if (ref.defaultCellView.cellWidth == null) null else TableViewListenerEvent(oldTableView[CellWidth], newTableView[CellWidth])
+            ).asSequence()
+
+            val columnEvents = ref.columnViews.asSequence().map {
+                val columnHeader = it.component1()
+                val viewMeta = it.component2()
+
+                val oldColumnView = oldTableView[columnHeader]
+                val newColumnView = newTableView[columnHeader]
+
+                listOfNotNull(
+                    if (viewMeta.cellClasses?.isEmpty() != false) null else TableViewListenerEvent(oldColumnView[CellClasses], newColumnView[CellClasses]),
+                    if (viewMeta.cellTopics?.isEmpty() != false) null else TableViewListenerEvent(oldColumnView[CellTopics], newColumnView[CellTopics]),
+                    if (viewMeta.cellWidth == null) null else TableViewListenerEvent(oldColumnView[CellWidth], newColumnView[CellWidth])
+                )
+            }.flatten()
+
+            val rowEvents = ref.rowViews.asSequence().map {
+                val index = it.component1()
+                val viewMeta = it.component2()
+
+                val oldRowView = oldTableView[index]
+                val newRowView = newTableView[index]
+
+                listOfNotNull(
+                    if (viewMeta.cellClasses?.isEmpty() != false) null else TableViewListenerEvent(oldRowView[CellClasses], newRowView[CellClasses]),
+                    if (viewMeta.cellHeight == null) null else TableViewListenerEvent(oldRowView[CellHeight], newRowView[CellHeight]),
+                    if (viewMeta.cellTopics?.isEmpty() != false) null else TableViewListenerEvent(oldRowView[CellTopics], newRowView[CellTopics])
+                )
+            }.flatten()
+
+            val cellEvents = ref.cellViews.asSequence().map {
+                val chi = it.component1()
+                val viewMeta = it.component2()
+
+                val oldCellView = oldTableView[chi.first, chi.second]
+                val newCellView = newTableView[chi.first, chi.second]
+
+                listOfNotNull(
+                    if (viewMeta.cellClasses?.isEmpty() != false) null else TableViewListenerEvent(oldCellView[CellClasses], newCellView[CellClasses]),
+                    if (viewMeta.cellHeight == null) null else TableViewListenerEvent(oldCellView[CellHeight], newCellView[CellHeight]),
+                    if (viewMeta.cellTopics?.isEmpty() != false) null else TableViewListenerEvent(oldCellView[CellTopics], newCellView[CellTopics]),
+                    if (viewMeta.cellWidth == null) null else TableViewListenerEvent(oldCellView[CellWidth], newCellView[CellWidth])
+                )
+            }.flatten()
+
+            val cellTransformerEvents = ref.cellTransformers.keys().asSequence().map {
+                val oldCellView = oldTableView[it.first, it.second]
+                val newCellView = newTableView[it.first, it.second]
+
+                TableViewListenerEvent(oldCellView[CellTransformer], newCellView[CellTransformer])
+            }
+
+            listenerRefEvent.listenerEvent((tableEvents + columnEvents + rowEvents + cellEvents + cellTransformerEvents) as Sequence<TableViewListenerEvent<Any>>)
         }
 
         return listenerRef
@@ -225,25 +267,45 @@ internal class TableViewEventProcessor {
             val oldTableView = columnView.tableView.makeClone(ref = TableViewRef())
             val newTableView = columnView.tableView.makeClone(ref = ref)
             listenerRefEvent.version = ref.version
-            // TODO TableView for on<TableView>(..) ? Note that we also have this as a BaseTableView for now..
-            val seq1 = (if (eventReceiver.type == Any::class || eventReceiver.type == ColumnView::class)
-                sequenceOf(newTableView[columnView]).map {
-                    TableViewListenerEvent(oldTableView[it], it)
-                } else emptySequence<ColumnView>()) as Sequence<TableViewListenerEvent<Any>>
-            val seq2 = (if (eventReceiver.type == Any::class || eventReceiver.type == RowView::class)
-                newTableView.rowViews.map {
-                    TableViewListenerEvent(oldTableView[it], it)
-                } else emptySequence<RowView>()) as Sequence<TableViewListenerEvent<Any>>
-            val seq3 = (if (eventReceiver.type == Any::class || eventReceiver.type == CellView::class)
-                newTableView[columnView].cellViews.map {
-                    TableViewListenerEvent(oldTableView[it], it)
-                } else emptySequence<CellView>()) as Sequence<TableViewListenerEvent<Any>>
-            val seq4 = (if (eventReceiver.type == Any::class || eventReceiver.type == DerivedCellView::class)
-                newTableView[columnView].asSequence().map {
-                    TableViewListenerEvent(oldTableView[it], it)
-                } else emptySequence<DerivedCellView>()) as Sequence<TableViewListenerEvent<Any>>
 
-            listenerRefEvent.listenerEvent(seq1 + seq2 + seq3 + seq4)
+            val columnEvents = ref.columnViews[columnView.header]?.let { viewMeta ->
+                val oldColumnView = oldTableView[columnView.header]
+                val newColumnView = newTableView[columnView.header]
+
+                listOf(
+                    if (viewMeta.cellClasses?.isEmpty() != false) null else TableViewListenerEvent(oldColumnView[CellClasses], newColumnView[CellClasses]),
+                    if (viewMeta.cellTopics?.isEmpty() != false) null else TableViewListenerEvent(oldColumnView[CellTopics], newColumnView[CellTopics]),
+                    if (viewMeta.cellWidth == null) null else TableViewListenerEvent(oldColumnView[CellWidth], newColumnView[CellWidth])
+                ).asSequence()
+            } ?: emptySequence()
+
+            val cellEvents = ref.cellViews.asSequence()
+                .filter { it.component1().first == columnView.header }
+                .map {
+                    val chi = it.component1()
+                    val viewMeta = it.component2()
+
+                    val oldCellView = oldTableView[chi.first, chi.second]
+                    val newCellView = newTableView[chi.first, chi.second]
+
+                    listOfNotNull(
+                        if (viewMeta.cellClasses?.isEmpty() != false) null else TableViewListenerEvent(oldCellView[CellClasses], newCellView[CellClasses]),
+                        if (viewMeta.cellHeight == null) null else TableViewListenerEvent(oldCellView[CellHeight], newCellView[CellHeight]),
+                        if (viewMeta.cellTopics?.isEmpty() != false) null else TableViewListenerEvent(oldCellView[CellTopics], newCellView[CellTopics]),
+                        if (viewMeta.cellWidth == null) null else TableViewListenerEvent(oldCellView[CellWidth], newCellView[CellWidth])
+                    )
+                }.flatten()
+
+            val cellTransformerEvents = ref.cellTransformers.keys().asSequence()
+                .filter { it.first == columnView.header }
+                .map {
+                    val oldCellView = oldTableView[it.first, it.second]
+                    val newCellView = newTableView[it.first, it.second]
+
+                    TableViewListenerEvent(oldCellView[CellTransformer], newCellView[CellTransformer])
+                }
+
+            listenerRefEvent.listenerEvent((columnEvents + cellEvents + cellTransformerEvents) as Sequence<TableViewListenerEvent<Any>>)
         }
 
         return listenerRef
@@ -281,25 +343,45 @@ internal class TableViewEventProcessor {
             val oldTableView = rowView.tableView.makeClone(ref = TableViewRef())
             val newTableView = rowView.tableView.makeClone(ref = ref)
             listenerRefEvent.version = ref.version
-            // TODO TableView for on<TableView>(..) ? Note that we also have this as a BaseTableView for now..
-            val seq1 = (if (eventReceiver.type == Any::class || eventReceiver.type == ColumnView::class)
-                newTableView.columnViews.map {
-                    TableViewListenerEvent(oldTableView[it], it)
-                } else emptySequence<ColumnView>()) as Sequence<TableViewListenerEvent<Any>>
-            val seq2 = (if (eventReceiver.type == Any::class || eventReceiver.type == RowView::class)
-                sequenceOf(newTableView[rowView]).map {
-                    TableViewListenerEvent(oldTableView[it], it)
-                } else emptySequence<RowView>()) as Sequence<TableViewListenerEvent<Any>>
-            val seq3 = (if (eventReceiver.type == Any::class || eventReceiver.type == CellView::class)
-                newTableView[rowView].cellViews.map {
-                    TableViewListenerEvent(oldTableView[it], it)
-                } else emptySequence<CellView>()) as Sequence<TableViewListenerEvent<Any>>
-            val seq4 = (if (eventReceiver.type == Any::class || eventReceiver.type == DerivedCellView::class)
-                newTableView[rowView].asSequence().map {
-                    TableViewListenerEvent(oldTableView[it], it)
-                } else emptySequence<DerivedCellView>()) as Sequence<TableViewListenerEvent<Any>>
 
-            listenerRefEvent.listenerEvent(seq1 + seq2 + seq3 + seq4)
+            val rowEvents = ref.rowViews[rowView.index]?.let { viewMeta ->
+                val oldRowView = oldTableView[rowView.index]
+                val newRowView = newTableView[rowView.index]
+
+                listOfNotNull(
+                    if (viewMeta.cellClasses?.isEmpty() != false) null else TableViewListenerEvent(oldRowView[CellClasses], newRowView[CellClasses]),
+                    if (viewMeta.cellHeight == null) null else TableViewListenerEvent(oldRowView[CellHeight], newRowView[CellHeight]),
+                    if (viewMeta.cellTopics?.isEmpty() != false) null else TableViewListenerEvent(oldRowView[CellTopics], newRowView[CellTopics])
+                ).asSequence()
+            } ?: emptySequence()
+
+            val cellEvents = ref.cellViews.asSequence()
+                .filter { it.component1().second == rowView.index }
+                .map {
+                    val chi = it.component1()
+                    val viewMeta = it.component2()
+
+                    val oldCellView = oldTableView[chi.first, chi.second]
+                    val newCellView = newTableView[chi.first, chi.second]
+
+                    listOfNotNull(
+                        if (viewMeta.cellClasses?.isEmpty() != false) null else TableViewListenerEvent(oldCellView[CellClasses], newCellView[CellClasses]),
+                        if (viewMeta.cellHeight == null) null else TableViewListenerEvent(oldCellView[CellHeight], newCellView[CellHeight]),
+                        if (viewMeta.cellTopics?.isEmpty() != false) null else TableViewListenerEvent(oldCellView[CellTopics], newCellView[CellTopics]),
+                        if (viewMeta.cellWidth == null) null else TableViewListenerEvent(oldCellView[CellWidth], newCellView[CellWidth])
+                    )
+                }.flatten()
+
+            val cellTransformerEvents = ref.cellTransformers.keys().asSequence()
+                .filter { it.second == rowView.index }
+                .map {
+                    val oldCellView = oldTableView[it.first, it.second]
+                    val newCellView = newTableView[it.first, it.second]
+
+                    TableViewListenerEvent(oldCellView[CellTransformer], newCellView[CellTransformer])
+                }
+
+            listenerRefEvent.listenerEvent((rowEvents + cellEvents + cellTransformerEvents) as Sequence<TableViewListenerEvent<Any>>)
         }
 
         return listenerRef
@@ -339,30 +421,34 @@ internal class TableViewEventProcessor {
             val oldTableView = cellView.tableView.makeClone(ref = TableViewRef())
             val newTableView = cellView.tableView.makeClone(ref = ref)
             listenerRefEvent.version = ref.version
-            // TODO TableView for on<TableView>(..) ? Note that we also have this as a BaseTableView for now..
-            val seq1 = (if (eventReceiver.type == Any::class || eventReceiver.type == ColumnView::class)
-                sequenceOf(newTableView[cellView.columnView]).map {
-                    TableViewListenerEvent(oldTableView[it], it)
-                } else emptySequence<ColumnView>()) as Sequence<TableViewListenerEvent<Any>>
-            val seq2 = (if (eventReceiver.type == Any::class || eventReceiver.type == RowView::class)
-                sequenceOf(newTableView[cellView.index]).map {
-                    TableViewListenerEvent(oldTableView[it], it)
-                } else emptySequence<RowView>()) as Sequence<TableViewListenerEvent<Any>>
-            val seq3 = (if (eventReceiver.type == Any::class || eventReceiver.type == CellView::class)
-                sequenceOf(newTableView[cellView]).map {
-                    TableViewListenerEvent(oldTableView[it], it)
-                } else emptySequence<CellView>()) as Sequence<TableViewListenerEvent<Any>>
-            val seq4 = (if (eventReceiver.type == Any::class || eventReceiver.type == DerivedCellView::class)
-                newTableView[cellView].asSequence().map {
-                    TableViewListenerEvent(oldTableView[it], it)
-                } else emptySequence<DerivedCellView>()) as Sequence<TableViewListenerEvent<Any>>
 
-            listenerRefEvent.listenerEvent(seq1 + seq2 + seq3 + seq4)
+            val cellEvents = ref.cellViews[cellView.columnView.header to cellView.index]?.let { viewMeta ->
+                val oldCellView = oldTableView[cellView]
+                val newCellView = newTableView[cellView]
+
+                listOfNotNull(
+                    if (viewMeta.cellClasses?.isEmpty() != false) null else TableViewListenerEvent(oldCellView[CellClasses], newCellView[CellClasses]),
+                    if (viewMeta.cellHeight == null) null else TableViewListenerEvent(oldCellView[CellHeight], newCellView[CellHeight]),
+                    if (viewMeta.cellTopics?.isEmpty() != false) null else TableViewListenerEvent(oldCellView[CellTopics], newCellView[CellTopics]),
+                    if (viewMeta.cellWidth == null) null else TableViewListenerEvent(oldCellView[CellWidth], newCellView[CellWidth])
+                ).asSequence()
+            } ?: emptySequence()
+
+            val cellTransformerEvents = if (ref.cellTransformers.containsKey(cellView.columnView.header to cellView.index)) {
+                val oldCellView = oldTableView[cellView]
+                val newCellView = newTableView[cellView]
+
+                listOf(TableViewListenerEvent(oldCellView[CellTransformer], newCellView[CellTransformer])).asSequence()
+            } else emptySequence()
+
+            listenerRefEvent.listenerEvent((cellEvents + cellTransformerEvents) as Sequence<TableViewListenerEvent<Any>>)
         }
 
         return listenerRef
     }
 
+    /*
+    // TODO Remove?
     @Synchronized
     fun subscribe(
         derivedCellView: DerivedCellView,
@@ -418,6 +504,7 @@ internal class TableViewEventProcessor {
 
         return listenerRef
     }
+     */
 
     // TODO Not sure if this is worth having?
     internal fun haveListeners(): Boolean {

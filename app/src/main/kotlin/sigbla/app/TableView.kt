@@ -25,44 +25,6 @@ import com.github.andrewoma.dexx.kollection.ImmutableSet as PSet
 
 // TODO Add transformers outside just CellView?
 
-// TODO Event model:
-//      .
-//      on<TableView>(tableView):
-//      on<TableView>(columnView):
-//      on<TableView>(rowView):
-//      on<TableView>(cellRangeView):
-//      on<TableView>(cellView):
-//      .
-//      on<ColumnView>(tableView):
-//      on<ColumnView>(columnView):
-//      on<ColumnView>(rowView):
-//      on<ColumnView>(cellRangeView):
-//      on<ColumnView>(cellView):
-//      .
-//      on<RowView>(tableView):
-//      on<RowView>(columnView):
-//      on<RowView>(rowView):
-//      on<RowView>(cellRangeView):
-//      on<RowView>(cellView):
-//      .
-//      on<CellRangeView>(tableView):
-//      on<CellRangeView>(columnView):
-//      on<CellRangeView>(rowView):
-//      on<CellRangeView>(cellRangeView):
-//      on<CellRangeView>(cellView):
-//      .
-//      on<CellView>(tableView):
-//      on<CellView>(columnView):
-//      on<CellView>(rowView):
-//      on<CellView>(cellRangeView):
-//      on<CellView>(cellView):
-//      .
-//      Not sure we want these below?
-//      on<Cell>(tableView) or on<O,N>(tableView):
-//      on<Cell>(columnView) or on<O,N>(columnView):
-//      on<Cell>(rowView) or on<O,N>(rowView):
-//      on<Cell>(cellView) or on<O,N>(cellView):
-
 // TODO Would be good to have something like on<INACTIVE>(tableView) { .. } with something like
 //      on<INACTIVE>(tableView) {
 //        timeout = ...
@@ -193,7 +155,9 @@ class TableView internal constructor(
             val old = makeClone(ref = oldRef)
             val new = makeClone(ref = newRef)
 
-            eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(old, new)) as List<TableViewListenerEvent<Any>>)
+            eventProcessor.publish(listOf(TableViewListenerEvent<SourceTable>(
+                SourceTable(old, oldRef.table), SourceTable(new, newRef.table)
+            )) as List<TableViewListenerEvent<Any>>)
         }
     }
 
@@ -504,10 +468,14 @@ class TableView internal constructor(
             val oldView = makeClone(ref = oldRef)
             val newView = makeClone(ref = newRef)
 
-            val old = oldView[columnHeader]
-            val new = newView[columnHeader]
+            val oldColumnView = oldView[columnHeader]
+            val newColumnView = newView[columnHeader]
 
-            eventProcessor.publish(listOf(TableViewListenerEvent<ColumnView>(old, new)) as List<TableViewListenerEvent<Any>>)
+            eventProcessor.publish(listOf(
+                TableViewListenerEvent(oldColumnView[CellClasses], newColumnView[CellClasses]),
+                TableViewListenerEvent(oldColumnView[CellTopics], newColumnView[CellTopics]),
+                TableViewListenerEvent(oldColumnView[CellWidth], newColumnView[CellWidth])
+            ))
         }
     }
 
@@ -536,10 +504,15 @@ class TableView internal constructor(
             val oldView = makeClone(ref = oldRef)
             val newView = makeClone(ref = newRef)
 
-            val old = oldView[row]
-            val new = newView[row]
+            val oldRowView = oldView[row]
+            val newRowView = newView[row]
 
-            eventProcessor.publish(listOf(TableViewListenerEvent<RowView>(old, new)) as List<TableViewListenerEvent<Any>>)
+
+            eventProcessor.publish(listOf(
+                TableViewListenerEvent(oldRowView[CellClasses], newRowView[CellClasses]),
+                TableViewListenerEvent(oldRowView[CellHeight], newRowView[CellHeight]),
+                TableViewListenerEvent(oldRowView[CellTopics], newRowView[CellTopics])
+            ))
         }
     }
 
@@ -573,10 +546,16 @@ class TableView internal constructor(
             val oldView = makeClone(ref = oldRef)
             val newView = makeClone(ref = newRef)
 
-            val old = oldView[columnHeader][index]
-            val new = newView[columnHeader][index]
+            val oldCellView = oldView[columnHeader][index]
+            val newCellView = newView[columnHeader][index]
 
-            eventProcessor.publish(listOf(TableViewListenerEvent(old, new)))
+            eventProcessor.publish(listOf(
+                TableViewListenerEvent(oldCellView[CellClasses], newCellView[CellClasses]),
+                TableViewListenerEvent(oldCellView[CellHeight], newCellView[CellHeight]),
+                TableViewListenerEvent(oldCellView[CellTopics], newCellView[CellTopics]),
+                TableViewListenerEvent(oldCellView[CellTransformer], newCellView[CellTransformer]),
+                TableViewListenerEvent(oldCellView[CellWidth], newCellView[CellWidth])
+            ))
         }
     }
 
@@ -1304,19 +1283,23 @@ class ColumnView internal constructor(
     // TODO Does this need to care about index relations?
     operator fun get(row: Row) = get(row.index)
 
-    // TODO get/set by RowView?
+    operator fun get(rowView: RowView) = get(rowView.index)
 
     operator fun set(index: Long, view: CellView?) { tableView[header, index] = view }
 
     operator fun set(index: Int, view: CellView?) { this[index.toLong()] = view }
 
-    operator fun set(row: Row, view: CellView?) = { this[row.index] = view }
+    operator fun set(row: Row, view: CellView?) { this[row.index] = view }
+
+    operator fun set(rowView: RowView, view: CellView?) { this[rowView.index] = view }
 
     operator fun set(index: Long, function: CellView.() -> Any?) { this[index] { function() } }
 
     operator fun set(index: Int, function: CellView.() -> Any?) { this[index] { function() } }
 
     operator fun set(row: Row, function: CellView.() -> Any?) { this[row.index] { function() } }
+
+    operator fun set(rowView: RowView, function: CellView.() -> Any?) { this[rowView.index] { function() } }
 
     override fun iterator(): Iterator<DerivedCellView> {
         val ref = tableView.tableViewRef.get()
@@ -2214,6 +2197,31 @@ class Resources internal constructor(
     companion object {
         internal val RESOURCE_COUNTER = AtomicLong()
     }
+}
+
+class SourceTable internal constructor(
+    val source: TableView,
+    val table: Table?
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as SourceTable
+
+        if (source != other.source) return false
+        if (table != other.table) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = source.hashCode()
+        result = 31 * result + (table?.hashCode() ?: 0)
+        return result
+    }
+
+    override fun toString(): String = table?.toString() ?: "null"
 }
 
 // TODO Consider an Index type which allows us to replace the index.html file served for a table,
