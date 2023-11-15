@@ -128,9 +128,12 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     // TODO Add a set(column: Column) = Column to copy over a whole column efficiently
 
+    /*
+    // TODO?
     operator fun get(table: Table.Companion): Table {
         return this
     }
+     */
 
     // -----
 

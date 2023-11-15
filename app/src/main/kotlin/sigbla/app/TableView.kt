@@ -140,6 +140,8 @@ class TableView internal constructor(
 
     // TODO Consider if get(tableView: TableView) and set(..: TableView, ..) should be included for symmetry?
 
+    /*
+    // TODO?
     operator fun get(tableView: Companion) = this
 
     operator fun set(tableView: Companion, newTableView: TableView) {
@@ -159,6 +161,7 @@ class TableView internal constructor(
             eventProcessor.publish(listOf(TableViewListenerEvent<TableView>(old, new)) as List<TableViewListenerEvent<Any>>)
         }
     }
+     */
 
     // TODO Consider if get(table: Table) and set(..: Table, ..) should be included for symmetry?
 

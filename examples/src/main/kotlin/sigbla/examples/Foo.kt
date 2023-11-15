@@ -231,10 +231,10 @@ fun main() {
 
         println("Subscribe 1a")
         events {
-            newTable[Table] //.forEach {
+//            newTable[Table] //.forEach {
 //                it.value
 //            }
-            oldTable[Table] //.forEach {
+//            oldTable[Table] //.forEach {
 //                it.value
 //            }
             forEach {
