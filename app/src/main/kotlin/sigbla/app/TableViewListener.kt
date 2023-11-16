@@ -1,7 +1,7 @@
 package sigbla.app
 
 import sigbla.app.exceptions.InvalidSequenceException
-import sigbla.app.exceptions.SigblaAppException
+import java.util.*
 import kotlin.reflect.KClass
 
 abstract class TableViewListenerReference {
@@ -45,13 +45,30 @@ class TableViewEventReceiver<S, T>(
     }
 }
 
-// TODO Can these be lazy? I.e., reuse same value?
+internal val newViewRefs = Collections.synchronizedMap(WeakHashMap<Sequence<TableViewListenerEvent<*>>, TableView>())
+internal val oldViewRefs = Collections.synchronizedMap(WeakHashMap<Sequence<TableViewListenerEvent<*>>, TableView>())
+
+// TODO See if val Sequence<TableListenerEvent<*, *>>.newView: TableView by lazy { .. } is a better option? Check lifecycle..
 val Sequence<TableViewListenerEvent<*>>.newView: TableView
-    get() = this.firstOrNull()?.let {
-        tableViewFromViewRelated(it.newValue)
-    } ?: throw InvalidSequenceException()
+    get() {
+        val view = newViewRefs[this]
+        if (view != null) return view
+
+        this.firstOrNull()?.let {
+            val view = tableViewFromViewRelated(it.newValue)
+            newViewRefs[this] = view
+            return view
+        } ?: throw InvalidSequenceException()
+    }
 
 val Sequence<TableViewListenerEvent<*>>.oldView: TableView
-    get() = this.firstOrNull()?.let {
-        tableViewFromViewRelated(it.oldValue)
-    } ?: throw InvalidSequenceException()
+    get() {
+        val view = oldViewRefs[this]
+        if (view != null) return view
+
+        this.firstOrNull()?.let {
+            val view = tableViewFromViewRelated(it.oldValue)
+            oldViewRefs[this] = view
+            return view
+        } ?: throw InvalidSequenceException()
+    }
