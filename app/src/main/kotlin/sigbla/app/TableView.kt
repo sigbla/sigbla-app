@@ -2120,6 +2120,7 @@ class CellTopics<S> internal constructor(
     companion object
 }
 
+// TODO Should introduce a generic type S like else where..
 sealed class CellTransformer<T> {
     abstract val source: CellView
     abstract val function: T
@@ -2138,6 +2139,7 @@ class FunctionCellTransformer internal constructor(
     override val function: Cell<*>.() -> Any?
 ): CellTransformer<Cell<*>.() -> Any?>()
 
+// TODO Should introduce a generic type S like else where..?
 class Resources internal constructor(
     val source: TableView,
     internal val _resources: PMap<String, Pair<Long, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>
@@ -2199,6 +2201,7 @@ class Resources internal constructor(
     }
 }
 
+// TODO Should introduce a generic type S like else where..
 class SourceTable internal constructor(
     val source: TableView,
     val table: Table?

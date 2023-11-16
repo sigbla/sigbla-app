@@ -114,7 +114,18 @@ fun indexFromViewRelated(value: Any?): Long? = when (value) {
     else -> throw InvalidValueException("Unsupported type: ${value?.javaClass}")
 }
 
-fun relatedFromViewRelated(tableView: TableView, value: Any): Any = when (value) {
+fun sourceFromViewEventRelated(value: Any?): Any = when (value) {
+    is CellHeight<*, *> -> value.source!!
+    is CellWidth<*, *> -> value.source!!
+    is CellClasses<*> -> value.source!!
+    is CellTopics<*> -> value.source!!
+    is CellTransformer<*> -> value.source
+    is Resources -> value.source
+    is SourceTable -> value.source
+    else -> throw InvalidValueException("Unsupported type: ${value?.javaClass}")
+}
+
+internal fun relatedFromViewRelated(tableView: TableView, value: Any?): Any = when (value) {
     is TableView -> tableView
     is ColumnView -> tableView[value]
     is RowView -> tableView[value]
