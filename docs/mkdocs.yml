@@ -19,6 +19,7 @@ nav:
   - 'charts.md'
   - 'user_input.md'
   - 'math.md'
+  - 'functions.md'
   - 'utils.md'
 
 theme:
