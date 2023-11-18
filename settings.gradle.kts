@@ -1,4 +1,4 @@
-rootProject.name = "sigbla"
+rootProject.name = "sigbla-app"
 
 include("app")
 include("widgets")
