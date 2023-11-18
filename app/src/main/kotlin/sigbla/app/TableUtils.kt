@@ -5,8 +5,6 @@ import sigbla.app.internals.Registry
 import java.io.Writer
 import kotlin.reflect.KClass
 
-// TODO Any iteration below needs to operate on a clone
-
 inline fun <reified T> valueOf(cell: Cell<*>): T? = valueOf(cell, T::class) as T?
 
 fun valueOf(cell: Cell<*>, typeFilter: KClass<*>): Any? = if (typeFilter.isInstance(cell.value)) cell.value else null
@@ -14,7 +12,7 @@ fun valueOf(cell: Cell<*>, typeFilter: KClass<*>): Any? = if (typeFilter.isInsta
 inline fun <reified T> valueOf(noinline source: Cell<*>.() -> Unit): T? = valueOf(source, T::class) as T?
 
 fun valueOf(source: Cell<*>.() -> Unit, typeFilter: KClass<*>): Any? {
-    val table = BaseTable("", null, false, RefHolder(TableRef())) as Table
+    val table = BaseTable(null, null, false, RefHolder(TableRef())) as Table
     table["valueOf", 0L].source()
     val value = valueOf(table["valueOf", 0L], typeFilter)
     Registry.deleteTable(table) // Clean up
@@ -31,7 +29,7 @@ fun headerOf(cell: Cell<*>) = cell.column.header
 
 fun headerOf(column: Column) = column.header
 
-fun headersOf(row: Row) = row.headers.asSequence()
+fun headersOf(row: Row) = row.headers
 
 fun headersOf(cells: Iterable<Cell<*>>) = cells
     .asSequence()
@@ -42,7 +40,7 @@ fun headersOf(cells: Iterable<Cell<*>>) = cells
 
 fun columnOf(cell: Cell<*>) = cell.column
 
-fun columnsOf(row: Row) = row.headers.asSequence().map { row.table[it] }
+fun columnsOf(row: Row) = row.headers.map { row.table[it] }
 
 fun columnsOf(cells: Iterable<Cell<*>>) = cells
     .asSequence()
