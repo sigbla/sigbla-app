@@ -1,4 +1,4 @@
-site_name: Sigbla docs
+site_name: Sigbla App docs
 docs_dir: content
 #site_url: TODO
 #repo_url: TODO
@@ -12,7 +12,7 @@ nav:
   - 'views.md'
   - 'functions.md'
   - 'charts.md'
-  - 'user_input.md'
+  - 'widgets.md'
   - 'math.md'
   - 'table_subscriptions.md'
   - 'view_subscriptions.md'
