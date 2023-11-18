@@ -1,11 +1,10 @@
 # Introduction to Sigbla
 
-Sigbla is spreadsheets for developers, a framework for working with data in tables, using the Kotlin programming language.
+Sigbla is a framework for working with data in tables, using the Kotlin programming language.
 It supports various data types, reactive programming and events, user input, charts, and many other things.
 
-Traditional spreadsheets are great, and used by many for all sorts of reasons.
-
-But they've got some issues, such as:
+We're probably all used to working with data in tables, using applications like Microsoft Excel or Google Sheets.
+Those are great, and used by many for all sorts of reasons. But they've got some shortcomings, such as:
 
 * Mixing code, data, and presentation into the same sheet
 * Performance challenges when doing a lot of calculations
@@ -19,14 +18,14 @@ Sigbla fixes this by:
 * With programming residing in source code files
 * And letting you view the data through views
 
-Sigbla also provide other things, like extending and making easier how we can do math in Kotlin,
+Sigbla also provides other things, like extending and making easier how we can do math in Kotlin,
 and, as mentioned, allows us to wire together relationships between cells through reactive programming.
 
 ## Getting started
 
-You can use Sigbla in your Kotlin projects like any other dependency.
+You can make use of Sigbla in your Kotlin projects by declaring it as a dependency.
 
-Simply include it in your Gradle build file like so:
+Include it in your Gradle build file like so:
 
 ```
 TODO
@@ -142,9 +141,9 @@ We've just scratched the surface of what's possible. Continue learning about [ta
 
 ## Background and current state of this software
 
-Sigbla has been a long-time hobby project of mine, one that stems from me scratching my own itch. There are still some
-features and test cases missing. Because of this, I would currently consider this alpha software. The APIs might change
-and bugs are expected.
+Sigbla has been a long-time hobby project of mine, one that stems from me wanting to be able to easily work with data
+on the JVM using Kotlin. There are still some features and test cases missing. Because of this, I would currently
+consider this alpha software. The APIs might change and bugs are expected.
 
 If you find any issues or have some suggestions, please reach out using GitHub issues or discussions. All feedback
 welcome while I work towards getting this production ready.

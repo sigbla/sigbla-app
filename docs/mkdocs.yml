@@ -9,18 +9,20 @@ nav:
   - 'columns.md'
   - 'rows.md'
   - 'cells.md'
-  - 'table_subscriptions.md'
   - 'views.md'
-  - 'resources.md'
-  - 'view_extensions.md'
-  - 'view_subscriptions.md'
-  - 'concurrency.md'
-  - 'batching.md'
+  - 'functions.md'
   - 'charts.md'
   - 'user_input.md'
   - 'math.md'
-  - 'functions.md'
+  - 'table_subscriptions.md'
+  - 'view_subscriptions.md'
+  - 'view_resources.md'
+  - 'view_extensions.md'
+  - 'concurrency.md'
+  - 'batching.md'
   - 'utils.md'
+
+# TODO: cellview sizing (with colspan, listeners etc)
 
 theme:
   name: material

@@ -1,7 +1,7 @@
-# Resources
+# View resources
 
 Because the UI runs in the browser, it doesn't take much imagination to think that it would be handy to be able to
-add extensions to the frontend. As we'll see in later chapters, this is how we're able to add charts and user input
+add extensions to the frontend. As seen in other chapters, this is how we're able to add charts and user input
 to table views.
 
 First step in allowing for such extensions is to be able to extend the HTTP endpoints exposed, something we'll cover
