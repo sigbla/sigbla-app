@@ -156,7 +156,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     open val asLong: Long? = null
     open val asDouble: Double? = null
     open val asBigInteger: BigInteger? = null
-    open val asBigDecimal: BigDecimal? by lazy { asBigDecimal(DefaultBigDecimalPrecision.mathContext) }
+    open val asBigDecimal: BigDecimal? by lazy { asBigDecimal(Precision.mathContext) }
     open fun asBigDecimal(mathContext: MathContext): BigDecimal? = null
     open val asNumber: Number? = null
 
@@ -442,7 +442,7 @@ class LongCell internal constructor(column: Column, index: Long, override val va
 
     override fun plus(that: BigInteger) = this.value.toBigInteger().add(that)!!
 
-    override fun plus(that: BigDecimal) = this.value.toBigDecimal(DefaultBigDecimalPrecision.mathContext).add(that)!!
+    override fun plus(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).add(that)!!
 
     override fun minus(that: Int) = minus(that.toLong())
 
@@ -454,7 +454,7 @@ class LongCell internal constructor(column: Column, index: Long, override val va
 
     override fun minus(that: BigInteger) = this.value.toBigInteger().subtract(that)!!
 
-    override fun minus(that: BigDecimal) = this.value.toBigDecimal(DefaultBigDecimalPrecision.mathContext).subtract(that)!!
+    override fun minus(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).subtract(that)!!
 
     override fun times(that: Int) = times(that.toLong())
 
@@ -466,7 +466,7 @@ class LongCell internal constructor(column: Column, index: Long, override val va
 
     override fun times(that: BigInteger) = this.value.toBigInteger().multiply(that)!!
 
-    override fun times(that: BigDecimal) = this.value.toBigDecimal(DefaultBigDecimalPrecision.mathContext).multiply(that)!!
+    override fun times(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).multiply(that)!!
 
     override fun div(that: Int) = div(that.toLong())
 
@@ -478,7 +478,7 @@ class LongCell internal constructor(column: Column, index: Long, override val va
 
     override fun div(that: BigInteger) = this.value.toBigInteger().divide(that)!!
 
-    override fun div(that: BigDecimal) = this.value.toBigDecimal(DefaultBigDecimalPrecision.mathContext).divide(that, DefaultBigDecimalPrecision.divRoundingMode)!!
+    override fun div(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).divide(that, Precision.mathContext.roundingMode)!!
 
     override fun rem(that: Int) = rem(that.toLong())
 
@@ -490,7 +490,7 @@ class LongCell internal constructor(column: Column, index: Long, override val va
 
     override fun rem(that: BigInteger) = this.value.toBigInteger().remainder(that)!!
 
-    override fun rem(that: BigDecimal) = this.value.toBigDecimal(DefaultBigDecimalPrecision.mathContext).remainder(that)!!
+    override fun rem(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).remainder(that)!!
 }
 
 class DoubleCell internal constructor(column: Column, index: Long, override val value: Double) : Cell<Double>(column, index) {
@@ -517,9 +517,9 @@ class DoubleCell internal constructor(column: Column, index: Long, override val 
 
     override fun plus(that: Double) = this.value + that
 
-    override fun plus(that: BigInteger) = this.value.toBigDecimal(DefaultBigDecimalPrecision.mathContext).add(that.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext))!!
+    override fun plus(that: BigInteger) = this.value.toBigDecimal(Precision.mathContext).add(that.toBigDecimal(mathContext = Precision.mathContext))!!
 
-    override fun plus(that: BigDecimal) = this.value.toBigDecimal(DefaultBigDecimalPrecision.mathContext).add(that)!!
+    override fun plus(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).add(that)!!
 
     override fun minus(that: Int) = minus(that.toLong())
 
@@ -529,9 +529,9 @@ class DoubleCell internal constructor(column: Column, index: Long, override val 
 
     override fun minus(that: Double) = this.value - that
 
-    override fun minus(that: BigInteger) = this.value.toBigDecimal(DefaultBigDecimalPrecision.mathContext).subtract(that.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext))!!
+    override fun minus(that: BigInteger) = this.value.toBigDecimal(Precision.mathContext).subtract(that.toBigDecimal(mathContext = Precision.mathContext))!!
 
-    override fun minus(that: BigDecimal) = this.value.toBigDecimal(DefaultBigDecimalPrecision.mathContext).subtract(that)!!
+    override fun minus(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).subtract(that)!!
 
     override fun times(that: Int) = times(that.toLong())
 
@@ -541,9 +541,9 @@ class DoubleCell internal constructor(column: Column, index: Long, override val 
 
     override fun times(that: Double) = this.value * that
 
-    override fun times(that: BigInteger) = this.value.toBigDecimal(DefaultBigDecimalPrecision.mathContext).multiply(that.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext))!!
+    override fun times(that: BigInteger) = this.value.toBigDecimal(Precision.mathContext).multiply(that.toBigDecimal(mathContext = Precision.mathContext))!!
 
-    override fun times(that: BigDecimal) = this.value.toBigDecimal(DefaultBigDecimalPrecision.mathContext).multiply(that)!!
+    override fun times(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).multiply(that)!!
 
     override fun div(that: Int) = div(that.toLong())
 
@@ -553,9 +553,9 @@ class DoubleCell internal constructor(column: Column, index: Long, override val 
 
     override fun div(that: Double) = this.value / that
 
-    override fun div(that: BigInteger) = this.value.toBigDecimal(DefaultBigDecimalPrecision.mathContext).divide(that.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), DefaultBigDecimalPrecision.divRoundingMode)!!
+    override fun div(that: BigInteger) = this.value.toBigDecimal(Precision.mathContext).divide(that.toBigDecimal(mathContext = Precision.mathContext), Precision.mathContext.roundingMode)!!
 
-    override fun div(that: BigDecimal) = this.value.toBigDecimal(DefaultBigDecimalPrecision.mathContext).divide(that, DefaultBigDecimalPrecision.divRoundingMode)!!
+    override fun div(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).divide(that, Precision.mathContext.roundingMode)!!
 
     override fun rem(that: Int) = rem(that.toLong())
 
@@ -565,9 +565,9 @@ class DoubleCell internal constructor(column: Column, index: Long, override val 
 
     override fun rem(that: Double) = this.value % that
 
-    override fun rem(that: BigInteger) = this.value.toBigDecimal(DefaultBigDecimalPrecision.mathContext).remainder(that.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext))!!
+    override fun rem(that: BigInteger) = this.value.toBigDecimal(Precision.mathContext).remainder(that.toBigDecimal(mathContext = Precision.mathContext))!!
 
-    override fun rem(that: BigDecimal) = this.value.toBigDecimal(DefaultBigDecimalPrecision.mathContext).remainder(that)!!
+    override fun rem(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).remainder(that)!!
 }
 
 class BigIntegerCell internal constructor(column: Column, index: Long, override val value: BigInteger) : Cell<BigInteger>(column, index) {
@@ -592,11 +592,11 @@ class BigIntegerCell internal constructor(column: Column, index: Long, override 
 
     override fun plus(that: Float) = plus(that.toDouble())
 
-    override fun plus(that: Double) = plus(that.toBigDecimal(DefaultBigDecimalPrecision.mathContext))
+    override fun plus(that: Double) = plus(that.toBigDecimal(Precision.mathContext))
 
     override fun plus(that: BigInteger) = this.value.add(that)!!
 
-    override fun plus(that: BigDecimal) = this.value.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).add(that)!!
+    override fun plus(that: BigDecimal) = this.value.toBigDecimal(mathContext = Precision.mathContext).add(that)!!
 
     override fun minus(that: Int) = minus(that.toLong())
 
@@ -604,11 +604,11 @@ class BigIntegerCell internal constructor(column: Column, index: Long, override 
 
     override fun minus(that: Float) = minus(that.toDouble())
 
-    override fun minus(that: Double) = minus(that.toBigDecimal(DefaultBigDecimalPrecision.mathContext))
+    override fun minus(that: Double) = minus(that.toBigDecimal(Precision.mathContext))
 
     override fun minus(that: BigInteger) = this.value.subtract(that)!!
 
-    override fun minus(that: BigDecimal) = this.value.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).subtract(that)!!
+    override fun minus(that: BigDecimal) = this.value.toBigDecimal(mathContext = Precision.mathContext).subtract(that)!!
 
     override fun times(that: Int) = times(that.toLong())
 
@@ -616,11 +616,11 @@ class BigIntegerCell internal constructor(column: Column, index: Long, override 
 
     override fun times(that: Float) = times(that.toDouble())
 
-    override fun times(that: Double) = times(that.toBigDecimal(DefaultBigDecimalPrecision.mathContext))
+    override fun times(that: Double) = times(that.toBigDecimal(Precision.mathContext))
 
     override fun times(that: BigInteger) = this.value.multiply(that)!!
 
-    override fun times(that: BigDecimal) = this.value.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).multiply(that)!!
+    override fun times(that: BigDecimal) = this.value.toBigDecimal(mathContext = Precision.mathContext).multiply(that)!!
 
     override fun div(that: Int) = div(that.toLong())
 
@@ -628,11 +628,11 @@ class BigIntegerCell internal constructor(column: Column, index: Long, override 
 
     override fun div(that: Float) = div(that.toDouble())
 
-    override fun div(that: Double) = div(that.toBigDecimal(DefaultBigDecimalPrecision.mathContext))
+    override fun div(that: Double) = div(that.toBigDecimal(Precision.mathContext))
 
     override fun div(that: BigInteger) = this.value.divide(that)!!
 
-    override fun div(that: BigDecimal) = this.value.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).divide(that, DefaultBigDecimalPrecision.divRoundingMode)!!
+    override fun div(that: BigDecimal) = this.value.toBigDecimal(mathContext = Precision.mathContext).divide(that, Precision.mathContext.roundingMode)!!
 
     override fun rem(that: Int) = rem(that.toLong())
 
@@ -640,11 +640,11 @@ class BigIntegerCell internal constructor(column: Column, index: Long, override 
 
     override fun rem(that: Float) = rem(that.toDouble())
 
-    override fun rem(that: Double) = rem(that.toBigDecimal(DefaultBigDecimalPrecision.mathContext))
+    override fun rem(that: Double) = rem(that.toBigDecimal(Precision.mathContext))
 
     override fun rem(that: BigInteger) = this.value.remainder(that)!!
 
-    override fun rem(that: BigDecimal) = this.value.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext).remainder(that)!!
+    override fun rem(that: BigDecimal) = this.value.toBigDecimal(mathContext = Precision.mathContext).remainder(that)!!
 }
 
 class BigDecimalCell internal constructor(column: Column, index: Long, override val value: BigDecimal) : Cell<BigDecimal>(column, index) {
@@ -669,9 +669,9 @@ class BigDecimalCell internal constructor(column: Column, index: Long, override 
 
     override fun plus(that: Float) = plus(that.toDouble())
 
-    override fun plus(that: Double) = plus(that.toBigDecimal(DefaultBigDecimalPrecision.mathContext))
+    override fun plus(that: Double) = plus(that.toBigDecimal(Precision.mathContext))
 
-    override fun plus(that: BigInteger) = this.value.add(that.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext))!!
+    override fun plus(that: BigInteger) = this.value.add(that.toBigDecimal(mathContext = Precision.mathContext))!!
 
     override fun plus(that: BigDecimal) = this.value.add(that)!!
 
@@ -681,9 +681,9 @@ class BigDecimalCell internal constructor(column: Column, index: Long, override 
 
     override fun minus(that: Float) = minus(that.toDouble())
 
-    override fun minus(that: Double) = minus(that.toBigDecimal(DefaultBigDecimalPrecision.mathContext))
+    override fun minus(that: Double) = minus(that.toBigDecimal(Precision.mathContext))
 
-    override fun minus(that: BigInteger) = this.value.subtract(that.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext))!!
+    override fun minus(that: BigInteger) = this.value.subtract(that.toBigDecimal(mathContext = Precision.mathContext))!!
 
     override fun minus(that: BigDecimal) = this.value.subtract(that)!!
 
@@ -693,9 +693,9 @@ class BigDecimalCell internal constructor(column: Column, index: Long, override 
 
     override fun times(that: Float) = times(that.toDouble())
 
-    override fun times(that: Double) = times(that.toBigDecimal(DefaultBigDecimalPrecision.mathContext))
+    override fun times(that: Double) = times(that.toBigDecimal(Precision.mathContext))
 
-    override fun times(that: BigInteger) = this.value.multiply(that.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext))!!
+    override fun times(that: BigInteger) = this.value.multiply(that.toBigDecimal(mathContext = Precision.mathContext))!!
 
     override fun times(that: BigDecimal) = this.value.multiply(that)!!
 
@@ -705,11 +705,11 @@ class BigDecimalCell internal constructor(column: Column, index: Long, override 
 
     override fun div(that: Float) = div(that.toDouble())
 
-    override fun div(that: Double) = div(that.toBigDecimal(DefaultBigDecimalPrecision.mathContext))
+    override fun div(that: Double) = div(that.toBigDecimal(Precision.mathContext))
 
-    override fun div(that: BigInteger) = this.value.divide(that.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), DefaultBigDecimalPrecision.divRoundingMode)!!
+    override fun div(that: BigInteger) = this.value.divide(that.toBigDecimal(mathContext = Precision.mathContext), Precision.mathContext.roundingMode)!!
 
-    override fun div(that: BigDecimal) = this.value.divide(that, DefaultBigDecimalPrecision.divRoundingMode)!!
+    override fun div(that: BigDecimal) = this.value.divide(that, Precision.mathContext.roundingMode)!!
 
     override fun rem(that: Int) = rem(that.toLong())
 
@@ -717,9 +717,9 @@ class BigDecimalCell internal constructor(column: Column, index: Long, override 
 
     override fun rem(that: Float) = rem(that.toDouble())
 
-    override fun rem(that: Double) = rem(that.toBigDecimal(DefaultBigDecimalPrecision.mathContext))
+    override fun rem(that: Double) = rem(that.toBigDecimal(Precision.mathContext))
 
-    override fun rem(that: BigInteger) = this.value.remainder(that.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext))!!
+    override fun rem(that: BigInteger) = this.value.remainder(that.toBigDecimal(mathContext = Precision.mathContext))!!
 
     override fun rem(that: BigDecimal) = this.value.remainder(that)!!
 }

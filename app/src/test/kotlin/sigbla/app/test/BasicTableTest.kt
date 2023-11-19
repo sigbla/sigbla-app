@@ -8,7 +8,7 @@ package sigbla.app.test
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.After
-import sigbla.app.DefaultBigDecimalPrecision
+import sigbla.app.Precision
 import sigbla.app.IndexRelation
 import sigbla.app.Table
 import sigbla.app.columnsOf
@@ -274,11 +274,11 @@ class BasicTableTest {
         assertEquals(BigInteger.ONE / BigInteger.TWO, valueOf<Any>(t["Div"][idxMapping[Pair(0, 4)]!!]))
         assertEquals(BigInteger.ONE % BigInteger.TWO, valueOf<Any>(t["Rem"][idxMapping[Pair(0, 4)]!!]))
 
-        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) + BigDecimal.TEN, valueOf<Any>(t["Plus"][idxMapping[Pair(0, 5)]!!]))
-        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) - BigDecimal.TEN, valueOf<Any>(t["Minus"][idxMapping[Pair(0, 5)]!!]))
-        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) * BigDecimal.TEN, valueOf<Any>(t["Times"][idxMapping[Pair(0, 5)]!!]))
-        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) / BigDecimal.TEN, valueOf<Any>(t["Div"][idxMapping[Pair(0, 5)]!!]))
-        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) % BigDecimal.TEN, valueOf<Any>(t["Rem"][idxMapping[Pair(0, 5)]!!]))
+        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = Precision.mathContext) + BigDecimal.TEN, valueOf<Any>(t["Plus"][idxMapping[Pair(0, 5)]!!]))
+        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = Precision.mathContext) - BigDecimal.TEN, valueOf<Any>(t["Minus"][idxMapping[Pair(0, 5)]!!]))
+        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = Precision.mathContext) * BigDecimal.TEN, valueOf<Any>(t["Times"][idxMapping[Pair(0, 5)]!!]))
+        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = Precision.mathContext) / BigDecimal.TEN, valueOf<Any>(t["Div"][idxMapping[Pair(0, 5)]!!]))
+        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = Precision.mathContext) % BigDecimal.TEN, valueOf<Any>(t["Rem"][idxMapping[Pair(0, 5)]!!]))
 
         // --
 
@@ -312,11 +312,11 @@ class BasicTableTest {
         assertEquals(BigInteger.TWO / BigInteger.TWO, valueOf<Any>(t["Div"][idxMapping[Pair(1, 4)]!!]))
         assertEquals(BigInteger.TWO % BigInteger.TWO, valueOf<Any>(t["Rem"][idxMapping[Pair(1, 4)]!!]))
 
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) + BigDecimal.TEN, valueOf<Any>(t["Plus"][idxMapping[Pair(1, 5)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) - BigDecimal.TEN, valueOf<Any>(t["Minus"][idxMapping[Pair(1, 5)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) * BigDecimal.TEN, valueOf<Any>(t["Times"][idxMapping[Pair(1, 5)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) / BigDecimal.TEN, valueOf<Any>(t["Div"][idxMapping[Pair(1, 5)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) % BigDecimal.TEN, valueOf<Any>(t["Rem"][idxMapping[Pair(1, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) + BigDecimal.TEN, valueOf<Any>(t["Plus"][idxMapping[Pair(1, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) - BigDecimal.TEN, valueOf<Any>(t["Minus"][idxMapping[Pair(1, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) * BigDecimal.TEN, valueOf<Any>(t["Times"][idxMapping[Pair(1, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) / BigDecimal.TEN, valueOf<Any>(t["Div"][idxMapping[Pair(1, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) % BigDecimal.TEN, valueOf<Any>(t["Rem"][idxMapping[Pair(1, 5)]!!]))
 
         // --
 
@@ -344,11 +344,11 @@ class BasicTableTest {
         assertEquals(3.0 / 3.0, valueOf<Any>(t["Div"][idxMapping[Pair(2, 3)]!!]))
         assertEquals(3.0 % 3.0, valueOf<Any>(t["Rem"][idxMapping[Pair(2, 3)]!!]))
 
-        assertEquals(BigDecimal("3.0") + BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Plus"][idxMapping[Pair(2, 4)]!!]))
-        assertEquals(BigDecimal("3.0") - BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Minus"][idxMapping[Pair(2, 4)]!!]))
-        assertEquals(BigDecimal("3.0") * BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Times"][idxMapping[Pair(2, 4)]!!]))
-        assertEquals(BigDecimal("3.0") / BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Div"][idxMapping[Pair(2, 4)]!!]))
-        assertEquals(BigDecimal("3.0") % BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Rem"][idxMapping[Pair(2, 4)]!!]))
+        assertEquals(BigDecimal("3.0") + BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Plus"][idxMapping[Pair(2, 4)]!!]))
+        assertEquals(BigDecimal("3.0") - BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Minus"][idxMapping[Pair(2, 4)]!!]))
+        assertEquals(BigDecimal("3.0") * BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Times"][idxMapping[Pair(2, 4)]!!]))
+        assertEquals(BigDecimal("3.0") / BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Div"][idxMapping[Pair(2, 4)]!!]))
+        assertEquals(BigDecimal("3.0") % BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Rem"][idxMapping[Pair(2, 4)]!!]))
 
         assertEquals(BigDecimal("3.0") + BigDecimal.TEN, valueOf<Any>(t["Plus"][idxMapping[Pair(2, 5)]!!]))
         assertEquals(BigDecimal("3.0") - BigDecimal.TEN, valueOf<Any>(t["Minus"][idxMapping[Pair(2, 5)]!!]))
@@ -382,11 +382,11 @@ class BasicTableTest {
         assertEquals(3.0 / 3.0, valueOf<Any>(t["Div"][idxMapping[Pair(3, 3)]!!]))
         assertEquals(3.0 % 3.0, valueOf<Any>(t["Rem"][idxMapping[Pair(3, 3)]!!]))
 
-        assertEquals(BigDecimal("3.0") + BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Plus"][idxMapping[Pair(3, 4)]!!]))
-        assertEquals(BigDecimal("3.0") - BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Minus"][idxMapping[Pair(3, 4)]!!]))
-        assertEquals(BigDecimal("3.0") * BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Times"][idxMapping[Pair(3, 4)]!!]))
-        assertEquals(BigDecimal("3.0") / BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Div"][idxMapping[Pair(3, 4)]!!]))
-        assertEquals(BigDecimal("3.0") % BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Rem"][idxMapping[Pair(3, 4)]!!]))
+        assertEquals(BigDecimal("3.0") + BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Plus"][idxMapping[Pair(3, 4)]!!]))
+        assertEquals(BigDecimal("3.0") - BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Minus"][idxMapping[Pair(3, 4)]!!]))
+        assertEquals(BigDecimal("3.0") * BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Times"][idxMapping[Pair(3, 4)]!!]))
+        assertEquals(BigDecimal("3.0") / BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Div"][idxMapping[Pair(3, 4)]!!]))
+        assertEquals(BigDecimal("3.0") % BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Rem"][idxMapping[Pair(3, 4)]!!]))
 
         assertEquals(BigDecimal("3.0") + BigDecimal.TEN, valueOf<Any>(t["Plus"][idxMapping[Pair(3, 5)]!!]))
         assertEquals(BigDecimal("3.0") - BigDecimal.TEN, valueOf<Any>(t["Minus"][idxMapping[Pair(3, 5)]!!]))
@@ -408,17 +408,17 @@ class BasicTableTest {
         assertEquals(BigInteger.TWO / BigInteger.TWO, valueOf<Any>(t["Div"][idxMapping[Pair(4, 1)]!!]))
         assertEquals(BigInteger.TWO % BigInteger.TWO, valueOf<Any>(t["Rem"][idxMapping[Pair(4, 1)]!!]))
 
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) + BigDecimal("3.0"), valueOf<Any>(t["Plus"][idxMapping[Pair(4, 2)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) - BigDecimal("3.0"), valueOf<Any>(t["Minus"][idxMapping[Pair(4, 2)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) * BigDecimal("3.0"), valueOf<Any>(t["Times"][idxMapping[Pair(4, 2)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) / BigDecimal("3.0"), valueOf<Any>(t["Div"][idxMapping[Pair(4, 2)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) % BigDecimal("3.0"), valueOf<Any>(t["Rem"][idxMapping[Pair(4, 2)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) + BigDecimal("3.0"), valueOf<Any>(t["Plus"][idxMapping[Pair(4, 2)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) - BigDecimal("3.0"), valueOf<Any>(t["Minus"][idxMapping[Pair(4, 2)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) * BigDecimal("3.0"), valueOf<Any>(t["Times"][idxMapping[Pair(4, 2)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) / BigDecimal("3.0"), valueOf<Any>(t["Div"][idxMapping[Pair(4, 2)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) % BigDecimal("3.0"), valueOf<Any>(t["Rem"][idxMapping[Pair(4, 2)]!!]))
 
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) + BigDecimal("3.0"), valueOf<Any>(t["Plus"][idxMapping[Pair(4, 3)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) - BigDecimal("3.0"), valueOf<Any>(t["Minus"][idxMapping[Pair(4, 3)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) * BigDecimal("3.0"), valueOf<Any>(t["Times"][idxMapping[Pair(4, 3)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) / BigDecimal("3.0"), valueOf<Any>(t["Div"][idxMapping[Pair(4, 3)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) % BigDecimal("3.0"), valueOf<Any>(t["Rem"][idxMapping[Pair(4, 3)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) + BigDecimal("3.0"), valueOf<Any>(t["Plus"][idxMapping[Pair(4, 3)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) - BigDecimal("3.0"), valueOf<Any>(t["Minus"][idxMapping[Pair(4, 3)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) * BigDecimal("3.0"), valueOf<Any>(t["Times"][idxMapping[Pair(4, 3)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) / BigDecimal("3.0"), valueOf<Any>(t["Div"][idxMapping[Pair(4, 3)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) % BigDecimal("3.0"), valueOf<Any>(t["Rem"][idxMapping[Pair(4, 3)]!!]))
 
         assertEquals(BigInteger.TWO + BigInteger.TWO, valueOf<Any>(t["Plus"][idxMapping[Pair(4, 4)]!!]))
         assertEquals(BigInteger.TWO - BigInteger.TWO, valueOf<Any>(t["Minus"][idxMapping[Pair(4, 4)]!!]))
@@ -426,11 +426,11 @@ class BasicTableTest {
         assertEquals(BigInteger.TWO / BigInteger.TWO, valueOf<Any>(t["Div"][idxMapping[Pair(4, 4)]!!]))
         assertEquals(BigInteger.TWO % BigInteger.TWO, valueOf<Any>(t["Rem"][idxMapping[Pair(4, 4)]!!]))
 
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) + BigDecimal.TEN, valueOf<Any>(t["Plus"][idxMapping[Pair(4, 5)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) - BigDecimal.TEN, valueOf<Any>(t["Minus"][idxMapping[Pair(4, 5)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) * BigDecimal.TEN, valueOf<Any>(t["Times"][idxMapping[Pair(4, 5)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) / BigDecimal.TEN, valueOf<Any>(t["Div"][idxMapping[Pair(4, 5)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) % BigDecimal.TEN, valueOf<Any>(t["Rem"][idxMapping[Pair(4, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) + BigDecimal.TEN, valueOf<Any>(t["Plus"][idxMapping[Pair(4, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) - BigDecimal.TEN, valueOf<Any>(t["Minus"][idxMapping[Pair(4, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) * BigDecimal.TEN, valueOf<Any>(t["Times"][idxMapping[Pair(4, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) / BigDecimal.TEN, valueOf<Any>(t["Div"][idxMapping[Pair(4, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) % BigDecimal.TEN, valueOf<Any>(t["Rem"][idxMapping[Pair(4, 5)]!!]))
 
         // --
 
@@ -536,11 +536,11 @@ class BasicTableTest {
         assertEquals(BigInteger.ONE / BigInteger.TWO, valueOf<Any>(t["Div"][idxMapping[Pair(0, 4)]!!]))
         assertEquals(BigInteger.ONE % BigInteger.TWO, valueOf<Any>(t["Rem"][idxMapping[Pair(0, 4)]!!]))
 
-        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) + BigDecimal.TEN, valueOf<Any>(t["Plus"][idxMapping[Pair(0, 5)]!!]))
-        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) - BigDecimal.TEN, valueOf<Any>(t["Minus"][idxMapping[Pair(0, 5)]!!]))
-        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) * BigDecimal.TEN, valueOf<Any>(t["Times"][idxMapping[Pair(0, 5)]!!]))
-        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) / BigDecimal.TEN, valueOf<Any>(t["Div"][idxMapping[Pair(0, 5)]!!]))
-        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) % BigDecimal.TEN, valueOf<Any>(t["Rem"][idxMapping[Pair(0, 5)]!!]))
+        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = Precision.mathContext) + BigDecimal.TEN, valueOf<Any>(t["Plus"][idxMapping[Pair(0, 5)]!!]))
+        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = Precision.mathContext) - BigDecimal.TEN, valueOf<Any>(t["Minus"][idxMapping[Pair(0, 5)]!!]))
+        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = Precision.mathContext) * BigDecimal.TEN, valueOf<Any>(t["Times"][idxMapping[Pair(0, 5)]!!]))
+        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = Precision.mathContext) / BigDecimal.TEN, valueOf<Any>(t["Div"][idxMapping[Pair(0, 5)]!!]))
+        assertEquals(BigInteger.ONE.toBigDecimal(mathContext = Precision.mathContext) % BigDecimal.TEN, valueOf<Any>(t["Rem"][idxMapping[Pair(0, 5)]!!]))
 
         // --
 
@@ -574,11 +574,11 @@ class BasicTableTest {
         assertEquals(BigInteger.TWO / BigInteger.TWO, valueOf<Any>(t["Div"][idxMapping[Pair(1, 4)]!!]))
         assertEquals(BigInteger.TWO % BigInteger.TWO, valueOf<Any>(t["Rem"][idxMapping[Pair(1, 4)]!!]))
 
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) + BigDecimal.TEN, valueOf<Any>(t["Plus"][idxMapping[Pair(1, 5)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) - BigDecimal.TEN, valueOf<Any>(t["Minus"][idxMapping[Pair(1, 5)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) * BigDecimal.TEN, valueOf<Any>(t["Times"][idxMapping[Pair(1, 5)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) / BigDecimal.TEN, valueOf<Any>(t["Div"][idxMapping[Pair(1, 5)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) % BigDecimal.TEN, valueOf<Any>(t["Rem"][idxMapping[Pair(1, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) + BigDecimal.TEN, valueOf<Any>(t["Plus"][idxMapping[Pair(1, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) - BigDecimal.TEN, valueOf<Any>(t["Minus"][idxMapping[Pair(1, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) * BigDecimal.TEN, valueOf<Any>(t["Times"][idxMapping[Pair(1, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) / BigDecimal.TEN, valueOf<Any>(t["Div"][idxMapping[Pair(1, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) % BigDecimal.TEN, valueOf<Any>(t["Rem"][idxMapping[Pair(1, 5)]!!]))
 
         // --
 
@@ -606,11 +606,11 @@ class BasicTableTest {
         assertEquals(3.0 / 3.0, valueOf<Any>(t["Div"][idxMapping[Pair(2, 3)]!!]))
         assertEquals(3.0 % 3.0, valueOf<Any>(t["Rem"][idxMapping[Pair(2, 3)]!!]))
 
-        assertEquals(BigDecimal("3.0") + BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Plus"][idxMapping[Pair(2, 4)]!!]))
-        assertEquals(BigDecimal("3.0") - BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Minus"][idxMapping[Pair(2, 4)]!!]))
-        assertEquals(BigDecimal("3.0") * BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Times"][idxMapping[Pair(2, 4)]!!]))
-        assertEquals(BigDecimal("3.0") / BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Div"][idxMapping[Pair(2, 4)]!!]))
-        assertEquals(BigDecimal("3.0") % BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Rem"][idxMapping[Pair(2, 4)]!!]))
+        assertEquals(BigDecimal("3.0") + BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Plus"][idxMapping[Pair(2, 4)]!!]))
+        assertEquals(BigDecimal("3.0") - BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Minus"][idxMapping[Pair(2, 4)]!!]))
+        assertEquals(BigDecimal("3.0") * BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Times"][idxMapping[Pair(2, 4)]!!]))
+        assertEquals(BigDecimal("3.0") / BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Div"][idxMapping[Pair(2, 4)]!!]))
+        assertEquals(BigDecimal("3.0") % BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Rem"][idxMapping[Pair(2, 4)]!!]))
 
         assertEquals(BigDecimal("3.0") + BigDecimal.TEN, valueOf<Any>(t["Plus"][idxMapping[Pair(2, 5)]!!]))
         assertEquals(BigDecimal("3.0") - BigDecimal.TEN, valueOf<Any>(t["Minus"][idxMapping[Pair(2, 5)]!!]))
@@ -644,11 +644,11 @@ class BasicTableTest {
         assertEquals(3.0 / 3.0, valueOf<Any>(t["Div"][idxMapping[Pair(3, 3)]!!]))
         assertEquals(3.0 % 3.0, valueOf<Any>(t["Rem"][idxMapping[Pair(3, 3)]!!]))
 
-        assertEquals(BigDecimal("3.0") + BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Plus"][idxMapping[Pair(3, 4)]!!]))
-        assertEquals(BigDecimal("3.0") - BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Minus"][idxMapping[Pair(3, 4)]!!]))
-        assertEquals(BigDecimal("3.0") * BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Times"][idxMapping[Pair(3, 4)]!!]))
-        assertEquals(BigDecimal("3.0") / BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Div"][idxMapping[Pair(3, 4)]!!]))
-        assertEquals(BigDecimal("3.0") % BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext), valueOf<Any>(t["Rem"][idxMapping[Pair(3, 4)]!!]))
+        assertEquals(BigDecimal("3.0") + BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Plus"][idxMapping[Pair(3, 4)]!!]))
+        assertEquals(BigDecimal("3.0") - BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Minus"][idxMapping[Pair(3, 4)]!!]))
+        assertEquals(BigDecimal("3.0") * BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Times"][idxMapping[Pair(3, 4)]!!]))
+        assertEquals(BigDecimal("3.0") / BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Div"][idxMapping[Pair(3, 4)]!!]))
+        assertEquals(BigDecimal("3.0") % BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext), valueOf<Any>(t["Rem"][idxMapping[Pair(3, 4)]!!]))
 
         assertEquals(BigDecimal("3.0") + BigDecimal.TEN, valueOf<Any>(t["Plus"][idxMapping[Pair(3, 5)]!!]))
         assertEquals(BigDecimal("3.0") - BigDecimal.TEN, valueOf<Any>(t["Minus"][idxMapping[Pair(3, 5)]!!]))
@@ -670,17 +670,17 @@ class BasicTableTest {
         assertEquals(BigInteger.TWO / BigInteger.TWO, valueOf<Any>(t["Div"][idxMapping[Pair(4, 1)]!!]))
         assertEquals(BigInteger.TWO % BigInteger.TWO, valueOf<Any>(t["Rem"][idxMapping[Pair(4, 1)]!!]))
 
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) + BigDecimal("3.0"), valueOf<Any>(t["Plus"][idxMapping[Pair(4, 2)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) - BigDecimal("3.0"), valueOf<Any>(t["Minus"][idxMapping[Pair(4, 2)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) * BigDecimal("3.0"), valueOf<Any>(t["Times"][idxMapping[Pair(4, 2)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) / BigDecimal("3.0"), valueOf<Any>(t["Div"][idxMapping[Pair(4, 2)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) % BigDecimal("3.0"), valueOf<Any>(t["Rem"][idxMapping[Pair(4, 2)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) + BigDecimal("3.0"), valueOf<Any>(t["Plus"][idxMapping[Pair(4, 2)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) - BigDecimal("3.0"), valueOf<Any>(t["Minus"][idxMapping[Pair(4, 2)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) * BigDecimal("3.0"), valueOf<Any>(t["Times"][idxMapping[Pair(4, 2)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) / BigDecimal("3.0"), valueOf<Any>(t["Div"][idxMapping[Pair(4, 2)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) % BigDecimal("3.0"), valueOf<Any>(t["Rem"][idxMapping[Pair(4, 2)]!!]))
 
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) + BigDecimal("3.0"), valueOf<Any>(t["Plus"][idxMapping[Pair(4, 3)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) - BigDecimal("3.0"), valueOf<Any>(t["Minus"][idxMapping[Pair(4, 3)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) * BigDecimal("3.0"), valueOf<Any>(t["Times"][idxMapping[Pair(4, 3)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) / BigDecimal("3.0"), valueOf<Any>(t["Div"][idxMapping[Pair(4, 3)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) % BigDecimal("3.0"), valueOf<Any>(t["Rem"][idxMapping[Pair(4, 3)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) + BigDecimal("3.0"), valueOf<Any>(t["Plus"][idxMapping[Pair(4, 3)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) - BigDecimal("3.0"), valueOf<Any>(t["Minus"][idxMapping[Pair(4, 3)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) * BigDecimal("3.0"), valueOf<Any>(t["Times"][idxMapping[Pair(4, 3)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) / BigDecimal("3.0"), valueOf<Any>(t["Div"][idxMapping[Pair(4, 3)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) % BigDecimal("3.0"), valueOf<Any>(t["Rem"][idxMapping[Pair(4, 3)]!!]))
 
         assertEquals(BigInteger.TWO + BigInteger.TWO, valueOf<Any>(t["Plus"][idxMapping[Pair(4, 4)]!!]))
         assertEquals(BigInteger.TWO - BigInteger.TWO, valueOf<Any>(t["Minus"][idxMapping[Pair(4, 4)]!!]))
@@ -688,11 +688,11 @@ class BasicTableTest {
         assertEquals(BigInteger.TWO / BigInteger.TWO, valueOf<Any>(t["Div"][idxMapping[Pair(4, 4)]!!]))
         assertEquals(BigInteger.TWO % BigInteger.TWO, valueOf<Any>(t["Rem"][idxMapping[Pair(4, 4)]!!]))
 
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) + BigDecimal.TEN, valueOf<Any>(t["Plus"][idxMapping[Pair(4, 5)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) - BigDecimal.TEN, valueOf<Any>(t["Minus"][idxMapping[Pair(4, 5)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) * BigDecimal.TEN, valueOf<Any>(t["Times"][idxMapping[Pair(4, 5)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) / BigDecimal.TEN, valueOf<Any>(t["Div"][idxMapping[Pair(4, 5)]!!]))
-        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = DefaultBigDecimalPrecision.mathContext) % BigDecimal.TEN, valueOf<Any>(t["Rem"][idxMapping[Pair(4, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) + BigDecimal.TEN, valueOf<Any>(t["Plus"][idxMapping[Pair(4, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) - BigDecimal.TEN, valueOf<Any>(t["Minus"][idxMapping[Pair(4, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) * BigDecimal.TEN, valueOf<Any>(t["Times"][idxMapping[Pair(4, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) / BigDecimal.TEN, valueOf<Any>(t["Div"][idxMapping[Pair(4, 5)]!!]))
+        assertEquals(BigInteger.TWO.toBigDecimal(mathContext = Precision.mathContext) % BigDecimal.TEN, valueOf<Any>(t["Rem"][idxMapping[Pair(4, 5)]!!]))
 
         // --
 
