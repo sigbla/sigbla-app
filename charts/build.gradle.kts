@@ -16,7 +16,7 @@ repositories {
     mavenCentral()
 }
 
-val klaxonVersion = "5.5"
+val klaxonVersion = "5.6"
 
 dependencies {
     implementation(project(":app"))

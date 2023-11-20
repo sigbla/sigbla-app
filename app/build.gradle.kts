@@ -17,11 +17,12 @@ repositories {
     maven { url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven") }
 }
 
-val klaxonVersion = "5.5"
+val klaxonVersion = "5.6"
 val dexxVersion = "0.7"
-val ktorVersion = "2.3.0"
-val kotlinxVersion = "0.8.1"
+val ktorVersion = "2.3.6"
+val kotlinxVersion = "0.9.1"
 val junitVersion = "4.13.2"
+val kotlinTestVersion = "1.9.20"
 
 dependencies {
     implementation("com.beust:klaxon:$klaxonVersion")
@@ -34,5 +35,5 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-html-jvm:$kotlinxVersion")
 
     testImplementation("junit:junit:$junitVersion")
-    testImplementation(kotlin("test"))
+    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinTestVersion")
 }
