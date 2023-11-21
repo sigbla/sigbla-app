@@ -1,11 +1,12 @@
 plugins {
-    id("java-library")
+    id("java")
     id("maven-publish")
+    id("com.github.johnrengelman.shadow")
     kotlin("jvm")
     signing
 }
 
-group = "sigbla.charts"
+group = "sigbla.all"
 
 kotlin {
     jvmToolchain {
@@ -17,21 +18,24 @@ repositories {
     mavenCentral()
 }
 
-val klaxonVersion = ext["klaxonVersion"]
+val slf4jVersion = ext["slf4jVersion"]
 
 dependencies {
     implementation(project(":app"))
-    implementation("com.beust:klaxon:$klaxonVersion")
+    implementation(project(":widgets"))
+    implementation(project(":charts"))
+    implementation("org.slf4j:slf4j-simple:$slf4jVersion")
 }
 
-tasks.jar {
+tasks.shadowJar {
     manifest {
-        archiveFileName.set("sigbla-app-charts-${project.version}.jar")
+        archiveFileName.set("sigbla-app-all-${project.version}.jar")
     }
+    archiveClassifier.set("")
 }
 
 java {
-    withSourcesJar()
+    //withSourcesJar()
     //withJavadocJar()
 }
 
@@ -39,9 +43,10 @@ publishing {
     publications {
         create<MavenPublication>("sigbla") {
             groupId = "sigbla.app"
-            artifactId = "sigbla-app-charts"
+            artifactId = "sigbla-app-all"
 
-            from(components["java"])
+            //from(components["java"])
+            artifact(tasks["shadowJar"])
         }
     }
 

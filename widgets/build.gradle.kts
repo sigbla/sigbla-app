@@ -1,10 +1,11 @@
 plugins {
     id("java-library")
+    id("maven-publish")
     kotlin("jvm")
+    signing
 }
 
 group = "sigbla.widgets"
-version = "1.0-SNAPSHOT"
 
 kotlin {
     jvmToolchain {
@@ -18,4 +19,37 @@ repositories {
 
 dependencies {
     implementation(project(":app"))
+}
+
+tasks.jar {
+    manifest {
+        archiveFileName.set("sigbla-app-widgets-${project.version}.jar")
+    }
+}
+
+java {
+    withSourcesJar()
+    //withJavadocJar()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("sigbla") {
+            groupId = "sigbla.app"
+            artifactId = "sigbla-app-widgets"
+
+            from(components["java"])
+        }
+    }
+
+    repositories {
+        maven {
+            name = "ProjectRepo"
+            url = uri(layout.projectDirectory.dir("../.m2/repository"))
+        }
+    }
+}
+
+signing {
+    sign(publishing.publications["sigbla"])
 }

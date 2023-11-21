@@ -46,3 +46,4 @@ bin
 .classpath
 .project
 .settings
+.m2
