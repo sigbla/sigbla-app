@@ -28,8 +28,16 @@ You can make use of Sigbla in your Kotlin projects by declaring it as a dependen
 Include it in your Gradle build file like so:
 
 ```
-TODO
+repositories {
+    maven { url = uri("https://mvn.sigbla.app/repository") }
+}
+
+dependencies {
+    implementation("sigbla.app:sigbla-app-all:1.+")
+}
 ```
+
+Please also consult the [Sigbla sample project](https://github.com/sigbla/sigbla-sample) for a working Gradle example.
 
 However, you don't need a full project setup and can also use a Kotlin REPL, such as [kscript](https://github.com/kscripting/kscript).
 
@@ -38,8 +46,8 @@ Assuming you have kscript installed, here's a quick example:
 ``` kotlin
 #!/usr/bin/env kscript
 
-@file:Repository("TODO")
-@file:DependsOn("TODO")
+@file:Repository("https://mvn.sigbla.app/repository")
+@file:DependsOn("sigbla.app:sigbla-app-all:[1.23,)")
 
 import sigbla.app.*
 
@@ -65,8 +73,8 @@ Let's walk through the various sections:
 ``` kotlin
 #!/usr/bin/env kscript
 
-@file:Repository("TODO")
-@file:DependsOn("TODO")
+@file:Repository("https://mvn.sigbla.app/repository")
+@file:DependsOn("sigbla.app:sigbla-app-all:[1.23,)")
 ```
 
 The first line allows us to run this script as an executable, assuming kscript is available.
