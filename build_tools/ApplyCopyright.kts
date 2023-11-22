@@ -2,11 +2,14 @@
 
 import java.io.File
 import java.io.FileWriter
+import java.time.LocalDate
 
 val ktCopyrightNotice = listOf(
     "/* Copyright 2019-2023, Christian Felde.",
     " * See LICENSE file for licensing details. */"
 )
+
+val mkdocsCopyrightNotice = "Copyright 2019-2023, Christian Felde"
 
 val folders = listOf(
     File("../all/src"),
@@ -109,5 +112,84 @@ for (target in folders) {
     manualFiles += otherLicense(target)
 }
 
-println("Done, $changedFiles files changed")
-println("Also, please verify $manualFiles files..")
+fun mkdocsCopyright() {
+    val target = File("../docs/mkdocs.yml")
+
+    if (!target.isFile) {
+        println("! Couldn't find ${target.path}")
+        return
+    }
+
+    val content = target.readLines()
+
+    if (content.find { it.startsWith("copyright: Copyright ") } == null) {
+        println("! Couldn't find copyright in ${target.path}")
+    }
+
+    val newContent = content.map {
+        if (it.startsWith("copyright: Copyright ")) {
+            "copyright: $mkdocsCopyrightNotice"
+        } else it
+    }
+
+    val newTarget = File(target.parentFile, target.name + ".tmp")
+
+    FileWriter(newTarget).use { writer ->
+        newContent.forEach {
+            writer.append(it)
+            writer.appendLine()
+        }
+
+        writer.flush()
+    }
+
+    newTarget.renameTo(target)
+}
+
+fun bslChangeDate() {
+    val target = File("../LICENSES/BSL.txt")
+
+    if (!target.isFile) {
+        println("! Couldn't find ${target.path}")
+        return
+    }
+
+    val content = target.readLines()
+
+    if (content.find { it.startsWith("Change Date:          ") } == null) {
+        println("! Couldn't find change date in ${target.path}")
+    }
+
+    val newContent = content.map {
+        if (it.startsWith("Change Date:          ")) {
+            val futureDate = LocalDate.now().plusYears(4)
+            "Change Date:          $futureDate"
+        } else it
+    }
+
+    val newTarget = File(target.parentFile, target.name + ".tmp")
+
+    FileWriter(newTarget).use { writer ->
+        newContent.forEach {
+            writer.append(it)
+            writer.appendLine()
+        }
+
+        writer.flush()
+    }
+
+    newTarget.renameTo(target)
+}
+
+println("$changedFiles files changed")
+println("Please verify $manualFiles files..")
+
+println()
+
+println("Doing mkdocs.yml")
+mkdocsCopyright()
+
+println("Doing BSL change date")
+bslChangeDate()
+
+println("Done")
