@@ -1,7 +1,9 @@
-site_name: Sigbla App docs
+site_name: Sigbla App Docs
+site_author: Christian Felde
+copyright: Copyright 2019-2023, Christian Felde
 docs_dir: content
-#site_url: TODO
-#repo_url: TODO
+site_url: https://sigbla.app/docs/
+repo_url: https://github.com/sigbla/sigbla-app
 
 nav:
   - 'index.md'
@@ -37,3 +39,7 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+
+extra_javascript:
+  - path: js/static1.js
+    defer: true
