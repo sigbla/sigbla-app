@@ -1,3 +1,5 @@
+/* Copyright 2019-2023, Christian Felde.
+ * See LICENSE file for licensing details. */
 window.sigbla.onTopic("sigbla-charts", (data) => {
     if (data.action === "preparing") {
         const canvas = data.target.querySelector("canvas");

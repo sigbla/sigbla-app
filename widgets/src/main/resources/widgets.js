@@ -1,3 +1,5 @@
+/* Copyright 2019-2023, Christian Felde.
+ * See LICENSE file for licensing details. */
 window.sigbla.onTopic("sigbla-widgets-button", (data) => {
     if (data.action === "preparing") {
         const input = data.target.querySelector("input");

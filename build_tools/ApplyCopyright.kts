@@ -75,10 +75,39 @@ fun applyLicense(target: File): Int {
     return 0
 }
 
+fun otherLicense(target: File): Int {
+    if (!target.exists()) return 0
+
+    if (target.isDirectory) {
+        var changedFiles = 0
+
+        for (child in target.listFiles()) {
+            changedFiles += otherLicense(child)
+        }
+
+        return changedFiles
+    }
+
+    if (target.isFile && target.name.endsWith(".js")) {
+        println("For manually check: ${target.path}")
+
+        return 1
+    }
+
+    return 0
+}
+
 var changedFiles = 0
 
 for (target in folders) {
     changedFiles += applyLicense(target)
 }
 
+var manualFiles = 0
+
+for (target in folders) {
+    manualFiles += otherLicense(target)
+}
+
 println("Done, $changedFiles files changed")
+println("Also, please verify $manualFiles files..")
