@@ -47,3 +47,4 @@ bin
 .project
 .settings
 .m2
+/docs/site
