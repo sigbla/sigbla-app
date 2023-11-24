@@ -2,6 +2,7 @@
  * See LICENSE file for licensing details. */
 package sigbla.app
 
+import sigbla.app.exceptions.InvalidTableViewException
 import sigbla.app.internals.SigblaBackend
 import sigbla.app.internals.load1
 import sigbla.app.internals.save1
@@ -655,9 +656,23 @@ fun off(tableViewEventReceiver: TableViewEventReceiver<*, *>) = off(tableViewEve
 
 // ---
 
-// TODO Allow File to be a String
+fun load(
+    tableView: TableView,
+    extension: String = "sigv"
+) = load1(
+    File(tableView.name ?: throw InvalidTableViewException("No table view name")) to tableView,
+    extension
+)
 
-// TODO Allow for just save(table), taking name from table, same for load
+fun save(
+    tableView: TableView,
+    extension: String = "sigv",
+    compress: Boolean = true
+) = save1(
+    tableView to File(tableView.name ?: throw InvalidTableViewException("No table view name")),
+    extension,
+    compress
+)
 
 fun load(
     resources: Pair<File, TableView>,
@@ -669,3 +684,23 @@ fun save(
     extension: String = "sigv",
     compress: Boolean = true
 ) = save1(resources, extension, compress)
+
+@JvmName("loadString")
+fun load(
+    resources: Pair<String, TableView>,
+    extension: String = "sigv"
+) = load1(
+    resources.let { File(it.first) to it.second },
+    extension
+)
+
+@JvmName("saveString")
+fun save(
+    resources: Pair<TableView, String>,
+    extension: String = "sigv",
+    compress: Boolean = true
+) = save1(
+    resources.let { it.first to File(it.second) },
+    extension,
+    compress
+)
