@@ -1,7 +1,8 @@
 # Introduction to Sigbla
 
 Sigbla is a framework for working with data in tables, using the Kotlin programming language.
-It supports various data types, reactive programming and events, user input, charts, and many other things.
+It supports [various data types](cells.md), [reactive programming and events](table_subscriptions.md),
+[user input](widgets.md), [charts](charts.md), among other things.
 
 We're probably all used to working with data in tables, using applications like Microsoft Excel or Google Sheets.
 Those are great, and used by many for all sorts of reasons. But they've got some shortcomings, such as:
@@ -153,5 +154,6 @@ Sigbla has been a long-time hobby project of mine, one that stems from me wantin
 on the JVM using Kotlin. There are still some features and test cases missing. Because of this, I would currently
 consider this alpha software. The APIs might change and bugs are expected.
 
-If you find any issues or have some suggestions, please reach out using GitHub issues or discussions. All feedback
-welcome while I work towards getting this production ready.
+If you find any issues or have some suggestions, please reach out using GitHub [issues](https://github.com/sigbla/sigbla-app/issues)
+or [discussions](https://github.com/sigbla/sigbla-app/discussions). All feedback welcome while I work towards getting
+this production ready.

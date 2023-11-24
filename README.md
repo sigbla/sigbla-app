@@ -1,7 +1,9 @@
 # Introduction to Sigbla
 
 Sigbla is a framework for working with data in tables, using the Kotlin programming language.
-It supports various data types, reactive programming and events, user input, charts, and many other things.
+It supports [various data types](https://sigbla.app/docs/cells/),
+[reactive programming and events](https://sigbla.app/docs/table_subscriptions/),
+[user input](https://sigbla.app/docs/widgets/), [charts](https://sigbla.app/docs/charts/), among other things.
 
 We're probably all used to working with data in tables, using applications like Microsoft Excel or Google Sheets.
 Those are great, and used by many for all sorts of reasons. But they've got some shortcomings, such as:
@@ -37,7 +39,7 @@ dependencies {
 }
 ```
 
-Please also consult the [Sigbla sample project](https://github.com/sigbla/sigbla-sample) for a working Gradle example.
+Please also consult the [Sigbla sample project](https://github.com/sigbla/sigbla-app-sample) for a working Gradle example.
 
 However, you don't need a full project setup and can also use a Kotlin REPL, such as [kscript](https://github.com/kscripting/kscript).
 
