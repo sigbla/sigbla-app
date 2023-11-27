@@ -1703,7 +1703,7 @@ fun move(rowToRowAction: RowToRowAction) {
                                 val columnHeader = ccm.component1()
                                 getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (cell, index) ->
                                     acc.put(columnHeader, ccm.component2().remove(index).put(right.index, cell))
-                                } ?: acc
+                                } ?: acc.put(columnHeader, ccm.component2().remove(right.index))
                             },
                             version = ref.version + 1L
                         )
@@ -1718,7 +1718,7 @@ fun move(rowToRowAction: RowToRowAction) {
                                 val columnHeader = ccm.component1()
                                 getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (_, index) ->
                                     acc.put(columnHeader, ccm.component2().remove(index))
-                                } ?: acc
+                                } ?: acc.put(columnHeader, ccm.component2())
                             },
                             version = ref.version + 1L
                         )
@@ -1736,7 +1736,7 @@ fun move(rowToRowAction: RowToRowAction) {
                             val columnHeader = ccm.component1()
                             getCellRaw(oldRef1, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
                                 acc.put(columnHeader, (acc.get(columnHeader) ?: PTreeMap()).put(right.index, cell))
-                            } ?: acc
+                            } ?: acc.put(columnHeader, (acc.get(columnHeader) ?: PTreeMap()).remove(right.index))
                         }
 
                         ref.copy(
@@ -1755,30 +1755,33 @@ fun move(rowToRowAction: RowToRowAction) {
                         ref.copy(
                             columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
                                 val columnHeader = ccm.component1()
-                                getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (cell, index) ->
-                                    // TODO Need to deal with overflow/underflow at edge of tables here and below
-                                    //      It would currently wrap around but then impact whatever is there already..
-                                    //      Just remove rows that get pushed out? Better to throw an exception..
-                                    val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
+                                val (cell, index) = getCellRaw(ref, columnHeader, left.index, left.indexRelation) ?: Pair(null, null)
 
-                                    val withoutMoved = ccm.component2().remove(index)
-                                    val headCells = withoutMoved.to(newIndex, order != RowActionOrder.AFTER)
-                                    val tailCells = withoutMoved.from(newIndex, order == RowActionOrder.AFTER)
+                                // TODO Need to deal with overflow/underflow at edge of tables here and below
+                                //      It would currently wrap around but then impact whatever is there already..
+                                //      Just remove rows that get pushed out? Better to throw an exception..
+                                val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
 
-                                    val cells = if (order == RowActionOrder.AFTER) {
-                                        tailCells.fold(headCells) { acc2, cell ->
-                                            // Shift down
-                                            acc2.put(cell.component1() + 1, cell.component2())
-                                        }
-                                    } else {
-                                        headCells.fold(tailCells) { acc2, cell ->
-                                            // Shift up
-                                            acc2.put(cell.component1() - 1, cell.component2())
-                                        }
+                                val withoutMoved = if (index != null) ccm.component2().remove(index) else ccm.component2()
+                                val headCells = withoutMoved.to(newIndex, order != RowActionOrder.AFTER)
+                                val tailCells = withoutMoved.from(newIndex, order == RowActionOrder.AFTER)
+
+                                val cells = if (order == RowActionOrder.AFTER) {
+                                    tailCells.fold(headCells) { acc2, cell ->
+                                        // Shift down
+                                        acc2.put(cell.component1() + 1, cell.component2())
                                     }
+                                } else {
+                                    headCells.fold(tailCells) { acc2, cell ->
+                                        // Shift up
+                                        acc2.put(cell.component1() - 1, cell.component2())
+                                    }
+                                }
 
+                                if (cell != null)
                                     acc.put(columnHeader, cells.put(newIndex, cell))
-                                } ?: acc
+                                else
+                                    acc.put(columnHeader, cells.remove(newIndex))
                             },
                             version = ref.version + 1L
                         )
@@ -1793,7 +1796,7 @@ fun move(rowToRowAction: RowToRowAction) {
                                 val columnHeader = ccm.component1()
                                 getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (_, index) ->
                                     acc.put(columnHeader, ccm.component2().remove(index))
-                                } ?: acc
+                                } ?: acc.put(columnHeader, ccm.component2())
                             },
                             version = ref.version + 1L
                         )
@@ -1812,28 +1815,31 @@ fun move(rowToRowAction: RowToRowAction) {
 
                         val columnCellMap = oldRef1.columnCells.fold(ref.columnCells) { acc, ccm ->
                             val columnHeader = ccm.component1()
-                            getCellRaw(oldRef1, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
-                                val cm = acc.get(columnHeader) ?: PTreeMap()
+                            val (cell, _) = getCellRaw(oldRef1, columnHeader, left.index, left.indexRelation) ?: Pair(null, null)
 
-                                val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
+                            val cm = acc.get(columnHeader) ?: PTreeMap()
 
-                                val headCells = cm.to(newIndex, order != RowActionOrder.AFTER)
-                                val tailCells = cm.from(newIndex, order == RowActionOrder.AFTER)
+                            val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
 
-                                val cells = if (order == RowActionOrder.AFTER) {
-                                    tailCells.fold(headCells) { acc2, cell ->
-                                        // Shift down
-                                        acc2.put(cell.component1() + 1, cell.component2())
-                                    }
-                                } else {
-                                    headCells.fold(tailCells) { acc2, cell ->
-                                        // Shift up
-                                        acc2.put(cell.component1() - 1, cell.component2())
-                                    }
+                            val headCells = cm.to(newIndex, order != RowActionOrder.AFTER)
+                            val tailCells = cm.from(newIndex, order == RowActionOrder.AFTER)
+
+                            val cells = if (order == RowActionOrder.AFTER) {
+                                tailCells.fold(headCells) { acc2, cell ->
+                                    // Shift down
+                                    acc2.put(cell.component1() + 1, cell.component2())
                                 }
+                            } else {
+                                headCells.fold(tailCells) { acc2, cell ->
+                                    // Shift up
+                                    acc2.put(cell.component1() - 1, cell.component2())
+                                }
+                            }
 
+                            if (cell != null)
                                 acc.put(columnHeader, cells.put(newIndex, cell))
-                            } ?: acc
+                            else
+                                acc.put(columnHeader, cells.remove(newIndex))
                         }
 
                         ref.copy(
@@ -1871,7 +1877,7 @@ fun copy(rowToRowAction: RowToRowAction) {
                                 val columnHeader = ccm.component1()
                                 getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
                                     acc.put(columnHeader, ccm.component2().put(right.index, cell))
-                                } ?: acc
+                                } ?: acc.put(columnHeader, ccm.component2().remove(right.index))
                             },
                             version = ref.version + 1L
                         )
@@ -1894,7 +1900,7 @@ fun copy(rowToRowAction: RowToRowAction) {
                             val columnHeader = ccm.component1()
                             getCellRaw(leftRef, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
                                 acc.put(columnHeader, (acc.get(columnHeader) ?: PTreeMap()).put(right.index, cell))
-                            } ?: acc
+                            } ?: acc.put(columnHeader, (acc.get(columnHeader) ?: PTreeMap()).remove(right.index))
                         }
 
                         ref.copy(
@@ -1913,26 +1919,29 @@ fun copy(rowToRowAction: RowToRowAction) {
                         ref.copy(
                             columnCells = ref.columnCells.fold(PHashMap()) { acc, ccm ->
                                 val columnHeader = ccm.component1()
-                                getCellRaw(ref, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
-                                    val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
+                                val (cell, _) = getCellRaw(ref, columnHeader, left.index, left.indexRelation) ?: Pair(null, null)
 
-                                    val headCells = ccm.component2().to(newIndex, order != RowActionOrder.AFTER)
-                                    val tailCells = ccm.component2().from(newIndex, order == RowActionOrder.AFTER)
+                                val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
 
-                                    val cells = if (order == RowActionOrder.AFTER) {
-                                        tailCells.fold(headCells) { acc2, cell ->
-                                            // Shift down
-                                            acc2.put(cell.component1() + 1, cell.component2())
-                                        }
-                                    } else {
-                                        headCells.fold(tailCells) { acc2, cell ->
-                                            // Shift up
-                                            acc2.put(cell.component1() - 1, cell.component2())
-                                        }
+                                val headCells = ccm.component2().to(newIndex, order != RowActionOrder.AFTER)
+                                val tailCells = ccm.component2().from(newIndex, order == RowActionOrder.AFTER)
+
+                                val cells = if (order == RowActionOrder.AFTER) {
+                                    tailCells.fold(headCells) { acc2, cell ->
+                                        // Shift down
+                                        acc2.put(cell.component1() + 1, cell.component2())
                                     }
+                                } else {
+                                    headCells.fold(tailCells) { acc2, cell ->
+                                        // Shift up
+                                        acc2.put(cell.component1() - 1, cell.component2())
+                                    }
+                                }
 
+                                if (cell != null)
                                     acc.put(columnHeader, cells.put(newIndex, cell))
-                                } ?: acc
+                                else
+                                    acc.put(columnHeader, cells.remove(newIndex))
                             },
                             version = ref.version + 1L
                         )
@@ -1956,28 +1965,31 @@ fun copy(rowToRowAction: RowToRowAction) {
 
                         val columnCellMap = leftRef.columnCells.fold(ref.columnCells) { acc, ccm ->
                             val columnHeader = ccm.component1()
-                            getCellRaw(leftRef, columnHeader, left.index, left.indexRelation)?.let { (cell, _) ->
-                                val cm = acc.get(columnHeader) ?: PTreeMap()
+                            val (cell, _) = getCellRaw(leftRef, columnHeader, left.index, left.indexRelation) ?: Pair(null, null)
 
-                                val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
+                            val cm = acc.get(columnHeader) ?: PTreeMap()
 
-                                val headCells = cm.to(newIndex, order != RowActionOrder.AFTER)
-                                val tailCells = cm.from(newIndex, order == RowActionOrder.AFTER)
+                            val newIndex = if (order == RowActionOrder.AFTER) right.index + 1 else right.index - 1
 
-                                val cells = if (order == RowActionOrder.AFTER) {
-                                    tailCells.fold(headCells) { acc2, cell ->
-                                        // Shift down
-                                        acc2.put(cell.component1() + 1, cell.component2())
-                                    }
-                                } else {
-                                    headCells.fold(tailCells) { acc2, cell ->
-                                        // Shift up
-                                        acc2.put(cell.component1() - 1, cell.component2())
-                                    }
+                            val headCells = cm.to(newIndex, order != RowActionOrder.AFTER)
+                            val tailCells = cm.from(newIndex, order == RowActionOrder.AFTER)
+
+                            val cells = if (order == RowActionOrder.AFTER) {
+                                tailCells.fold(headCells) { acc2, cell ->
+                                    // Shift down
+                                    acc2.put(cell.component1() + 1, cell.component2())
                                 }
+                            } else {
+                                headCells.fold(tailCells) { acc2, cell ->
+                                    // Shift up
+                                    acc2.put(cell.component1() - 1, cell.component2())
+                                }
+                            }
 
+                            if (cell != null)
                                 acc.put(columnHeader, cells.put(newIndex, cell))
-                            } ?: acc
+                            else
+                                acc.put(columnHeader, cells.remove(newIndex))
                         }
 
                         ref.copy(
