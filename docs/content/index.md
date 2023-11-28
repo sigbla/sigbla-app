@@ -61,7 +61,8 @@ table["Sum", 2] = sum(table["Column A", 0], table["Column A", 1])
 
 val tableView = TableView[table]
 
-show(tableView)
+val url = show(tableView)
+println(url)
 ```
 
 It's a basic example that puts the values 100 and 200 into a cell each, before assigning the sum of these to a separate
@@ -125,7 +126,8 @@ much like any other spreadsheet.
 ``` kotlin
 val tableView = TableView[table]
 
-show(tableView)
+val url = show(tableView)
+println(url)
 ```
 
 ![Getting started example sheet](img/getting_started_example_1.png)

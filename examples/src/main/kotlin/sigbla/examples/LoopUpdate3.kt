@@ -28,7 +28,8 @@ fun main() {
     }
 
     val tableView = TableView[table]
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 
     tableView {
         tableView[CellWidth] = 10

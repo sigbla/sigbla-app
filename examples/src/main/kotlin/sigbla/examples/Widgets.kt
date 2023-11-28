@@ -45,7 +45,8 @@ fun main() {
 
     move(table["A"] before table["B"])
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 
     println("END")
 }

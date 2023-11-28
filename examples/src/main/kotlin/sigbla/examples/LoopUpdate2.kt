@@ -30,7 +30,9 @@ fun main() {
         tableView[CellHeight] = 10
     }
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
+
     Thread.sleep(15000)
 
     while (true) {

@@ -36,7 +36,8 @@ fun main() {
     tableView[0][CellHeight] = 250
     tableView["Chart"][CellWidth] = 550
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 }
 ```
 
@@ -89,7 +90,8 @@ fun main() {
     tableView[0][CellHeight] = 250
     tableView["Chart"][CellWidth] = 550
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 }
 ```
 

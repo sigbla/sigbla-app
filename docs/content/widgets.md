@@ -30,7 +30,8 @@ fun main() {
         table["Value", 0] = table["Value", 0] - 1
     }
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 }
 ```
 
@@ -54,7 +55,8 @@ fun main() {
         table["Result", 0] = if (this.checked) "Checked" else "Not checked"
     }
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 }
 ```
 
@@ -84,7 +86,8 @@ fun main() {
 
     initButtons()
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 }
 ```
 
@@ -112,7 +115,8 @@ fun main() {
         println("Text update: ${this.text}")
     }
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 }
 ```
 
@@ -138,6 +142,7 @@ fun main() {
         this.text = (this.text.toLong() + 1).toString()
     }
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 }
 ```

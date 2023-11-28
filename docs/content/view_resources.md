@@ -34,7 +34,8 @@ fun main() {
         call.respondText(text = "Hello from my resources")
     }
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 }
 ```
 
@@ -63,7 +64,8 @@ fun main() {
         call.respondText(text = "Hello $name")
     }
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 }
 ```
 
@@ -100,7 +102,8 @@ fun main() {
         call.respondText(text = "Hello $name")
     }
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 }
 ```
 
@@ -175,7 +178,8 @@ fun main() {
         )
     )
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 }
 ```
 
@@ -217,7 +221,8 @@ tableView[Resources] = tableView[Resources] + ("my.css" to css {
     """
 })
 
-show(tableView)
+val url = show(tableView)
+println(url)
 ```
 
 This produces a lovely looking table with our custom color scheme:

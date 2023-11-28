@@ -70,7 +70,8 @@ fun main() {
         }
     )
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 }
 ```
 
@@ -305,7 +306,8 @@ tableView[Resources] = "my.css" to css {
     """
 }
 
-show(tableView)
+val url = show(tableView)
+println(url)
 ```
 
 ![Custom cell classes with CSS](img/view_extensions_classes_css.png)
@@ -336,7 +338,8 @@ tableView[Resources] = "my.js" to js {
     """
 }
 
-show(tableView)
+val url = show(tableView)
+println(url)
 ```
 
 ![Multiple topics triggering callback](img/view_extensions_multiple_topics.png)
@@ -453,7 +456,8 @@ fun main() {
     tableView["A", 1] = clickableCellCounter(table["A", 1])
     tableView["A", 2] = clickableCellCounter(table["A", 2])
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 }
 ```
 

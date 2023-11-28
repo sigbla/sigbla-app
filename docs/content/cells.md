@@ -425,7 +425,8 @@ fun main() {
     // 1                                              |<div class="yellow"><p>A yellow cell</p></div>
     // 2                                              |<div class="green"><p>A green cell</p></div>
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 }
 ```
 

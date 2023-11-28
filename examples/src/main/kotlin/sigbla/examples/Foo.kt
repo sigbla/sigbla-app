@@ -482,7 +482,8 @@ fun main() {
     on((table["input", 1] or table["input", 2]) and table["button", 1]) ..
      */
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 
     println("END")
 }

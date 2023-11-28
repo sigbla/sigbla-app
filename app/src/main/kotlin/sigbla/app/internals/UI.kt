@@ -34,11 +34,12 @@ import kotlin.collections.set
 import kotlin.collections.toSet
 import kotlin.concurrent.thread
 import kotlin.reflect.KClass
+import java.net.URL
 
 internal object SigblaBackend {
     private val engine: ApplicationEngine
+    private val port: Int
     private val blockingThread: Thread
-    val port: Int
 
     private val listeners: ConcurrentMap<WebSocketSession, SigblaClient> = ConcurrentHashMap()
 
@@ -54,6 +55,7 @@ internal object SigblaBackend {
     private fun start(n: Int): Pair<ApplicationEngine, Int> {
         return try {
             val port = TableView[Port]
+            // TODO Add val host = TableView[Host], and pass to embeddedServer ?
             val engine = embeddedServer(Netty, port) {
                 install(WebSockets)
 
@@ -553,7 +555,7 @@ internal object SigblaBackend {
         }
     }
 
-    fun openView(view: TableView) {
+    fun openView(view: TableView, ref: String, urlGenerator: (engine: ApplicationEngine, view: TableView, ref: String) -> URL): URL {
         // TODO It's possible for a view to be replaced by another view on same name.
         //      We'll need to ensure we remove this listener and add a new listener in that case.
         on(view) {
@@ -589,7 +591,7 @@ internal object SigblaBackend {
                         }
                     } else {
                         listeners.values.forEach { client ->
-                            if (client.ref == view.name) {
+                            if (client.ref == ref) {
                                 runBlocking {
                                     handleDims(client)
                                     handleDirty(client, dirtyCells, dirtyResources)
@@ -613,7 +615,7 @@ internal object SigblaBackend {
                     if (any()) {
                         val dirtyCells = map { it.newValue }.toList()
                         listeners.values.forEach { client ->
-                            if (client.ref == view.name) {
+                            if (client.ref == ref) {
                                 runBlocking {
                                     handleDims(client)
                                     handleDirty(client, dirtyCells, emptyList())
@@ -625,7 +627,7 @@ internal object SigblaBackend {
             }
         }
 
-        println("http://127.0.0.1:$port/t/${view.name}/")
+        return urlGenerator(engine, view, ref)
     }
 
     private fun addListener(
