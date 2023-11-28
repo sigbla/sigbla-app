@@ -2,11 +2,7 @@
  * See LICENSE file for licensing details. */
 package sigbla.examples
 
-import sigbla.app.Table
-import sigbla.app.TableView
-import sigbla.app.show
-import sigbla.app.sum
-import sigbla.app.valuesOf
+import sigbla.app.*
 
 fun main() {
     val table = Table["test"]
@@ -33,7 +29,8 @@ fun main() {
 
     val tableView = TableView[table]
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 
     println("END")
 }

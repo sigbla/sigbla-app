@@ -255,7 +255,8 @@ fun main() {
     }
      */
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 
     on(tableView, allowLoop = true) events {
         forEach {

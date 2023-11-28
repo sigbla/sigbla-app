@@ -2,11 +2,13 @@
  * See LICENSE file for licensing details. */
 package sigbla.app
 
+import io.ktor.server.engine.*
 import sigbla.app.exceptions.InvalidTableViewException
 import sigbla.app.internals.SigblaBackend
 import sigbla.app.internals.load1
 import sigbla.app.internals.save1
 import java.io.File
+import java.net.URL
 import kotlin.reflect.KClass
 
 fun clear(columnView: ColumnView) {
@@ -105,11 +107,24 @@ fun clone(tableView: TableView): TableView = tableView.makeClone()
 
 fun clone(tableView: TableView, name: String): TableView = tableView.makeClone(name, true)
 
-// TODO Have show return the URL
-// TODO Consider logging the URL rather than println, or some other mechanism to allow users to turn it off
-fun show(tableView: TableView) = SigblaBackend.openView(tableView)
+fun show(
+    tableView: TableView,
+    ref: String = tableView.name ?: throw InvalidTableViewException("No name on table view"),
+    urlGenerator: (engine: ApplicationEngine, view: TableView, ref: String) -> URL = { engine, _, ref ->
+        val type = engine.environment.connectors.first().type.name
+        val host = engine.environment.connectors.first().host
+        val port = engine.environment.connectors.first().port
+        URL("$type://$host:$port/t/${ref}/")
+    }
+): URL = SigblaBackend.openView(tableView, ref, urlGenerator)
 
-fun show(table: Table) = show(TableView[table])
+fun show(table: Table): URL = show(TableView[table])
+fun show(table: Table, ref: String): URL = show(TableView[table], ref)
+fun show(
+    table: Table,
+    ref: String,
+    urlGenerator: (engine: ApplicationEngine, view: TableView, ref: String) -> URL
+): URL = show(TableView[table], ref, urlGenerator)
 
 // ---
 

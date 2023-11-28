@@ -329,7 +329,8 @@ table["A"].forEach {
     }
 }
 
-show(tableView)
+val url = show(tableView)
+println(url)
 ```
 
 This is, as explained for the `WebCell` in the chapter on cells using `kotlinx.html` so an `import kotlinx.html.*` is
@@ -417,7 +418,8 @@ table["A", 0] = 100
 table["B", 0] = "B0"
 
 val tableView = TableView[table]
-show(tableView)
+val url = show(tableView)
+println(url)
 ```
 
 Once you have the UI for a table opened in a browser, you are able to interact with some of the table view metadata.

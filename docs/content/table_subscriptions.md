@@ -24,7 +24,8 @@ on(table["A", 0] or table["A", 1]) events {
 table["A", 0] = 100
 table["A", 1] = 123.123
 
-show(table)
+val url = show(table)
+println(url)
 ```
 
 Starting with the `on` function, this takes cell references and executes our event listener. We can pass any type of

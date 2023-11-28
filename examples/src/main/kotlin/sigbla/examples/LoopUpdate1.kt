@@ -13,7 +13,8 @@ fun main() {
     tableView[CellClasses] = "testClass"
     tableView[CellTopics] = sortedSetOf("test-event")
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 
     table["B", 0] = sum(table["A", 0]..table["A", 9])
 

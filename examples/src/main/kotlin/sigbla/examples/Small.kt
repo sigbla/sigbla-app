@@ -59,7 +59,8 @@ fun main() {
     on(tableView) = listener
      */
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 
     println("END")
 }

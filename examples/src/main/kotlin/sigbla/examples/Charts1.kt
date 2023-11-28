@@ -35,7 +35,8 @@ fun main() {
         )
     }
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 
     println("END")
 }

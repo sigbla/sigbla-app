@@ -32,7 +32,8 @@ fun main() {
     tableView["B"][CellWidth] = 350
     tableView["C"][CellWidth] = 350
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 
     Thread.sleep(10000)
 

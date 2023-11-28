@@ -40,7 +40,8 @@ fun main() {
         this + ("static-file/sigbla.txt" to staticFile(tmpFile))
     }
 
-    show(tableView)
+    val url = show(tableView)
+    println(url)
 
     tableView[Resources] {
         this + ("static-resource/magpie.jpg" to staticResource("/test-folder/magpie.jpg"))
