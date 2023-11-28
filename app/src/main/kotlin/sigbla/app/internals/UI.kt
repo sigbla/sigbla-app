@@ -34,7 +34,11 @@ import kotlin.collections.set
 import kotlin.collections.toSet
 import kotlin.concurrent.thread
 import kotlin.reflect.KClass
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.net.URL
+
+private val logger: Logger = LoggerFactory.getLogger("sigbla.app.internals.UI")
 
 internal object SigblaBackend {
     private val engine: ApplicationEngine
@@ -134,7 +138,7 @@ internal object SigblaBackend {
                                 }
                             }
                         } catch (ex: Exception) {
-                            println("Closing listener due to: " + ex.message)
+                            logger.info("Closing listener on $ref due to: ${ex.message}")
                             removeListener(this)
                         }
                     }
@@ -581,7 +585,7 @@ internal object SigblaBackend {
                     }
 
                     if (clear) {
-                        println("force clear")
+                        logger.debug("Forcing a clear on {}", ref)
                         listeners.values.forEach { client ->
                             if (client.ref == source.name) {
                                 runBlocking {
@@ -674,7 +678,7 @@ internal data class SigblaClient(
         val overflow = outgoingPackages.size > MAX_PACKAGES
 
         if (overflow) {
-            println("overflow")
+            logger.debug("View overflow on {}", ref)
 
             outgoingPackages.clear()
             contentState.clear()

@@ -24,10 +24,12 @@ val ktorVersion = ext["ktorVersion"]
 val kotlinxVersion = ext["kotlinxVersion"]
 val junitVersion = ext["junitVersion"]
 val kotlinTestVersion = ext["kotlinTestVersion"]
+val slf4jVersion = ext["slf4jVersion"]
 
 dependencies {
     implementation("com.beust:klaxon:$klaxonVersion")
     implementation("com.github.andrewoma.dexx:kollection:$dexxVersion")
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
 
     api("io.ktor:ktor-server-core:$ktorVersion")
     api("io.ktor:ktor-server-netty:$ktorVersion")
