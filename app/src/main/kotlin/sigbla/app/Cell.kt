@@ -73,6 +73,7 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
 
         val columns = ref
             .headers
+            // TODO prenatal filter?
             .filter { it.second.columnOrder in minOrder..maxOrder }
             .let {
                 if (currentStart > currentEnd) it.toList().reversed().asSequence() else it
@@ -822,6 +823,7 @@ class Cells(sources: List<Iterable<Cell<*>>>): Iterable<Cell<*>> {
     override fun iterator(): Iterator<Cell<*>> {
         val ref = table.tableRef.get()
         // TODO Each iterator should make use of the same reference..
+        // TODO prenatal filter?
         return sources.asSequence().flatten().mapNotNull {
             val meta = ref.columns[it.column.header] ?: return@mapNotNull null
             val column = BaseColumn(table, it.column.header, meta.columnOrder)

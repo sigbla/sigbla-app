@@ -351,6 +351,7 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
         return ref
             .headers
             .filter { it.second.columnOrder in minOrder..maxOrder }
+            // TODO prenatal filter?
             .let {
                 if (currentStart > currentEnd) it.toList().reversed().asSequence() else it
             }
