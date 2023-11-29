@@ -2929,5 +2929,16 @@ fun save(
     compress
 )
 
+fun compact(table: Table) = table {
+    clone(table).let { sparseTable ->
+        clear(table)
+
+        var index = 0L
+        sparseTable.indexes.forEach {
+            copy(sparseTable[it] to table[index++])
+        }
+    }
+}
+
 // TODO Add functions for sorting, like sort(table by table["A"]) or sort(table by table[1]) etc..
 //      Also look at supporting sort of a subsection of a table through cell ranges, columns, etc

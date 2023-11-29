@@ -1095,4 +1095,48 @@ class TableTest {
         assertEquals("B1 T", t1["B", 1].value)
         assertEquals("B2 T", t1["B", 2].value)
     }
+
+    @Test
+    fun `table compact`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", -1] = "A-1"
+        t["A", 2] = "A2"
+        t["A", 4] = "A4"
+        t["A", 6] = "A6"
+
+        t["B", 1] = "B1"
+        t["B", 2] = "B2"
+        t["B", 4] = "B4"
+
+        var events: List<TableListenerEvent<out Any, out Any>> = emptyList()
+
+        on(t, skipHistory = true) events {
+            events = toList()
+        }
+
+        compact(t)
+
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), t.indexes.toList())
+        assertEquals(listOf("A-1", "A2", "A4", "A6"), t["A"].map { it.toString() }.toList())
+        assertEquals(listOf("B1", "B2", "B4"), t["B"].map { it.toString() }.toList())
+        assertEquals(listOf(0L, 2L, 3L, 4L), t["A"].map { it.index }.toList())
+        assertEquals(listOf(1L, 2L, 3L), t["B"].map { it.index }.toList())
+
+        val eventsOnA = events.filter { it.newValue.column.header[0] == "A" }.sortedBy { it.newValue.index }
+
+        assertEquals(7, eventsOnA.count())
+        assertEquals(listOf(-1L, 0L, 1L, 2L, 3L, 4L, 6L), eventsOnA.map { it.oldValue.index })
+        assertEquals(listOf(-1L, 0L, 1L, 2L, 3L, 4L, 6L), eventsOnA.map { it.newValue.index })
+        assertEquals(listOf("A-1", "", "", "A2", "", "A4", "A6"), eventsOnA.map { it.oldValue.toString() })
+        assertEquals(listOf("", "A-1", "", "A2", "A4", "A6", ""), eventsOnA.map { it.newValue.toString() })
+
+        val eventsOnB = events.filter { it.newValue.column.header[0] == "B" }.sortedBy { it.newValue.index }
+
+        assertEquals(5, eventsOnB.count())
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), eventsOnB.map { it.oldValue.index })
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), eventsOnB.map { it.newValue.index })
+        assertEquals(listOf("", "B1", "B2", "", "B4"), eventsOnB.map { it.oldValue.toString() })
+        assertEquals(listOf("", "B1", "B2", "B4", ""), eventsOnB.map { it.newValue.toString() })
+    }
 }
