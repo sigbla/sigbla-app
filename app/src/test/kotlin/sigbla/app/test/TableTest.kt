@@ -507,6 +507,8 @@ class TableTest {
         assertTrue(t.iterator().hasNext())
         assertEquals(listOf("[A]", "[B]", "[C]", "[D]"), t.headers.map { it.toString() }.toList())
         assertTrue(t.indexes.iterator().hasNext())
+        assertEquals(2, t["A"].indexes.count())
+        assertEquals(0, t["B"].indexes.count())
     }
 
     @Test
