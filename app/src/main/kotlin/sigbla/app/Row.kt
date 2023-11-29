@@ -19,6 +19,9 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
     val headers: Sequence<ColumnHeader>
         get() = table.headers
 
+    val columns: Sequence<Column>
+        get() = table.columns
+
     operator fun get(header: ColumnHeader): Cell<*> = table[header][indexRelation, index]
 
     operator fun get(column: Column): Cell<*> = table[column][indexRelation, index]

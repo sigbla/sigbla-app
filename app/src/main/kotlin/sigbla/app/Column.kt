@@ -69,6 +69,10 @@ abstract class Column internal constructor(
     val header: ColumnHeader,
     val order: Long
 ) : Comparable<Column>, Iterable<Cell<*>> {
+    val indexes: Sequence<Long>
+        get() = table.tableRef.get().columnCells[header]?.keys()?.sorted()?.asSequence()
+            ?: throw InvalidColumnException("Unable to find column $header")
+
     abstract operator fun get(indexRelation: IndexRelation, index: Long): Cell<*>
 
     abstract operator fun set(index: Long, value: Cell<*>?)
@@ -347,6 +351,7 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
         return ref
             .headers
             .filter { it.second.columnOrder in minOrder..maxOrder }
+            // TODO prenatal filter?
             .let {
                 if (currentStart > currentEnd) it.toList().reversed().asSequence() else it
             }

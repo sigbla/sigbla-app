@@ -916,6 +916,7 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     override fun iterator(): Iterator<Cell<*>> {
         val ref = tableRef.get()
+        // TODO prenatal filter?
         val columnIterator = ref.headers.map { BaseColumn(this, it.first, it.second.columnOrder) }.iterator()
 
         return object : Iterator<Cell<*>> {
@@ -994,6 +995,7 @@ internal data class TableRef(
             .filter { !it.component2().prenatal }
             .map { it.component1() }
             .fold(TreeSet<Long>()) { acc, column ->
+                // TODO columnCells should contain column, otherwise we've got a bug.. throw exception if missing
                 acc.addAll(columnCells[column]?.keys() ?: emptyList())
                 acc
             }
