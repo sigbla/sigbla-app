@@ -120,6 +120,49 @@ instance. The same for a row index, both via a `Row` instance, or again a `Cell`
 For easing this and similar cases, there exists a group of utility functions called `headerOf(..)`, `headersOf(..)`,
 `columnOf(..)`, `columnsOf(..)`, `indexOf(..)`, and `indexesOf(..)`.
 
+## Table compact
+
+You might sometimes have a sparse table, one where rows might be empty, and you wish to compact this so that there are
+no empty rows in-between rows with content.
+
+You can do that with the `compact(table)` function:
+
+``` kotlin
+val table = Table[null]
+
+table["A", 1] = "A1"
+table["A", 4] = "A4"
+table["A", 9] = "A9"
+
+table["B", 2] = "B2"
+table["B", 4] = "B4"
+table["B", 6] = "B6"
+
+// Before compact
+print(table)
+
+// Output:
+//    |A  |B  
+// 1  |A1 |   
+// 2  |   |B2 
+// 4  |A4 |B4 
+// 6  |   |B6 
+// 9  |A9 |   
+
+compact(table)
+
+// After compact
+print(table)
+
+// Output:
+//    |A  |B  
+// 0  |A1 |   
+// 1  |   |B2 
+// 2  |A4 |B4 
+// 3  |   |B6 
+// 4  |A9 |   
+```
+
 ## View related
 
 Table views deal with many different types of view metadata, which can make events and their contained types somewhat
