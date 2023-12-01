@@ -127,13 +127,13 @@ much like any other spreadsheet.
 val tableView = TableView[table]
 
 val url = show(tableView)
-println(url)
+println("Table URL: $url")
 ```
 
 ![Getting started example sheet](img/getting_started_example_1.png)
 
 Please note that the port in your URL is unlikely to be the same as shown in the above screenshot, so look for
-your particular URL printed to the console when executing `show(tableView)`.
+your particular URL printed to the console after executing `show(tableView)`.
 
 Also worth being aware of is that you can do `print(table)` if you just need a quick console output:
 
