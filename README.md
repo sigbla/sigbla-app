@@ -49,7 +49,7 @@ Assuming you have kscript installed, here's a quick example:
 #!/usr/bin/env kscript
 
 @file:Repository("https://mvn.sigbla.app/repository")
-@file:DependsOn("sigbla.app:sigbla-app-all:[1.23,)")
+@file:DependsOn("sigbla.app:sigbla-app-all:[1,)")
 
 import sigbla.app.*
 
@@ -62,7 +62,8 @@ table["Sum", 2] = sum(table["Column A", 0], table["Column A", 1])
 
 val tableView = TableView[table]
 
-show(tableView)
+val url = show(tableView)
+println("Table URL: $url")
 ```
 
 It's a basic example that puts the values 100 and 200 into a cell each, before assigning the sum of these to a separate
