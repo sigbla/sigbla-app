@@ -57,6 +57,8 @@ val table = Table["MyTable"]
 table["Column A", 0] = 100
 table["Column A", 1] = 200
 
+// Instead of sum(table["Column A", 0], table["Column A", 1]), you can also do sum(table["Column A"])
+// if you want to sum all "Column A" values. Other variants and combinations are also possible.
 table["Sum", 2] = sum(table["Column A", 0], table["Column A", 1])
 
 val tableView = TableView[table]
@@ -118,6 +120,9 @@ table["Sum", 2] = sum(table["Column A", 0], table["Column A", 1])
 As said earlier, the sum function is reactive, and it will be told about changes made to the cells it is referring to.
 This allows it to automatically update the sum value whenever any of its inputs are updated, like we would expect in a
 traditional spreadsheet application.
+
+The `sum` function, and other similar functions like `min`, `max`, and `count`, all accept various types of references,
+such as individual cells (like above), columns, rows, cell ranges, and combinations of these.
 
 Finally, we want to have a look at our table, and we do that by creating what's known as a `TableView`, passing the
 relevant table in, before calling `show(tableView)`. This gives us a URL we can open in the browser, to view our table
