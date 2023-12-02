@@ -7,6 +7,7 @@ import sigbla.app.IndexRelation.*
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
+import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.min
 
@@ -97,8 +98,31 @@ abstract class Column internal constructor(
 
     infix fun after(index: Int) = get(AFTER, index)
 
-    // TODO Look to add a left and a right infix function, like column left|right X, to navigate X columns left|right
-    //      Similar to do exists for cells, but including up|down..?
+    // TODO Think about adding similar left|right for cells, + including up|down..?
+
+    infix fun left(offset: Int): Column? {
+        if (offset == 0) return this
+        else if (offset < 0) return right(offset.absoluteValue)
+
+        val header = table.tableRef.get().headers
+            .takeWhile { it.first != this.header }
+            .fold(LinkedList<ColumnHeader>()) { acc, (header, _) -> acc.add(0, header); acc }
+            .drop(offset - 1).firstOrNull() ?: return null
+
+        return table[header]
+    }
+
+    infix fun right(offset: Int): Column? {
+        if (offset == 0) return this
+        else if (offset < 0) return left(offset.absoluteValue)
+
+        val (header, _) = table.tableRef.get().headers
+            .dropWhile { it.first != this.header }
+            .drop(offset)
+            .firstOrNull() ?: return null
+
+        return table[header]
+    }
 
     operator fun get(index: Long) = get(AT, index)
 

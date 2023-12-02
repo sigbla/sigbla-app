@@ -128,6 +128,35 @@ assert(table2 == Table.fromRegistry("MyTable2"))
 assert(table2 != Table.fromRegistry("MyTable1"))
 ```
 
+## Navigating between columns
+
+Columns come with functions to navigate left or right as seen in the next example. The parameter specifies how many
+columns to move left or right, and a `null` would be returned if you move beyond the edge of the table.
+
+``` kotlin
+val table = Table[null]
+
+table["A", 0] = "A0"
+table["B", 0] = "B0"
+table["C", 0] = "C0"
+
+val columnA = table["B"] left 1
+val columnC = table["B"] right 1
+
+// This will return column C
+table["A"] right 2
+
+// This will return null because we move past the edge
+table["B"] left 2
+
+// This will return the column provided
+table["B"] left 0
+
+// A negative offset is also possible, which makes a left a right and vice versa
+table["B"] left -1
+table["B"] right -1
+```
+
 ## Clearing and removing columns
 
 Clearing and removing columns from a table are two different operations. Clearing a column will clear all the data
