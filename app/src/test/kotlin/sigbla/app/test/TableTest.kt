@@ -1139,4 +1139,48 @@ class TableTest {
         assertEquals(listOf("", "B1", "B2", "", "B4"), eventsOnB.map { it.oldValue.toString() })
         assertEquals(listOf("", "B1", "B2", "B4", ""), eventsOnB.map { it.newValue.toString() })
     }
+
+    @Test
+    fun `column left right`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "A0"
+        t["B", 0] = "B0"
+        t["C", 0] = "C0"
+
+        assertEquals(t["B"], t["B"] left 0)
+        assertEquals(t["B"], t["B"] right 0)
+
+        assertEquals(t["B"], t["C"] left 1)
+        assertEquals(t["A"], t["C"] left 2)
+        assertNull( t["C"] left 3)
+        assertNull( t["C"] left 4)
+
+        assertEquals(t["A"], t["B"] left 1)
+        assertNull( t["B"] left 2)
+
+        assertEquals(t["B"], t["A"] right 1)
+        assertEquals(t["C"], t["A"] right 2)
+        assertNull( t["A"] right 3)
+        assertNull( t["A"] right 4)
+
+        assertEquals(t["C"], t["B"] right 1)
+        assertNull( t["B"] right 2)
+
+        assertEquals(t["B"], t["C"] right -1)
+        assertEquals(t["A"], t["C"] right -2)
+        assertNull( t["C"] right -3)
+        assertNull( t["C"] right -4)
+
+        assertEquals(t["A"], t["B"] right -1)
+        assertNull( t["B"] right -2)
+
+        assertEquals(t["B"], t["A"] left -1)
+        assertEquals(t["C"], t["A"] left -2)
+        assertNull( t["A"] left -3)
+        assertNull( t["A"] left -4)
+
+        assertEquals(t["C"], t["B"] left -1)
+        assertNull( t["B"] left -2)
+    }
 }
