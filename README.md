@@ -73,4 +73,6 @@ column we label "Sum" at row 2.
 
 Because of the reactive nature of `sum(..)`, if the values update, so will the sum.
 
-Please see the [Sigbla documentation](https://sigbla.app/docs) for further details.
+Please see the [Sigbla documentation](https://sigbla.app/docs) for further details. If you find any issues or have some
+suggestions, please reach out using GitHub [issues](https://github.com/sigbla/sigbla-app/issues) or
+[discussions](https://github.com/sigbla/sigbla-app/discussions).
