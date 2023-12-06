@@ -120,6 +120,48 @@ instance. The same for a row index, both via a `Row` instance, or again a `Cell`
 For easing this and similar cases, there exists a group of utility functions called `headerOf(..)`, `headersOf(..)`,
 `columnOf(..)`, `columnsOf(..)`, `indexOf(..)`, and `indexesOf(..)`.
 
+## Swapping rows or columns
+
+It's possible to swap rows or columns using the `swap` function. It will, as the name indicates, swap the values
+between the selected pair of rows or columns as shown in the next example:
+
+``` kotlin
+val table = Table[null]
+
+table["A", 0] = "A0"
+table["A", 1] = "A1"
+table["A", 2] = "A2"
+table["B", 0] = "B0"
+table["B", 1] = "B1"
+table["B", 2] = "B2"
+table["C", 0] = "C0"
+table["C", 1] = "C1"
+table["C", 2] = "C2"
+
+// Swap column A and C
+swap(table["A"], table["C"])
+
+print(table)
+
+// Output:
+//    |A  |B  |C
+// 0  |C0 |B0 |A0
+// 1  |C1 |B1 |A1
+// 2  |C2 |B2 |A2
+
+// Swap row 1 and 2
+swap(table[1], table[2])
+
+// Output:
+//    |A  |B  |C  
+// 0  |C0 |B0 |A0 
+// 1  |C1 |B1 |A1 
+// 2  |C2 |B2 |A2 
+```
+
+The two row or column references may also be between different tables, such as `swap(t1["A"], t2["B"])` or
+`swap(t1[2], t2[1])`.
+
 ## Table compact
 
 You might sometimes have a sparse table, one where rows might be empty, and you wish to compact this so that there are
