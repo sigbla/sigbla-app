@@ -2962,5 +2962,8 @@ fun swap(r1: Row, r2: Row): Unit {
     }
 }
 
+// TODO Consider adding a swap between row -> column, or column -> row?
+//  Might be better to call this transpose + support transpose(table) as well..
+
 // TODO Add functions for sorting, like sort(table by table["A"]) or sort(table by table[1]) etc..
 //      Also look at supporting sort of a subsection of a table through cell ranges, columns, etc
