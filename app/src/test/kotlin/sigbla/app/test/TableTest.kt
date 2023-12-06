@@ -1183,4 +1183,375 @@ class TableTest {
         assertEquals(t["C"], t["B"] left -1)
         assertNull( t["B"] left -2)
     }
+
+    @Test
+    fun `column internal swap`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "A0"
+        t["A", 2] = "A2"
+
+        t["B", 0] = "B0"
+        t["B", 1] = "B1"
+
+        t["C", 0] = "C0"
+        t["C", 1] = "C1"
+        t["C", 3] = "C3"
+
+        var events: List<TableListenerEvent<out Any, out Any>> = emptyList()
+
+        on(t, skipHistory = true) events {
+            events = toList()
+        }
+
+        swap(t["A"], t["C"])
+
+        assertEquals(listOf("C0", "C1", "C3"), t["A"].map { it.toString() }.toList())
+        assertEquals(listOf(0L, 1L, 3L), t["A"].map { it.index }.toList())
+        assertEquals(listOf("A", "A", "A"), t["A"].map { it.column.header[0] }.toList())
+
+        assertEquals(listOf("A0", "A2"), t["C"].map { it.toString() }.toList())
+        assertEquals(listOf(0L, 2L), t["C"].map { it.index }.toList())
+        assertEquals(listOf("C", "C"), t["C"].map { it.column.header[0] }.toList())
+
+        assertEquals(listOf("B0", "B1"), t["B"].map { it.toString() }.toList())
+        assertEquals(listOf(0L, 1L), t["B"].map { it.index }.toList())
+        assertEquals(listOf("B", "B"), t["B"].map { it.column.header[0] }.toList())
+
+        assertEquals(listOf("A", "B", "C"), t.headers.map { it[0] }.toList())
+
+        assertEquals(8, events.size)
+
+        val eventsA = events.filter { it.newValue.column.header[0] == "A" }.sortedBy { it.newValue.index }
+        val eventsC = events.filter { it.newValue.column.header[0] == "C" }.sortedBy { it.newValue.index }
+
+        assertEquals(4, eventsA.size)
+        assertEquals(4, eventsC.size)
+
+        val oldA = listOf("A0", Unit, "A2", Unit)
+        val newA = listOf("C0", "C1", Unit, "C3")
+
+        for (i in 0..3) {
+            assertEquals("A", eventsA[i].oldValue.column.header[0])
+            assertEquals("A", eventsA[i].newValue.column.header[0])
+            assertEquals(i.toLong(), eventsA[i].oldValue.index)
+            assertEquals(i.toLong(), eventsA[i].newValue.index)
+            assertEquals(oldA[i], valueOf(eventsA[i].oldValue))
+            assertEquals(newA[i], valueOf(eventsA[i].newValue))
+        }
+
+        val oldC = listOf("C0", "C1", Unit, "C3")
+        val newC = listOf("A0", Unit, "A2", Unit)
+
+        for (i in 0..3) {
+            assertEquals("C", eventsC[i].oldValue.column.header[0])
+            assertEquals("C", eventsC[i].newValue.column.header[0])
+            assertEquals(i.toLong(), eventsC[i].oldValue.index)
+            assertEquals(i.toLong(), eventsC[i].newValue.index)
+            assertEquals(oldC[i], valueOf(eventsC[i].oldValue))
+            assertEquals(newC[i], valueOf(eventsC[i].newValue))
+        }
+    }
+
+    @Test
+    fun `column external swap`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
+        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+
+        t1["A", 0] = "A0-1"
+        t1["A", 2] = "A2-1"
+
+        t1["B", 0] = "B0-1"
+        t1["B", 1] = "B1-1"
+
+        t1["C", 0] = "C0-1"
+        t1["C", 1] = "C1-1"
+        t1["C", 3] = "C3-1"
+
+        t2["A", 0] = "A0-2"
+        t2["A", 2] = "A2-2"
+
+        t2["B", 0] = "B0-2"
+        t2["B", 1] = "B1-2"
+
+        t2["C", 0] = "C0-2"
+        t2["C", 1] = "C1-2"
+        t2["C", 3] = "C3-2"
+
+        var events1: List<TableListenerEvent<out Any, out Any>> = emptyList()
+        var events2: List<TableListenerEvent<out Any, out Any>> = emptyList()
+
+        on(t1, skipHistory = true) events {
+            events1 = toList()
+        }
+
+        on(t2, skipHistory = true) events {
+            events2 = toList()
+        }
+
+        swap(t1["A"], t2["C"])
+
+        assertEquals(listOf("C0-2", "C1-2", "C3-2"), t1["A"].map { it.toString() }.toList())
+        assertEquals(listOf(0L, 1L, 3L), t1["A"].map { it.index }.toList())
+        assertEquals(listOf("A", "A", "A"), t1["A"].map { it.column.header[0] }.toList())
+
+        assertEquals(listOf("A0-1", "A2-1"), t2["C"].map { it.toString() }.toList())
+        assertEquals(listOf(0L, 2L), t2["C"].map { it.index }.toList())
+        assertEquals(listOf("C", "C"), t2["C"].map { it.column.header[0] }.toList())
+
+        assertEquals(listOf("B0-1", "B1-1"), t1["B"].map { it.toString() }.toList())
+        assertEquals(listOf(0L, 1L), t1["B"].map { it.index }.toList())
+        assertEquals(listOf("B", "B"), t1["B"].map { it.column.header[0] }.toList())
+
+        assertEquals(listOf("B0-2", "B1-2"), t2["B"].map { it.toString() }.toList())
+        assertEquals(listOf(0L, 1L), t2["B"].map { it.index }.toList())
+        assertEquals(listOf("B", "B"), t2["B"].map { it.column.header[0] }.toList())
+
+        assertEquals(listOf("A", "B", "C"), t1.headers.map { it[0] }.toList())
+        assertEquals(listOf("A", "B", "C"), t2.headers.map { it[0] }.toList())
+
+        assertEquals(4, events1.size)
+        assertEquals(4, events2.size)
+
+        val eventsA = events1.filter { it.newValue.column.header[0] == "A" }.sortedBy { it.newValue.index }
+        val eventsC = events2.filter { it.newValue.column.header[0] == "C" }.sortedBy { it.newValue.index }
+
+        assertEquals(4, eventsA.size)
+        assertEquals(4, eventsC.size)
+
+        val oldA = listOf("A0-1", Unit, "A2-1", Unit)
+        val newA = listOf("C0-2", "C1-2", Unit, "C3-2")
+
+        for (i in 0..3) {
+            assertEquals("A", eventsA[i].oldValue.column.header[0])
+            assertEquals("A", eventsA[i].newValue.column.header[0])
+            assertEquals(i.toLong(), eventsA[i].oldValue.index)
+            assertEquals(i.toLong(), eventsA[i].newValue.index)
+            assertEquals(oldA[i], valueOf(eventsA[i].oldValue))
+            assertEquals(newA[i], valueOf(eventsA[i].newValue))
+        }
+
+        val oldC = listOf("C0-2", "C1-2", Unit, "C3-2")
+        val newC = listOf("A0-1", Unit, "A2-1", Unit)
+
+        for (i in 0..3) {
+            assertEquals("C", eventsC[i].oldValue.column.header[0])
+            assertEquals("C", eventsC[i].newValue.column.header[0])
+            assertEquals(i.toLong(), eventsC[i].oldValue.index)
+            assertEquals(i.toLong(), eventsC[i].newValue.index)
+            assertEquals(oldC[i], valueOf(eventsC[i].oldValue))
+            assertEquals(newC[i], valueOf(eventsC[i].newValue))
+        }
+    }
+
+    @Test
+    fun `row internal swap`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "A0"
+        t["A", 2] = "A2"
+
+        t["B", 1] = "B1"
+        t["B", 2] = "B2"
+
+        t["C", 0] = "C0"
+        t["C", 1] = "C1"
+        t["C", 3] = "C3"
+
+        var events: List<TableListenerEvent<out Any, out Any>> = emptyList()
+
+        on(t, skipHistory = true) events {
+            events = toList()
+        }
+
+        swap(t[1], t[2])
+
+        assertEquals(listOf("A0", "A2"), t["A"].map { it.toString() }.toList())
+        assertEquals(listOf(0L, 1L), t["A"].map { it.index }.toList())
+        assertEquals(listOf("A", "A"), t["A"].map { it.column.header[0] }.toList())
+
+        assertEquals(listOf("B2", "B1"), t["B"].map { it.toString() }.toList())
+        assertEquals(listOf(1L, 2L), t["B"].map { it.index }.toList())
+        assertEquals(listOf("B", "B"), t["B"].map { it.column.header[0] }.toList())
+
+        assertEquals(listOf("C0", "C1", "C3"), t["C"].map { it.toString() }.toList())
+        assertEquals(listOf(0L, 2L, 3L), t["C"].map { it.index }.toList())
+        assertEquals(listOf("C", "C", "C"), t["C"].map { it.column.header[0] }.toList())
+
+        assertEquals(listOf("A", "B", "C"), t.headers.map { it[0] }.toList())
+
+        assertEquals(6, events.size)
+
+        val eventsA = events.filter { it.newValue.column.header[0] == "A" }.sortedBy { it.newValue.index }
+        val eventsB = events.filter { it.newValue.column.header[0] == "B" }.sortedBy { it.newValue.index }
+        val eventsC = events.filter { it.newValue.column.header[0] == "C" }.sortedBy { it.newValue.index }
+
+        assertEquals(2, eventsA.size)
+        assertEquals(2, eventsB.size)
+        assertEquals(2, eventsC.size)
+
+        val oldA = listOf(Unit, "A2")
+        val newA = listOf("A2", Unit)
+
+        for (i in 0..1) {
+            assertEquals("A", eventsA[i].oldValue.column.header[0])
+            assertEquals("A", eventsA[i].newValue.column.header[0])
+            assertEquals(i.toLong() + 1, eventsA[i].oldValue.index)
+            assertEquals(i.toLong() + 1, eventsA[i].newValue.index)
+            assertEquals(oldA[i], valueOf(eventsA[i].oldValue))
+            assertEquals(newA[i], valueOf(eventsA[i].newValue))
+        }
+
+        val oldB = listOf("B1", "B2")
+        val newB = listOf("B2", "B1")
+
+        for (i in 0..1) {
+            assertEquals("B", eventsB[i].oldValue.column.header[0])
+            assertEquals("B", eventsB[i].newValue.column.header[0])
+            assertEquals(i.toLong() + 1, eventsB[i].oldValue.index)
+            assertEquals(i.toLong() + 1, eventsB[i].newValue.index)
+            assertEquals(oldB[i], valueOf(eventsB[i].oldValue))
+            assertEquals(newB[i], valueOf(eventsB[i].newValue))
+        }
+
+        val oldC = listOf("C1", Unit)
+        val newC = listOf(Unit, "C1")
+
+        for (i in 0..1) {
+            assertEquals("C", eventsC[i].oldValue.column.header[0])
+            assertEquals("C", eventsC[i].newValue.column.header[0])
+            assertEquals(i.toLong() + 1, eventsC[i].oldValue.index)
+            assertEquals(i.toLong() + 1, eventsC[i].newValue.index)
+            assertEquals(oldC[i], valueOf(eventsC[i].oldValue))
+            assertEquals(newC[i], valueOf(eventsC[i].newValue))
+        }
+    }
+
+    @Test
+    fun `row external swap`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
+        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+
+        t1["A", 0] = "A0-1"
+        t1["A", 2] = "A2-1"
+
+        t1["B", 1] = "B1-1"
+        t1["B", 2] = "B2-1"
+
+        t1["C", 0] = "C0-1"
+        t1["C", 1] = "C1-1"
+        t1["C", 3] = "C3-1"
+
+        t2["A", 0] = "A0-2"
+        t2["A", 2] = "A2-2"
+
+        t2["B", 1] = "B1-2"
+        t2["B", 2] = "B2-2"
+
+        t2["C", 0] = "C0-2"
+        t2["C", 1] = "C1-2"
+        t2["C", 3] = "C3-2"
+
+        var events1: List<TableListenerEvent<out Any, out Any>> = emptyList()
+        var events2: List<TableListenerEvent<out Any, out Any>> = emptyList()
+
+        on(t1, skipHistory = true) events {
+            events1 = toList()
+        }
+
+        on(t2, skipHistory = true) events {
+            events2 = toList()
+        }
+
+        swap(t1[1], t2[2])
+
+        assertEquals(listOf("A0-1", "A2-2", "A2-1"), t1["A"].map { it.toString() }.toList())
+        assertEquals(listOf(0L, 1L, 2L), t1["A"].map { it.index }.toList())
+        assertEquals(listOf("A", "A", "A"), t1["A"].map { it.column.header[0] }.toList())
+
+        assertEquals(listOf("B2-2", "B2-1"), t1["B"].map { it.toString() }.toList())
+        assertEquals(listOf(1L, 2L), t1["B"].map { it.index }.toList())
+        assertEquals(listOf("B", "B"), t1["B"].map { it.column.header[0] }.toList())
+
+        assertEquals(listOf("C0-1", "C3-1"), t1["C"].map { it.toString() }.toList())
+        assertEquals(listOf(0L, 3L), t1["C"].map { it.index }.toList())
+        assertEquals(listOf("C", "C"), t1["C"].map { it.column.header[0] }.toList())
+
+        assertEquals(listOf("A", "B", "C"), t1.headers.map { it[0] }.toList())
+
+        assertEquals(listOf("A0-2"), t2["A"].map { it.toString() }.toList())
+        assertEquals(listOf(0L), t2["A"].map { it.index }.toList())
+        assertEquals(listOf("A"), t2["A"].map { it.column.header[0] }.toList())
+
+        assertEquals(listOf("B1-2", "B1-1"), t2["B"].map { it.toString() }.toList())
+        assertEquals(listOf(1L, 2L), t2["B"].map { it.index }.toList())
+        assertEquals(listOf("B", "B"), t2["B"].map { it.column.header[0] }.toList())
+
+        assertEquals(listOf("C0-2", "C1-2", "C1-1", "C3-2"), t2["C"].map { it.toString() }.toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), t2["C"].map { it.index }.toList())
+        assertEquals(listOf("C", "C", "C", "C"), t2["C"].map { it.column.header[0] }.toList())
+
+        assertEquals(listOf("A", "B", "C"), t2.headers.map { it[0] }.toList())
+
+        assertEquals(3, events1.size)
+        assertEquals(3, events2.size)
+
+        val events1A = events1.filter { it.newValue.column.header[0] == "A" }.sortedBy { it.newValue.index }
+        val events1B = events1.filter { it.newValue.column.header[0] == "B" }.sortedBy { it.newValue.index }
+        val events1C = events1.filter { it.newValue.column.header[0] == "C" }.sortedBy { it.newValue.index }
+
+        assertEquals(1, events1A.size)
+        assertEquals(1, events1B.size)
+        assertEquals(1, events1C.size)
+
+        assertEquals("A", events1A[0].oldValue.column.header[0])
+        assertEquals("A", events1A[0].newValue.column.header[0])
+        assertEquals(1L, events1A[0].oldValue.index)
+        assertEquals(1L, events1A[0].newValue.index)
+        assertEquals(Unit, valueOf(events1A[0].oldValue))
+        assertEquals("A2-2", valueOf(events1A[0].newValue))
+
+        assertEquals("B", events1B[0].oldValue.column.header[0])
+        assertEquals("B", events1B[0].newValue.column.header[0])
+        assertEquals(1L, events1B[0].oldValue.index)
+        assertEquals(1L, events1B[0].newValue.index)
+        assertEquals("B1-1", valueOf(events1B[0].oldValue))
+        assertEquals("B2-2", valueOf(events1B[0].newValue))
+
+        assertEquals("C", events1C[0].oldValue.column.header[0])
+        assertEquals("C", events1C[0].newValue.column.header[0])
+        assertEquals(1L, events1C[0].oldValue.index)
+        assertEquals(1L, events1C[0].newValue.index)
+        assertEquals("C1-1", valueOf(events1C[0].oldValue))
+        assertEquals(Unit, valueOf(events1C[0].newValue))
+
+        val events2A = events2.filter { it.newValue.column.header[0] == "A" }.sortedBy { it.newValue.index }
+        val events2B = events2.filter { it.newValue.column.header[0] == "B" }.sortedBy { it.newValue.index }
+        val events2C = events2.filter { it.newValue.column.header[0] == "C" }.sortedBy { it.newValue.index }
+
+        assertEquals(1, events2A.size)
+        assertEquals(1, events2B.size)
+        assertEquals(1, events2C.size)
+
+        assertEquals("A", events2A[0].oldValue.column.header[0])
+        assertEquals("A", events2A[0].newValue.column.header[0])
+        assertEquals(2L, events2A[0].oldValue.index)
+        assertEquals(2L, events2A[0].newValue.index)
+        assertEquals("A2-2", valueOf(events2A[0].oldValue))
+        assertEquals(Unit, valueOf(events2A[0].newValue))
+
+        assertEquals("B", events2B[0].oldValue.column.header[0])
+        assertEquals("B", events2B[0].newValue.column.header[0])
+        assertEquals(2L, events2B[0].oldValue.index)
+        assertEquals(2L, events2B[0].newValue.index)
+        assertEquals("B2-2", valueOf(events2B[0].oldValue))
+        assertEquals("B1-1", valueOf(events2B[0].newValue))
+
+        assertEquals("C", events2C[0].oldValue.column.header[0])
+        assertEquals("C", events2C[0].newValue.column.header[0])
+        assertEquals(2L, events2C[0].oldValue.index)
+        assertEquals(2L, events2C[0].newValue.index)
+        assertEquals(Unit, valueOf(events2C[0].oldValue))
+        assertEquals("C1-1", valueOf(events2C[0].newValue))
+    }
 }
