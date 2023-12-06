@@ -2929,13 +2929,35 @@ fun save(
     compress
 )
 
-fun compact(table: Table) = table {
+fun compact(table: Table): Unit = table {
     clone(table).let { sparseTable ->
         clear(table)
 
         var index = 0L
         sparseTable.indexes.forEach {
             copy(sparseTable[it] to table[index++])
+        }
+    }
+}
+
+fun swap(c1: Column, c2: Column): Unit {
+    c1.table {
+        c2.table {
+            val t1Clone = clone(c1.table)
+            val t2Clone = if (c1.table == c2.table) t1Clone else clone(c2.table)
+            copy(t1Clone[c1] to c2)
+            copy(t2Clone[c2] to c1)
+        }
+    }
+}
+
+fun swap(r1: Row, r2: Row): Unit {
+    r1.table {
+        r2.table {
+            val t1Clone = clone(r1.table)
+            val t2Clone = if (r1.table == r2.table) t1Clone else clone(r2.table)
+            copy(t1Clone[r1] to r2)
+            copy(t2Clone[r2] to r1)
         }
     }
 }
