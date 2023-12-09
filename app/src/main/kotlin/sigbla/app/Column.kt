@@ -375,7 +375,6 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
         return ref
             .headers
             .filter { it.second.columnOrder in minOrder..maxOrder }
-            // TODO prenatal filter?
             .let {
                 if (currentStart > currentEnd) it.toList().reversed().asSequence() else it
             }
@@ -384,16 +383,18 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
     }
 
     override fun contains(value: Column): Boolean {
-        // TODO Because columns might move around, get the latest order
-        //      See iterator above..
-        if (value.order < min(start.order, endInclusive.order) || value.order > max(start.order, endInclusive.order)) {
-            return false
-        }
+        val ref = table.tableRef.get()
 
-        return true
+        // Because columns might move around, get the latest order
+        val currentStart = ref.columns[start.header]?.columnOrder ?: throw InvalidColumnException("Unable to find column $start")
+        val currentEnd = ref.columns[endInclusive.header]?.columnOrder ?: throw InvalidColumnException("Unable to find column $endInclusive")
+
+        val minOrder = min(currentStart, currentEnd)
+        val maxOrder = max(currentStart, currentEnd)
+
+        return !(value.order < minOrder || value.order > maxOrder)
     }
 
-    // TODO Consider what the return value here actually represents?
     override fun isEmpty() = false
 
     override fun toString(): String {
