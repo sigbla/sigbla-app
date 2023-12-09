@@ -75,3 +75,10 @@ signing {
     sign(publishing.publications["sigbla"])
 }
 
+tasks.withType<JacocoReport> {
+    reports {
+        xml.required = true
+        csv.required = true
+        html.required = true
+    }
+}
