@@ -142,7 +142,6 @@ class RowRange(override val start: Row, override val endInclusive: Row) : Closed
         get() = start.table
 
     override fun iterator(): Iterator<Row> {
-        // TODO Revisit the below comment..
         // Note, a row range is fixed to the indexes used, so no need to worry about refs or prenatal
         return if (start.index <= endInclusive.index) {
             ((start.index)..(endInclusive.index))
@@ -158,14 +157,9 @@ class RowRange(override val start: Row, override val endInclusive: Row) : Closed
     }
 
     override fun contains(value: Row): Boolean {
-        if (value.index < min(start.index, endInclusive.index) || value.index > max(start.index, endInclusive.index)) {
-            return false
-        }
-
-        return true
+        return !(value.index < min(start.index, endInclusive.index) || value.index > max(start.index, endInclusive.index))
     }
 
-    // TODO Consider what the return value here actually represents?
     override fun isEmpty() = false
 
     override fun toString(): String {
