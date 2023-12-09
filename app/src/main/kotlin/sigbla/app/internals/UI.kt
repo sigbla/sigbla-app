@@ -46,6 +46,7 @@ internal object SigblaBackend {
     private val blockingThread: Thread
 
     private val listeners: ConcurrentMap<WebSocketSession, SigblaClient> = ConcurrentHashMap()
+    private val viewRefs: ConcurrentMap<String, Triple<TableView, TableViewListenerReference, TableListenerReference?>> = ConcurrentHashMap()
 
     init {
         val (engine, port) = start(10)
@@ -74,7 +75,7 @@ internal object SigblaBackend {
                                 return@handle
                             }
 
-                            val view = Registry.getView(ref)
+                            val view = viewRefs[ref]?.first
                             if (view == null) {
                                 call.respondText(status = HttpStatusCode.NotFound, text = "Not found")
                                 return@handle
@@ -92,7 +93,7 @@ internal object SigblaBackend {
                                 return@handle
                             }
 
-                            val view = Registry.getView(ref)
+                            val view = viewRefs[ref]?.first
                             if (view == null) {
                                 call.respondText(status = HttpStatusCode.NotFound, text = "Not found")
                                 return@handle
@@ -114,7 +115,7 @@ internal object SigblaBackend {
                             return@webSocket
                         }
 
-                        val view = Registry.getView(ref)
+                        val view = viewRefs[ref]?.first
                         if (view == null) {
                             close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No ref"))
                             // TODO return@webSocket ?
@@ -151,7 +152,7 @@ internal object SigblaBackend {
                                 return@handle
                             }
 
-                            val view = Registry.getView(ref)
+                            val view = viewRefs[ref]?.first
                             if (view == null) {
                                 call.respondText(status = HttpStatusCode.NotFound, text = "Not found")
                                 return@handle
@@ -340,14 +341,14 @@ internal object SigblaBackend {
 
             clientPackage.outgoing.add(jsonParser.toJsonString(ClientEvent(ClientEventType.CLEAR.type)))
 
-            Registry.getView(client.ref)?.let { view ->
-                val dims = dims(view)
-                val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.maxX, dims.maxY)
+            val view = viewRefs[client.ref]?.first ?: return
 
-                client.dims = dims
+            val dims = dims(view)
+            val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.maxX, dims.maxY)
 
-                clientPackage.outgoing.add(jsonParser.toJsonString(clientEventDims))
-            }
+            client.dims = dims
+
+            clientPackage.outgoing.add(jsonParser.toJsonString(clientEventDims))
 
             client.publish(clientPackage)
         }
@@ -355,7 +356,7 @@ internal object SigblaBackend {
 
     private suspend fun handleDims(client: SigblaClient) {
         client.mutex.withLock {
-            val view = Registry.getView(client.ref) ?: return
+            val view = viewRefs[client.ref]?.first ?: return
 
             val dims = dims(view)
             val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.maxX, dims.maxY)
@@ -369,7 +370,7 @@ internal object SigblaBackend {
 
     private suspend fun handleTiles(client: SigblaClient, scroll: ClientEventScroll) {
         client.mutex.withLock {
-            val view = clone(Registry.getView(client.ref) ?: return)
+            val view = clone(viewRefs[client.ref]?.first ?: return)
             val currentRegion = client.contentState.updateTiles(scroll)
 
             val dims = client.dims
@@ -468,7 +469,7 @@ internal object SigblaBackend {
 
     private suspend fun handleDirty(client: SigblaClient, dirtyCells: List<Cell<*>>, dirtyResources: List<Resources>) {
         client.mutex.withLock {
-            val view = clone(Registry.getView(client.ref) ?: return)
+            val view = clone(viewRefs[client.ref]?.first ?: return)
             val currentDims = client.contentState.existingDims
 
             val clientPackage = ClientPackage(client.nextEventId())
@@ -537,7 +538,7 @@ internal object SigblaBackend {
 
     private fun handleResize(client: SigblaClient, resize: ClientEventResize) {
         // No lock here as we're not sending data
-        val view = Registry.getView(client.ref) ?: return
+        val view = viewRefs[client.ref]?.first ?: return
         // Note that resize.target is the client side element id
         val targetId = resize.target.substring(1).toLong()
         val target = client.contentState.withPCFor(targetId) ?: return
@@ -559,10 +560,33 @@ internal object SigblaBackend {
         }
     }
 
+    @Synchronized
     fun openView(view: TableView, ref: String, urlGenerator: (engine: ApplicationEngine, view: TableView, ref: String) -> URL): URL {
-        // TODO It's possible for a view to be replaced by another view on same name.
-        //      We'll need to ensure we remove this listener and add a new listener in that case.
-        on(view) {
+        fun tableSubscription(table: Table?): TableListenerReference? {
+            if (table == null) return null
+
+            return on(table) {
+                skipHistory = true
+                order = Long.MAX_VALUE
+                name = "UI"
+
+                events {
+                    if (any()) {
+                        val dirtyCells = map { it.newValue }.toList()
+                        listeners.values.forEach { client ->
+                            if (client.ref == ref) {
+                                runBlocking {
+                                    handleDims(client)
+                                    handleDirty(client, dirtyCells, emptyList())
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        val viewListener = on(view) {
             skipHistory = true
             order = Long.MAX_VALUE
             name = "UI"
@@ -574,8 +598,20 @@ internal object SigblaBackend {
                     val dirtyCells = mutableListOf<Cell<*>>()
                     val dirtyResources = mutableListOf<Resources>()
                     for (event in this) {
-                        when (val value = cellOrResourceOrFalseFromViewRelated(event.newValue)) {
+                        when (val value = cellOrResourceOrSourceTableOrFalseFromViewRelated(event.newValue)) {
                             false -> {
+                                clear = true
+                                break
+                            }
+                            is SourceTable -> {
+                                synchronized(SigblaBackend) {
+                                    val viewRef = viewRefs[ref] ?: throw SigblaAppException("No view ref on $ref")
+                                    viewRef.third?.apply { off(this) }
+                                    if (!viewRefs.replace(ref, viewRef, viewRef.copy(
+                                        third = tableSubscription(value.table)
+                                    ))) throw SigblaAppException("Unexpected view ref update")
+                                }
+
                                 clear = true
                                 break
                             }
@@ -587,7 +623,7 @@ internal object SigblaBackend {
                     if (clear) {
                         logger.debug("Forcing a clear on {}", ref)
                         listeners.values.forEach { client ->
-                            if (client.ref == source.name) {
+                            if (client.ref == ref) {
                                 runBlocking {
                                     handleClear(client)
                                 }
@@ -607,25 +643,17 @@ internal object SigblaBackend {
             }
         }
 
-        // TODO As with the view, the underlying table might also change, so we need to remove
-        //      and add a new listener when this happens..
-        view.tableViewRef.get().table?.apply {
-            on(this) {
-                skipHistory = true
-                order = Long.MAX_VALUE
-                name = "UI"
+        val tableListener = tableSubscription(view.tableViewRef.get().table)
 
-                events {
-                    if (any()) {
-                        val dirtyCells = map { it.newValue }.toList()
-                        listeners.values.forEach { client ->
-                            if (client.ref == ref) {
-                                runBlocking {
-                                    handleDims(client)
-                                    handleDirty(client, dirtyCells, emptyList())
-                                }
-                            }
-                        }
+        viewRefs.put(ref, Triple(view, viewListener, tableListener))?.apply {
+            off(this.second)
+            this.third?.apply { off(this) }
+
+            logger.debug("Forcing a clear on {}", ref)
+            listeners.values.forEach { client ->
+                if (client.ref == ref) {
+                    runBlocking {
+                        handleClear(client)
                     }
                 }
             }
