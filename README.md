@@ -1,3 +1,5 @@
+[![Build](https://github.com/sigbla/sigbla-app/actions/workflows/build.yml/badge.svg)](https://github.com/sigbla/sigbla-app/actions/workflows/build.yml)
+
 # Introduction to Sigbla
 
 Sigbla is a framework for working with data in tables, using the Kotlin programming language.
