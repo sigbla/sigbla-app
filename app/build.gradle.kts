@@ -1,6 +1,7 @@
 plugins {
     id("java-library")
     id("maven-publish")
+    id("jacoco")
     kotlin("jvm")
     signing
 }
@@ -73,3 +74,4 @@ publishing {
 signing {
     sign(publishing.publications["sigbla"])
 }
+
