@@ -162,6 +162,97 @@ swap(table[1], table[2])
 The two row or column references may also be between different tables, such as `swap(t1["A"], t2["B"])` or
 `swap(t1[2], t2[1])`.
 
+## Table sorting
+
+You can sort the content of a table, either by rows or by columns, with the `sort` function. Looking at sorting by
+rows first, you'll see that we provide a comparison function which is asked to compare one row to another:
+
+``` kotlin
+import sigbla.app.*
+import java.util.concurrent.ThreadLocalRandom
+
+fun main() {
+    TableView[Port] = 8080
+    val view = TableView[null]
+    println(show(view, ref = "sorted"))
+
+    val table = Table[null]
+    view[Table] = table
+
+    for (c in listOf("A", "B", "C", "D", "E")) {
+        for (r in 0 until 10) {
+            table[c][r] = ThreadLocalRandom.current().nextInt(1000)
+        }
+    }
+
+    // Sorting rows by values in column A
+    sort(table by table[0]..table[9]) {
+        row1, row2 -> row1["A"].compareTo(row2["A"])
+    }
+}
+```
+
+If you open the URL, you'll find something like this, where the values in column A go from low to high:
+
+![Sort rows by column A](img/utils_sort_by_rows.png)
+
+In a similar manner, sorting by columns requires a comparison function asked to compare one column to another:
+
+``` kotlin
+import sigbla.app.*
+import java.util.concurrent.ThreadLocalRandom
+
+fun main() {
+    TableView[Port] = 8080
+    val view = TableView[null]
+    println(show(view, ref = "sorted"))
+
+    val table = Table[null]
+    view[Table] = table
+
+    for (c in listOf("A", "B", "C", "D", "E")) {
+        for (r in 0 until 10) {
+            table[c][r] = ThreadLocalRandom.current().nextInt(1000)
+        }
+    }
+
+    // Sorting columns by values in row 0
+    sort(table by table["A"]..table["E"]) {
+        column1, column2 -> column1[0].compareTo(column2[0])
+    }
+}
+```
+
+![Sort columns by row 0](img/utils_sort_by_columns.png)
+
+Only the rows or columns within the range provided are sorted, with any omitted remaining untouched.
+
+If you want to sort in reverse order you have two options:
+
+Use a comparison function that reverses the comparison:
+
+``` kotlin
+sort(table by table["A"]..table["E"]) {
+    column1, column2 -> column2[0].compareTo(column1[0])
+}
+```
+
+Reverse the row or column range by flipping the start and end points, keeping the original comparison function:
+
+``` kotlin
+sort(table by table["E"]..table["A"]) {
+    column1, column2 -> column1[0].compareTo(column2[0])
+}
+```
+
+Sorting by rows vs columns show us the difference between what a row represents vs what a column represents. When
+sorting columns, the columns are moved around, resulting in a different column order. When sorting rows, because a
+row is always ordered by the index, the values within the rows are instead moved around.
+
+From an events point of view, this means that when a column is moved as part of sorting it, the old and new values
+remain the same, with only the column order value being updated. For rows, the events will contain old and new values
+related to which two rows are swapped, with the index remaining.
+
 ## Table compact
 
 You might sometimes have a sparse table, one where rows might be empty, and you wish to compact this so that there are

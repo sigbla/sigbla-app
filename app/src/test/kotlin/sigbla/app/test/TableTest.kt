@@ -1554,4 +1554,181 @@ class TableTest {
         assertEquals(Unit, valueOf(events2C[0].oldValue))
         assertEquals("C1-1", valueOf(events2C[0].newValue))
     }
+
+    @Test
+    fun `table column sort`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = 300
+        t["A", 1] = 400
+        t["A", 2] = 500
+
+        t["B", 0] = 200
+        t["B", 1] = 500
+        t["B", 2] = 300
+
+        t["C", 0] = 100
+        t["C", 1] = 600
+        t["C", 2] = 400
+
+        var events: List<TableListenerEvent<out Any, out Any>> = emptyList()
+
+        on(t, skipHistory = true) events {
+            events = toList()
+        }
+
+        sort(t by t["A"]..t["A"]) { c1, c2 -> c1[0].compareTo(c2[0]) }
+
+        assertEquals(listOf("A", "B", "C"), t.headers.map { it[0] }.toList())
+        assertEquals(3, events.size)
+
+        events = emptyList()
+
+        sort(t, t["C"]..t["C"]) { c1, c2 -> c1[0].compareTo(c2[0]) }
+
+        assertEquals(listOf("A", "B", "C"), t.headers.map { it[0] }.toList())
+        assertEquals(3, events.size)
+
+        events = emptyList()
+
+        sort(t by t["A"]..t["B"]) { c1, c2 -> c1[0].compareTo(c2[0]) }
+
+        assertEquals(listOf("B", "A", "C"), t.headers.map { it[0] }.toList())
+        assertEquals(6, events.size)
+        assertEquals(setOf("A", "B"), events.map { it.newValue.column.header[0] }.toSet())
+
+        events = emptyList()
+
+        sort(t by t["A"]..t["C"]) { c1, c2 -> c1[0].compareTo(c2[0]) }
+
+        assertEquals(listOf("B", "C", "A"), t.headers.map { it[0] }.toList())
+        assertEquals(6, events.size)
+        assertEquals(setOf("A", "C"), events.map { it.newValue.column.header[0] }.toSet())
+
+        events = emptyList()
+
+        sort(t by t["B"]..t["A"]) { c1, c2 -> c1[0].compareTo(c2[0]) }
+
+        assertEquals(listOf("C", "B", "A"), t.headers.map { it[0] }.toList())
+
+        assertEquals(9, events.size)
+        assertEquals(9, events.count { it.newValue.column.header == it.oldValue.column.header })
+        assertEquals(9, events.count { it.newValue == it.oldValue })
+        assertEquals(3, events.count { it.newValue.column.header[0] == "A" })
+        assertEquals(3, events.count { it.newValue.column.header[0] == "B" })
+        assertEquals(3, events.count { it.newValue.column.header[0] == "C" })
+        assertEquals(listOf(100L, 600L, 400L, 200L, 500L, 300L, 300L, 400L, 500L), t.map { valueOf<Long>(it) }.toList())
+
+        events = emptyList()
+
+        // Reverse
+        sort(t by t["A"]..t["C"]) { c1, c2 -> c1[0].compareTo(c2[0]) }
+
+        assertEquals(listOf("A", "B", "C"), t.headers.map { it[0] }.toList())
+        assertEquals(9, events.size)
+        assertEquals(9, events.count { it.newValue.column.header == it.oldValue.column.header })
+        assertEquals(9, events.count { it.newValue == it.oldValue })
+        assertEquals(3, events.count { it.newValue.column.header[0] == "A" })
+        assertEquals(3, events.count { it.newValue.column.header[0] == "B" })
+        assertEquals(3, events.count { it.newValue.column.header[0] == "C" })
+        assertEquals(listOf(300L, 400L, 500L, 200L, 500L, 300L, 100L, 600L, 400L), t.map { valueOf<Long>(it) }.toList())
+
+        events = emptyList()
+
+        // Double reverse
+        sort(t by t["C"]..t["A"]) { c1, c2 -> c2[0].compareTo(c1[0]) }
+
+        assertEquals(listOf("C", "B", "A"), t.headers.map { it[0] }.toList())
+        assertEquals(9, events.size)
+        assertEquals(9, events.count { it.newValue.column.header == it.oldValue.column.header })
+        assertEquals(9, events.count { it.newValue == it.oldValue })
+        assertEquals(3, events.count { it.newValue.column.header[0] == "A" })
+        assertEquals(3, events.count { it.newValue.column.header[0] == "B" })
+        assertEquals(3, events.count { it.newValue.column.header[0] == "C" })
+        assertEquals(listOf(100L, 600L, 400L, 200L, 500L, 300L, 300L, 400L, 500L), t.map { valueOf<Long>(it) }.toList())
+    }
+
+    @Test
+    fun `table row sort`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = 300
+        t["A", 1] = 400
+        t["A", 2] = 500
+
+        t["B", 0] = 200
+        t["B", 1] = 500
+        t["B", 2] = 300
+
+        t["C", 0] = 100
+        t["C", 1] = 600
+        t["C", 2] = 400
+
+        var events: List<TableListenerEvent<out Any, out Any>> = emptyList()
+
+        on(t, skipHistory = true) events {
+            events = toList()
+        }
+
+        sort(t by t[0]..t[0]) { r1, r2 -> r1["B"].compareTo(r2["B"]) }
+
+        assertEquals(listOf(200L, 500L, 300L), t["B"].map { valueOf<Long>(it) }.toList())
+        assertEquals(3, events.size)
+
+        events = emptyList()
+
+        sort(t, t[2]..t[2]) { r1, r2 -> r1["B"].compareTo(r2["B"]) }
+
+        assertEquals(listOf(200L, 500L, 300L), t["B"].map { valueOf<Long>(it) }.toList())
+        assertEquals(3, events.size)
+
+        events = emptyList()
+
+        sort(t by t[3]..t[3]) { r1, r2 -> r1["B"].compareTo(r2["B"]) }
+
+        assertEquals(listOf(200L, 500L, 300L), t["B"].map { valueOf<Long>(it) }.toList())
+        assertEquals(3, events.size)
+
+        events = emptyList()
+
+        sort(t by t[1]..t[2]) { r1, r2 -> r1["B"].compareTo(r2["B"]) }
+
+        assertEquals(listOf(200L, 300L, 500L), t["B"].map { valueOf<Long>(it) }.toList())
+        assertEquals(listOf("A", "B", "C"), t.headers.map { it[0] }.toList())
+        assertEquals(6, events.size)
+        assertEquals(6, events.count { it.newValue.column.header == it.oldValue.column.header })
+        assertEquals(6, events.count { it.newValue != it.oldValue })
+        assertEquals(2, events.count { it.newValue.column.header[0] == "A" })
+        assertEquals(2, events.count { it.newValue.column.header[0] == "B" })
+        assertEquals(2, events.count { it.newValue.column.header[0] == "C" })
+
+        events = emptyList()
+
+        // Reverse
+        sort(t by t[0]..t[1]) { r1, r2 -> r2["B"].compareTo(r1["B"]) }
+
+        assertEquals(listOf(300L, 200L, 500L), t["B"].map { valueOf<Long>(it) }.toList())
+        assertEquals(listOf("A", "B", "C"), t.headers.map { it[0] }.toList())
+        assertEquals(6, events.size)
+        assertEquals(6, events.count { it.newValue.column.header == it.oldValue.column.header })
+        assertEquals(6, events.count { it.newValue != it.oldValue })
+        assertEquals(2, events.count { it.newValue.column.header[0] == "A" })
+        assertEquals(2, events.count { it.newValue.column.header[0] == "B" })
+        assertEquals(2, events.count { it.newValue.column.header[0] == "C" })
+
+        events = emptyList()
+
+        // Double reverse
+        sort(t by t[2]..t[0]) { r1, r2 -> r2["C"].compareTo(r1["C"]) }
+
+        assertEquals(listOf("A", "B", "C"), t.headers.map { it[0] }.toList())
+        assertEquals(9, events.size)
+        assertEquals(9, events.count { it.newValue.column.header == it.oldValue.column.header })
+        assertEquals(6, events.count { it.newValue != it.oldValue })
+        assertEquals(3, events.count { it.newValue.column.header[0] == "A" })
+        assertEquals(3, events.count { it.newValue.column.header[0] == "B" })
+        assertEquals(3, events.count { it.newValue.column.header[0] == "C" })
+
+        assertEquals(listOf(300L, 500L, 400L, 200L, 300L, 500L, 100L, 400L, 600L), t.map { valueOf<Long>(it) }.toList())
+    }
 }
