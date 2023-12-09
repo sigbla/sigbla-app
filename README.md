@@ -1,6 +1,7 @@
 # Introduction to Sigbla
 
 [![Build](https://github.com/sigbla/sigbla-app/actions/workflows/build.yml/badge.svg)](https://github.com/sigbla/sigbla-app/actions/workflows/build.yml)
+[![codecov](https://codecov.io/gh/sigbla/sigbla-app/graph/badge.svg?token=EU00X66Y7N)](https://codecov.io/gh/sigbla/sigbla-app)
 
 Sigbla is a framework for working with data in tables, using the Kotlin programming language.
 It supports [various data types](https://sigbla.app/docs/cells/),
