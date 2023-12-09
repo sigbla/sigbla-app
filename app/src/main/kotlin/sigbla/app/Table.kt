@@ -974,7 +974,6 @@ internal data class ColumnMeta(
     val prenatal: Boolean
 )
 
-// TODO Consider if this shouldn't be a data class?
 internal data class TableRef(
     val columns: PMap<ColumnHeader, ColumnMeta> = PHashMap(),
     val columnCells: PMap<ColumnHeader, PSortedMap<Long, CellValue<*>>> = PHashMap(),
@@ -1067,3 +1066,9 @@ class BaseTable internal constructor(
 
     companion object
 }
+
+infix fun Table.by(columnRange: ColumnRange) = TableByColumnRangeAction(this, columnRange)
+infix fun Table.by(rowRange: RowRange) = TableByRowRangeAction(this, rowRange)
+
+class TableByColumnRangeAction internal constructor(val table: Table, val columnRange: ColumnRange)
+class TableByRowRangeAction internal constructor(val table: Table, val rowRange: RowRange)

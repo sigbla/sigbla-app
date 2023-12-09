@@ -2940,6 +2940,8 @@ fun compact(table: Table): Unit = table {
     }
 }
 
+// TODO Consider adding a swap that also swaps the column header
+
 fun swap(c1: Column, c2: Column): Unit {
     c1.table {
         c2.table {
@@ -2965,5 +2967,62 @@ fun swap(r1: Row, r2: Row): Unit {
 // TODO Consider adding a swap between row -> column, or column -> row?
 //  Might be better to call this transpose + support transpose(table) as well..
 
-// TODO Add functions for sorting, like sort(table by table["A"]) or sort(table by table[1]) etc..
-//      Also look at supporting sort of a subsection of a table through cell ranges, columns, etc
+fun sort(
+    table: Table,
+    columnRange: ColumnRange,
+    comparator: Comparator<Column>
+) = sort(table by columnRange, comparator)
+
+fun sort(
+    tableByColumnRangeAction: TableByColumnRangeAction,
+    comparator: Comparator<Column>
+): Unit = tableByColumnRangeAction.table {
+    val columns = tableByColumnRangeAction.columnRange.toList()
+
+    val it1 = columns.iterator()
+    val it2 = columns.sortedWith(comparator).iterator()
+
+    val refClone = tableRef.get()
+
+    while (it1.hasNext() && it2.hasNext()) {
+        val c1 = it1.next()
+        val c2 = it2.next()
+
+        val (oldRef, newRef) = tableRef.refAction { prev ->
+            val c1Meta = refClone.columns[c1.header] ?: throw InvalidColumnException(c1.header)
+            val c2Meta = prev.columns[c2.header] ?: throw InvalidColumnException(c2.header)
+
+            prev.copy(
+                columns = prev.columns.put(c2.header, c2Meta.copy(columnOrder = c1Meta.columnOrder))
+            )
+        }
+
+        publishColumnMoveEvents(c2, c2, c2, ColumnActionOrder.TO, oldRef, newRef, oldRef, newRef)
+    }
+
+    if (it1.hasNext() || it2.hasNext()) throw InvalidTableException("Unexpected column")
+}
+
+fun sort(
+    table: Table,
+    rowRange: RowRange,
+    comparator: Comparator<Row>
+) = sort(table by rowRange, comparator)
+
+fun sort(
+    tableByRowRangeAction: TableByRowRangeAction,
+    comparator: Comparator<Row>
+): Unit = tableByRowRangeAction.table {
+    val rows = tableByRowRangeAction.rowRange.toList()
+
+    val clone = clone(this)
+
+    val it1 = rows.iterator()
+    val it2 = rows.sortedWith(comparator).iterator()
+
+    while (it1.hasNext() && it2.hasNext()) {
+        copy(clone[it2.next()] to this[it1.next()])
+    }
+
+    if (it1.hasNext() || it2.hasNext()) throw InvalidTableException("Unexpected row")
+}
