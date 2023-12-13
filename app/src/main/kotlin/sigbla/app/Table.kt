@@ -7,14 +7,14 @@ import sigbla.app.exceptions.InvalidTableException
 import sigbla.app.internals.RefHolder
 import sigbla.app.internals.Registry
 import sigbla.app.internals.TableEventProcessor
+import sigbla.app.pds.collection.HashMap as PHashMap
+import sigbla.app.pds.collection.Map as PMap
+import sigbla.app.pds.collection.SortedMap as PSortedMap
+import sigbla.app.pds.collection.TreeMap as PTreeMap
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
-import com.github.andrewoma.dexx.collection.HashMap as PHashMap
-import com.github.andrewoma.dexx.collection.Map as PMap
-import com.github.andrewoma.dexx.collection.SortedMap as PSortedMap
-import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
 
 // TODO Should this be sealed rather than abstract? Or just a normal class with no BaseTable?
 abstract class Table(val name: String?, internal val source: Table?) : Iterable<Cell<*>> {

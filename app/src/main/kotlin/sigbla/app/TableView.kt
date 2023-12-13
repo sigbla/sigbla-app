@@ -9,18 +9,18 @@ import sigbla.app.exceptions.InvalidCellWidthException
 import sigbla.app.exceptions.InvalidValueException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.TableViewEventProcessor
+import sigbla.app.pds.collection.Map as PMap
+import sigbla.app.pds.collection.HashMap as PHashMap
+import sigbla.app.pds.kollection.toImmutableSet
+import sigbla.app.pds.kollection.immutableSetOf
+import sigbla.app.pds.kollection.ImmutableSet as PSet
 import kotlin.collections.LinkedHashMap
 import io.ktor.server.application.*
 import io.ktor.util.pipeline.*
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
-import com.github.andrewoma.dexx.kollection.toImmutableSet
-import com.github.andrewoma.dexx.kollection.immutableSetOf
 import sigbla.app.internals.RefHolder
 import java.util.concurrent.ThreadLocalRandom
-import com.github.andrewoma.dexx.collection.Map as PMap
-import com.github.andrewoma.dexx.collection.HashMap as PHashMap
-import com.github.andrewoma.dexx.kollection.ImmutableSet as PSet
 
 // A table view is associated with one table, and holds metadata related on how to view a table.
 // This includes among other things column widths, row heights, individual cell dimensions, styling, etc..
