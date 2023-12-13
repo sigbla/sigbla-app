@@ -7,10 +7,10 @@ import sigbla.app.exceptions.InvalidTableException
 import sigbla.app.internals.Registry
 import sigbla.app.internals.load1
 import sigbla.app.internals.save1
+import sigbla.app.pds.collection.HashMap as PHashMap
+import sigbla.app.pds.collection.TreeMap as PTreeMap
 import java.io.File
 import java.util.*
-import com.github.andrewoma.dexx.collection.HashMap as PHashMap
-import com.github.andrewoma.dexx.collection.TreeMap as PTreeMap
 import kotlin.reflect.KClass
 
 // TODO Refactor TableOps.kt into various files, like for column ops, rows ops, events, etc..?

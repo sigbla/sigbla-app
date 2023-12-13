@@ -11,7 +11,7 @@ allprojects {
 
     ext {
         set("klaxonVersion", "5.6")
-        set("dexxVersion", "0.7")
+        set("pdsVersion", "1.0")
         set("ktorVersion", "2.3.6")
         set("kotlinxVersion", "0.9.1")
         set("junitVersion", "4.13.2")

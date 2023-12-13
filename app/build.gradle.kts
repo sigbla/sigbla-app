@@ -16,11 +16,12 @@ kotlin {
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://mvn.sigbla.app/repository") }
     maven { url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven") }
 }
 
 val klaxonVersion = ext["klaxonVersion"]
-val dexxVersion = ext["dexxVersion"]
+val pdsVersion = ext["pdsVersion"]
 val ktorVersion = ext["ktorVersion"]
 val kotlinxVersion = ext["kotlinxVersion"]
 val junitVersion = ext["junitVersion"]
@@ -28,8 +29,8 @@ val kotlinTestVersion = ext["kotlinTestVersion"]
 val slf4jVersion = ext["slf4jVersion"]
 
 dependencies {
+    implementation("sigbla.app:sigbla-pds:$pdsVersion")
     implementation("com.beust:klaxon:$klaxonVersion")
-    implementation("com.github.andrewoma.dexx:kollection:$dexxVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
 
     api("io.ktor:ktor-server-core:$ktorVersion")

@@ -15,6 +15,7 @@ kotlin {
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://mvn.sigbla.app/repository") }
 }
 
 val slf4jVersion = ext["slf4jVersion"]
