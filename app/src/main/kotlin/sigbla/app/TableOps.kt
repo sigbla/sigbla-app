@@ -1689,7 +1689,6 @@ fun move(rowToRowAction: RowToRowAction) {
     val right = rowToRowAction.right
     val order = rowToRowAction.order
 
-    // TODO Handle index relation on right side..?
     if (right.indexRelation != IndexRelation.AT) throw UnsupportedOperationException("Only supporting IndexRelation.AT on right side")
 
     synchronized(left.table.eventProcessor) {
@@ -1863,7 +1862,6 @@ fun copy(rowToRowAction: RowToRowAction) {
     val right = rowToRowAction.right
     val order = rowToRowAction.order
 
-    // TODO Handle index relation on right side..?
     if (right.indexRelation != IndexRelation.AT) throw UnsupportedOperationException("Only supporting IndexRelation.AT on right side")
 
     synchronized(left.table.eventProcessor) {
@@ -2009,10 +2007,6 @@ fun copy(rowToRowAction: RowToRowAction) {
 fun copy(left: Row, actionOrder: RowActionOrder, right: Row) = copy(RowToRowAction(left, right, actionOrder))
 
 // TODO move/copy rowToTableAction ?
-
-// ---
-
-// TODO swap(row to row) / swap(column to column) ?
 
 // ---
 

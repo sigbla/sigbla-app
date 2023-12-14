@@ -98,8 +98,6 @@ abstract class Column internal constructor(
 
     infix fun after(index: Int) = get(AFTER, index)
 
-    // TODO Think about adding similar left|right for cells, + including up|down..?
-
     infix fun left(offset: Int): Column? {
         if (offset == 0) return this
         else if (offset < 0) return right(offset.absoluteValue)

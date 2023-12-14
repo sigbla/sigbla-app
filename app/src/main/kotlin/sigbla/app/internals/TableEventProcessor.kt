@@ -176,21 +176,6 @@ internal class TableEventProcessor {
         }
     }
 
-    // TODO Consider a mechanism to pause processing, buffering up events till no longer paused.
-    //      Can be useful when we know that a single or a few cells are going to be updated many times
-    //      but we don't want to fire for each of these updates individually?
-    //      Potential example: table { // ops in here }
-
-    // TODO Synchronize these and other interactions with event processor (instead of the existing synchronization)
-    //      This to help with the above to do and also to help with the reasoning for tables, which should be:
-    //      Each write is single threaded, if two or more threads try to write to the same table concurrently,
-    //      they will wait for each other. Reading from a table is not synchronized, as it will operate on
-    //      stable snapshots. Because event listener from part of the write path, they need to complete before
-    //      any update returns. Also, when a new listener is added through subscribe, it will also block other
-    //      write operations.
-
-    // TODO Add rollback on any exception from publish?
-
     @Synchronized
     fun subscribe(
         table: Table,
@@ -503,7 +488,6 @@ internal class TableEventProcessor {
         return listenerRef
     }
 
-    // TODO Not sure if this is worth having?
     internal fun haveListeners(): Boolean {
         return tableListeners.size > 0 ||
                 columnListeners.size > 0 ||
@@ -591,10 +575,8 @@ internal class TableEventProcessor {
                     .values
                     .forEach { listenerRef ->
                         val columnBatch = Collections.unmodifiableList(batch.filter {
-                            return@filter it.newValue.column == listenerRef.listenerReference.column
-                                    || it.newValue.column.header == listenerRef.listenerReference.column.header // TODO Might not need this?
-                                    || it.oldValue.column == listenerRef.listenerReference.column
-                                    || it.oldValue.column.header == listenerRef.listenerReference.column.header // TODO Might not need this?
+                            return@filter it.newValue.column.header == listenerRef.listenerReference.column.header
+                                    || it.oldValue.column.header == listenerRef.listenerReference.column.header
                         }.filter { it.newValue.table.tableRef.get().version > listenerRef.version })
 
                         if (columnBatch.isNotEmpty()) {
@@ -642,11 +624,9 @@ internal class TableEventProcessor {
                     .forEach { listenerRef ->
                         val cellBatch = Collections.unmodifiableList(batch.filter {
                             return@filter (listenerRef.listenerReference.cell.index == it.newValue.index
-                                            && (listenerRef.listenerReference.cell.column == it.newValue.column
-                                            || listenerRef.listenerReference.cell.column.header == it.newValue.column.header)) // TODO Is the columnHeader check really needed?
+                                            && listenerRef.listenerReference.cell.column.header == it.newValue.column.header)
                                         || (listenerRef.listenerReference.cell.index == it.oldValue.index
-                                            && (listenerRef.listenerReference.cell.column == it.oldValue.column
-                                            || listenerRef.listenerReference.cell.column.header == it.oldValue.column.header)) // TODO Is the columnHeader check really needed?
+                                            && listenerRef.listenerReference.cell.column.header == it.oldValue.column.header)
                         }.filter { it.newValue.table.tableRef.get().version > listenerRef.version })
 
                         if (cellBatch.isNotEmpty()) {

@@ -48,7 +48,6 @@ internal data class ViewMeta(
     val cellTopics: PSet<String>? = null
 )
 
-// TODO Consider if this shouldn't be a data class?
 internal data class TableViewRef(
     val defaultCellView: ViewMeta = ViewMeta(),
     val columnViews: PMap<ColumnHeader, ViewMeta> = PHashMap(),
@@ -133,7 +132,7 @@ class TableView internal constructor(
         val ref = tableViewRef.get()
         val table = ref.table?.let { it.makeClone() } ?: BaseTable(name = null, source = null, onRegistry = false)
 
-        // TODO Look into making this lazy?
+        // TODO Look into making this lazy? Or at least cache it
         ref.cellTransformers.forEach {
             val key = it.component1()
             val init = it.component2()
@@ -1093,7 +1092,7 @@ class DerivedCellView internal constructor(
 
     // Note: This is assigned on init to preserve the derived nature of the class
     // TODO: This should use a ref to ensure snapshot across multiple derived cell views
-    val cell: Cell<*>? = tableView[Table]?.let { it[columnView.header][index] }
+    val cell: Cell<*> = tableView[Table].let { it[columnView.header][index] }
 
     val cellClasses: CellClasses<DerivedCellView> by lazy {
         CellClasses(this, classes)
@@ -1317,8 +1316,6 @@ class ColumnView internal constructor(
                 override fun hasNext() = false
                 override fun next() = throw NoSuchElementException()
             }
-
-        // TODO Any need to filter our prenatal, or those are empty columns anyway?
 
         val values = tableRef.columnCells[header] ?: throw InvalidColumnException(header)
         val columnIterator = values.asSequence().map { it.component2().toCell(BaseColumn(table, header, columnMeta.columnOrder), it.component1()) }.iterator()
