@@ -223,7 +223,6 @@ internal object SigblaBackend {
                     ml = applicableX + headerWidth,
                     cw = dims.maxX,
                     ch = dims.maxY,
-                    // TODO This needs to use the derived column to get tableView level classes and topics
                     className = ("ch " + view[applicableColumn].derived.cellClasses.joinToString(separator = " ")).trim(),
                     topics = view[applicableColumn].derived.cellTopics.toList(),
                     x = null,
@@ -258,7 +257,6 @@ internal object SigblaBackend {
                 mt = applicableY,
                 cw = dims.maxX,
                 ch = dims.maxY,
-                // TODO This needs to use the derived row to get tableView level classes and topics
                 className = ("rh " + view[applicableRow].derived.cellClasses.joinToString(separator = " ")).trim(),
                 topics = view[applicableRow].derived.cellTopics.toList(),
                 x = 0,
@@ -295,8 +293,7 @@ internal object SigblaBackend {
     }
 
     private fun dims(view: TableView): Dimensions {
-        // TODO Consider using a stable snapshot ref for view/table
-        val table = view[Table] ?: return Dimensions(0, 0, 0, 0)
+        val table = view[Table]
 
         val headerHeight = view[-1].derived.cellHeight
         val headerWidth = view[emptyColumnHeader].derived.cellWidth
@@ -341,7 +338,7 @@ internal object SigblaBackend {
 
             clientPackage.outgoing.add(jsonParser.toJsonString(ClientEvent(ClientEventType.CLEAR.type)))
 
-            val view = viewRefs[client.ref]?.first ?: return
+            val view = clone(viewRefs[client.ref]?.first ?: return)
 
             val dims = dims(view)
             val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.maxX, dims.maxY)
@@ -356,7 +353,7 @@ internal object SigblaBackend {
 
     private suspend fun handleDims(client: SigblaClient) {
         client.mutex.withLock {
-            val view = viewRefs[client.ref]?.first ?: return
+            val view = clone(viewRefs[client.ref]?.first ?: return)
 
             val dims = dims(view)
             val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.maxX, dims.maxY)
@@ -538,7 +535,7 @@ internal object SigblaBackend {
 
     private fun handleResize(client: SigblaClient, resize: ClientEventResize) {
         // No lock here as we're not sending data
-        val view = viewRefs[client.ref]?.first ?: return
+        val view = clone(viewRefs[client.ref]?.first ?: return)
         // Note that resize.target is the client side element id
         val targetId = resize.target.substring(1).toLong()
         val target = client.contentState.withPCFor(targetId) ?: return

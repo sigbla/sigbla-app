@@ -73,7 +73,6 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
 
         val columns = ref
             .headers
-            // TODO prenatal filter?
             .filter { it.second.columnOrder in minOrder..maxOrder }
             .let {
                 if (currentStart > currentEnd) it.toList().reversed().asSequence() else it
@@ -352,9 +351,6 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     operator fun contains(that: Any): Boolean {
         return compareTo(that) == 0
     }
-
-    // TODO Can remove this after adding iterator functionality
-    fun asSequence(): Sequence<Cell<*>> = sequenceOf(this)
 
     operator fun invoke(function: Cell<*>.() -> Any?): Any? {
         return when (val value = function()) {
