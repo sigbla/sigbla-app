@@ -95,20 +95,20 @@ class TableTest {
             }
         }
 
-        assertEquals(listOf("[A]", "[B]", "[C]"), (t1["A"]..t1["C"]).map { it.toString() }.toList())
-        assertEquals(listOf("[C]", "[B]", "[A]"), (t1["C"]..t1["A"]).map { it.toString() }.toList())
+        assertEquals(listOf("[A]", "[B]", "[C]"), (t1["A"]..t1["C"]).map { it.header.labels.toString() }.toList())
+        assertEquals(listOf("[C]", "[B]", "[A]"), (t1["C"]..t1["A"]).map { it.header.labels.toString() }.toList())
 
         // This introduces D between A and B
         move(t1["D"] after t1["A"])
 
-        assertEquals(listOf("[A]", "[D]", "[B]", "[C]"), (t1["A"]..t1["C"]).map { it.toString() }.toList())
-        assertEquals(listOf("[C]", "[B]", "[D]", "[A]"), (t1["C"]..t1["A"]).map { it.toString() }.toList())
+        assertEquals(listOf("[A]", "[D]", "[B]", "[C]"), (t1["A"]..t1["C"]).map { it.header.labels.toString() }.toList())
+        assertEquals(listOf("[C]", "[B]", "[D]", "[A]"), (t1["C"]..t1["A"]).map { it.header.labels.toString() }.toList())
 
         // This removes D and B
         move(t1["A"] after t1["C"])
 
-        assertEquals(listOf("[A]", "[C]"), (t1["A"]..t1["C"]).map { it.toString() }.toList())
-        assertEquals(listOf("[C]", "[A]"), (t1["C"]..t1["A"]).map { it.toString() }.toList())
+        assertEquals(listOf("[A]", "[C]"), (t1["A"]..t1["C"]).map { it.header.labels.toString() }.toList())
+        assertEquals(listOf("[C]", "[A]"), (t1["C"]..t1["A"]).map { it.header.labels.toString() }.toList())
     }
 
     @Test
@@ -121,8 +121,8 @@ class TableTest {
             }
         }
 
-        assertEquals(listOf("-1", "0", "1", "2"), (t1[-1]..t1[2]).map { it.toString() }.toList())
-        assertEquals(listOf("2", "1", "0", "-1"), (t1[2]..t1[-1]).map { it.toString() }.toList())
+        assertEquals(listOf("-1", "0", "1", "2"), (t1[-1]..t1[2]).map { it.index.toString() }.toList())
+        assertEquals(listOf("2", "1", "0", "-1"), (t1[2]..t1[-1]).map { it.index.toString() }.toList())
     }
 
     @Test
@@ -474,7 +474,7 @@ class TableTest {
         clear(t)
 
         assertFalse(t.iterator().hasNext())
-        assertEquals(listOf("[A]", "[B]", "[C]", "[D]"), t.headers.map { it.toString() }.toList())
+        assertEquals(listOf("[A]", "[B]", "[C]", "[D]"), t.headers.map { it.labels.toString() }.toList())
         assertFalse(t.indexes.iterator().hasNext())
 
         remove(t["A"])
@@ -505,7 +505,7 @@ class TableTest {
 
         assertFalse(t["B"].iterator().hasNext())
         assertTrue(t.iterator().hasNext())
-        assertEquals(listOf("[A]", "[B]", "[C]", "[D]"), t.headers.map { it.toString() }.toList())
+        assertEquals(listOf("[A]", "[B]", "[C]", "[D]"), t.headers.map { it.labels.toString() }.toList())
         assertTrue(t.indexes.iterator().hasNext())
         assertEquals(2, t["A"].indexes.count())
         assertEquals(0, t["B"].indexes.count())
@@ -529,7 +529,7 @@ class TableTest {
 
         assertFalse(t[1].iterator().hasNext())
         assertTrue(t.iterator().hasNext())
-        assertEquals(listOf("[A]", "[B]", "[C]", "[D]"), t.headers.map { it.toString() }.toList())
+        assertEquals(listOf("[A]", "[B]", "[C]", "[D]"), t.headers.map { it.labels.toString() }.toList())
         assertTrue(t.indexes.iterator().hasNext())
 
         assertEquals(listOf(0L), t.indexes.toList())

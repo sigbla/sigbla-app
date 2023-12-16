@@ -37,13 +37,9 @@ class ColumnHeader(vararg labels: String) : Comparable<ColumnHeader> {
             false
     }
 
-    override fun hashCode(): Int {
-        return this.labels.hashCode()
-    }
+    override fun hashCode() = labels.hashCode()
 
-    override fun toString(): String {
-        return this.labels.toString()
-    }
+    override fun toString() = "ColumnHeader[${labels.joinToString(limit = 30)}]"
 
     override fun compareTo(other: ColumnHeader): Int {
         for (i in 0 until max(this.labels.size, other.labels.size)) {
@@ -222,7 +218,7 @@ abstract class Column internal constructor(
 
     override fun hashCode() = header.hashCode()
 
-    override fun toString() = header.toString()
+    override fun toString() = "Column[${header.labels.joinToString(limit = 30)}]"
 }
 
 class BaseColumn internal constructor(
@@ -395,17 +391,35 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
 
     override fun isEmpty() = false
 
-    override fun toString(): String {
-        return "$start..$endInclusive"
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ColumnRange
+
+        if (start != other.start) return false
+        if (endInclusive != other.endInclusive) return false
+
+        return true
     }
+
+    override fun hashCode(): Int {
+        var result = start.hashCode()
+        result = 31 * result + endInclusive.hashCode()
+        return result
+    }
+
+    override fun toString() = "$start..$endInclusive"
 }
 
 // TODO Think about including a RELATIVE_TO option:
 //      If I have a row relative to index 10, and I move row 10 to row 9, then my existing
 //      Row instance relative to index 10 would then point to the new location at row 9.
 //      The same would need to apply to other rows part of the cascading effect..
-enum class IndexRelation {
-    BEFORE, AT_OR_BEFORE, AT, AT_OR_AFTER, AFTER
+enum class IndexRelation(private val text: String) {
+    BEFORE("before"), AT_OR_BEFORE("at or before"), AT("at"), AT_OR_AFTER("at or after"), AFTER("after");
+
+    override fun toString() = text
 }
 
 infix fun Column.before(other: Column): ColumnToColumnAction {

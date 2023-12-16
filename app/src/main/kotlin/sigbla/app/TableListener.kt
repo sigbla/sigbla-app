@@ -12,15 +12,11 @@ abstract class TableListenerReference {
     abstract val skipHistory: Boolean
     internal abstract fun unsubscribe()
 
-    override fun toString(): String {
-        return "TableListenerReference(name=${name}, order=${order}, allowLoop=${allowLoop})"
-    }
+    override fun toString() = "TableListenerReference[${name}, order=${order}, allowLoop=${allowLoop}]"
 }
 
 class TableListenerEvent<O, N>(val oldValue: Cell<O>, val newValue: Cell<N>) {
-    override fun toString(): String {
-        return "TableListenerEvent(oldValue=$oldValue, newValue=$newValue)"
-    }
+    override fun toString() = "TableListenerEvent[$oldValue -> $newValue]"
 }
 
 class TableEventReceiver<S, O, N>(

@@ -949,13 +949,16 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     internal abstract fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableRef = tableRef.get()!!): Table
 
-    override fun toString(): String {
-        return "Table[$name]"
-    }
+    override fun toString() = "Table[$name]"
 
     override fun equals(other: Any?): Boolean {
         // Implemented to ensure expected equality check to always just be a reference compare, that's what we want
         return this === other
+    }
+
+    override fun hashCode(): Int {
+        // Clustered by name
+        return Objects.hashCode(name)
     }
 
     companion object {
