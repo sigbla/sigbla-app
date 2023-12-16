@@ -707,13 +707,16 @@ class TableView internal constructor(
 
     internal fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableViewRef = tableViewRef.get()) = TableView(name, onRegistry, RefHolder(ref))
 
-    override fun toString(): String {
-        return "TableView[$name]"
-    }
+    override fun toString() = "TableView[$name]"
 
     override fun equals(other: Any?): Boolean {
         // Implemented to ensure expected equality check to always just be a reference compare, that's what we want
         return this === other
+    }
+
+    override fun hashCode(): Int {
+        // Clustered by name
+        return Objects.hashCode(name)
     }
 
     companion object {
@@ -1022,9 +1025,7 @@ class CellView(
         return listOf(derivedCellView).iterator()
     }
 
-    override fun toString(): String {
-        return "$columnView:$index"
-    }
+    override fun toString() = "CellView[${columnView.header.labels.joinToString(limit = 30)}, $index]"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -1115,11 +1116,25 @@ class DerivedCellView internal constructor(
         return listOf(derivedCellView).iterator()
     }
 
-    override fun toString(): String {
-        return "DerivedCellView(columnView=$columnView, index=$index, cellHeight=$cellHeight, cellWidth=$cellWidth, tableView=$tableView, cellView=$cellView, cell=$cell, cellClasses=$cellClasses, cellTopics=$cellTopics)"
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as DerivedCellView
+
+        if (columnView != other.columnView) return false
+        if (index != other.index) return false
+
+        return true
     }
 
-    // TODO hashCode, equals
+    override fun hashCode(): Int {
+        var result = columnView.hashCode()
+        result = 31 * result + index.hashCode()
+        return result
+    }
+
+    override fun toString() = "DerivedCellView[${columnView.header.labels.joinToString(limit = 30)}, $index]"
 }
 
 class ColumnView internal constructor(
@@ -1336,6 +1351,7 @@ class ColumnView internal constructor(
 
         other as ColumnView
 
+        if (tableView != other.tableView) return false
         if (header != other.header) return false
 
         return true
@@ -1343,7 +1359,7 @@ class ColumnView internal constructor(
 
     override fun hashCode() = header.hashCode()
 
-    override fun toString() = header.toString()
+    override fun toString() = "ColumnView[${header.labels.joinToString(limit = 30)}]"
 }
 
 internal fun createDerivedColumnView(columnView: ColumnView): DerivedColumnView {
@@ -1386,7 +1402,20 @@ class DerivedColumnView internal constructor(
 
     override fun iterator() = columnView.iterator()
 
-    // TODO toString, hashCode, equals
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as DerivedColumnView
+
+        if (columnView != other.columnView) return false
+
+        return true
+    }
+
+    override fun hashCode() = columnView.hashCode()
+
+    override fun toString() = "DerivedColumnView[${columnView.header.labels.joinToString(limit = 30)}]"
 }
 
 class RowView internal constructor(
@@ -1588,6 +1617,7 @@ class RowView internal constructor(
 
         other as RowView
 
+        if (tableView != other.tableView) return false
         if (index != other.index) return false
 
         return true
@@ -1595,7 +1625,7 @@ class RowView internal constructor(
 
     override fun hashCode(): Int = index.hashCode()
 
-    override fun toString(): String = index.toString()
+    override fun toString(): String = "RowView[$index]"
 }
 
 internal fun createDerivedRowView(rowView: RowView): DerivedRowView {
@@ -1638,7 +1668,20 @@ class DerivedRowView internal constructor(
 
     override fun iterator() = rowView.iterator()
 
-    // TODO toString, hashCode, equals
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as DerivedRowView
+
+        if (rowView != other.rowView) return false
+
+        return true
+    }
+
+    override fun hashCode() = rowView.hashCode()
+
+    override fun toString() = "DerivedRowView[${rowView.index}]"
 }
 
 sealed class CellHeight<S, T> {
@@ -1785,8 +1828,6 @@ sealed class CellHeight<S, T> {
 
     override fun hashCode() = Objects.hash(this.height)
 
-    override fun toString() = this.height.toString()
-
     companion object
 }
 
@@ -1795,7 +1836,7 @@ class UnitCellHeight<S> internal constructor(
 ) : CellHeight<S, Unit>() {
     override val height = Unit
 
-    override fun toString() = ""
+    override fun toString() = "UnitCellHeight"
 }
 
 class PixelCellHeight<S> internal constructor(
@@ -1825,6 +1866,8 @@ class PixelCellHeight<S> internal constructor(
     override fun rem(that: Int) = height % that
 
     override fun rem(that: Long) = height % that
+
+    override fun toString() = "PixelCellHeight[$height]"
 }
 
 sealed class CellWidth<S, T> {
@@ -1973,8 +2016,6 @@ sealed class CellWidth<S, T> {
 
     override fun hashCode() = Objects.hash(this.width)
 
-    override fun toString() = this.width.toString()
-
     companion object
 }
 
@@ -1983,7 +2024,7 @@ class UnitCellWidth<S> internal constructor(
 ) : CellWidth<S, Unit>() {
     override val width = Unit
 
-    override fun toString() = ""
+    override fun toString() = "UnitCellWidth"
 }
 
 class PixelCellWidth<S> internal constructor(
@@ -2013,6 +2054,8 @@ class PixelCellWidth<S> internal constructor(
     override fun rem(that: Int) = width % that
 
     override fun rem(that: Long) = width % that
+
+    override fun toString() = "PixelCellWidth[$width]"
 }
 
 class CellClasses<S> internal constructor(
@@ -2029,6 +2072,7 @@ class CellClasses<S> internal constructor(
     operator fun minus(topics: Collection<String>): CellClasses<S> = CellClasses(source, topics.fold(this._classes) { acc, topic -> acc - topic })
     override fun iterator(): Iterator<String> = classes.iterator()
 
+    // TODO Change these and similar to be CellClasses<*>.() -> Any?
     operator fun <T> invoke(function: CellClasses<*>.() -> T): T {
         val value = this.function()
         val classes = when(value) {
@@ -2062,7 +2106,7 @@ class CellClasses<S> internal constructor(
 
     override fun hashCode() = Objects.hash(this._classes)
 
-    override fun toString() = classes.toString()
+    override fun toString() = "CellClasses[${classes.joinToString(limit = 30)}]"
 
     companion object
 }
@@ -2114,7 +2158,7 @@ class CellTopics<S> internal constructor(
 
     override fun hashCode() = Objects.hash(this._topics)
 
-    override fun toString() = topics.toString()
+    override fun toString() = "CellTopics[${topics.joinToString(limit = 30)}]"
 
     companion object
 }
@@ -2131,12 +2175,16 @@ class UnitCellTransformer internal constructor(
     override val source: CellView
 ): CellTransformer<Unit>() {
     override val function = Unit
+
+    // TODO Equals, hashCode, toString?
 }
 
 class FunctionCellTransformer internal constructor(
     override val source: CellView,
     override val function: Cell<*>.() -> Any?
-): CellTransformer<Cell<*>.() -> Any?>()
+): CellTransformer<Cell<*>.() -> Any?>() {
+    // TODO Equals, hashCode, toString?
+}
 
 // TODO Should introduce a generic type S like else where..?
 class Resources internal constructor(
@@ -2174,7 +2222,7 @@ class Resources internal constructor(
     override fun equals(other: Any?): Boolean {
         // TODO Add functionality to make this symmetric, i.e. "some string" == some CellTopics containing just "some string" must return true, etc..
         return when (other) {
-            is Resources -> _resources == other._resources
+            is Resources -> _resources.all { other._resources[it.component1()]?.second == it.component2().second } && _resources.size() == other._resources.size()
             is Map<*,*> -> _resources.all { other[it.component1()] == it.component2() } && _resources.size() == other.size
             is Pair<*,*> -> other.first is String && _resources[other.first as String] == other.second && _resources.size() == 1
             is Iterable<*> -> {
@@ -2191,9 +2239,9 @@ class Resources internal constructor(
         }
     }
 
-    override fun hashCode() = Objects.hash(this._resources)
+    override fun hashCode() = Objects.hash(this._resources.map { it.component1() to it.component2().second })
 
-    override fun toString() = resources.toString()
+    override fun toString() = "Resources[${resources.keys.joinToString(limit = 30)}]"
 
     companion object {
         internal val RESOURCE_COUNTER = AtomicLong()
@@ -2223,7 +2271,7 @@ class SourceTable internal constructor(
         return result
     }
 
-    override fun toString(): String = table?.toString() ?: "null"
+    override fun toString() = "SourceTable[$source, ${table?.toString() ?: "null"}]"
 }
 
 // TODO Consider an Index type which allows us to replace the index.html file served for a table,

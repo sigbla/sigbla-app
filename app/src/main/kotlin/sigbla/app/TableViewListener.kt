@@ -12,15 +12,14 @@ abstract class TableViewListenerReference {
     abstract val allowLoop: Boolean
     abstract fun unsubscribe()
 
-    override fun toString(): String {
-        return "ViewListenerReference(name=${name}, order=${order}, allowLoop=${allowLoop})"
-    }
+    override fun toString() = "TableViewListenerReference[${name}, order=${order}, allowLoop=${allowLoop}]"
 }
 
 class TableViewListenerEvent<T>(val oldValue: T, val newValue: T) {
     override fun toString(): String {
         return "TableViewListenerEvent(oldValue=$oldValue, newValue=$newValue)"
     }
+    override fun toString() = "TableViewListenerEvent[$oldValue -> $newValue]"
 }
 
 class TableViewEventReceiver<S, T>(

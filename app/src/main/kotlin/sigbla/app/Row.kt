@@ -132,7 +132,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
 
     override fun hashCode() = index.hashCode()
 
-    override fun toString() = index.toString()
+    override fun toString() = "Row[$indexRelation $index]"
 }
 
 class BaseRow internal constructor(override val table: Table, override val indexRelation: IndexRelation, override val index: Long) : Row()
@@ -162,9 +162,25 @@ class RowRange(override val start: Row, override val endInclusive: Row) : Closed
 
     override fun isEmpty() = false
 
-    override fun toString(): String {
-        return "$start..$endInclusive"
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as RowRange
+
+        if (start != other.start) return false
+        if (endInclusive != other.endInclusive) return false
+
+        return true
     }
+
+    override fun hashCode(): Int {
+        var result = start.hashCode()
+        result = 31 * result + endInclusive.hashCode()
+        return result
+    }
+
+    override fun toString() = "$start..$endInclusive"
 }
 
 infix fun Row.before(other: Row): RowToRowAction {
