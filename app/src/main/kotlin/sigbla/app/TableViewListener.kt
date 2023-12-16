@@ -16,9 +16,6 @@ abstract class TableViewListenerReference {
 }
 
 class TableViewListenerEvent<T>(val oldValue: T, val newValue: T) {
-    override fun toString(): String {
-        return "TableViewListenerEvent(oldValue=$oldValue, newValue=$newValue)"
-    }
     override fun toString() = "TableViewListenerEvent[$oldValue -> $newValue]"
 }
 
