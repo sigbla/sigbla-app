@@ -16,6 +16,12 @@ abstract class TableViewListenerReference {
 }
 
 class TableViewListenerEvent<T>(val oldValue: T, val newValue: T) {
+    val tableView: TableView by lazy { tableViewFromViewRelated(newValue) }
+
+    val columnView: ColumnView? by lazy { columnViewFromViewRelated(newValue) }
+
+    val index: Long? by lazy { indexFromViewRelated(newValue) }
+
     override fun toString() = "TableViewListenerEvent[$oldValue -> $newValue]"
 }
 

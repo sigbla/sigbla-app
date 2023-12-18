@@ -9,8 +9,10 @@ import sigbla.app.*
 import sigbla.app.exceptions.ListenerLoopException
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class TableViewListenerTest {
@@ -552,6 +554,31 @@ class TableViewListenerTest {
         assertEquals(DEFAULT_CELL_WIDTH / 2, t["A", 0][CellWidth].width)
 
         assertEquals(3, count)
+    }
+
+    @Test
+    fun `event properties`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        tv1["A", 1][CellHeight] = 100
+
+        on(tv1) events {
+            forEach {
+                assertNotNull(it.columnView)
+                assertNotNull(it.index)
+
+                assertEquals(it.tableView, tableViewFromViewRelated(it.newValue))
+                assertEquals(it.columnView, columnViewFromViewRelated(it.newValue))
+                assertEquals(it.index, indexFromViewRelated(it.newValue))
+
+                assertNotEquals(it.tableView, tableViewFromViewRelated(it.oldValue))
+                assertNotEquals(it.columnView, columnViewFromViewRelated(it.oldValue))
+                assertEquals(it.columnView!!.header, columnViewFromViewRelated(it.oldValue)!!.header)
+                assertEquals(it.index, indexFromViewRelated(it.oldValue))
+            }
+        }
+
+        tv1["A", 1][CellHeight] = 200
     }
 
     // TODO CellClasses and CellTopics

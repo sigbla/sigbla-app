@@ -10,6 +10,7 @@ import org.junit.Test
 import sigbla.app.exceptions.InvalidCellException
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -657,5 +658,27 @@ class TableListenerTest {
 
         assertEquals("Original value A1", t1["A", 1].value)
         assertEquals("Original value A2", t1["A", 2].value)
+    }
+
+    @Test
+    fun `event properties`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        t1["A", 1] = "A"
+
+        on(t1) events {
+            forEach {
+                assertEquals(it.table, it.newValue.table)
+                assertEquals(it.column, it.newValue.column)
+                assertEquals(it.index, it.newValue.index)
+
+                assertNotEquals(it.table, it.oldValue.table)
+                assertNotEquals(it.column, it.oldValue.column)
+                assertEquals(it.column.header, it.oldValue.column.header)
+                assertEquals(it.index, it.newValue.index)
+            }
+        }
+
+        t1["A", 1] = "B"
     }
 }
