@@ -83,3 +83,7 @@ tasks.withType<JacocoReport> {
         html.required = true
     }
 }
+
+tasks.withType<Test> {
+    maxParallelForks = 2
+}
