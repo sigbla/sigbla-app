@@ -4,6 +4,7 @@ package sigbla.app.internals
 
 import sigbla.app.*
 import sigbla.app.exceptions.InvalidListenerException
+import sigbla.app.exceptions.InvalidRowException
 import sigbla.app.exceptions.InvalidValueException
 import sigbla.app.exceptions.ListenerLoopException
 import java.util.*
@@ -275,6 +276,8 @@ internal class TableEventProcessor {
         init: TableEventReceiver<Row, Any, Any>.() -> Unit,
         ref: TableRef = row.table.tableRef.get()
     ): TableListenerReference {
+        if (row.indexRelation != IndexRelation.AT) throw InvalidRowException("Only IndexRelation.AT supported: $row")
+
         val listenerRef = ListenerRowRef(
             rowListeners,
             row
@@ -590,7 +593,6 @@ internal class TableEventProcessor {
                     .values
                     .forEach { listenerRef ->
                         val rowBatch = Collections.unmodifiableList(batch.filter {
-                            // TODO This filtering will need to take into account the index relation
                             return@filter it.newValue.index == listenerRef.listenerReference.row.index
                                     || it.oldValue.index == listenerRef.listenerReference.row.index
                         }.filter { it.newValue.table.tableRef.get().version > listenerRef.version })

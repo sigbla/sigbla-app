@@ -8,6 +8,7 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Test
 import sigbla.app.exceptions.InvalidCellException
+import sigbla.app.exceptions.InvalidRowException
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -656,5 +657,20 @@ class RowListenerTest {
 
         assertEquals("Original value A1", t1["A", 1].value)
         assertEquals("Original value A2", t1["B", 1].value)
+    }
+
+    @Test
+    fun `only at index subscriptions`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+
+        for (type in IndexRelation.entries) {
+            if (type == IndexRelation.AT) {
+                on(t1[type, 1]) {}
+            } else {
+                assertFailsWith<InvalidRowException> {
+                    on(t1[type, 1]) {}
+                }
+            }
+        }
     }
 }
