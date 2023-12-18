@@ -54,7 +54,7 @@ enum class CellOrder { COLUMN, ROW }
 class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>, val order: CellOrder = CellOrder.COLUMN) : ClosedRange<Cell<*>>, Iterable<Cell<*>> {
     init {
         if (start.column.table !== endInclusive.column.table) {
-            throw InvalidTableException("Cell range much be within same table")
+            throw InvalidCellException("CellRange much be within same table")
         }
     }
 

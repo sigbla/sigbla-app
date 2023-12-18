@@ -6,6 +6,9 @@ import sigbla.app.*
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.After
+import sigbla.app.exceptions.InvalidCellException
+import sigbla.app.exceptions.InvalidColumnException
+import sigbla.app.exceptions.InvalidRowException
 import sigbla.app.exceptions.InvalidTableException
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -86,6 +89,17 @@ class TableTest {
     }
 
     @Test
+    fun `invalid cell range`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
+        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+
+        val c1 = t1["A", 0]
+        val c2 = t2["A", 1]
+
+        assertFailsWith<InvalidCellException> { c1..c2 }
+    }
+
+    @Test
     fun `column range`() {
         val t1 = Table[object {}.javaClass.enclosingMethod.name]
 
@@ -112,6 +126,17 @@ class TableTest {
     }
 
     @Test
+    fun `invalid column range`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
+        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+
+        val c1 = t1["A"]
+        val c2 = t2["B"]
+
+        assertFailsWith<InvalidColumnException> { c1..c2 }
+    }
+
+    @Test
     fun `row range`() {
         val t1 = Table[object {}.javaClass.enclosingMethod.name]
 
@@ -123,6 +148,27 @@ class TableTest {
 
         assertEquals(listOf("-1", "0", "1", "2"), (t1[-1]..t1[2]).map { it.index.toString() }.toList())
         assertEquals(listOf("2", "1", "0", "-1"), (t1[2]..t1[-1]).map { it.index.toString() }.toList())
+    }
+
+    @Test
+    fun `invalid row range`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
+        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+
+        val r1 = t1[0]
+        val r2 = t2[10]
+
+        assertFailsWith<InvalidRowException> { r1..r2 }
+
+        for (type in IndexRelation.entries) {
+            if (type == IndexRelation.AT) r1..t1[type, 10]
+            else assertFailsWith<InvalidRowException> { r1..t1[type, 10] }
+        }
+
+        for (type in IndexRelation.entries) {
+            if (type == IndexRelation.AT) t2[type, 0]..r2
+            else assertFailsWith<InvalidRowException> { t2[type, 0]..r2 }
+        }
     }
 
     @Test

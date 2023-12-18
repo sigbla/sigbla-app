@@ -353,6 +353,10 @@ internal fun getCellRaw(ref: TableRef, columnHeader: ColumnHeader, index: Long, 
 }
 
 class ColumnRange(override val start: Column, override val endInclusive: Column) : ClosedRange<Column>, Iterable<Column> {
+    init {
+        if (start.table !== endInclusive.table) throw InvalidColumnException("ColumnRange must be within same table")
+    }
+
     val table: Table
         get() = start.table
 
