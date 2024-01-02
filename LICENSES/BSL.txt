@@ -10,11 +10,11 @@ Parameters
 Licensor:             Christian Felde
 
 Licensed Work:        Sigbla App
-                      The Licensed Work is copyright © 2019-2023 Christian Felde
+                      The Licensed Work is copyright © 2019-2024 Christian Felde
 
 Additional Use Grant: None
 
-Change Date:          2027-12-01
+Change Date:          2028-01-02
 
 Change License:       AGPL-3.0-or-later
 
