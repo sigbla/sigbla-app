@@ -4,12 +4,16 @@ import java.io.File
 import java.io.FileWriter
 import java.time.LocalDate
 
+val currentYear = LocalDate.now().year
+
 val ktCopyrightNotice = listOf(
-    "/* Copyright 2019-2023, Christian Felde.",
+    "/* Copyright 2019-$currentYear, Christian Felde.",
     " * See LICENSE file for licensing details. */"
 )
 
-val mkdocsCopyrightNotice = "Copyright 2019-2023, Christian Felde"
+val mkdocsCopyrightNotice = "Copyright 2019-$currentYear, Christian Felde"
+
+val licenseFileCopyrightNotice = "All source code, documentation, and related project and repository files are copyright 2019-$currentYear, Christian Felde."
 
 val folders = listOf(
     File("../all/src"),
@@ -146,6 +150,40 @@ fun mkdocsCopyright() {
     newTarget.renameTo(target)
 }
 
+fun licenseFileCopyright() {
+    val target = File("../LICENSE")
+
+    if (!target.isFile) {
+        println("! Couldn't find ${target.path}")
+        return
+    }
+
+    val content = target.readLines()
+
+    if (content.find { it.startsWith("All source code, documentation, and related project and repository files are copyright ") } == null) {
+        println("! Couldn't find copyright in ${target.path}")
+    }
+
+    val newContent = content.map {
+        if (it.startsWith("All source code, documentation, and related project and repository files are copyright ")) {
+            licenseFileCopyrightNotice
+        } else it
+    }
+
+    val newTarget = File(target.parentFile, target.name + ".tmp")
+
+    FileWriter(newTarget).use { writer ->
+        newContent.forEach {
+            writer.append(it)
+            writer.appendLine()
+        }
+
+        writer.flush()
+    }
+
+    newTarget.renameTo(target)
+}
+
 fun bslChangeDate() {
     val target = File("../LICENSES/BSL.txt")
 
@@ -156,12 +194,18 @@ fun bslChangeDate() {
 
     val content = target.readLines()
 
+    if (content.find { it.startsWith("                      The Licensed Work is copyright © ") } == null) {
+        println("! Couldn't find copyright in ${target.path}")
+    }
+
     if (content.find { it.startsWith("Change Date:          ") } == null) {
         println("! Couldn't find change date in ${target.path}")
     }
 
     val newContent = content.map {
-        if (it.startsWith("Change Date:          ")) {
+        if (it.startsWith("                      The Licensed Work is copyright © ")) {
+            "                      The Licensed Work is copyright © 2019-$currentYear Christian Felde"
+        } else if (it.startsWith("Change Date:          ")) {
             val futureDate = LocalDate.now().plusYears(4)
             "Change Date:          $futureDate"
         } else it
@@ -188,6 +232,9 @@ println()
 
 println("Doing mkdocs.yml")
 mkdocsCopyright()
+
+println("Doing LICENSE")
+licenseFileCopyright()
 
 println("Doing BSL change date")
 bslChangeDate()
