@@ -46,6 +46,15 @@ class TableViewTest {
     }
 
     @Test
+    fun `define host`() {
+        TableView[Host] = "192.168.0.1"
+        assertEquals("192.168.0.1", TableView[Host])
+
+        TableView[Host] = "192.168.0.2"
+        assertEquals("192.168.0.1", TableView[Host])
+    }
+
+    @Test
     fun `define port`() {
         TableView[Port] = 8088
         assertEquals(8088, TableView[Port])

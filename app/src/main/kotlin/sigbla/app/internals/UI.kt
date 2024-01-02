@@ -59,9 +59,9 @@ internal object SigblaBackend {
 
     private fun start(n: Int): Pair<ApplicationEngine, Int> {
         return try {
+            val host = TableView[Host]
             val port = TableView[Port]
-            // TODO Add val host = TableView[Host], and pass to embeddedServer ?
-            val engine = embeddedServer(Netty, port) {
+            val engine = embeddedServer(Netty, port, host) {
                 install(WebSockets)
 
                 routing {
