@@ -736,12 +736,39 @@ class TableView internal constructor(
 
         // TODO Consider a operator get/set(resources: Resources, ..) on this level as well to allow for global resources
 
+        operator fun get(host: Host): String = Host.host
+
+        operator fun set(_host: Host, host: String) {
+            Host.host = host
+        }
+
         operator fun get(port: Port): Int = Port.port
 
         operator fun set(_port: Port, port: Int) {
             Port.port = port
         }
     }
+}
+
+object Host {
+    private var _host: String? = null
+
+    init {
+        val envHost = System.getenv("SIGBLA_HOST")
+        (envHost ?: null)?.apply {
+            _host = this
+        }
+    }
+
+    internal var host: String
+        get() {
+            if (_host == null) _host = "127.0.0.1"
+            return _host!!
+        }
+        set(host) {
+            if (_host != null) return
+            this._host = host
+        }
 }
 
 object Port {

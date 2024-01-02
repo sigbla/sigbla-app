@@ -401,15 +401,20 @@ other hand is included in the cloned view, sharing the same instance references.
 By default, when doing `show(tableView)`, Sigbla will pick a random port. It's a random port because there's an
 assumption that you might run multiple Sigbla apps at the same time, and a random port helps avoid port collisions.
 
-However, you might want to control the port used yourself and there's two ways to do that. You can, as shown in the
+However, you might want to control the port used yourself and there are two ways to do that. You can, as shown in the
 example, do `TableView[Port] = <port number>`. Or, you can define an environment variable called `SIGBLA_PORT`.
 
 The port can only be set once, with any subsequent attempts ignored. If the environment variable is defined, this will
-take precedence over any port set by the source code. 
+take precedence over any port set by the source code.
+
+You may also define the host using `TableView[Host] = "hostname or IP"` or with an environment variable called
+`SIGBLA_HOST`. Just like with the port, this can only be set once. If not set, it will default to `127.0.0.1`.
 
 ```
+TableView[Host] = "localhost"
 TableView[Port] = 8080
 
+println("Using host ${TableView[Host]}")
 println("Using port ${TableView[Port]}")
 
 val table = Table["Table"]
