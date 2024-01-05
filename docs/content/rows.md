@@ -53,7 +53,7 @@ A `Row` instance is therefore, like with the column, linked to the table it belo
 if it belongs to the same table, and points to the same index. There's one other factor that impacts equality of rows,
 something known as "index relations", but we'll cover that later.
 
-Also, like the `Column` contains a `ColumnHeader`, the `Row` contains an `index`, and rows are naturally ordered by this
+Also, like the `Column` contains a `Header`, the `Row` contains an `index`, and rows are naturally ordered by this
 index, with no duplicate indexes.
 
 ``` kotlin

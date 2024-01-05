@@ -29,9 +29,9 @@ class HashCodeEqualsTest {
         val labels = mutableListOf<String>()
 
         for (i in 1..40) {
-            val ch1 = if (labels.isNotEmpty()) ColumnHeader(*labels.toTypedArray()) else null
+            val ch1 = if (labels.isNotEmpty()) Header(*labels.toTypedArray()) else null
             labels.add(UUID.randomUUID().toString())
-            val ch2 = ColumnHeader(*labels.toTypedArray())
+            val ch2 = Header(*labels.toTypedArray())
 
             if (ch1 != null) {
                 move(table1[ch1] to table1[ch2])
@@ -151,7 +151,7 @@ class HashCodeEqualsTest {
 
         for (i in 1..40) {
             labels.add(UUID.randomUUID().toString())
-            val ch = ColumnHeader(*labels.toTypedArray())
+            val ch = Header(*labels.toTypedArray())
 
             val cellView1 = tableView1[ch][i]
             val columnView1 = tableView1[ch]

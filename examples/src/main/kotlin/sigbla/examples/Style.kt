@@ -75,7 +75,7 @@ fun main() {
     tableView["A", "B"] = {
 
     }
-    tableView[ColumnHeader("A", "B")] = {
+    tableView[Header["A", "B"]] = {
 
     }
     tableView[1] = {
@@ -96,10 +96,10 @@ fun main() {
     tableView["A", "B"][1L] = {
 
     }
-    tableView[ColumnHeader("A", "B")][1] = {
+    tableView[Header["A", "B"]][1] = {
 
     }
-    tableView[ColumnHeader("A", "B")][1L] = {
+    tableView[Header["A", "B"]][1L] = {
 
     }
     tableView[1]["A"] = {
@@ -114,10 +114,10 @@ fun main() {
     tableView[1L]["A", "B"] = {
 
     }
-    tableView[1][ColumnHeader("A", "B")] = {
+    tableView[1][Header["A", "B"]] = {
 
     }
-    tableView[1L][ColumnHeader("A", "B")] = {
+    tableView[1L][Header["A", "B"]] = {
 
     }
     tableView["A", 1] = {
@@ -132,10 +132,10 @@ fun main() {
     tableView["A", "B", 1L] = {
 
     }
-    tableView[ColumnHeader("A", "B"), 1] = {
+    tableView[Header["A", "B"], 1] = {
 
     }
-    tableView[ColumnHeader("A", "B"), 1L] = {
+    tableView[Header["A", "B"], 1L] = {
 
     }
      */
@@ -146,7 +146,7 @@ fun main() {
     tableView["A", "B"].let {
 
     }
-    tableView[ColumnHeader("A", "B")].let {
+    tableView[Header["A", "B"]].let {
 
     }
     tableView[1].let {
@@ -167,10 +167,10 @@ fun main() {
     tableView["A", "B"][1L].let {
 
     }
-    tableView[ColumnHeader("A", "B")][1].let {
+    tableView[Header["A", "B"]][1].let {
 
     }
-    tableView[ColumnHeader("A", "B")][1L].let {
+    tableView[Header["A", "B"]][1L].let {
 
     }
     tableView[1]["A"].let {
@@ -185,10 +185,10 @@ fun main() {
     tableView[1L]["A", "B"].let {
 
     }
-    tableView[1][ColumnHeader("A", "B")].let {
+    tableView[1][Header["A", "B"]].let {
 
     }
-    tableView[1L][ColumnHeader("A", "B")].let {
+    tableView[1L][Header["A", "B"]].let {
 
     }
     tableView["A", 1].let {
@@ -203,15 +203,15 @@ fun main() {
     tableView["A", "B", 1L].let {
 
     }
-    tableView[ColumnHeader("A", "B"), 1].let {
+    tableView[Header["A", "B"], 1].let {
 
     }
-    tableView[ColumnHeader("A", "B"), 1L].let {
+    tableView[Header["A", "B"], 1L].let {
 
     }
 
     /*
-    tableView[ColumnHeader("A"), 1] = {
+    tableView[Header["A"], 1] = {
         cellHeight = null
         cellWidth = 100
         /*
@@ -228,8 +228,8 @@ fun main() {
          */
     }
      */
-    tableView[ColumnHeader("A"), 1][CellHeight] = null
-    tableView[ColumnHeader("A"), 1][CellWidth] = 100
+    tableView[Header["A"], 1][CellHeight] = null
+    tableView[Header["A"], 1][CellWidth] = 100
 
     // TODO?
     /*
@@ -250,7 +250,7 @@ fun main() {
     tableView[CellHeight] = height
 
     /*
-    tableView[ColumnHeader("A")] = {
+    tableView[Header["A"]] = {
         cellWidth = 100
     }
      */

@@ -805,7 +805,7 @@ private fun publishRowMoveEvents(
         val oldRef = oldTable.tableRef.get()
         val newRef = newTable.tableRef.get()
 
-        val columnHeaders = oldRef.headers.fold(LinkedHashMap<ColumnHeader, ColumnMeta>()) { acc, pair ->
+        val headers = oldRef.headers.fold(LinkedHashMap<Header, ColumnMeta>()) { acc, pair ->
             acc[pair.first] = pair.second
             acc
         }.apply {
@@ -816,7 +816,7 @@ private fun publishRowMoveEvents(
         }
 
         // Get columns anchored to old and new ref
-        val columns = columnHeaders.map { (columnHeader, columnMeta) ->
+        val columns = headers.map { (columnHeader, columnMeta) ->
             val oldColumn = BaseColumn(
                 oldTable,
                 columnHeader,
@@ -848,7 +848,7 @@ private fun publishRowMoveEvents(
         val oldRef = oldTable.tableRef.get()
         val newRef = newTable.tableRef.get()
 
-        val columnHeaders = oldRef.headers.fold(LinkedHashMap<ColumnHeader, ColumnMeta>()) { acc, pair ->
+        val headers = oldRef.headers.fold(LinkedHashMap<Header, ColumnMeta>()) { acc, pair ->
             acc[pair.first] = pair.second
             acc
         }.apply {
@@ -859,7 +859,7 @@ private fun publishRowMoveEvents(
         }
 
         // Get columns anchored to old and new ref
-        val columns = columnHeaders.map { (columnHeader, columnMeta) ->
+        val columns = headers.map { (columnHeader, columnMeta) ->
             val oldColumn = BaseColumn(
                 oldTable,
                 columnHeader,
@@ -896,7 +896,7 @@ private fun publishRowMoveEvents(
         val oldRef = oldTable.tableRef.get()
         val newRef = newTable.tableRef.get()
 
-        val columnHeaders = oldRef.headers.fold(LinkedHashMap<ColumnHeader, ColumnMeta>()) { acc, pair ->
+        val headers = oldRef.headers.fold(LinkedHashMap<Header, ColumnMeta>()) { acc, pair ->
             acc[pair.first] = pair.second
             acc
         }.apply {
@@ -907,7 +907,7 @@ private fun publishRowMoveEvents(
         }
 
         // Get columns anchored to old and new ref
-        val columns = columnHeaders.map { (columnHeader, columnMeta) ->
+        val columns = headers.map { (columnHeader, columnMeta) ->
             val oldColumn = BaseColumn(
                 oldTable,
                 columnHeader,
@@ -1069,7 +1069,7 @@ private fun publishRowCopyEvents(
         val oldRef = oldTable.tableRef.get()
         val newRef = newTable.tableRef.get()
 
-        val columnHeaders = oldRef.headers.fold(LinkedHashMap<ColumnHeader, ColumnMeta>()) { acc, pair ->
+        val headers = oldRef.headers.fold(LinkedHashMap<Header, ColumnMeta>()) { acc, pair ->
             acc[pair.first] = pair.second
             acc
         }.apply {
@@ -1080,7 +1080,7 @@ private fun publishRowCopyEvents(
         }
 
         // Get columns anchored to old and new ref
-        val columns = columnHeaders.map { (columnHeader, columnMeta) ->
+        val columns = headers.map { (columnHeader, columnMeta) ->
             val oldColumn = BaseColumn(
                 oldTable,
                 columnHeader,
@@ -1112,7 +1112,7 @@ private fun publishRowCopyEvents(
         val oldRef = oldTable.tableRef.get()
         val newRef = newTable.tableRef.get()
 
-        val columnHeaders = oldRef.headers.fold(LinkedHashMap<ColumnHeader, ColumnMeta>()) { acc, pair ->
+        val headers = oldRef.headers.fold(LinkedHashMap<Header, ColumnMeta>()) { acc, pair ->
             acc[pair.first] = pair.second
             acc
         }.apply {
@@ -1123,7 +1123,7 @@ private fun publishRowCopyEvents(
         }
 
         // Get columns anchored to old and new ref
-        val columns = columnHeaders.map { (columnHeader, columnMeta) ->
+        val columns = headers.map { (columnHeader, columnMeta) ->
             val oldColumn = BaseColumn(
                 oldTable,
                 columnHeader,
@@ -1160,7 +1160,7 @@ private fun publishRowCopyEvents(
         val oldRef = oldTable.tableRef.get()
         val newRef = newTable.tableRef.get()
 
-        val columnHeaders = oldRef.headers.fold(LinkedHashMap<ColumnHeader, ColumnMeta>()) { acc, pair ->
+        val headers = oldRef.headers.fold(LinkedHashMap<Header, ColumnMeta>()) { acc, pair ->
             acc[pair.first] = pair.second
             acc
         }.apply {
@@ -1171,7 +1171,7 @@ private fun publishRowCopyEvents(
         }
 
         // Get columns anchored to old and new ref
-        val columns = columnHeaders.map { (columnHeader, columnMeta) ->
+        val columns = headers.map { (columnHeader, columnMeta) ->
             val oldColumn = BaseColumn(
                 oldTable,
                 columnHeader,
@@ -1295,8 +1295,8 @@ private fun publishRowCopyEvents(
     }
 }
 
-fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
-    fun columnMove(left: ColumnHeader, right: ColumnHeader, order: ColumnActionOrder, withName: ColumnHeader, refUpdate: TableRef.() -> TableRef): (ref: TableRef) -> TableRef = { inRef ->
+fun move(columnToColumnAction: ColumnToColumnAction, withName: Header) {
+    fun columnMove(left: Header, right: Header, order: ColumnActionOrder, withName: Header, refUpdate: TableRef.() -> TableRef): (ref: TableRef) -> TableRef = { inRef ->
         val ref = inRef.refUpdate()
 
         val changedColumns = ref
@@ -1319,14 +1319,14 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
             .filter { (columnHeader, _) -> columnHeader != left }
             .sortedBy { (_, meta) -> meta.columnOrder }
             .map { it.component1() }
-            .takeWhile { firstChangedColumn == null || firstChangedColumn != it } as Sequence<ColumnHeader>
+            .takeWhile { firstChangedColumn == null || firstChangedColumn != it } as Sequence<Header>
 
         val newColumn = sequenceOf(withName)
 
         val remainingColumns = changedColumns.filter { it != withName }.let { columns ->
             if (order == ColumnActionOrder.TO) columns.filter { it != right }
             else columns
-        } as Sequence<ColumnHeader>
+        } as Sequence<Header>
 
         val allColumns = unchangedColumns + newColumn + remainingColumns
 
@@ -1337,7 +1337,7 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
             .sorted()
 
         // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
-        val newColumnMap = columnOrders.fold(PHashMap<ColumnHeader, ColumnMeta>()) { acc, (columnHeader, columnOrder) ->
+        val newColumnMap = columnOrders.fold(PHashMap<Header, ColumnMeta>()) { acc, (columnHeader, columnOrder) ->
             val prenatal = ref.columns[columnHeader]?.prenatal ?: throw InvalidColumnException(columnHeader)
             acc.put(columnHeader, ColumnMeta(columnOrder, prenatal))
         }
@@ -1397,18 +1397,18 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
     }
 }
 
-fun move(columnToColumnAction: ColumnToColumnAction, vararg withName: String) = move(columnToColumnAction, ColumnHeader(*withName))
+fun move(columnToColumnAction: ColumnToColumnAction, vararg withName: String) = move(columnToColumnAction, Header(*withName))
 
 fun move(columnToColumnAction: ColumnToColumnAction) = move(columnToColumnAction, if (columnToColumnAction.order == ColumnActionOrder.TO) columnToColumnAction.right.header else columnToColumnAction.left.header)
 
-fun move(left: Column, actionOrder: ColumnActionOrder, right: Column, withName: ColumnHeader) = move(ColumnToColumnAction(left, right, actionOrder), withName)
+fun move(left: Column, actionOrder: ColumnActionOrder, right: Column, withName: Header) = move(ColumnToColumnAction(left, right, actionOrder), withName)
 
 fun move(left: Column, actionOrder: ColumnActionOrder, right: Column, vararg withName: String) = move(ColumnToColumnAction(left, right, actionOrder), *withName)
 
 fun move(left: Column, actionOrder: ColumnActionOrder, right: Column) = move(ColumnToColumnAction(left, right, actionOrder))
 
-fun move(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
-    fun columnMove(withName: ColumnHeader, refUpdate: TableRef.() -> TableRef): (ref: TableRef) -> TableRef = { inRef ->
+fun move(columnToTableAction: ColumnToTableAction, withName: Header) {
+    fun columnMove(withName: Header, refUpdate: TableRef.() -> TableRef): (ref: TableRef) -> TableRef = { inRef ->
         val ref = inRef.refUpdate()
 
         // TODO Probably don't need any of this logic as just adding a new column at the end is enough..
@@ -1418,7 +1418,7 @@ fun move(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
             .asSequence()
             .filter { (header, _) -> header != withName }
             .sortedBy { (_, meta) -> meta.columnOrder }
-            .map { it.component1() } as Sequence<ColumnHeader>
+            .map { it.component1() } as Sequence<Header>
 
         val newColumn = sequenceOf(withName)
 
@@ -1431,7 +1431,7 @@ fun move(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
             .sorted()
 
         // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
-        val newColumnMap = columnOrders.fold(PHashMap<ColumnHeader, ColumnMeta>()) { acc, (columnHeader, columnOrder) ->
+        val newColumnMap = columnOrders.fold(PHashMap<Header, ColumnMeta>()) { acc, (columnHeader, columnOrder) ->
             val prenatal = ref.columns[columnHeader]?.prenatal ?: throw InvalidColumnException(columnHeader)
             acc.put(columnHeader, ColumnMeta(columnOrder, prenatal))
         }
@@ -1486,18 +1486,18 @@ fun move(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
     }
 }
 
-fun move(columnToTableAction: ColumnToTableAction, vararg withName: String) = move(columnToTableAction, ColumnHeader(*withName))
+fun move(columnToTableAction: ColumnToTableAction, vararg withName: String) = move(columnToTableAction, Header(*withName))
 
 fun move(columnToTableAction: ColumnToTableAction) = move(columnToTableAction, columnToTableAction.left.header)
 
-fun move(left: Column, table: Table, withName: ColumnHeader) = move(ColumnToTableAction(left, table), withName)
+fun move(left: Column, table: Table, withName: Header) = move(ColumnToTableAction(left, table), withName)
 
 fun move(left: Column, table: Table, vararg withName: String) = move(ColumnToTableAction(left, table), *withName)
 
 fun move(left: Column, table: Table) = move(ColumnToTableAction(left, table), left.header)
 
-fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
-    fun columnCopy(left: ColumnHeader, right: ColumnHeader, order: ColumnActionOrder, withName: ColumnHeader, refUpdate: TableRef.() -> TableRef): (ref: TableRef) -> TableRef = { inRef ->
+fun copy(columnToColumnAction: ColumnToColumnAction, withName: Header) {
+    fun columnCopy(left: Header, right: Header, order: ColumnActionOrder, withName: Header, refUpdate: TableRef.() -> TableRef): (ref: TableRef) -> TableRef = { inRef ->
         val ref = inRef.refUpdate()
 
         val changedColumns = ref
@@ -1520,14 +1520,14 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
             .filter { (header, _) -> header != withName || header != left }
             .sortedBy { (_, meta) -> meta.columnOrder }
             .map { it.component1() }
-            .takeWhile { firstChangedColumn == null || firstChangedColumn != it } as Sequence<ColumnHeader>
+            .takeWhile { firstChangedColumn == null || firstChangedColumn != it } as Sequence<Header>
 
         val newColumn = sequenceOf(withName)
 
         val remainingColumns = changedColumns.filter { it != withName }.let { columns ->
             if (order == ColumnActionOrder.TO) columns.filter { it != right }
             else columns
-        } as Sequence<ColumnHeader>
+        } as Sequence<Header>
 
         val allColumns = unchangedColumns + newColumn + remainingColumns
 
@@ -1538,7 +1538,7 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
             .sorted()
 
         // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
-        val newColumnMap = columnOrders.fold(PHashMap<ColumnHeader, ColumnMeta>()) { acc, (columnHeader, columnOrder) ->
+        val newColumnMap = columnOrders.fold(PHashMap<Header, ColumnMeta>()) { acc, (columnHeader, columnOrder) ->
             val prenatal = ref.columns[columnHeader]?.prenatal ?: throw InvalidColumnException(columnHeader)
             acc.put(columnHeader, ColumnMeta(columnOrder, prenatal))
         }
@@ -1591,18 +1591,18 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: ColumnHeader) {
     }
 }
 
-fun copy(columnToColumnAction: ColumnToColumnAction, vararg withName: String) = copy(columnToColumnAction, ColumnHeader(*withName))
+fun copy(columnToColumnAction: ColumnToColumnAction, vararg withName: String) = copy(columnToColumnAction, Header(*withName))
 
 fun copy(columnToColumnAction: ColumnToColumnAction) = copy(columnToColumnAction, if (columnToColumnAction.order == ColumnActionOrder.TO) columnToColumnAction.right.header else columnToColumnAction.left.header)
 
-fun copy(left: Column, actionOrder: ColumnActionOrder, right: Column, withName: ColumnHeader) = copy(ColumnToColumnAction(left, right, actionOrder), withName)
+fun copy(left: Column, actionOrder: ColumnActionOrder, right: Column, withName: Header) = copy(ColumnToColumnAction(left, right, actionOrder), withName)
 
-fun copy(left: Column, actionOrder: ColumnActionOrder, right: Column, vararg withName: String) = copy(ColumnToColumnAction(left, right, actionOrder), ColumnHeader(*withName))
+fun copy(left: Column, actionOrder: ColumnActionOrder, right: Column, vararg withName: String) = copy(ColumnToColumnAction(left, right, actionOrder), Header(*withName))
 
 fun copy(left: Column, actionOrder: ColumnActionOrder, right: Column) = copy(ColumnToColumnAction(left, right, actionOrder))
 
-fun copy(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
-    fun columnCopy(withName: ColumnHeader, refUpdate: TableRef.() -> TableRef): (ref: TableRef) -> TableRef = { inRef ->
+fun copy(columnToTableAction: ColumnToTableAction, withName: Header) {
+    fun columnCopy(withName: Header, refUpdate: TableRef.() -> TableRef): (ref: TableRef) -> TableRef = { inRef ->
         val ref = inRef.refUpdate()
 
         // TODO Probably don't need any of this logic as just adding a new column at the end is enough..
@@ -1611,7 +1611,7 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
             .asSequence()
             .filter { (header, _) -> header != withName }
             .sortedBy { (_, meta) -> meta.columnOrder }
-            .map { it.component1() } as Sequence<ColumnHeader>
+            .map { it.component1() } as Sequence<Header>
 
         val newColumn = sequenceOf(withName)
 
@@ -1624,7 +1624,7 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
             .sorted()
 
         // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
-        val newColumnMap = columnOrders.fold(PHashMap<ColumnHeader, ColumnMeta>()) { acc, (columnHeader, columnOrder) ->
+        val newColumnMap = columnOrders.fold(PHashMap<Header, ColumnMeta>()) { acc, (columnHeader, columnOrder) ->
             val prenatal = ref.columns[columnHeader]?.prenatal ?: throw InvalidColumnException(columnHeader)
             acc.put(columnHeader, ColumnMeta(columnOrder, prenatal))
         }
@@ -1672,11 +1672,11 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: ColumnHeader) {
     }
 }
 
-fun copy(columnToTableAction: ColumnToTableAction, vararg withName: String) = copy(columnToTableAction, ColumnHeader(*withName))
+fun copy(columnToTableAction: ColumnToTableAction, vararg withName: String) = copy(columnToTableAction, Header(*withName))
 
 fun copy(columnToTableAction: ColumnToTableAction) = copy(columnToTableAction, columnToTableAction.left.header)
 
-fun copy(left: Column, table: Table, withName: ColumnHeader) = copy(ColumnToTableAction(left, table), withName)
+fun copy(left: Column, table: Table, withName: Header) = copy(ColumnToTableAction(left, table), withName)
 
 fun copy(left: Column, table: Table, vararg withName: String) = copy(ColumnToTableAction(left, table), *withName)
 
@@ -2010,7 +2010,7 @@ fun copy(left: Row, actionOrder: RowActionOrder, right: Row) = copy(RowToRowActi
 
 // ---
 
-fun rename(column: Column, withName: ColumnHeader): Unit = move(column to column, withName)
+fun rename(column: Column, withName: Header): Unit = move(column to column, withName)
 
 fun rename(column: Column, vararg withName: String): Unit = move(column to column, *withName)
 

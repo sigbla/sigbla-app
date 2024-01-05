@@ -4,7 +4,7 @@ package sigbla.app.internals
 
 import sigbla.app.CellValue
 import sigbla.app.Column
-import sigbla.app.ColumnHeader
+import sigbla.app.Header
 import sigbla.app.Table
 import sigbla.app.exceptions.InvalidStorageException
 import java.io.BufferedOutputStream
@@ -106,7 +106,7 @@ internal fun load1(
                     }.toList()
 
                     val columnLocation = headers.first().location ?: throw InvalidStorageException("Missing column location")
-                    val header = ColumnHeader(headers.map { it.section }.reversed())
+                    val header = Header(headers.map { it.section }.reversed())
                     val column = Table[null][header]
 
                     fillColumn(file, compressed, column, columnLocation)

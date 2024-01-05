@@ -50,12 +50,12 @@ internal data class ViewMeta(
 
 internal data class TableViewRef(
     val defaultCellView: ViewMeta = ViewMeta(),
-    val columnViews: PMap<ColumnHeader, ViewMeta> = PHashMap(),
+    val columnViews: PMap<Header, ViewMeta> = PHashMap(),
     val rowViews: PMap<Long, ViewMeta> = PHashMap(),
-    val cellViews: PMap<Pair<ColumnHeader, Long>, ViewMeta> = PHashMap(),
+    val cellViews: PMap<Pair<Header, Long>, ViewMeta> = PHashMap(),
 
     val resources: PMap<String, Pair<Long, suspend PipelineContext<*, ApplicationCall>.() -> Unit>> = PHashMap(),
-    val cellTransformers: PMap<Pair<ColumnHeader, Long>, Cell<*>.() -> Any?> = PHashMap(),
+    val cellTransformers: PMap<Pair<Header, Long>, Cell<*>.() -> Any?> = PHashMap(),
     val table: Table? = null,
 
     val version: Long = Long.MIN_VALUE,
@@ -363,10 +363,10 @@ class TableView internal constructor(
         }
     }
 
-    operator fun get(columnHeader: ColumnHeader) = ColumnView(this, columnHeader)
+    operator fun get(header: Header) = ColumnView(this, header)
 
     operator fun get(vararg header: String): ColumnView = get(
-        ColumnHeader(
+        Header(
             *header
         )
     )
@@ -418,7 +418,7 @@ class TableView internal constructor(
     // -----
 
     operator fun get(index: Long, column: Column): CellView = this[column, index]
-    operator fun get(index: Long, columnHeader: ColumnHeader): CellView = this[columnHeader, index]
+    operator fun get(index: Long, header: Header): CellView = this[header, index]
 
     // -----
 
@@ -426,7 +426,7 @@ class TableView internal constructor(
 
     operator fun get(columnView: ColumnView, index: Long): CellView = this[columnView.header, index]
 
-    operator fun get(columnHeader: ColumnHeader, index: Long): CellView = CellView(get(columnHeader), index)
+    operator fun get(header: Header, index: Long): CellView = CellView(get(header), index)
 
     // -----
 
@@ -450,16 +450,16 @@ class TableView internal constructor(
 
     // -----
 
-    operator fun set(columnHeader: ColumnHeader, view: ColumnView?) {
+    operator fun set(header: Header, view: ColumnView?) {
         synchronized(eventProcessor) {
             val (oldRef, newRef) = tableViewRef.refAction {
                 val viewMeta = if (view == null) null else view.tableView.tableViewRef.get().columnViews[view.header]
 
                 it.copy(
                     columnViews = if (viewMeta != null)
-                        it.columnViews.put(columnHeader, viewMeta)
+                        it.columnViews.put(header, viewMeta)
                     else
-                        it.columnViews.remove(columnHeader),
+                        it.columnViews.remove(header),
                     version = it.version + 1L
                 )
             }
@@ -469,8 +469,8 @@ class TableView internal constructor(
             val oldView = makeClone(ref = oldRef)
             val newView = makeClone(ref = newRef)
 
-            val oldColumnView = oldView[columnHeader]
-            val newColumnView = newView[columnHeader]
+            val oldColumnView = oldView[header]
+            val newColumnView = newView[header]
 
             eventProcessor.publish(listOf(
                 TableViewListenerEvent(oldColumnView[CellClasses], newColumnView[CellClasses]),
@@ -523,13 +523,13 @@ class TableView internal constructor(
 
     // -----
 
-    operator fun set(columnHeader: ColumnHeader, index: Int, view: CellView?) {
-        this[columnHeader, index.toLong()] = view
+    operator fun set(header: Header, index: Int, view: CellView?) {
+        this[header, index.toLong()] = view
     }
 
-    operator fun set(columnHeader: ColumnHeader, index: Long, view: CellView?) {
+    operator fun set(header: Header, index: Long, view: CellView?) {
         synchronized(eventProcessor) {
-            val cell = Pair(columnHeader, index)
+            val cell = Pair(header, index)
             val (oldRef, newRef) = tableViewRef.refAction {
                 val viewMeta = if (view == null) null else view.tableView.tableViewRef.get().cellViews[cell]
 
@@ -547,8 +547,8 @@ class TableView internal constructor(
             val oldView = makeClone(ref = oldRef)
             val newView = makeClone(ref = newRef)
 
-            val oldCellView = oldView[columnHeader][index]
-            val newCellView = newView[columnHeader][index]
+            val oldCellView = oldView[header][index]
+            val newCellView = newView[header][index]
 
             eventProcessor.publish(listOf(
                 TableViewListenerEvent(oldCellView[CellClasses], newCellView[CellClasses]),
@@ -562,18 +562,18 @@ class TableView internal constructor(
 
     // -----
 
-    operator fun set(columnHeader: ColumnHeader, index: Int, function: CellView.() -> Any?) {
-        this[columnHeader][index] { function() }
+    operator fun set(header: Header, index: Int, function: CellView.() -> Any?) {
+        this[header][index] { function() }
     }
 
-    operator fun set(columnHeader: ColumnHeader, index: Long, function: CellView.() -> Any?) {
-        this[columnHeader][index] { function() }
+    operator fun set(header: Header, index: Long, function: CellView.() -> Any?) {
+        this[header][index] { function() }
     }
 
     // -----
 
     operator fun set(vararg header: String, view: ColumnView?) {
-        this[ColumnHeader(*header)] = view
+        this[Header(*header)] = view
     }
 
     // -----
@@ -1166,12 +1166,12 @@ class DerivedCellView internal constructor(
 
 class ColumnView internal constructor(
     val tableView: TableView,
-    val header: ColumnHeader
+    val header: Header
 ) : Iterable<DerivedCellView> {
     init {
         // Best efforts to help columns appear in the order they are referenced,
         // but ultimately this is controlled by the underlying table.
-        if (header !== emptyColumnHeader) tableView.tableViewRef.get().table?.get(header)
+        if (header !== emptyHeader) tableView.tableViewRef.get().table?.get(header)
     }
 
     operator fun get(cellWidth: CellWidth.Companion): CellWidth<ColumnView, *> {
@@ -1416,7 +1416,7 @@ class DerivedColumnView internal constructor(
     val tableView: TableView
         get() = columnView.tableView
 
-    val header: ColumnHeader
+    val header: Header
         get() = columnView.header
 
     val cellClasses: CellClasses<DerivedColumnView> by lazy {
@@ -1594,25 +1594,25 @@ class RowView internal constructor(
     val derived: DerivedRowView
         get() = createDerivedRowView(this)
 
-    operator fun get(vararg header: String): CellView = tableView[ColumnHeader(*header), index]
+    operator fun get(vararg header: String): CellView = tableView[Header(*header), index]
 
-    operator fun get(columnHeader: ColumnHeader): CellView = tableView[columnHeader, index]
+    operator fun get(header: Header): CellView = tableView[header, index]
 
     operator fun get(columnView: ColumnView): CellView = tableView[columnView.header, index]
 
     operator fun get(column: Column): CellView = tableView[column.header, index]
 
-    operator fun set(vararg header: String, view: CellView?) { tableView[ColumnHeader(*header), index] = view }
+    operator fun set(vararg header: String, view: CellView?) { tableView[Header(*header), index] = view }
 
-    operator fun set(columnHeader: ColumnHeader, view: CellView?) { tableView[columnHeader, index] = view }
+    operator fun set(header: Header, view: CellView?) { tableView[header, index] = view }
 
     operator fun set(columnView: ColumnView, view: CellView?) { tableView[columnView.header, index] = view }
 
     operator fun set(column: Column, view: CellView?) { tableView[column.header, index] = view }
 
-    operator fun set(vararg header: String, function: CellView.() -> Any?) { tableView[ColumnHeader(*header), index] { function() } }
+    operator fun set(vararg header: String, function: CellView.() -> Any?) { tableView[Header(*header), index] { function() } }
 
-    operator fun set(columnHeader: ColumnHeader, function: CellView.() -> Any?) { tableView[columnHeader, index] { function() } }
+    operator fun set(header: Header, function: CellView.() -> Any?) { tableView[header, index] { function() } }
 
     operator fun set(columnView: ColumnView, function: CellView.() -> Any?) { tableView[columnView.header, index] { function() } }
 

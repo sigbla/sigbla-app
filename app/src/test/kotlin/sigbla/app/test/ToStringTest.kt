@@ -27,16 +27,16 @@ class ToStringTest {
         val labels = mutableListOf<String>()
 
         for (i in 1..40) {
-            val ch1 = if (labels.isNotEmpty()) ColumnHeader(*labels.toTypedArray()) else null
+            val ch1 = if (labels.isNotEmpty()) Header(*labels.toTypedArray()) else null
             labels.add(UUID.randomUUID().toString())
-            val ch2 = ColumnHeader(*labels.toTypedArray())
+            val ch2 = Header(*labels.toTypedArray())
 
             if (ch1 != null)
                 move(table[ch1] to table[ch2])
             else
                 table[ch2, 0] = "0"
 
-            assertEquals("ColumnHeader[${labels.joinToString(limit = 30)}]", ch2.toString())
+            assertEquals("Header[${labels.joinToString(limit = 30)}]", ch2.toString())
             assertEquals("Column[${labels.joinToString(limit = 30)}]", table[ch2].toString())
         }
     }
@@ -109,7 +109,7 @@ class ToStringTest {
 
         for (i in 1..40) {
             labels.add(UUID.randomUUID().toString())
-            val ch = ColumnHeader(*labels.toTypedArray())
+            val ch = Header(*labels.toTypedArray())
 
             val cellView = tableView[ch][i]
             val columnView = tableView[ch]

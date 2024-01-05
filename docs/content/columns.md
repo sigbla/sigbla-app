@@ -61,7 +61,7 @@ print(table)
 // 0       |Cell A0 |Cell B0
 ```
 
-## Column and ColumnHeader
+## Column and Header
 
 A table may contain any number of columns, and each column contains one or more column labels, as represented by a
 column header. Each column header must be unique within a table.
@@ -70,8 +70,8 @@ You can't create a `Column` instance directly, but instead do that through `tabl
 column is equal to another column if they point to the same table and contain the same header. As such, columns are
 linked to tables via the `Column` class.
 
-The column header is contained within the `ColumnHeader` class. You can create `ColumnHeader` instances through its
-constructor, or obtain a reference to it via the `Column` instance. A `ColumnHeader` is equal to another `ColumnHeader`
+The column header is contained within the `Header` class. You can create `Header` instances by calling `Header[...]`,
+or obtain a reference to it via the `Column` instance. A `Header` is equal to another `Header`
 instance if they have equal labels.
 
 Columns are ordered by their order value, and can be sorted according to this. As we'll see later, we can move columns
@@ -86,26 +86,25 @@ fun assert(value: Boolean) {
 }
 
 // The below is the same as doing table["L1", L1"], but here
-// using the ColumnHeader constructor directly, before passing
-// that to our table:
-val columnHeader1 = ColumnHeader("L1", "L2")
-val columnT1C1 = table1[columnHeader1]
+// using the Header directly, before passing that to our table:
+val header1 = Header["L1", "L2"]
+val columnT1C1 = table1[header1]
 
 // Because column headers just contain labels, we can use
 // them across several tables, and they will return us
 // columns with the same column labels:
-val columnT2C1 = table2[columnHeader1]
+val columnT2C1 = table2[header1]
 
 // We can also pass a column, even from a different table,
 // which is shorthand for table[column.header]
 assert(columnT2C1 == table2[columnT1C1])
 
-// Two separate instances of ColumnHeader are equal if they
+// Two separate instances of Header are equal if they
 // contain the same labels in the same order:
-assert(columnHeader1 == ColumnHeader("L1", "L2"))
-assert(columnHeader1 == columnT1C1.header)
+assert(header1 == Header["L1", "L2"])
+assert(header1 == columnT1C1.header)
 assert(columnT1C1.header == columnT2C1.header)
-assert(columnHeader1 != ColumnHeader("L3", "L4"))
+assert(header1 != Header["L3", "L4"])
 
 // Two columns are not equal if they belong to different
 // tables, even if they have the same column header:
@@ -314,7 +313,7 @@ print(table)
 // 0  |B0
 ```
 
-Nested labels and use of the ColumnHeader class is also supported when providing a new name. Column references are not
+Nested labels and use of the Header class is also supported when providing a new name. Column references are not
 supported as a new name parameter to avoid any confusion around the source or destination of the renamed column.
 
 ``` kotlin
@@ -332,7 +331,7 @@ print(table)
 //    |   |L2
 // 0  |B0 |A0
 
-// Could also do move(table["L1", "L2"] before table["B"], ColumnHeader("B"))
+// Could also do move(table["L1", "L2"] before table["B"], Header["B"])
 move(table["L1", "L2"] before table["B"], table["B"].header)
 
 print(table)
