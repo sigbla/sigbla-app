@@ -535,7 +535,8 @@ internal object SigblaBackend {
 
     private fun handleResize(client: SigblaClient, resize: ClientEventResize) {
         // No lock here as we're not sending data
-        val view = clone(viewRefs[client.ref]?.first ?: return)
+        // No view clone here as we're manipulating the view below
+        val view = viewRefs[client.ref]?.first ?: return
         // Note that resize.target is the client side element id
         val targetId = resize.target.substring(1).toLong()
         val target = client.contentState.withPCFor(targetId) ?: return
