@@ -41,7 +41,7 @@ fun main() {
     val cell3 = table["A", "B"][1]
     val cell4 = table[1]["A", "B"]
 
-    table[1][ColumnHeader("A")] = "A"
+    table[1][Header["A"]] = "A"
     table[1]["A", "B"] = "A"
 
     val tickerHeaders = headersOf(table).filter { it[2] == "Ticker" }

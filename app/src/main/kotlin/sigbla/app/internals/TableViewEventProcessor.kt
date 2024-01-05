@@ -497,7 +497,7 @@ internal class TableViewEventProcessor {
                 val oldView = tableViewFromViewRelated(this.first().oldValue)
                 val newView = tableViewFromViewRelated(this.last().newValue)
 
-                val locations = LinkedHashMap<Triple<ColumnHeader?, Long?, KClass<*>>, Any>()
+                val locations = LinkedHashMap<Triple<Header?, Long?, KClass<*>>, Any>()
 
                 this.forEach {
                     val location = Triple(columnViewFromViewRelated(it.newValue)?.header, indexFromViewRelated(it.newValue), it.newValue::class)

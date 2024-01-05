@@ -63,7 +63,7 @@ table[0]["A"] = "Cell A0"
 
 Using the first approach (`table["A", 0]`) you can address columns up to 5 labels deep.
 Should you need more you can use the `vararg` options (second and third approach), or you can make use of the
-`ColumnHeader` class directly.
+`Header` class directly.
 
 ``` kotlin
 // This works
@@ -76,9 +76,9 @@ table["L1", "L2", "L3", "L4", "L5", "L6", 1] = "Cell value"
 table["L1", "L2", "L3", "L4", "L5", "L6"][1] = "Cell value"
 table[1]["L1", "L2", "L3", "L4", "L5", "L6"] = "Cell value"
 
-// Using the ColumnHeader class directly is also an option
-table[ColumnHeader("L1", "L2", "L3", "L4", "L5", "L6")][1] = "Cell value"
-table[1][ColumnHeader("L1", "L2", "L3", "L4", "L5", "L6")] = "Cell value"
+// Using the Header class directly is also an option
+table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][1] = "Cell value"
+table[1][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = "Cell value"
 ```
 
 Being able to do `table["A"][0]` and `table[0]["A"]` gives us a clue to how we read or address multiple cells in one

@@ -142,7 +142,7 @@ internal fun load1(
                         nonLeafSections[currentSection.parent]
                     }.toList()
 
-                    val header = ColumnHeader(headers.map { it.section ?: throw InvalidStorageException("Missing column section") }.reversed())
+                    val header = Header(headers.map { it.section ?: throw InvalidStorageException("Missing column section") }.reversed())
 
                     val viewMeta = deserializeViewMeta(inputStream)
                     if (viewMeta.cellWidth == null) tableView[header][CellWidth] = null else tableView[header][CellWidth] = viewMeta.cellWidth
@@ -212,7 +212,7 @@ internal fun load1(
                         nonLeafSections[currentSection.parent]
                     }.drop(1).toList()
 
-                    val header = ColumnHeader(headers.map { it.section ?: throw InvalidStorageException("Missing column section") }.reversed())
+                    val header = Header(headers.map { it.section ?: throw InvalidStorageException("Missing column section") }.reversed())
                     val row = viewSection.row ?: throw InvalidStorageException("Missing row section")
 
                     val viewMeta = deserializeViewMeta(inputStream)

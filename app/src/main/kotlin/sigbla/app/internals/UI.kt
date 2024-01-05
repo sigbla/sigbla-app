@@ -189,7 +189,7 @@ internal object SigblaBackend {
         var maxHeaderOffset = 0L
         var maxHeaderCells = 0
 
-        val headerWidth = view[emptyColumnHeader].derived.cellWidth
+        val headerWidth = view[emptyHeader].derived.cellWidth
 
         for (column in table.columns) {
             if (x <= runningWidth && runningWidth <= x + w) applicableColumns.add(Pair(column, runningWidth))
@@ -248,7 +248,7 @@ internal object SigblaBackend {
             if (dirtyRowIndices != null && !dirtyRowIndices.contains(applicableRow)) continue
 
             output.add(PositionedContent(
-                emptyColumnHeader,
+                emptyHeader,
                 applicableRow,
                 applicableRow.toString(),
                 view[applicableRow].derived.cellHeight,
@@ -296,7 +296,7 @@ internal object SigblaBackend {
         val table = view[Table]
 
         val headerHeight = view[-1].derived.cellHeight
-        val headerWidth = view[emptyColumnHeader].derived.cellWidth
+        val headerWidth = view[emptyHeader].derived.cellWidth
 
         var maxHeaderOffset = headerHeight
         var runningWidth = headerWidth
@@ -841,7 +841,7 @@ internal class ClientEventAdapter: TypeAdapter<ClientEvent> {
 internal data class Coordinate(val x: Long, val y: Long)
 
 internal data class PositionedContent(
-    val contentHeader: ColumnHeader,
+    val contentHeader: Header,
     val contentRow: Long,
     val content: String?,
     val h: Long,

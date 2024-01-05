@@ -17,32 +17,32 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
 
     abstract val index: Long
 
-    val headers: Sequence<ColumnHeader>
+    val headers: Sequence<Header>
         get() = table.headers
 
     val columns: Sequence<Column>
         get() = table.columns
 
-    operator fun get(header: ColumnHeader): Cell<*> = table[header][indexRelation, index]
+    operator fun get(header: Header): Cell<*> = table[header][indexRelation, index]
 
     operator fun get(column: Column): Cell<*> = table[column][indexRelation, index]
 
     operator fun get(vararg columnHeader: String): Cell<*> = get(
-        ColumnHeader(
+        Header(
             *columnHeader
         )
     )
 
-    operator fun set(header: ColumnHeader, value: Cell<*>?) = table[header].set(index, value)
-    operator fun set(header: ColumnHeader, value: String) = table[header].set(index, value)
-    operator fun set(header: ColumnHeader, value: Double) = table[header].set(index, value)
-    operator fun set(header: ColumnHeader, value: Float) = table[header].set(index, value)
-    operator fun set(header: ColumnHeader, value: Long) = table[header].set(index, value)
-    operator fun set(header: ColumnHeader, value: Int) = table[header].set(index, value)
-    operator fun set(header: ColumnHeader, value: BigInteger) = table[header].set(index, value)
-    operator fun set(header: ColumnHeader, value: BigDecimal) = table[header].set(index, value)
-    operator fun set(header: ColumnHeader, value: Number) = table[header].set(index, value)
-    operator fun set(header: ColumnHeader, init: Cell<*>.() -> Any?) = table[header][index] { init() }
+    operator fun set(header: Header, value: Cell<*>?) = table[header].set(index, value)
+    operator fun set(header: Header, value: String) = table[header].set(index, value)
+    operator fun set(header: Header, value: Double) = table[header].set(index, value)
+    operator fun set(header: Header, value: Float) = table[header].set(index, value)
+    operator fun set(header: Header, value: Long) = table[header].set(index, value)
+    operator fun set(header: Header, value: Int) = table[header].set(index, value)
+    operator fun set(header: Header, value: BigInteger) = table[header].set(index, value)
+    operator fun set(header: Header, value: BigDecimal) = table[header].set(index, value)
+    operator fun set(header: Header, value: Number) = table[header].set(index, value)
+    operator fun set(header: Header, init: Cell<*>.() -> Any?) = table[header][index] { init() }
 
     operator fun set(column: Column, value: Cell<*>?) = table[column].set(index, value)
     operator fun set(column: Column, value: String) = table[column].set(index, value)
@@ -55,16 +55,16 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
     operator fun set(column: Column, value: Number) = table[column].set(index, value)
     operator fun set(column: Column, init: Cell<*>.() -> Any?) = table[column][index] { init() }
 
-    operator fun set(vararg header: String, value: Cell<*>?) = table[ColumnHeader(*header)].set(index, value)
-    operator fun set(vararg header: String, value: String) = table[ColumnHeader(*header)].set(index, value)
-    operator fun set(vararg header: String, value: Double) = table[ColumnHeader(*header)].set(index, value)
-    operator fun set(vararg header: String, value: Float) = table[ColumnHeader(*header)].set(index, value)
-    operator fun set(vararg header: String, value: Long) = table[ColumnHeader(*header)].set(index, value)
-    operator fun set(vararg header: String, value: Int) = table[ColumnHeader(*header)].set(index, value)
-    operator fun set(vararg header: String, value: BigInteger) = table[ColumnHeader(*header)].set(index, value)
-    operator fun set(vararg header: String, value: BigDecimal) = table[ColumnHeader(*header)].set(index, value)
-    operator fun set(vararg header: String, value: Number) = table[ColumnHeader(*header)].set(index, value)
-    operator fun set(vararg header: String, init: Cell<*>.() -> Any?) = table[ColumnHeader(*header)][index] { init() }
+    operator fun set(vararg header: String, value: Cell<*>?) = table[Header(*header)].set(index, value)
+    operator fun set(vararg header: String, value: String) = table[Header(*header)].set(index, value)
+    operator fun set(vararg header: String, value: Double) = table[Header(*header)].set(index, value)
+    operator fun set(vararg header: String, value: Float) = table[Header(*header)].set(index, value)
+    operator fun set(vararg header: String, value: Long) = table[Header(*header)].set(index, value)
+    operator fun set(vararg header: String, value: Int) = table[Header(*header)].set(index, value)
+    operator fun set(vararg header: String, value: BigInteger) = table[Header(*header)].set(index, value)
+    operator fun set(vararg header: String, value: BigDecimal) = table[Header(*header)].set(index, value)
+    operator fun set(vararg header: String, value: Number) = table[Header(*header)].set(index, value)
+    operator fun set(vararg header: String, init: Cell<*>.() -> Any?) = table[Header(*header)][index] { init() }
 
     operator fun rangeTo(other: Row): RowRange {
         return RowRange(this, other)
@@ -74,20 +74,20 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
         val ref = table.tableRef.get()
         val columnCellMap = ref.columnCells
 
-        fun at(columnHeader: ColumnHeader): CellValue<*>? {
-            val values = columnCellMap[columnHeader] ?: throw InvalidColumnException(columnHeader)
+        fun at(header: Header): CellValue<*>? {
+            val values = columnCellMap[header] ?: throw InvalidColumnException(header)
             return values[index]
         }
 
-        fun firstBefore(columnHeader: ColumnHeader): CellValue<*>? {
-            val values = columnCellMap[columnHeader] ?: throw InvalidColumnException(columnHeader)
+        fun firstBefore(header: Header): CellValue<*>? {
+            val values = columnCellMap[header] ?: throw InvalidColumnException(header)
             val keys = values.asSortedMap().headMap(index).keys
             if (keys.isEmpty()) return null
             return values[keys.last()]
         }
 
-        fun firstAfter(columnHeader: ColumnHeader): CellValue<*>? {
-            val values = columnCellMap[columnHeader] ?: throw InvalidColumnException(columnHeader)
+        fun firstAfter(header: Header): CellValue<*>? {
+            val values = columnCellMap[header] ?: throw InvalidColumnException(header)
             val keys = values.asSortedMap().tailMap(index + 1L).keys
             if (keys.isEmpty()) return null
             return values[keys.first()]

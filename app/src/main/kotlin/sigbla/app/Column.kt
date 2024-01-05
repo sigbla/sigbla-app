@@ -11,10 +11,10 @@ import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.min
 
-class ColumnHeader(vararg labels: String) : Comparable<ColumnHeader> {
+class Header internal constructor(vararg labels: String) : Comparable<Header> {
     val labels: List<String> = Collections.unmodifiableList(labels.asList())
 
-    constructor(labels: List<String>) : this(*labels.toTypedArray())
+    internal constructor(labels: List<String>) : this(*labels.toTypedArray())
 
     init {
         labels.forEach {
@@ -31,7 +31,7 @@ class ColumnHeader(vararg labels: String) : Comparable<ColumnHeader> {
     }
 
     override fun equals(other: Any?): Boolean {
-        return if (other is ColumnHeader)
+        return if (other is Header)
             this.labels == other.labels
         else
             false
@@ -39,13 +39,13 @@ class ColumnHeader(vararg labels: String) : Comparable<ColumnHeader> {
 
     override fun hashCode() = labels.hashCode()
 
-    override fun toString() = "ColumnHeader[${labels.joinToString(limit = 30)}]"
+    override fun toString() = "Header[${labels.joinToString(limit = 30)}]"
 
-    override fun compareTo(other: ColumnHeader): Int {
-        for (i in 0 until max(this.labels.size, other.labels.size)) {
-            val thisItem = if (i < this.labels.size) this.labels[i] else ""
-            val otherItem = if (i < other.labels.size) other.labels[i] else ""
-            val cmp = thisItem.compareTo(otherItem)
+    override fun compareTo(other: Header): Int {
+        if (this.labels.size != other.labels.size) return this.labels.size.compareTo(other.labels.size)
+
+        for (i in 0 until this.labels.size) {
+            val cmp = this.labels[i].compareTo(other.labels[i])
 
             if (cmp != 0) return cmp
         }
@@ -53,17 +53,22 @@ class ColumnHeader(vararg labels: String) : Comparable<ColumnHeader> {
         return 0
     }
 
-    operator fun component1() = this[1]
-    operator fun component2() = this[2]
-    operator fun component3() = this[3]
-    operator fun component4() = this[4]
-    operator fun component5() = this[5]
+    operator fun component1() = this[0]
+    operator fun component2() = this[1]
+    operator fun component3() = this[2]
+    operator fun component4() = this[3]
+    operator fun component5() = this[4]
+
+    companion object {
+        operator fun get(vararg labels: String) = Header(*labels)
+        operator fun get(labels: List<String>) = Header(labels)
+    }
 }
 
 // TODO Should the be sealed rather than abstract? Or just a normal class with no BaseColumn?
 abstract class Column internal constructor(
     val table: Table,
-    val header: ColumnHeader,
+    val header: Header,
     val order: Long
 ) : Comparable<Column>, Iterable<Cell<*>> {
     val indexes: Sequence<Long>
@@ -100,7 +105,7 @@ abstract class Column internal constructor(
 
         val header = table.tableRef.get().headers
             .takeWhile { it.first != this.header }
-            .fold(LinkedList<ColumnHeader>()) { acc, (header, _) -> acc.add(0, header); acc }
+            .fold(LinkedList<Header>()) { acc, (header, _) -> acc.add(0, header); acc }
             .drop(offset - 1).firstOrNull() ?: return null
 
         return table[header]
@@ -223,11 +228,11 @@ abstract class Column internal constructor(
 
 class BaseColumn internal constructor(
     table: Table,
-    columnHeader: ColumnHeader,
-    columnOrder: Long = table.tableRef.get().columns[columnHeader]?.columnOrder ?: table.tableRef.get().columnCounter.getAndIncrement()
+    header: Header,
+    columnOrder: Long = table.tableRef.get().columns[header]?.columnOrder ?: table.tableRef.get().columnCounter.getAndIncrement()
 ) : Column(
     table,
-    columnHeader,
+    header,
     columnOrder
 ) {
     // TODO At an optimized version for get(index)
@@ -324,8 +329,8 @@ class BaseColumn internal constructor(
     }
 }
 
-internal fun getCellRaw(ref: TableRef, columnHeader: ColumnHeader, index: Long, indexRelation: IndexRelation): Pair<CellValue<*>, Long>? {
-    val values = ref.columnCells[columnHeader] ?: return null
+internal fun getCellRaw(ref: TableRef, header: Header, index: Long, indexRelation: IndexRelation): Pair<CellValue<*>, Long>? {
+    val values = ref.columnCells[header] ?: return null
 
     fun firstBefore(): Pair<CellValue<*>, Long>? {
         val keys = values.asSortedMap().headMap(index).keys
@@ -347,8 +352,8 @@ internal fun getCellRaw(ref: TableRef, columnHeader: ColumnHeader, index: Long, 
         AT -> values[index]?.let { Pair(it, index) }
         BEFORE -> firstBefore()
         AFTER -> firstAfter()
-        AT_OR_BEFORE -> values[index]?.let { Pair(it, index) } ?: getCellRaw(ref, columnHeader, index, BEFORE)
-        AT_OR_AFTER -> values[index]?.let { Pair(it, index) } ?: getCellRaw(ref, columnHeader, index, AFTER)
+        AT_OR_BEFORE -> values[index]?.let { Pair(it, index) } ?: getCellRaw(ref, header, index, BEFORE)
+        AT_OR_AFTER -> values[index]?.let { Pair(it, index) } ?: getCellRaw(ref, header, index, AFTER)
     }
 }
 
@@ -469,4 +474,4 @@ class ColumnToColumnAction internal constructor(val left: Column, val right: Col
 
 enum class ColumnActionOrder { BEFORE, AFTER, TO }
 
-internal val emptyColumnHeader = ColumnHeader()
+internal val emptyHeader = Header()

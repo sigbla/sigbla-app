@@ -22,7 +22,7 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
     var closed: Boolean = false
         internal set
 
-    abstract val headers: Sequence<ColumnHeader>
+    abstract val headers: Sequence<Header>
 
     abstract val columns: Sequence<Column>
 
@@ -32,10 +32,10 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     internal abstract val eventProcessor: TableEventProcessor
 
-    abstract operator fun get(header: ColumnHeader): Column
+    abstract operator fun get(header: Header): Column
 
     operator fun get(vararg header: String): Column = get(
-        ColumnHeader(
+        Header(
             *header
         )
     )
@@ -102,25 +102,25 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     operator fun get(column: Column, index: Int) = this[column][index]
 
-    operator fun get(columnHeader: ColumnHeader, index: Long) = this[columnHeader][index]
+    operator fun get(header: Header, index: Long) = this[header][index]
 
-    operator fun get(columnHeader: ColumnHeader, index: Int) = this[columnHeader][index]
+    operator fun get(header: Header, index: Int) = this[header][index]
 
     operator fun get(index: Long, column: Column) = this[column][index]
 
     operator fun get(index: Int, column: Column) = this[column][index]
 
-    operator fun get(index: Long, columnHeader: ColumnHeader) = this[columnHeader][index]
+    operator fun get(index: Long, header: Header) = this[header][index]
 
-    operator fun get(index: Int, columnHeader: ColumnHeader) = this[columnHeader][index]
+    operator fun get(index: Int, header: Header) = this[header][index]
 
     operator fun get(column: Column, row: Row) = this[column][row]
 
-    operator fun get(columnHeader: ColumnHeader, row: Row) = this[columnHeader][row]
+    operator fun get(header: Header, row: Row) = this[header][row]
 
     operator fun get(row: Row, column: Column) = this[column][row]
 
-    operator fun get(row: Row, columnHeader: ColumnHeader) = this[columnHeader][row]
+    operator fun get(row: Row, header: Header) = this[header][row]
 
     // TODO Check for missing shorthand convenience functions on get/set
 
@@ -203,67 +203,67 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     // -----
 
-    operator fun set(columnHeader: ColumnHeader, index: Long, value: Cell<*>?) {
-        this[columnHeader][index] = value
+    operator fun set(header: Header, index: Long, value: Cell<*>?) {
+        this[header][index] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, index: Long, value: String) {
-        this[columnHeader][index] = value
+    operator fun set(header: Header, index: Long, value: String) {
+        this[header][index] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, index: Long, value: Long) {
-        this[columnHeader][index] = value
+    operator fun set(header: Header, index: Long, value: Long) {
+        this[header][index] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, index: Long, value: Double) {
-        this[columnHeader][index] = value
+    operator fun set(header: Header, index: Long, value: Double) {
+        this[header][index] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, index: Long, value: BigInteger) {
-        this[columnHeader][index] = value
+    operator fun set(header: Header, index: Long, value: BigInteger) {
+        this[header][index] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, index: Long, value: BigDecimal) {
-        this[columnHeader][index] = value
+    operator fun set(header: Header, index: Long, value: BigDecimal) {
+        this[header][index] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, index: Long, value: Number) {
-        this[columnHeader][index] = value
+    operator fun set(header: Header, index: Long, value: Number) {
+        this[header][index] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, index: Long, init: Cell<*>.() -> Any?) = this[columnHeader][index] { init() }
+    operator fun set(header: Header, index: Long, init: Cell<*>.() -> Any?) = this[header][index] { init() }
 
     // -----
 
-    operator fun set(columnHeader: ColumnHeader, index: Int, value: Cell<*>?) {
-        this[columnHeader][index] = value
+    operator fun set(header: Header, index: Int, value: Cell<*>?) {
+        this[header][index] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, index: Int, value: String) {
-        this[columnHeader][index] = value
+    operator fun set(header: Header, index: Int, value: String) {
+        this[header][index] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, index: Int, value: Long) {
-        this[columnHeader][index] = value
+    operator fun set(header: Header, index: Int, value: Long) {
+        this[header][index] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, index: Int, value: Double) {
-        this[columnHeader][index] = value
+    operator fun set(header: Header, index: Int, value: Double) {
+        this[header][index] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, index: Int, value: BigInteger) {
-        this[columnHeader][index] = value
+    operator fun set(header: Header, index: Int, value: BigInteger) {
+        this[header][index] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, index: Int, value: BigDecimal) {
-        this[columnHeader][index] = value
+    operator fun set(header: Header, index: Int, value: BigDecimal) {
+        this[header][index] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, index: Int, value: Number) {
-        this[columnHeader][index] = value
+    operator fun set(header: Header, index: Int, value: Number) {
+        this[header][index] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, index: Int, init: Cell<*>.() -> Any?) = this[columnHeader][index] { init() }
+    operator fun set(header: Header, index: Int, init: Cell<*>.() -> Any?) = this[header][index] { init() }
 
     // -----
 
@@ -299,35 +299,35 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     // -----
 
-    operator fun set(columnHeader: ColumnHeader, row: Row, value: Cell<*>?) {
-        this[columnHeader][row] = value
+    operator fun set(header: Header, row: Row, value: Cell<*>?) {
+        this[header][row] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, row: Row, value: String) {
-        this[columnHeader][row] = value
+    operator fun set(header: Header, row: Row, value: String) {
+        this[header][row] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, row: Row, value: Long) {
-        this[columnHeader][row] = value
+    operator fun set(header: Header, row: Row, value: Long) {
+        this[header][row] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, row: Row, value: Double) {
-        this[columnHeader][row] = value
+    operator fun set(header: Header, row: Row, value: Double) {
+        this[header][row] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, row: Row, value: BigInteger) {
-        this[columnHeader][row] = value
+    operator fun set(header: Header, row: Row, value: BigInteger) {
+        this[header][row] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, row: Row, value: BigDecimal) {
-        this[columnHeader][row] = value
+    operator fun set(header: Header, row: Row, value: BigDecimal) {
+        this[header][row] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, row: Row, value: Number) {
-        this[columnHeader][row] = value
+    operator fun set(header: Header, row: Row, value: Number) {
+        this[header][row] = value
     }
 
-    operator fun set(columnHeader: ColumnHeader, row: Row, init: Cell<*>.() -> Any?) = this[columnHeader][row] { init() }
+    operator fun set(header: Header, row: Row, init: Cell<*>.() -> Any?) = this[header][row] { init() }
 
     // -----
 
@@ -395,67 +395,67 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     // -----
 
-    operator fun set(index: Long, columnHeader: ColumnHeader, value: Cell<*>?) {
-        this[columnHeader][index] = value
+    operator fun set(index: Long, header: Header, value: Cell<*>?) {
+        this[header][index] = value
     }
 
-    operator fun set(index: Long, columnHeader: ColumnHeader, value: String) {
-        this[columnHeader][index] = value
+    operator fun set(index: Long, header: Header, value: String) {
+        this[header][index] = value
     }
 
-    operator fun set(index: Long, columnHeader: ColumnHeader, value: Long) {
-        this[columnHeader][index] = value
+    operator fun set(index: Long, header: Header, value: Long) {
+        this[header][index] = value
     }
 
-    operator fun set(index: Long, columnHeader: ColumnHeader, value: Double) {
-        this[columnHeader][index] = value
+    operator fun set(index: Long, header: Header, value: Double) {
+        this[header][index] = value
     }
 
-    operator fun set(index: Long, columnHeader: ColumnHeader, value: BigInteger) {
-        this[columnHeader][index] = value
+    operator fun set(index: Long, header: Header, value: BigInteger) {
+        this[header][index] = value
     }
 
-    operator fun set(index: Long, columnHeader: ColumnHeader, value: BigDecimal) {
-        this[columnHeader][index] = value
+    operator fun set(index: Long, header: Header, value: BigDecimal) {
+        this[header][index] = value
     }
 
-    operator fun set(index: Long, columnHeader: ColumnHeader, value: Number) {
-        this[columnHeader][index] = value
+    operator fun set(index: Long, header: Header, value: Number) {
+        this[header][index] = value
     }
 
-    operator fun set(index: Long, columnHeader: ColumnHeader, init: Cell<*>.() -> Any?) = this[columnHeader][index] { init() }
+    operator fun set(index: Long, header: Header, init: Cell<*>.() -> Any?) = this[header][index] { init() }
 
     // -----
 
-    operator fun set(index: Int, columnHeader: ColumnHeader, value: Cell<*>?) {
-        this[columnHeader][index] = value
+    operator fun set(index: Int, header: Header, value: Cell<*>?) {
+        this[header][index] = value
     }
 
-    operator fun set(index: Int, columnHeader: ColumnHeader, value: String) {
-        this[columnHeader][index] = value
+    operator fun set(index: Int, header: Header, value: String) {
+        this[header][index] = value
     }
 
-    operator fun set(index: Int, columnHeader: ColumnHeader, value: Long) {
-        this[columnHeader][index] = value
+    operator fun set(index: Int, header: Header, value: Long) {
+        this[header][index] = value
     }
 
-    operator fun set(index: Int, columnHeader: ColumnHeader, value: Double) {
-        this[columnHeader][index] = value
+    operator fun set(index: Int, header: Header, value: Double) {
+        this[header][index] = value
     }
 
-    operator fun set(index: Int, columnHeader: ColumnHeader, value: BigInteger) {
-        this[columnHeader][index] = value
+    operator fun set(index: Int, header: Header, value: BigInteger) {
+        this[header][index] = value
     }
 
-    operator fun set(index: Int, columnHeader: ColumnHeader, value: BigDecimal) {
-        this[columnHeader][index] = value
+    operator fun set(index: Int, header: Header, value: BigDecimal) {
+        this[header][index] = value
     }
 
-    operator fun set(index: Int, columnHeader: ColumnHeader, value: Number) {
-        this[columnHeader][index] = value
+    operator fun set(index: Int, header: Header, value: Number) {
+        this[header][index] = value
     }
 
-    operator fun set(index: Int, columnHeader: ColumnHeader, init: Cell<*>.() -> Any?) = this[columnHeader][index] { init() }
+    operator fun set(index: Int, header: Header, init: Cell<*>.() -> Any?) = this[header][index] { init() }
 
     // -----
 
@@ -491,35 +491,35 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     // -----
 
-    operator fun set(row: Row, columnHeader: ColumnHeader, value: Cell<*>?) {
-        this[columnHeader][row] = value
+    operator fun set(row: Row, header: Header, value: Cell<*>?) {
+        this[header][row] = value
     }
 
-    operator fun set(row: Row, columnHeader: ColumnHeader, value: String) {
-        this[columnHeader][row] = value
+    operator fun set(row: Row, header: Header, value: String) {
+        this[header][row] = value
     }
 
-    operator fun set(row: Row, columnHeader: ColumnHeader, value: Long) {
-        this[columnHeader][row] = value
+    operator fun set(row: Row, header: Header, value: Long) {
+        this[header][row] = value
     }
 
-    operator fun set(row: Row, columnHeader: ColumnHeader, value: Double) {
-        this[columnHeader][row] = value
+    operator fun set(row: Row, header: Header, value: Double) {
+        this[header][row] = value
     }
 
-    operator fun set(row: Row, columnHeader: ColumnHeader, value: BigInteger) {
-        this[columnHeader][row] = value
+    operator fun set(row: Row, header: Header, value: BigInteger) {
+        this[header][row] = value
     }
 
-    operator fun set(row: Row, columnHeader: ColumnHeader, value: BigDecimal) {
-        this[columnHeader][row] = value
+    operator fun set(row: Row, header: Header, value: BigDecimal) {
+        this[header][row] = value
     }
 
-    operator fun set(row: Row, columnHeader: ColumnHeader, value: Number) {
-        this[columnHeader][row] = value
+    operator fun set(row: Row, header: Header, value: Number) {
+        this[header][row] = value
     }
 
-    operator fun set(row: Row, columnHeader: ColumnHeader, init: Cell<*>.() -> Any?) = this[columnHeader][row] { init() }
+    operator fun set(row: Row, header: Header, init: Cell<*>.() -> Any?) = this[header][row] { init() }
 
     // -----
 
@@ -910,9 +910,9 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
     // -----
 
     // TODO Consider if we want this
-    abstract operator fun contains(header: ColumnHeader): Boolean
+    abstract operator fun contains(header: Header): Boolean
 
-    fun contains(vararg header: String): Boolean = contains(ColumnHeader(*header))
+    fun contains(vararg header: String): Boolean = contains(Header(*header))
 
     override fun iterator(): Iterator<Cell<*>> {
         val ref = tableRef.get()
@@ -980,12 +980,12 @@ internal data class ColumnMeta(
 )
 
 internal data class TableRef(
-    val columns: PMap<ColumnHeader, ColumnMeta> = PHashMap(),
-    val columnCells: PMap<ColumnHeader, PSortedMap<Long, CellValue<*>>> = PHashMap(),
+    val columns: PMap<Header, ColumnMeta> = PHashMap(),
+    val columnCells: PMap<Header, PSortedMap<Long, CellValue<*>>> = PHashMap(),
     val version: Long = Long.MIN_VALUE,
     val columnCounter: AtomicLong = AtomicLong(Long.MIN_VALUE)
 ) {
-    val headers: Sequence<Pair<ColumnHeader, ColumnMeta>> by lazy {
+    val headers: Sequence<Pair<Header, ColumnMeta>> by lazy {
         columns
             .asSequence()
             .filter { !it.component2().prenatal }
@@ -1017,7 +1017,7 @@ class BaseTable internal constructor(
         if (name != null && onRegistry) Registry.setTable(name, this)
     }
 
-    override val headers: Sequence<ColumnHeader>
+    override val headers: Sequence<Header>
         get() = tableRef.get().headers.filter { !it.second.prenatal }.map { it.first }
 
     override val columns: Sequence<Column>
@@ -1026,7 +1026,7 @@ class BaseTable internal constructor(
     override val indexes: Sequence<Long>
         get() = tableRef.get().indexes
 
-    override fun get(header: ColumnHeader): Column {
+    override fun get(header: Header): Column {
         if (closed) throw InvalidTableException("Table is closed")
         if (header.labels.isEmpty()) throw InvalidColumnException("Empty header")
 
@@ -1045,7 +1045,7 @@ class BaseTable internal constructor(
         return BaseColumn(this, header, columnMeta.columnOrder)
     }
 
-    override fun contains(header: ColumnHeader): Boolean = tableRef.get().columns[header]?.prenatal == false
+    override fun contains(header: Header): Boolean = tableRef.get().columns[header]?.prenatal == false
 
     override operator fun <R> invoke(batch: Table.() -> R): R {
         synchronized(eventProcessor) {

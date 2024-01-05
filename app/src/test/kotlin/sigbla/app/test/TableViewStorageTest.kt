@@ -341,14 +341,14 @@ class TableViewStorageTest {
                 val headers = generateSequence {
                     val r = ThreadLocalRandom.current().nextInt(0, 21)
                     if (r == 0) null else if (r == 1) "" else {
-                        val ba = ByteArray(r)
+                        val ba = ByteArray(r-1)
                         ThreadLocalRandom.current().nextBytes(ba)
                         String(ba)
                     }
                 }.toList().take(49)
 
                 if (headers.isEmpty()) continue
-                val column = tableView1[ColumnHeader(headers)]
+                val column = tableView1[Header(headers)]
 
                 if (ThreadLocalRandom.current().nextBoolean()) {
                     if (ThreadLocalRandom.current().nextBoolean()) {

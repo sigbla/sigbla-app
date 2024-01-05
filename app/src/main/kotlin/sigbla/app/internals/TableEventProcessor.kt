@@ -540,7 +540,7 @@ internal class TableEventProcessor {
                 val oldTable = this.first().oldValue.table
                 val newTable = this.last().newValue.table
 
-                val locations = LinkedHashMap<Pair<ColumnHeader, Long>, Boolean>()
+                val locations = LinkedHashMap<Pair<Header, Long>, Boolean>()
 
                 this.forEach {
                     val location = it.newValue.column.header to it.newValue.index
