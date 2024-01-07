@@ -649,20 +649,70 @@ class TableTest {
         t["B", 0] = "B0"
 
         val headers1 = t.headers
+        val columns1 = t.columns
 
         assertEquals(listOf(listOf("A"), listOf("B")), headers1.map { it.labels }.toList())
         assertEquals(listOf(listOf("A"), listOf("B")), headers1.map { it.labels }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B")), columns1.map { it.header.labels }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B")), columns1.map { it.header.labels }.toList())
+
+        t["C", 0]
+        t["D", 0]
+
+        assertTrue(t.contains("A"))
+        assertTrue(Header["B"] in t)
+        assertFalse(t.contains("C"))
+        assertFalse(t.contains(Header["D"]))
+
+        val headers2 = t.headers
+        val columns2 = t.columns
+
+        assertEquals(listOf(listOf("A"), listOf("B")), headers2.map { it.labels }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B")), headers2.map { it.labels }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B")), columns2.map { it.header.labels }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B")), columns2.map { it.header.labels }.toList())
 
         t["C", 0] = "C0"
         t["D", 0] = "D0"
 
-        val headers2 = t.headers
+        assertTrue(t.contains("A"))
+        assertTrue(t.contains(Header["B"]))
+        assertTrue(t.contains("C"))
+        assertTrue(t.contains(Header["D"]))
+
+        val headers3 = t.headers
+        val columns3 = t.columns
 
         assertEquals(listOf(listOf("A"), listOf("B")), headers1.map { it.labels }.toList())
         assertEquals(listOf(listOf("A"), listOf("B")), headers1.map { it.labels }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B")), columns1.map { it.header.labels }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B")), columns1.map { it.header.labels }.toList())
 
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headers2.map { it.labels }.toList())
-        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headers2.map { it.labels }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headers3.map { it.labels }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), headers3.map { it.labels }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), columns3.map { it.header.labels }.toList())
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C"), listOf("D")), columns3.map { it.header.labels }.toList())
+
+        var prevOrder: Long? = null
+        for (column in columns1) {
+            if (prevOrder != null) assertTrue(prevOrder < column.order)
+            prevOrder = column.order
+            assertEquals(t, column.table)
+        }
+
+        prevOrder = null
+        for (column in columns2) {
+            if (prevOrder != null) assertTrue(prevOrder < column.order)
+            prevOrder = column.order
+            assertEquals(t, column.table)
+        }
+
+        prevOrder = null
+        for (column in columns3) {
+            if (prevOrder != null) assertTrue(prevOrder < column.order)
+            prevOrder = column.order
+            assertEquals(t, column.table)
+        }
     }
 
     @Test
