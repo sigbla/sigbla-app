@@ -438,3 +438,38 @@ feature of `TableView`. This CSS is loaded into the view, allowing us to use the
 
 We make use of these classes on the `WebContent` divs by passing a string as shown, for example
 `table["A", 0] = div("red") { .. }`.
+
+## Cell accessors
+
+Now that we've covered tables, columns and rows in previous chapters, and cells in this chapter, we can summarize how,
+across all of these classes, cells are accessible and assignable.
+
+Cells can be read and assigned using these patterns:
+
+```
+table[label 1, label 2, label 3, label X.., Int|Long|Row] = value
+table[label 1, label 2, label 3, label X..][Int|Long|Row] = value
+table[Int|Long|Row][label 1, label 2, label 3, label X..] = value
+table[Header|Column, Int|Long|Row] = value
+table[Header|Column][Int|Long|Row] = value
+table[Int|Long|Row][Header|Column] = value
+table[Cell] = value
+```
+
+When using labels directly on a table or row instance, you can provide between 1 and 5 labels. If you need more, use a
+`Header` instance instead, which you can create with `Header[label 1, label 2, label 3, label 4, label 5, lable X..]`.
+
+Rows contain an index relation, as we covered in the chapter on rows. Index relations only apply when reading, so when
+a row is used for assigning a cell, only the row index is used. Index relations can also be used for reading cells:
+
+```
+table[label 1, label 2, label 3, label X.., IndexRelation, Int|Long]
+table[label 1, label 2, label 3, label X..][IndexRelation, Int|Long]
+table[IndexRelation, Int|Long][label 1, label 2, label 3, label X..]
+table[Header|Column, IndexRelation, Int|Long]
+table[Header|Column][IndexRelation, Int|Long]
+table[IndexRelation, Int|Long][Header|Column]
+```
+
+You'll notice that when an index relation is provided we can't also provide a `Row` instance. This is because the `Row`
+instance provides its own index relation.

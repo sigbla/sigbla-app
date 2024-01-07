@@ -90,6 +90,16 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     operator fun get(header1: String, header2: String, header3: String, header4: String, header5: String, indexRelation: IndexRelation, index: Int): Cell<*> = this[header1, header2, header3, header4, header5][indexRelation, index]
 
+    operator fun get(header1: String, row: Row): Cell<*> = this[header1][row]
+
+    operator fun get(header1: String, header2: String, row: Row): Cell<*> = this[header1, header2][row]
+
+    operator fun get(header1: String, header2: String, header3: String, row: Row): Cell<*> = this[header1, header2, header3][row]
+
+    operator fun get(header1: String, header2: String, header3: String, header4: String, row: Row): Cell<*> = this[header1, header2, header3, header4][row]
+
+    operator fun get(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row): Cell<*> = this[header1, header2, header3, header4, header5][row]
+
     // -----
 
     operator fun get(cell: Cell<*>): Cell<*> = this[cell.column.header][cell.index]
@@ -106,23 +116,17 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     operator fun get(header: Header, index: Int) = this[header][index]
 
-    operator fun get(index: Long, column: Column) = this[column][index]
+    operator fun get(column: Column, indexRelation: IndexRelation, index: Long) = this[column][indexRelation, index]
 
-    operator fun get(index: Int, column: Column) = this[column][index]
+    operator fun get(column: Column, indexRelation: IndexRelation, index: Int) = this[column][indexRelation, index]
 
-    operator fun get(index: Long, header: Header) = this[header][index]
+    operator fun get(header: Header, indexRelation: IndexRelation, index: Long) = this[header][indexRelation, index]
 
-    operator fun get(index: Int, header: Header) = this[header][index]
+    operator fun get(header: Header, indexRelation: IndexRelation, index: Int) = this[header][indexRelation, index]
 
     operator fun get(column: Column, row: Row) = this[column][row]
 
     operator fun get(header: Header, row: Row) = this[header][row]
-
-    operator fun get(row: Row, column: Column) = this[column][row]
-
-    operator fun get(row: Row, header: Header) = this[header][row]
-
-    // TODO Check for missing shorthand convenience functions on get/set
 
     // TODO Consider if get(table: Table) and set(..: Table, ..) should be included for symmetry?
 
@@ -328,198 +332,6 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
     }
 
     operator fun set(header: Header, row: Row, init: Cell<*>.() -> Any?) = this[header][row] { init() }
-
-    // -----
-
-    operator fun set(index: Long, column: Column, value: Cell<*>?) {
-        this[column][index] = value
-    }
-
-    operator fun set(index: Long, column: Column, value: String) {
-        this[column][index] = value
-    }
-
-    operator fun set(index: Long, column: Column, value: Long) {
-        this[column][index] = value
-    }
-
-    operator fun set(index: Long, column: Column, value: Double) {
-        this[column][index] = value
-    }
-
-    operator fun set(index: Long, column: Column, value: BigInteger) {
-        this[column][index] = value
-    }
-
-    operator fun set(index: Long, column: Column, value: BigDecimal) {
-        this[column][index] = value
-    }
-
-    operator fun set(index: Long, column: Column, value: Number) {
-        this[column][index] = value
-    }
-
-    operator fun set(index: Long, column: Column, init: Cell<*>.() -> Any?) = this[column][index] { init() }
-
-    // -----
-
-    operator fun set(index: Int, column: Column, value: Cell<*>?) {
-        this[column][index] = value
-    }
-
-    operator fun set(index: Int, column: Column, value: String) {
-        this[column][index] = value
-    }
-
-    operator fun set(index: Int, column: Column, value: Long) {
-        this[column][index] = value
-    }
-
-    operator fun set(index: Int, column: Column, value: Double) {
-        this[column][index] = value
-    }
-
-    operator fun set(index: Int, column: Column, value: BigInteger) {
-        this[column][index] = value
-    }
-
-    operator fun set(index: Int, column: Column, value: BigDecimal) {
-        this[column][index] = value
-    }
-
-    operator fun set(index: Int, column: Column, value: Number) {
-        this[column][index] = value
-    }
-
-    operator fun set(index: Int, column: Column, init: Cell<*>.() -> Any?) = this[column][index] { init() }
-
-    // -----
-
-    operator fun set(index: Long, header: Header, value: Cell<*>?) {
-        this[header][index] = value
-    }
-
-    operator fun set(index: Long, header: Header, value: String) {
-        this[header][index] = value
-    }
-
-    operator fun set(index: Long, header: Header, value: Long) {
-        this[header][index] = value
-    }
-
-    operator fun set(index: Long, header: Header, value: Double) {
-        this[header][index] = value
-    }
-
-    operator fun set(index: Long, header: Header, value: BigInteger) {
-        this[header][index] = value
-    }
-
-    operator fun set(index: Long, header: Header, value: BigDecimal) {
-        this[header][index] = value
-    }
-
-    operator fun set(index: Long, header: Header, value: Number) {
-        this[header][index] = value
-    }
-
-    operator fun set(index: Long, header: Header, init: Cell<*>.() -> Any?) = this[header][index] { init() }
-
-    // -----
-
-    operator fun set(index: Int, header: Header, value: Cell<*>?) {
-        this[header][index] = value
-    }
-
-    operator fun set(index: Int, header: Header, value: String) {
-        this[header][index] = value
-    }
-
-    operator fun set(index: Int, header: Header, value: Long) {
-        this[header][index] = value
-    }
-
-    operator fun set(index: Int, header: Header, value: Double) {
-        this[header][index] = value
-    }
-
-    operator fun set(index: Int, header: Header, value: BigInteger) {
-        this[header][index] = value
-    }
-
-    operator fun set(index: Int, header: Header, value: BigDecimal) {
-        this[header][index] = value
-    }
-
-    operator fun set(index: Int, header: Header, value: Number) {
-        this[header][index] = value
-    }
-
-    operator fun set(index: Int, header: Header, init: Cell<*>.() -> Any?) = this[header][index] { init() }
-
-    // -----
-
-    operator fun set(row: Row, column: Column, value: Cell<*>?) {
-        this[column][row] = value
-    }
-
-    operator fun set(row: Row, column: Column, value: String) {
-        this[column][row] = value
-    }
-
-    operator fun set(row: Row, column: Column, value: Long) {
-        this[column][row] = value
-    }
-
-    operator fun set(row: Row, column: Column, value: Double) {
-        this[column][row] = value
-    }
-
-    operator fun set(row: Row, column: Column, value: BigInteger) {
-        this[column][row] = value
-    }
-
-    operator fun set(row: Row, column: Column, value: BigDecimal) {
-        this[column][row] = value
-    }
-
-    operator fun set(row: Row, column: Column, value: Number) {
-        this[column][row] = value
-    }
-
-    operator fun set(row: Row, column: Column, init: Cell<*>.() -> Any?) = this[column][row] { init() }
-
-    // -----
-
-    operator fun set(row: Row, header: Header, value: Cell<*>?) {
-        this[header][row] = value
-    }
-
-    operator fun set(row: Row, header: Header, value: String) {
-        this[header][row] = value
-    }
-
-    operator fun set(row: Row, header: Header, value: Long) {
-        this[header][row] = value
-    }
-
-    operator fun set(row: Row, header: Header, value: Double) {
-        this[header][row] = value
-    }
-
-    operator fun set(row: Row, header: Header, value: BigInteger) {
-        this[header][row] = value
-    }
-
-    operator fun set(row: Row, header: Header, value: BigDecimal) {
-        this[header][row] = value
-    }
-
-    operator fun set(row: Row, header: Header, value: Number) {
-        this[header][row] = value
-    }
-
-    operator fun set(row: Row, header: Header, init: Cell<*>.() -> Any?) = this[header][row] { init() }
 
     // -----
 
@@ -883,6 +695,160 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, value: Number) {
         this[header1, header2, header3, header4, header5][index] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, row: Row, value: Cell<*>?) {
+        this[header1][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, row: Row, value: Cell<*>?) {
+        this[header1, header2][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, row: Row, value: Cell<*>?) {
+        this[header1, header2, header3][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, value: Cell<*>?) {
+        this[header1, header2, header3, header4][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, value: Cell<*>?) {
+        this[header1, header2, header3, header4, header5][row] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, row: Row, value: String) {
+        this[header1][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, row: Row, value: String) {
+        this[header1, header2][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, row: Row, value: String) {
+        this[header1, header2, header3][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, value: String) {
+        this[header1, header2, header3, header4][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, value: String) {
+        this[header1, header2, header3, header4, header5][row] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, row: Row, value: Long) {
+        this[header1][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, row: Row, value: Long) {
+        this[header1, header2][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, row: Row, value: Long) {
+        this[header1, header2, header3][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, value: Long) {
+        this[header1, header2, header3, header4][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, value: Long) {
+        this[header1, header2, header3, header4, header5][row] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, row: Row, value: Double) {
+        this[header1][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, row: Row, value: Double) {
+        this[header1, header2][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, row: Row, value: Double) {
+        this[header1, header2, header3][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, value: Double) {
+        this[header1, header2, header3, header4][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, value: Double) {
+        this[header1, header2, header3, header4, header5][row] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, row: Row, value: BigInteger) {
+        this[header1][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, row: Row, value: BigInteger) {
+        this[header1, header2][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, row: Row, value: BigInteger) {
+        this[header1, header2, header3][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, value: BigInteger) {
+        this[header1, header2, header3, header4][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, value: BigInteger) {
+        this[header1, header2, header3, header4, header5][row] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, row: Row, value: BigDecimal) {
+        this[header1][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, row: Row, value: BigDecimal) {
+        this[header1, header2][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, row: Row, value: BigDecimal) {
+        this[header1, header2, header3][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, value: BigDecimal) {
+        this[header1, header2, header3, header4][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, value: BigDecimal) {
+        this[header1, header2, header3, header4, header5][row] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, row: Row, value: Number) {
+        this[header1][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, row: Row, value: Number) {
+        this[header1, header2][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, row: Row, value: Number) {
+        this[header1, header2, header3][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, value: Number) {
+        this[header1, header2, header3, header4][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, value: Number) {
+        this[header1, header2, header3, header4, header5][row] = value
     }
 
     // -----
