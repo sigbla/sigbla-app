@@ -131,8 +131,6 @@ abstract class Column internal constructor(
 
     operator fun get(row: Row) = get(row.indexRelation, row.index)
 
-    operator fun get(indexRelation: IndexRelation, row: Row) = get(indexRelation, row.index)
-
     // ---
 
     operator fun set(index: Long, value: String) = set(index, value.toCell(this, index))
