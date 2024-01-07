@@ -1827,4 +1827,48 @@ class TableTest {
 
         assertEquals(listOf(300L, 500L, 400L, 200L, 300L, 500L, 100L, 400L, 600L), t.map { valueOf<Long>(it) }.toList())
     }
+
+    @Test
+    fun `index relation infix`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", -100] = "A -100"
+        t["A", 0] = "A 0"
+        t["A", 100] = "A 100"
+
+        assertEquals("Row[at 0]", (t at 0).toString())
+        assertEquals("Row[at 0]", (t at 0L).toString())
+        assertEquals("A 0", (t at 0)["A"].toString())
+        assertEquals("A 0", (t at 0L)["A"].toString())
+
+        assertEquals("Row[at or before 0]", (t atOrBefore 0).toString())
+        assertEquals("Row[at or before 0]", (t atOrBefore 0L).toString())
+        assertEquals("A 0", (t atOrBefore 0)["A"].toString())
+        assertEquals("A 0", (t atOrBefore 0L)["A"].toString())
+
+        assertEquals("Row[at or after 0]", (t atOrAfter 0).toString())
+        assertEquals("Row[at or after 0]", (t atOrAfter 0L).toString())
+        assertEquals("A 0", (t atOrAfter 0)["A"].toString())
+        assertEquals("A 0", (t atOrAfter 0L)["A"].toString())
+
+        assertEquals("Row[at or before -1]", (t atOrBefore -1).toString())
+        assertEquals("Row[at or before -1]", (t atOrBefore -1L).toString())
+        assertEquals("A -100", (t atOrBefore -1)["A"].toString())
+        assertEquals("A -100", (t atOrBefore -1L)["A"].toString())
+
+        assertEquals("Row[at or after 1]", (t atOrAfter 1).toString())
+        assertEquals("Row[at or after 1]", (t atOrAfter 1L).toString())
+        assertEquals("A 100", (t atOrAfter 1)["A"].toString())
+        assertEquals("A 100", (t atOrAfter 1L)["A"].toString())
+
+        assertEquals("Row[before 0]", (t before 0).toString())
+        assertEquals("Row[before 0]", (t before 0L).toString())
+        assertEquals("A -100", (t before 0)["A"].toString())
+        assertEquals("A -100", (t before 0L)["A"].toString())
+
+        assertEquals("Row[after 0]", (t after 0).toString())
+        assertEquals("Row[after 0]", (t after 0L).toString())
+        assertEquals("A 100", (t after 0)["A"].toString())
+        assertEquals("A 100", (t after 0L)["A"].toString())
+    }
 }
