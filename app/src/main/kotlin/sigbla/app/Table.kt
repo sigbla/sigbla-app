@@ -128,10 +128,6 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     operator fun get(header: Header, row: Row) = this[header][row]
 
-    operator fun get(row: Row, column: Column) = this[column][row]
-
-    operator fun get(row: Row, header: Header) = this[header][row]
-
     // TODO Consider if get(table: Table) and set(..: Table, ..) should be included for symmetry?
 
     // TODO Include set as well, which will, like with TableView, copy over all the data
