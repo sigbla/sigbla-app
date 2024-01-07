@@ -887,7 +887,6 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     // -----
 
-    // TODO Consider if we want this
     abstract operator fun contains(header: Header): Boolean
 
     fun contains(vararg header: String): Boolean = contains(Header(*header))
