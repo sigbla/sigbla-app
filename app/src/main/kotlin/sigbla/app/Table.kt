@@ -391,6 +391,18 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     // -----
 
+    operator fun set(header1: String, row: Row, init: Cell<*>.() -> Any?) = this[header1][row] { init() }
+
+    operator fun set(header1: String, header2: String, row: Row, init: Cell<*>.() -> Any?) = this[header1, header2][row] { init() }
+
+    operator fun set(header1: String, header2: String, header3: String, row: Row, init: Cell<*>.() -> Any?) = this[header1, header2, header3][row] { init() }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, init: Cell<*>.() -> Any?) = this[header1, header2, header3, header4][row] { init() }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, init: Cell<*>.() -> Any?) = this[header1, header2, header3, header4, header5][row] { init() }
+
+    // -----
+
     operator fun set(header1: String, index: Long, value: Cell<*>?) {
         this[header1][index] = value
     }
