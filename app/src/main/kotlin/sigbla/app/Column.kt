@@ -366,9 +366,10 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
     override fun iterator(): Iterator<Column> {
         val ref = table.tableRef.get()
 
-        // Because columns might move around, get the latest order
-        val currentStart = ref.columns[start.header]?.columnOrder ?: throw InvalidColumnException("Unable to find column $start")
-        val currentEnd = ref.columns[endInclusive.header]?.columnOrder ?: throw InvalidColumnException("Unable to find column $endInclusive")
+        // Because columns might move around, get the latest order.
+        // It might also mean the column is no longer available
+        val currentStart = ref.columns[start.header]?.columnOrder ?: return Collections.emptyIterator()
+        val currentEnd = ref.columns[endInclusive.header]?.columnOrder ?: return Collections.emptyIterator()
 
         val minOrder = min(currentStart, currentEnd)
         val maxOrder = max(currentStart, currentEnd)
@@ -386,9 +387,13 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
     override fun contains(value: Column): Boolean {
         val ref = table.tableRef.get()
 
+        val valueMeta = ref.columns[value.header] ?: return false
+        if (valueMeta.prenatal) return false
+
         // Because columns might move around, get the latest order
-        val currentStart = ref.columns[start.header]?.columnOrder ?: throw InvalidColumnException("Unable to find column $start")
-        val currentEnd = ref.columns[endInclusive.header]?.columnOrder ?: throw InvalidColumnException("Unable to find column $endInclusive")
+        // It might also mean the column is no longer available
+        val currentStart = ref.columns[start.header]?.columnOrder ?: return false
+        val currentEnd = ref.columns[endInclusive.header]?.columnOrder ?: return false
 
         val minOrder = min(currentStart, currentEnd)
         val maxOrder = max(currentStart, currentEnd)
@@ -396,7 +401,7 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
         return !(value.order < minOrder || value.order > maxOrder)
     }
 
-    override fun isEmpty() = false
+    override fun isEmpty() = !iterator().hasNext()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
