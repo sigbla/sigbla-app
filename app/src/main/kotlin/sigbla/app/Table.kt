@@ -889,6 +889,8 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     abstract operator fun contains(header: Header): Boolean
 
+    operator fun contains(column: Column): Boolean = contains(column.header)
+
     fun contains(vararg header: String): Boolean = contains(Header(*header))
 
     override fun iterator(): Iterator<Cell<*>> {
