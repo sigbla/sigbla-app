@@ -1923,7 +1923,7 @@ class TableTest {
     }
 
     @Test
-    fun `index relation infix`() {
+    fun `table index relation infix`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 
         t["A", -100] = "A -100"
@@ -1964,5 +1964,81 @@ class TableTest {
         assertEquals("Row[after 0]", (t after 0L).toString())
         assertEquals("A 100", (t after 0)["A"].toString())
         assertEquals("A 100", (t after 0L)["A"].toString())
+    }
+
+    @Test
+    fun `row index relation iterator`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "A0"
+        t["B", 1] = "B1"
+        t["C", 2] = "C2"
+
+        val rAt1 = t at 1
+        val rAtOrBefore1 = t atOrBefore 1
+        val rAtOrAfter1 = t atOrAfter 1
+        val rBefore1 = t before 1
+        val rAfter1 = t after 1
+
+        assertEquals(listOf("B1"), rAt1.map { it.value }.toList())
+        assertEquals(listOf("A0", "B1"), rAtOrBefore1.map { it.value }.toList())
+        assertEquals(listOf("B1", "C2"), rAtOrAfter1.map { it.value }.toList())
+        assertEquals(listOf("A0"), rBefore1.map { it.value }.toList())
+        assertEquals(listOf("C2"), rAfter1.map { it.value }.toList())
+    }
+
+    @Test
+    fun `row compare and sort`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        val rAt0 = t at 0
+        val rAtOrBefore0 = t atOrBefore 0
+        val rAtOrAfter0 = t atOrAfter 0
+        val rBefore0 = t before 0
+        val rAfter0 = t after 0
+
+        val rAt1 = t at 1
+        val rAtOrBefore1 = t atOrBefore 1
+        val rAtOrAfter1 = t atOrAfter 1
+        val rBefore1 = t before 1
+        val rAfter1 = t after 1
+
+        val rAt2 = t at 2
+        val rAtOrBefore2 = t atOrBefore 2
+        val rAtOrAfter2 = t atOrAfter 2
+        val rBefore2 = t before 2
+        val rAfter2 = t after 2
+
+        val unsorted = listOf(
+            rAt0, rAtOrBefore0, rAtOrAfter0, rBefore0, rAfter0,
+            rAt1, rAtOrBefore1, rAtOrAfter1, rBefore1, rAfter1,
+            rAt2, rAtOrBefore2, rAtOrAfter2, rBefore2, rAfter2
+        )
+
+        val sorted1 = unsorted.shuffled().sorted().iterator()
+        for (r in 0..2) {
+            for (ir in IndexRelation.entries) {
+                assertTrue(sorted1.hasNext())
+                val row = sorted1.next()
+                assertEquals(row.index, r.toLong())
+                assertEquals(row.indexRelation, ir)
+            }
+        }
+        assertFalse(sorted1.hasNext())
+
+        t["A", -1] = "A0"
+        t["B", 1] = "B1"
+        t["C", 3] = "C2"
+
+        val sorted2 = unsorted.shuffled().sorted().iterator()
+        for (r in 0..2) {
+            for (ir in IndexRelation.entries) {
+                assertTrue(sorted2.hasNext())
+                val row = sorted2.next()
+                assertEquals(row.index, r.toLong())
+                assertEquals(row.indexRelation, ir)
+            }
+        }
+        assertFalse(sorted2.hasNext())
     }
 }
