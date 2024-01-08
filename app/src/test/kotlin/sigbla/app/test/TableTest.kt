@@ -109,6 +109,13 @@ class TableTest {
             }
         }
 
+        assertTrue(t1["A"] in t1["A"]..t1["C"])
+        assertTrue((t1["A"]..t1["C"]).contains(t1["B"]))
+        assertFalse(t1["E"] in t1["A"]..t1["E"])
+
+        assertFalse((t1["A"]..t1["C"]).isEmpty())
+        assertTrue((t1["E"]..t1["F"]).isEmpty())
+
         assertEquals(listOf("[A]", "[B]", "[C]"), (t1["A"]..t1["C"]).map { it.header.labels.toString() }.toList())
         assertEquals(listOf("[C]", "[B]", "[A]"), (t1["C"]..t1["A"]).map { it.header.labels.toString() }.toList())
 
@@ -148,6 +155,17 @@ class TableTest {
 
         assertEquals(listOf("-1", "0", "1", "2"), (t1[-1]..t1[2]).map { it.index.toString() }.toList())
         assertEquals(listOf("2", "1", "0", "-1"), (t1[2]..t1[-1]).map { it.index.toString() }.toList())
+
+        assertFalse((t1[0]..t1[0]).isEmpty())
+        assertFalse((t1[0]..t1[10]).isEmpty())
+        assertFalse((t1[10]..t1[0]).isEmpty())
+
+        assertTrue((t1[0]..t1[0]).contains(t1[0]))
+        assertTrue((t1[-1]..t1[0]).contains(t1[-1]))
+        assertTrue((t1[-1]..t1[0]).contains(t1[0]))
+        assertTrue((t1[1]..t1[-1]).contains(t1[1]))
+        assertFalse((t1[10]..t1[0]).contains(t1[-1]))
+        assertFalse((t1[0]..t1[10]).contains(t1[11]))
     }
 
     @Test
