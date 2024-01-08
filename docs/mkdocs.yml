@@ -11,6 +11,7 @@ nav:
   - 'columns.md'
   - 'rows.md'
   - 'cells.md'
+  - 'ranges.md'
   - 'views.md'
   - 'functions.md'
   - 'charts.md'

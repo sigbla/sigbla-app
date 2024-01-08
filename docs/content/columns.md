@@ -40,7 +40,9 @@ print(table)
 ```
 
 As expected, we can now see the content of column B, with a cell at row 0. Column A still doesn't have any data, so
-is still hidden in its prenatal state.
+is still hidden in its prenatal state. Note that you can check if a column is in a prenatal state by using the `in`
+operator. Doing `table["A"] in table` above would evaluate to false due to this, while `table["B"] in table` would
+instead evaluate to true as it has been assigned to already.
 
 Because we created column A first, by doing `table["A"]`, when we put data into it, it will show as the first column.
 This is the case also when assigning data to it last, as shown next. It's the order they are created in that matters.
