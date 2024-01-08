@@ -113,9 +113,9 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
             .iterator()
     }
 
-    override fun compareTo(other: Row): Int = when (index.compareTo(other.index)) {
-        0 -> 0
-        else -> indexRelation.compareTo(other.indexRelation)
+    override fun compareTo(other: Row): Int = when (val cmp = index.compareTo(other.index)) {
+        0 -> indexRelation.compareTo(other.indexRelation)
+        else -> cmp
     }
 
     override fun equals(other: Any?): Boolean {
