@@ -13,6 +13,7 @@ import org.junit.After
 import sigbla.app.Precision
 import sigbla.app.IndexRelation
 import sigbla.app.Table
+import sigbla.app.columnOf
 import sigbla.app.columnsOf
 import sigbla.app.remove
 import sigbla.app.valueOf
@@ -112,6 +113,87 @@ class BasicTableTest {
 
     @Test
     fun `basic table ops 2`() {
+        val name = object {}.javaClass.enclosingMethod.name
+        val t = Table[name]
+        assertTrue(Table.names.contains(name))
+
+        t["A"][1] = "String"
+        t["B"][2] = 123L
+        t["C"][3] = 123.0
+        t["D"][4] = BigInteger.ONE
+        t["E"][5] = BigDecimal.TEN
+
+        assertEquals("String", valueOf<Any>(t["A"][1]))
+        assertEquals(123L, valueOf<Any>(t["B"][2]))
+        assertEquals(123.0, valueOf<Any>(t["C"][3]))
+        assertEquals(BigInteger.ONE, valueOf<Any>(t["D"][4]))
+        assertEquals(BigDecimal.TEN, valueOf<Any>(t["E"][5]))
+
+        assertEquals(Unit, valueOf<Any>(t["A"][2]))
+        assertEquals(Unit, valueOf<Any>(t["A"][3]))
+        assertEquals(Unit, valueOf<Any>(t["A"][4]))
+        assertEquals(Unit, valueOf<Any>(t["A"][5]))
+
+        assertEquals(Unit, valueOf<Any>(t["B"][1]))
+        assertEquals(Unit, valueOf<Any>(t["B"][3]))
+        assertEquals(Unit, valueOf<Any>(t["B"][4]))
+        assertEquals(Unit, valueOf<Any>(t["B"][5]))
+
+        assertEquals(Unit, valueOf<Any>(t["C"][1]))
+        assertEquals(Unit, valueOf<Any>(t["C"][2]))
+        assertEquals(Unit, valueOf<Any>(t["C"][4]))
+        assertEquals(Unit, valueOf<Any>(t["C"][5]))
+
+        assertEquals(Unit, valueOf<Any>(t["D"][1]))
+        assertEquals(Unit, valueOf<Any>(t["D"][2]))
+        assertEquals(Unit, valueOf<Any>(t["D"][3]))
+        assertEquals(Unit, valueOf<Any>(t["D"][5]))
+
+        assertEquals(Unit, valueOf<Any>(t["E"][1]))
+        assertEquals(Unit, valueOf<Any>(t["E"][2]))
+        assertEquals(Unit, valueOf<Any>(t["E"][3]))
+        assertEquals(Unit, valueOf<Any>(t["E"][4]))
+
+        t.forEach {
+            remove(columnOf(it))
+        }
+
+        assertEquals(Unit, valueOf<Any>(t["A"][1]))
+        assertEquals(Unit, valueOf<Any>(t["A"][2]))
+        assertEquals(Unit, valueOf<Any>(t["A"][3]))
+        assertEquals(Unit, valueOf<Any>(t["A"][4]))
+        assertEquals(Unit, valueOf<Any>(t["A"][5]))
+
+        assertEquals(Unit, valueOf<Any>(t["B"][1]))
+        assertEquals(Unit, valueOf<Any>(t["B"][2]))
+        assertEquals(Unit, valueOf<Any>(t["B"][3]))
+        assertEquals(Unit, valueOf<Any>(t["B"][4]))
+        assertEquals(Unit, valueOf<Any>(t["B"][5]))
+
+        assertEquals(Unit, valueOf<Any>(t["C"][1]))
+        assertEquals(Unit, valueOf<Any>(t["C"][2]))
+        assertEquals(Unit, valueOf<Any>(t["C"][3]))
+        assertEquals(Unit, valueOf<Any>(t["C"][4]))
+        assertEquals(Unit, valueOf<Any>(t["C"][5]))
+
+        assertEquals(Unit, valueOf<Any>(t["D"][1]))
+        assertEquals(Unit, valueOf<Any>(t["D"][2]))
+        assertEquals(Unit, valueOf<Any>(t["D"][3]))
+        assertEquals(Unit, valueOf<Any>(t["D"][4]))
+        assertEquals(Unit, valueOf<Any>(t["D"][5]))
+
+        assertEquals(Unit, valueOf<Any>(t["E"][1]))
+        assertEquals(Unit, valueOf<Any>(t["E"][2]))
+        assertEquals(Unit, valueOf<Any>(t["E"][3]))
+        assertEquals(Unit, valueOf<Any>(t["E"][4]))
+        assertEquals(Unit, valueOf<Any>(t["E"][5]))
+
+        Table.delete(name)
+        assertFalse(Table.names.contains(name))
+    }
+
+    @Test
+    fun `basic table ops 3`() {
         val name = object {}.javaClass.enclosingMethod.name
         val t = Table[name]
         assertTrue(Table.names.contains(name))
