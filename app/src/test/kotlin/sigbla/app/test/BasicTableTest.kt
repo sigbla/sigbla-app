@@ -15,11 +15,13 @@ import sigbla.app.IndexRelation
 import sigbla.app.Table
 import sigbla.app.columnOf
 import sigbla.app.columnsOf
+import sigbla.app.exceptions.InvalidCellException
 import sigbla.app.remove
 import sigbla.app.valueOf
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.reflect.KClass
+import kotlin.test.assertFailsWith
 
 // NOTE: It's important that this does not import anything from BasicMath!
 //       Otherwise, some of the math ops below will use what is inside
@@ -563,6 +565,18 @@ class BasicTableTest {
         val values = listOf(1, 2L, 3F, 3.0, BigInteger.TWO, BigDecimal.TEN)
 
         var idx = 0
+
+        for (val1 in values) {
+            assertFailsWith<InvalidCellException> { t["Plus"][idx] = t["Val1"][idx] + val1 }
+            assertFailsWith<InvalidCellException> { t["Minus"][idx] = t["Val1"][idx] - val1 }
+            assertFailsWith<InvalidCellException> { t["Times"][idx] = t["Val1"][idx] * val1 }
+            assertFailsWith<InvalidCellException> { t["Div"][idx] = t["Val1"][idx] / val1 }
+            assertFailsWith<InvalidCellException> { t["Rem"][idx] = t["Val1"][idx] % val1 }
+
+            idx++
+        }
+
+        idx = 0
         val idxMapping = HashMap<Pair<Int, Int>, Int>()
 
         for ((idx1, val1) in values.withIndex()) {

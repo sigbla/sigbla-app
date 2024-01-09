@@ -9,6 +9,7 @@ import org.junit.Test
 import sigbla.app.exceptions.InvalidCellException
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.math.MathContext
 import kotlin.reflect.KClass
 
 class BasicMathTest {
@@ -167,5 +168,18 @@ class BasicMathTest {
             assertEquals(val1 / (t["Val2"][idx].asBigDecimal ?: throw InvalidCellException("")), val1 / t["Val2"][idx])
             assertEquals(val1 % (t["Val2"][idx].asBigDecimal ?: throw InvalidCellException("")), val1 % t["Val2"][idx])
         }
+    }
+
+    @Test
+    fun `unit cell as`() {
+        // Testing math between number and cell
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        assertNull(t["Val1", 0].asLong)
+        assertNull(t["Val1", 0].asDouble)
+        assertNull(t["Val1", 0].asBigInteger)
+        assertNull(t["Val1", 0].asBigDecimal)
+        assertNull(t["Val1", 0].asBigDecimal(MathContext.DECIMAL32))
+        assertNull(t["Val1", 0].asNumber)
     }
 }
