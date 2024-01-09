@@ -110,7 +110,7 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
             .iterator()
     }
 
-    operator fun contains(value: Any): Boolean {
+    operator fun contains(value: Any?): Boolean {
         iterator().forEach {
             if (it.value == value) return true
         }
@@ -169,9 +169,9 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
 
     operator fun plus(that: Number): Number {
         return when (that) {
-            is Int -> plus(that.toLong())
+            is Int -> plus(that)
             is Long -> plus(that)
-            is Float -> plus(that.toDouble())
+            is Float -> plus(that)
             is Double -> plus(that)
             is BigInteger -> plus(that)
             is BigDecimal -> plus(that)
@@ -198,9 +198,9 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
 
     operator fun minus(that: Number): Number {
         return when (that) {
-            is Int -> minus(that.toLong())
+            is Int -> minus(that)
             is Long -> minus(that)
-            is Float -> minus(that.toDouble())
+            is Float -> minus(that)
             is Double -> minus(that)
             is BigInteger -> minus(that)
             is BigDecimal -> minus(that)
@@ -227,9 +227,9 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
 
     operator fun times(that: Number): Number {
         return when (that) {
-            is Int -> times(that.toLong())
+            is Int -> times(that)
             is Long -> times(that)
-            is Float -> times(that.toDouble())
+            is Float -> times(that)
             is Double -> times(that)
             is BigInteger -> times(that)
             is BigDecimal -> times(that)
@@ -256,9 +256,9 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
 
     operator fun div(that: Number): Number {
         return when (that) {
-            is Int -> div(that.toLong())
+            is Int -> div(that)
             is Long -> div(that)
-            is Float -> div(that.toDouble())
+            is Float -> div(that)
             is Double -> div(that)
             is BigInteger -> div(that)
             is BigDecimal -> div(that)
@@ -285,9 +285,9 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
 
     operator fun rem(that: Number): Number {
         return when (that) {
-            is Int -> rem(that.toLong())
+            is Int -> rem(that)
             is Long -> rem(that)
-            is Float -> rem(that.toDouble())
+            is Float -> rem(that)
             is Double -> rem(that)
             is BigInteger -> rem(that)
             is BigDecimal -> rem(that)

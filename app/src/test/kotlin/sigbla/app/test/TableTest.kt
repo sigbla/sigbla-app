@@ -51,11 +51,16 @@ class TableTest {
     fun `cell range`() {
         val t1 = Table[object {}.javaClass.enclosingMethod.name]
 
+        assertTrue((t1["F", 0]..t1["G", 0]).isEmpty())
+
         for (c in listOf("D", "A", "B", "C", "E")) {
             for (r in -100..100) {
                 t1[c][r] = "$c$r"
             }
         }
+
+        assertFalse((t1["A", 0]..t1["C", 0]).isEmpty())
+        assertFalse((t1["E", 0]..t1["H", 0]).isEmpty())
 
         assertEquals(listOf("A1", "A2", "B1", "B2"), (t1["A", 1]..t1["B", 2]).map { it.toString() }.toList())
         assertEquals(listOf("A1", "A2", "B1", "B2"), (t1["A", 1]..t1["B", 2] by CellOrder.COLUMN).map { it.toString() }.toList())
@@ -86,6 +91,17 @@ class TableTest {
         assertEquals(listOf("B2", "B1", "A2", "A1"), (t1["B", 2]..t1["A", 1]).map { it.toString() }.toList())
         assertEquals(listOf("B2", "B1", "A2", "A1"), (t1["B", 2]..t1["A", 1] by CellOrder.COLUMN).map { it.toString() }.toList())
         assertEquals(listOf("B2", "A2", "B1", "A1"), (t1["B", 2]..t1["A", 1] by CellOrder.ROW).map { it.toString() }.toList())
+
+        t1.forEach {
+            assertTrue(it in t1["D", -100]..t1["E", 100])
+            assertTrue(it.value in t1["D", -100]..t1["E", 100])
+        }
+
+        assertFalse(t1["G", 0] in t1["D", -100]..t1["E", 100])
+        assertFalse(t1["G", -1000] in t1["D", -100]..t1["E", 100])
+        assertFalse(t1["G", 1000] in t1["D", -100]..t1["E", 100])
+        assertFalse(null in t1["D", -100]..t1["E", 100])
+        assertFalse("Not a value" in t1["D", -100]..t1["E", 100])
     }
 
     @Test
