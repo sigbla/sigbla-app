@@ -638,6 +638,18 @@ operator fun Number.plus(that: BigDecimal): Number {
     }
 }
 
+operator fun Number.plus(that: Number): Number {
+    return when (that) {
+        is Int -> this + that
+        is Long -> this + that
+        is Float -> this + that
+        is Double -> this + that
+        is BigInteger -> this + that
+        is BigDecimal -> this + that
+        else -> throw UnsupportedOperationException()
+    }
+}
+
 operator fun Number.minus(that: Cell<*>): Number {
     return when (this) {
         is Int -> this - that
@@ -726,6 +738,18 @@ operator fun Number.minus(that: BigDecimal): Number {
     }
 }
 
+operator fun Number.minus(that: Number): Number {
+    return when (that) {
+        is Int -> this - that
+        is Long -> this - that
+        is Float -> this - that
+        is Double -> this - that
+        is BigInteger -> this - that
+        is BigDecimal -> this - that
+        else -> throw UnsupportedOperationException()
+    }
+}
+
 operator fun Number.times(that: Cell<*>): Number {
     return when (this) {
         is Int -> this * that
@@ -810,6 +834,18 @@ operator fun Number.times(that: BigDecimal): Number {
         is Double -> this * that
         is BigInteger -> this.toBigDecimal(mathContext = Precision.mathContext).multiply(that)
         is BigDecimal -> this.multiply(that)
+        else -> throw UnsupportedOperationException()
+    }
+}
+
+operator fun Number.times(that: Number): Number {
+    return when (that) {
+        is Int -> this * that
+        is Long -> this * that
+        is Float -> this * that
+        is Double -> this * that
+        is BigInteger -> this * that
+        is BigDecimal -> this * that
         else -> throw UnsupportedOperationException()
     }
 }
@@ -917,6 +953,18 @@ operator fun Number.div(that: BigDecimal): Number {
     }
 }
 
+operator fun Number.div(that: Number): Number {
+    return when (that) {
+        is Int -> this / that
+        is Long -> this / that
+        is Float -> this / that
+        is Double -> this / that
+        is BigInteger -> this / that
+        is BigDecimal -> this / that
+        else -> throw UnsupportedOperationException()
+    }
+}
+
 operator fun Number.rem(that: Cell<*>): Number {
     return when (this) {
         is Int -> this % that
@@ -1001,6 +1049,18 @@ operator fun Number.rem(that: BigDecimal): Number {
         is Double -> this % that
         is BigInteger -> this.toBigDecimal(mathContext = Precision.mathContext).remainder(that)
         is BigDecimal -> this.remainder(that)
+        else -> throw UnsupportedOperationException()
+    }
+}
+
+operator fun Number.rem(that: Number): Number {
+    return when (that) {
+        is Int -> this % that
+        is Long -> this % that
+        is Float -> this % that
+        is Double -> this % that
+        is BigInteger -> this % that
+        is BigDecimal -> this % that
         else -> throw UnsupportedOperationException()
     }
 }
