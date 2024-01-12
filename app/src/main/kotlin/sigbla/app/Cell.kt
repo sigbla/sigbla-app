@@ -426,11 +426,11 @@ class LongCell internal constructor(column: Column, index: Long, override val va
 
     override val asNumber: Number = value
 
-    override fun plus(that: Int) = plus(that.toLong())
+    override fun plus(that: Int) = this.value + that
 
     override fun plus(that: Long) = this.value + that
 
-    override fun plus(that: Float) = plus(that.toDouble())
+    override fun plus(that: Float) = this.value + that
 
     override fun plus(that: Double) = this.value + that
 
@@ -438,11 +438,11 @@ class LongCell internal constructor(column: Column, index: Long, override val va
 
     override fun plus(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).add(that)!!
 
-    override fun minus(that: Int) = minus(that.toLong())
+    override fun minus(that: Int) = this.value - that
 
     override fun minus(that: Long) = this.value - that
 
-    override fun minus(that: Float) = minus(that.toDouble())
+    override fun minus(that: Float) = this.value - that
 
     override fun minus(that: Double) = this.value - that
 
@@ -450,11 +450,11 @@ class LongCell internal constructor(column: Column, index: Long, override val va
 
     override fun minus(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).subtract(that)!!
 
-    override fun times(that: Int) = times(that.toLong())
+    override fun times(that: Int) = this.value * that
 
     override fun times(that: Long) = this.value * that
 
-    override fun times(that: Float) = times(that.toDouble())
+    override fun times(that: Float) = this.value * that
 
     override fun times(that: Double) = this.value * that
 
@@ -462,11 +462,11 @@ class LongCell internal constructor(column: Column, index: Long, override val va
 
     override fun times(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).multiply(that)!!
 
-    override fun div(that: Int) = div(that.toLong())
+    override fun div(that: Int) = this.value / that
 
     override fun div(that: Long) = this.value / that
 
-    override fun div(that: Float) = div(that.toDouble())
+    override fun div(that: Float) = this.value / that
 
     override fun div(that: Double) = this.value / that
 
@@ -474,11 +474,11 @@ class LongCell internal constructor(column: Column, index: Long, override val va
 
     override fun div(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).divide(that, Precision.mathContext.roundingMode)!!
 
-    override fun rem(that: Int) = rem(that.toLong())
+    override fun rem(that: Int) = this.value % that
 
     override fun rem(that: Long) = this.value % that
 
-    override fun rem(that: Float) = rem(that.toDouble())
+    override fun rem(that: Float) = this.value % that
 
     override fun rem(that: Double) = this.value % that
 
@@ -503,11 +503,11 @@ class DoubleCell internal constructor(column: Column, index: Long, override val 
 
     override val asNumber: Number = value
 
-    override fun plus(that: Int) = plus(that.toLong())
+    override fun plus(that: Int) = this.value + that
 
     override fun plus(that: Long) = this.value + that
 
-    override fun plus(that: Float) = plus(that.toDouble())
+    override fun plus(that: Float) = this.value + that
 
     override fun plus(that: Double) = this.value + that
 
@@ -515,11 +515,11 @@ class DoubleCell internal constructor(column: Column, index: Long, override val 
 
     override fun plus(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).add(that)!!
 
-    override fun minus(that: Int) = minus(that.toLong())
+    override fun minus(that: Int) = this.value - that
 
     override fun minus(that: Long) = this.value - that
 
-    override fun minus(that: Float) = minus(that.toDouble())
+    override fun minus(that: Float) = this.value - that
 
     override fun minus(that: Double) = this.value - that
 
@@ -527,11 +527,11 @@ class DoubleCell internal constructor(column: Column, index: Long, override val 
 
     override fun minus(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).subtract(that)!!
 
-    override fun times(that: Int) = times(that.toLong())
+    override fun times(that: Int) = this.value * that
 
     override fun times(that: Long) = this.value * that
 
-    override fun times(that: Float) = times(that.toDouble())
+    override fun times(that: Float) = this.value * that
 
     override fun times(that: Double) = this.value * that
 
@@ -539,11 +539,11 @@ class DoubleCell internal constructor(column: Column, index: Long, override val 
 
     override fun times(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).multiply(that)!!
 
-    override fun div(that: Int) = div(that.toLong())
+    override fun div(that: Int) = this.value / that
 
     override fun div(that: Long) = this.value / that
 
-    override fun div(that: Float) = div(that.toDouble())
+    override fun div(that: Float) = this.value / that
 
     override fun div(that: Double) = this.value / that
 
@@ -551,11 +551,11 @@ class DoubleCell internal constructor(column: Column, index: Long, override val 
 
     override fun div(that: BigDecimal) = this.value.toBigDecimal(Precision.mathContext).divide(that, Precision.mathContext.roundingMode)!!
 
-    override fun rem(that: Int) = rem(that.toLong())
+    override fun rem(that: Int) = this.value % that
 
     override fun rem(that: Long) = this.value % that
 
-    override fun rem(that: Float) = rem(that.toDouble())
+    override fun rem(that: Float) = this.value % that
 
     override fun rem(that: Double) = this.value % that
 
