@@ -7,10 +7,12 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Test
 import sigbla.app.exceptions.InvalidCellException
+import sigbla.app.exceptions.InvalidValueException
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.MathContext
 import kotlin.reflect.KClass
+import kotlin.test.assertFailsWith
 
 class BasicMathTest {
     @After
@@ -865,5 +867,129 @@ class BasicMathTest {
         assertEquals("0.3333333333333333", ((1.0/3) / BigDecimal.ONE).toString())
 
         // TODO Should test all places precision is used..
+    }
+
+    @Test
+    fun `not numeric cells`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        val values = listOf(1, 2L, 3F, 4.0, BigInteger.TWO, BigDecimal.TEN)
+
+        for (value in values) {
+            assertFailsWith<InvalidCellException> { value + t["Val1", 0] }
+            assertFailsWith<InvalidCellException> { value - t["Val1", 0] }
+            assertFailsWith<InvalidCellException> { value * t["Val1", 0] }
+            assertFailsWith<InvalidCellException> { value / t["Val1", 0] }
+            assertFailsWith<InvalidCellException> { value % t["Val1", 0] }
+        }
+    }
+
+    @Test
+    fun `unsupported number`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["Val1", 0] = 1
+
+        val short = (1.toShort() as Number)
+
+        assertFailsWith<UnsupportedOperationException> { short + 1 }
+        assertFailsWith<UnsupportedOperationException> { short - 1 }
+        assertFailsWith<UnsupportedOperationException> { short * 1 }
+        assertFailsWith<UnsupportedOperationException> { short / 1 }
+        assertFailsWith<UnsupportedOperationException> { short % 1 }
+
+        assertFailsWith<UnsupportedOperationException> { short + 2L }
+        assertFailsWith<UnsupportedOperationException> { short - 2L }
+        assertFailsWith<UnsupportedOperationException> { short * 2L }
+        assertFailsWith<UnsupportedOperationException> { short / 2L }
+        assertFailsWith<UnsupportedOperationException> { short % 2L }
+
+        assertFailsWith<UnsupportedOperationException> { short + 3F }
+        assertFailsWith<UnsupportedOperationException> { short - 3F }
+        assertFailsWith<UnsupportedOperationException> { short * 3F }
+        assertFailsWith<UnsupportedOperationException> { short / 3F }
+        assertFailsWith<UnsupportedOperationException> { short % 3F }
+
+        assertFailsWith<UnsupportedOperationException> { short + 4.0 }
+        assertFailsWith<UnsupportedOperationException> { short - 4.0 }
+        assertFailsWith<UnsupportedOperationException> { short * 4.0 }
+        assertFailsWith<UnsupportedOperationException> { short / 4.0 }
+        assertFailsWith<UnsupportedOperationException> { short % 4.0 }
+
+        assertFailsWith<UnsupportedOperationException> { short + BigInteger.TWO }
+        assertFailsWith<UnsupportedOperationException> { short - BigInteger.TWO }
+        assertFailsWith<UnsupportedOperationException> { short * BigInteger.TWO }
+        assertFailsWith<UnsupportedOperationException> { short / BigInteger.TWO }
+        assertFailsWith<UnsupportedOperationException> { short % BigInteger.TWO }
+
+        assertFailsWith<UnsupportedOperationException> { short + BigDecimal.TEN }
+        assertFailsWith<UnsupportedOperationException> { short - BigDecimal.TEN }
+        assertFailsWith<UnsupportedOperationException> { short * BigDecimal.TEN }
+        assertFailsWith<UnsupportedOperationException> { short / BigDecimal.TEN }
+        assertFailsWith<UnsupportedOperationException> { short % BigDecimal.TEN }
+
+        assertFailsWith<UnsupportedOperationException> { short + t["Val1", 0] }
+        assertFailsWith<UnsupportedOperationException> { short - t["Val1", 0] }
+        assertFailsWith<UnsupportedOperationException> { short * t["Val1", 0] }
+        assertFailsWith<UnsupportedOperationException> { short / t["Val1", 0] }
+        assertFailsWith<UnsupportedOperationException> { short % t["Val1", 0] }
+
+        assertFailsWith<UnsupportedOperationException> { 1 + short }
+        assertFailsWith<UnsupportedOperationException> { 1 - short }
+        assertFailsWith<UnsupportedOperationException> { 1 * short }
+        assertFailsWith<UnsupportedOperationException> { 1 / short }
+        assertFailsWith<UnsupportedOperationException> { 1 % short }
+
+        assertFailsWith<UnsupportedOperationException> { 2L + short }
+        assertFailsWith<UnsupportedOperationException> { 2L - short }
+        assertFailsWith<UnsupportedOperationException> { 2L * short }
+        assertFailsWith<UnsupportedOperationException> { 2L / short }
+        assertFailsWith<UnsupportedOperationException> { 2L % short }
+
+        assertFailsWith<UnsupportedOperationException> { 3F + short }
+        assertFailsWith<UnsupportedOperationException> { 3F - short }
+        assertFailsWith<UnsupportedOperationException> { 3F * short }
+        assertFailsWith<UnsupportedOperationException> { 3F / short }
+        assertFailsWith<UnsupportedOperationException> { 3F % short }
+
+        assertFailsWith<UnsupportedOperationException> { 4.0 + short }
+        assertFailsWith<UnsupportedOperationException> { 4.0 - short }
+        assertFailsWith<UnsupportedOperationException> { 4.0 * short }
+        assertFailsWith<UnsupportedOperationException> { 4.0 / short }
+        assertFailsWith<UnsupportedOperationException> { 4.0 / short }
+
+        assertFailsWith<UnsupportedOperationException> { BigInteger.TWO + short }
+        assertFailsWith<UnsupportedOperationException> { BigInteger.TWO - short }
+        assertFailsWith<UnsupportedOperationException> { BigInteger.TWO * short }
+        assertFailsWith<UnsupportedOperationException> { BigInteger.TWO / short }
+        assertFailsWith<UnsupportedOperationException> { BigInteger.TWO % short }
+
+        assertFailsWith<UnsupportedOperationException> { BigDecimal.TEN + short }
+        assertFailsWith<UnsupportedOperationException> { BigDecimal.TEN - short }
+        assertFailsWith<UnsupportedOperationException> { BigDecimal.TEN * short }
+        assertFailsWith<UnsupportedOperationException> { BigDecimal.TEN / short }
+        assertFailsWith<UnsupportedOperationException> { BigDecimal.TEN % short }
+
+        assertFailsWith<InvalidValueException> { t["Val1", 0] + short }
+        assertFailsWith<InvalidValueException> { t["Val1", 0] - short }
+        assertFailsWith<InvalidValueException> { t["Val1", 0] * short }
+        assertFailsWith<InvalidValueException> { t["Val1", 0] / short }
+        assertFailsWith<InvalidValueException> { t["Val1", 0] % short }
+
+        val values = listOf(1, 2L, 3F, 4.0, BigInteger.TWO, BigDecimal.TEN)
+
+        for (value in values) {
+            assertFailsWith<UnsupportedOperationException> { short + value }
+            assertFailsWith<UnsupportedOperationException> { short - value }
+            assertFailsWith<UnsupportedOperationException> { short * value }
+            assertFailsWith<UnsupportedOperationException> { short / value }
+            assertFailsWith<UnsupportedOperationException> { short % value }
+
+            assertFailsWith<UnsupportedOperationException> { value - short }
+            assertFailsWith<UnsupportedOperationException> { value + short }
+            assertFailsWith<UnsupportedOperationException> { value * short }
+            assertFailsWith<UnsupportedOperationException> { value / short }
+            assertFailsWith<UnsupportedOperationException> { value % short }
+        }
     }
 }

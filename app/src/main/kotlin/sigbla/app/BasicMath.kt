@@ -35,8 +35,7 @@ operator fun Int.plus(that: Cell<*>): Number {
         is Double -> this + v
         is BigInteger -> this + v
         is BigDecimal -> this + v
-        // TODO Update exception text to include column here and below
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -54,7 +53,7 @@ operator fun Int.minus(that: Cell<*>): Number {
         is Double -> this - v
         is BigInteger -> this - v
         is BigDecimal -> this - v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -72,7 +71,7 @@ operator fun Int.times(that: Cell<*>): Number {
         is Double -> this * v
         is BigInteger -> this * v
         is BigDecimal -> this * v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -92,7 +91,7 @@ operator fun Int.div(that: Cell<*>): Number {
         is Double -> this / v
         is BigInteger -> this / v
         is BigDecimal -> this / v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -110,7 +109,7 @@ operator fun Int.rem(that: Cell<*>): Number {
         is Double -> this % v
         is BigInteger -> this % v
         is BigDecimal -> this % v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -128,7 +127,7 @@ operator fun Long.plus(that: Cell<*>): Number {
         is Double -> this + v
         is BigInteger -> this + v
         is BigDecimal -> this + v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -146,7 +145,7 @@ operator fun Long.minus(that: Cell<*>): Number {
         is Double -> this - v
         is BigInteger -> this - v
         is BigDecimal -> this - v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -164,7 +163,7 @@ operator fun Long.times(that: Cell<*>): Number {
         is Double -> this * v
         is BigInteger -> this * v
         is BigDecimal -> this * v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -184,7 +183,7 @@ operator fun Long.div(that: Cell<*>): Number {
         is Double -> this / v
         is BigInteger -> this / v
         is BigDecimal -> this / v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -202,7 +201,7 @@ operator fun Long.rem(that: Cell<*>): Number {
         is Double -> this % v
         is BigInteger -> this % v
         is BigDecimal -> this % v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -220,7 +219,7 @@ operator fun Float.plus(that: Cell<*>): Number {
         is Double -> this + v
         is BigInteger -> this + v
         is BigDecimal -> this + v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -238,7 +237,7 @@ operator fun Float.minus(that: Cell<*>): Number {
         is Double -> this - v
         is BigInteger -> this - v
         is BigDecimal -> this - v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -256,7 +255,7 @@ operator fun Float.times(that: Cell<*>): Number {
         is Double -> this * v
         is BigInteger -> this * v
         is BigDecimal -> this * v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -278,7 +277,7 @@ operator fun Float.div(that: Cell<*>): Number {
         is Double -> this / v
         is BigInteger -> this / v
         is BigDecimal -> this / v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -296,7 +295,7 @@ operator fun Float.rem(that: Cell<*>): Number {
         is Double -> this % v
         is BigInteger -> this % v
         is BigDecimal -> this % v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -314,7 +313,7 @@ operator fun Double.plus(that: Cell<*>): Number {
         is Double -> this + v
         is BigInteger -> this + v
         is BigDecimal -> this + v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -332,7 +331,7 @@ operator fun Double.minus(that: Cell<*>): Number {
         is Double -> this - v
         is BigInteger -> this - v
         is BigDecimal -> this - v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -350,7 +349,7 @@ operator fun Double.times(that: Cell<*>): Number {
         is Double -> this * v
         is BigInteger -> this * v
         is BigDecimal -> this * v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -372,7 +371,7 @@ operator fun Double.div(that: Cell<*>): Number {
         is Double -> this / v
         is BigInteger -> this / v
         is BigDecimal -> this / v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -390,7 +389,7 @@ operator fun Double.rem(that: Cell<*>): Number {
         is Double -> this % v
         is BigInteger -> this % v
         is BigDecimal -> this % v
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -404,7 +403,7 @@ operator fun BigInteger.plus(that: Cell<*>): Number {
         is Double -> this.toBigDecimal(mathContext = Precision.mathContext).add(that.asBigDecimal)
         is BigInteger -> this.add(that.asBigInteger)
         is BigDecimal -> this.toBigDecimal(mathContext = Precision.mathContext).add(that.asBigDecimal)
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -418,7 +417,7 @@ operator fun BigInteger.minus(that: Cell<*>): Number {
         is Double -> this.toBigDecimal(mathContext = Precision.mathContext).subtract(that.asBigDecimal)
         is BigInteger -> this.subtract(that.asBigInteger)
         is BigDecimal -> this.toBigDecimal(mathContext = Precision.mathContext).subtract(that.asBigDecimal)
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -432,7 +431,7 @@ operator fun BigInteger.times(that: Cell<*>): Number {
         is Double -> this.toBigDecimal(mathContext = Precision.mathContext).multiply(that.asBigDecimal)
         is BigInteger -> this.multiply(that.asBigInteger)
         is BigDecimal -> this.toBigDecimal(mathContext = Precision.mathContext).multiply(that.asBigDecimal)
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -452,7 +451,7 @@ operator fun BigInteger.div(that: Cell<*>): Number {
         is BigDecimal -> this.toBigDecimal(mathContext = Precision.mathContext).divide(that.asBigDecimal,
             Precision.mathContext.roundingMode
         )
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -466,7 +465,7 @@ operator fun BigInteger.rem(that: Cell<*>): Number {
         is Double -> this.toBigDecimal(mathContext = Precision.mathContext).remainder(that.asBigDecimal)
         is BigInteger -> this.remainder(that.asBigInteger)
         is BigDecimal -> this.toBigDecimal(mathContext = Precision.mathContext).remainder(that.asBigDecimal)
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -480,7 +479,7 @@ operator fun BigDecimal.plus(that: Cell<*>): Number {
         is Double -> this.add(that.asBigDecimal)
         is BigInteger -> this.add(that.asBigDecimal)
         is BigDecimal -> this.add(that.asBigDecimal)
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -494,7 +493,7 @@ operator fun BigDecimal.minus(that: Cell<*>): Number {
         is Double -> this.subtract(that.asBigDecimal)
         is BigInteger -> this.subtract(that.asBigDecimal)
         is BigDecimal -> this.subtract(that.asBigDecimal)
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -504,11 +503,11 @@ operator fun BigDecimal.times(that: BigInteger): Number {
 
 operator fun BigDecimal.times(that: Cell<*>): Number {
     return when (that.value) {
-        is Long -> this * (that.asBigInteger ?: throw InvalidCellException("Cell not numeric at ${that.index}"))
-        is Double -> this * (that.asBigDecimal ?: throw InvalidCellException("Cell not numeric at ${that.index}"))
-        is BigInteger -> this * (that.asBigInteger ?: throw InvalidCellException("Cell not numeric at ${that.index}"))
-        is BigDecimal -> this * (that.asBigDecimal ?: throw InvalidCellException("Cell not numeric at ${that.index}"))
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        is Long -> this * (that.asBigInteger ?: throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}"))
+        is Double -> this * (that.asBigDecimal ?: throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}"))
+        is BigInteger -> this * (that.asBigInteger ?: throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}"))
+        is BigDecimal -> this * (that.asBigDecimal ?: throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}"))
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -532,7 +531,7 @@ operator fun BigDecimal.div(that: Cell<*>): Number {
         is BigDecimal -> this.divide(that.asBigDecimal,
             Precision.mathContext.roundingMode
         )
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -546,7 +545,7 @@ operator fun BigDecimal.rem(that: Cell<*>): Number {
         is Double -> this.remainder(that.asBigDecimal)
         is BigInteger -> this.remainder(that.asBigDecimal)
         is BigDecimal -> this.remainder(that.asBigDecimal)
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw InvalidCellException("Cell not numeric at ${that.column}:${that.index}")
     }
 }
 
@@ -758,7 +757,7 @@ operator fun Number.times(that: Cell<*>): Number {
         is Double -> this * that
         is BigInteger -> this * that
         is BigDecimal -> this * that
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw UnsupportedOperationException()
     }
 }
 
@@ -858,7 +857,7 @@ operator fun Number.div(that: Cell<*>): Number {
         is Double -> this / that
         is BigInteger -> this / that
         is BigDecimal -> this / that
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw UnsupportedOperationException()
     }
 }
 
@@ -973,7 +972,7 @@ operator fun Number.rem(that: Cell<*>): Number {
         is Double -> this % that
         is BigInteger -> this % that
         is BigDecimal -> this % that
-        else -> throw InvalidCellException("Cell not numeric at ${that.index}")
+        else -> throw UnsupportedOperationException()
     }
 }
 
