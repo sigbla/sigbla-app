@@ -827,4 +827,43 @@ class BasicMathTest {
         assertNull(t["Val1", 0].asBigDecimal(MathContext.DECIMAL32))
         assertNull(t["Val1", 0].asNumber)
     }
+
+    @Test
+    fun `other basic math`() {
+        val bigInt2 = BigInteger.TWO
+        val bigInt10 = BigInteger.TEN
+        val bigDec2 = BigDecimal.valueOf(2)
+        val bigDec10 = BigDecimal.TEN
+
+        assertEquals(bigDec2.add(bigDec10), bigInt2 + bigDec10)
+        assertEquals(bigDec2.minus(bigDec10), bigInt2 - bigDec10)
+        assertEquals(bigDec2.times(bigDec10), bigInt2 * bigDec10)
+        assertEquals(bigDec2.div(bigDec10), bigInt2 / bigDec10)
+        assertEquals(bigDec2.remainder(bigDec10), bigInt2 % bigDec10)
+
+        assertEquals(bigDec2.add(bigDec10), bigDec2 + bigInt10)
+        assertEquals(bigDec2.minus(bigDec10), bigDec2 - bigInt10)
+        assertEquals(bigDec2.times(bigDec10), bigDec2 * bigInt10)
+        assertEquals(bigDec2.div(bigDec10), bigDec2 / bigInt10)
+        assertEquals(bigDec2.remainder(bigDec10), bigDec2 % bigInt10)
+    }
+
+    @Test
+    fun precision() {
+        val original = Math[Precision]
+
+        assertEquals(MathContext.DECIMAL64, original)
+
+        assertEquals("0.3333333333333333", ((1.0/3) / BigDecimal.ONE).toString())
+
+        Math[Precision] = MathContext.DECIMAL32
+
+        assertEquals("0.3333333", ((1.0/3) / BigDecimal.ONE).toString())
+
+        Math[Precision] = original
+
+        assertEquals("0.3333333333333333", ((1.0/3) / BigDecimal.ONE).toString())
+
+        // TODO Should test all places precision is used..
+    }
 }
