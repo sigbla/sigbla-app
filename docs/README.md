@@ -17,4 +17,4 @@ If Python3 isn't your default, try
 
 Then simply build and serve the docs locally with
 
-`mkdocs serve`
+`mkdocs serve` or `python3 -m mkdocs serve`

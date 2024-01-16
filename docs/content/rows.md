@@ -301,7 +301,22 @@ print(table)
 ```
 
 The two lines within the `when` statement, including `UnitCell` and how the value is assigned to the cell hasn't been
-covered yet, but will be in the next chapter.
+covered yet, but will be in the next chapter. Be aware that if you try to get a cell on a column where the relation
+can't be fulfilled, as shown in the below example, the returned unit cell will be at the index provided, irrespective
+of the index relation used.
+
+``` kotlin
+val table = Table[null]
+
+table["A", 0] = "A0"
+
+val cell = table["A"] after 0
+
+println("Cell type is ${cell::class} at index ${cell.index}")
+
+// Output:
+// Cell type is class sigbla.app.UnitCell at index 0
+```
 
 We can also use index relations on a row, letting us fetch the nearest cell across the whole row:
 
