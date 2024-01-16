@@ -278,6 +278,9 @@ print(table)
 As we can see from the example, `cellA1v1` keeps its original value, also after changing the table. You can always
 change the cell type in a table by simply assigning the value of the type you need.
 
+It's worth noting that we could do `table["A", 1] { "Second value" }` above instead of first assigning this to
+`cellA1v1`. Doing `table["A", 1] = { "Second value" }` also works.
+
 ## Utility functions and properties
 
 We covered some utility properties already, specifically `isNumber` and `isText`, and also how you can compare cells to
