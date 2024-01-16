@@ -4,6 +4,7 @@ package sigbla.app
 
 import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.IndexRelation.*
+import sigbla.app.exceptions.InvalidRowException
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -177,21 +178,45 @@ abstract class Column internal constructor(
 
     // ---
 
-    operator fun set(row: Row, cell: Cell<*>?) = set(row.index, cell)
+    operator fun set(row: Row, cell: Cell<*>?) {
+        if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        set(row.index, cell)
+    }
 
-    operator fun set(row: Row, value: String) = set(row.index, value)
+    operator fun set(row: Row, value: String) {
+        if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        set(row.index, value)
+    }
 
-    operator fun set(row: Row, value: Double) = set(row.index, value)
+    operator fun set(row: Row, value: Double) {
+        if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        set(row.index, value)
+    }
 
-    operator fun set(row: Row, value: Long) = set(row.index, value)
+    operator fun set(row: Row, value: Long) {
+        if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        set(row.index, value)
+    }
 
-    operator fun set(row: Row, value: BigInteger) = set(row.index, value)
+    operator fun set(row: Row, value: BigInteger) {
+        if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        set(row.index, value)
+    }
 
-    operator fun set(row: Row, value: BigDecimal) = set(row.index, value)
+    operator fun set(row: Row, value: BigDecimal) {
+        if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        set(row.index, value)
+    }
 
-    operator fun set(row: Row, value: Number) = set(row.index, value)
+    operator fun set(row: Row, value: Number) {
+        if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        set(row.index, value)
+    }
 
-    operator fun set(row: Row, init: Cell<*>.() -> Any?) = this[row.index] { init() }
+    operator fun set(row: Row, init: Cell<*>.() -> Any?) {
+        // No IR.AT check here because this is actually a get before set
+        this[row.indexRelation, row.index] { init() }
+    }
 
     // ---
 
