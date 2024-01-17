@@ -2059,7 +2059,7 @@ class TableTest {
     }
 
     @Test
-    fun `row set`() {
+    fun `table set`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 
         t["A", 0] = "Cell"
@@ -2088,6 +2088,146 @@ class TableTest {
                 is BigInteger -> t["A", row] = { v }
                 is BigDecimal -> t["A", row] = { v }
                 is Number -> t["A", row] = { v }
+                else -> throw Exception()
+            }
+        }
+
+        var lastValue = t["A", 0].value
+
+        for (value in values) {
+            for (ir in IndexRelation.entries) {
+                val row = t[ir, 0]
+
+                if (ir == IndexRelation.AT) {
+                    assign(row, value)
+                    lastValue = t["A"][0].value
+                } else {
+                    assertFailsWith<InvalidRowException> { assign(row, value) }
+                }
+
+                // Assert no change on exception
+                assertEquals(lastValue, t["A"][0].value)
+            }
+        }
+
+        assertEquals(1, t["A"].count())
+
+        for (value in values) {
+            for (ir in IndexRelation.entries) {
+                remove(t["A"])
+
+                val row = t[ir, 0]
+
+                assignFunction(row, value)
+
+                if (value is Int)
+                    assertEquals(value.toLong(), t["A"][0].value)
+                else
+                    assertEquals(value, t["A"][0].value)
+            }
+        }
+    }
+
+    @Test
+    fun `column set`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "Cell"
+
+        val values = listOf<Any>(t["A", 0], "String", 1.0, 2L, BigInteger.TEN, BigDecimal.valueOf(100), 1000 as Number)
+
+        fun assign(row: Row, v: Any) {
+            when (v) {
+                is Cell<*> -> t["A"][row] = v
+                is String -> t["A"][row] = v
+                is Double -> t["A"][row] = v
+                is Long -> t["A"][row] = v
+                is BigInteger -> t["A"][row] = v
+                is BigDecimal -> t["A"][row] = v
+                is Number -> t["A"][row] = v
+                else -> throw Exception()
+            }
+        }
+
+        fun assignFunction(row: Row, v: Any) {
+            when (v) {
+                is Cell<*> -> t["A"][row] = { v }
+                is String -> t["A"][row] = { v }
+                is Double -> t["A"][row] = { v }
+                is Long -> t["A"][row] = { v }
+                is BigInteger -> t["A"][row] = { v }
+                is BigDecimal -> t["A"][row] = { v }
+                is Number -> t["A"][row] = { v }
+                else -> throw Exception()
+            }
+        }
+
+        var lastValue = t["A", 0].value
+
+        for (value in values) {
+            for (ir in IndexRelation.entries) {
+                val row = t[ir, 0]
+
+                if (ir == IndexRelation.AT) {
+                    assign(row, value)
+                    lastValue = t["A"][0].value
+                } else {
+                    assertFailsWith<InvalidRowException> { assign(row, value) }
+                }
+
+                // Assert no change on exception
+                assertEquals(lastValue, t["A"][0].value)
+            }
+        }
+
+        assertEquals(1, t["A"].count())
+
+        for (value in values) {
+            for (ir in IndexRelation.entries) {
+                remove(t["A"])
+
+                val row = t[ir, 0]
+
+                assignFunction(row, value)
+
+                if (value is Int)
+                    assertEquals(value.toLong(), t["A"][0].value)
+                else
+                    assertEquals(value, t["A"][0].value)
+            }
+        }
+    }
+
+    @Test
+    fun `row set`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 0] = "Cell"
+
+        val values = listOf<Any>(t["A", 0], "String", 1.0, 2L, BigInteger.TEN, BigDecimal.valueOf(100), 1000 as Number)
+
+        fun assign(row: Row, v: Any) {
+            when (v) {
+                is Cell<*> -> t[row]["A"] = v
+                is String -> t[row]["A"] = v
+                is Double -> t[row]["A"] = v
+                is Long -> t[row]["A"] = v
+                is BigInteger -> t[row]["A"] = v
+                is BigDecimal -> t[row]["A"] = v
+                is Number -> t[row]["A"] = v
+                else -> throw Exception()
+            }
+        }
+
+        fun assignFunction(row: Row, v: Any) {
+            when (v) {
+                is Cell<*> -> t[row]["A"] = { v }
+                is String -> t[row]["A"] = { v }
+                is Double -> t[row]["A"] = { v }
+                is Long -> t[row]["A"] = { v }
+                is BigInteger -> t[row]["A"] = { v }
+                is BigDecimal -> t[row]["A"] = { v }
+                is Number -> t[row]["A"] = { v }
                 else -> throw Exception()
             }
         }
