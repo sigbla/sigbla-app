@@ -146,9 +146,6 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     val table: Table
         get() = column.table
 
-    // TODO Looks like we can remove this
-    internal abstract fun toCell(column: Column, index: Long): Cell<T>
-
     internal fun toCellValue() = CellValue(value)
 
     open val isNumeric: Boolean = false
@@ -404,28 +401,16 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
 class UnitCell internal constructor(column: Column, index: Long) : Cell<Unit>(column, index) {
     override val value = Unit
 
-    override fun toCell(column: Column, index: Long): Cell<Unit> =
-        UnitCell(column, index)
-
     override fun toString() = ""
 }
 
-class BooleanCell internal constructor(column: Column, index: Long, override val value: Boolean) : Cell<Boolean>(column, index) {
-    override fun toCell(column: Column, index: Long): Cell<Boolean> =
-        BooleanCell(column, index, this.value)
-}
+class BooleanCell internal constructor(column: Column, index: Long, override val value: Boolean) : Cell<Boolean>(column, index)
 
 class StringCell internal constructor(column: Column, index: Long, override val value: String) : Cell<String>(column, index) {
-    override fun toCell(column: Column, index: Long): Cell<String> =
-        StringCell(column, index, this.value)
-
     override val isText = true
 }
 
 class LongCell internal constructor(column: Column, index: Long, override val value: Long) : Cell<Long>(column, index) {
-    override fun toCell(column: Column, index: Long): Cell<Long> =
-        LongCell(column, index, this.value)
-
     override val isNumeric = true
 
     override val asLong: Long = value
@@ -500,9 +485,6 @@ class LongCell internal constructor(column: Column, index: Long, override val va
 }
 
 class DoubleCell internal constructor(column: Column, index: Long, override val value: Double) : Cell<Double>(column, index) {
-    override fun toCell(column: Column, index: Long): Cell<Double> =
-        DoubleCell(column, index, this.value)
-
     override val isNumeric = true
 
     override val asLong: Long by lazy { value.toLong() }
@@ -577,9 +559,6 @@ class DoubleCell internal constructor(column: Column, index: Long, override val 
 }
 
 class BigIntegerCell internal constructor(column: Column, index: Long, override val value: BigInteger) : Cell<BigInteger>(column, index) {
-    override fun toCell(column: Column, index: Long): Cell<BigInteger> =
-        BigIntegerCell(column, index, this.value)
-
     override val isNumeric = true
 
     override val asLong: Long by lazy { value.toLong() }
@@ -654,9 +633,6 @@ class BigIntegerCell internal constructor(column: Column, index: Long, override 
 }
 
 class BigDecimalCell internal constructor(column: Column, index: Long, override val value: BigDecimal) : Cell<BigDecimal>(column, index) {
-    override fun toCell(column: Column, index: Long): Cell<BigDecimal> =
-        BigDecimalCell(column, index, this.value)
-
     override val isNumeric = true
 
     override val asLong: Long by lazy { value.toLong() }
@@ -736,22 +712,10 @@ class WebContent internal constructor(val content: String) {
 
 internal fun String.toWebContent() = WebContent(this)
 
-class WebCell internal constructor(column: Column, index: Long, override val value: WebContent) : Cell<WebContent>(column, index) {
-    override fun toCell(column: Column, index: Long): Cell<WebContent> =
-        WebCell(column, index, this.value)
-}
+class WebCell internal constructor(column: Column, index: Long, override val value: WebContent) : Cell<WebContent>(column, index)
 
 // TODO Other types of cells:
-
-// Boolean cell
-// Time cell
-// Blob cell for storing blobs of data?
-// Table cell for storing a table in a cell?
-// Chart cell for rendering a chart..
-//   - Having looked at options I don't find anything I like in the JVM world..
-//   - Maybe use D3 in a web frame.. https://www.d3-graph-gallery.com/
-
-// Chart cell to be done as a WebCell instead..
+//      Time/Date cell
 
 fun div(
     classes : String? = null, block : DIV.() -> Unit = {}
