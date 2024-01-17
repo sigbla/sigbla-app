@@ -85,6 +85,15 @@ class SerializationTest {
                     assertEquals(v1, v2)
                     assertEquals(v1.javaClass.toString(), v2?.javaClass.toString())
                 }
+                12 -> {
+                    // Practically same as string but with different type value
+                    val ba = ByteArray(ThreadLocalRandom.current().nextInt(0, 1000))
+                    ThreadLocalRandom.current().nextBytes(ba)
+                    val v1 = String(ba)
+                    val v2 = SerializationUtils.toType(SerializationUtils.fromType(v1))
+                    assertEquals(v1, v2)
+                    assertEquals(v1.javaClass.toString(), v2?.javaClass.toString())
+                }
                 else -> throw UnsupportedOperationException()
             }
         }
