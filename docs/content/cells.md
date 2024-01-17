@@ -63,28 +63,31 @@ fun main() {
     val table = Table[null]
 
     table["Types", 1] = "Some text"
-    table["Types", 2] = Long.MAX_VALUE
-    table["Types", 3] = Double.MAX_VALUE
-    table["Types", 4] = BigInteger.ZERO
-    table["Types", 5] = BigDecimal.TEN
-    table["Types", 6] = div { p { +"HTML content" } }
+    table["Types", 2] = true
+    table["Types", 3] = Long.MAX_VALUE
+    table["Types", 4] = Double.MAX_VALUE
+    table["Types", 5] = BigInteger.ZERO
+    table["Types", 6] = BigDecimal.TEN
+    table["Types", 7] = div { p { +"HTML content" } }
 
     print(table)
 
     // Output:
     //                                |Types                          
     // 1                              |Some text                      
-    // 2                              |9223372036854775807            
-    // 3                              |1.7976931348623157E308         
-    // 4                              |0                              
-    // 5                              |10                             
-    // 6                              |<div><p>HTML content</p></div> 
+    // 2                              |true                           
+    // 3                              |9223372036854775807            
+    // 4                              |1.7976931348623157E308         
+    // 5                              |0                              
+    // 6                              |10                             
+    // 7                              |<div><p>HTML content</p></div> 
 }
 ```
 
 | Value type | Cell type      | Is numeric | Is text |
 |------------|----------------|------------|---------|
 | Unit       | UnitCell       | false      | false   |
+| Boolean    | BooleanCell    | false      | false   |
 | String     | StringCell     | false      | true    |
 | Long       | LongCell       | true       | false   |
 | Double     | DoubleCell     | true       | false   |
@@ -184,23 +187,26 @@ with an example:
 val table = Table[null]
 
 table["Types", 1] = "Some text"
-table["Types", 2] = Long.MAX_VALUE
-table["Types", 3] = Double.MAX_VALUE
-table["Types", 4] = BigInteger.ZERO
-table["Types", 5] = BigDecimal.TEN
-table["Types", 6] = div { +"HTML content" }
+table["Types", 2] = true
+table["Types", 3] = Long.MAX_VALUE
+table["Types", 4] = Double.MAX_VALUE
+table["Types", 5] = BigInteger.ZERO
+table["Types", 6] = BigDecimal.TEN
+table["Types", 7] = div { +"HTML content" }
 
 val unitCell = table["Types", 0]
 val stringCell = table["Types", 1]
-val longCell = table["Types", 2]
-val doubleCell = table["Types", 3]
-val bigIntegerCell = table["Types", 4]
-val bigDecimalCell = table["Types", 5]
-val webCell = table["Types", 6]
+val booleanCell = table["Types", 2]
+val longCell = table["Types", 3]
+val doubleCell = table["Types", 4]
+val bigIntegerCell = table["Types", 5]
+val bigDecimalCell = table["Types", 6]
+val webCell = table["Types", 7]
 
 listOf(
-    unitCell, stringCell, longCell, doubleCell,
-    bigIntegerCell, bigDecimalCell, webCell
+    unitCell, stringCell, booleanCell, longCell,
+    doubleCell, bigIntegerCell, bigDecimalCell,
+    webCell
 ).sorted().forEach {
     println("$it [${it::class}]")
 }
@@ -213,6 +219,7 @@ listOf(
 // 1.7976931348623157E308 [class sigbla.app.DoubleCell]
 // <div>HTML content</div> [class sigbla.app.WebCell]
 // Some text [class sigbla.app.StringCell]
+// true [class sigbla.app.BooleanCell]
 ```
 
 It's not immediately obvious what's going on, other than obtaining a list of cells that have been sorted according to

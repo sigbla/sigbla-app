@@ -147,6 +147,10 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
         this[column][index] = value
     }
 
+    operator fun set(column: Column, index: Long, value: Boolean) {
+        this[column][index] = value
+    }
+
     operator fun set(column: Column, index: Long, value: String) {
         this[column][index] = value
     }
@@ -176,6 +180,10 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
     // -----
 
     operator fun set(column: Column, index: Int, value: Cell<*>?) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Int, value: Boolean) {
         this[column][index] = value
     }
 
@@ -211,6 +219,10 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
         this[header][index] = value
     }
 
+    operator fun set(header: Header, index: Long, value: Boolean) {
+        this[header][index] = value
+    }
+
     operator fun set(header: Header, index: Long, value: String) {
         this[header][index] = value
     }
@@ -240,6 +252,10 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
     // -----
 
     operator fun set(header: Header, index: Int, value: Cell<*>?) {
+        this[header][index] = value
+    }
+
+    operator fun set(header: Header, index: Int, value: Boolean) {
         this[header][index] = value
     }
 
@@ -275,6 +291,10 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
         this[column][row] = value
     }
 
+    operator fun set(column: Column, row: Row, value: Boolean) {
+        this[column][row] = value
+    }
+
     operator fun set(column: Column, row: Row, value: String) {
         this[column][row] = value
     }
@@ -307,6 +327,10 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
         this[header][row] = value
     }
 
+    operator fun set(header: Header, row: Row, value: Boolean) {
+        this[header][row] = value
+    }
+
     operator fun set(header: Header, row: Row, value: String) {
         this[header][row] = value
     }
@@ -336,6 +360,10 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
     // -----
 
     operator fun set(cell: Cell<*>, value: Cell<*>?) {
+        this[cell.column][cell.index] = value
+    }
+
+    operator fun set(cell: Cell<*>, value: Boolean) {
         this[cell.column][cell.index] = value
     }
 
@@ -420,6 +448,28 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
     }
 
     operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, value: Cell<*>?) {
+        this[header1, header2, header3, header4, header5][index] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, index: Long, value: Boolean) {
+        this[header1][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, index: Long, value: Boolean) {
+        this[header1, header2][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Long, value: Boolean) {
+        this[header1, header2, header3][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, value: Boolean) {
+        this[header1, header2, header3, header4][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, value: Boolean) {
         this[header1, header2, header3, header4, header5][index] = value
     }
 
@@ -579,6 +629,28 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
     // -----
 
+    operator fun set(header1: String, index: Int, value: Boolean) {
+        this[header1][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, index: Int, value: Boolean) {
+        this[header1, header2][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Int, value: Boolean) {
+        this[header1, header2, header3][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, value: Boolean) {
+        this[header1, header2, header3, header4][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, value: Boolean) {
+        this[header1, header2, header3, header4, header5][index] = value
+    }
+
+    // -----
+
     operator fun set(header1: String, index: Int, value: String) {
         this[header1][index] = value
     }
@@ -728,6 +800,28 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
     }
 
     operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, value: Cell<*>?) {
+        this[header1, header2, header3, header4, header5][row] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, row: Row, value: Boolean) {
+        this[header1][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, row: Row, value: Boolean) {
+        this[header1, header2][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, row: Row, value: Boolean) {
+        this[header1, header2, header3][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, value: Boolean) {
+        this[header1, header2, header3, header4][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, value: Boolean) {
         this[header1, header2, header3, header4, header5][row] = value
     }
 

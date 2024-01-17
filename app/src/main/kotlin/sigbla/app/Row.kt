@@ -34,6 +34,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
     )
 
     operator fun set(header: Header, value: Cell<*>?) = table[header].set(this, value)
+    operator fun set(header: Header, value: Boolean) = table[header].set(this, value)
     operator fun set(header: Header, value: String) = table[header].set(this, value)
     operator fun set(header: Header, value: Double) = table[header].set(this, value)
     operator fun set(header: Header, value: Float) = table[header].set(this, value)
@@ -45,6 +46,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
     operator fun set(header: Header, init: Cell<*>.() -> Any?) = table[header][this] { init() }
 
     operator fun set(column: Column, value: Cell<*>?) = table[column].set(this, value)
+    operator fun set(column: Column, value: Boolean) = table[column].set(this, value)
     operator fun set(column: Column, value: String) = table[column].set(this, value)
     operator fun set(column: Column, value: Double) = table[column].set(this, value)
     operator fun set(column: Column, value: Float) = table[column].set(this, value)
@@ -56,6 +58,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
     operator fun set(column: Column, init: Cell<*>.() -> Any?) = table[column][this] { init() }
 
     operator fun set(vararg header: String, value: Cell<*>?) = table[Header(*header)].set(this, value)
+    operator fun set(vararg header: String, value: Boolean) = table[Header(*header)].set(this, value)
     operator fun set(vararg header: String, value: String) = table[Header(*header)].set(this, value)
     operator fun set(vararg header: String, value: Double) = table[Header(*header)].set(this, value)
     operator fun set(vararg header: String, value: Float) = table[Header(*header)].set(this, value)
