@@ -45,37 +45,50 @@ class BasicTableTest {
         t["C"][3] = 123.0
         t["D"][4] = BigInteger.ONE
         t["E"][5] = BigDecimal.TEN
+        t["F"][6] = true
 
         assertEquals("String", valueOf<Any>(t["A"][1]))
         assertEquals(123L, valueOf<Any>(t["B"][2]))
         assertEquals(123.0, valueOf<Any>(t["C"][3]))
         assertEquals(BigInteger.ONE, valueOf<Any>(t["D"][4]))
         assertEquals(BigDecimal.TEN, valueOf<Any>(t["E"][5]))
+        assertEquals(true, valueOf<Any>(t["F"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["A"][2]))
         assertEquals(Unit, valueOf<Any>(t["A"][3]))
         assertEquals(Unit, valueOf<Any>(t["A"][4]))
         assertEquals(Unit, valueOf<Any>(t["A"][5]))
+        assertEquals(Unit, valueOf<Any>(t["A"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["B"][1]))
         assertEquals(Unit, valueOf<Any>(t["B"][3]))
         assertEquals(Unit, valueOf<Any>(t["B"][4]))
         assertEquals(Unit, valueOf<Any>(t["B"][5]))
+        assertEquals(Unit, valueOf<Any>(t["B"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["C"][1]))
         assertEquals(Unit, valueOf<Any>(t["C"][2]))
         assertEquals(Unit, valueOf<Any>(t["C"][4]))
         assertEquals(Unit, valueOf<Any>(t["C"][5]))
+        assertEquals(Unit, valueOf<Any>(t["C"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["D"][1]))
         assertEquals(Unit, valueOf<Any>(t["D"][2]))
         assertEquals(Unit, valueOf<Any>(t["D"][3]))
         assertEquals(Unit, valueOf<Any>(t["D"][5]))
+        assertEquals(Unit, valueOf<Any>(t["D"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["E"][1]))
         assertEquals(Unit, valueOf<Any>(t["E"][2]))
         assertEquals(Unit, valueOf<Any>(t["E"][3]))
         assertEquals(Unit, valueOf<Any>(t["E"][4]))
+        assertEquals(Unit, valueOf<Any>(t["E"][6]))
+
+        assertEquals(Unit, valueOf<Any>(t["F"][1]))
+        assertEquals(Unit, valueOf<Any>(t["F"][2]))
+        assertEquals(Unit, valueOf<Any>(t["F"][3]))
+        assertEquals(Unit, valueOf<Any>(t["F"][4]))
+        assertEquals(Unit, valueOf<Any>(t["F"][5]))
 
         columnsOf(t).forEach { remove(it) }
 
@@ -84,30 +97,42 @@ class BasicTableTest {
         assertEquals(Unit, valueOf<Any>(t["A"][3]))
         assertEquals(Unit, valueOf<Any>(t["A"][4]))
         assertEquals(Unit, valueOf<Any>(t["A"][5]))
+        assertEquals(Unit, valueOf<Any>(t["A"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["B"][1]))
         assertEquals(Unit, valueOf<Any>(t["B"][2]))
         assertEquals(Unit, valueOf<Any>(t["B"][3]))
         assertEquals(Unit, valueOf<Any>(t["B"][4]))
         assertEquals(Unit, valueOf<Any>(t["B"][5]))
+        assertEquals(Unit, valueOf<Any>(t["B"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["C"][1]))
         assertEquals(Unit, valueOf<Any>(t["C"][2]))
         assertEquals(Unit, valueOf<Any>(t["C"][3]))
         assertEquals(Unit, valueOf<Any>(t["C"][4]))
         assertEquals(Unit, valueOf<Any>(t["C"][5]))
+        assertEquals(Unit, valueOf<Any>(t["C"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["D"][1]))
         assertEquals(Unit, valueOf<Any>(t["D"][2]))
         assertEquals(Unit, valueOf<Any>(t["D"][3]))
         assertEquals(Unit, valueOf<Any>(t["D"][4]))
         assertEquals(Unit, valueOf<Any>(t["D"][5]))
+        assertEquals(Unit, valueOf<Any>(t["D"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["E"][1]))
         assertEquals(Unit, valueOf<Any>(t["E"][2]))
         assertEquals(Unit, valueOf<Any>(t["E"][3]))
         assertEquals(Unit, valueOf<Any>(t["E"][4]))
         assertEquals(Unit, valueOf<Any>(t["E"][5]))
+        assertEquals(Unit, valueOf<Any>(t["E"][6]))
+
+        assertEquals(Unit, valueOf<Any>(t["F"][1]))
+        assertEquals(Unit, valueOf<Any>(t["F"][2]))
+        assertEquals(Unit, valueOf<Any>(t["F"][3]))
+        assertEquals(Unit, valueOf<Any>(t["F"][4]))
+        assertEquals(Unit, valueOf<Any>(t["F"][5]))
+        assertEquals(Unit, valueOf<Any>(t["F"][6]))
 
         Table.delete(name)
         assertFalse(Table.names.contains(name))
@@ -124,37 +149,50 @@ class BasicTableTest {
         t["C"][3] = 123.0
         t["D"][4] = BigInteger.ONE
         t["E"][5] = BigDecimal.TEN
+        t["F"][6] = false
 
         assertEquals("String", valueOf<Any>(t["A"][1]))
         assertEquals(123L, valueOf<Any>(t["B"][2]))
         assertEquals(123.0, valueOf<Any>(t["C"][3]))
         assertEquals(BigInteger.ONE, valueOf<Any>(t["D"][4]))
         assertEquals(BigDecimal.TEN, valueOf<Any>(t["E"][5]))
+        assertEquals(false, valueOf<Any>(t["F"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["A"][2]))
         assertEquals(Unit, valueOf<Any>(t["A"][3]))
         assertEquals(Unit, valueOf<Any>(t["A"][4]))
         assertEquals(Unit, valueOf<Any>(t["A"][5]))
+        assertEquals(Unit, valueOf<Any>(t["A"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["B"][1]))
         assertEquals(Unit, valueOf<Any>(t["B"][3]))
         assertEquals(Unit, valueOf<Any>(t["B"][4]))
         assertEquals(Unit, valueOf<Any>(t["B"][5]))
+        assertEquals(Unit, valueOf<Any>(t["B"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["C"][1]))
         assertEquals(Unit, valueOf<Any>(t["C"][2]))
         assertEquals(Unit, valueOf<Any>(t["C"][4]))
         assertEquals(Unit, valueOf<Any>(t["C"][5]))
+        assertEquals(Unit, valueOf<Any>(t["C"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["D"][1]))
         assertEquals(Unit, valueOf<Any>(t["D"][2]))
         assertEquals(Unit, valueOf<Any>(t["D"][3]))
         assertEquals(Unit, valueOf<Any>(t["D"][5]))
+        assertEquals(Unit, valueOf<Any>(t["D"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["E"][1]))
         assertEquals(Unit, valueOf<Any>(t["E"][2]))
         assertEquals(Unit, valueOf<Any>(t["E"][3]))
         assertEquals(Unit, valueOf<Any>(t["E"][4]))
+        assertEquals(Unit, valueOf<Any>(t["E"][6]))
+
+        assertEquals(Unit, valueOf<Any>(t["F"][1]))
+        assertEquals(Unit, valueOf<Any>(t["F"][2]))
+        assertEquals(Unit, valueOf<Any>(t["F"][3]))
+        assertEquals(Unit, valueOf<Any>(t["F"][4]))
+        assertEquals(Unit, valueOf<Any>(t["F"][5]))
 
         t.forEach {
             remove(columnOf(it))
@@ -165,30 +203,35 @@ class BasicTableTest {
         assertEquals(Unit, valueOf<Any>(t["A"][3]))
         assertEquals(Unit, valueOf<Any>(t["A"][4]))
         assertEquals(Unit, valueOf<Any>(t["A"][5]))
+        assertEquals(Unit, valueOf<Any>(t["A"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["B"][1]))
         assertEquals(Unit, valueOf<Any>(t["B"][2]))
         assertEquals(Unit, valueOf<Any>(t["B"][3]))
         assertEquals(Unit, valueOf<Any>(t["B"][4]))
         assertEquals(Unit, valueOf<Any>(t["B"][5]))
+        assertEquals(Unit, valueOf<Any>(t["B"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["C"][1]))
         assertEquals(Unit, valueOf<Any>(t["C"][2]))
         assertEquals(Unit, valueOf<Any>(t["C"][3]))
         assertEquals(Unit, valueOf<Any>(t["C"][4]))
         assertEquals(Unit, valueOf<Any>(t["C"][5]))
+        assertEquals(Unit, valueOf<Any>(t["C"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["D"][1]))
         assertEquals(Unit, valueOf<Any>(t["D"][2]))
         assertEquals(Unit, valueOf<Any>(t["D"][3]))
         assertEquals(Unit, valueOf<Any>(t["D"][4]))
         assertEquals(Unit, valueOf<Any>(t["D"][5]))
+        assertEquals(Unit, valueOf<Any>(t["D"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["E"][1]))
         assertEquals(Unit, valueOf<Any>(t["E"][2]))
         assertEquals(Unit, valueOf<Any>(t["E"][3]))
         assertEquals(Unit, valueOf<Any>(t["E"][4]))
         assertEquals(Unit, valueOf<Any>(t["E"][5]))
+        assertEquals(Unit, valueOf<Any>(t["E"][6]))
 
         Table.delete(name)
         assertFalse(Table.names.contains(name))
@@ -205,37 +248,50 @@ class BasicTableTest {
         t["C", 3] = 123.0
         t["D", 4] = BigInteger.ONE
         t["E", 5] = BigDecimal.TEN
+        t["F", 6] = true
 
         assertEquals("String", valueOf<Any>(t["A"][1]))
         assertEquals(123L, valueOf<Any>(t["B"][2]))
         assertEquals(123.0, valueOf<Any>(t["C"][3]))
         assertEquals(BigInteger.ONE, valueOf<Any>(t["D"][4]))
         assertEquals(BigDecimal.TEN, valueOf<Any>(t["E"][5]))
+        assertEquals(true, valueOf<Any>(t["F"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["A"][2]))
         assertEquals(Unit, valueOf<Any>(t["A"][3]))
         assertEquals(Unit, valueOf<Any>(t["A"][4]))
         assertEquals(Unit, valueOf<Any>(t["A"][5]))
+        assertEquals(Unit, valueOf<Any>(t["A"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["B"][1]))
         assertEquals(Unit, valueOf<Any>(t["B"][3]))
         assertEquals(Unit, valueOf<Any>(t["B"][4]))
         assertEquals(Unit, valueOf<Any>(t["B"][5]))
+        assertEquals(Unit, valueOf<Any>(t["B"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["C"][1]))
         assertEquals(Unit, valueOf<Any>(t["C"][2]))
         assertEquals(Unit, valueOf<Any>(t["C"][4]))
         assertEquals(Unit, valueOf<Any>(t["C"][5]))
+        assertEquals(Unit, valueOf<Any>(t["C"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["D"][1]))
         assertEquals(Unit, valueOf<Any>(t["D"][2]))
         assertEquals(Unit, valueOf<Any>(t["D"][3]))
         assertEquals(Unit, valueOf<Any>(t["D"][5]))
+        assertEquals(Unit, valueOf<Any>(t["D"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["E"][1]))
         assertEquals(Unit, valueOf<Any>(t["E"][2]))
         assertEquals(Unit, valueOf<Any>(t["E"][3]))
         assertEquals(Unit, valueOf<Any>(t["E"][4]))
+        assertEquals(Unit, valueOf<Any>(t["E"][6]))
+
+        assertEquals(Unit, valueOf<Any>(t["F"][1]))
+        assertEquals(Unit, valueOf<Any>(t["F"][2]))
+        assertEquals(Unit, valueOf<Any>(t["F"][3]))
+        assertEquals(Unit, valueOf<Any>(t["F"][4]))
+        assertEquals(Unit, valueOf<Any>(t["F"][5]))
 
         columnsOf(t).forEach { remove(it) }
 
@@ -244,30 +300,42 @@ class BasicTableTest {
         assertEquals(Unit, valueOf<Any>(t["A"][3]))
         assertEquals(Unit, valueOf<Any>(t["A"][4]))
         assertEquals(Unit, valueOf<Any>(t["A"][5]))
+        assertEquals(Unit, valueOf<Any>(t["A"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["B"][1]))
         assertEquals(Unit, valueOf<Any>(t["B"][2]))
         assertEquals(Unit, valueOf<Any>(t["B"][3]))
         assertEquals(Unit, valueOf<Any>(t["B"][4]))
         assertEquals(Unit, valueOf<Any>(t["B"][5]))
+        assertEquals(Unit, valueOf<Any>(t["B"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["C"][1]))
         assertEquals(Unit, valueOf<Any>(t["C"][2]))
         assertEquals(Unit, valueOf<Any>(t["C"][3]))
         assertEquals(Unit, valueOf<Any>(t["C"][4]))
         assertEquals(Unit, valueOf<Any>(t["C"][5]))
+        assertEquals(Unit, valueOf<Any>(t["C"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["D"][1]))
         assertEquals(Unit, valueOf<Any>(t["D"][2]))
         assertEquals(Unit, valueOf<Any>(t["D"][3]))
         assertEquals(Unit, valueOf<Any>(t["D"][4]))
         assertEquals(Unit, valueOf<Any>(t["D"][5]))
+        assertEquals(Unit, valueOf<Any>(t["D"][6]))
 
         assertEquals(Unit, valueOf<Any>(t["E"][1]))
         assertEquals(Unit, valueOf<Any>(t["E"][2]))
         assertEquals(Unit, valueOf<Any>(t["E"][3]))
         assertEquals(Unit, valueOf<Any>(t["E"][4]))
         assertEquals(Unit, valueOf<Any>(t["E"][5]))
+        assertEquals(Unit, valueOf<Any>(t["E"][6]))
+
+        assertEquals(Unit, valueOf<Any>(t["F"][1]))
+        assertEquals(Unit, valueOf<Any>(t["F"][2]))
+        assertEquals(Unit, valueOf<Any>(t["F"][3]))
+        assertEquals(Unit, valueOf<Any>(t["F"][4]))
+        assertEquals(Unit, valueOf<Any>(t["F"][5]))
+        assertEquals(Unit, valueOf<Any>(t["F"][6]))
     }
 
     private fun typeValue(clazz: KClass<*>): Int {

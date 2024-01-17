@@ -254,7 +254,7 @@ class TableStorageTest {
                     }
 
                     for (r in range) {
-                        val type = ThreadLocalRandom.current().nextInt(0, 7)
+                        val type = ThreadLocalRandom.current().nextInt(0, 8)
                         when (type) {
                             0 -> { /* skip */ }
                             1 -> column[r] = ThreadLocalRandom.current().nextLong().toString() + " " + ThreadLocalRandom.current().nextBoolean()
@@ -262,7 +262,8 @@ class TableStorageTest {
                             3 -> column[r] = ThreadLocalRandom.current().nextDouble()
                             4 -> column[r] = BigInteger.valueOf(ThreadLocalRandom.current().nextLong()).multiply(BigInteger.valueOf(ThreadLocalRandom.current().nextLong()))
                             5 -> column[r] = BigDecimal.valueOf(ThreadLocalRandom.current().nextDouble()).multiply(BigDecimal.valueOf(ThreadLocalRandom.current().nextDouble()))
-                            6 -> column[r] = if (ThreadLocalRandom.current().nextBoolean()) div {
+                            6 -> column[r] = ThreadLocalRandom.current().nextBoolean()
+                            7 -> column[r] = if (ThreadLocalRandom.current().nextBoolean()) div {
                                 val text = ThreadLocalRandom.current().nextLong().toString() + " " + ThreadLocalRandom.current().nextBoolean()
                                 +text
                             } else div(classes = "with-class") {

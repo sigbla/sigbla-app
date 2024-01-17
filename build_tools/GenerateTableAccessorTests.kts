@@ -500,6 +500,10 @@ fun generateForNumber() {
     generateForX("number", "val cell = 123 as Number", "cell.toLong()")
 }
 
+fun generateForBool() {
+    generateForX("boolean", "val cell = true")
+}
+
 generateForCell()
 generateForString()
 generateForInt()
@@ -509,3 +513,4 @@ generateForDouble()
 generateForBigInteger()
 generateForBigDecimal()
 generateForNumber()
+generateForBool()

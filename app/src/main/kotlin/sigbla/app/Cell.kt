@@ -18,6 +18,8 @@ import java.util.*
 import kotlin.math.min
 import kotlin.math.max
 
+internal fun Boolean.toCell(column: Column, index: Long) =
+    BooleanCell(column, index, this)
 internal fun String.toCell(column: Column, index: Long) =
     StringCell(column, index, this)
 internal fun Long.toCell(column: Column, index: Long) =
@@ -34,6 +36,7 @@ internal fun WebContent.toCell(column: Column, index: Long): WebCell =
 internal class CellValue<T>(val value: T) {
     fun toCell(column: Column, index: Long): Cell<*> {
         return when (value) {
+            is Boolean -> value.toCell(column, index)
             is String -> value.toCell(column, index)
             is Long -> value.toCell(column, index)
             is Double -> value.toCell(column, index)
@@ -143,6 +146,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     val table: Table
         get() = column.table
 
+    // TODO Looks like we can remove this
     internal abstract fun toCell(column: Column, index: Long): Cell<T>
 
     internal fun toCellValue() = CellValue(value)
@@ -367,6 +371,9 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
             is String -> {
                 table[this] = value; value
             }
+            is Boolean -> {
+                table[this] = value; value
+            }
             is Cell<*> -> {
                 table[this] = value; value
             }
@@ -401,6 +408,11 @@ class UnitCell internal constructor(column: Column, index: Long) : Cell<Unit>(co
         UnitCell(column, index)
 
     override fun toString() = ""
+}
+
+class BooleanCell internal constructor(column: Column, index: Long, override val value: Boolean) : Cell<Boolean>(column, index) {
+    override fun toCell(column: Column, index: Long): Cell<Boolean> =
+        BooleanCell(column, index, this.value)
 }
 
 class StringCell internal constructor(column: Column, index: Long, override val value: String) : Cell<String>(column, index) {

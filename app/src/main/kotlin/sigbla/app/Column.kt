@@ -134,6 +134,8 @@ abstract class Column internal constructor(
 
     // ---
 
+    operator fun set(index: Long, value: Boolean) = set(index, value.toCell(this, index))
+
     operator fun set(index: Long, value: String) = set(index, value.toCell(this, index))
 
     operator fun set(index: Long, value: Double) = set(index, value.toCell(this, index))
@@ -162,6 +164,8 @@ abstract class Column internal constructor(
 
     operator fun set(index: Int, cell: Cell<*>?) = set(index.toLong(), cell)
 
+    operator fun set(index: Int, value: Boolean) = set(index.toLong(), value)
+
     operator fun set(index: Int, value: String) = set(index.toLong(), value)
 
     operator fun set(index: Int, value: Double) = set(index.toLong(), value)
@@ -181,6 +185,11 @@ abstract class Column internal constructor(
     operator fun set(row: Row, cell: Cell<*>?) {
         if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
         set(row.index, cell)
+    }
+
+    operator fun set(row: Row, value: Boolean) {
+        if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        set(row.index, value)
     }
 
     operator fun set(row: Row, value: String) {
