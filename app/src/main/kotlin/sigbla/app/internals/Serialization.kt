@@ -2,6 +2,7 @@
  * See LICENSE file for licensing details. */
 package sigbla.app.internals
 
+import sigbla.app.WebContent
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -22,7 +23,8 @@ internal enum class SerializationType(val type: Int) {
     //CHAR(8),
     STRING(9),
     BIGINTEGER(10),
-    BIGDECIMAL(11)
+    BIGDECIMAL(11),
+    WEBCONTENT(12)
 }
 
 internal object SerializationUtils {
@@ -125,6 +127,13 @@ internal object SerializationUtils {
                     baos.writeBytes(scale)
                 }
 
+                is WebContent -> {
+                    baos.write(SerializationType.WEBCONTENT.type)
+                    val bytes = value.content.toByteArray(Charsets.UTF_8)
+                    baos.write(fromInt(bytes.size))
+                    baos.writeBytes(bytes)
+                }
+
                 else -> throw UnsupportedOperationException("Not supported: ${value.javaClass}")
             }
 
@@ -221,6 +230,19 @@ internal object SerializationUtils {
                 }
                 val scale = buffer2.getInt()
                 return BigDecimal(BigInteger(bigdecimal), scale)
+            }
+            SerializationType.WEBCONTENT.type -> {
+                val buffer = ByteArray(Int.SIZE_BYTES).let {
+                    if (inputStream.readNBytes(it, 0, it.size) != it.size) throw IllegalArgumentException()
+                    ByteBuffer.wrap(it)
+                }
+                val length = buffer.getInt()
+                if (length == 0) return WebContent("")
+                val string = ByteArray(length).let {
+                    if (inputStream.readNBytes(it, 0, it.size) != it.size) throw IllegalArgumentException()
+                    it
+                }
+                return WebContent(String(string, Charsets.UTF_8))
             }
             else -> throw IllegalArgumentException("Unsupported type $type")
         }
