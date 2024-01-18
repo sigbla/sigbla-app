@@ -4,6 +4,34 @@ All notable changes to this project will be documented in this file.
 
 This project is versioned following the [major release].[last 2 digits in release year].[minor release] format.
 
+## v1.24.1 - 2024-01-18 - Plain Hill
+
+The general theme of this release is various minor API tidy-ups and improvements/fixes with increased test coverage,
+plus added functionality within storage and cell types. The changes have focused on Table.kt and related functionality.
+
+### Added
+
+- Add storage support for WebCell
+- Add support for boolean cell values
+- Add convenience function to check if column is in table
+- Improve BasicMath.kt number support and tidy up Cell.kt math
+- Various Row, Cell and cell range improvements
+- Various test case improvements, better coverage
+- Various documentation improvements
+
+### Fixed
+
+- Fix bug preventing column/row resize from UI
+- Fix Row.compareTo function
+
+### Changed
+
+- Rename ColumnHeader to Header, change how class is initialized via operator function
+
+### Removed
+
+- Some convenience functions on Table.kt (and related) to ensure a better overall API structure
+
 ## v1.24.0 - 2024-01-02 - Still Rice
 
 ### Added
