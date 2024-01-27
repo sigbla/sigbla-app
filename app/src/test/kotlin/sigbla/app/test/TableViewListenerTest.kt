@@ -23,58 +23,246 @@ class TableViewListenerTest {
 
     // TODO Ensure we test this subscribe and unsubscribe test below on all onAny functions
     @Test
-    fun `subscribe and unsubscribe`() {
+    fun `subscribe and unsubscribe cellview`() {
         val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
 
         var eventCount = 0
 
         val ref = on(tv1) {
             events {
-                eventCount += map { it.newValue }
-                    .filter { it is CellWidth<*, *> || it is CellHeight<*, *> }
-                    .mapNotNull { if (it is CellWidth<*, *>) it.source else if (it is CellHeight<*, *>) it.source else null }
-                    .filterIsInstance<CellView>()
-                    .count()
+                val c = count()
+                assertEquals(1, c)
+                eventCount += c
             }
         }
 
         tv1["A", 1][CellHeight] = 25
         tv1["A", 1][CellWidth] = 25
+        tv1["A", 1][CellClasses] = "cell-classes-1"
+        tv1["A", 1][CellTopics] = "cell-topics-1"
+        tv1["A", 1][CellTransformer] = {}
 
-        assertEquals(2, eventCount)
+        assertEquals(5, eventCount)
 
         tv1["A", 1][CellHeight] = 50
         tv1["A", 1][CellWidth] = 50
+        tv1["A", 1][CellClasses] = "cell-classes-2"
+        tv1["A", 1][CellTopics] = "cell-topics-2"
+        tv1["A", 1][CellTransformer] = {}
 
-        assertEquals(4, eventCount)
+        assertEquals(10, eventCount)
 
         tv1["A", 2][CellHeight] = 100
         tv1["A", 2][CellWidth] = 100
+        tv1["A", 2][CellClasses] = "cell-classes-3"
+        tv1["A", 2][CellTopics] = "cell-topics-3"
+        tv1["A", 2][CellTransformer] = {}
 
         tv1["B", 3][CellHeight] = 125
         tv1["B", 3][CellWidth] = 125
+        tv1["B", 3][CellClasses] = "cell-classes-4"
+        tv1["B", 3][CellTopics] = "cell-topics-4"
+        tv1["B", 3][CellTransformer] = {}
 
-        assertEquals(8, eventCount)
+        assertEquals(20, eventCount)
 
         off(ref)
 
         tv1["B", 3][CellHeight] = 150
         tv1["B", 3][CellWidth] = 150
+        tv1["B", 3][CellClasses] = "cell-classes-5"
+        tv1["B", 3][CellTopics] = "cell-topics-5"
+        tv1["B", 3][CellTransformer] = {}
 
         tv1["C", 4][CellHeight] = 175
         tv1["C", 4][CellWidth] = 175
+        tv1["C", 4][CellClasses] = "cell-classes-6"
+        tv1["C", 4][CellTopics] = "cell-topics-6"
+        tv1["C", 4][CellTransformer] = {}
 
-        assertEquals(8, eventCount)
+        assertEquals(20, eventCount)
     }
 
     @Test
-    fun `subscribe to filled table and unsubscribe`() {
+    fun `subscribe and unsubscribe columnview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount = 0
+
+        val ref = on(tv1) {
+            events {
+                val c = count()
+                assertEquals(1, c)
+                eventCount += c
+            }
+        }
+
+        //tv1["A"][CellHeight] = 25
+        tv1["A"][CellWidth] = 25
+        tv1["A"][CellClasses] = "cell-classes-1"
+        tv1["A"][CellTopics] = "cell-topics-1"
+        //tv1["A"][CellTransformer] = {}
+
+        assertEquals(3, eventCount)
+
+        //tv1["A"][CellHeight] = 50
+        tv1["A"][CellWidth] = 50
+        tv1["A"][CellClasses] = "cell-classes-2"
+        tv1["A"][CellTopics] = "cell-topics-2"
+        //tv1["A"][CellTransformer] = {}
+
+        assertEquals(6, eventCount)
+
+        //tv1["A"][CellHeight] = 100
+        tv1["A"][CellWidth] = 100
+        tv1["A"][CellClasses] = "cell-classes-3"
+        tv1["A"][CellTopics] = "cell-topics-3"
+        //tv1["A"][CellTransformer] = {}
+
+        //tv1["B"][CellHeight] = 125
+        tv1["B"][CellWidth] = 125
+        tv1["B"][CellClasses] = "cell-classes-4"
+        tv1["B"][CellTopics] = "cell-topics-4"
+        //tv1["B"][CellTransformer] = {}
+
+        assertEquals(12, eventCount)
+
+        off(ref)
+
+        //tv1["B"][CellHeight] = 150
+        tv1["B"][CellWidth] = 150
+        tv1["B"][CellClasses] = "cell-classes-5"
+        tv1["B"][CellTopics] = "cell-topics-5"
+        //tv1["B"][CellTransformer] = {}
+
+        //tv1["C"][CellHeight] = 175
+        tv1["C"][CellWidth] = 175
+        tv1["C"][CellClasses] = "cell-classes-6"
+        tv1["C"][CellTopics] = "cell-topics-6"
+        //tv1["C"][CellTransformer] = {}
+
+        assertEquals(12, eventCount)
+    }
+
+    @Test
+    fun `subscribe and unsubscribe rowview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount = 0
+
+        val ref = on(tv1) {
+            events {
+                val c = count()
+                assertEquals(1, c)
+                eventCount += c
+            }
+        }
+
+        tv1[1][CellHeight] = 25
+        //tv1[1][CellWidth] = 25
+        tv1[1][CellClasses] = "cell-classes-1"
+        tv1[1][CellTopics] = "cell-topics-1"
+        //tv1[1][CellTransformer] = {}
+
+        assertEquals(3, eventCount)
+
+        tv1[1][CellHeight] = 50
+        //tv1[1][CellWidth] = 50
+        tv1[1][CellClasses] = "cell-classes-2"
+        tv1[1][CellTopics] = "cell-topics-2"
+        //tv1[1][CellTransformer] = {}
+
+        assertEquals(6, eventCount)
+
+        tv1[2][CellHeight] = 100
+        //tv1[2][CellWidth] = 100
+        tv1[2][CellClasses] = "cell-classes-3"
+        tv1[2][CellTopics] = "cell-topics-3"
+        //tv1[2][CellTransformer] = {}
+
+        tv1[3][CellHeight] = 125
+        //tv1[3][CellWidth] = 125
+        tv1[3][CellClasses] = "cell-classes-4"
+        tv1[3][CellTopics] = "cell-topics-4"
+        //tv1[3][CellTransformer] = {}
+
+        assertEquals(12, eventCount)
+
+        off(ref)
+
+        tv1[3][CellHeight] = 150
+        //tv1[3][CellWidth] = 150
+        tv1[3][CellClasses] = "cell-classes-5"
+        tv1[3][CellTopics] = "cell-topics-5"
+        //tv1[3][CellTransformer] = {}
+
+        tv1[4][CellHeight] = 175
+        //tv1[4][CellWidth] = 175
+        tv1[4][CellClasses] = "cell-classes-6"
+        tv1[4][CellTopics] = "cell-topics-6"
+        //tv1[4][CellTransformer] = {}
+
+        assertEquals(12, eventCount)
+    }
+
+    @Test
+    fun `subscribe and unsubscribe tableview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount = 0
+
+        val ref = on(tv1) {
+            events {
+                val c = count()
+                assertEquals(1, c)
+                eventCount += c
+            }
+        }
+
+        tv1[CellHeight] = 25
+        tv1[CellWidth] = 25
+        tv1[CellClasses] = "cell-classes-1"
+        tv1[CellTopics] = "cell-topics-1"
+        //tv1[CellTransformer] = {}
+        tv1[Resources] = ("a" to {})
+        tv1[Table] = Table[null]
+
+        assertEquals(6, eventCount)
+
+        tv1[CellHeight] = 50
+        tv1[CellWidth] = 50
+        tv1[CellClasses] = "cell-classes-2"
+        tv1[CellTopics] = "cell-topics-2"
+        //tv1[CellTransformer] = {}
+        tv1[Resources] = ("b" to {})
+        tv1[Table] = Table[null]
+
+        assertEquals(12, eventCount)
+
+        off(ref)
+
+        tv1[CellHeight] = 150
+        tv1[CellWidth] = 150
+        tv1[CellClasses] = "cell-classes-3"
+        tv1[CellTopics] = "cell-topics-3"
+        //tv1[CellTransformer] = {}
+        tv1[Resources] = ("c" to {})
+        tv1[Table] = Table[null]
+
+        assertEquals(12, eventCount)
+    }
+
+    @Test
+    fun `subscribe to filled table and unsubscribe cellview`() {
         val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
 
         var eventCount = 0
 
         tv1["A", 1][CellHeight] = 25
         tv1["A", 1][CellWidth] = 25
+        tv1["A", 1][CellClasses] = "cell-classes-1"
+        tv1["A", 1][CellTopics] = "cell-topics-1"
+        tv1["A", 1][CellTransformer] = {}
 
         val ref = on(tv1) {
             events {
@@ -82,34 +270,212 @@ class TableViewListenerTest {
             }
         }
 
-        assertEquals(2, eventCount)
+        assertEquals(5, eventCount)
 
         tv1["A", 1][CellHeight] = 50
         tv1["A", 1][CellWidth] = 50
+        tv1["A", 1][CellClasses] = "cell-classes-2"
+        tv1["A", 1][CellTopics] = "cell-topics-2"
+        tv1["A", 1][CellTransformer] = {}
 
-        assertEquals(4, eventCount)
+        assertEquals(10, eventCount)
 
         tv1["A", 2][CellHeight] = 75
         tv1["A", 2][CellWidth] = 75
+        tv1["A", 2][CellClasses] = "cell-classes-3"
+        tv1["A", 2][CellTopics] = "cell-topics-3"
+        tv1["A", 2][CellTransformer] = {}
 
         tv1["B", 3][CellHeight] = 100
         tv1["B", 3][CellWidth] = 100
+        tv1["B", 3][CellClasses] = "cell-classes-4"
+        tv1["B", 3][CellTopics] = "cell-topics-4"
+        tv1["B", 3][CellTransformer] = {}
 
-        assertEquals(8, eventCount)
+        assertEquals(20, eventCount)
 
         off(ref)
 
         tv1["B", 3][CellHeight] = 125
         tv1["B", 3][CellWidth] = 125
+        tv1["B", 3][CellClasses] = "cell-classes-5"
+        tv1["B", 3][CellTopics] = "cell-topics-5"
+        tv1["B", 3][CellTransformer] = {}
 
         tv1["C", 4][CellHeight] = 150
         tv1["C", 4][CellWidth] = 150
+        tv1["C", 4][CellClasses] = "cell-classes-6"
+        tv1["C", 4][CellTopics] = "cell-topics-6"
+        tv1["C", 4][CellTransformer] = {}
 
-        assertEquals(8, eventCount)
+        assertEquals(20, eventCount)
     }
 
     @Test
-    fun `subscribe and instant unsubscribe`() {
+    fun `subscribe to filled table and unsubscribe columnview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount = 0
+
+        //tv1["A"][CellHeight] = 25
+        tv1["A"][CellWidth] = 25
+        tv1["A"][CellClasses] = "cell-classes-1"
+        tv1["A"][CellTopics] = "cell-topics-1"
+        //tv1["A"][CellTransformer] = {}
+
+        val ref = on(tv1) {
+            events {
+                eventCount += count()
+            }
+        }
+
+        assertEquals(3, eventCount)
+
+        //tv1["A"][CellHeight] = 50
+        tv1["A"][CellWidth] = 50
+        tv1["A"][CellClasses] = "cell-classes-2"
+        tv1["A"][CellTopics] = "cell-topics-2"
+        //tv1["A"][CellTransformer] = {}
+
+        assertEquals(6, eventCount)
+
+        //tv1["A"][CellHeight] = 75
+        tv1["A"][CellWidth] = 75
+        tv1["A"][CellClasses] = "cell-classes-3"
+        tv1["A"][CellTopics] = "cell-topics-3"
+        //tv1["A"][CellTransformer] = {}
+
+        //tv1["B"][CellHeight] = 100
+        tv1["B"][CellWidth] = 100
+        tv1["B"][CellClasses] = "cell-classes-4"
+        tv1["B"][CellTopics] = "cell-topics-4"
+        //tv1["B"][CellTransformer] = {}
+
+        assertEquals(12, eventCount)
+
+        off(ref)
+
+        //tv1["B"][CellHeight] = 125
+        tv1["B"][CellWidth] = 125
+        tv1["B"][CellClasses] = "cell-classes-5"
+        tv1["B"][CellTopics] = "cell-topics-5"
+        //tv1["B"][CellTransformer] = {}
+
+        //tv1["C"][CellHeight] = 150
+        tv1["C"][CellWidth] = 150
+        tv1["C"][CellClasses] = "cell-classes-6"
+        tv1["C"][CellTopics] = "cell-topics-6"
+        //tv1["C"][CellTransformer] = {}
+
+        assertEquals(12, eventCount)
+    }
+
+    @Test
+    fun `subscribe to filled table and unsubscribe rowview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount = 0
+
+        tv1[1][CellHeight] = 25
+        //tv1[1][CellWidth] = 25
+        tv1[1][CellClasses] = "cell-classes-1"
+        tv1[1][CellTopics] = "cell-topics-1"
+        //tv1[1][CellTransformer] = {}
+
+        val ref = on(tv1) {
+            events {
+                eventCount += count()
+            }
+        }
+
+        assertEquals(3, eventCount)
+
+        tv1[1][CellHeight] = 50
+        //tv1[1][CellWidth] = 50
+        tv1[1][CellClasses] = "cell-classes-2"
+        tv1[1][CellTopics] = "cell-topics-2"
+        //tv1[1][CellTransformer] = {}
+
+        assertEquals(6, eventCount)
+
+        tv1[2][CellHeight] = 75
+        //tv1[2][CellWidth] = 75
+        tv1[2][CellClasses] = "cell-classes-3"
+        tv1[2][CellTopics] = "cell-topics-3"
+        //tv1[2][CellTransformer] = {}
+
+        tv1[3][CellHeight] = 100
+        //tv1[3][CellWidth] = 100
+        tv1[3][CellClasses] = "cell-classes-4"
+        tv1[3][CellTopics] = "cell-topics-4"
+        //tv1[3][CellTransformer] = {}
+
+        assertEquals(12, eventCount)
+
+        off(ref)
+
+        tv1[3][CellHeight] = 125
+        //tv1[3][CellWidth] = 125
+        tv1[3][CellClasses] = "cell-classes-5"
+        tv1[3][CellTopics] = "cell-topics-5"
+        //tv1[3][CellTransformer] = {}
+
+        tv1[4][CellHeight] = 150
+        //tv1[4][CellWidth] = 150
+        tv1[4][CellClasses] = "cell-classes-6"
+        tv1[4][CellTopics] = "cell-topics-6"
+        //tv1[4][CellTransformer] = {}
+
+        assertEquals(12, eventCount)
+    }
+
+    @Test
+    fun `subscribe to filled table and unsubscribe tableview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount = 0
+
+        tv1[CellHeight] = 25
+        tv1[CellWidth] = 25
+        tv1[CellClasses] = "cell-classes-1"
+        tv1[CellTopics] = "cell-topics-1"
+        //tv1[CellTransformer] = {}
+        tv1[Resources] = ("a" to {})
+        tv1[Table] = Table[null]
+
+        val ref = on(tv1) {
+            events {
+                eventCount += count()
+            }
+        }
+
+        assertEquals(6, eventCount)
+
+        tv1[CellHeight] = 50
+        tv1[CellWidth] = 50
+        tv1[CellClasses] = "cell-classes-2"
+        tv1[CellTopics] = "cell-topics-2"
+        //tv1[CellTransformer] = {}
+        tv1[Resources] = ("b" to {})
+        tv1[Table] = Table[null]
+
+        assertEquals(12, eventCount)
+
+        off(ref)
+
+        tv1[CellHeight] = 125
+        tv1[CellWidth] = 125
+        tv1[CellClasses] = "cell-classes-5"
+        tv1[CellTopics] = "cell-topics-5"
+        //tv1[CellTransformer] = {}
+        tv1[Resources] = ("c" to {})
+        tv1[Table] = Table[null]
+
+        assertEquals(12, eventCount)
+    }
+
+    @Test
+    fun `subscribe and instant unsubscribe cellview`() {
         val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
 
         var eventCount = 0
@@ -126,18 +492,18 @@ class TableViewListenerTest {
 
         tv1["A", 1][CellHeight] = 25
         tv1["A", 1][CellWidth] = 25
+        tv1["A", 1][CellClasses] = "cell-classes-1"
+        tv1["A", 1][CellTopics] = "cell-topics-1"
+        tv1["A", 1][CellTransformer] = {}
 
         assertEquals(0, eventCount)
     }
 
     @Test
-    fun `subscribe to filled table and instant unsubscribe`() {
+    fun `subscribe and instant unsubscribe columnview`() {
         val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
 
         var eventCount = 0
-
-        tv1["A", 1][CellHeight] = 25
-        tv1["A", 1][CellWidth] = 25
 
         on(tv1) {
             off(this)
@@ -147,12 +513,195 @@ class TableViewListenerTest {
             }
         }
 
-        assertEquals(2, eventCount)
+        assertEquals(0, eventCount)
+
+        //tv1["A"][CellHeight] = 25
+        tv1["A"][CellWidth] = 25
+        tv1["A"][CellClasses] = "cell-classes-1"
+        tv1["A"][CellTopics] = "cell-topics-1"
+        //tv1["A"][CellTransformer] = {}
+
+        assertEquals(0, eventCount)
+    }
+
+    @Test
+    fun `subscribe and instant unsubscribe rowview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount = 0
+
+        on(tv1) {
+            off(this)
+
+            events {
+                eventCount += count()
+            }
+        }
+
+        assertEquals(0, eventCount)
+
+        tv1[1][CellHeight] = 25
+        //tv1[1][CellWidth] = 25
+        tv1[1][CellClasses] = "cell-classes-1"
+        tv1[1][CellTopics] = "cell-topics-1"
+        //tv1[1][CellTransformer] = {}
+
+        assertEquals(0, eventCount)
+    }
+
+    @Test
+    fun `subscribe and instant unsubscribe tableview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount = 0
+
+        on(tv1) {
+            off(this)
+
+            events {
+                eventCount += count()
+            }
+        }
+
+        assertEquals(0, eventCount)
+
+        tv1[CellHeight] = 25
+        tv1[CellWidth] = 25
+        tv1[CellClasses] = "cell-classes-1"
+        tv1[CellTopics] = "cell-topics-1"
+        //tv1[CellTransformer] = {}
+        tv1[Resources] = ("a" to {})
+        tv1[Table] = Table[null]
+
+        assertEquals(0, eventCount)
+    }
+
+    @Test
+    fun `subscribe to filled table and instant unsubscribe cellview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount = 0
+
+        tv1["A", 1][CellHeight] = 25
+        tv1["A", 1][CellWidth] = 25
+        tv1["A", 1][CellClasses] = "cell-classes-1"
+        tv1["A", 1][CellTopics] = "cell-topics-1"
+        tv1["A", 1][CellTransformer] = {}
+
+        on(tv1) {
+            off(this)
+
+            events {
+                eventCount += count()
+            }
+        }
+
+        assertEquals(5, eventCount)
 
         tv1["A", 1][CellHeight] = 50
         tv1["A", 1][CellWidth] = 50
+        tv1["A", 1][CellClasses] = "cell-classes-2"
+        tv1["A", 1][CellTopics] = "cell-topics-2"
+        tv1["A", 1][CellTransformer] = {}
 
-        assertEquals(2, eventCount)
+        assertEquals(5, eventCount)
+    }
+
+    @Test
+    fun `subscribe to filled table and instant unsubscribe columnview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount = 0
+
+        //tv1["A"][CellHeight] = 25
+        tv1["A"][CellWidth] = 25
+        tv1["A"][CellClasses] = "cell-classes-1"
+        tv1["A"][CellTopics] = "cell-topics-1"
+        //tv1["A"][CellTransformer] = {}
+
+        on(tv1) {
+            off(this)
+
+            events {
+                eventCount += count()
+            }
+        }
+
+        assertEquals(3, eventCount)
+
+        //tv1["A"][CellHeight] = 50
+        tv1["A"][CellWidth] = 50
+        tv1["A"][CellClasses] = "cell-classes-2"
+        tv1["A"][CellTopics] = "cell-topics-2"
+        //tv1["A"][CellTransformer] = {}
+
+        assertEquals(3, eventCount)
+    }
+
+    @Test
+    fun `subscribe to filled table and instant unsubscribe rowview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount = 0
+
+        tv1[1][CellHeight] = 25
+        //tv1[1][CellWidth] = 25
+        tv1[1][CellClasses] = "cell-classes-1"
+        tv1[1][CellTopics] = "cell-topics-1"
+        //tv1[1][CellTransformer] = {}
+
+        on(tv1) {
+            off(this)
+
+            events {
+                eventCount += count()
+            }
+        }
+
+        assertEquals(3, eventCount)
+
+        //tv1["A"][CellHeight] = 50
+        tv1["A"][CellWidth] = 50
+        tv1["A"][CellClasses] = "cell-classes-2"
+        tv1["A"][CellTopics] = "cell-topics-2"
+        //tv1["A"][CellTransformer] = {}
+
+        assertEquals(3, eventCount)
+    }
+
+    @Test
+    fun `subscribe to filled table and instant unsubscribe tableview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        var eventCount = 0
+
+        tv1[CellHeight] = 25
+        tv1[CellWidth] = 25
+        tv1[CellClasses] = "cell-classes-1"
+        tv1[CellTopics] = "cell-topics-1"
+        //tv1[CellTransformer] = {}
+        tv1[Resources] = ("a" to {})
+        tv1[Table] = Table[null]
+
+        on(tv1) {
+            off(this)
+
+            events {
+                eventCount += count()
+            }
+        }
+
+        assertEquals(6, eventCount)
+
+        tv1[CellHeight] = 50
+        tv1[CellWidth] = 50
+        tv1[CellClasses] = "cell-classes-2"
+        tv1[CellTopics] = "cell-topics-2"
+        //tv1[CellTransformer] = {}
+        tv1[Resources] = ("b" to {})
+        tv1[Table] = Table[null]
+
+        assertEquals(6, eventCount)
     }
 
     @Test
@@ -231,7 +780,7 @@ class TableViewListenerTest {
 
         for (c in listOf("A", "B", "C", "D")) {
             for (r in 1..100) {
-                t1[c][r][CellHeight] = c.first().toByte().toLong()
+                t1[c][r][CellHeight] = c.first().code.toLong()
                 t1[c][r][CellWidth] = r.toLong()
 
                 expectedT1EventCount += 2
@@ -240,7 +789,7 @@ class TableViewListenerTest {
 
         for (c in listOf("A", "B", "C", "D")) {
             for (r in 1..100) {
-                t1[c][r][CellHeight] = c.first().toByte().toLong()
+                t1[c][r][CellHeight] = c.first().code.toLong()
                 t1[c][r][CellWidth] = r.toLong()
 
                 expectedT1EventCount += 2
@@ -261,7 +810,7 @@ class TableViewListenerTest {
 
         for (c in listOf("A", "B", "C", "D")) {
             for (r in 1..100) {
-                t1[c][r][CellHeight] = c.first().toByte().toLong()
+                t1[c][r][CellHeight] = c.first().code.toLong()
                 t1[c][r][CellWidth] = r.toLong() + 100
 
                 expectedT1EventCount += 2
@@ -270,7 +819,7 @@ class TableViewListenerTest {
 
         for (c in listOf("A", "B", "C", "D")) {
             for (r in 1..100) {
-                t2[c][r][CellHeight] = c.first().toByte().toLong()
+                t2[c][r][CellHeight] = c.first().code.toLong()
                 t2[c][r][CellWidth] = r.toLong() + 100
 
                 expectedT2EventCount += 2
@@ -372,7 +921,7 @@ class TableViewListenerTest {
 
         t["A", 0][CellHeight] = 150
 
-        assertTrue(id1 ?: Int.MIN_VALUE > id2 ?: Int.MAX_VALUE)
+        assertTrue((id1 ?: Int.MIN_VALUE) > (id2 ?: Int.MAX_VALUE))
 
         id1 = null
         id2 = null
@@ -380,7 +929,7 @@ class TableViewListenerTest {
 
         t["A", 0][CellWidth] = 150
 
-        assertTrue(id2 ?: Int.MIN_VALUE > id3 ?: Int.MAX_VALUE)
+        assertTrue((id2 ?: Int.MIN_VALUE) > (id3 ?: Int.MAX_VALUE))
     }
 
     @Test
