@@ -1554,5 +1554,119 @@ class TableViewListenerTest {
         tv1[Table] = t2
     }
 
+    @Test
+    fun `type filtering for subscriptions`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        val t1 = Table[null]
+        val t2 = Table[null]
+
+        val ct1: Cell<*>.() -> Any? = {}
+        val ct2: Cell<*>.() -> Any? = {}
+
+        val r1: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "a" to {}
+        val r2: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "b" to {}
+
+        tv1[CellHeight] = 25
+        tv1[CellWidth] = 30
+        tv1[CellClasses] = "cell-classes-1"
+        tv1[CellTopics] = "cell-topics-1"
+        //tv1[CellTransformer] = ct1
+        tv1[Resources] = r1
+        tv1[Table] = t1
+
+        var eventCount1 = 0
+        var eventCount2 = 0
+        var eventCount3 = 0
+        var eventCount4 = 0
+        var eventCount5 = 0
+        var eventCount6 = 0
+
+        on<CellHeight<*,*>>(tv1) events {
+            eventCount1 += count()
+        }
+
+        on<CellWidth<*,*>>(tv1) events {
+            eventCount2 += count()
+        }
+
+        on<CellClasses<*>>(tv1) events {
+            eventCount3 += count()
+        }
+
+        on<CellTopics<*>>(tv1) events {
+            eventCount4 += count()
+        }
+
+        on<Resources>(tv1) events {
+            eventCount5 += count()
+        }
+
+        on<SourceTable>(tv1) events {
+            eventCount6 += count()
+        }
+
+        assertEquals(1, eventCount1)
+        assertEquals(1, eventCount2)
+        assertEquals(1, eventCount3)
+        assertEquals(1, eventCount4)
+        assertEquals(1, eventCount5)
+        assertEquals(1, eventCount6)
+
+        tv1[CellHeight] = 45
+
+        assertEquals(2, eventCount1)
+        assertEquals(1, eventCount2)
+        assertEquals(1, eventCount3)
+        assertEquals(1, eventCount4)
+        assertEquals(1, eventCount5)
+        assertEquals(1, eventCount6)
+
+        tv1[CellWidth] = 60
+
+        assertEquals(2, eventCount1)
+        assertEquals(2, eventCount2)
+        assertEquals(1, eventCount3)
+        assertEquals(1, eventCount4)
+        assertEquals(1, eventCount5)
+        assertEquals(1, eventCount6)
+
+        tv1[CellClasses] = "cell-classes-2"
+
+        assertEquals(2, eventCount1)
+        assertEquals(2, eventCount2)
+        assertEquals(2, eventCount3)
+        assertEquals(1, eventCount4)
+        assertEquals(1, eventCount5)
+        assertEquals(1, eventCount6)
+
+        tv1[CellTopics] = "cell-topics-2"
+
+        assertEquals(2, eventCount1)
+        assertEquals(2, eventCount2)
+        assertEquals(2, eventCount3)
+        assertEquals(2, eventCount4)
+        assertEquals(1, eventCount5)
+        assertEquals(1, eventCount6)
+
+        tv1[Resources] = r2
+
+        assertEquals(2, eventCount1)
+        assertEquals(2, eventCount2)
+        assertEquals(2, eventCount3)
+        assertEquals(2, eventCount4)
+        assertEquals(2, eventCount5)
+        assertEquals(1, eventCount6)
+
+        tv1[Table] = t2
+
+        assertEquals(2, eventCount1)
+        assertEquals(2, eventCount2)
+        assertEquals(2, eventCount3)
+        assertEquals(2, eventCount4)
+        assertEquals(2, eventCount5)
+        assertEquals(2, eventCount6)
+    }
+
     // TODO Test type filters cases like on<A> etc..
 }
