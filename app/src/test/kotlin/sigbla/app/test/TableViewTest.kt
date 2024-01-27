@@ -106,6 +106,16 @@ class TableViewTest {
         assertEquals(setOf("a", "d"), tv1[CellClasses].toSet())
         assertEquals(setOf("b", "e"), tv1[CellTopics].toSet())
 
+        tv1[CellClasses] = (tv1[CellClasses] - "a") - "d"
+        tv1[CellTopics] = (tv1[CellTopics] - "b") - "e"
+        assertEquals(emptySet<String>(), tv1[CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv1[CellTopics].toSet())
+
+        tv1[CellClasses] = tv1[CellClasses] + "a"
+        tv1[CellTopics] = tv1[CellTopics] + "b"
+        assertEquals(setOf("a"), tv1[CellClasses].toSet())
+        assertEquals(setOf("b"), tv1[CellTopics].toSet())
+
         tv1[CellHeight] = null
         tv1[CellWidth] = null
         tv1[CellClasses] = null
@@ -157,6 +167,16 @@ class TableViewTest {
         assertEquals(setOf("a", "d"), tv1["A"][CellClasses].toSet())
         assertEquals(setOf("b", "e"), tv1["A"][CellTopics].toSet())
 
+        tv1["A"][CellClasses] = (tv1[CellClasses] - "a") - "d"
+        tv1["A"][CellTopics] = (tv1[CellTopics] - "b") - "e"
+        assertEquals(emptySet<String>(), tv1["A"][CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv1["A"][CellTopics].toSet())
+
+        tv1["A"][CellClasses] = tv1[CellClasses] + "a"
+        tv1["A"][CellTopics] = tv1[CellTopics] + "b"
+        assertEquals(setOf("a"), tv1["A"][CellClasses].toSet())
+        assertEquals(setOf("b"), tv1["A"][CellTopics].toSet())
+
         tv1["A"][CellWidth] = null
         tv1["A"][CellClasses] = null
         tv1["A"][CellTopics] = null
@@ -205,6 +225,16 @@ class TableViewTest {
         tv1[1][CellTopics] = tv1[1][CellTopics] + "b"
         assertEquals(setOf("a", "d"), tv1[1][CellClasses].toSet())
         assertEquals(setOf("b", "e"), tv1[1][CellTopics].toSet())
+
+        tv1[1][CellClasses] = (tv1[CellClasses] - "a") - "d"
+        tv1[1][CellTopics] = (tv1[CellTopics] - "b") - "e"
+        assertEquals(emptySet<String>(), tv1[1][CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv1[1][CellTopics].toSet())
+
+        tv1[1][CellClasses] = tv1[CellClasses] + "a"
+        tv1[1][CellTopics] = tv1[CellTopics] + "b"
+        assertEquals(setOf("a"), tv1[1][CellClasses].toSet())
+        assertEquals(setOf("b"), tv1[1][CellTopics].toSet())
 
         tv1[1][CellHeight] = null
         tv1[1][CellClasses] = null
