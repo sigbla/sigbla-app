@@ -2,6 +2,8 @@
  * See LICENSE file for licensing details. */
 package sigbla.app.test
 
+import io.ktor.server.application.*
+import io.ktor.util.pipeline.*
 import org.junit.After
 import org.junit.Assert
 import org.junit.Test
@@ -1130,7 +1132,427 @@ class TableViewListenerTest {
         tv1["A", 1][CellHeight] = 200
     }
 
-    // TODO CellClasses and CellTopics
+    @Test
+    fun `event values cellview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        val ct1: Cell<*>.() -> Any? = {}
+        val ct2: Cell<*>.() -> Any? = {}
+
+        tv1["A", 1][CellHeight] = 25
+        tv1["A", 1][CellWidth] = 30
+        tv1["A", 1][CellClasses] = "cell-classes-1"
+        tv1["A", 1][CellTopics] = "cell-topics-1"
+        tv1["A", 1][CellTransformer] = ct1
+
+        var init = true
+
+        on(tv1) events {
+            if (init) {
+                forEach {
+                    when (it.newValue) {
+                        is CellHeight<*, *> -> {
+                            assertEquals(Unit, (it.oldValue as CellHeight<*, *>).height)
+                            assertEquals(25L, (it.newValue as CellHeight<*, *>).height)
+                            assertEquals(oldView["A", 1], (it.oldValue as CellHeight<*, *>).source)
+                            assertEquals(newView["A", 1], (it.newValue as CellHeight<*, *>).source)
+                        }
+                        is CellWidth<*, *> -> {
+                            assertEquals(Unit, (it.oldValue as CellWidth<*, *>).width)
+                            assertEquals(30L, (it.newValue as CellWidth<*, *>).width)
+                            assertEquals(oldView["A", 1], (it.oldValue as CellWidth<*, *>).source)
+                            assertEquals(newView["A", 1], (it.newValue as CellWidth<*, *>).source)
+                        }
+                        is CellClasses<*> -> {
+                            assertEquals(emptyList(), (it.oldValue as CellClasses<*>).classes)
+                            assertEquals(listOf("cell-classes-1"), (it.newValue as CellClasses<*>).classes)
+                            assertEquals(oldView["A", 1], (it.oldValue as CellClasses<*>).source)
+                            assertEquals(newView["A", 1], (it.newValue as CellClasses<*>).source)
+                        }
+                        is CellTopics<*> -> {
+                            assertEquals(emptyList(), (it.oldValue as CellTopics<*>).topics)
+                            assertEquals(listOf("cell-topics-1"), (it.newValue as CellTopics<*>).topics)
+                            assertEquals(oldView["A", 1], (it.oldValue as CellTopics<*>).source)
+                            assertEquals(newView["A", 1], (it.newValue as CellTopics<*>).source)
+                        }
+                        is CellTransformer<*> -> {
+                            assertEquals(Unit, (it.oldValue as CellTransformer<*>).function)
+                            assertEquals(ct1, (it.newValue as CellTransformer<*>).function)
+                            assertEquals(oldView["A", 1], (it.oldValue as CellTransformer<*>).source)
+                            assertEquals(newView["A", 1], (it.newValue as CellTransformer<*>).source)
+                        }
+                        else -> assertTrue(false)
+                    }
+                }
+            } else {
+                forEach {
+                    when (it.newValue) {
+                        is CellHeight<*, *> -> {
+                            assertEquals(25L, (it.oldValue as CellHeight<*, *>).height)
+                            assertEquals(55L, (it.newValue as CellHeight<*, *>).height)
+                            assertEquals(oldView["A", 1], (it.oldValue as CellHeight<*, *>).source)
+                            assertEquals(newView["A", 1], (it.newValue as CellHeight<*, *>).source)
+                        }
+                        is CellWidth<*, *> -> {
+                            assertEquals(30L, (it.oldValue as CellWidth<*, *>).width)
+                            assertEquals(60L, (it.newValue as CellWidth<*, *>).width)
+                            assertEquals(oldView["A", 1], (it.oldValue as CellWidth<*, *>).source)
+                            assertEquals(newView["A", 1], (it.newValue as CellWidth<*, *>).source)
+                        }
+                        is CellClasses<*> -> {
+                            assertEquals(listOf("cell-classes-1"), (it.oldValue as CellClasses<*>).classes)
+                            assertEquals(listOf("cell-classes-2"), (it.newValue as CellClasses<*>).classes)
+                            assertEquals(oldView["A", 1], (it.oldValue as CellClasses<*>).source)
+                            assertEquals(newView["A", 1], (it.newValue as CellClasses<*>).source)
+                        }
+                        is CellTopics<*> -> {
+                            assertEquals(listOf("cell-topics-1"), (it.oldValue as CellTopics<*>).topics)
+                            assertEquals(listOf("cell-topics-2"), (it.newValue as CellTopics<*>).topics)
+                            assertEquals(oldView["A", 1], (it.oldValue as CellTopics<*>).source)
+                            assertEquals(newView["A", 1], (it.newValue as CellTopics<*>).source)
+                        }
+                        is CellTransformer<*> -> {
+                            assertEquals(ct1, (it.oldValue as CellTransformer<*>).function)
+                            assertEquals(ct2, (it.newValue as CellTransformer<*>).function)
+                            assertEquals(oldView["A", 1], (it.oldValue as CellTransformer<*>).source)
+                            assertEquals(newView["A", 1], (it.newValue as CellTransformer<*>).source)
+                        }
+                        else -> assertTrue(false)
+                    }
+                }
+            }
+        }
+
+        init = false
+
+        tv1["A", 1][CellHeight] = 55
+        tv1["A", 1][CellWidth] = 60
+        tv1["A", 1][CellClasses] = "cell-classes-2"
+        tv1["A", 1][CellTopics] = "cell-topics-2"
+        tv1["A", 1][CellTransformer] = ct2
+    }
+
+    @Test
+    fun `event values columnview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        val ct1: Cell<*>.() -> Any? = {}
+        val ct2: Cell<*>.() -> Any? = {}
+
+        //tv1["A"][CellHeight] = 25
+        tv1["A"][CellWidth] = 30
+        tv1["A"][CellClasses] = "cell-classes-1"
+        tv1["A"][CellTopics] = "cell-topics-1"
+        //tv1["A"][CellTransformer] = ct1
+
+        var init = true
+
+        on(tv1) events {
+            if (init) {
+                forEach {
+                    when (it.newValue) {
+                        is CellWidth<*, *> -> {
+                            assertEquals(Unit, (it.oldValue as CellWidth<*, *>).width)
+                            assertEquals(30L, (it.newValue as CellWidth<*, *>).width)
+                            assertEquals(oldView["A"], (it.oldValue as CellWidth<*, *>).source)
+                            assertEquals(newView["A"], (it.newValue as CellWidth<*, *>).source)
+                        }
+                        is CellClasses<*> -> {
+                            assertEquals(emptyList(), (it.oldValue as CellClasses<*>).classes)
+                            assertEquals(listOf("cell-classes-1"), (it.newValue as CellClasses<*>).classes)
+                            assertEquals(oldView["A"], (it.oldValue as CellClasses<*>).source)
+                            assertEquals(newView["A"], (it.newValue as CellClasses<*>).source)
+                        }
+                        is CellTopics<*> -> {
+                            assertEquals(emptyList(), (it.oldValue as CellTopics<*>).topics)
+                            assertEquals(listOf("cell-topics-1"), (it.newValue as CellTopics<*>).topics)
+                            assertEquals(oldView["A"], (it.oldValue as CellTopics<*>).source)
+                            assertEquals(newView["A"], (it.newValue as CellTopics<*>).source)
+                        }
+                        /*
+                        is CellTransformer<*> -> {
+                            assertEquals(Unit, (it.oldValue as CellTransformer<*>).function)
+                            assertEquals(ct1, (it.newValue as CellTransformer<*>).function)
+                            assertEquals(oldView["A"], (it.oldValue as CellTransformer<*>).source)
+                            assertEquals(newView["A"], (it.newValue as CellTransformer<*>).source)
+                        }
+                         */
+                        else -> assertTrue(false)
+                    }
+                }
+            } else {
+                forEach {
+                    when (it.newValue) {
+                        is CellWidth<*, *> -> {
+                            assertEquals(30L, (it.oldValue as CellWidth<*, *>).width)
+                            assertEquals(60L, (it.newValue as CellWidth<*, *>).width)
+                            assertEquals(oldView["A"], (it.oldValue as CellWidth<*, *>).source)
+                            assertEquals(newView["A"], (it.newValue as CellWidth<*, *>).source)
+                        }
+                        is CellClasses<*> -> {
+                            assertEquals(listOf("cell-classes-1"), (it.oldValue as CellClasses<*>).classes)
+                            assertEquals(listOf("cell-classes-2"), (it.newValue as CellClasses<*>).classes)
+                            assertEquals(oldView["A"], (it.oldValue as CellClasses<*>).source)
+                            assertEquals(newView["A"], (it.newValue as CellClasses<*>).source)
+                        }
+                        is CellTopics<*> -> {
+                            assertEquals(listOf("cell-topics-1"), (it.oldValue as CellTopics<*>).topics)
+                            assertEquals(listOf("cell-topics-2"), (it.newValue as CellTopics<*>).topics)
+                            assertEquals(oldView["A"], (it.oldValue as CellTopics<*>).source)
+                            assertEquals(newView["A"], (it.newValue as CellTopics<*>).source)
+                        }
+                        /*
+                        is CellTransformer<*> -> {
+                            assertEquals(ct1, (it.oldValue as CellTransformer<*>).function)
+                            assertEquals(ct2, (it.newValue as CellTransformer<*>).function)
+                            assertEquals(oldView["A"], (it.oldValue as CellTransformer<*>).source)
+                            assertEquals(newView["A"], (it.newValue as CellTransformer<*>).source)
+                        }
+                         */
+                        else -> assertTrue(false)
+                    }
+                }
+            }
+        }
+
+        init = false
+
+        //tv1["A"][CellHeight] = 55
+        tv1["A"][CellWidth] = 60
+        tv1["A"][CellClasses] = "cell-classes-2"
+        tv1["A"][CellTopics] = "cell-topics-2"
+        //tv1["A"][CellTransformer] = ct2
+    }
+
+    @Test
+    fun `event values rowview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        val ct1: Cell<*>.() -> Any? = {}
+        val ct2: Cell<*>.() -> Any? = {}
+
+        tv1[1][CellHeight] = 25
+        //tv1[1][CellWidth] = 30
+        tv1[1][CellClasses] = "cell-classes-1"
+        tv1[1][CellTopics] = "cell-topics-1"
+        //tv1[1][CellTransformer] = ct1
+
+        var init = true
+
+        on(tv1) events {
+            if (init) {
+                forEach {
+                    when (it.newValue) {
+                        is CellHeight<*, *> -> {
+                            assertEquals(Unit, (it.oldValue as CellHeight<*, *>).height)
+                            assertEquals(25L, (it.newValue as CellHeight<*, *>).height)
+                            assertEquals(oldView[1], (it.oldValue as CellHeight<*, *>).source)
+                            assertEquals(newView[1], (it.newValue as CellHeight<*, *>).source)
+                        }
+                        is CellClasses<*> -> {
+                            assertEquals(emptyList(), (it.oldValue as CellClasses<*>).classes)
+                            assertEquals(listOf("cell-classes-1"), (it.newValue as CellClasses<*>).classes)
+                            assertEquals(oldView[1], (it.oldValue as CellClasses<*>).source)
+                            assertEquals(newView[1], (it.newValue as CellClasses<*>).source)
+                        }
+                        is CellTopics<*> -> {
+                            assertEquals(emptyList(), (it.oldValue as CellTopics<*>).topics)
+                            assertEquals(listOf("cell-topics-1"), (it.newValue as CellTopics<*>).topics)
+                            assertEquals(oldView[1], (it.oldValue as CellTopics<*>).source)
+                            assertEquals(newView[1], (it.newValue as CellTopics<*>).source)
+                        }
+                        /*
+                        is CellTransformer<*> -> {
+                            assertEquals(Unit, (it.oldValue as CellTransformer<*>).function)
+                            assertEquals(ct1, (it.newValue as CellTransformer<*>).function)
+                            assertEquals(oldView[1], (it.oldValue as CellTransformer<*>).source)
+                            assertEquals(newView[1], (it.newValue as CellTransformer<*>).source)
+                        }
+                         */
+                        else -> assertTrue(false)
+                    }
+                }
+            } else {
+                forEach {
+                    when (it.newValue) {
+                        is CellHeight<*, *> -> {
+                            assertEquals(25L, (it.oldValue as CellHeight<*, *>).height)
+                            assertEquals(55L, (it.newValue as CellHeight<*, *>).height)
+                            assertEquals(oldView[1], (it.oldValue as CellHeight<*, *>).source)
+                            assertEquals(newView[1], (it.newValue as CellHeight<*, *>).source)
+                        }
+                        is CellClasses<*> -> {
+                            assertEquals(listOf("cell-classes-1"), (it.oldValue as CellClasses<*>).classes)
+                            assertEquals(listOf("cell-classes-2"), (it.newValue as CellClasses<*>).classes)
+                            assertEquals(oldView[1], (it.oldValue as CellClasses<*>).source)
+                            assertEquals(newView[1], (it.newValue as CellClasses<*>).source)
+                        }
+                        is CellTopics<*> -> {
+                            assertEquals(listOf("cell-topics-1"), (it.oldValue as CellTopics<*>).topics)
+                            assertEquals(listOf("cell-topics-2"), (it.newValue as CellTopics<*>).topics)
+                            assertEquals(oldView[1], (it.oldValue as CellTopics<*>).source)
+                            assertEquals(newView[1], (it.newValue as CellTopics<*>).source)
+                        }
+                        /*
+                        is CellTransformer<*> -> {
+                            assertEquals(ct1, (it.oldValue as CellTransformer<*>).function)
+                            assertEquals(ct2, (it.newValue as CellTransformer<*>).function)
+                            assertEquals(oldView[1], (it.oldValue as CellTransformer<*>).source)
+                            assertEquals(newView[1], (it.newValue as CellTransformer<*>).source)
+                        }
+                         */
+                        else -> assertTrue(false)
+                    }
+                }
+            }
+        }
+
+        init = false
+
+        tv1[1][CellHeight] = 55
+        //tv1[1][CellWidth] = 60
+        tv1[1][CellClasses] = "cell-classes-2"
+        tv1[1][CellTopics] = "cell-topics-2"
+        //tv1[1][CellTransformer] = ct2
+    }
+
+    @Test
+    fun `event values tableview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        val t1 = Table[null]
+        val t2 = Table[null]
+
+        val ct1: Cell<*>.() -> Any? = {}
+        val ct2: Cell<*>.() -> Any? = {}
+
+        val r1: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "a" to {}
+        val r2: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "b" to {}
+
+        tv1[CellHeight] = 25
+        tv1[CellWidth] = 30
+        tv1[CellClasses] = "cell-classes-1"
+        tv1[CellTopics] = "cell-topics-1"
+        //tv1[CellTransformer] = ct1
+        tv1[Resources] = r1
+        tv1[Table] = t1
+
+        var init = true
+
+        on(tv1) events {
+            if (init) {
+                forEach {
+                    when (it.newValue) {
+                        is CellHeight<*, *> -> {
+                            assertEquals(Unit, (it.oldValue as CellHeight<*, *>).height)
+                            assertEquals(25L, (it.newValue as CellHeight<*, *>).height)
+                            assertEquals(oldView, (it.oldValue as CellHeight<*, *>).source)
+                            assertEquals(newView, (it.newValue as CellHeight<*, *>).source)
+                        }
+                        is CellWidth<*, *> -> {
+                            assertEquals(Unit, (it.oldValue as CellWidth<*, *>).width)
+                            assertEquals(30L, (it.newValue as CellWidth<*, *>).width)
+                            assertEquals(oldView, (it.oldValue as CellWidth<*, *>).source)
+                            assertEquals(newView, (it.newValue as CellWidth<*, *>).source)
+                        }
+                        is CellClasses<*> -> {
+                            assertEquals(emptyList(), (it.oldValue as CellClasses<*>).classes)
+                            assertEquals(listOf("cell-classes-1"), (it.newValue as CellClasses<*>).classes)
+                            assertEquals(oldView, (it.oldValue as CellClasses<*>).source)
+                            assertEquals(newView, (it.newValue as CellClasses<*>).source)
+                        }
+                        is CellTopics<*> -> {
+                            assertEquals(emptyList(), (it.oldValue as CellTopics<*>).topics)
+                            assertEquals(listOf("cell-topics-1"), (it.newValue as CellTopics<*>).topics)
+                            assertEquals(oldView, (it.oldValue as CellTopics<*>).source)
+                            assertEquals(newView, (it.newValue as CellTopics<*>).source)
+                        }
+                        /*
+                        is CellTransformer<*> -> {
+                            assertEquals(Unit, (it.oldValue as CellTransformer<*>).function)
+                            assertEquals(ct1, (it.newValue as CellTransformer<*>).function)
+                            assertEquals(oldView, (it.oldValue as CellTransformer<*>).source)
+                            assertEquals(newView, (it.newValue as CellTransformer<*>).source)
+                        }
+                         */
+                        is Resources -> {
+                            assertEquals(emptyMap(), (it.oldValue as Resources).resources)
+                            assertEquals(mapOf(r1), (it.newValue as Resources).resources)
+                            assertEquals(oldView, (it.oldValue as Resources).source)
+                            assertEquals(newView, (it.newValue as Resources).source)
+                        }
+                        is SourceTable -> {
+                            assertEquals(null, (it.oldValue as SourceTable).table)
+                            assertEquals(t1, (it.newValue as SourceTable).table)
+                            assertEquals(oldView, (it.oldValue as SourceTable).source)
+                            assertEquals(newView, (it.newValue as SourceTable).source)
+                        }
+                        else -> assertTrue(false)
+                    }
+                }
+            } else {
+                forEach {
+                    when (it.newValue) {
+                        is CellHeight<*, *> -> {
+                            assertEquals(25L, (it.oldValue as CellHeight<*, *>).height)
+                            assertEquals(55L, (it.newValue as CellHeight<*, *>).height)
+                            assertEquals(oldView, (it.oldValue as CellHeight<*, *>).source)
+                            assertEquals(newView, (it.newValue as CellHeight<*, *>).source)
+                        }
+                        is CellWidth<*, *> -> {
+                            assertEquals(30L, (it.oldValue as CellWidth<*, *>).width)
+                            assertEquals(60L, (it.newValue as CellWidth<*, *>).width)
+                            assertEquals(oldView, (it.oldValue as CellWidth<*, *>).source)
+                            assertEquals(newView, (it.newValue as CellWidth<*, *>).source)
+                        }
+                        is CellClasses<*> -> {
+                            assertEquals(listOf("cell-classes-1"), (it.oldValue as CellClasses<*>).classes)
+                            assertEquals(listOf("cell-classes-2"), (it.newValue as CellClasses<*>).classes)
+                            assertEquals(oldView, (it.oldValue as CellClasses<*>).source)
+                            assertEquals(newView, (it.newValue as CellClasses<*>).source)
+                        }
+                        is CellTopics<*> -> {
+                            assertEquals(listOf("cell-topics-1"), (it.oldValue as CellTopics<*>).topics)
+                            assertEquals(listOf("cell-topics-2"), (it.newValue as CellTopics<*>).topics)
+                            assertEquals(oldView, (it.oldValue as CellTopics<*>).source)
+                            assertEquals(newView, (it.newValue as CellTopics<*>).source)
+                        }
+                        /*
+                        is CellTransformer<*> -> {
+                            assertEquals(ct1, (it.oldValue as CellTransformer<*>).function)
+                            assertEquals(ct2, (it.newValue as CellTransformer<*>).function)
+                            assertEquals(oldView, (it.oldValue as CellTransformer<*>).source)
+                            assertEquals(newView, (it.newValue as CellTransformer<*>).source)
+                        }
+                         */
+                        is Resources -> {
+                            assertEquals(mapOf(r1), (it.oldValue as Resources).resources)
+                            assertEquals(mapOf(r2), (it.newValue as Resources).resources)
+                            assertEquals(oldView, (it.oldValue as Resources).source)
+                            assertEquals(newView, (it.newValue as Resources).source)
+                        }
+                        is SourceTable -> {
+                            assertEquals(t1, (it.oldValue as SourceTable).table)
+                            assertEquals(t2, (it.newValue as SourceTable).table)
+                            assertEquals(oldView, (it.oldValue as SourceTable).source)
+                            assertEquals(newView, (it.newValue as SourceTable).source)
+                        }
+                        else -> assertTrue(false)
+                    }
+                }
+            }
+        }
+
+        init = false
+
+        tv1[CellHeight] = 55
+        tv1[CellWidth] = 60
+        tv1[CellClasses] = "cell-classes-2"
+        tv1[CellTopics] = "cell-topics-2"
+        //tv1[CellTransformer] = ct2
+        tv1[Resources] = r2
+        tv1[Table] = t2
+    }
 
     // TODO Test type filters cases like on<A> etc..
 }
