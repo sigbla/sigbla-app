@@ -486,16 +486,16 @@ class TableView internal constructor(
 
     // -----
 
-    operator fun set(row: Long, view: RowView?) {
+    operator fun set(index: Long, view: RowView?) {
         synchronized(eventProcessor) {
             val (oldRef, newRef) = tableViewRef.refAction {
                 val viewMeta = if (view == null) null else view.tableView.tableViewRef.get().rowViews[view.index]
 
                 it.copy(
                     rowViews = if (viewMeta != null)
-                        it.rowViews.put(row, viewMeta)
+                        it.rowViews.put(index, viewMeta)
                     else
-                        it.rowViews.remove(row),
+                        it.rowViews.remove(index),
                     version = it.version + 1L
                 )
             }
@@ -505,8 +505,8 @@ class TableView internal constructor(
             val oldView = makeClone(ref = oldRef)
             val newView = makeClone(ref = newRef)
 
-            val oldRowView = oldView[row]
-            val newRowView = newView[row]
+            val oldRowView = oldView[index]
+            val newRowView = newView[index]
 
 
             eventProcessor.publish(listOf(

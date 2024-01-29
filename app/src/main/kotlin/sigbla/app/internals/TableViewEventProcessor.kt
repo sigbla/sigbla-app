@@ -120,24 +120,6 @@ internal class TableViewEventProcessor {
         }
     }
 
-    private class ListenerDerivedCellViewRef(
-        private val listeners: ConcurrentMap<ListenerId, ListenerReferenceEvent<ListenerDerivedCellViewRef>>,
-        val derivedCellView: DerivedCellView
-    ) : ListenerUnsubscribeRef() {
-        var lazyName: String? = null
-        var lazyOrder: Long? = null
-        var lazyAllowLoop: Boolean? = null
-
-        override val name: String? by lazy { lazyName }
-        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
-        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
-
-        override fun unsubscribe() {
-            haveUnsubscribed = true
-            listeners.remove(key ?: return)
-        }
-    }
-
     @Synchronized
     fun subscribe(
         tableView: TableView,
@@ -608,7 +590,6 @@ internal class TableViewEventProcessor {
         rowViewListeners.clear()
         // TODO cellRangeViewListeners.clear()
         cellViewListeners.clear()
-        //derivedCellViewListeners.clear()
     }
 
     companion object {

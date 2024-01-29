@@ -870,7 +870,7 @@ class TableViewBatchListenerTest {
         val t2 =  t1 {
             for (c in listOf("A", "B", "C", "D")) {
                 for (r in 1..100) {
-                    t1[c][r][CellHeight] = c.first().toByte().toLong()
+                    t1[c][r][CellHeight] = c.first().code.toLong()
                     t1[c][r][CellWidth] = r.toLong()
 
                     // these will be overwritten expectedT1EventCount += 2
@@ -879,7 +879,7 @@ class TableViewBatchListenerTest {
 
             for (c in listOf("A", "B", "C", "D")) {
                 for (r in 1..100) {
-                    t1[c][r][CellHeight] = c.first().toByte().toLong()
+                    t1[c][r][CellHeight] = c.first().code.toLong()
                     t1[c][r][CellWidth] = r.toLong()
 
                     expectedT1EventCount += 2
@@ -898,7 +898,7 @@ class TableViewBatchListenerTest {
         }
 
         // Testing event separation between t1/t2
-        t1["A"][1][CellHeight] = "A".toCharArray().first().toByte().toLong()
+        t1["A"][1][CellHeight] = "A".toCharArray().first().code.toLong()
         t1["A"][1][CellWidth] = 1.toLong() + 100
         expectedT1EventCount += 2
 
@@ -906,7 +906,7 @@ class TableViewBatchListenerTest {
             t2 {
                 for (c in listOf("A", "B", "C", "D")) {
                     for (r in 1..100) {
-                        t1[c][r][CellHeight] = c.first().toByte().toLong()
+                        t1[c][r][CellHeight] = c.first().code.toLong()
                         t1[c][r][CellWidth] = r.toLong() + 100
 
                         expectedT1EventCount += 2
@@ -915,7 +915,7 @@ class TableViewBatchListenerTest {
 
                 for (c in listOf("A", "B", "C", "D")) {
                     for (r in 1..100) {
-                        t2[c][r][CellHeight] = c.first().toByte().toLong()
+                        t2[c][r][CellHeight] = c.first().code.toLong()
                         t2[c][r][CellWidth] = r.toLong() + 100
 
                         expectedT2EventCount += 2
