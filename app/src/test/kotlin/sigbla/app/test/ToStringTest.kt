@@ -132,25 +132,25 @@ class ToStringTest {
     fun `meta classes`() {
         val tableView = TableView[object {}.javaClass.enclosingMethod.name]
 
-        val unitCellHeight = tableView[CellHeight].also { it <Int>{ 100 } }
+        val unitCellHeight = tableView[CellHeight].also { it { 100 } }
         val pixelCellHeight = tableView[CellHeight]
 
         assertEquals("UnitCellHeight", unitCellHeight.toString())
         assertEquals("PixelCellHeight[100]", pixelCellHeight.toString())
 
-        val unitCellWidth = tableView[CellWidth].also { it <Int>{ 100 } }
+        val unitCellWidth = tableView[CellWidth].also { it { 100 } }
         val pixelCellWidth = tableView[CellWidth]
 
         assertEquals("UnitCellWidth", unitCellWidth.toString())
         assertEquals("PixelCellWidth[100]", pixelCellWidth.toString())
 
-        val emptyCellClasses = tableView[CellClasses].also { it <List<String>>{ listOf("B", "A") } }
+        val emptyCellClasses = tableView[CellClasses].also { it { listOf("B", "A") } }
         val filledCellClasses = tableView[CellClasses]
 
         assertEquals("CellClasses[]", emptyCellClasses.toString())
         assertEquals("CellClasses[A, B]", filledCellClasses.toString())
 
-        val emptyCellTopics = tableView[CellTopics].also { it <List<String>>{ listOf("B", "A") } }
+        val emptyCellTopics = tableView[CellTopics].also { it { listOf("B", "A") } }
         val filledCellTopics = tableView[CellTopics]
 
         assertEquals("CellTopics[]", emptyCellTopics.toString())
@@ -162,7 +162,7 @@ class ToStringTest {
             }
         }
 
-        val emptyResources = tableView[Resources].also { it <List<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>>{ listOf("B" to getHandler(), "A" to getHandler()) } }
+        val emptyResources = tableView[Resources].also { it { listOf("B" to getHandler(), "A" to getHandler()) } }
         val filledResources = tableView[Resources]
 
         assertEquals("Resources[]", emptyResources.toString())
