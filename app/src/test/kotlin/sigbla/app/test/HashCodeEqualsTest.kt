@@ -198,36 +198,36 @@ class HashCodeEqualsTest {
 
         val tableView1 = TableView[object {}.javaClass.enclosingMethod.name + " 1"]
 
-        val unitCellHeight1 = tableView1[CellHeight].also { it <Int>{ 100 } }
+        val unitCellHeight1 = tableView1[CellHeight].also { it { 100 } }
         val pixelCellHeight1 = tableView1[CellHeight]
 
-        val unitCellWidth1 = tableView1[CellWidth].also { it <Int>{ 100 } }
+        val unitCellWidth1 = tableView1[CellWidth].also { it { 100 } }
         val pixelCellWidth1 = tableView1[CellWidth]
 
-        val emptyCellClasses1 = tableView1[CellClasses].also { it <List<String>>{ listOf("B", "A") } }
+        val emptyCellClasses1 = tableView1[CellClasses].also { it { listOf("B", "A") } }
         val filledCellClasses1 = tableView1[CellClasses]
 
-        val emptyCellTopics1 = tableView1[CellTopics].also { it <List<String>>{ listOf("B", "A") } }
+        val emptyCellTopics1 = tableView1[CellTopics].also { it { listOf("B", "A") } }
         val filledCellTopics1 = tableView1[CellTopics]
 
-        val emptyResources1 = tableView1[Resources].also { it <List<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>>{ listOf("B" to handler1, "A" to handler2) } }
+        val emptyResources1 = tableView1[Resources].also { it { listOf("B" to handler1, "A" to handler2) } }
         val filledResources1 = tableView1[Resources]
 
         val tableView2 = TableView[object {}.javaClass.enclosingMethod.name + " 2"]
 
-        val unitCellHeight2 = tableView2[CellHeight].also { it <Int>{ 100 } }
+        val unitCellHeight2 = tableView2[CellHeight].also { it { 100 } }
         val pixelCellHeight2 = tableView2[CellHeight]
 
-        val unitCellWidth2 = tableView2[CellWidth].also { it <Int>{ 100 } }
+        val unitCellWidth2 = tableView2[CellWidth].also { it { 100 } }
         val pixelCellWidth2 = tableView2[CellWidth]
 
-        val emptyCellClasses2 = tableView2[CellClasses].also { it <List<String>>{ listOf("B", "A") } }
+        val emptyCellClasses2 = tableView2[CellClasses].also { it { listOf("B", "A") } }
         val filledCellClasses2 = tableView2[CellClasses]
 
-        val emptyCellTopics2 = tableView2[CellTopics].also { it <List<String>>{ listOf("B", "A") } }
+        val emptyCellTopics2 = tableView2[CellTopics].also { it { listOf("B", "A") } }
         val filledCellTopics2 = tableView2[CellTopics]
 
-        val emptyResources2 = tableView2[Resources].also { it <List<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>>{ listOf("B" to handler1, "A" to handler2) } }
+        val emptyResources2 = tableView2[Resources].also { it { listOf("B" to handler1, "A" to handler2) } }
         val filledResources2 = tableView2[Resources]
 
         assertEquals(unitCellHeight1, unitCellHeight2)

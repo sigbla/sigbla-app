@@ -1016,14 +1016,14 @@ class CellView(
         }
     }
 
-    operator fun <T> invoke(function: CellView.() -> T): T {
+    operator fun invoke(function: CellView.() -> Any?): Any? {
         return when (val value = function()) {
             is CellHeight<*, *> -> { tableView[this][CellHeight] = value; value }
             is CellWidth<*, *> -> { tableView[this][CellWidth] = value; value }
             is CellClasses<*> -> { tableView[this][CellClasses] = value; value }
             is CellTopics<*> -> { tableView[this][CellTopics] = value; value }
-            is Unit -> { /* no assignment */ Unit as T }
-            is Function1<*, *> -> { invoke(value as CellView.() -> T?) as T }
+            is Unit -> { /* no assignment */ Unit }
+            is Function1<*, *> -> { invoke(value as CellView.() -> Any?) }
             // TODO CellTransformer?
             // TODO null?
             else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
@@ -1814,10 +1814,10 @@ sealed class CellHeight<S, T> {
     open operator fun rem(that: Int): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
     open operator fun rem(that: Long): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
 
-    operator fun <T> invoke(function: CellHeight<*,*>.() -> T): T {
+    operator fun invoke(function: CellHeight<*,*>.() -> Any?): Any? {
         val value = this.function()
         val longValue = when(value) {
-            is Unit -> /* no assignment */ return Unit as T
+            is Unit -> /* no assignment */ return Unit
             is Int -> value.toLong()
             is Long -> value
             is CellHeight<*,*> -> when (val height = value.height) {
@@ -2000,10 +2000,10 @@ sealed class CellWidth<S, T> {
     open operator fun rem(that: Int): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
     open operator fun rem(that: Long): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
 
-    operator fun <T> invoke(function: CellWidth<*,*>.() -> T): T {
+    operator fun invoke(function: CellWidth<*,*>.() -> Any?): Any? {
         val value = this.function()
         val longValue = when(value) {
-            is Unit -> /* no assignment */ return Unit as T
+            is Unit -> /* no assignment */ return Unit
             is Int -> value.toLong()
             is Long -> value
             is CellWidth<*,*> -> when (val width = value.width) {
@@ -2099,11 +2099,10 @@ class CellClasses<S> internal constructor(
     operator fun minus(topics: Collection<String>): CellClasses<S> = CellClasses(source, topics.fold(this._classes) { acc, topic -> acc - topic })
     override fun iterator(): Iterator<String> = classes.iterator()
 
-    // TODO Change these and similar to be CellClasses<*>.() -> Any?
-    operator fun <T> invoke(function: CellClasses<*>.() -> T): T {
+    operator fun invoke(function: CellClasses<*>.() -> Any?): Any? {
         val value = this.function()
         val classes = when(value) {
-            is Unit -> /* no assignment */ return Unit as T
+            is Unit -> /* no assignment */ return Unit
             is String -> setOf(value)
             is Collection<*> -> value as Collection<String>
             is CellClasses<*> -> value.classes
@@ -2152,10 +2151,10 @@ class CellTopics<S> internal constructor(
     operator fun minus(topics: Collection<String>): CellTopics<S> = CellTopics(source, topics.fold(this._topics) { acc, topic -> acc - topic })
     override fun iterator(): Iterator<String> = topics.iterator()
 
-    operator fun <T> invoke(function: CellTopics<*>.() -> T): T {
+    operator fun invoke(function: CellTopics<*>.() -> Any?): Any? {
         val value = this.function()
         val topics = when(value) {
-            is Unit -> /* no assignment */ return Unit as T
+            is Unit -> /* no assignment */ return Unit
             is String -> setOf(value)
             is Collection<*> -> value as Collection<String>
             is CellTopics<*> -> value.topics
@@ -2229,10 +2228,10 @@ class Resources internal constructor(
     operator fun minus(resources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>): Resources = Resources(source, resources.fold(_resources) {acc, resource -> acc.remove(resource.first)})
     override fun iterator(): Iterator<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>> = resources.map { Pair(it.key, it.value) }.iterator()
 
-    operator fun <T> invoke(function: Resources.() -> T): T {
+    operator fun invoke(function: Resources.() -> Any?): Any? {
         val value = this.function()
         val resources = when(value) {
-            is Unit -> /* no assignment */ return Unit as T
+            is Unit -> /* no assignment */ return Unit
             is Map<*, *> -> value as Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>
             is Pair<*, *> -> mapOf(value as Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>)
             is Collection<*> -> (value as Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>).toMap()
