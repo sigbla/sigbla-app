@@ -61,8 +61,9 @@ val table = Table["MyTable"]
 table["Column A", 0] = 100
 table["Column A", 1] = 200
 
-// Instead of sum(table["Column A", 0], table["Column A", 1]), you can also do sum(table["Column A"])
-// if you want to sum all "Column A" values. Other variants and combinations are also possible.
+// Instead of sum(table["Column A", 0], table["Column A", 1]), you can also
+// do sum(table["Column A"]) if you want to sum all "Column A" values.
+// Other variants and combinations are also possible.
 table["Sum", 2] = sum(table["Column A", 0], table["Column A", 1])
 
 val tableView = TableView[table]
