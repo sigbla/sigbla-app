@@ -2,11 +2,8 @@
  * See LICENSE file for licensing details. */
 package sigbla.app
 
-import sigbla.app.exceptions.InvalidColumnException
-import sigbla.app.exceptions.InvalidTableViewException
-import sigbla.app.exceptions.InvalidCellHeightException
-import sigbla.app.exceptions.InvalidCellWidthException
-import sigbla.app.exceptions.InvalidValueException
+import sigbla.app.exceptions.*
+import sigbla.app.internals.RefHolder
 import sigbla.app.internals.Registry
 import sigbla.app.internals.TableViewEventProcessor
 import sigbla.app.pds.collection.Map as PMap
@@ -19,7 +16,6 @@ import io.ktor.server.application.*
 import io.ktor.util.pipeline.*
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
-import sigbla.app.internals.RefHolder
 import java.util.concurrent.ThreadLocalRandom
 
 // A table view is associated with one table, and holds metadata related on how to view a table.
@@ -411,7 +407,10 @@ class TableView internal constructor(
 
     // -----
 
-    operator fun get(row: Row) = this[row.index]
+    operator fun get(row: Row): RowView {
+        if (row.indexRelation != IndexRelation.AT) throw InvalidRowException("Only IndexRelation.AT supported in get: $row")
+        return this[row.index]
+    }
 
     operator fun get(rowView: RowView) = this[rowView.index]
 
@@ -484,6 +483,18 @@ class TableView internal constructor(
 
     operator fun set(columnView: ColumnView, view: ColumnView?) = set(columnView.header, view)
 
+    operator fun set(header: Header, function: ColumnView.() -> Any?) {
+        this[header] { function() }
+    }
+
+    operator fun set(column: Column, function: ColumnView.() -> Any?) {
+        this[column] { function() }
+    }
+
+    operator fun set(columnView: ColumnView, function: ColumnView.() -> Any?) {
+        this[columnView] { function() }
+    }
+
     // -----
 
     operator fun set(index: Long, view: RowView?) {
@@ -519,7 +530,26 @@ class TableView internal constructor(
 
     operator fun set(rowView: RowView, view: RowView?) = set(rowView.index, view)
 
-    operator fun set(row: Row, view: RowView?) = set(row.index, view)
+    operator fun set(row: Row, view: RowView?) {
+        if (row.indexRelation != IndexRelation.AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        set(row.index, view)
+    }
+
+    operator fun set(index: Int, function: RowView.() -> Any?) {
+        this[index] { function() }
+    }
+
+    operator fun set(index: Long, function: RowView.() -> Any?) {
+        this[index] { function() }
+    }
+
+    operator fun set(rowView: RowView, function: RowView.() -> Any?) {
+        this[rowView] { function() }
+    }
+
+    operator fun set(row: Row, function: RowView.() -> Any?) {
+        this[row] { function() }
+    }
 
     // -----
 
@@ -1018,6 +1048,7 @@ class CellView(
 
     operator fun invoke(function: CellView.() -> Any?): Any? {
         return when (val value = function()) {
+            is CellView -> { tableView[this] = value; value }
             is CellHeight<*, *> -> { tableView[this][CellHeight] = value; value }
             is CellWidth<*, *> -> { tableView[this][CellWidth] = value; value }
             is CellClasses<*> -> { tableView[this][CellClasses] = value; value }
@@ -1304,6 +1335,20 @@ class ColumnView internal constructor(
         }
     }
 
+    operator fun invoke(function: ColumnView.() -> Any?): Any? {
+        return when (val value = function()) {
+            is ColumnView -> { tableView[this] = value; value }
+            is CellWidth<*, *> -> { tableView[this][CellWidth] = value; value }
+            is CellClasses<*> -> { tableView[this][CellClasses] = value; value }
+            is CellTopics<*> -> { tableView[this][CellTopics] = value; value }
+            is Unit -> { /* no assignment */ Unit }
+            is Function1<*, *> -> { invoke(value as ColumnView.() -> Any?) }
+            // TODO CellTransformer?
+            // TODO null?
+            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
+        }
+    }
+
     // Note: cellViews return the defined CellViews, while the ColumnView iterator
     // returns the calculated cell views for current cells
     val cellViews: Sequence<CellView>
@@ -1323,8 +1368,10 @@ class ColumnView internal constructor(
 
     operator fun get(index: Int) = get(index.toLong())
 
-    // TODO Does this need to care about index relations?
-    operator fun get(row: Row) = get(row.index)
+    operator fun get(row: Row): CellView {
+        if (row.indexRelation != IndexRelation.AT) throw InvalidRowException("Only IndexRelation.AT supported in get: $row")
+        return get(row.index)
+    }
 
     operator fun get(rowView: RowView) = get(rowView.index)
 
@@ -1332,7 +1379,10 @@ class ColumnView internal constructor(
 
     operator fun set(index: Int, view: CellView?) { this[index.toLong()] = view }
 
-    operator fun set(row: Row, view: CellView?) { this[row.index] = view }
+    operator fun set(row: Row, view: CellView?) {
+        if (row.indexRelation != IndexRelation.AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        this[row.index] = view
+    }
 
     operator fun set(rowView: RowView, view: CellView?) { this[rowView.index] = view }
 
@@ -1340,7 +1390,10 @@ class ColumnView internal constructor(
 
     operator fun set(index: Int, function: CellView.() -> Any?) { this[index] { function() } }
 
-    operator fun set(row: Row, function: CellView.() -> Any?) { this[row.index] { function() } }
+    operator fun set(row: Row, function: CellView.() -> Any?) {
+        // No IR.AT check here because this is actually a get before set
+        this[row] { function() }
+    }
 
     operator fun set(rowView: RowView, function: CellView.() -> Any?) { this[rowView.index] { function() } }
 
@@ -1576,6 +1629,20 @@ class RowView internal constructor(
             val new = newView[index][CellTopics]
 
             tableView.eventProcessor.publish(listOf(TableViewListenerEvent<CellTopics<RowView>>(old, new)) as List<TableViewListenerEvent<Any>>)
+        }
+    }
+
+    operator fun invoke(function: RowView.() -> Any?): Any? {
+        return when (val value = function()) {
+            is RowView -> { tableView[this] = value; value }
+            is CellHeight<*, *> -> { tableView[this][CellHeight] = value; value }
+            is CellClasses<*> -> { tableView[this][CellClasses] = value; value }
+            is CellTopics<*> -> { tableView[this][CellTopics] = value; value }
+            is Unit -> { /* no assignment */ Unit }
+            is Function1<*, *> -> { invoke(value as RowView.() -> Any?) }
+            // TODO CellTransformer?
+            // TODO null?
+            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
         }
     }
 

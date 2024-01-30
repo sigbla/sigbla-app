@@ -9,6 +9,7 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Test
 import sigbla.app.*
+import sigbla.app.exceptions.InvalidRowException
 import sigbla.app.exceptions.InvalidTableViewException
 import java.io.File
 import kotlin.test.assertFailsWith
@@ -728,6 +729,59 @@ class TableViewTest {
 
         assertEquals(2, jsHandlers.size)
         assertEquals(2, cssHandlers.size)
+    }
+
+    @Test
+    fun `only valid row index relation getters and setters`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView[t1]
+
+        for (ir in IndexRelation.entries) {
+            // TableView
+            if (ir == IndexRelation.AT) {
+                tv1[t1[ir, 0]] = tv1[t1[ir, 0]]
+                tv1[t1[ir, 0]] = { tv1[t1[ir, 0]] }
+                tv1[t1[ir, 0]] { tv1[t1[ir, 0]] }
+                assertEquals(RowView::class, tv1[t1[ir, 0]]::class)
+            } else {
+                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]] }
+                val validRow = t1[IndexRelation.AT, 0]
+                val rowView = tv1[validRow]
+                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]] = rowView }
+                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]] = { rowView } }
+                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]] { rowView } }
+            }
+
+            // ColumnView
+            if (ir == IndexRelation.AT) {
+                tv1["A"][t1[ir, 0]] = tv1["A"][t1[ir, 0]]
+                tv1["A"][t1[ir, 0]] = { tv1["A"][t1[ir, 0]] }
+                tv1["A"][t1[ir, 0]] { tv1["A"][t1[ir, 0]] }
+                assertEquals(CellView::class, tv1["A"][t1[ir, 0]]::class)
+            } else {
+                assertFailsWith<InvalidRowException> { tv1["A"][t1[ir, 0]] }
+                val validRow = t1[IndexRelation.AT, 0]
+                val cellView = tv1["A"][validRow]
+                assertFailsWith<InvalidRowException> { tv1["A"][t1[ir, 0]] = cellView }
+                assertFailsWith<InvalidRowException> { tv1["A"][t1[ir, 0]] = { cellView } }
+                assertFailsWith<InvalidRowException> { tv1["A"][t1[ir, 0]] { cellView } }
+            }
+
+            // RowView
+            if (ir == IndexRelation.AT) {
+                tv1[t1[ir, 0]]["A"] = tv1[t1[ir, 0]]["A"]
+                tv1[t1[ir, 0]]["A"] = { tv1[t1[ir, 0]]["A"] }
+                assertEquals(CellView::class, tv1[t1[ir, 0]]["A"]::class)
+            } else {
+                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]]["A"] }
+                val validRow = t1[IndexRelation.AT, 0]
+                val cellView = tv1[validRow]["A"]
+
+                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]]["A"] = cellView }
+                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]]["A"] = { cellView } }
+                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]]["A"] { cellView } }
+            }
+        }
     }
 
     // TODO See TableTest for inspiration
