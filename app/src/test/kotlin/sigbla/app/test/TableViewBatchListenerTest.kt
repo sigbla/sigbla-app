@@ -731,11 +731,11 @@ class TableViewBatchListenerTest {
 
             assertEquals(3, eventCount)
 
-            //tv1["A"][CellHeight] = 50
-            tv1["A"][CellWidth] = 50
-            tv1["A"][CellClasses] = "cell-classes-2"
-            tv1["A"][CellTopics] = "cell-topics-2"
-            //tv1["A"][CellTransformer] = {}
+            tv1[1][CellHeight] = 50
+            //tv1[1][CellWidth] = 50
+            tv1[1][CellClasses] = "cell-classes-2"
+            tv1[1][CellTopics] = "cell-topics-2"
+            //tv1[1][CellTransformer] = {}
 
             assertEquals(3, eventCount)
         }
@@ -1093,7 +1093,7 @@ class TableViewBatchListenerTest {
         }
 
         t {
-            assertEquals<Any?>(DEFAULT_CELL_WIDTH * 2, t["A", 0][CellWidth].width)
+            assertEquals(DEFAULT_CELL_WIDTH * 2, t["A", 0][CellWidth].width)
 
             t["A", 0][CellWidth] = DEFAULT_CELL_WIDTH * 3
 
@@ -1114,7 +1114,7 @@ class TableViewBatchListenerTest {
         assertEquals(DEFAULT_CELL_WIDTH * 3 + 1, v2New)
         assertEquals(DEFAULT_CELL_WIDTH * 3 + 2, v3New)
 
-        assertEquals<Any?>(DEFAULT_CELL_WIDTH * 3, t["A", 0][CellWidth].width)
+        assertEquals(DEFAULT_CELL_WIDTH * 3, t["A", 0][CellWidth].width)
     }
 
     @Test
@@ -1173,8 +1173,8 @@ class TableViewBatchListenerTest {
                     oldView["A", 0][CellWidth] = source["A", 0].derived.cellWidth + 200
                     newView["A", 0][CellWidth] = source["A", 0].derived.cellWidth + 300
 
-                    assertEquals<Any?>(source["A", 0].derived.cellWidth + 200, oldView["A", 0][CellWidth].width)
-                    assertEquals<Any?>(source["A", 0].derived.cellWidth + 300, newView["A", 0][CellWidth].width)
+                    assertEquals(source["A", 0].derived.cellWidth + 200, oldView["A", 0][CellWidth].width)
+                    assertEquals(source["A", 0].derived.cellWidth + 300, newView["A", 0][CellWidth].width)
 
                     count += count()
                 }
@@ -1186,19 +1186,19 @@ class TableViewBatchListenerTest {
                 skipHistory = true
 
                 events {
-                    assertEquals<Any?>(source["A", 0].derived.cellWidth + 200, oldView["A", 0][CellWidth].width)
-                    assertEquals<Any?>(source["A", 0].derived.cellWidth + 300, newView["A", 0][CellWidth].width)
+                    assertEquals(source["A", 0].derived.cellWidth + 200, oldView["A", 0][CellWidth].width)
+                    assertEquals(source["A", 0].derived.cellWidth + 300, newView["A", 0][CellWidth].width)
 
                     count += count()
                 }
             }
 
-            assertEquals<Any?>(DEFAULT_CELL_WIDTH, t["A", 0][CellWidth].width)
+            assertEquals(DEFAULT_CELL_WIDTH, t["A", 0][CellWidth].width)
 
             t["A", 0][CellWidth] = DEFAULT_CELL_WIDTH / 2
         }
 
-        assertEquals<Any?>(DEFAULT_CELL_WIDTH / 2, t["A", 0][CellWidth].width)
+        assertEquals(DEFAULT_CELL_WIDTH / 2, t["A", 0][CellWidth].width)
 
         assertEquals(3, count)
     }
