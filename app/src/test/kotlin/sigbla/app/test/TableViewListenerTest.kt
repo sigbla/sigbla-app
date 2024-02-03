@@ -663,11 +663,11 @@ class TableViewListenerTest {
 
         assertEquals(3, eventCount)
 
-        //tv1["A"][CellHeight] = 50
-        tv1["A"][CellWidth] = 50
-        tv1["A"][CellClasses] = "cell-classes-2"
-        tv1["A"][CellTopics] = "cell-topics-2"
-        //tv1["A"][CellTransformer] = {}
+        tv1[1][CellHeight] = 50
+        //tv1[1][CellWidth] = 50
+        tv1[1][CellClasses] = "cell-classes-2"
+        tv1[1][CellTopics] = "cell-topics-2"
+        //tv1[1][CellTransformer] = {}
 
         assertEquals(3, eventCount)
     }
@@ -1011,7 +1011,7 @@ class TableViewListenerTest {
         assertEquals(DEFAULT_CELL_WIDTH * 2 + 1, v2New)
         assertEquals(DEFAULT_CELL_WIDTH * 2 + 2, v3New)
 
-        assertEquals<Any?>(DEFAULT_CELL_WIDTH * 2, t["A", 0][CellWidth].width)
+        assertEquals(DEFAULT_CELL_WIDTH * 2, t["A", 0][CellWidth].width)
 
         t["A", 0][CellWidth] = DEFAULT_CELL_WIDTH * 3
 
@@ -1023,7 +1023,7 @@ class TableViewListenerTest {
         assertEquals(DEFAULT_CELL_WIDTH * 3 + 1, v2New)
         assertEquals(DEFAULT_CELL_WIDTH * 3 + 2, v3New)
 
-        assertEquals<Any?>(DEFAULT_CELL_WIDTH * 3, t["A", 0][CellWidth].width)
+        assertEquals(DEFAULT_CELL_WIDTH * 3, t["A", 0][CellWidth].width)
     }
 
     @Test
