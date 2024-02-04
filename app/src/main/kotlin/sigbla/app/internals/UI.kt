@@ -7,36 +7,28 @@ import com.beust.klaxon.TypeAdapter
 import com.beust.klaxon.TypeFor
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.routing.*
 import io.ktor.server.engine.*
-import io.ktor.server.netty.*
 import io.ktor.server.http.content.*
+import io.ktor.server.netty.*
 import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import sigbla.app.*
-import sigbla.app.exceptions.SigblaAppException
+import sigbla.app.exceptions.InvalidTableViewException
+import sigbla.app.exceptions.InvalidUIException
+import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.atomic.AtomicLong
-import kotlin.collections.MutableList
-import kotlin.collections.Set
-import kotlin.collections.filter
-import kotlin.collections.firstOrNull
-import kotlin.collections.forEach
-import kotlin.collections.isNotEmpty
-import kotlin.collections.mutableListOf
-import kotlin.collections.mutableSetOf
 import kotlin.collections.set
-import kotlin.collections.toSet
 import kotlin.concurrent.thread
 import kotlin.reflect.KClass
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import java.net.URL
 
 private val logger: Logger = LoggerFactory.getLogger("sigbla.app.internals.UI")
 
@@ -603,11 +595,11 @@ internal object SigblaBackend {
                             }
                             is SourceTable -> {
                                 synchronized(SigblaBackend) {
-                                    val viewRef = viewRefs[ref] ?: throw SigblaAppException("No view ref on $ref")
+                                    val viewRef = viewRefs[ref] ?: throw InvalidTableViewException("No view ref on $ref")
                                     viewRef.third?.apply { off(this) }
                                     if (!viewRefs.replace(ref, viewRef, viewRef.copy(
                                         third = tableSubscription(value.table)
-                                    ))) throw SigblaAppException("Unexpected view ref update")
+                                    ))) throw InvalidTableViewException("Unexpected view ref update")
                                 }
 
                                 clear = true
@@ -695,7 +687,7 @@ internal data class SigblaClient(
     internal fun nextEventId() = idGenerator.getAndIncrement()
 
     suspend fun publish(clientPackage: ClientPackage? = null, isDirty: Boolean = false) {
-        if (!mutex.isLocked) throw SigblaAppException("Mutex not locked!")
+        if (!mutex.isLocked) throw InvalidUIException("Mutex not locked!")
 
         if (clearId != null && isDirty) return
 
@@ -736,7 +728,7 @@ internal data class SigblaClient(
     }
 
     suspend fun purge(id: Long) {
-        if (!mutex.isLocked) throw SigblaAppException("Mutex not locked!")
+        if (!mutex.isLocked) throw InvalidUIException("Mutex not locked!")
         outgoingPackages.removeIf { it.id == id }
         if (clearId == id) clearId = null
         publish()

@@ -2,7 +2,4 @@
  * See LICENSE file for licensing details. */
 package sigbla.app.exceptions
 
-class InvalidTableException : SigblaAppException {
-    constructor() : super()
-    constructor(message: String) : super(message)
-}
+class InvalidTableException internal constructor(message: String) : SigblaAppException(message)

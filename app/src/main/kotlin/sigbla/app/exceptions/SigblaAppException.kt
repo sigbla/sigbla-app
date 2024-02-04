@@ -2,19 +2,4 @@
  * See LICENSE file for licensing details. */
 package sigbla.app.exceptions
 
-open class SigblaAppException : RuntimeException {
-    constructor() : super()
-
-    constructor(message: String) : super(message)
-
-    constructor(message: String, cause: Throwable) : super(message, cause)
-
-    constructor(cause: Throwable) : super(cause)
-
-    protected constructor(
-        message: String,
-        cause: Throwable,
-        enableSuppression: Boolean,
-        writableStackTrace: Boolean
-    ) : super(message, cause, enableSuppression, writableStackTrace)
-}
+sealed class SigblaAppException(message: String) : RuntimeException(message)

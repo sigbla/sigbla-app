@@ -2,7 +2,7 @@
  * See LICENSE file for licensing details. */
 package sigbla.app.internals
 
-import sigbla.app.exceptions.SigblaAppException
+import sigbla.app.exceptions.InvalidRefException
 
 internal class RefHolder<V>(@Volatile private var ref: V) {
     private val local = ThreadLocal<V>()
@@ -12,7 +12,7 @@ internal class RefHolder<V>(@Volatile private var ref: V) {
     }
 
     fun commitLocal() {
-        ref = local.get() ?: throw SigblaAppException("No local")
+        ref = local.get() ?: throw InvalidRefException("No local")
         local.remove()
     }
 

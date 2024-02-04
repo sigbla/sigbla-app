@@ -2,4 +2,4 @@
  * See LICENSE file for licensing details. */
 package sigbla.app.exceptions
 
-class InvalidListenerException internal constructor(message: String) : SigblaAppException(message)
+class InvalidUIException internal constructor(message: String) : SigblaAppException(message)

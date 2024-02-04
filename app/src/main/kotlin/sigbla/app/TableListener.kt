@@ -65,7 +65,7 @@ val Sequence<TableListenerEvent<*, *>>.newTable: Table
             val table = it.newValue.column.table
             newTableRefs[this] = table
             return table
-        } ?: throw InvalidSequenceException()
+        } ?: throw InvalidSequenceException("No event in sequence")
     }
 
 val Sequence<TableListenerEvent<*, *>>.oldTable: Table
@@ -77,5 +77,5 @@ val Sequence<TableListenerEvent<*, *>>.oldTable: Table
             val table = it.oldValue.column.table
             oldTableRefs[this] = table
             return table
-        } ?: throw InvalidSequenceException()
+        } ?: throw InvalidSequenceException("No event in sequence")
     }

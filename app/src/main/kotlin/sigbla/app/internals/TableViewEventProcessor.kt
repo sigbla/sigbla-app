@@ -55,8 +55,8 @@ internal class TableViewEventProcessor {
         var lazyAllowLoop: Boolean? = null
 
         override val name: String? by lazy { lazyName }
-        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
-        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
+        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException("Missing lazy order") }
+        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException("Missing lazy allowLoop") }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -73,8 +73,8 @@ internal class TableViewEventProcessor {
         var lazyAllowLoop: Boolean? = null
 
         override val name: String? by lazy { lazyName }
-        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
-        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
+        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException("Missing lazy order") }
+        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException("Missing lazy allowLoop") }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -91,8 +91,8 @@ internal class TableViewEventProcessor {
         var lazyAllowLoop: Boolean? = null
 
         override val name: String? by lazy { lazyName }
-        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
-        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
+        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException("Missing lazy order") }
+        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException("Missing lazy allowLoop") }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -111,8 +111,8 @@ internal class TableViewEventProcessor {
         var lazyAllowLoop: Boolean? = null
 
         override val name: String? by lazy { lazyName }
-        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
-        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
+        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException("Missing lazy order") }
+        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException("Missing lazy allowLoop") }
 
         override fun unsubscribe() {
             haveUnsubscribed = true

@@ -997,7 +997,7 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
             private fun nextCellIterator(): Iterator<Cell<*>> {
                 while (columnIterator.hasNext()) {
                     val column = columnIterator.next()
-                    val values = ref.columnCells[column.header] ?: throw InvalidColumnException(column.header)
+                    val values = ref.columnCells[column.header] ?: throw InvalidColumnException("Unable to find column cells for header ${column.header}")
                     val itr = values.asSequence().map { it.component2().toCell(column, it.component1()) }.iterator()
                     if (itr.hasNext()) return itr
                 }
@@ -1071,8 +1071,8 @@ internal data class TableRef(
             .asSequence()
             .filter { !it.component2().prenatal }
             .map { it.component1() }
-            .fold(TreeSet<Long>()) { acc, column ->
-                acc.addAll(columnCells[column]?.keys() ?: throw InvalidColumnException(column))
+            .fold(TreeSet<Long>()) { acc, header ->
+                acc.addAll(columnCells[header]?.keys() ?: throw InvalidColumnException("Unable to find column cells for header $header"))
                 acc
             }
             .asSequence()
@@ -1113,7 +1113,7 @@ class BaseTable internal constructor(
                 columnCells = it.columnCells.put(header, PTreeMap()),
                 version = it.version + 1L
             )
-        }.columns[header] ?: throw InvalidColumnException(header)
+        }.columns[header] ?: throw InvalidColumnException("Unable to find column meta for header $header")
 
         return BaseColumn(this, header, columnMeta.columnOrder)
     }

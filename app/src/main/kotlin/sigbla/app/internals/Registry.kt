@@ -28,7 +28,7 @@ internal object Registry {
 
         table.closed = true;
 
-        if (table !is BaseTable) throw InvalidTableException()
+        if (table !is BaseTable) throw InvalidTableException("Unsupported table type")
 
         table.eventProcessor.shutdown()
         table.tableRef.set(TableRef(version = Long.MAX_VALUE))
