@@ -2,4 +2,4 @@
  * See LICENSE file for licensing details. */
 package sigbla.app.exceptions
 
-class InvalidValueException(message: String) : SigblaAppException(message)
+class InvalidValueException internal constructor(message: String) : SigblaAppException(message)

@@ -1337,9 +1337,9 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: Header) {
             .sorted()
 
         // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
-        val newColumnMap = columnOrders.fold(PHashMap<Header, ColumnMeta>()) { acc, (columnHeader, columnOrder) ->
-            val prenatal = ref.columns[columnHeader]?.prenatal ?: throw InvalidColumnException(columnHeader)
-            acc.put(columnHeader, ColumnMeta(columnOrder, prenatal))
+        val newColumnMap = columnOrders.fold(PHashMap<Header, ColumnMeta>()) { acc, (header, columnOrder) ->
+            val prenatal = ref.columns[header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header $header")
+            acc.put(header, ColumnMeta(columnOrder, prenatal))
         }
 
         // TODO Find a more efficient approach
@@ -1364,7 +1364,7 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: Header) {
                 val (oldRef, newRef) = left.table.tableRef.refAction(
                     (::columnMove)(left.header, right.header, order, withName) {
                         copy(
-                            columns = this.columns.put(withName, ColumnMeta(newRight.order, this.columns[left.header]?.prenatal ?: throw InvalidColumnException(left))),
+                            columns = this.columns.put(withName, ColumnMeta(newRight.order, this.columns[left.header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header ${left.header}"))),
                             columnCells = this.columnCells.put(withName, this.columnCells[left.header] ?: PTreeMap())
                         )
                     }
@@ -1385,7 +1385,7 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: Header) {
                 val (oldRef2, newRef2) = right.table.tableRef.refAction(
                     (::columnMove)(newRight.header, right.header, order, withName) {
                         copy(
-                            columns = this.columns.put(withName, ColumnMeta(newRight.order, oldRef1.columns[left.header]?.prenatal ?: throw InvalidColumnException(left))),
+                            columns = this.columns.put(withName, ColumnMeta(newRight.order, oldRef1.columns[left.header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header ${left.header}"))),
                             columnCells = this.columnCells.put(withName, oldRef1.columnCells[left.header] ?: PTreeMap())
                         )
                     }
@@ -1431,9 +1431,9 @@ fun move(columnToTableAction: ColumnToTableAction, withName: Header) {
             .sorted()
 
         // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
-        val newColumnMap = columnOrders.fold(PHashMap<Header, ColumnMeta>()) { acc, (columnHeader, columnOrder) ->
-            val prenatal = ref.columns[columnHeader]?.prenatal ?: throw InvalidColumnException(columnHeader)
-            acc.put(columnHeader, ColumnMeta(columnOrder, prenatal))
+        val newColumnMap = columnOrders.fold(PHashMap<Header, ColumnMeta>()) { acc, (header, columnOrder) ->
+            val prenatal = ref.columns[header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header $header")
+            acc.put(header, ColumnMeta(columnOrder, prenatal))
         }
 
         ref.copy(
@@ -1453,7 +1453,7 @@ fun move(columnToTableAction: ColumnToTableAction, withName: Header) {
                 val (oldRef, newRef) = table.tableRef.refAction(
                     (::columnMove)(withName) {
                         copy(
-                            columns = this.columns.remove(left.header).put(withName, ColumnMeta(newRight.order, this.columns[left.header]?.prenatal ?: throw InvalidColumnException(left))),
+                            columns = this.columns.remove(left.header).put(withName, ColumnMeta(newRight.order, this.columns[left.header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header ${left.header}"))),
                             columnCells = this.columnCells.remove(left.header).put(withName, this.columnCells[left.header] ?: PTreeMap()),
                         )
                     }
@@ -1474,7 +1474,7 @@ fun move(columnToTableAction: ColumnToTableAction, withName: Header) {
                 val (oldRef2, newRef2) = table.tableRef.refAction(
                     (::columnMove)(withName) {
                         copy(
-                            columns = this.columns.put(withName, ColumnMeta(newRight.order, oldRef1.columns[left.header]?.prenatal ?: throw InvalidColumnException(left))),
+                            columns = this.columns.put(withName, ColumnMeta(newRight.order, oldRef1.columns[left.header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header ${left.header}"))),
                             columnCells = this.columnCells.put(withName, oldRef1.columnCells[left.header] ?: PTreeMap()),
                         )
                     }
@@ -1538,9 +1538,9 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: Header) {
             .sorted()
 
         // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
-        val newColumnMap = columnOrders.fold(PHashMap<Header, ColumnMeta>()) { acc, (columnHeader, columnOrder) ->
-            val prenatal = ref.columns[columnHeader]?.prenatal ?: throw InvalidColumnException(columnHeader)
-            acc.put(columnHeader, ColumnMeta(columnOrder, prenatal))
+        val newColumnMap = columnOrders.fold(PHashMap<Header, ColumnMeta>()) { acc, (header, columnOrder) ->
+            val prenatal = ref.columns[header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header $header")
+            acc.put(header, ColumnMeta(columnOrder, prenatal))
         }
 
         // TODO Find a more efficient approach
@@ -1565,7 +1565,7 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: Header) {
                 val (oldRef, newRef) = left.table.tableRef.refAction(
                     (::columnCopy)(left.header, right.header, order, withName) {
                         copy(
-                            columns = this.columns.put(withName, ColumnMeta(newRight.order, this.columns[left.header]?.prenatal ?: throw InvalidColumnException(left))),
+                            columns = this.columns.put(withName, ColumnMeta(newRight.order, this.columns[left.header]?.prenatal ?: throw InvalidColumnException("Unable to find column for header ${left.header}"))),
                             columnCells = this.columnCells.put(withName, this.columnCells[left.header] ?: PTreeMap())
                         )
                     }
@@ -1579,7 +1579,7 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: Header) {
                     (::columnCopy)(newRight.header, right.header, order, withName) {
                         val leftRef = left.table.tableRef.get()
                         copy(
-                            columns = this.columns.put(withName, ColumnMeta(newRight.order, leftRef.columns[left.header]?.prenatal ?: throw InvalidColumnException(left))),
+                            columns = this.columns.put(withName, ColumnMeta(newRight.order, leftRef.columns[left.header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header ${left.header}"))),
                             columnCells = this.columnCells.put(withName, leftRef.columnCells[left.header] ?: PTreeMap())
                         )
                     }
@@ -1624,9 +1624,9 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: Header) {
             .sorted()
 
         // Use sequence of columnOrder as it already exists, and just reassign accordingly to the new sequence..
-        val newColumnMap = columnOrders.fold(PHashMap<Header, ColumnMeta>()) { acc, (columnHeader, columnOrder) ->
-            val prenatal = ref.columns[columnHeader]?.prenatal ?: throw InvalidColumnException(columnHeader)
-            acc.put(columnHeader, ColumnMeta(columnOrder, prenatal))
+        val newColumnMap = columnOrders.fold(PHashMap<Header, ColumnMeta>()) { acc, (header, columnOrder) ->
+            val prenatal = ref.columns[header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header $header")
+            acc.put(header, ColumnMeta(columnOrder, prenatal))
         }
 
         ref.copy(
@@ -1646,7 +1646,7 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: Header) {
                 val (oldRef, newRef) = table.tableRef.refAction(
                     (::columnCopy)(withName) {
                         copy(
-                            columns = this.columns.put(withName, ColumnMeta(newRight.order, this.columns[left.header]?.prenatal ?: throw InvalidColumnException(left))),
+                            columns = this.columns.put(withName, ColumnMeta(newRight.order, this.columns[left.header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header ${left.header}"))),
                             columnCells = this.columnCells.put(withName, this.columnCells[left.header] ?: PTreeMap()),
                         )
                     }
@@ -1660,7 +1660,7 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: Header) {
                     (::columnCopy)(withName) {
                         val leftRef = left.table.tableRef.get()
                         copy(
-                            columns = this.columns.put(withName, ColumnMeta(newRight.order, leftRef.columns[left.header]?.prenatal ?: throw InvalidColumnException(left))),
+                            columns = this.columns.put(withName, ColumnMeta(newRight.order, leftRef.columns[left.header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header ${left.header}"))),
                             columnCells = this.columnCells.put(withName, left.table.tableRef.get().columnCells[left.header] ?: PTreeMap()),
                         )
                     }
@@ -2983,8 +2983,8 @@ fun sort(
         val c2 = it2.next()
 
         val (oldRef, newRef) = tableRef.refAction { prev ->
-            val c1Meta = refClone.columns[c1.header] ?: throw InvalidColumnException(c1.header)
-            val c2Meta = prev.columns[c2.header] ?: throw InvalidColumnException(c2.header)
+            val c1Meta = refClone.columns[c1.header] ?: throw InvalidColumnException("Unable to find column meta for header ${c1.header}")
+            val c2Meta = prev.columns[c2.header] ?: throw InvalidColumnException("Unable to find column meta for header ${c2.header}")
 
             prev.copy(
                 columns = prev.columns.put(c2.header, c2Meta.copy(columnOrder = c1Meta.columnOrder))

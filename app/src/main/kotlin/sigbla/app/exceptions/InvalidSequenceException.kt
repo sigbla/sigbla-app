@@ -2,4 +2,4 @@
  * See LICENSE file for licensing details. */
 package sigbla.app.exceptions
 
-class InvalidSequenceException : SigblaAppException()
+class InvalidSequenceException internal constructor(message: String) : SigblaAppException(message)

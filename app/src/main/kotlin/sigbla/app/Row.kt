@@ -78,19 +78,19 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
         val columnCellMap = ref.columnCells
 
         fun at(header: Header): CellValue<*>? {
-            val values = columnCellMap[header] ?: throw InvalidColumnException(header)
+            val values = columnCellMap[header] ?: throw InvalidColumnException("Unable to find column cells for header $header")
             return values[index]
         }
 
         fun firstBefore(header: Header): CellValue<*>? {
-            val values = columnCellMap[header] ?: throw InvalidColumnException(header)
+            val values = columnCellMap[header] ?: throw InvalidColumnException("Unable to find column cells for header $header")
             val keys = values.asSortedMap().headMap(index).keys
             if (keys.isEmpty()) return null
             return values[keys.last()]
         }
 
         fun firstAfter(header: Header): CellValue<*>? {
-            val values = columnCellMap[header] ?: throw InvalidColumnException(header)
+            val values = columnCellMap[header] ?: throw InvalidColumnException("Unable to find column cells for header $header")
             val keys = values.asSortedMap().tailMap(index + 1L).keys
             if (keys.isEmpty()) return null
             return values[keys.first()]

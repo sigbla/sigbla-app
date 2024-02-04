@@ -62,7 +62,7 @@ val Sequence<TableViewListenerEvent<*>>.newView: TableView
             val view = tableViewFromViewRelated(it.newValue)
             newViewRefs[this] = view
             return view
-        } ?: throw InvalidSequenceException()
+        } ?: throw InvalidSequenceException("No event in sequence")
     }
 
 val Sequence<TableViewListenerEvent<*>>.oldView: TableView
@@ -74,5 +74,5 @@ val Sequence<TableViewListenerEvent<*>>.oldView: TableView
             val view = tableViewFromViewRelated(it.oldValue)
             oldViewRefs[this] = view
             return view
-        } ?: throw InvalidSequenceException()
+        } ?: throw InvalidSequenceException("No event in sequence")
     }

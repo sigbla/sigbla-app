@@ -1412,7 +1412,7 @@ class ColumnView internal constructor(
                 override fun next() = throw NoSuchElementException()
             }
 
-        val values = tableRef.columnCells[header] ?: throw InvalidColumnException(header)
+        val values = tableRef.columnCells[header] ?: throw InvalidColumnException("Unable to find column cells for header $header")
         val columnIterator = values.asSequence().map { it.component2().toCell(BaseColumn(table, header, columnMeta.columnOrder), it.component1()) }.iterator()
 
         return object : Iterator<DerivedCellView> {

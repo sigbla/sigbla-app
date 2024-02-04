@@ -58,9 +58,9 @@ internal class TableEventProcessor {
         var lazySkipHistory: Boolean? = null
 
         override val name: String? by lazy { lazyName }
-        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
-        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
-        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException() }
+        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException("Missing lazy order") }
+        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException("Missing lazy allowLoop") }
+        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException("Missing lazy skipHistory") }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -78,9 +78,9 @@ internal class TableEventProcessor {
         var lazySkipHistory: Boolean? = null
 
         override val name: String? by lazy { lazyName }
-        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
-        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
-        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException() }
+        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException("Missing lazy order") }
+        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException("Missing lazy allowLoop") }
+        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException("Missing lazy skipHistory") }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -98,9 +98,9 @@ internal class TableEventProcessor {
         var lazySkipHistory: Boolean? = null
 
         override val name: String? by lazy { lazyName }
-        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
-        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
-        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException() }
+        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException("Missing lazy order") }
+        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException("Missing lazy allowLoop") }
+        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException("Missing lazy skipHistory") }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -118,9 +118,9 @@ internal class TableEventProcessor {
         var lazySkipHistory: Boolean? = null
 
         override val name: String? by lazy { lazyName }
-        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
-        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
-        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException() }
+        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException("Missing lazy order") }
+        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException("Missing lazy allowLoop") }
+        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException("Missing lazy skipHistory") }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -138,9 +138,9 @@ internal class TableEventProcessor {
         var lazySkipHistory: Boolean? = null
 
         override val name: String? by lazy { lazyName }
-        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
-        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
-        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException() }
+        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException("Missing lazy order") }
+        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException("Missing lazy allowLoop") }
+        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException("Missing lazy skipHistory") }
 
         override fun unsubscribe() {
             haveUnsubscribed = true
@@ -165,9 +165,9 @@ internal class TableEventProcessor {
         var lazySkipHistory: Boolean? = null
 
         override val name: String? by lazy { lazyName }
-        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException() }
-        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException() }
-        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException() }
+        override val order: Long by lazy { lazyOrder ?: throw InvalidListenerException("Missing lazy order") }
+        override val allowLoop: Boolean by lazy { lazyAllowLoop ?: throw InvalidListenerException("Missing lazy allowLoop") }
+        override val skipHistory: Boolean by lazy { lazySkipHistory ?: throw InvalidListenerException("Missing lazy skipHistory") }
 
         override fun unsubscribe() {
             haveUnsubscribed = true

@@ -284,8 +284,8 @@ class BaseColumn internal constructor(
 
         synchronized(table.eventProcessor) {
             val (oldRef, newRef) = table.tableRef.refAction {
-                val meta = it.columns[this.header] ?: throw InvalidColumnException(this)
-                val values = it.columnCells[this.header] ?: throw InvalidColumnException(this)
+                val meta = it.columns[this.header] ?: throw InvalidColumnException("Unable to find column meta for header ${this.header}")
+                val values = it.columnCells[this.header] ?: throw InvalidColumnException("Unable to find column cells for header ${this.header}")
 
                 it.copy(
                     columns = if (meta.prenatal) it.columns.put(
@@ -320,8 +320,8 @@ class BaseColumn internal constructor(
     private fun clear(index: Long): Cell<*> {
         synchronized(table.eventProcessor) {
             val (oldRef, newRef) = table.tableRef.refAction {
-                val meta = it.columns[this.header] ?: throw InvalidColumnException(this)
-                val values = it.columnCells[this.header] ?: throw InvalidColumnException(this)
+                val meta = it.columns[this.header] ?: throw InvalidColumnException("Unable to find column meta for header ${this.header}")
+                val values = it.columnCells[this.header] ?: throw InvalidColumnException("Unable to find column cells for header ${this.header}")
 
                 it.copy(
                     columns = if (meta.prenatal) it.columns.put(
@@ -356,7 +356,7 @@ class BaseColumn internal constructor(
     }
 
     override fun iterator(): Iterator<Cell<*>> {
-        val values = table.tableRef.get().columnCells[this.header] ?: throw InvalidColumnException(this)
+        val values = table.tableRef.get().columnCells[this.header] ?: throw InvalidColumnException("Unable to find column cells for header ${this.header}")
         return values.asSequence().map { it.component2().toCell(this, it.component1()) }.iterator()
     }
 }
