@@ -77,6 +77,10 @@ column we label "Sum" at row 2.
 
 Because of the reactive nature of `sum(..)`, if the values update, so will the sum.
 
+If you open the printed URL, you'll see the table:
+
+![Sigbla example table](https://sigbla.app/docs/img/getting_started_example_1.png)
+
 Please see the [Sigbla documentation](https://sigbla.app/docs) for further details. If you find any issues or have some
 suggestions, please reach out using GitHub [issues](https://github.com/sigbla/sigbla-app/issues) or
 [discussions](https://github.com/sigbla/sigbla-app/discussions).
