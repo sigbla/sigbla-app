@@ -784,5 +784,127 @@ class TableViewTest {
         }
     }
 
+    @Test
+    fun `clear columnview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        tv1["A"][CellClasses] = "cc-1"
+        tv1["A"][CellTopics] = "ct-1"
+        tv1["A"][CellWidth] = 1000
+
+        var count = 0
+
+        on(tv1["A"], skipHistory = true) events {
+            count += count()
+
+            assertEquals(listOf("cc-1"), oldView["A"][CellClasses].classes)
+            assertEquals(listOf("ct-1"), oldView["A"][CellTopics].topics)
+            assertEquals(1000L, oldView["A"][CellWidth].width)
+
+            assertEquals(emptyList<String>(), newView["A"][CellClasses].classes)
+            assertEquals(emptyList<String>(), newView["A"][CellTopics].topics)
+            assertEquals(Unit, newView["A"][CellWidth].width)
+        }
+
+        assertEquals(0, count)
+
+        assertEquals(listOf("cc-1"), tv1["A"][CellClasses].classes)
+        assertEquals(listOf("ct-1"), tv1["A"][CellTopics].topics)
+        assertEquals(1000L, tv1["A"][CellWidth].width)
+
+        clear(tv1["A"])
+
+        assertEquals(emptyList<String>(), tv1["A"][CellClasses].classes)
+        assertEquals(emptyList<String>(), tv1["A"][CellTopics].topics)
+        assertEquals(Unit, tv1["A"][CellWidth].width)
+
+        assertEquals(3, count)
+    }
+
+    @Test
+    fun `clear rowview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        tv1[1][CellClasses] = "cc-1"
+        tv1[1][CellTopics] = "ct-1"
+        tv1[1][CellHeight] = 1000
+
+        var count = 0
+
+        on(tv1[1], skipHistory = true) events {
+            count += count()
+
+            assertEquals(listOf("cc-1"), oldView[1][CellClasses].classes)
+            assertEquals(listOf("ct-1"), oldView[1][CellTopics].topics)
+            assertEquals(1000L, oldView[1][CellHeight].height)
+
+            assertEquals(emptyList<String>(), newView[1][CellClasses].classes)
+            assertEquals(emptyList<String>(), newView[1][CellTopics].topics)
+            assertEquals(Unit, newView[1][CellHeight].height)
+        }
+
+        assertEquals(0, count)
+
+        assertEquals(listOf("cc-1"), tv1[1][CellClasses].classes)
+        assertEquals(listOf("ct-1"), tv1[1][CellTopics].topics)
+        assertEquals(1000L, tv1[1][CellHeight].height)
+
+        clear(tv1[1])
+
+        assertEquals(emptyList<String>(), tv1[1][CellClasses].classes)
+        assertEquals(emptyList<String>(), tv1[1][CellTopics].topics)
+        assertEquals(Unit, tv1[1][CellHeight].height)
+
+        assertEquals(3, count)
+    }
+
+    @Test
+    fun `clear cellview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        tv1["A", 1][CellHeight] = 1000
+        tv1["A", 1][CellWidth] = 2000
+        tv1["A", 1][CellClasses] = "cc-1"
+        tv1["A", 1][CellTopics] = "ct-1"
+        val ct: Cell<*>.() -> Any? = {}
+        tv1["A", 1][CellTransformer] = ct
+
+        var count = 0
+
+        on(tv1["A", 1], skipHistory = true) events {
+            count += count()
+
+            assertEquals(listOf("cc-1"), oldView["A", 1][CellClasses].classes)
+            assertEquals(listOf("ct-1"), oldView["A", 1][CellTopics].topics)
+            assertEquals(1000L, oldView["A", 1][CellHeight].height)
+            assertEquals(2000L, oldView["A", 1][CellWidth].width)
+            assertEquals(ct, oldView["A", 1][CellTransformer].function)
+
+            assertEquals(emptyList<String>(), newView["A", 1][CellClasses].classes)
+            assertEquals(emptyList<String>(), newView["A", 1][CellTopics].topics)
+            assertEquals(Unit, newView["A", 1][CellHeight].height)
+            assertEquals(Unit, newView["A", 1][CellWidth].width)
+            assertEquals(Unit, newView["A", 1][CellTransformer].function)
+        }
+
+        assertEquals(0, count)
+
+        assertEquals(listOf("cc-1"), tv1["A", 1][CellClasses].classes)
+        assertEquals(listOf("ct-1"), tv1["A", 1][CellTopics].topics)
+        assertEquals(1000L, tv1["A", 1][CellHeight].height)
+        assertEquals(2000L, tv1["A", 1][CellWidth].width)
+        assertEquals(ct, tv1["A", 1][CellTransformer].function)
+
+        clear(tv1["A", 1])
+
+        assertEquals(emptyList<String>(), tv1["A", 1][CellClasses].classes)
+        assertEquals(emptyList<String>(), tv1["A", 1][CellTopics].topics)
+        assertEquals(Unit, tv1["A", 1][CellHeight].height)
+        assertEquals(Unit, tv1["A", 1][CellWidth].width)
+        assertEquals(Unit, tv1["A", 1][CellTransformer].function)
+
+        assertEquals(5, count)
+    }
+
     // TODO See TableTest for inspiration
 }
