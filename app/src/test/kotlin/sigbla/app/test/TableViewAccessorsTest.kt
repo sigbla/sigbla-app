@@ -1251,4 +1251,132 @@ class TableViewAccessorsTest {
         tableView[table["L1", 2002]] { sourceCellView }
         compare(tableView[table["L1", 2002]])
     }
+
+    @Test
+    fun `columnview accessors`() {
+        val table = Table[object {}.javaClass.enclosingMethod.name]
+
+        val tableView = TableView[table]
+
+        tableView["A"][CellWidth] = 2000
+        tableView["A"][CellClasses] = "cc-1"
+        tableView["A"][CellTopics] = "ct-1"
+        //val ct: Cell<*>.() -> Any? = {}
+        //tableView["L1"][CellTransformer] = ct
+
+        val sourceColumnView = tableView["A"]
+
+        fun compare(columnView: ColumnView) {
+            assertEquals(2000L, sourceColumnView[CellWidth].width)
+            assertEquals(listOf("cc-1"), sourceColumnView[CellClasses].classes)
+            assertEquals(listOf("ct-1"), sourceColumnView[CellTopics].topics)
+            //assertEquals(ct, sourceColumnView[CellTransformer].function)
+
+            assertEquals(sourceColumnView[CellWidth].width, columnView[CellWidth].width)
+            assertEquals(sourceColumnView[CellClasses].classes, columnView[CellClasses].classes)
+            assertEquals(sourceColumnView[CellTopics].topics, columnView[CellTopics].topics)
+            //assertEquals(sourceColumnView[CellTransformer].function, columnView[CellTransformer].function)
+
+            clear(columnView)
+        }
+
+        tableView["L1"] = sourceColumnView
+        compare(tableView["L1"])
+
+        tableView["L1", "L2"] = sourceColumnView
+        compare(tableView["L1", "L2"])
+
+        tableView["L1", "L2", "L3"] = sourceColumnView
+        compare(tableView["L1", "L2", "L3"])
+
+        tableView["L1", "L2", "L3", "L4"] = sourceColumnView
+        compare(tableView["L1", "L2", "L3", "L4"])
+
+        tableView["L1", "L2", "L3", "L4", "L5"] = sourceColumnView
+        compare(tableView["L1", "L2", "L3", "L4", "L5"])
+
+        tableView["L1"] = { sourceColumnView }
+        compare(tableView["L1"])
+
+        tableView["L1", "L2"] = { sourceColumnView }
+        compare(tableView["L1", "L2"])
+
+        tableView["L1", "L2", "L3"] = { sourceColumnView }
+        compare(tableView["L1", "L2", "L3"])
+
+        tableView["L1", "L2", "L3", "L4"] = { sourceColumnView }
+        compare(tableView["L1", "L2", "L3", "L4"])
+
+        tableView["L1", "L2", "L3", "L4", "L5"] = { sourceColumnView }
+        compare(tableView["L1", "L2", "L3", "L4", "L5"])
+
+        tableView["L1"] { sourceColumnView }
+        compare(tableView["L1"])
+
+        tableView["L1", "L2"] { sourceColumnView }
+        compare(tableView["L1", "L2"])
+
+        tableView["L1", "L2", "L3"] { sourceColumnView }
+        compare(tableView["L1", "L2", "L3"])
+
+        tableView["L1", "L2", "L3", "L4"] { sourceColumnView }
+        compare(tableView["L1", "L2", "L3", "L4"])
+
+        tableView["L1", "L2", "L3", "L4", "L5"] { sourceColumnView }
+        compare(tableView["L1", "L2", "L3", "L4", "L5"])
+
+        tableView[Header["L1", "L2", "L3", "L4", "L5"]] = sourceColumnView
+        compare(tableView[Header["L1", "L2", "L3", "L4", "L5"]])
+
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]] = sourceColumnView
+        compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]])
+
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]] = sourceColumnView
+        compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]])
+
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]] = sourceColumnView
+        compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]])
+
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = sourceColumnView
+        compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
+
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = sourceColumnView
+        compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
+
+        tableView[Header["L1", "L2", "L3", "L4", "L5"]] = { sourceColumnView }
+        compare(tableView[Header["L1", "L2", "L3", "L4", "L5"]])
+
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]] = { sourceColumnView }
+        compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]])
+
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]] = { sourceColumnView }
+        compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]])
+
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]] = { sourceColumnView }
+        compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]])
+
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { sourceColumnView }
+        compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
+
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { sourceColumnView }
+        compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
+
+        tableView[Header["L1", "L2", "L3", "L4", "L5"]] { sourceColumnView }
+        compare(tableView[Header["L1", "L2", "L3", "L4", "L5"]])
+
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]] { sourceColumnView }
+        compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]])
+
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]] { sourceColumnView }
+        compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]])
+
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]] { sourceColumnView }
+        compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]])
+
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] { sourceColumnView }
+        compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
+
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] { sourceColumnView }
+        compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
+    }
 }

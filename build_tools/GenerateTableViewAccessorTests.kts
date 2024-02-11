@@ -17,15 +17,11 @@
 // ColumnView value:
 // tableView[label1, label2, label3, labelX] = value
 // tableView[header|column|columnview] = value
-// tableView[int|long|row|rowview][label1, label2, label3, labelX] = value
-// tableView[int|long|row|rowview][header|column|columnview] = value
 
 // + the ColumnView.() -> Any? assignment pattern
 
 // RowView value:
 // tableView[int|long|row|rowview] = value
-// tableView[label1, label2, label3, labelX][int|long|row|rowview] = value
-// tableView[header|column|columnview][int|long|row|rowview] = value
 
 // + the RowView.() -> Any? assignment pattern
 
@@ -837,4 +833,125 @@ fun generateForCellView() {
     println()
 }
 
+fun generateForColumnView() {
+    println("@Test")
+    println("fun `columnview accessors`() {")
+
+    println("""
+        val table = Table[object {}.javaClass.enclosingMethod.name]
+        
+        val tableView = TableView[table]
+
+        tableView["A"][CellWidth] = 2000
+        tableView["A"][CellClasses] = "cc-1"
+        tableView["A"][CellTopics] = "ct-1"
+        //val ct: Cell<*>.() -> Any? = {}
+        //tableView["L1"][CellTransformer] = ct
+
+        val sourceColumnView = tableView["A"]
+
+        fun compare(columnView: ColumnView) {
+            assertEquals(2000L, sourceColumnView[CellWidth].width)
+            assertEquals(listOf("cc-1"), sourceColumnView[CellClasses].classes)
+            assertEquals(listOf("ct-1"), sourceColumnView[CellTopics].topics)
+            //assertEquals(ct, sourceColumnView[CellTransformer].function)
+
+            assertEquals(sourceColumnView[CellWidth].width, columnView[CellWidth].width)
+            assertEquals(sourceColumnView[CellClasses].classes, columnView[CellClasses].classes)
+            assertEquals(sourceColumnView[CellTopics].topics, columnView[CellTopics].topics)
+            //assertEquals(sourceColumnView[CellTransformer].function, columnView[CellTransformer].function)
+
+            clear(columnView)
+        }
+    """.trimIndent())
+
+    for (i in 1..5) {
+        val headers = (1..i).fold(mutableListOf<String>()) { acc, i -> acc.apply { add("\"L$i\"") } }
+
+        // tableView[label1, label2, label3, labelX] = value
+        println()
+        println("tableView[${headers.joinToString()}] = sourceColumnView")
+        println("compare(tableView[${headers.joinToString()}])")
+    }
+
+    for (i in 1..5) {
+        val headers = (1..i).fold(mutableListOf<String>()) { acc, i -> acc.apply { add("\"L$i\"") } }
+
+        // tableView[label1, label2, label3, labelX] = value
+        println()
+        println("tableView[${headers.joinToString()}] = { sourceColumnView }")
+        println("compare(tableView[${headers.joinToString()}])")
+    }
+
+    for (i in 1..5) {
+        val headers = (1..i).fold(mutableListOf<String>()) { acc, i -> acc.apply { add("\"L$i\"") } }
+
+        // tableView[label1, label2, label3, labelX] = value
+        println()
+        println("tableView[${headers.joinToString()}] { sourceColumnView }")
+        println("compare(tableView[${headers.joinToString()}])")
+    }
+
+    for (i in 5..6) {
+        val headers = (1..i).fold(mutableListOf<String>()) { acc, i -> acc.apply { add("\"L$i\"") } }
+
+        // tableView[header] = value
+        println()
+        println("tableView[Header[${headers.joinToString()}]] = sourceColumnView")
+        println("compare(tableView[Header[${headers.joinToString()}]])")
+
+        // tableView[column] = value
+        println()
+        println("tableView[table[Header[${headers.joinToString()}]]] = sourceColumnView")
+        println("compare(tableView[table[Header[${headers.joinToString()}]]])")
+
+        // tableView[columnView] = value
+        println()
+        println("tableView[tableView[Header[${headers.joinToString()}]]] = sourceColumnView")
+        println("compare(tableView[tableView[Header[${headers.joinToString()}]]])")
+    }
+
+    for (i in 5..6) {
+        val headers = (1..i).fold(mutableListOf<String>()) { acc, i -> acc.apply { add("\"L$i\"") } }
+
+        // tableView[header] = value
+        println()
+        println("tableView[Header[${headers.joinToString()}]] = { sourceColumnView }")
+        println("compare(tableView[Header[${headers.joinToString()}]])")
+
+        // tableView[column] = value
+        println()
+        println("tableView[table[Header[${headers.joinToString()}]]] = { sourceColumnView }")
+        println("compare(tableView[table[Header[${headers.joinToString()}]]])")
+
+        // tableView[columnView] = value
+        println()
+        println("tableView[tableView[Header[${headers.joinToString()}]]] = { sourceColumnView }")
+        println("compare(tableView[tableView[Header[${headers.joinToString()}]]])")
+    }
+
+    for (i in 5..6) {
+        val headers = (1..i).fold(mutableListOf<String>()) { acc, i -> acc.apply { add("\"L$i\"") } }
+
+        // tableView[header] = value
+        println()
+        println("tableView[Header[${headers.joinToString()}]] { sourceColumnView }")
+        println("compare(tableView[Header[${headers.joinToString()}]])")
+
+        // tableView[column] = value
+        println()
+        println("tableView[table[Header[${headers.joinToString()}]]] { sourceColumnView }")
+        println("compare(tableView[table[Header[${headers.joinToString()}]]])")
+
+        // tableView[columnView] = value
+        println()
+        println("tableView[tableView[Header[${headers.joinToString()}]]] { sourceColumnView }")
+        println("compare(tableView[tableView[Header[${headers.joinToString()}]]])")
+    }
+
+    println("}")
+    println()
+}
+
 generateForCellView()
+generateForColumnView()

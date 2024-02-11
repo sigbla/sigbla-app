@@ -549,6 +549,28 @@ class TableView internal constructor(
 
     // -----
 
+    operator fun set(header1: String, function: ColumnView.() -> Any?) {
+        this[header1] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, function: ColumnView.() -> Any?) {
+        this[header1, header2] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, function: ColumnView.() -> Any?) {
+        this[header1, header2, header3] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, function: ColumnView.() -> Any?) {
+        this[header1, header2, header3, header4] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, function: ColumnView.() -> Any?) {
+        this[header1, header2, header3, header4, header5] { function() }
+    }
+
+    // -----
+
     operator fun set(index: Long, view: RowView?) {
         synchronized(eventProcessor) {
             val (oldRef, newRef) = tableViewRef.refAction {
