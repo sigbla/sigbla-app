@@ -953,5 +953,102 @@ fun generateForColumnView() {
     println()
 }
 
+fun generateForRowView() {
+    println("@Test")
+    println("fun `rowview accessors`() {")
+
+    println("""
+        val table = Table[object {}.javaClass.enclosingMethod.name]
+        
+        val tableView = TableView[table]
+
+        tableView[1][CellHeight] = 1000
+        tableView[1][CellClasses] = "cc-1"
+        tableView[1][CellTopics] = "ct-1"
+        //val ct: Cell<*>.() -> Any? = {}
+        //tableView[1][CellTransformer] = ct
+
+        val sourceRowView = tableView[1]
+
+        fun compare(rowView: RowView) {
+            assertEquals(1000L, sourceRowView[CellHeight].height)
+            assertEquals(listOf("cc-1"), sourceRowView[CellClasses].classes)
+            assertEquals(listOf("ct-1"), sourceRowView[CellTopics].topics)
+            //assertEquals(ct, sourceRowView[CellTransformer].function)
+
+            assertEquals(sourceRowView[CellHeight].height, rowView[CellHeight].height)
+            assertEquals(sourceRowView[CellClasses].classes, rowView[CellClasses].classes)
+            assertEquals(sourceRowView[CellTopics].topics, rowView[CellTopics].topics)
+            //assertEquals(sourceRowView[CellTransformer].function, rowView[CellTransformer].function)
+
+            clear(rowView)
+        }
+    """.trimIndent())
+
+    // tableView[int] = value
+    println()
+    println("tableView[Int.MAX_VALUE] = sourceRowView")
+    println("compare(tableView[Int.MAX_VALUE])")
+
+    // tableView[long] = value
+    println()
+    println("tableView[Long.MAX_VALUE] = sourceRowView")
+    println("compare(tableView[Long.MAX_VALUE])")
+
+    // tableView[row] = value
+    println()
+    println("tableView[table[2000]] = sourceRowView")
+    println("compare(tableView[table[2000]])")
+
+    // tableView[rowview] = value
+    println()
+    println("tableView[tableView[3000]] = sourceRowView")
+    println("compare(tableView[tableView[3000]])")
+
+    // tableView[int] = value
+    println()
+    println("tableView[Int.MAX_VALUE] = { sourceRowView }")
+    println("compare(tableView[Int.MAX_VALUE])")
+
+    // tableView[long] = value
+    println()
+    println("tableView[Long.MAX_VALUE] = { sourceRowView }")
+    println("compare(tableView[Long.MAX_VALUE])")
+
+    // tableView[row] = value
+    println()
+    println("tableView[table[2000]] = { sourceRowView }")
+    println("compare(tableView[table[2000]])")
+
+    // tableView[rowview] = value
+    println()
+    println("tableView[tableView[3000]] = { sourceRowView }")
+    println("compare(tableView[tableView[3000]])")
+
+    // tableView[int] = value
+    println()
+    println("tableView[Int.MAX_VALUE] { sourceRowView }")
+    println("compare(tableView[Int.MAX_VALUE])")
+
+    // tableView[long] = value
+    println()
+    println("tableView[Long.MAX_VALUE] { sourceRowView }")
+    println("compare(tableView[Long.MAX_VALUE])")
+
+    // tableView[row] = value
+    println()
+    println("tableView[table[2000]] { sourceRowView }")
+    println("compare(tableView[table[2000]])")
+
+    // tableView[rowview] = value
+    println()
+    println("tableView[tableView[3000]] { sourceRowView }")
+    println("compare(tableView[tableView[3000]])")
+
+    println("}")
+    println()
+}
+
 generateForCellView()
 generateForColumnView()
+generateForRowView()
