@@ -602,6 +602,8 @@ class TableView internal constructor(
         }
     }
 
+    operator fun set(index: Int, view: RowView?) = set(index.toLong(), view)
+
     operator fun set(rowView: RowView, view: RowView?) = set(rowView.index, view)
 
     operator fun set(row: Row, view: RowView?) {

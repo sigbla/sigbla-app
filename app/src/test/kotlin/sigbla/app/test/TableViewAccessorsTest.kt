@@ -1379,4 +1379,69 @@ class TableViewAccessorsTest {
         tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] { sourceColumnView }
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
     }
+
+    @Test
+    fun `rowview accessors`() {
+        val table = Table[object {}.javaClass.enclosingMethod.name]
+
+        val tableView = TableView[table]
+
+        tableView[1][CellHeight] = 1000
+        tableView[1][CellClasses] = "cc-1"
+        tableView[1][CellTopics] = "ct-1"
+        //val ct: Cell<*>.() -> Any? = {}
+        //tableView[1][CellTransformer] = ct
+
+        val sourceRowView = tableView[1]
+
+        fun compare(rowView: RowView) {
+            assertEquals(1000L, sourceRowView[CellHeight].height)
+            assertEquals(listOf("cc-1"), sourceRowView[CellClasses].classes)
+            assertEquals(listOf("ct-1"), sourceRowView[CellTopics].topics)
+            //assertEquals(ct, sourceRowView[CellTransformer].function)
+
+            assertEquals(sourceRowView[CellHeight].height, rowView[CellHeight].height)
+            assertEquals(sourceRowView[CellClasses].classes, rowView[CellClasses].classes)
+            assertEquals(sourceRowView[CellTopics].topics, rowView[CellTopics].topics)
+            //assertEquals(sourceRowView[CellTransformer].function, rowView[CellTransformer].function)
+
+            clear(rowView)
+        }
+
+        tableView[Int.MAX_VALUE] = sourceRowView
+        compare(tableView[Int.MAX_VALUE])
+
+        tableView[Long.MAX_VALUE] = sourceRowView
+        compare(tableView[Long.MAX_VALUE])
+
+        tableView[table[2000]] = sourceRowView
+        compare(tableView[table[2000]])
+
+        tableView[tableView[3000]] = sourceRowView
+        compare(tableView[tableView[3000]])
+
+        tableView[Int.MAX_VALUE] = { sourceRowView }
+        compare(tableView[Int.MAX_VALUE])
+
+        tableView[Long.MAX_VALUE] = { sourceRowView }
+        compare(tableView[Long.MAX_VALUE])
+
+        tableView[table[2000]] = { sourceRowView }
+        compare(tableView[table[2000]])
+
+        tableView[tableView[3000]] = { sourceRowView }
+        compare(tableView[tableView[3000]])
+
+        tableView[Int.MAX_VALUE] { sourceRowView }
+        compare(tableView[Int.MAX_VALUE])
+
+        tableView[Long.MAX_VALUE] { sourceRowView }
+        compare(tableView[Long.MAX_VALUE])
+
+        tableView[table[2000]] { sourceRowView }
+        compare(tableView[table[2000]])
+
+        tableView[tableView[3000]] { sourceRowView }
+        compare(tableView[tableView[3000]])
+    }
 }
