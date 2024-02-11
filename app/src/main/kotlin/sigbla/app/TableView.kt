@@ -369,6 +369,8 @@ class TableView internal constructor(
 
     operator fun get(index: Long) = RowView(this, index)
 
+    // -----
+
     operator fun get(header1: String, index: Long): CellView = this[header1][index]
 
     operator fun get(header1: String, header2: String, index: Long): CellView = this[header1, header2][index]
@@ -379,7 +381,35 @@ class TableView internal constructor(
 
     operator fun get(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long): CellView = this[header1, header2, header3, header4, header5][index]
 
+    // -----
+
+    operator fun get(header1: String, row: Row): CellView = this[header1][row]
+
+    operator fun get(header1: String, header2: String, row: Row): CellView = this[header1, header2][row]
+
+    operator fun get(header1: String, header2: String, header3: String, row: Row): CellView = this[header1, header2, header3][row]
+
+    operator fun get(header1: String, header2: String, header3: String, header4: String, row: Row): CellView = this[header1, header2, header3, header4][row]
+
+    operator fun get(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row): CellView = this[header1, header2, header3, header4, header5][row]
+
+    // -----
+
+    operator fun get(header1: String, rowView: RowView): CellView = this[header1][rowView]
+
+    operator fun get(header1: String, header2: String, rowView: RowView): CellView = this[header1, header2][rowView]
+
+    operator fun get(header1: String, header2: String, header3: String, rowView: RowView): CellView = this[header1, header2, header3][rowView]
+
+    operator fun get(header1: String, header2: String, header3: String, header4: String, rowView: RowView): CellView = this[header1, header2, header3, header4][rowView]
+
+    operator fun get(header1: String, header2: String, header3: String, header4: String, header5: String, rowView: RowView): CellView = this[header1, header2, header3, header4, header5][rowView]
+
+    // -----
+
     operator fun get(index: Int): RowView = get(index.toLong())
+
+    // -----
 
     operator fun get(header1: String, index: Int): CellView = this[header1][index]
 
@@ -416,16 +446,38 @@ class TableView internal constructor(
 
     // -----
 
-    operator fun get(index: Long, column: Column): CellView = this[column, index]
-    operator fun get(index: Long, header: Header): CellView = this[header, index]
-
-    // -----
-
     operator fun get(column: Column, index: Long): CellView = this[column.header, index]
 
     operator fun get(columnView: ColumnView, index: Long): CellView = this[columnView.header, index]
 
     operator fun get(header: Header, index: Long): CellView = CellView(get(header), index)
+
+    // -----
+
+    operator fun get(column: Column, rowView: RowView): CellView = this[column.header, rowView.index]
+
+    operator fun get(columnView: ColumnView, rowView: RowView): CellView = this[columnView.header, rowView.index]
+
+    operator fun get(header: Header, rowView: RowView): CellView = CellView(get(header), rowView.index)
+
+    // -----
+
+    operator fun get(column: Column, row: Row): CellView = this[column.header, row]
+
+    operator fun get(columnView: ColumnView, row: Row): CellView = this[columnView.header, row]
+
+    operator fun get(header: Header, row: Row): CellView {
+        if (row.indexRelation != IndexRelation.AT) throw InvalidRowException("Only IndexRelation.AT supported in get: $row")
+        return this[header, row.index]
+    }
+
+    // -----
+
+    operator fun get(column: Column, index: Int): CellView = this[column.header, index]
+
+    operator fun get(columnView: ColumnView, index: Int): CellView = this[columnView.header, index]
+
+    operator fun get(header: Header, index: Int): CellView = CellView(get(header), index.toLong())
 
     // -----
 
@@ -553,21 +605,73 @@ class TableView internal constructor(
 
     // -----
 
+    operator fun set(column: Column, index: Int, view: CellView?) {
+        this[column.header, index] = view
+    }
+
+    operator fun set(column: Column, row: Row, view: CellView?) {
+        this[column.header, row] = view
+    }
+
+    operator fun set(column: Column, rowView: RowView, view: CellView?) {
+        this[column.header, rowView] = view
+    }
+
+    operator fun set(column: Column, index: Long, view: CellView?) {
+        this[column.header, index] = view
+    }
+
+    // -----
+
+    operator fun set(columnView: ColumnView, index: Int, view: CellView?) {
+        this[columnView.header, index] = view
+    }
+
+    operator fun set(columnView: ColumnView, row: Row, view: CellView?) {
+        this[columnView.header, row] = view
+    }
+
+    operator fun set(columnView: ColumnView, rowView: RowView, view: CellView?) {
+        this[columnView.header, rowView] = view
+    }
+
+    operator fun set(columnView: ColumnView, index: Long, view: CellView?) {
+        this[columnView.header, index] = view
+    }
+
+    // -----
+
     operator fun set(header: Header, index: Int, view: CellView?) {
         this[header, index.toLong()] = view
     }
 
+    operator fun set(header: Header, row: Row, view: CellView?) {
+        if (row.indexRelation != IndexRelation.AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        this[header, row.index] = view
+    }
+
+    operator fun set(header: Header, rowView: RowView, view: CellView?) {
+        this[header, rowView.index] = view
+    }
+
     operator fun set(header: Header, index: Long, view: CellView?) {
         synchronized(eventProcessor) {
+            val sourceCell = if (view == null) null else Pair(view.columnView.header, view.index)
             val cell = Pair(header, index)
+
             val (oldRef, newRef) = tableViewRef.refAction {
-                val viewMeta = if (view == null) null else view.tableView.tableViewRef.get().cellViews[cell]
+                val viewMeta = if (view == null) null else view.tableView.tableViewRef.get().cellViews[sourceCell!!]
+                val transformer = if (view == null) null else view.tableView.tableViewRef.get().cellTransformers[sourceCell!!]
 
                 it.copy(
                     cellViews = if (viewMeta != null)
                         it.cellViews.put(cell, viewMeta)
                     else
                         it.cellViews.remove(cell),
+                    cellTransformers = if (transformer != null)
+                        it.cellTransformers.put(cell, transformer)
+                    else
+                        it.cellTransformers.remove(cell),
                     version = it.version + 1L
                 )
             }
@@ -600,6 +704,53 @@ class TableView internal constructor(
         this[header][index] { function() }
     }
 
+    operator fun set(header: Header, row: Row, function: CellView.() -> Any?) {
+        // No IR.AT check here because this is actually a get before set
+        this[header][row] { function() }
+    }
+
+    operator fun set(header: Header, rowView: RowView, function: CellView.() -> Any?) {
+        this[header][rowView] { function() }
+    }
+
+    // -----
+
+    operator fun set(column: Column, index: Int, function: CellView.() -> Any?) {
+        this[column][index] { function() }
+    }
+
+    operator fun set(column: Column, index: Long, function: CellView.() -> Any?) {
+        this[column][index] { function() }
+    }
+
+    operator fun set(column: Column, row: Row, function: CellView.() -> Any?) {
+        // No IR.AT check here because this is actually a get before set
+        this[column][row] { function() }
+    }
+
+    operator fun set(column: Column, rowView: RowView, function: CellView.() -> Any?) {
+        this[column][rowView] { function() }
+    }
+
+    // -----
+
+    operator fun set(columnView: ColumnView, index: Int, function: CellView.() -> Any?) {
+        this[columnView][index] { function() }
+    }
+
+    operator fun set(columnView: ColumnView, index: Long, function: CellView.() -> Any?) {
+        this[columnView][index] { function() }
+    }
+
+    operator fun set(columnView: ColumnView, row: Row, function: CellView.() -> Any?) {
+        // No IR.AT check here because this is actually a get before set
+        this[columnView][row] { function() }
+    }
+
+    operator fun set(columnView: ColumnView, rowView: RowView, function: CellView.() -> Any?) {
+        this[columnView][rowView] { function() }
+    }
+
     // -----
 
     operator fun set(vararg header: String, view: ColumnView?) {
@@ -630,6 +781,50 @@ class TableView internal constructor(
 
     // -----
 
+    operator fun set(header1: String, row: Row, view: CellView?) {
+        this[header1][row] = view
+    }
+
+    operator fun set(header1: String, header2: String, row: Row, view: CellView?) {
+        this[header1, header2][row] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, row: Row, view: CellView?) {
+        this[header1, header2, header3][row] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, view: CellView?) {
+        this[header1, header2, header3, header4][row] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, view: CellView?) {
+        this[header1, header2, header3, header4, header5][row] = view
+    }
+
+    // -----
+
+    operator fun set(header1: String, rowView: RowView, view: CellView?) {
+        this[header1][rowView] = view
+    }
+
+    operator fun set(header1: String, header2: String, rowView: RowView, view: CellView?) {
+        this[header1, header2][rowView] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, rowView: RowView, view: CellView?) {
+        this[header1, header2, header3][rowView] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, rowView: RowView, view: CellView?) {
+        this[header1, header2, header3, header4][rowView] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, rowView: RowView, view: CellView?) {
+        this[header1, header2, header3, header4, header5][rowView] = view
+    }
+
+    // -----
+
     operator fun set(header1: String, index: Long, function: CellView.() -> Any?) {
         this[header1][index] { function() }
     }
@@ -648,6 +843,55 @@ class TableView internal constructor(
 
     operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, function: CellView.() -> Any?) {
         this[header1, header2, header3, header4, header5][index] { function() }
+    }
+
+    // -----
+
+    operator fun set(header1: String, row: Row, function: CellView.() -> Any?) {
+        // No IR.AT check here because this is actually a get before set
+        this[header1][row] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, row: Row, function: CellView.() -> Any?) {
+        // No IR.AT check here because this is actually a get before set
+        this[header1, header2][row] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, row: Row, function: CellView.() -> Any?) {
+        // No IR.AT check here because this is actually a get before set
+        this[header1, header2, header3][row] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, function: CellView.() -> Any?) {
+        // No IR.AT check here because this is actually a get before set
+        this[header1, header2, header3, header4][row] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, function: CellView.() -> Any?) {
+        // No IR.AT check here because this is actually a get before set
+        this[header1, header2, header3, header4, header5][row] { function() }
+    }
+
+    // -----
+
+    operator fun set(header1: String, rowView: RowView, function: CellView.() -> Any?) {
+        this[header1][rowView] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, rowView: RowView, function: CellView.() -> Any?) {
+        this[header1, header2][rowView] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, rowView: RowView, function: CellView.() -> Any?) {
+        this[header1, header2, header3][rowView] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, rowView: RowView, function: CellView.() -> Any?) {
+        this[header1, header2, header3, header4][rowView] { function() }
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, rowView: RowView, function: CellView.() -> Any?) {
+        this[header1, header2, header3, header4, header5][rowView] { function() }
     }
 
     // -----
@@ -1202,6 +1446,7 @@ class ColumnView internal constructor(
     init {
         // Best efforts to help columns appear in the order they are referenced,
         // but ultimately this is controlled by the underlying table.
+        // TODO Do != instead of !== to allow row header style control?
         if (header !== emptyHeader) tableView.tableViewRef.get().table?.get(header)
     }
 
