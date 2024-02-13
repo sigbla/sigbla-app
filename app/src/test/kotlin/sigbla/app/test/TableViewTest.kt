@@ -606,8 +606,9 @@ class TableViewTest {
     }
 
     @Test
-    fun `rowview invoke`() {
+    fun `rowview invoke 1`() {
         val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        // TODO Add CellTransformer when supported
 
         tv1[1][CellHeight] {
             200
@@ -648,6 +649,68 @@ class TableViewTest {
         assertEquals(Unit, tv1[1][CellHeight].height)
         assertEquals(emptyList<String>(), tv1[1][CellClasses].classes)
         assertEquals(emptyList<String>(), tv1[1][CellTopics].topics)
+    }
+
+    @Test
+    fun `rowview invoke 2`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        // TODO Add CellTransformer when supported
+
+        tv1[1] {
+            tv1[2][CellHeight]
+        }
+        tv1[1] {
+            tv1[2][CellClasses]
+        }
+        tv1[1] {
+            tv1[2][CellTopics]
+        }
+        tv1[1] { }
+
+        assertEquals(Unit, tv1[1][CellHeight].height)
+        assertEquals(emptyList<String>(), tv1[1][CellClasses].classes)
+        assertEquals(emptyList<String>(), tv1[1][CellTopics].topics)
+
+        tv1[2][CellHeight] {
+            200
+        }
+        tv1[2][CellClasses] {
+            "300"
+        }
+        tv1[2][CellTopics] {
+            "400"
+        }
+        tv1[1] {
+            tv1[2][CellHeight]
+        }
+        tv1[1] {
+            tv1[2][CellClasses]
+        }
+        tv1[1] {
+            tv1[2][CellTopics]
+        }
+
+        assertEquals(200L, tv1[1][CellHeight].height)
+        assertEquals(listOf("300"), tv1[1][CellClasses].classes)
+        assertEquals(listOf("400"), tv1[1][CellTopics].topics)
+
+        tv1[1] { }
+
+        assertEquals(200L, tv1[1][CellHeight].height)
+        assertEquals(listOf("300"), tv1[1][CellClasses].classes)
+        assertEquals(listOf("400"), tv1[1][CellTopics].topics)
+
+        tv1[1] { null }
+
+        assertEquals(Unit, tv1[1][CellHeight].height)
+        assertEquals(emptyList<String>(), tv1[1][CellClasses].classes)
+        assertEquals(emptyList<String>(), tv1[1][CellTopics].topics)
+
+        tv1[1] { tv1[2] }
+
+        assertEquals(200L, tv1[1][CellHeight].height)
+        assertEquals(listOf("300"), tv1[1][CellClasses].classes)
+        assertEquals(listOf("400"), tv1[1][CellTopics].topics)
     }
 
     @Test
