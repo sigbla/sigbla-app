@@ -1730,4 +1730,157 @@ class TableViewListenerTest {
         assertEquals(2, eventCount1)
         assertEquals(2, eventCount2)
     }
+
+    @Test
+    fun `columnview on header`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        var count = 0
+
+        on(tv1["B"], skipHistory = true) events {
+            count += count()
+
+            forEach {
+                when (it.newValue) {
+                    is CellClasses<*> -> {
+                        val old = it.oldValue as CellClasses<*>
+                        val new = it.newValue as CellClasses<*>
+                        assertEquals(emptyList(), old.classes)
+                        assertEquals(listOf("cc-1"), new.classes)
+                    }
+                    is CellTopics<*> -> {
+                        val old = it.oldValue as CellTopics<*>
+                        val new = it.newValue as CellTopics<*>
+                        assertEquals(emptyList(), old.topics)
+                        assertEquals(listOf("ct-1"), new.topics)
+                    }
+                    is CellTransformer<*> -> {
+                        TODO()
+                    }
+                    is CellWidth<*, *> -> {
+                        val old = it.oldValue as CellWidth<*, *>
+                        val new = it.newValue as CellWidth<*, *>
+                        assertEquals(Unit, old.width)
+                        assertEquals(1000L, new.width)
+                    }
+                    else -> assertTrue(false)
+                }
+            }
+        }
+
+        tv1["A"][CellClasses] = "cc-1"
+        tv1["A"][CellTopics] = "ct-1"
+        //tv1["A"][CellTransformer] = TODO
+        tv1["A"][CellWidth] = 1000
+
+        assertEquals(0, count)
+        tv1["B"] = tv1["A"]
+        assertEquals(3, count)
+    }
+
+    @Test
+    fun `rowview on row`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        var count = 0
+
+        on(tv1[2], skipHistory = true) events {
+            count += count()
+
+            forEach {
+                when (it.newValue) {
+                    is CellClasses<*> -> {
+                        val old = it.oldValue as CellClasses<*>
+                        val new = it.newValue as CellClasses<*>
+                        assertEquals(emptyList(), old.classes)
+                        assertEquals(listOf("cc-1"), new.classes)
+                    }
+                    is CellTopics<*> -> {
+                        val old = it.oldValue as CellTopics<*>
+                        val new = it.newValue as CellTopics<*>
+                        assertEquals(emptyList(), old.topics)
+                        assertEquals(listOf("ct-1"), new.topics)
+                    }
+                    is CellTransformer<*> -> {
+                        TODO()
+                    }
+                    is CellHeight<*, *> -> {
+                        val old = it.oldValue as CellHeight<*, *>
+                        val new = it.newValue as CellHeight<*, *>
+                        assertEquals(Unit, old.height)
+                        assertEquals(1000L, new.height)
+                    }
+                    else -> assertTrue(false)
+                }
+            }
+        }
+
+        tv1[1][CellClasses] = "cc-1"
+        tv1[1][CellTopics] = "ct-1"
+        //tv1[1][CellTransformer] = TODO
+        tv1[1][CellHeight] = 1000
+
+        assertEquals(0, count)
+        tv1[2] = tv1[1]
+        assertEquals(3, count)
+    }
+
+    @Test
+    fun `cellview on cell`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        var count = 0
+
+        val ct: Cell<*>.() -> Any? = {}
+
+        on(tv1["B", 2], skipHistory = true) events {
+            count += count()
+
+            forEach {
+                when (it.newValue) {
+                    is CellClasses<*> -> {
+                        val old = it.oldValue as CellClasses<*>
+                        val new = it.newValue as CellClasses<*>
+                        assertEquals(emptyList(), old.classes)
+                        assertEquals(listOf("cc-1"), new.classes)
+                    }
+                    is CellTopics<*> -> {
+                        val old = it.oldValue as CellTopics<*>
+                        val new = it.newValue as CellTopics<*>
+                        assertEquals(emptyList(), old.topics)
+                        assertEquals(listOf("ct-1"), new.topics)
+                    }
+                    is CellTransformer<*> -> {
+                        val old = it.oldValue as CellTransformer<*>
+                        val new = it.newValue as CellTransformer<*>
+                        assertEquals(Unit, old.function)
+                        assertEquals(ct, new.function)
+                    }
+                    is CellHeight<*, *> -> {
+                        val old = it.oldValue as CellHeight<*, *>
+                        val new = it.newValue as CellHeight<*, *>
+                        assertEquals(Unit, old.height)
+                        assertEquals(1000L, new.height)
+                    }
+                    is CellWidth<*, *> -> {
+                        val old = it.oldValue as CellWidth<*, *>
+                        val new = it.newValue as CellWidth<*, *>
+                        assertEquals(Unit, old.width)
+                        assertEquals(2000L, new.width)
+                    }
+                    else -> assertTrue(false)
+                }
+            }
+        }
+
+        tv1["A", 1][CellClasses] = "cc-1"
+        tv1["A", 1][CellTopics] = "ct-1"
+        tv1["A", 1][CellTransformer] = ct
+        tv1["A", 1][CellHeight] = 1000
+        tv1["A", 1][CellWidth] = 2000
+
+        assertEquals(0, count)
+        tv1["B", 2] = tv1["A", 1]
+        assertEquals(5, count)
+    }
 }
