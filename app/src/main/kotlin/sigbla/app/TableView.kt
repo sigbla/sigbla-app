@@ -1323,7 +1323,6 @@ class CellView(
             is CellTopics<*> -> { tableView[this][CellTopics] = value; value }
             is Unit -> { /* no assignment */ Unit }
             is Function1<*, *> -> { invoke(value as CellView.() -> Any?) }
-            // TODO null?
             null -> { tableView[this] = null; null }
             else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
         }
@@ -2529,6 +2528,31 @@ class CellTopics<S> internal constructor(
 sealed class CellTransformer<T> {
     abstract val source: CellView
     abstract val function: T
+
+    operator fun invoke(function: CellTransformer<*>.() -> Any?): Any? {
+        val value = this.function()
+        val transformer = when(value) {
+            is FunctionCellTransformer -> value.function
+            is UnitCellTransformer -> null
+            is Unit -> { /* no assignment */ return Unit }
+            is Function1<*, *> -> value as Cell<*>.() -> Any?
+            null -> null
+            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
+        }
+
+        if (transformer == null) source[CellTransformer] = null else source[CellTransformer] = transformer
+        /*
+        // TODO
+        when (val source = source) {
+            is TableView -> if (transformer == null) source[CellTransformer] = null else source[CellTransformer] = transformer
+            is ColumnView -> if (transformer == null) source[CellTransformer] = null else source[CellTransformer] = transformer
+            is RowView -> if (transformer == null) source[CellTransformer] = null else source[CellTransformer] = transformer
+            is CellView -> if (transformer == null) source[CellTransformer] = null else source[CellTransformer] = transformer
+        }
+         */
+
+        return value
+    }
 
     companion object
 }
