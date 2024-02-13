@@ -659,10 +659,10 @@ class TableViewTest {
         tv1[1] {
             tv1[2][CellHeight]
         }
-        tv1[1][CellClasses] {
+        tv1[1] {
             tv1[2][CellClasses]
         }
-        tv1[1][CellTopics] {
+        tv1[1] {
             tv1[2][CellTopics]
         }
         tv1[1] { }
@@ -683,10 +683,10 @@ class TableViewTest {
         tv1[1] {
             tv1[2][CellHeight]
         }
-        tv1[1][CellClasses] {
+        tv1[1] {
             tv1[2][CellClasses]
         }
-        tv1[1][CellTopics] {
+        tv1[1] {
             tv1[2][CellTopics]
         }
 
