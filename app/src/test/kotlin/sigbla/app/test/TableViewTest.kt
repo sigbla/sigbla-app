@@ -433,7 +433,7 @@ class TableViewTest {
      */
 
     @Test
-    fun `tableview invoke`() {
+    fun `tableview invoke 1`() {
         val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
 
         tv1[CellHeight] {
@@ -486,8 +486,20 @@ class TableViewTest {
     }
 
     @Test
-    fun `columnview invoke`() {
+    fun `tableview invoke 2`() {
+        /*
+        TODO
+
+        See cellview invoke 2 and similar..
+        But to make that work, we can't do batching with tv { .. } (or table { .. } to keep consistency),
+        and would need to introduce batch(tv) { .. } as the batching API approach..
+         */
+    }
+
+    @Test
+    fun `columnview invoke 1`() {
         val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        // TODO Add CellTransformer when supported
 
         tv1["A"][CellWidth] {
             200
@@ -528,6 +540,69 @@ class TableViewTest {
         assertEquals(Unit, tv1["A"][CellWidth].width)
         assertEquals(emptyList<String>(), tv1["A"][CellClasses].classes)
         assertEquals(emptyList<String>(), tv1["A"][CellTopics].topics)
+    }
+
+    @Test
+    fun `columnview invoke 2`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        // TODO Add CellTransformer when supported
+
+        tv1["A"] {
+            tv1["B"][CellWidth]
+        }
+        tv1["A"] {
+            tv1["B"][CellClasses]
+        }
+        tv1["A"] {
+            tv1["B"][CellTopics]
+        }
+        tv1["A"] { }
+
+        assertEquals(Unit, tv1["A"][CellWidth].width)
+        assertEquals(emptyList<String>(), tv1["A"][CellClasses].classes)
+        assertEquals(emptyList<String>(), tv1["A"][CellTopics].topics)
+
+        tv1["B"][CellWidth] {
+            200
+        }
+        tv1["B"][CellClasses] {
+            "300"
+        }
+        tv1["B"][CellTopics] {
+            "400"
+        }
+
+        tv1["A"] {
+            tv1["B"][CellWidth]
+        }
+        tv1["A"] {
+            tv1["B"][CellClasses]
+        }
+        tv1["A"] {
+            tv1["B"][CellTopics]
+        }
+
+        assertEquals(200L, tv1["A"][CellWidth].width)
+        assertEquals(listOf("300"), tv1["A"][CellClasses].classes)
+        assertEquals(listOf("400"), tv1["A"][CellTopics].topics)
+
+        tv1["A"] { }
+
+        assertEquals(200L, tv1["A"][CellWidth].width)
+        assertEquals(listOf("300"), tv1["A"][CellClasses].classes)
+        assertEquals(listOf("400"), tv1["A"][CellTopics].topics)
+
+        tv1["A"] { null }
+
+        assertEquals(Unit, tv1["A"][CellWidth].width)
+        assertEquals(emptyList<String>(), tv1["A"][CellClasses].classes)
+        assertEquals(emptyList<String>(), tv1["A"][CellTopics].topics)
+
+        tv1["A"] { tv1["B"] }
+
+        assertEquals(200L, tv1["A"][CellWidth].width)
+        assertEquals(listOf("300"), tv1["A"][CellClasses].classes)
+        assertEquals(listOf("400"), tv1["A"][CellTopics].topics)
     }
 
     @Test
@@ -718,6 +793,14 @@ class TableViewTest {
         assertEquals(emptyList<String>(), tv1["A", 1][CellClasses].classes)
         assertEquals(emptyList<String>(), tv1["A", 1][CellTopics].topics)
         assertEquals(Unit, tv1["A", 1][CellTransformer].function)
+
+        tv1["A", 1] { tv1["B", 1] }
+
+        assertEquals(100L, tv1["A", 1][CellHeight].height)
+        assertEquals(200L, tv1["A", 1][CellWidth].width)
+        assertEquals(listOf("300"), tv1["A", 1][CellClasses].classes)
+        assertEquals(listOf("400"), tv1["A", 1][CellTopics].topics)
+        assertEquals(ct, tv1["A", 1][CellTransformer].function)
     }
 
     @Test
