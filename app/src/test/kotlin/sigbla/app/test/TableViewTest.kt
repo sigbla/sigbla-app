@@ -576,7 +576,7 @@ class TableViewTest {
     }
 
     @Test
-    fun `cellview invoke`() {
+    fun `cellview invoke 1`() {
         val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
         val ct: Cell<*>.() -> Any? = {}
 
@@ -629,6 +629,89 @@ class TableViewTest {
         tv1["A", 1][CellClasses] { null }
         tv1["A", 1][CellTopics] { null }
         tv1["A", 1][CellTransformer] { null }
+
+        assertEquals(Unit, tv1["A", 1][CellHeight].height)
+        assertEquals(Unit, tv1["A", 1][CellWidth].width)
+        assertEquals(emptyList<String>(), tv1["A", 1][CellClasses].classes)
+        assertEquals(emptyList<String>(), tv1["A", 1][CellTopics].topics)
+        assertEquals(Unit, tv1["A", 1][CellTransformer].function)
+    }
+
+    @Test
+    fun `cellview invoke 2`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val ct: Cell<*>.() -> Any? = {}
+
+        tv1["A", 1] {
+            tv1["B", 1][CellHeight]
+        }
+        tv1["A", 1] {
+            tv1["B", 1][CellWidth]
+        }
+        tv1["A", 1] {
+            tv1["B", 1][CellClasses]
+        }
+        tv1["A", 1] {
+            tv1["B", 1][CellTopics]
+        }
+        tv1["A", 1] {
+            tv1["B", 1][CellTransformer]
+        }
+        tv1["A", 1] { }
+
+        assertEquals(Unit, tv1["A", 1][CellHeight].height)
+        assertEquals(Unit, tv1["A", 1][CellWidth].width)
+        assertEquals(emptyList<String>(), tv1["A", 1][CellClasses].classes)
+        assertEquals(emptyList<String>(), tv1["A", 1][CellTopics].topics)
+        assertEquals(Unit, tv1["A", 1][CellTransformer].function)
+
+        tv1["B", 1][CellHeight] {
+            100
+        }
+        tv1["B", 1][CellWidth] {
+            200
+        }
+        tv1["B", 1][CellClasses] {
+            "300"
+        }
+        tv1["B", 1][CellTopics] {
+            "400"
+        }
+        tv1["B", 1][CellTransformer] {
+            ct
+        }
+
+        tv1["A", 1] {
+            tv1["B", 1][CellHeight]
+        }
+        tv1["A", 1] {
+            tv1["B", 1][CellWidth]
+        }
+        tv1["A", 1] {
+            tv1["B", 1][CellClasses]
+        }
+        tv1["A", 1] {
+            tv1["B", 1][CellTopics]
+        }
+        tv1["A", 1] {
+            tv1["B", 1][CellTransformer]
+        }
+
+        assertEquals(100L, tv1["A", 1][CellHeight].height)
+        assertEquals(200L, tv1["A", 1][CellWidth].width)
+        assertEquals(listOf("300"), tv1["A", 1][CellClasses].classes)
+        assertEquals(listOf("400"), tv1["A", 1][CellTopics].topics)
+        assertEquals(ct, tv1["A", 1][CellTransformer].function)
+
+        tv1["A", 1] { }
+
+        assertEquals(100L, tv1["A", 1][CellHeight].height)
+        assertEquals(200L, tv1["A", 1][CellWidth].width)
+        assertEquals(listOf("300"), tv1["A", 1][CellClasses].classes)
+        assertEquals(listOf("400"), tv1["A", 1][CellTopics].topics)
+        assertEquals(ct, tv1["A", 1][CellTransformer].function)
+
+        tv1["A", 1] { null }
 
         assertEquals(Unit, tv1["A", 1][CellHeight].height)
         assertEquals(Unit, tv1["A", 1][CellWidth].width)
