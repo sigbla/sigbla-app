@@ -1284,20 +1284,20 @@ class CellView(
     }
 
     operator fun set(cell: CellTransformer.Companion, cellTransformer: CellTransformer<*>?) {
-        setCellTransformer(if (cellTransformer == null) null else cellTransformer.function as (Cell<*>.() -> Any?)?)
+        setCellTransformer(cellTransformer?.function as? (Cell<*>.() -> Any?)?)
     }
 
     operator fun set(cell: CellTransformer.Companion, cellTransformer: Cell<*>.() -> Any?) {
         setCellTransformer(cellTransformer)
     }
 
-    private fun setCellTransformer(init: (Cell<*>.() -> Any?)?) {
+    private fun setCellTransformer(transformer: (Cell<*>.() -> Any?)?) {
         synchronized(columnView.tableView.eventProcessor) {
             val (oldRef, newRef) = columnView.tableView.tableViewRef.refAction {
                 val key = Pair(columnView.header, index)
 
                 it.copy(
-                    cellTransformers = if (init == null) it.cellTransformers.remove(key) else it.cellTransformers.put(key, init),
+                    cellTransformers = if (transformer == null) it.cellTransformers.remove(key) else it.cellTransformers.put(key, transformer),
                     version = it.version + 1L
                 )
             }
@@ -1321,6 +1321,7 @@ class CellView(
             is CellWidth<*, *> -> { tableView[this][CellWidth] = value; value }
             is CellClasses<*> -> { tableView[this][CellClasses] = value; value }
             is CellTopics<*> -> { tableView[this][CellTopics] = value; value }
+            is CellTransformer<*> -> { tableView[this][CellTransformer] = value; value }
             is Unit -> { /* no assignment */ Unit }
             is Function1<*, *> -> { invoke(value as CellView.() -> Any?) }
             null -> { tableView[this] = null; null }
