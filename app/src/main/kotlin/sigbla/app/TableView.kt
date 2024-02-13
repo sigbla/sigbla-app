@@ -1323,8 +1323,8 @@ class CellView(
             is CellTopics<*> -> { tableView[this][CellTopics] = value; value }
             is Unit -> { /* no assignment */ Unit }
             is Function1<*, *> -> { invoke(value as CellView.() -> Any?) }
-            // TODO CellTransformer?
             // TODO null?
+            null -> { tableView[this] = null; null }
             else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
         }
     }
@@ -1613,7 +1613,7 @@ class ColumnView internal constructor(
             is Unit -> { /* no assignment */ Unit }
             is Function1<*, *> -> { invoke(value as ColumnView.() -> Any?) }
             // TODO CellTransformer?
-            // TODO null?
+            null -> { tableView[this] = null; null }
             else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
         }
     }
@@ -1910,7 +1910,7 @@ class RowView internal constructor(
             is Unit -> { /* no assignment */ Unit }
             is Function1<*, *> -> { invoke(value as RowView.() -> Any?) }
             // TODO CellTransformer?
-            // TODO null?
+            null -> { tableView[this] = null; null }
             else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
         }
     }

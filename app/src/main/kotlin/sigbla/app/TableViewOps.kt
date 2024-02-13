@@ -11,95 +11,11 @@ import java.io.File
 import java.net.URL
 import kotlin.reflect.KClass
 
-fun clear(columnView: ColumnView) {
-    synchronized(columnView.tableView.eventProcessor) {
-        val tableViewRef = columnView.tableView.tableViewRef
-        val columnHeader = columnView.header
-        val eventProcessor = columnView.tableView.eventProcessor
+fun clear(columnView: ColumnView) = columnView { null }
 
-        val (oldRef, newRef) = tableViewRef.refAction {
-            it.copy(
-                columnViews = it.columnViews.remove(columnHeader),
-                version = it.version + 1L
-            )
-        }
+fun clear(rowView: RowView) = rowView { null }
 
-        if (!eventProcessor.haveListeners()) return
-
-        val oldView = columnView.tableView.makeClone(ref = oldRef)
-        val newView = columnView.tableView.makeClone(ref = newRef)
-
-        val oldColumnView = oldView[columnView]
-        val newColumnView = newView[columnView]
-
-        eventProcessor.publish(listOf(
-            TableViewListenerEvent(oldColumnView[CellClasses], newColumnView[CellClasses]),
-            TableViewListenerEvent(oldColumnView[CellTopics], newColumnView[CellTopics]),
-            TableViewListenerEvent(oldColumnView[CellWidth], newColumnView[CellWidth])
-        ))
-    }
-}
-
-fun clear(rowView: RowView) {
-    synchronized(rowView.tableView.eventProcessor) {
-        val tableViewRef = rowView.tableView.tableViewRef
-        val eventProcessor = rowView.tableView.eventProcessor
-
-        val (oldRef, newRef) = tableViewRef.refAction {
-            it.copy(
-                rowViews = it.rowViews.remove(rowView.index),
-                version = it.version + 1L
-            )
-        }
-
-        if (!eventProcessor.haveListeners()) return
-
-        val oldView = rowView.tableView.makeClone(ref = oldRef)
-        val newView = rowView.tableView.makeClone(ref = newRef)
-
-        val oldRowView = oldView[rowView]
-        val newRowView = newView[rowView]
-
-        eventProcessor.publish(listOf(
-            TableViewListenerEvent(oldRowView[CellClasses], newRowView[CellClasses]),
-            TableViewListenerEvent(oldRowView[CellHeight], newRowView[CellHeight]),
-            TableViewListenerEvent(oldRowView[CellTopics], newRowView[CellTopics])
-        ))
-    }
-}
-
-fun clear(cellView: CellView) {
-    synchronized(cellView.tableView.eventProcessor) {
-        val tableViewRef = cellView.tableView.tableViewRef
-        val columnHeader = cellView.columnView.header
-        val index = cellView.index
-        val eventProcessor = cellView.tableView.eventProcessor
-
-        val (oldRef, newRef) = tableViewRef.refAction {
-            it.copy(
-                cellViews = it.cellViews.remove(Pair(columnHeader, index)),
-                cellTransformers = it.cellTransformers.remove(Pair(columnHeader, index)),
-                version = it.version + 1L
-            )
-        }
-
-        if (!eventProcessor.haveListeners()) return
-
-        val oldView = cellView.tableView.makeClone(ref = oldRef)
-        val newView = cellView.tableView.makeClone(ref = newRef)
-
-        val oldCellView = oldView[cellView]
-        val newCellView = newView[cellView]
-
-        eventProcessor.publish(listOf(
-            TableViewListenerEvent(oldCellView[CellClasses], newCellView[CellClasses]),
-            TableViewListenerEvent(oldCellView[CellHeight], newCellView[CellHeight]),
-            TableViewListenerEvent(oldCellView[CellTopics], newCellView[CellTopics]),
-            TableViewListenerEvent(oldCellView[CellTransformer], newCellView[CellTransformer]),
-            TableViewListenerEvent(oldCellView[CellWidth], newCellView[CellWidth])
-        ))
-    }
-}
+fun clear(cellView: CellView) = cellView { null }
 
 // ---
 
