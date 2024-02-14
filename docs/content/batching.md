@@ -155,7 +155,7 @@ on(table) {
 
 println("Before move")
 
-table {
+batch(table) {
     table["B", 1] = table["A", 1]
     table["B", 2] = table["A", 2]
     remove(table["A"])
@@ -187,8 +187,8 @@ table {
 
 As you can see from the output, we're now back to receiving 4 events at once during the manually implemented move operation.
 
-The only change we did was to put these operations within `table { .. }`, which is how you invoke and define what goes
-into the batch.
+The only change we did was to put these operations within `batch(table) { .. }`, which is how you initiate and define
+what goes into the batch.
 
 So what's going on?
 
@@ -211,7 +211,7 @@ occur within the batch, all changes are discarded.
 You'll notice we used the `table` reference within the batch:
 
 ``` kotlin
-table {
+batch(table) {
     table["B", 1] = table["A", 1]
     table["B", 2] = table["A", 2]
     remove(table["A"])
@@ -221,7 +221,7 @@ table {
 We could instead have done like the below, which allows for more reusable batch functions, but is otherwise the same:
 
 ``` kotlin
-table {
+batch(table) {
     this["B", 1] = this["A", 1]
     this["B", 2] = this["A", 2]
     remove(this["A"])
@@ -244,7 +244,7 @@ table["A", 2] = "A2"
 table["B", 1] = "B1"
 table["B", 2] = "B2"
 
-val (iterator1, iterator2) = table {
+val (iterator1, iterator2) = batch(table) {
     this["A", 3] = "A3"
     this["B", 3] = "B3"
 
@@ -295,7 +295,7 @@ on(table) events {
     }
 }
 
-table {
+batch(table) {
     this["A", 1] = "A1 v1"
     this["A", 1] = "A1 v2"
     this["A", 1] = "A1 v3"
@@ -322,7 +322,7 @@ on(table, skipHistory = true) events {
     }
 }
 
-table {
+batch(table) {
     move(this["A"] to this["B"])
     move(this["B"] to this["C"])
 }
@@ -336,7 +336,7 @@ table {
 That second event above doesn't do anything, but is included because we touch column B during our move:
 
 ``` kotlin
-table {
+batch(table) {
     move(this["A"] to this["B"])
     move(this["B"] to this["C"])
 }
@@ -382,8 +382,8 @@ on(t2) events {
     }
 }
 
-t1 {
-    t2 {
+batch(t1) {
+    batch(t2) {
         println("Batch start")
 
         t1["A"].forEach {
@@ -416,12 +416,12 @@ need to know or care if a batch has already been started.
 ``` kotlin
 val t1 = Table[null]
 
-fun myUpdateFunction(table: Table) = table {
+fun myUpdateFunction(table: Table) = batch(table) {
     this["A", 1] = this["A", 1] * 2
     this["A", 2] = this["A", 2] * 2
 }
 
-t1 {
+batch(t1) {
     this["A", 1] = 100
     this["A", 2] = 200
 
@@ -450,7 +450,7 @@ on(tableView) events {
     }
 }
 
-tableView {
+batch(tableView) {
     this[CellHeight] = 45
     this[CellHeight] = 40
     this[1][CellHeight] = 35

@@ -25,7 +25,7 @@ fun main() {
         }
     }
 
-    tableView {
+    batch(tableView) {
         tableView[CellWidth] = 10
         tableView[CellHeight] = 10
     }
@@ -36,7 +36,7 @@ fun main() {
     Thread.sleep(15000)
 
     while (true) {
-        table {
+        batch(table) {
             for (i in 1..10) {
                 cell(
                     ThreadLocalRandom.current().nextInt(0, 100),

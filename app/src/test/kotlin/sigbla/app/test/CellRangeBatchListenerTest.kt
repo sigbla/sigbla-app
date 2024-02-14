@@ -38,7 +38,7 @@ class CellRangeBatchListenerTest {
             }
         }
 
-        t1 {
+        batch(t1) {
             t1["A", 1] = "A"
 
             assertEquals(0, eventCount)
@@ -82,7 +82,7 @@ class CellRangeBatchListenerTest {
             }
         }
 
-        t1 {
+        batch(t1) {
             assertEquals(1, eventCount)
 
             t1["A", 1] = "B"
@@ -111,7 +111,7 @@ class CellRangeBatchListenerTest {
 
         var eventCount = 0
 
-        t1 {
+        batch(t1) {
             on(t1["A", 1]..t1["A", 1]) {
                 off(this)
 
@@ -138,7 +138,7 @@ class CellRangeBatchListenerTest {
 
         t1["A", 1] = "A"
 
-        t1 {
+        batch(t1) {
             on(t1["A", 1]..t1["A", 1]) {
                 off(this)
 
@@ -161,7 +161,7 @@ class CellRangeBatchListenerTest {
     fun `listener ref with name and order`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 
-        t {
+        batch(t) {
             val ref = on(t["A", 1]..t["A", 1]) {
                 name = "Name A"
                 order = 123
@@ -178,7 +178,7 @@ class CellRangeBatchListenerTest {
     fun `listener ref without name and order`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 
-        t {
+        batch(t) {
             val ref = on(t["A", 1]..t["A", 1]) {}
 
             assertNull(ref.name)
@@ -192,7 +192,7 @@ class CellRangeBatchListenerTest {
     fun `listener loop support`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 
-        val ref2 = t {
+        val ref2 = batch(t) {
             val ref1 = on(t["A", 0]..t["A", 1]) {
                 events {
                     t["A", 0] = 1
@@ -219,7 +219,7 @@ class CellRangeBatchListenerTest {
 
             t["A", 1] = 0
 
-            return@t ref2
+            return@batch ref2
         }
 
         assertEquals(1000L, valueOf<Long>(t["A", 1]))
@@ -248,7 +248,7 @@ class CellRangeBatchListenerTest {
 
         var expectedT1EventCount = 0
 
-        val t2 = t1 {
+        val t2 = batch(t1) {
             for (c in listOf("A", "B", "C", "D")) {
                 for (r in 1..100) {
                     t1[c][r] = "$c$r A1"
@@ -263,7 +263,7 @@ class CellRangeBatchListenerTest {
                 }
             }
 
-            return@t1 clone(t1, "tableClone2")
+            return@batch clone(t1, "tableClone2")
         }
 
         var expectedT2EventCount = expectedT1EventCount
@@ -278,8 +278,8 @@ class CellRangeBatchListenerTest {
         t1["A", 1] = t1["A", 1]
         expectedT1EventCount++
 
-        t1 {
-            t2 {
+        batch(t1) {
+            batch(t2) {
                 for (c in listOf("A", "B", "C", "D")) {
                     for (r in 1..100) {
                         t1[c][r] = "$c$r A2"
@@ -318,7 +318,7 @@ class CellRangeBatchListenerTest {
             }
         }
 
-        t {
+        batch(t) {
             t["A", 1] = 2
             t["A", 1] = 4
         }
@@ -336,7 +336,7 @@ class CellRangeBatchListenerTest {
         var id2: Int? = null
         var id3: Int? = null
 
-        t {
+        batch(t) {
             on(t["A", 0]..t["A", 0]) {
                 order = 3
                 skipHistory = true
@@ -393,7 +393,7 @@ class CellRangeBatchListenerTest {
         var v2New: Any? = null
         var v3New: Any? = null
 
-        t {
+        batch(t) {
             on(t["A", 0]..t["A", 0]) {
                 order = 2
 
@@ -454,7 +454,7 @@ class CellRangeBatchListenerTest {
             assertNull(v3Old)
         }
 
-        t {
+        batch(t) {
             assertTrue(100L in t["A", 0])
 
             t["A", 0] = 200
@@ -487,7 +487,7 @@ class CellRangeBatchListenerTest {
 
         var count = 0
 
-        t {
+        batch(t) {
             on(t["A", 0]..t["A", 0]) {
                 events {
                     assertEquals(0, oldTable.iterator().asSequence().count())
@@ -524,7 +524,7 @@ class CellRangeBatchListenerTest {
 
         var count = 0
 
-        t {
+        batch(t) {
             on(t["A", 0]..t["A", 0]) {
                 events {
                     oldTable["A", 0] = source.table["A", 0] + 200
@@ -595,7 +595,7 @@ class CellRangeBatchListenerTest {
             eventCount6 += count()
         }
 
-        t1 { t1["A", 0] = "String 1" }
+        batch(t1) { t1["A", 0] = "String 1" }
 
         assertEquals(1, eventCount1)
         assertEquals(0, eventCount2)
@@ -604,7 +604,7 @@ class CellRangeBatchListenerTest {
         assertEquals(0, eventCount5)
         assertEquals(0, eventCount6)
 
-        t1 { t1["A", 1] = 100L }
+        batch(t1) { t1["A", 1] = 100L }
 
         assertEquals(1, eventCount1)
         assertEquals(1, eventCount2)
@@ -613,7 +613,7 @@ class CellRangeBatchListenerTest {
         assertEquals(0, eventCount5)
         assertEquals(0, eventCount6)
 
-        t1 { t1["A", 0] = "String 2" }
+        batch(t1) { t1["A", 0] = "String 2" }
 
         assertEquals(2, eventCount1)
         assertEquals(1, eventCount2)
@@ -622,7 +622,7 @@ class CellRangeBatchListenerTest {
         assertEquals(0, eventCount5)
         assertEquals(0, eventCount6)
 
-        t1 { t1["A", 1] = 200 } // Auto converted to Long
+        batch(t1) { t1["A", 1] = 200 } // Auto converted to Long
 
         assertEquals(2, eventCount1)
         assertEquals(2, eventCount2)
@@ -631,7 +631,7 @@ class CellRangeBatchListenerTest {
         assertEquals(0, eventCount5)
         assertEquals(0, eventCount6)
 
-        t1 { t1["A", 0] = 300L }
+        batch(t1) { t1["A", 0] = 300L }
 
         assertEquals(2, eventCount1)
         assertEquals(3, eventCount2)
@@ -640,7 +640,7 @@ class CellRangeBatchListenerTest {
         assertEquals(1, eventCount5)
         assertEquals(0, eventCount6)
 
-        t1 { t1["A", 1] = "String 3" }
+        batch(t1) { t1["A", 1] = "String 3" }
 
         assertEquals(3, eventCount1)
         assertEquals(3, eventCount2)
@@ -672,12 +672,12 @@ class CellRangeBatchListenerTest {
             }
         }
 
-        t1 {
+        batch(t1) {
             t1["A", 1] = "100"
             t1["A", 2] = "110"
         }
 
-        t1 {
+        batch(t1) {
             t1["A", 1] = "105"
             t1["A", 2] = "120"
         }
@@ -712,7 +712,7 @@ class CellRangeBatchListenerTest {
             }
         }
 
-        t1 {
+        batch(t1) {
             t1["A", 1] = "Original value A1"
             t1["A", 2] = "Original value A2"
         }

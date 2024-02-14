@@ -984,25 +984,6 @@ class TableView internal constructor(
         }
     }
 
-    operator fun <R> invoke(batch: TableView.() -> R): R {
-        synchronized(eventProcessor) {
-            if (eventProcessor.pauseEvents()) {
-                try {
-                    tableViewRef.useLocal()
-                    val r = this.batch()
-                    eventProcessor.publish(true)
-                    tableViewRef.commitLocal()
-                    return r
-                } finally {
-                    eventProcessor.clearBuffer()
-                    tableViewRef.clearLocal()
-                }
-            } else {
-                return this.batch()
-            }
-        }
-    }
-
     internal fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableViewRef = tableViewRef.get()) = TableView(name, onRegistry, RefHolder(ref))
 
     override fun toString() = "TableView[$name]"

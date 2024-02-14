@@ -277,7 +277,7 @@ class HashCodeEqualsTest {
             }
         }
 
-        table {
+        batch(table) {
             table["A", 0] = "2"
             table["A", 1] = "2"
         }

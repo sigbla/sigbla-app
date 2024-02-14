@@ -2024,11 +2024,11 @@ fun remove(column: Column) = move(column to Table[null])
 fun remove(row: Row) = move(row to Table[null][0])
 
 // TODO These can be more efficient, especially if there are no listeners
-fun clear(table: Table): Unit = table { table.forEach { clear(it) } }
+fun clear(table: Table): Unit = batch(table) { table.forEach { clear(it) } }
 
-fun clear(column: Column): Unit = column.table { column.forEach { clear(it) } }
+fun clear(column: Column): Unit = batch(column.table) { column.forEach { clear(it) } }
 
-fun clear(row: Row): Unit = row.table { row.forEach { clear(it) } }
+fun clear(row: Row): Unit = batch(row.table) { row.forEach { clear(it) } }
 
 fun clear(cell: Cell<*>) = cell { null }
 
@@ -2867,6 +2867,27 @@ fun off(tableEventReceiver: TableEventReceiver<*, *, *>) = off(tableEventReceive
 
 // ---
 
+fun <R> batch(table: Table, batch: Table.() -> R): R {
+    synchronized(table.eventProcessor) {
+        if (table.eventProcessor.pauseEvents()) {
+            try {
+                table.tableRef.useLocal()
+                val r = table.batch()
+                table.eventProcessor.publish(true)
+                table.tableRef.commitLocal()
+                return r
+            } finally {
+                table.eventProcessor.clearBuffer()
+                table.tableRef.clearLocal()
+            }
+        } else {
+            return table.batch()
+        }
+    }
+}
+
+// ---
+
 // TODO Also support CellRange in addition to Table, allowing for storing subsections?
 
 fun load(
@@ -2923,7 +2944,7 @@ fun save(
     compress
 )
 
-fun compact(table: Table): Unit = table {
+fun compact(table: Table): Unit = batch(table) {
     clone(table).let { sparseTable ->
         clear(table)
 
@@ -2937,8 +2958,8 @@ fun compact(table: Table): Unit = table {
 // TODO Consider adding a swap that also swaps the column header
 
 fun swap(c1: Column, c2: Column): Unit {
-    c1.table {
-        c2.table {
+    batch(c1.table) {
+        batch(c2.table) {
             val t1Clone = clone(c1.table)
             val t2Clone = if (c1.table == c2.table) t1Clone else clone(c2.table)
             copy(t1Clone[c1] to c2)
@@ -2948,8 +2969,8 @@ fun swap(c1: Column, c2: Column): Unit {
 }
 
 fun swap(r1: Row, r2: Row): Unit {
-    r1.table {
-        r2.table {
+    batch(r1.table) {
+        batch(r2.table) {
             val t1Clone = clone(r1.table)
             val t2Clone = if (r1.table == r2.table) t1Clone else clone(r2.table)
             copy(t1Clone[r1] to r2)
@@ -2970,7 +2991,7 @@ fun sort(
 fun sort(
     tableByColumnRangeAction: TableByColumnRangeAction,
     comparator: Comparator<Column>
-): Unit = tableByColumnRangeAction.table {
+): Unit = batch(tableByColumnRangeAction.table) {
     val columns = tableByColumnRangeAction.columnRange.toList()
 
     val it1 = columns.iterator()
@@ -3006,7 +3027,7 @@ fun sort(
 fun sort(
     tableByRowRangeAction: TableByRowRangeAction,
     comparator: Comparator<Row>
-): Unit = tableByRowRangeAction.table {
+): Unit = batch(tableByRowRangeAction.table) {
     val rows = tableByRowRangeAction.rowRange.toList()
 
     val clone = clone(this)
