@@ -11,6 +11,8 @@ import java.io.File
 import java.net.URL
 import kotlin.reflect.KClass
 
+// TODO clear(tableView: TableView)..
+
 fun clear(columnView: ColumnView) = columnView { null }
 
 fun clear(rowView: RowView) = rowView { null }
@@ -483,6 +485,27 @@ fun on(
 fun off(reference: TableViewListenerReference) = reference.unsubscribe()
 
 fun off(tableViewEventReceiver: TableViewEventReceiver<*, *>) = off(tableViewEventReceiver.reference)
+
+// ---
+
+fun <R> batch(tableView: TableView, batch: TableView.() -> R): R {
+    synchronized(tableView.eventProcessor) {
+        if (tableView.eventProcessor.pauseEvents()) {
+            try {
+                tableView.tableViewRef.useLocal()
+                val r = tableView.batch()
+                tableView.eventProcessor.publish(true)
+                tableView.tableViewRef.commitLocal()
+                return r
+            } finally {
+                tableView.eventProcessor.clearBuffer()
+                tableView.tableViewRef.clearLocal()
+            }
+        } else {
+            return tableView.batch()
+        }
+    }
+}
 
 // ---
 

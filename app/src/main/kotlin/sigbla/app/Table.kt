@@ -1018,8 +1018,6 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
         }
     }
 
-    abstract operator fun <R> invoke(batch: Table.() -> R): R
-
     internal abstract fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableRef = tableRef.get()!!): Table
 
     override fun toString() = "Table[$name]"
@@ -1119,25 +1117,6 @@ class BaseTable internal constructor(
     }
 
     override fun contains(header: Header): Boolean = tableRef.get().columns[header]?.prenatal == false
-
-    override operator fun <R> invoke(batch: Table.() -> R): R {
-        synchronized(eventProcessor) {
-            if (eventProcessor.pauseEvents()) {
-                try {
-                    tableRef.useLocal()
-                    val r = this.batch()
-                    eventProcessor.publish(true)
-                    tableRef.commitLocal()
-                    return r
-                } finally {
-                    eventProcessor.clearBuffer()
-                    tableRef.clearLocal()
-                }
-            } else {
-                return this.batch()
-            }
-        }
-    }
 
     override fun makeClone(name: String?, onRegistry: Boolean, ref: TableRef): Table = BaseTable(name, this, onRegistry, RefHolder(ref))
 

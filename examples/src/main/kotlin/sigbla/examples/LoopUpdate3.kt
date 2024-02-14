@@ -31,7 +31,7 @@ fun main() {
     val url = show(tableView)
     println(url)
 
-    tableView {
+    batch(tableView) {
         tableView[CellWidth] = 10
         tableView[CellHeight] = 10
     }

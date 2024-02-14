@@ -1123,13 +1123,13 @@ class TableTest {
     fun `batching commit`() {
         val t1 = Table[object {}.javaClass.enclosingMethod.name]
 
-        val t2 = t1 {
+        val t2 = batch(t1) {
             t1["A", 1] = "A1"
             t1["A", 2] = "A2"
             t1["B", 1] = "B1"
             t1["B", 2] = "B2"
 
-            return@t1 clone(t1)
+            return@batch clone(t1)
         }
 
         assertEquals("A1", t1["A", 1].value)
@@ -1157,15 +1157,15 @@ class TableTest {
 
         var count = 0
 
-        val t2 = t1 {
+        val t2 = batch(t1) {
             on(this) events {
                 count += count()
             }
 
-            this {
-                assertTrue(this === this@t1)
+            batch(this) {
+                assertTrue(this === this@batch)
                 assertTrue(this === t1)
-                assertTrue(this == this@t1)
+                assertTrue(this == this@batch)
                 assertTrue(this == t1)
 
                 t1["A", 1] = "A1"
@@ -1176,7 +1176,7 @@ class TableTest {
 
             assertEquals(0, count)
 
-            return@t1 clone(t1)
+            return@batch clone(t1)
         }
 
         assertEquals(4, count)
@@ -1206,7 +1206,7 @@ class TableTest {
         var t2: Table? = null
 
         assertFailsWith(RuntimeException::class) {
-            t1 {
+            batch(t1) {
                 t1["A", 1] = "A1"
                 t1["A", 2] = "A2"
                 t1["B", 1] = "B1"
@@ -1243,7 +1243,7 @@ class TableTest {
         val flag5 = AtomicReference(true)
 
         val thread1 = thread {
-            t1 {
+            batch(t1) {
                 flag1.set(false)
                 while(flag2.get()) Thread.sleep(1)
 
@@ -1252,7 +1252,7 @@ class TableTest {
                 assertEquals("B1", t1["B", 1].value)
                 assertEquals("B2", this["B", 2].value)
 
-                this {
+                batch(this) {
                     this["A", 1] = "A1 T"
                     t1["A", 2] = "A2 T"
                     this["B", 1] = "B1 T"
@@ -1268,7 +1268,7 @@ class TableTest {
         while (flag1.get()) Thread.sleep(1)
 
         val thread2 = thread {
-            t1 {
+            batch(t1) {
                 assertEquals("A1 T", t1["A", 1].value)
                 assertEquals("A2 T", t1["A", 2].value)
                 assertEquals("B1 T", t1["B", 1].value)

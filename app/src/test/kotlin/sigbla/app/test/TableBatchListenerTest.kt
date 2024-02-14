@@ -33,7 +33,7 @@ class TableBatchListenerTest {
             }
         }
 
-        t1 {
+        batch(t1) {
             t1["A", 1] = "A"
 
             assertEquals(0, eventCount)
@@ -72,7 +72,7 @@ class TableBatchListenerTest {
             }
         }
 
-        t1 {
+        batch(t1) {
             assertEquals(1, eventCount)
 
             t1["A", 1] = "B"
@@ -101,7 +101,7 @@ class TableBatchListenerTest {
 
         var eventCount = 0
 
-        t1 {
+        batch(t1) {
             on(t1) {
                 off(this)
 
@@ -128,7 +128,7 @@ class TableBatchListenerTest {
 
         t1["A", 1] = "A"
 
-        t1 {
+        batch(t1) {
             on(t1) {
                 off(this)
 
@@ -151,7 +151,7 @@ class TableBatchListenerTest {
     fun `listener ref with name and order`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 
-        t {
+        batch(t) {
             val ref = on(t) {
                 name = "Name A"
                 order = 123
@@ -168,7 +168,7 @@ class TableBatchListenerTest {
     fun `listener ref without name and order`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 
-        t {
+        batch(t) {
             val ref = on(t) {}
 
             assertNull(ref.name)
@@ -182,7 +182,7 @@ class TableBatchListenerTest {
     fun `listener loop support`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 
-        val ref2 = t {
+        val ref2 = batch(t) {
             val ref1 = on(t) {
                 events {
                     t["A", 0] = 1
@@ -209,7 +209,7 @@ class TableBatchListenerTest {
 
             t["A", 1] = 0
 
-            return@t ref2
+            return@batch ref2
         }
 
         assertEquals(1000L, valueOf<Long>(t["A", 1]))
@@ -232,7 +232,7 @@ class TableBatchListenerTest {
 
         var expectedT1EventCount = 0
 
-        val t2 = t1 {
+        val t2 = batch(t1) {
             for (c in listOf("A", "B", "C", "D")) {
                 for (r in 1..100) {
                     t1[c][r] = "$c$r A1"
@@ -247,7 +247,7 @@ class TableBatchListenerTest {
                 }
             }
 
-            return@t1 clone(t1, "tableClone2")
+            return@batch clone(t1, "tableClone2")
         }
 
         var expectedT2EventCount = expectedT1EventCount
@@ -262,8 +262,8 @@ class TableBatchListenerTest {
         t1["A", 1] = t1["A", 1]
         expectedT1EventCount++
 
-        t1 {
-            t2 {
+        batch(t1) {
+            batch(t2) {
                 for (c in listOf("A", "B", "C", "D")) {
                     for (r in 1..100) {
                         t1[c][r] = "$c$r A2"
@@ -302,7 +302,7 @@ class TableBatchListenerTest {
             }
         }
 
-        t {
+        batch(t) {
             t["A", 1] = 2
             t["A", 1] = 4
         }
@@ -320,7 +320,7 @@ class TableBatchListenerTest {
         var id2: Int? = null
         var id3: Int? = null
 
-        t {
+        batch(t) {
             on(t) {
                 order = 3
                 skipHistory = true
@@ -377,7 +377,7 @@ class TableBatchListenerTest {
         var v2New: Any? = null
         var v3New: Any? = null
 
-        t {
+        batch(t) {
             on(t) {
                 order = 2
 
@@ -438,7 +438,7 @@ class TableBatchListenerTest {
             assertNull(v3Old)
         }
 
-        t {
+        batch(t) {
             assertTrue(100L in t["A", 0])
 
             t["A", 0] = 200
@@ -471,7 +471,7 @@ class TableBatchListenerTest {
 
         var count = 0
 
-        t {
+        batch(t) {
             on(t) {
                 events {
                     assertEquals(0, oldTable.iterator().asSequence().count())
@@ -508,7 +508,7 @@ class TableBatchListenerTest {
 
         var count = 0
 
-        t {
+        batch(t) {
             on(t) {
                 events {
                     oldTable["A", 0] = source["A", 0] + 200
@@ -579,7 +579,7 @@ class TableBatchListenerTest {
             eventCount6 += count()
         }
 
-        t1 { t1["A", 0] = "String 1" }
+        batch(t1) { t1["A", 0] = "String 1" }
 
         assertEquals(1, eventCount1)
         assertEquals(0, eventCount2)
@@ -588,7 +588,7 @@ class TableBatchListenerTest {
         assertEquals(0, eventCount5)
         assertEquals(0, eventCount6)
 
-        t1 { t1["A", 1] = 100L }
+        batch(t1) { t1["A", 1] = 100L }
 
         assertEquals(1, eventCount1)
         assertEquals(1, eventCount2)
@@ -597,7 +597,7 @@ class TableBatchListenerTest {
         assertEquals(0, eventCount5)
         assertEquals(0, eventCount6)
 
-        t1 { t1["A", 0] = "String 2" }
+        batch(t1) { t1["A", 0] = "String 2" }
 
         assertEquals(2, eventCount1)
         assertEquals(1, eventCount2)
@@ -606,7 +606,7 @@ class TableBatchListenerTest {
         assertEquals(0, eventCount5)
         assertEquals(0, eventCount6)
 
-        t1 { t1["A", 1] = 200 } // Auto converted to Long
+        batch(t1) { t1["A", 1] = 200 } // Auto converted to Long
 
         assertEquals(2, eventCount1)
         assertEquals(2, eventCount2)
@@ -615,7 +615,7 @@ class TableBatchListenerTest {
         assertEquals(0, eventCount5)
         assertEquals(0, eventCount6)
 
-        t1 { t1["A", 0] = 300L }
+        batch(t1) { t1["A", 0] = 300L }
 
         assertEquals(2, eventCount1)
         assertEquals(3, eventCount2)
@@ -624,7 +624,7 @@ class TableBatchListenerTest {
         assertEquals(1, eventCount5)
         assertEquals(0, eventCount6)
 
-        t1 { t1["A", 1] = "String 3" }
+        batch(t1) { t1["A", 1] = "String 3" }
 
         assertEquals(3, eventCount1)
         assertEquals(3, eventCount2)
@@ -657,12 +657,12 @@ class TableBatchListenerTest {
             }
         }
 
-        t1 {
+        batch(t1) {
             t1["A", 1] = "100"
             t1["A", 2] = "110"
         }
 
-        t1 {
+        batch(t1) {
             t1["A", 1] = "105"
             t1["A", 2] = "120"
         }
@@ -697,7 +697,7 @@ class TableBatchListenerTest {
             }
         }
 
-        t1 {
+        batch(t1) {
             t1["A", 1] = "Original value A1"
             t1["A", 2] = "Original value A2"
         }

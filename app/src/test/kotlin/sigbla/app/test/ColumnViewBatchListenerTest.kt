@@ -36,7 +36,7 @@ class ColumnViewBatchListenerTest {
             }
         }
 
-        tv1 {
+        batch(tv1) {
             tv1["A", 1][CellHeight] = 25
             tv1["A", 1][CellWidth] = 25
             tv1["A", 1][CellClasses] = "cell-classes-1"
@@ -101,7 +101,7 @@ class ColumnViewBatchListenerTest {
             }
         }
 
-        tv1 {
+        batch(tv1) {
             //tv1["A"][CellHeight] = 25
             tv1["A"][CellWidth] = 25
             tv1["A"][CellClasses] = "cell-classes-1"
@@ -166,7 +166,7 @@ class ColumnViewBatchListenerTest {
             }
         }
 
-        tv1 {
+        batch(tv1) {
             tv1[1][CellHeight] = 25
             //tv1[1][CellWidth] = 25
             tv1[1][CellClasses] = "cell-classes-1"
@@ -231,7 +231,7 @@ class ColumnViewBatchListenerTest {
             }
         }
 
-        tv1 {
+        batch(tv1) {
             tv1[CellHeight] = 25
             tv1[CellWidth] = 25
             tv1[CellClasses] = "cell-classes-1"
@@ -274,7 +274,7 @@ class ColumnViewBatchListenerTest {
 
         var eventCount = 0
 
-        tv1 {
+        batch(tv1) {
             tv1["A", 1][CellHeight] = 25
             tv1["A", 1][CellWidth] = 25
             tv1["A", 1][CellClasses] = "cell-classes-1"
@@ -288,7 +288,7 @@ class ColumnViewBatchListenerTest {
             }
         }
 
-        tv1 {
+        batch(tv1) {
             assertEquals(5, eventCount)
 
             tv1["A", 1][CellHeight] = 50
@@ -339,7 +339,7 @@ class ColumnViewBatchListenerTest {
 
         var eventCount = 0
 
-        tv1 {
+        batch(tv1) {
             //tv1["A"][CellHeight] = 25
             tv1["A"][CellWidth] = 25
             tv1["A"][CellClasses] = "cell-classes-1"
@@ -353,7 +353,7 @@ class ColumnViewBatchListenerTest {
             }
         }
 
-        tv1 {
+        batch(tv1) {
             assertEquals(3, eventCount)
 
             //tv1["A"][CellHeight] = 50
@@ -404,7 +404,7 @@ class ColumnViewBatchListenerTest {
 
         var eventCount = 0
 
-        tv1 {
+        batch(tv1) {
             tv1[1][CellHeight] = 25
             //tv1[1][CellWidth] = 25
             tv1[1][CellClasses] = "cell-classes-1"
@@ -418,7 +418,7 @@ class ColumnViewBatchListenerTest {
             }
         }
 
-        tv1 {
+        batch(tv1) {
             assertEquals(0, eventCount)
 
             tv1[1][CellHeight] = 50
@@ -469,7 +469,7 @@ class ColumnViewBatchListenerTest {
 
         var eventCount = 0
 
-        tv1 {
+        batch(tv1) {
             tv1[CellHeight] = 25
             tv1[CellWidth] = 25
             tv1[CellClasses] = "cell-classes-1"
@@ -485,7 +485,7 @@ class ColumnViewBatchListenerTest {
             }
         }
 
-        tv1 {
+        batch(tv1) {
             assertEquals(0, eventCount)
 
             tv1[CellHeight] = 50
@@ -520,7 +520,7 @@ class ColumnViewBatchListenerTest {
 
         var eventCount = 0
 
-        tv1 {
+        batch(tv1) {
             on(tv1["A"]) {
                 off(this)
 
@@ -549,7 +549,7 @@ class ColumnViewBatchListenerTest {
 
         var eventCount = 0
 
-        tv1 {
+        batch(tv1) {
             on(tv1["A"]) {
                 off(this)
 
@@ -578,7 +578,7 @@ class ColumnViewBatchListenerTest {
 
         var eventCount = 0
 
-        tv1 {
+        batch(tv1) {
             on(tv1["A"]) {
                 off(this)
 
@@ -607,7 +607,7 @@ class ColumnViewBatchListenerTest {
 
         var eventCount = 0
 
-        tv1 {
+        batch(tv1) {
             on(tv1["A"]) {
                 off(this)
 
@@ -638,7 +638,7 @@ class ColumnViewBatchListenerTest {
 
         var eventCount = 0
 
-        tv1 {
+        batch(tv1) {
             tv1["A", 1][CellHeight] = 25
             tv1["A", 1][CellWidth] = 25
             tv1["A", 1][CellClasses] = "cell-classes-1"
@@ -646,7 +646,7 @@ class ColumnViewBatchListenerTest {
             tv1["A", 1][CellTransformer] = {}
         }
 
-        tv1 {
+        batch(tv1) {
             on(tv1["A"]) {
                 off(this)
 
@@ -675,7 +675,7 @@ class ColumnViewBatchListenerTest {
 
         var eventCount = 0
 
-        tv1 {
+        batch(tv1) {
             //tv1["A"][CellHeight] = 25
             tv1["A"][CellWidth] = 25
             tv1["A"][CellClasses] = "cell-classes-1"
@@ -683,7 +683,7 @@ class ColumnViewBatchListenerTest {
             //tv1["A"][CellTransformer] = {}
         }
 
-        tv1 {
+        batch(tv1) {
             on(tv1["A"]) {
                 off(this)
 
@@ -712,7 +712,7 @@ class ColumnViewBatchListenerTest {
 
         var eventCount = 0
 
-        tv1 {
+        batch(tv1) {
             tv1[1][CellHeight] = 25
             //tv1[1][CellWidth] = 25
             tv1[1][CellClasses] = "cell-classes-1"
@@ -720,7 +720,7 @@ class ColumnViewBatchListenerTest {
             //tv1[1][CellTransformer] = {}
         }
 
-        tv1 {
+        batch(tv1) {
             on(tv1["A"]) {
                 off(this)
 
@@ -749,7 +749,7 @@ class ColumnViewBatchListenerTest {
 
         var eventCount = 0
 
-        tv1 {
+        batch(tv1) {
             tv1[CellHeight] = 25
             tv1[CellWidth] = 25
             tv1[CellClasses] = "cell-classes-1"
@@ -759,7 +759,7 @@ class ColumnViewBatchListenerTest {
             tv1[Table] = Table[null]
         }
 
-        tv1 {
+        batch(tv1) {
             on(tv1["A"]) {
                 off(this)
 
@@ -788,7 +788,7 @@ class ColumnViewBatchListenerTest {
     fun `listener ref with name and order`() {
         val t = TableView[object {}.javaClass.enclosingMethod.name]
 
-        t {
+        batch(t) {
             val ref = on(t["A"]) {
                 name = "Name A"
                 order = 123
@@ -805,7 +805,7 @@ class ColumnViewBatchListenerTest {
     fun `listener ref without name and order`() {
         val t = TableView[object {}.javaClass.enclosingMethod.name]
 
-        t {
+        batch(t) {
             val ref = on(t["A"]) {}
 
             assertNull(ref.name)
@@ -819,7 +819,7 @@ class ColumnViewBatchListenerTest {
     fun `listener loop support`() {
         val t = TableView[object {}.javaClass.enclosingMethod.name]
 
-        val ref2 = t {
+        val ref2 = batch(t) {
             val ref1 = on(t["A"]) {
                 events {
                     t["A", 0][CellWidth] = 25
@@ -844,7 +844,7 @@ class ColumnViewBatchListenerTest {
 
             t["A", 1][CellWidth] = 0
 
-            return@t ref2
+            return@batch ref2
         }
 
         assertEquals(1000L, t["A", 1][CellWidth].toLong())
@@ -867,7 +867,7 @@ class ColumnViewBatchListenerTest {
 
         var expectedT1EventCount = 0
 
-        val t2 =  t1 {
+        val t2 = batch(t1) {
             for (c in listOf("A", "B", "C", "D")) {
                 for (r in 1..100) {
                     t1[c][r][CellHeight] = c.first().code.toLong()
@@ -886,7 +886,7 @@ class ColumnViewBatchListenerTest {
                 }
             }
 
-            return@t1 clone(t1, "tableClone2")
+            return@batch clone(t1, "tableClone2")
         }
 
         var expectedT2EventCount = expectedT1EventCount
@@ -902,8 +902,8 @@ class ColumnViewBatchListenerTest {
         t1["A"][1][CellWidth] = 1.toLong() + 100
         expectedT1EventCount += 2
 
-        t1 {
-            t2 {
+        batch(t1) {
+            batch(t2) {
                 for (c in listOf("A", "B", "C", "D")) {
                     for (r in 1..100) {
                         t1[c][r][CellHeight] = c.first().code.toLong()
@@ -934,7 +934,7 @@ class ColumnViewBatchListenerTest {
     fun `table events with old and new snapshots`() {
         val t = TableView[object {}.javaClass.enclosingMethod.name]
 
-        t {
+        batch(t) {
             t["A", 1][CellHeight] = 20
             t["A", 1][CellWidth] = 25
         }
@@ -942,7 +942,7 @@ class ColumnViewBatchListenerTest {
         var heightChange: Number = 0
         var widthChange: Number = 0
 
-        t {
+        batch(t) {
             on(t["A"]) {
                 skipHistory = true
 
@@ -976,7 +976,7 @@ class ColumnViewBatchListenerTest {
         var id2: Int? = null
         var id3: Int? = null
 
-        t {
+        batch(t) {
             on(t["A"]) {
                 order = 3
                 skipHistory = true
@@ -1034,7 +1034,7 @@ class ColumnViewBatchListenerTest {
         var v2New: Long? = null
         var v3New: Long? = null
 
-        t {
+        batch(t) {
             on(t["A"]) {
                 skipHistory = true
                 order = 2
@@ -1092,7 +1092,7 @@ class ColumnViewBatchListenerTest {
             assertNull(v3Old)
         }
 
-        t {
+        batch(t) {
             assertEquals(DEFAULT_CELL_WIDTH * 2, t["A", 0][CellWidth].width)
 
             t["A", 0][CellWidth] = DEFAULT_CELL_WIDTH * 3
@@ -1122,13 +1122,13 @@ class ColumnViewBatchListenerTest {
         val t = Table[object {}.javaClass.enclosingMethod.name]
         val tv = TableView[t]
 
-        t {
+        batch(t) {
             t["A", 0] = 100
         }
 
         var count = 0
 
-        t {
+        batch(t) {
             on(tv["A"]) {
                 events {
                     assertEquals(0, oldView.iterator().asSequence().count())
@@ -1161,13 +1161,13 @@ class ColumnViewBatchListenerTest {
     fun `old and new table is a clone of source table`() {
         val t = TableView[object {}.javaClass.enclosingMethod.name]
 
-        t {
+        batch(t) {
             t["A", 0][CellWidth] = DEFAULT_CELL_WIDTH
         }
 
         var count = 0
 
-        t {
+        batch(t) {
             on(t["A"]) {
                 events {
                     oldView["A", 0][CellWidth] = source[0].derived.cellWidth + 200
@@ -1207,11 +1207,11 @@ class ColumnViewBatchListenerTest {
     fun `event properties`() {
         val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
 
-        tv1 {
+        batch(tv1) {
             tv1["A", 1][CellHeight] = 100
         }
 
-        tv1 {
+        batch(tv1) {
             on(tv1["A"]) events {
                 forEach {
                     assertNotNull(it.columnView)
@@ -1239,7 +1239,7 @@ class ColumnViewBatchListenerTest {
         val ct1: Cell<*>.() -> Any? = {}
         val ct2: Cell<*>.() -> Any? = {}
 
-        tv1 {
+        batch(tv1) {
             tv1["A", 1][CellHeight] = 25
             tv1["A", 1][CellWidth] = 30
             tv1["A", 1][CellClasses] = "cell-classes-1"
@@ -1249,7 +1249,7 @@ class ColumnViewBatchListenerTest {
 
         var init = true
 
-        tv1 {
+        batch(tv1) {
             on(tv1["A"]) events {
                 if (init) {
                     forEach {
@@ -1353,7 +1353,7 @@ class ColumnViewBatchListenerTest {
         val ct1: Cell<*>.() -> Any? = {}
         val ct2: Cell<*>.() -> Any? = {}
 
-        tv1 {
+        batch(tv1) {
             //tv1["A"][CellHeight] = 25
             tv1["A"][CellWidth] = 30
             tv1["A"][CellClasses] = "cell-classes-1"
@@ -1363,7 +1363,7 @@ class ColumnViewBatchListenerTest {
 
         var init = true
 
-        tv1 {
+        batch(tv1) {
             on(tv1["A"]) events {
                 if (init) {
                     forEach {
@@ -1453,7 +1453,7 @@ class ColumnViewBatchListenerTest {
         val ct1: Cell<*>.() -> Any? = {}
         val ct2: Cell<*>.() -> Any? = {}
 
-        tv1 {
+        batch(tv1) {
             tv1[1][CellHeight] = 25
             //tv1[1][CellWidth] = 30
             tv1[1][CellClasses] = "cell-classes-1"
@@ -1464,7 +1464,7 @@ class ColumnViewBatchListenerTest {
         var init = true
         var count = 0
 
-        tv1 {
+        batch(tv1) {
             on(tv1["A"]) events {
                 count += count()
 
@@ -1564,7 +1564,7 @@ class ColumnViewBatchListenerTest {
         val r1: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "a" to {}
         val r2: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "b" to {}
 
-        tv1 {
+        batch(tv1) {
             tv1[CellHeight] = 25
             tv1[CellWidth] = 30
             tv1[CellClasses] = "cell-classes-1"
@@ -1577,7 +1577,7 @@ class ColumnViewBatchListenerTest {
         var init = true
         var count = 0
 
-        tv1 {
+        batch(tv1) {
             on(tv1["A"]) events {
                 count += count()
 
@@ -1721,7 +1721,7 @@ class ColumnViewBatchListenerTest {
         val r1: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "a" to {}
         val r2: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "b" to {}
 
-        tv1 {
+        batch(tv1) {
             tv1[CellHeight] = 25
             tv1["A"][CellWidth] = 30
             tv1["A"][CellClasses] = "cell-classes-1"
@@ -1769,7 +1769,7 @@ class ColumnViewBatchListenerTest {
         assertEquals(0, eventCount5)
         assertEquals(0, eventCount6)
 
-        tv1 {
+        batch(tv1) {
             tv1[CellHeight] = 45
         }
 
@@ -1780,7 +1780,7 @@ class ColumnViewBatchListenerTest {
         assertEquals(0, eventCount5)
         assertEquals(0, eventCount6)
 
-        tv1 {
+        batch(tv1) {
             tv1["A"][CellWidth] = 60
         }
 
@@ -1791,7 +1791,7 @@ class ColumnViewBatchListenerTest {
         assertEquals(0, eventCount5)
         assertEquals(0, eventCount6)
 
-        tv1 {
+        batch(tv1) {
             tv1["A"][CellClasses] = "cell-classes-2"
         }
 
@@ -1802,7 +1802,7 @@ class ColumnViewBatchListenerTest {
         assertEquals(0, eventCount5)
         assertEquals(0, eventCount6)
 
-        tv1 {
+        batch(tv1) {
             tv1["A"][CellTopics] = "cell-topics-2"
         }
 
@@ -1813,7 +1813,7 @@ class ColumnViewBatchListenerTest {
         assertEquals(0, eventCount5)
         assertEquals(0, eventCount6)
 
-        tv1 {
+        batch(tv1) {
             tv1[Resources] = r2
         }
 
@@ -1824,7 +1824,7 @@ class ColumnViewBatchListenerTest {
         assertEquals(0, eventCount5)
         assertEquals(0, eventCount6)
 
-        tv1 {
+        batch(tv1) {
             tv1[Table] = t2
         }
 
@@ -1859,14 +1859,14 @@ class ColumnViewBatchListenerTest {
             }
         }
 
-        tv1 {
+        batch(tv1) {
             tv1["A", 1][CellWidth] = 50
         }
 
         assertEquals(1, eventCount1)
         assertEquals(1, eventCount2)
 
-        tv1 {
+        batch(tv1) {
             tv1["A", 1][CellWidth] = null
         }
 
