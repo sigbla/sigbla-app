@@ -1139,6 +1139,62 @@ class TableViewTest {
     }
 
     @Test
+    fun `clear tableview`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val t = Table[null]
+        val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
+            call.respondText(text = "Response 1")
+        }
+
+        tv1[CellClasses] = "cc-1"
+        tv1[CellTopics] = "ct-1"
+        tv1[CellHeight] = 1000
+        tv1[CellWidth] = 2000
+        tv1[Resources] = "a" to handler
+        tv1[Table] = t
+
+        var count = 0
+
+        on(tv1, skipHistory = true) events {
+            count += count()
+
+            assertEquals(listOf("cc-1"), oldView[CellClasses].classes)
+            assertEquals(listOf("ct-1"), oldView[CellTopics].topics)
+            assertEquals(1000L, oldView[CellHeight].height)
+            assertEquals(2000L, oldView[CellWidth].width)
+            assertEquals(mapOf("a" to handler), oldView[Resources].resources)
+            assertEquals(t, oldView[Table].source)
+
+            assertEquals(emptyList<String>(), newView[CellClasses].classes)
+            assertEquals(emptyList<String>(), newView[CellTopics].topics)
+            assertEquals(Unit, newView[CellHeight].height)
+            assertEquals(Unit, newView[CellWidth].width)
+            assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), newView[Resources].resources)
+            assertEquals(null, newView[Table].source)
+        }
+
+        assertEquals(0, count)
+
+        assertEquals(listOf("cc-1"), tv1[CellClasses].classes)
+        assertEquals(listOf("ct-1"), tv1[CellTopics].topics)
+        assertEquals(1000L, tv1[CellHeight].height)
+        assertEquals(2000L, tv1[CellWidth].width)
+        assertEquals(mapOf("a" to handler), tv1[Resources].resources)
+        assertEquals(t, tv1[Table].source)
+
+        clear(tv1)
+
+        assertEquals(emptyList<String>(), tv1[CellClasses].classes)
+        assertEquals(emptyList<String>(), tv1[CellTopics].topics)
+        assertEquals(Unit, tv1[CellHeight].height)
+        assertEquals(Unit, tv1[CellWidth].width)
+        assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), tv1[Resources].resources)
+        assertEquals(null, tv1[Table].source)
+
+        assertEquals(6, count)
+    }
+
+    @Test
     fun `clear columnview`() {
         val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
 

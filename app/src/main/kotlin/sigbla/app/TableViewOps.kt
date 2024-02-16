@@ -11,7 +11,7 @@ import java.io.File
 import java.net.URL
 import kotlin.reflect.KClass
 
-// TODO clear(tableView: TableView)..
+fun clear(tableView: TableView) = tableView { null }
 
 fun clear(columnView: ColumnView) = columnView { null }
 
