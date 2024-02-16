@@ -984,6 +984,45 @@ class TableView internal constructor(
         }
     }
 
+    operator fun invoke(function: TableView.() -> Any?): Any? {
+        return when (val value = function()) {
+            is CellHeight<*, *> -> { this[CellHeight] = value; value }
+            is CellWidth<*, *> -> { this[CellWidth] = value; value }
+            is CellClasses<*> -> { this[CellClasses] = value; value }
+            is CellTopics<*> -> { this[CellTopics] = value; value }
+            is Resources -> { this[Resources] = value; value }
+            is Unit -> { /* no assignment */ Unit }
+            is Function1<*, *> -> { invoke(value as TableView.() -> Any?) }
+            // TODO CellTransformer?
+            is Table -> { this[Table] = value; value }
+            is TableView -> {
+                batch(this) {
+                    this[CellHeight] = value[CellHeight]
+                    this[CellWidth] = value[CellWidth]
+                    this[CellClasses] = value[CellClasses]
+                    this[CellTopics] = value[CellTopics]
+                    this[Resources] = value[Resources]
+                    // TODO this[CellTransformer] = value[CellTransformer]
+                    this[Table] = value[Table]
+                }
+                null
+            }
+            null -> {
+                batch(this) {
+                    this[CellHeight] = null
+                    this[CellWidth] = null
+                    this[CellClasses] = null
+                    this[CellTopics] = null
+                    this[Resources] = null
+                    // TODO this[CellTransformer] = null
+                    this[Table] = null
+                }
+                null
+            }
+            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
+        }
+    }
+
     internal fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableViewRef = tableViewRef.get()) = TableView(name, onRegistry, RefHolder(ref))
 
     override fun toString() = "TableView[$name]"

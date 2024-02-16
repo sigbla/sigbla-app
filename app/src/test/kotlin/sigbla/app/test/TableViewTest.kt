@@ -435,6 +435,11 @@ class TableViewTest {
     @Test
     fun `tableview invoke 1`() {
         val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        // TODO Add CellTransformer when supported
+
+        val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
+            call.respondText(text = "Response 1")
+        }
 
         tv1[CellHeight] {
             100
@@ -448,11 +453,19 @@ class TableViewTest {
         tv1[CellTopics] {
             "400"
         }
+        tv1[Resources] {
+            "a" to handler
+        }
+        // TODO Consider impact of supporting:
+        //      tv1[Table] { table }
+        //      It would imply doing table1 { table2 },
+        //      so would need invoke support on Table
 
         assertEquals(100L, tv1[CellHeight].height)
         assertEquals(200L, tv1[CellWidth].width)
         assertEquals(listOf("300"), tv1[CellClasses].classes)
         assertEquals(listOf("400"), tv1[CellTopics].topics)
+        assertEquals(mapOf("a" to handler), tv1[Resources].resources)
 
         tv1[CellClasses] {
             setOf("500", "600")
@@ -468,32 +481,135 @@ class TableViewTest {
         tv1[CellWidth] { }
         tv1[CellClasses] { }
         tv1[CellTopics] { }
+        tv1[Resources] { }
 
         assertEquals(100L, tv1[CellHeight].height)
         assertEquals(200L, tv1[CellWidth].width)
         assertEquals(listOf("500", "600"), tv1[CellClasses].classes)
         assertEquals(listOf("700", "800"), tv1[CellTopics].topics)
+        assertEquals(mapOf("a" to handler), tv1[Resources].resources)
 
         tv1[CellHeight] { null }
         tv1[CellWidth] { null }
         tv1[CellClasses] { null }
         tv1[CellTopics] { null }
+        tv1[Resources] { null }
 
         assertEquals(Unit, tv1[CellHeight].height)
         assertEquals(Unit, tv1[CellWidth].width)
         assertEquals(emptyList<String>(), tv1[CellClasses].classes)
         assertEquals(emptyList<String>(), tv1[CellTopics].topics)
+        assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), tv1[Resources].resources)
     }
 
     @Test
     fun `tableview invoke 2`() {
-        /*
-        TODO
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name + " 1"]
+        val tv2 = TableView[object {}.javaClass.enclosingMethod.name + " 2"]
 
-        See cellview invoke 2 and similar..
-        But to make that work, we can't do batching with tv { .. } (or table { .. } to keep consistency),
-        and would need to introduce batch(tv) { .. } as the batching API approach..
-         */
+        // TODO Add CellTransformer when supported
+
+        val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
+            call.respondText(text = "Response 1")
+        }
+
+        tv1 {
+            tv2[CellHeight]
+        }
+        tv1 {
+            tv2[CellWidth]
+        }
+        tv1 {
+            tv2[CellClasses]
+        }
+        tv1 {
+            tv2[CellTopics]
+        }
+        tv1 {
+            tv2[Resources]
+        }
+        val t1 = tv1 {
+            tv2[Table]
+        } as Table
+
+        assertEquals(Unit, tv1[CellHeight].height)
+        assertEquals(Unit, tv1[CellWidth].width)
+        assertEquals(emptyList<String>(), tv1[CellClasses].classes)
+        assertEquals(emptyList<String>(), tv1[CellTopics].topics)
+        assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), tv1[Resources].resources)
+        assertEquals(t1, tv1[Table].source)
+
+        tv2[CellHeight] {
+            100
+        }
+        tv2[CellWidth] {
+            200
+        }
+        tv2[CellClasses] {
+            "300"
+        }
+        tv2[CellTopics] {
+            "400"
+        }
+        tv2[Resources] {
+            "a" to handler
+        }
+        tv2[Table] = t1
+
+        tv1 {
+            tv2[CellHeight]
+        }
+        tv1 {
+            tv2[CellWidth]
+        }
+        tv1 {
+            tv2[CellClasses]
+        }
+        tv1 {
+            tv2[CellTopics]
+        }
+        tv1 {
+            tv2[Resources]
+        }
+        val t2 = tv1 {
+            tv2[Table]
+        } as Table
+
+        assertEquals(100L, tv1[CellHeight].height)
+        assertEquals(200L, tv1[CellWidth].width)
+        assertEquals(listOf("300"), tv1[CellClasses].classes)
+        assertEquals(listOf("400"), tv1[CellTopics].topics)
+        assertEquals(mapOf("a" to handler), tv1[Resources].resources)
+        assertEquals(t2, tv1[Table].source)
+
+        tv1 { }
+
+        assertEquals(100L, tv1[CellHeight].height)
+        assertEquals(200L, tv1[CellWidth].width)
+        assertEquals(listOf("300"), tv1[CellClasses].classes)
+        assertEquals(listOf("400"), tv1[CellTopics].topics)
+        assertEquals(mapOf("a" to handler), tv1[Resources].resources)
+        assertEquals(t2, tv1[Table].source)
+
+        tv1 { null }
+
+        assertEquals(Unit, tv1[CellHeight].height)
+        assertEquals(Unit, tv1[CellWidth].width)
+        assertEquals(emptyList<String>(), tv1[CellClasses].classes)
+        assertEquals(emptyList<String>(), tv1[CellTopics].topics)
+        assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), tv1[Resources].resources)
+        assertEquals(null, tv1[Table].source)
+
+        tv1 { tv2 }
+
+        assertEquals(100L, tv1[CellHeight].height)
+        assertEquals(200L, tv1[CellWidth].width)
+        assertEquals(listOf("300"), tv1[CellClasses].classes)
+        assertEquals(listOf("400"), tv1[CellTopics].topics)
+        assertEquals(mapOf("a" to handler), tv1[Resources].resources)
+
+        // Don't have access to actual source table with tv1 { tv2 } above..
+        assertNotEquals(t2, tv1[Table].source)
     }
 
     @Test
