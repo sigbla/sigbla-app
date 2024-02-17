@@ -1490,13 +1490,13 @@ class TableViewTest {
         val t1 = Table[null]
         val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
 
-        val it1 = tv1["A", 0].iterator()
+        val it1 = tv1["A", 0].derived.iterator()
         tv1[Table] = t1
-        val it2 = tv1["A", 0].iterator()
+        val it2 = tv1["A", 0].derived.iterator()
 
         t1["A", 0] = "A0"
 
-        val it3 = tv1["A", 0].iterator()
+        val it3 = tv1["A", 0].derived.iterator()
 
         assertFalse(it1.hasNext())
         assertFailsWith<NoSuchElementException> { it1.next() }
@@ -1569,9 +1569,10 @@ class TableViewTest {
     @Test
     fun `rowview iterator`() {
         val t1 = Table[null]
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name, t1]
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
 
         val it1 = tv1[0].iterator()
+        tv1[Table] = t1
 
         t1["A", 0] = "A0"
 
@@ -1587,13 +1588,14 @@ class TableViewTest {
     @Test
     fun `derivedrowview iterator`() {
         val t1 = Table[null]
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name, t1]
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
 
-        val it1 = tv1[0].iterator()
+        val it1 = tv1[0].derived.iterator()
+        tv1[Table] = t1
 
         t1["A", 0] = "A0"
 
-        val it2 = tv1[0].iterator()
+        val it2 = tv1[0].derived.iterator()
 
         assertFalse(it1.hasNext())
         assertFailsWith<NoSuchElementException> { it1.next() }
