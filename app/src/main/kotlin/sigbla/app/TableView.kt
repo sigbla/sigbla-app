@@ -1360,7 +1360,7 @@ class CellView(
 
     override fun iterator(): Iterator<DerivedCellView> {
         val ref = tableView.tableViewRef.get()
-        if (ref.table == null)
+        if (ref.table == null || ref.table.tableRef.get().columnCells.get(this.columnView.header)?.get(this.index) == null)
             return object : Iterator<DerivedCellView> {
                 override fun hasNext() = false
                 override fun next() = throw NoSuchElementException()
@@ -1449,18 +1449,7 @@ class DerivedCellView internal constructor(
         CellTopics(this, topics)
     }
 
-    override fun iterator(): Iterator<DerivedCellView> {
-        val ref = tableView.tableViewRef.get()
-        if (ref.table == null)
-            return object : Iterator<DerivedCellView> {
-                override fun hasNext() = false
-                override fun next() = throw NoSuchElementException()
-            }
-
-        val derivedCellView = createDerivedCellViewFromRef(ref, columnView, index)
-
-        return listOf(derivedCellView).iterator()
-    }
+    override fun iterator(): Iterator<DerivedCellView> = cellView.iterator()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
