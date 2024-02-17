@@ -25,7 +25,7 @@ class TableViewTest {
 
     @Test
     fun `registry test`() {
-        val t1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val t1 = TableView[object {}.javaClass.enclosingMethod.name, Table[null]]
         val t2 = TableView.fromRegistry(t1.name!!)
         assertEquals(t1, t2)
         assertTrue(t1 === t2)
@@ -603,7 +603,10 @@ class TableViewTest {
         assertEquals(Unit, tv1[CellWidth].width)
         assertEquals(emptyList<String>(), tv1[CellClasses].classes)
         assertEquals(emptyList<String>(), tv1[CellTopics].topics)
-        assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), tv1[Resources].resources)
+        assertEquals(
+            emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(),
+            tv1[Resources].resources
+        )
     }
 
     @Test
@@ -640,7 +643,10 @@ class TableViewTest {
         assertEquals(Unit, tv1[CellWidth].width)
         assertEquals(emptyList<String>(), tv1[CellClasses].classes)
         assertEquals(emptyList<String>(), tv1[CellTopics].topics)
-        assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), tv1[Resources].resources)
+        assertEquals(
+            emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(),
+            tv1[Resources].resources
+        )
         assertEquals(t1, tv1[Table].source)
 
         tv2[CellHeight] {
@@ -701,7 +707,10 @@ class TableViewTest {
         assertEquals(Unit, tv1[CellWidth].width)
         assertEquals(emptyList<String>(), tv1[CellClasses].classes)
         assertEquals(emptyList<String>(), tv1[CellTopics].topics)
-        assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), tv1[Resources].resources)
+        assertEquals(
+            emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(),
+            tv1[Resources].resources
+        )
         assertEquals(null, tv1[Table].source)
 
         tv1 { tv2 }
@@ -1128,7 +1137,10 @@ class TableViewTest {
         assertEquals(mapOf("foo/bar" to handler2), tv1[Resources].resources)
 
         tv1[Resources] { resources1 }
-        assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), tv1[Resources].resources)
+        assertEquals(
+            emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(),
+            tv1[Resources].resources
+        )
 
         tv1[Resources] { resources2 }
         assertEquals(mapOf("foo/bar" to handler1), tv1[Resources].resources)
@@ -1278,7 +1290,10 @@ class TableViewTest {
             assertEquals(emptyList<String>(), newView[CellTopics].topics)
             assertEquals(Unit, newView[CellHeight].height)
             assertEquals(Unit, newView[CellWidth].width)
-            assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), newView[Resources].resources)
+            assertEquals(
+                emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(),
+                newView[Resources].resources
+            )
             assertEquals(null, newView[Table].source)
         }
 
@@ -1297,7 +1312,10 @@ class TableViewTest {
         assertEquals(emptyList<String>(), tv1[CellTopics].topics)
         assertEquals(Unit, tv1[CellHeight].height)
         assertEquals(Unit, tv1[CellWidth].width)
-        assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), tv1[Resources].resources)
+        assertEquals(
+            emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(),
+            tv1[Resources].resources
+        )
         assertEquals(null, tv1[Table].source)
 
         assertEquals(6, count)
@@ -1425,5 +1443,162 @@ class TableViewTest {
         assertEquals(5, count)
     }
 
-    // TODO See TableTest for inspiration
+    @Test
+    fun `tableview iterator`() {
+        val t1 = Table[null]
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        val it1 = tv1.iterator()
+        tv1[Table] = t1
+
+        t1["A", 0] = "A0"
+
+        val it2 = tv1.iterator()
+
+        assertFalse(it1.hasNext())
+        assertFailsWith<NoSuchElementException> { it1.next() }
+
+        assertTrue(it2.hasNext())
+        assertEquals(1, it2.asSequence().count())
+    }
+
+    @Test
+    fun `cellview iterator`() {
+        val t1 = Table[null]
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        val it1 = tv1["A", 0].iterator()
+        tv1[Table] = t1
+        val it2 = tv1["A", 0].iterator()
+
+        t1["A", 0] = "A0"
+
+        val it3 = tv1["A", 0].iterator()
+
+        assertFalse(it1.hasNext())
+        assertFailsWith<NoSuchElementException> { it1.next() }
+
+        assertFalse(it2.hasNext())
+        assertFailsWith<NoSuchElementException> { it2.next() }
+
+        assertTrue(it3.hasNext())
+        assertEquals(1, it3.asSequence().count())
+    }
+
+    @Test
+    fun `derivedcellview iterator`() {
+        val t1 = Table[null]
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        val it1 = tv1["A", 0].iterator()
+        tv1[Table] = t1
+        val it2 = tv1["A", 0].iterator()
+
+        t1["A", 0] = "A0"
+
+        val it3 = tv1["A", 0].iterator()
+
+        assertFalse(it1.hasNext())
+        assertFailsWith<NoSuchElementException> { it1.next() }
+
+        assertFalse(it2.hasNext())
+        assertFailsWith<NoSuchElementException> { it2.next() }
+
+        assertTrue(it3.hasNext())
+        assertEquals(1, it3.asSequence().count())
+    }
+
+    @Test
+    fun `columnview iterator`() {
+        val t1 = Table[null]
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        // This will trigger path when ref.table is null
+        val it1 = tv1["A"].iterator()
+
+        // Create CV here before assigning table avoid creating column on t1
+        val cv = tv1["A"]
+        tv1[Table] = t1
+
+        // This will trigger path when tableRef.columns[header] is null
+        val it2 = cv.iterator()
+
+        t1["A", 0] = "A0"
+
+        val it3 = tv1["A"].iterator()
+
+        assertFalse(it1.hasNext())
+        assertFailsWith<NoSuchElementException> { it1.next() }
+
+        assertFalse(it2.hasNext())
+        assertFailsWith<NoSuchElementException> { it2.next() }
+
+        assertTrue(it3.hasNext())
+        assertEquals(1, it3.asSequence().count())
+    }
+
+    @Test
+    fun `derivedcolumnview iterator`() {
+        val t1 = Table[null]
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        // This will trigger path when ref.table is null
+        val it1 = tv1["A"].derived.iterator()
+
+        // Create DCV here before assigning table avoid creating column on t1
+        val dcv = tv1["A"].derived
+        tv1[Table] = t1
+
+        // This will trigger path when tableRef.columns[header] is null
+        val it2 = dcv.iterator()
+
+        t1["A", 0] = "A0"
+
+        val it3 = dcv.iterator()
+
+        assertFalse(it1.hasNext())
+        assertFailsWith<NoSuchElementException> { it1.next() }
+
+        assertFalse(it2.hasNext())
+        assertFailsWith<NoSuchElementException> { it2.next() }
+
+        assertTrue(it3.hasNext())
+        assertEquals(1, it3.asSequence().count())
+    }
+
+    @Test
+    fun `rowview iterator`() {
+        val t1 = Table[null]
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name, t1]
+
+        val it1 = tv1[0].iterator()
+
+        t1["A", 0] = "A0"
+
+        val it2 = tv1[0].iterator()
+
+        assertFalse(it1.hasNext())
+        assertFailsWith<NoSuchElementException> { it1.next() }
+
+        assertTrue(it2.hasNext())
+        assertEquals(1, it2.asSequence().count())
+    }
+
+    @Test
+    fun `derivedrowview iterator`() {
+        val t1 = Table[null]
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name, t1]
+
+        val it1 = tv1[0].iterator()
+
+        t1["A", 0] = "A0"
+
+        val it2 = tv1[0].iterator()
+
+        assertFalse(it1.hasNext())
+        assertFailsWith<NoSuchElementException> { it1.next() }
+
+        assertTrue(it2.hasNext())
+        assertEquals(1, it2.asSequence().count())
+    }
 }
