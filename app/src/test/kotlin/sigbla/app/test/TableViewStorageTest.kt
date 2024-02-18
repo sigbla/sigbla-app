@@ -9,10 +9,12 @@ import java.nio.file.Path
 import kotlin.io.path.deleteExisting
 import kotlin.io.path.listDirectoryEntries
 import org.junit.Assert.*
+import sigbla.app.exceptions.InvalidStorageException
 import java.io.File
 import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import java.util.concurrent.ThreadLocalRandom
+import kotlin.test.assertFailsWith
 
 class TableViewStorageTest {
     @After
@@ -286,6 +288,20 @@ class TableViewStorageTest {
 
         assertFalse(it5.hasNext())
         assertFalse(it6.hasNext())
+
+        deleteFolder(tmpFolder)
+    }
+
+    @Test
+    fun `ensure magic check`() {
+        val tmpFolder = Files.createTempDirectory("sigbla-test")
+        val tmpFile = File(tmpFolder.toFile(),"test-${System.currentTimeMillis()}.sigv")
+
+        tmpFile.writeBytes(ByteArray(100) { 0 })
+
+        assertFailsWith(InvalidStorageException::class, "Unsupported file type") {
+            load(tmpFile to TableView[null])
+        }
 
         deleteFolder(tmpFolder)
     }
