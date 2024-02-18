@@ -14,6 +14,8 @@ import java.nio.file.Path
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.io.path.*
 import org.junit.Assert.*
+import sigbla.app.exceptions.InvalidStorageException
+import kotlin.test.assertFailsWith
 
 class TableStorageTest {
     @After
@@ -150,6 +152,20 @@ class TableStorageTest {
 
         assertFalse(it1.hasNext())
         assertFalse(it2.hasNext())
+
+        deleteFolder(tmpFolder)
+    }
+
+    @Test
+    fun `ensure magic check`() {
+        val tmpFolder = Files.createTempDirectory("sigbla-test")
+        val tmpFile = File(tmpFolder.toFile(),"test-${System.currentTimeMillis()}.sigt")
+
+        tmpFile.writeBytes(ByteArray(100) { 0 })
+
+        assertFailsWith(InvalidStorageException::class, "Unsupported file type") {
+            load(tmpFile to Table[null])
+        }
 
         deleteFolder(tmpFolder)
     }
