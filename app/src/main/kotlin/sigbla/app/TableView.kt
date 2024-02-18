@@ -179,7 +179,7 @@ class TableView internal constructor(
     }
 
     operator fun set(cellHeight: CellHeight.Companion, height: CellHeight<*, *>?) {
-        setCellHeight(height?.toLong())
+        setCellHeight(height?.asLong)
     }
 
     private fun setCellHeight(height: Long?) {
@@ -223,7 +223,7 @@ class TableView internal constructor(
     }
 
     operator fun set(cellWidth: CellWidth.Companion, width: CellWidth<*, *>?) {
-        setCellWidth(width?.toLong())
+        setCellWidth(width?.asLong)
     }
 
     private fun setCellWidth(width: Long?) {
@@ -1136,7 +1136,7 @@ class CellView(
     }
 
     operator fun set(cellHeight: CellHeight.Companion, height: CellHeight<*, *>?) {
-        setCellHeight(height?.toLong())
+        setCellHeight(height?.asLong)
     }
 
     private fun setCellHeight(height: Long?) {
@@ -1185,7 +1185,7 @@ class CellView(
     }
 
     operator fun set(cellWidth: CellWidth.Companion, width: CellWidth<*, *>?) {
-        setCellWidth(width?.toLong())
+        setCellWidth(width?.asLong)
     }
 
     private fun setCellWidth(width: Long?) {
@@ -1504,7 +1504,7 @@ class ColumnView internal constructor(
     }
 
     operator fun set(cellWidth: CellWidth.Companion, width: CellWidth<*, *>?) {
-        setCellWidth(width?.toLong())
+        setCellWidth(width?.asLong)
     }
 
     private fun setCellWidth(width: Long?) {
@@ -1801,7 +1801,7 @@ class RowView internal constructor(
     }
 
     operator fun set(cellHeight: CellHeight.Companion, height: CellHeight<*, *>?) {
-        setCellHeight(height?.toLong())
+        setCellHeight(height?.asLong)
     }
 
     private fun setCellHeight(height: Long?) {
@@ -2060,14 +2060,13 @@ sealed class CellHeight<S, T> {
     abstract val source: S
     abstract val height: T
 
-    // TODO Make these match Cell
-    open fun isNumeric(): Boolean = false
-    open fun toLong(): Long? = null
+    open val isNumeric: Boolean = false
+    open val asLong: Long? = null
 
     operator fun plus(that: CellHeight<*, *>): Number {
         return when (that.height) {
-            is Int -> plus(that.toLong() ?: 0L)
-            is Long -> plus(that.toLong() ?: 0L)
+            is Int -> plus(that.asLong ?: 0L)
+            is Long -> plus(that.asLong ?: 0L)
             else -> throw InvalidCellHeightException("CellHeight not numeric at $source")
         }
     }
@@ -2085,8 +2084,8 @@ sealed class CellHeight<S, T> {
 
     operator fun minus(that: CellHeight<*, *>): Number {
         return when (that.height) {
-            is Int -> minus(that.toLong() ?: 0L)
-            is Long -> minus(that.toLong() ?: 0L)
+            is Int -> minus(that.asLong ?: 0L)
+            is Long -> minus(that.asLong ?: 0L)
             else -> throw InvalidCellHeightException("CellHeight not numeric at $source")
         }
     }
@@ -2104,8 +2103,8 @@ sealed class CellHeight<S, T> {
 
     operator fun times(that: CellHeight<*, *>): Number {
         return when (that.height) {
-            is Int -> times(that.toLong() ?: 0L)
-            is Long -> times(that.toLong() ?: 0L)
+            is Int -> times(that.asLong ?: 0L)
+            is Long -> times(that.asLong ?: 0L)
             else -> throw InvalidCellHeightException("CellHeight not numeric at $source")
         }
     }
@@ -2123,8 +2122,8 @@ sealed class CellHeight<S, T> {
 
     operator fun div(that: CellHeight<*, *>): Number {
         return when (that.height) {
-            is Int -> div(that.toLong() ?: 0L)
-            is Long -> div(that.toLong() ?: 0L)
+            is Int -> div(that.asLong ?: 0L)
+            is Long -> div(that.asLong ?: 0L)
             else -> throw InvalidCellHeightException("CellHeight not numeric at $source")
         }
     }
@@ -2142,8 +2141,8 @@ sealed class CellHeight<S, T> {
 
     operator fun rem(that: CellHeight<*, *>): Number {
         return when (that.height) {
-            is Int -> rem(that.toLong() ?: 0L)
-            is Long -> rem(that.toLong() ?: 0L)
+            is Int -> rem(that.asLong ?: 0L)
+            is Long -> rem(that.asLong ?: 0L)
             else -> throw InvalidCellHeightException("CellHeight not numeric at $source")
         }
     }
@@ -2215,9 +2214,9 @@ class PixelCellHeight<S> internal constructor(
     override val source: S,
     override val height: Long
 ) : CellHeight<S, Long>() {
-    override fun isNumeric() = true
+    override val isNumeric = true
 
-    override fun toLong() = height
+    override val asLong = height
 
     override fun plus(that: Int) = height + that
 
@@ -2246,14 +2245,13 @@ sealed class CellWidth<S, T> {
     abstract val source: S
     abstract val width: T
 
-    // TODO Make these match Cell
-    open fun isNumeric(): Boolean = false
-    open fun toLong(): Long? = null
+    open val isNumeric: Boolean = false
+    open val asLong: Long? = null
 
     operator fun plus(that: CellWidth<*, *>): Number {
         return when (that.width) {
-            is Int -> plus(that.toLong() ?: 0L)
-            is Long -> plus(that.toLong() ?: 0L)
+            is Int -> plus(that.asLong ?: 0L)
+            is Long -> plus(that.asLong ?: 0L)
             else -> throw InvalidCellWidthException("CellWidth not numeric at $source")
         }
     }
@@ -2271,8 +2269,8 @@ sealed class CellWidth<S, T> {
 
     operator fun minus(that: CellWidth<*, *>): Number {
         return when (that.width) {
-            is Int -> minus(that.toLong() ?: 0L)
-            is Long -> minus(that.toLong() ?: 0L)
+            is Int -> minus(that.asLong ?: 0L)
+            is Long -> minus(that.asLong ?: 0L)
             else -> throw InvalidCellWidthException("CellWidth not numeric at $source")
         }
     }
@@ -2290,8 +2288,8 @@ sealed class CellWidth<S, T> {
 
     operator fun times(that: CellWidth<*, *>): Number {
         return when (that.width) {
-            is Int -> times(that.toLong() ?: 0L)
-            is Long -> times(that.toLong() ?: 0L)
+            is Int -> times(that.asLong ?: 0L)
+            is Long -> times(that.asLong ?: 0L)
             else -> throw InvalidCellWidthException("CellWidth not numeric at $source")
         }
     }
@@ -2309,8 +2307,8 @@ sealed class CellWidth<S, T> {
 
     operator fun div(that: CellWidth<*, *>): Number {
         return when (that.width) {
-            is Int -> div(that.toLong() ?: 0L)
-            is Long -> div(that.toLong() ?: 0L)
+            is Int -> div(that.asLong ?: 0L)
+            is Long -> div(that.asLong ?: 0L)
             else -> throw InvalidCellWidthException("CellWidth not numeric at $source")
         }
     }
@@ -2328,8 +2326,8 @@ sealed class CellWidth<S, T> {
 
     operator fun rem(that: CellWidth<*, *>): Number {
         return when (that.width) {
-            is Int -> rem(that.toLong() ?: 0L)
-            is Long -> rem(that.toLong() ?: 0L)
+            is Int -> rem(that.asLong ?: 0L)
+            is Long -> rem(that.asLong ?: 0L)
             else -> throw InvalidCellWidthException("CellWidth not numeric at $source")
         }
     }
@@ -2403,9 +2401,9 @@ class PixelCellWidth<S> internal constructor(
     override val source: S,
     override val width: Long
 ) : CellWidth<S, Long>() {
-    override fun isNumeric() = true
+    override val isNumeric = true
 
-    override fun toLong() = width
+    override val asLong = width
 
     override fun plus(that: Int) = width + that
 
