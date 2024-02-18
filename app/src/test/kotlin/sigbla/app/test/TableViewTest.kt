@@ -1603,4 +1603,150 @@ class TableViewTest {
         assertTrue(it2.hasNext())
         assertEquals(1, it2.asSequence().count())
     }
+
+    @Test
+    fun `cellheight math`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        val unitHeight = tv1[CellHeight]
+        assertFalse(unitHeight.isNumeric)
+        assertNull(unitHeight.asLong)
+
+        tv1[CellHeight] = 1000
+
+        val pixelHeight1 = tv1[CellHeight]
+        assertTrue(pixelHeight1.isNumeric)
+        assertEquals(1000L, pixelHeight1.asLong)
+
+        tv1[CellHeight] = 200
+
+        val pixelHeight2 = tv1[CellHeight]
+
+        assertEquals(1001L, pixelHeight1 + 1)
+        assertEquals(999L, pixelHeight1 - 1)
+        assertEquals(2000L, pixelHeight1 * 2)
+        assertEquals(500L, pixelHeight1 / 2)
+        assertEquals(0L, pixelHeight1 % 2)
+
+        assertEquals(1001L, pixelHeight1 + 1L)
+        assertEquals(999L, pixelHeight1 - 1L)
+        assertEquals(2000L, pixelHeight1 * 2L)
+        assertEquals(500L, pixelHeight1 / 2L)
+        assertEquals(0L, pixelHeight1 % 2L)
+
+        assertEquals(1200L, pixelHeight1 + pixelHeight2)
+        assertEquals(800L, pixelHeight1 - pixelHeight2)
+        assertEquals(200000L, pixelHeight1 * pixelHeight2)
+        assertEquals(5L, pixelHeight1 / pixelHeight2)
+        assertEquals(0L, pixelHeight1 % pixelHeight2)
+
+        assertFailsWith<InvalidCellHeightException> { pixelHeight1 + unitHeight }
+        assertFailsWith<InvalidCellHeightException> { pixelHeight1 - unitHeight }
+        assertFailsWith<InvalidCellHeightException> { pixelHeight1 * unitHeight }
+        assertFailsWith<InvalidCellHeightException> { pixelHeight1 / unitHeight }
+        assertFailsWith<InvalidCellHeightException> { pixelHeight1 % unitHeight }
+
+        assertFailsWith<InvalidCellHeightException> { unitHeight + 1 }
+        assertFailsWith<InvalidCellHeightException> { unitHeight - 1 }
+        assertFailsWith<InvalidCellHeightException> { unitHeight * 1 }
+        assertFailsWith<InvalidCellHeightException> { unitHeight / 1 }
+        assertFailsWith<InvalidCellHeightException> { unitHeight % 1 }
+
+        assertFailsWith<InvalidCellHeightException> { unitHeight + 1L }
+        assertFailsWith<InvalidCellHeightException> { unitHeight - 1L }
+        assertFailsWith<InvalidCellHeightException> { unitHeight * 1L }
+        assertFailsWith<InvalidCellHeightException> { unitHeight / 1L }
+        assertFailsWith<InvalidCellHeightException> { unitHeight % 1L }
+
+        assertFailsWith<InvalidCellHeightException> { unitHeight + (1 as Number) }
+        assertFailsWith<InvalidCellHeightException> { unitHeight - (1 as Number) }
+        assertFailsWith<InvalidCellHeightException> { unitHeight * (1 as Number) }
+        assertFailsWith<InvalidCellHeightException> { unitHeight / (1 as Number) }
+        assertFailsWith<InvalidCellHeightException> { unitHeight % (1 as Number) }
+
+        assertFailsWith<InvalidCellHeightException> { unitHeight + (1L as Number) }
+        assertFailsWith<InvalidCellHeightException> { unitHeight - (1L as Number) }
+        assertFailsWith<InvalidCellHeightException> { unitHeight * (1L as Number) }
+        assertFailsWith<InvalidCellHeightException> { unitHeight / (1L as Number) }
+        assertFailsWith<InvalidCellHeightException> { unitHeight % (1L as Number) }
+
+        assertFailsWith<InvalidCellHeightException> { pixelHeight2 + 1.0 }
+        assertFailsWith<InvalidCellHeightException> { pixelHeight2 - 1.0 }
+        assertFailsWith<InvalidCellHeightException> { pixelHeight2 * 1.0 }
+        assertFailsWith<InvalidCellHeightException> { pixelHeight2 / 1.0 }
+        assertFailsWith<InvalidCellHeightException> { pixelHeight2 % 1.0 }
+    }
+
+    @Test
+    fun `cellwidth math`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        val unitWidth = tv1[CellWidth]
+        assertFalse(unitWidth.isNumeric)
+        assertNull(unitWidth.asLong)
+
+        tv1[CellWidth] = 1000
+
+        val pixelWidth1 = tv1[CellWidth]
+        assertTrue(pixelWidth1.isNumeric)
+        assertEquals(1000L, pixelWidth1.asLong)
+
+        tv1[CellWidth] = 200
+
+        val pixelWidth2 = tv1[CellWidth]
+
+        assertEquals(1001L, pixelWidth1 + 1)
+        assertEquals(999L, pixelWidth1 - 1)
+        assertEquals(2000L, pixelWidth1 * 2)
+        assertEquals(500L, pixelWidth1 / 2)
+        assertEquals(0L, pixelWidth1 % 2)
+
+        assertEquals(1001L, pixelWidth1 + 1L)
+        assertEquals(999L, pixelWidth1 - 1L)
+        assertEquals(2000L, pixelWidth1 * 2L)
+        assertEquals(500L, pixelWidth1 / 2L)
+        assertEquals(0L, pixelWidth1 % 2L)
+
+        assertEquals(1200L, pixelWidth1 + pixelWidth2)
+        assertEquals(800L, pixelWidth1 - pixelWidth2)
+        assertEquals(200000L, pixelWidth1 * pixelWidth2)
+        assertEquals(5L, pixelWidth1 / pixelWidth2)
+        assertEquals(0L, pixelWidth1 % pixelWidth2)
+
+        assertFailsWith<InvalidCellWidthException> { pixelWidth1 + unitWidth }
+        assertFailsWith<InvalidCellWidthException> { pixelWidth1 - unitWidth }
+        assertFailsWith<InvalidCellWidthException> { pixelWidth1 * unitWidth }
+        assertFailsWith<InvalidCellWidthException> { pixelWidth1 / unitWidth }
+        assertFailsWith<InvalidCellWidthException> { pixelWidth1 % unitWidth }
+
+        assertFailsWith<InvalidCellWidthException> { unitWidth + 1 }
+        assertFailsWith<InvalidCellWidthException> { unitWidth - 1 }
+        assertFailsWith<InvalidCellWidthException> { unitWidth * 1 }
+        assertFailsWith<InvalidCellWidthException> { unitWidth / 1 }
+        assertFailsWith<InvalidCellWidthException> { unitWidth % 1 }
+
+        assertFailsWith<InvalidCellWidthException> { unitWidth + 1L }
+        assertFailsWith<InvalidCellWidthException> { unitWidth - 1L }
+        assertFailsWith<InvalidCellWidthException> { unitWidth * 1L }
+        assertFailsWith<InvalidCellWidthException> { unitWidth / 1L }
+        assertFailsWith<InvalidCellWidthException> { unitWidth % 1L }
+
+        assertFailsWith<InvalidCellWidthException> { unitWidth + (1 as Number) }
+        assertFailsWith<InvalidCellWidthException> { unitWidth - (1 as Number) }
+        assertFailsWith<InvalidCellWidthException> { unitWidth * (1 as Number) }
+        assertFailsWith<InvalidCellWidthException> { unitWidth / (1 as Number) }
+        assertFailsWith<InvalidCellWidthException> { unitWidth % (1 as Number) }
+
+        assertFailsWith<InvalidCellWidthException> { unitWidth + (1L as Number) }
+        assertFailsWith<InvalidCellWidthException> { unitWidth - (1L as Number) }
+        assertFailsWith<InvalidCellWidthException> { unitWidth * (1L as Number) }
+        assertFailsWith<InvalidCellWidthException> { unitWidth / (1L as Number) }
+        assertFailsWith<InvalidCellWidthException> { unitWidth % (1L as Number) }
+
+        assertFailsWith<InvalidCellWidthException> { pixelWidth2 + 1.0 }
+        assertFailsWith<InvalidCellWidthException> { pixelWidth2 - 1.0 }
+        assertFailsWith<InvalidCellWidthException> { pixelWidth2 * 1.0 }
+        assertFailsWith<InvalidCellWidthException> { pixelWidth2 / 1.0 }
+        assertFailsWith<InvalidCellWidthException> { pixelWidth2 % 1.0 }
+    }
 }

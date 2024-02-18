@@ -2065,16 +2065,15 @@ sealed class CellHeight<S, T> {
 
     operator fun plus(that: CellHeight<*, *>): Number {
         return when (that.height) {
-            is Int -> plus(that.asLong ?: 0L)
             is Long -> plus(that.asLong ?: 0L)
-            else -> throw InvalidCellHeightException("CellHeight not numeric at $source")
+            else -> throw InvalidCellHeightException("CellHeight not numeric at ${that.source}")
         }
     }
 
     operator fun plus(that: Number): Number {
         return when (that) {
-            is Int -> plus(that.toLong())
-            is Long -> plus(that.toLong())
+            is Int -> plus(that)
+            is Long -> plus(that)
             else -> throw InvalidCellHeightException("Unsupported type: ${that::class}")
         }
     }
@@ -2084,16 +2083,15 @@ sealed class CellHeight<S, T> {
 
     operator fun minus(that: CellHeight<*, *>): Number {
         return when (that.height) {
-            is Int -> minus(that.asLong ?: 0L)
             is Long -> minus(that.asLong ?: 0L)
-            else -> throw InvalidCellHeightException("CellHeight not numeric at $source")
+            else -> throw InvalidCellHeightException("CellHeight not numeric at ${that.source}")
         }
     }
 
     operator fun minus(that: Number): Number {
         return when (that) {
-            is Int -> minus(that.toLong())
-            is Long -> minus(that.toLong())
+            is Int -> minus(that)
+            is Long -> minus(that)
             else -> throw InvalidCellHeightException("Unsupported type: ${that::class}")
         }
     }
@@ -2103,16 +2101,15 @@ sealed class CellHeight<S, T> {
 
     operator fun times(that: CellHeight<*, *>): Number {
         return when (that.height) {
-            is Int -> times(that.asLong ?: 0L)
             is Long -> times(that.asLong ?: 0L)
-            else -> throw InvalidCellHeightException("CellHeight not numeric at $source")
+            else -> throw InvalidCellHeightException("CellHeight not numeric at ${that.source}")
         }
     }
 
     operator fun times(that: Number): Number {
         return when (that) {
-            is Int -> minus(that.toLong())
-            is Long -> minus(that.toLong())
+            is Int -> minus(that)
+            is Long -> minus(that)
             else -> throw InvalidCellHeightException("Unsupported type: ${that::class}")
         }
     }
@@ -2122,16 +2119,15 @@ sealed class CellHeight<S, T> {
 
     operator fun div(that: CellHeight<*, *>): Number {
         return when (that.height) {
-            is Int -> div(that.asLong ?: 0L)
             is Long -> div(that.asLong ?: 0L)
-            else -> throw InvalidCellHeightException("CellHeight not numeric at $source")
+            else -> throw InvalidCellHeightException("CellHeight not numeric at ${that.source}")
         }
     }
 
     operator fun div(that: Number): Number {
         return when (that) {
-            is Int -> div(that.toLong())
-            is Long -> div(that.toLong())
+            is Int -> div(that)
+            is Long -> div(that)
             else -> throw InvalidCellHeightException("Unsupported type: ${that::class}")
         }
     }
@@ -2141,16 +2137,15 @@ sealed class CellHeight<S, T> {
 
     operator fun rem(that: CellHeight<*, *>): Number {
         return when (that.height) {
-            is Int -> rem(that.asLong ?: 0L)
             is Long -> rem(that.asLong ?: 0L)
-            else -> throw InvalidCellHeightException("CellHeight not numeric at $source")
+            else -> throw InvalidCellHeightException("CellHeight not numeric at ${that.source}")
         }
     }
 
     operator fun rem(that: Number): Number {
         return when (that) {
-            is Int -> rem(that.toLong())
-            is Long -> rem(that.toLong())
+            is Int -> rem(that)
+            is Long -> rem(that)
             else -> throw InvalidCellHeightException("Unsupported type: ${that::class}")
         }
     }
@@ -2250,16 +2245,15 @@ sealed class CellWidth<S, T> {
 
     operator fun plus(that: CellWidth<*, *>): Number {
         return when (that.width) {
-            is Int -> plus(that.asLong ?: 0L)
             is Long -> plus(that.asLong ?: 0L)
-            else -> throw InvalidCellWidthException("CellWidth not numeric at $source")
+            else -> throw InvalidCellWidthException("CellWidth not numeric at ${that.source}")
         }
     }
 
     operator fun plus(that: Number): Number {
         return when (that) {
-            is Int -> plus(that.toLong())
-            is Long -> plus(that.toLong())
+            is Int -> plus(that)
+            is Long -> plus(that)
             else -> throw InvalidCellWidthException("Unsupported type: ${that::class}")
         }
     }
@@ -2269,16 +2263,15 @@ sealed class CellWidth<S, T> {
 
     operator fun minus(that: CellWidth<*, *>): Number {
         return when (that.width) {
-            is Int -> minus(that.asLong ?: 0L)
             is Long -> minus(that.asLong ?: 0L)
-            else -> throw InvalidCellWidthException("CellWidth not numeric at $source")
+            else -> throw InvalidCellWidthException("CellWidth not numeric at ${that.source}")
         }
     }
 
     operator fun minus(that: Number): Number {
         return when (that) {
-            is Int -> minus(that.toLong())
-            is Long -> minus(that.toLong())
+            is Int -> minus(that)
+            is Long -> minus(that)
             else -> throw InvalidCellWidthException("Unsupported type: ${that::class}")
         }
     }
@@ -2288,16 +2281,15 @@ sealed class CellWidth<S, T> {
 
     operator fun times(that: CellWidth<*, *>): Number {
         return when (that.width) {
-            is Int -> times(that.asLong ?: 0L)
             is Long -> times(that.asLong ?: 0L)
-            else -> throw InvalidCellWidthException("CellWidth not numeric at $source")
+            else -> throw InvalidCellWidthException("CellWidth not numeric at ${that.source}")
         }
     }
 
     operator fun times(that: Number): Number {
         return when (that) {
-            is Int -> minus(that.toLong())
-            is Long -> minus(that.toLong())
+            is Int -> minus(that)
+            is Long -> minus(that)
             else -> throw InvalidCellWidthException("Unsupported type: ${that::class}")
         }
     }
@@ -2307,16 +2299,15 @@ sealed class CellWidth<S, T> {
 
     operator fun div(that: CellWidth<*, *>): Number {
         return when (that.width) {
-            is Int -> div(that.asLong ?: 0L)
             is Long -> div(that.asLong ?: 0L)
-            else -> throw InvalidCellWidthException("CellWidth not numeric at $source")
+            else -> throw InvalidCellWidthException("CellWidth not numeric at ${that.source}")
         }
     }
 
     operator fun div(that: Number): Number {
         return when (that) {
-            is Int -> div(that.toLong())
-            is Long -> div(that.toLong())
+            is Int -> div(that)
+            is Long -> div(that)
             else -> throw InvalidCellWidthException("Unsupported type: ${that::class}")
         }
     }
@@ -2326,16 +2317,15 @@ sealed class CellWidth<S, T> {
 
     operator fun rem(that: CellWidth<*, *>): Number {
         return when (that.width) {
-            is Int -> rem(that.asLong ?: 0L)
             is Long -> rem(that.asLong ?: 0L)
-            else -> throw InvalidCellWidthException("CellWidth not numeric at $source")
+            else -> throw InvalidCellWidthException("CellWidth not numeric at ${that.source}")
         }
     }
 
     operator fun rem(that: Number): Number {
         return when (that) {
-            is Int -> rem(that.toLong())
-            is Long -> rem(that.toLong())
+            is Int -> rem(that)
+            is Long -> rem(that)
             else -> throw InvalidCellWidthException("Unsupported type: ${that::class}")
         }
     }
