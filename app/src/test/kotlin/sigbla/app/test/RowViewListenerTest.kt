@@ -761,7 +761,7 @@ class RowViewListenerTest {
 
         t["A", 1][CellWidth] = 0
 
-        assertEquals(1000L, t["A", 1][CellWidth].toLong())
+        assertEquals(1000L, t["A", 1][CellWidth].asLong)
 
         off(ref2)
     }
@@ -952,8 +952,8 @@ class RowViewListenerTest {
             order = 2
 
             events {
-                v2Old = oldView["A", 0][CellWidth].toLong()
-                v2New = newView["A", 0][CellWidth].toLong()
+                v2Old = oldView["A", 0][CellWidth].asLong
+                v2New = newView["A", 0][CellWidth].asLong
 
                 assertEquals(t["A", 0][CellWidth], source["A"][CellWidth])
 
@@ -967,8 +967,8 @@ class RowViewListenerTest {
             order = 3
 
             events {
-                v3Old = oldView["A", 0][CellWidth].toLong()
-                v3New = newView["A", 0][CellWidth].toLong()
+                v3Old = oldView["A", 0][CellWidth].asLong
+                v3New = newView["A", 0][CellWidth].asLong
 
                 assertEquals(t["A", 0][CellWidth], source["A"][CellWidth])
 
@@ -982,8 +982,8 @@ class RowViewListenerTest {
             order = 1
 
             events {
-                v1Old = oldView["A", 0][CellWidth].toLong()
-                v1New = newView["A", 0][CellWidth].toLong()
+                v1Old = oldView["A", 0][CellWidth].asLong
+                v1New = newView["A", 0][CellWidth].asLong
 
                 assertEquals(t["A", 0][CellWidth], source["A"][CellWidth])
 
