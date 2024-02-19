@@ -2422,14 +2422,14 @@ class CellClasses<S> internal constructor(
     val source: S,
     internal val _classes: PSet<String>
 ) : Iterable<String> {
-    val classes: List<String> by lazy {
-        _classes.sorted().toList()
+    val classes: SortedSet<String> by lazy {
+        _classes.toSortedSet()
     }
 
-    operator fun plus(topic: String): CellClasses<S> = CellClasses(source, _classes + topic)
-    operator fun plus(topics: Collection<String>): CellClasses<S> = CellClasses(source, topics.fold(this._classes) { acc, topic -> acc + topic })
-    operator fun minus(topic: String): CellClasses<S> = CellClasses(source, _classes - topic)
-    operator fun minus(topics: Collection<String>): CellClasses<S> = CellClasses(source, topics.fold(this._classes) { acc, topic -> acc - topic })
+    operator fun plus(topic: String): SortedSet<String> = (_classes + topic).toSortedSet()
+    operator fun plus(topics: Collection<String>): SortedSet<String> = (topics.fold(this._classes) { acc, topic -> acc + topic }).toSortedSet()
+    operator fun minus(topic: String): SortedSet<String> = (_classes - topic).toSortedSet()
+    operator fun minus(topics: Collection<String>): SortedSet<String> = (topics.fold(this._classes) { acc, topic -> acc - topic }).toSortedSet()
     override fun iterator(): Iterator<String> = classes.iterator()
 
     operator fun invoke(function: CellClasses<*>.() -> Any?): Any? {
@@ -2474,14 +2474,14 @@ class CellTopics<S> internal constructor(
     val source: S,
     internal val _topics: PSet<String>
 ) : Iterable<String> {
-    val topics: List<String> by lazy {
-        _topics.sorted().toList()
+    val topics: SortedSet<String> by lazy {
+        _topics.toSortedSet()
     }
 
-    operator fun plus(topic: String): CellTopics<S> = CellTopics(source, _topics + topic)
-    operator fun plus(topics: Collection<String>): CellTopics<S> = CellTopics(source, topics.fold(this._topics) { acc, topic -> acc + topic })
-    operator fun minus(topic: String): CellTopics<S> = CellTopics(source, _topics - topic)
-    operator fun minus(topics: Collection<String>): CellTopics<S> = CellTopics(source, topics.fold(this._topics) { acc, topic -> acc - topic })
+    operator fun plus(topic: String): SortedSet<String> = (_topics + topic).toSortedSet()
+    operator fun plus(topics: Collection<String>): SortedSet<String> = (topics.fold(this._topics) { acc, topic -> acc + topic }).toSortedSet()
+    operator fun minus(topic: String): SortedSet<String> = (_topics - topic).toSortedSet()
+    operator fun minus(topics: Collection<String>): SortedSet<String> = (topics.fold(this._topics) { acc, topic -> acc - topic }).toSortedSet()
     override fun iterator(): Iterator<String> = topics.iterator()
 
     operator fun invoke(function: CellTopics<*>.() -> Any?): Any? {

@@ -33,8 +33,8 @@ class TableViewAccessorsTest {
         fun compare(cellView: CellView) {
             assertEquals(1000L, sourceCellView[CellHeight].height)
             assertEquals(2000L, sourceCellView[CellWidth].width)
-            assertEquals(listOf("cc-1"), sourceCellView[CellClasses].classes)
-            assertEquals(listOf("ct-1"), sourceCellView[CellTopics].topics)
+            assertEquals(setOf("cc-1"), sourceCellView[CellClasses].classes)
+            assertEquals(setOf("ct-1"), sourceCellView[CellTopics].topics)
             assertEquals(ct, sourceCellView[CellTransformer].function)
 
             assertEquals(sourceCellView[CellHeight].height, cellView[CellHeight].height)
@@ -1268,8 +1268,8 @@ class TableViewAccessorsTest {
 
         fun compare(columnView: ColumnView) {
             assertEquals(2000L, sourceColumnView[CellWidth].width)
-            assertEquals(listOf("cc-1"), sourceColumnView[CellClasses].classes)
-            assertEquals(listOf("ct-1"), sourceColumnView[CellTopics].topics)
+            assertEquals(setOf("cc-1"), sourceColumnView[CellClasses].classes)
+            assertEquals(setOf("ct-1"), sourceColumnView[CellTopics].topics)
             //assertEquals(ct, sourceColumnView[CellTransformer].function)
 
             assertEquals(sourceColumnView[CellWidth].width, columnView[CellWidth].width)
@@ -1396,8 +1396,8 @@ class TableViewAccessorsTest {
 
         fun compare(rowView: RowView) {
             assertEquals(1000L, sourceRowView[CellHeight].height)
-            assertEquals(listOf("cc-1"), sourceRowView[CellClasses].classes)
-            assertEquals(listOf("ct-1"), sourceRowView[CellTopics].topics)
+            assertEquals(setOf("cc-1"), sourceRowView[CellClasses].classes)
+            assertEquals(setOf("ct-1"), sourceRowView[CellTopics].topics)
             //assertEquals(ct, sourceRowView[CellTransformer].function)
 
             assertEquals(sourceRowView[CellHeight].height, rowView[CellHeight].height)

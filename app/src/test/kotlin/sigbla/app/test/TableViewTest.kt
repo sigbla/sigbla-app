@@ -167,6 +167,19 @@ class TableViewTest {
         assertEquals(setOf("a", "c", "d"), tv1["A"][CellClasses].toSet())
         assertEquals(setOf("b", "e", "f"), tv1["A"][CellTopics].toSet())
 
+        tv1["A"][CellClasses] = tv1["A"][CellClasses] + tv1["A"][CellClasses]
+        tv1["A"][CellTopics] = tv1["A"][CellTopics] + tv1["A"][CellTopics]
+        assertEquals(setOf("a", "c", "d"), tv1["A"][CellClasses].toSet())
+        assertEquals(setOf("b", "e", "f"), tv1["A"][CellTopics].toSet())
+
+        tv1["A"][CellClasses] = tv1["A"][CellClasses] - tv1["A"][CellClasses]
+        tv1["A"][CellTopics] = tv1["A"][CellTopics] - tv1["A"][CellTopics]
+        assertEquals(emptySet<String>(), tv1["A"][CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv1["A"][CellTopics].toSet())
+
+        tv1["A"][CellClasses] = listOf("a", "c", "d")
+        tv1["A"][CellTopics] = listOf("b", "e", "f")
+
         tv1["A"][CellClasses] = tv1["A"][CellClasses] - setOf("c")
         tv1["A"][CellTopics] = tv1["A"][CellTopics] - setOf("f")
         assertEquals(setOf("a", "d"), tv1["A"][CellClasses].toSet())
@@ -231,6 +244,19 @@ class TableViewTest {
         tv1[1][CellTopics] = tv1[1][CellTopics] + setOf("e", "f")
         assertEquals(setOf("a", "c", "d"), tv1[1][CellClasses].toSet())
         assertEquals(setOf("b", "e", "f"), tv1[1][CellTopics].toSet())
+
+        tv1[1][CellClasses] = tv1[1][CellClasses] + tv1[1][CellClasses]
+        tv1[1][CellTopics] = tv1[1][CellTopics] + tv1[1][CellTopics]
+        assertEquals(setOf("a", "c", "d"), tv1[1][CellClasses].toSet())
+        assertEquals(setOf("b", "e", "f"), tv1[1][CellTopics].toSet())
+
+        tv1[1][CellClasses] = tv1[1][CellClasses] - tv1[1][CellClasses]
+        tv1[1][CellTopics] = tv1[1][CellTopics] - tv1[1][CellTopics]
+        assertEquals(emptySet<String>(), tv1[1][CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv1[1][CellTopics].toSet())
+
+        tv1[1][CellClasses] = listOf("a", "c", "d")
+        tv1[1][CellTopics] = listOf("b", "e", "f")
 
         tv1[1][CellClasses] = tv1[1][CellClasses] - setOf("c")
         tv1[1][CellTopics] = tv1[1][CellTopics] - setOf("f")
@@ -299,6 +325,19 @@ class TableViewTest {
         tv1["A"][1][CellTopics] = tv1["A"][1][CellTopics] + setOf("e", "f")
         assertEquals(setOf("a", "c", "d"), tv1["A"][1][CellClasses].toSet())
         assertEquals(setOf("b", "e", "f"), tv1["A"][1][CellTopics].toSet())
+
+        tv1["A"][1][CellClasses] = tv1["A"][1][CellClasses] + tv1["A"][1][CellClasses]
+        tv1["A"][1][CellTopics] = tv1["A"][1][CellTopics] + tv1["A"][1][CellTopics]
+        assertEquals(setOf("a", "c", "d"), tv1["A"][1][CellClasses].toSet())
+        assertEquals(setOf("b", "e", "f"), tv1["A"][1][CellTopics].toSet())
+
+        tv1["A"][1][CellClasses] = tv1["A"][1][CellClasses] - tv1["A"][1][CellClasses]
+        tv1["A"][1][CellTopics] = tv1["A"][1][CellTopics] - tv1["A"][1][CellTopics]
+        assertEquals(emptySet<String>(), tv1["A"][1][CellClasses].toSet())
+        assertEquals(emptySet<String>(), tv1["A"][1][CellTopics].toSet())
+
+        tv1["A"][1][CellClasses] = listOf("a", "c", "d")
+        tv1["A"][1][CellTopics] = listOf("b", "e", "f")
 
         tv1["A"][1][CellClasses] = tv1["A"][1][CellClasses] - setOf("c")
         tv1["A"][1][CellTopics] = tv1["A"][1][CellTopics] - setOf("f")
@@ -567,8 +606,8 @@ class TableViewTest {
 
         assertEquals(100L, tv1[CellHeight].height)
         assertEquals(200L, tv1[CellWidth].width)
-        assertEquals(listOf("300"), tv1[CellClasses].classes)
-        assertEquals(listOf("400"), tv1[CellTopics].topics)
+        assertEquals(setOf("300"), tv1[CellClasses].classes)
+        assertEquals(setOf("400"), tv1[CellTopics].topics)
         assertEquals(mapOf("a" to handler), tv1[Resources].resources)
 
         tv1[CellClasses] {
@@ -578,8 +617,8 @@ class TableViewTest {
             setOf("700", "800")
         }
 
-        assertEquals(listOf("500", "600"), tv1[CellClasses].classes)
-        assertEquals(listOf("700", "800"), tv1[CellTopics].topics)
+        assertEquals(setOf("500", "600"), tv1[CellClasses].classes)
+        assertEquals(setOf("700", "800"), tv1[CellTopics].topics)
 
         tv1[CellHeight] { }
         tv1[CellWidth] { }
@@ -589,8 +628,8 @@ class TableViewTest {
 
         assertEquals(100L, tv1[CellHeight].height)
         assertEquals(200L, tv1[CellWidth].width)
-        assertEquals(listOf("500", "600"), tv1[CellClasses].classes)
-        assertEquals(listOf("700", "800"), tv1[CellTopics].topics)
+        assertEquals(setOf("500", "600"), tv1[CellClasses].classes)
+        assertEquals(setOf("700", "800"), tv1[CellTopics].topics)
         assertEquals(mapOf("a" to handler), tv1[Resources].resources)
 
         tv1[CellHeight] { null }
@@ -601,8 +640,8 @@ class TableViewTest {
 
         assertEquals(Unit, tv1[CellHeight].height)
         assertEquals(Unit, tv1[CellWidth].width)
-        assertEquals(emptyList<String>(), tv1[CellClasses].classes)
-        assertEquals(emptyList<String>(), tv1[CellTopics].topics)
+        assertEquals(emptySet<String>(), tv1[CellClasses].classes)
+        assertEquals(emptySet<String>(), tv1[CellTopics].topics)
         assertEquals(
             emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(),
             tv1[Resources].resources
@@ -641,8 +680,8 @@ class TableViewTest {
 
         assertEquals(Unit, tv1[CellHeight].height)
         assertEquals(Unit, tv1[CellWidth].width)
-        assertEquals(emptyList<String>(), tv1[CellClasses].classes)
-        assertEquals(emptyList<String>(), tv1[CellTopics].topics)
+        assertEquals(emptySet<String>(), tv1[CellClasses].classes)
+        assertEquals(emptySet<String>(), tv1[CellTopics].topics)
         assertEquals(
             emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(),
             tv1[Resources].resources
@@ -687,8 +726,8 @@ class TableViewTest {
 
         assertEquals(100L, tv1[CellHeight].height)
         assertEquals(200L, tv1[CellWidth].width)
-        assertEquals(listOf("300"), tv1[CellClasses].classes)
-        assertEquals(listOf("400"), tv1[CellTopics].topics)
+        assertEquals(setOf("300"), tv1[CellClasses].classes)
+        assertEquals(setOf("400"), tv1[CellTopics].topics)
         assertEquals(mapOf("a" to handler), tv1[Resources].resources)
         assertEquals(t2, tv1[Table].source)
 
@@ -696,8 +735,8 @@ class TableViewTest {
 
         assertEquals(100L, tv1[CellHeight].height)
         assertEquals(200L, tv1[CellWidth].width)
-        assertEquals(listOf("300"), tv1[CellClasses].classes)
-        assertEquals(listOf("400"), tv1[CellTopics].topics)
+        assertEquals(setOf("300"), tv1[CellClasses].classes)
+        assertEquals(setOf("400"), tv1[CellTopics].topics)
         assertEquals(mapOf("a" to handler), tv1[Resources].resources)
         assertEquals(t2, tv1[Table].source)
 
@@ -705,8 +744,8 @@ class TableViewTest {
 
         assertEquals(Unit, tv1[CellHeight].height)
         assertEquals(Unit, tv1[CellWidth].width)
-        assertEquals(emptyList<String>(), tv1[CellClasses].classes)
-        assertEquals(emptyList<String>(), tv1[CellTopics].topics)
+        assertEquals(emptySet<String>(), tv1[CellClasses].classes)
+        assertEquals(emptySet<String>(), tv1[CellTopics].topics)
         assertEquals(
             emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(),
             tv1[Resources].resources
@@ -717,8 +756,8 @@ class TableViewTest {
 
         assertEquals(100L, tv1[CellHeight].height)
         assertEquals(200L, tv1[CellWidth].width)
-        assertEquals(listOf("300"), tv1[CellClasses].classes)
-        assertEquals(listOf("400"), tv1[CellTopics].topics)
+        assertEquals(setOf("300"), tv1[CellClasses].classes)
+        assertEquals(setOf("400"), tv1[CellTopics].topics)
         assertEquals(mapOf("a" to handler), tv1[Resources].resources)
 
         // Don't have access to actual source table with tv1 { tv2 } above..
@@ -741,8 +780,8 @@ class TableViewTest {
         }
 
         assertEquals(200L, tv1["A"][CellWidth].width)
-        assertEquals(listOf("300"), tv1["A"][CellClasses].classes)
-        assertEquals(listOf("400"), tv1["A"][CellTopics].topics)
+        assertEquals(setOf("300"), tv1["A"][CellClasses].classes)
+        assertEquals(setOf("400"), tv1["A"][CellTopics].topics)
 
         tv1["A"][CellClasses] {
             setOf("500", "600")
@@ -751,24 +790,24 @@ class TableViewTest {
             setOf("700", "800")
         }
 
-        assertEquals(listOf("500", "600"), tv1["A"][CellClasses].classes)
-        assertEquals(listOf("700", "800"), tv1["A"][CellTopics].topics)
+        assertEquals(setOf("500", "600"), tv1["A"][CellClasses].classes)
+        assertEquals(setOf("700", "800"), tv1["A"][CellTopics].topics)
 
         tv1["A"][CellWidth] { }
         tv1["A"][CellClasses] { }
         tv1["A"][CellTopics] { }
 
         assertEquals(200L, tv1["A"][CellWidth].width)
-        assertEquals(listOf("500", "600"), tv1["A"][CellClasses].classes)
-        assertEquals(listOf("700", "800"), tv1["A"][CellTopics].topics)
+        assertEquals(setOf("500", "600"), tv1["A"][CellClasses].classes)
+        assertEquals(setOf("700", "800"), tv1["A"][CellTopics].topics)
 
         tv1["A"][CellWidth] { null }
         tv1["A"][CellClasses] { null }
         tv1["A"][CellTopics] { null }
 
         assertEquals(Unit, tv1["A"][CellWidth].width)
-        assertEquals(emptyList<String>(), tv1["A"][CellClasses].classes)
-        assertEquals(emptyList<String>(), tv1["A"][CellTopics].topics)
+        assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
+        assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
     }
 
     @Test
@@ -788,8 +827,8 @@ class TableViewTest {
         tv1["A"] { }
 
         assertEquals(Unit, tv1["A"][CellWidth].width)
-        assertEquals(emptyList<String>(), tv1["A"][CellClasses].classes)
-        assertEquals(emptyList<String>(), tv1["A"][CellTopics].topics)
+        assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
+        assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
 
         tv1["B"][CellWidth] {
             200
@@ -812,26 +851,26 @@ class TableViewTest {
         }
 
         assertEquals(200L, tv1["A"][CellWidth].width)
-        assertEquals(listOf("300"), tv1["A"][CellClasses].classes)
-        assertEquals(listOf("400"), tv1["A"][CellTopics].topics)
+        assertEquals(setOf("300"), tv1["A"][CellClasses].classes)
+        assertEquals(setOf("400"), tv1["A"][CellTopics].topics)
 
         tv1["A"] { }
 
         assertEquals(200L, tv1["A"][CellWidth].width)
-        assertEquals(listOf("300"), tv1["A"][CellClasses].classes)
-        assertEquals(listOf("400"), tv1["A"][CellTopics].topics)
+        assertEquals(setOf("300"), tv1["A"][CellClasses].classes)
+        assertEquals(setOf("400"), tv1["A"][CellTopics].topics)
 
         tv1["A"] { null }
 
         assertEquals(Unit, tv1["A"][CellWidth].width)
-        assertEquals(emptyList<String>(), tv1["A"][CellClasses].classes)
-        assertEquals(emptyList<String>(), tv1["A"][CellTopics].topics)
+        assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
+        assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
 
         tv1["A"] { tv1["B"] }
 
         assertEquals(200L, tv1["A"][CellWidth].width)
-        assertEquals(listOf("300"), tv1["A"][CellClasses].classes)
-        assertEquals(listOf("400"), tv1["A"][CellTopics].topics)
+        assertEquals(setOf("300"), tv1["A"][CellClasses].classes)
+        assertEquals(setOf("400"), tv1["A"][CellTopics].topics)
     }
 
     @Test
@@ -850,8 +889,8 @@ class TableViewTest {
         }
 
         assertEquals(200L, tv1[1][CellHeight].height)
-        assertEquals(listOf("300"), tv1[1][CellClasses].classes)
-        assertEquals(listOf("400"), tv1[1][CellTopics].topics)
+        assertEquals(setOf("300"), tv1[1][CellClasses].classes)
+        assertEquals(setOf("400"), tv1[1][CellTopics].topics)
 
         tv1[1][CellClasses] {
             setOf("500", "600")
@@ -860,24 +899,24 @@ class TableViewTest {
             setOf("700", "800")
         }
 
-        assertEquals(listOf("500", "600"), tv1[1][CellClasses].classes)
-        assertEquals(listOf("700", "800"), tv1[1][CellTopics].topics)
+        assertEquals(setOf("500", "600"), tv1[1][CellClasses].classes)
+        assertEquals(setOf("700", "800"), tv1[1][CellTopics].topics)
 
         tv1[1][CellHeight] { }
         tv1[1][CellClasses] { }
         tv1[1][CellTopics] { }
 
         assertEquals(200L, tv1[1][CellHeight].height)
-        assertEquals(listOf("500", "600"), tv1[1][CellClasses].classes)
-        assertEquals(listOf("700", "800"), tv1[1][CellTopics].topics)
+        assertEquals(setOf("500", "600"), tv1[1][CellClasses].classes)
+        assertEquals(setOf("700", "800"), tv1[1][CellTopics].topics)
 
         tv1[1][CellHeight] { null }
         tv1[1][CellClasses] { null }
         tv1[1][CellTopics] { null }
 
         assertEquals(Unit, tv1[1][CellHeight].height)
-        assertEquals(emptyList<String>(), tv1[1][CellClasses].classes)
-        assertEquals(emptyList<String>(), tv1[1][CellTopics].topics)
+        assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
+        assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
     }
 
     @Test
@@ -897,8 +936,8 @@ class TableViewTest {
         tv1[1] { }
 
         assertEquals(Unit, tv1[1][CellHeight].height)
-        assertEquals(emptyList<String>(), tv1[1][CellClasses].classes)
-        assertEquals(emptyList<String>(), tv1[1][CellTopics].topics)
+        assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
+        assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
 
         tv1[2][CellHeight] {
             200
@@ -920,26 +959,26 @@ class TableViewTest {
         }
 
         assertEquals(200L, tv1[1][CellHeight].height)
-        assertEquals(listOf("300"), tv1[1][CellClasses].classes)
-        assertEquals(listOf("400"), tv1[1][CellTopics].topics)
+        assertEquals(setOf("300"), tv1[1][CellClasses].classes)
+        assertEquals(setOf("400"), tv1[1][CellTopics].topics)
 
         tv1[1] { }
 
         assertEquals(200L, tv1[1][CellHeight].height)
-        assertEquals(listOf("300"), tv1[1][CellClasses].classes)
-        assertEquals(listOf("400"), tv1[1][CellTopics].topics)
+        assertEquals(setOf("300"), tv1[1][CellClasses].classes)
+        assertEquals(setOf("400"), tv1[1][CellTopics].topics)
 
         tv1[1] { null }
 
         assertEquals(Unit, tv1[1][CellHeight].height)
-        assertEquals(emptyList<String>(), tv1[1][CellClasses].classes)
-        assertEquals(emptyList<String>(), tv1[1][CellTopics].topics)
+        assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
+        assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
 
         tv1[1] { tv1[2] }
 
         assertEquals(200L, tv1[1][CellHeight].height)
-        assertEquals(listOf("300"), tv1[1][CellClasses].classes)
-        assertEquals(listOf("400"), tv1[1][CellTopics].topics)
+        assertEquals(setOf("300"), tv1[1][CellClasses].classes)
+        assertEquals(setOf("400"), tv1[1][CellTopics].topics)
     }
 
     @Test
@@ -965,8 +1004,8 @@ class TableViewTest {
 
         assertEquals(100L, tv1["A", 1][CellHeight].height)
         assertEquals(200L, tv1["A", 1][CellWidth].width)
-        assertEquals(listOf("300"), tv1["A", 1][CellClasses].classes)
-        assertEquals(listOf("400"), tv1["A", 1][CellTopics].topics)
+        assertEquals(setOf("300"), tv1["A", 1][CellClasses].classes)
+        assertEquals(setOf("400"), tv1["A", 1][CellTopics].topics)
         assertEquals(ct, tv1["A", 1][CellTransformer].function)
 
         tv1["A", 1][CellClasses] {
@@ -976,8 +1015,8 @@ class TableViewTest {
             setOf("700", "800")
         }
 
-        assertEquals(listOf("500", "600"), tv1["A", 1][CellClasses].classes)
-        assertEquals(listOf("700", "800"), tv1["A", 1][CellTopics].topics)
+        assertEquals(setOf("500", "600"), tv1["A", 1][CellClasses].classes)
+        assertEquals(setOf("700", "800"), tv1["A", 1][CellTopics].topics)
 
         tv1["A", 1][CellHeight] { }
         tv1["A", 1][CellWidth] { }
@@ -987,8 +1026,8 @@ class TableViewTest {
 
         assertEquals(100L, tv1["A", 1][CellHeight].height)
         assertEquals(200L, tv1["A", 1][CellWidth].width)
-        assertEquals(listOf("500", "600"), tv1["A", 1][CellClasses].classes)
-        assertEquals(listOf("700", "800"), tv1["A", 1][CellTopics].topics)
+        assertEquals(setOf("500", "600"), tv1["A", 1][CellClasses].classes)
+        assertEquals(setOf("700", "800"), tv1["A", 1][CellTopics].topics)
         assertEquals(ct, tv1["A", 1][CellTransformer].function)
 
         tv1["A", 1][CellHeight] { null }
@@ -999,8 +1038,8 @@ class TableViewTest {
 
         assertEquals(Unit, tv1["A", 1][CellHeight].height)
         assertEquals(Unit, tv1["A", 1][CellWidth].width)
-        assertEquals(emptyList<String>(), tv1["A", 1][CellClasses].classes)
-        assertEquals(emptyList<String>(), tv1["A", 1][CellTopics].topics)
+        assertEquals(emptySet<String>(), tv1["A", 1][CellClasses].classes)
+        assertEquals(emptySet<String>(), tv1["A", 1][CellTopics].topics)
         assertEquals(Unit, tv1["A", 1][CellTransformer].function)
     }
 
@@ -1028,8 +1067,8 @@ class TableViewTest {
 
         assertEquals(Unit, tv1["A", 1][CellHeight].height)
         assertEquals(Unit, tv1["A", 1][CellWidth].width)
-        assertEquals(emptyList<String>(), tv1["A", 1][CellClasses].classes)
-        assertEquals(emptyList<String>(), tv1["A", 1][CellTopics].topics)
+        assertEquals(emptySet<String>(), tv1["A", 1][CellClasses].classes)
+        assertEquals(emptySet<String>(), tv1["A", 1][CellTopics].topics)
         assertEquals(Unit, tv1["A", 1][CellTransformer].function)
 
         tv1["B", 1][CellHeight] {
@@ -1066,32 +1105,32 @@ class TableViewTest {
 
         assertEquals(100L, tv1["A", 1][CellHeight].height)
         assertEquals(200L, tv1["A", 1][CellWidth].width)
-        assertEquals(listOf("300"), tv1["A", 1][CellClasses].classes)
-        assertEquals(listOf("400"), tv1["A", 1][CellTopics].topics)
+        assertEquals(setOf("300"), tv1["A", 1][CellClasses].classes)
+        assertEquals(setOf("400"), tv1["A", 1][CellTopics].topics)
         assertEquals(ct, tv1["A", 1][CellTransformer].function)
 
         tv1["A", 1] { }
 
         assertEquals(100L, tv1["A", 1][CellHeight].height)
         assertEquals(200L, tv1["A", 1][CellWidth].width)
-        assertEquals(listOf("300"), tv1["A", 1][CellClasses].classes)
-        assertEquals(listOf("400"), tv1["A", 1][CellTopics].topics)
+        assertEquals(setOf("300"), tv1["A", 1][CellClasses].classes)
+        assertEquals(setOf("400"), tv1["A", 1][CellTopics].topics)
         assertEquals(ct, tv1["A", 1][CellTransformer].function)
 
         tv1["A", 1] { null }
 
         assertEquals(Unit, tv1["A", 1][CellHeight].height)
         assertEquals(Unit, tv1["A", 1][CellWidth].width)
-        assertEquals(emptyList<String>(), tv1["A", 1][CellClasses].classes)
-        assertEquals(emptyList<String>(), tv1["A", 1][CellTopics].topics)
+        assertEquals(emptySet<String>(), tv1["A", 1][CellClasses].classes)
+        assertEquals(emptySet<String>(), tv1["A", 1][CellTopics].topics)
         assertEquals(Unit, tv1["A", 1][CellTransformer].function)
 
         tv1["A", 1] { tv1["B", 1] }
 
         assertEquals(100L, tv1["A", 1][CellHeight].height)
         assertEquals(200L, tv1["A", 1][CellWidth].width)
-        assertEquals(listOf("300"), tv1["A", 1][CellClasses].classes)
-        assertEquals(listOf("400"), tv1["A", 1][CellTopics].topics)
+        assertEquals(setOf("300"), tv1["A", 1][CellClasses].classes)
+        assertEquals(setOf("400"), tv1["A", 1][CellTopics].topics)
         assertEquals(ct, tv1["A", 1][CellTransformer].function)
     }
 
@@ -1279,15 +1318,15 @@ class TableViewTest {
         on(tv1, skipHistory = true) events {
             count += count()
 
-            assertEquals(listOf("cc-1"), oldView[CellClasses].classes)
-            assertEquals(listOf("ct-1"), oldView[CellTopics].topics)
+            assertEquals(setOf("cc-1"), oldView[CellClasses].classes)
+            assertEquals(setOf("ct-1"), oldView[CellTopics].topics)
             assertEquals(1000L, oldView[CellHeight].height)
             assertEquals(2000L, oldView[CellWidth].width)
             assertEquals(mapOf("a" to handler), oldView[Resources].resources)
             assertEquals(t, oldView[Table].source)
 
-            assertEquals(emptyList<String>(), newView[CellClasses].classes)
-            assertEquals(emptyList<String>(), newView[CellTopics].topics)
+            assertEquals(emptySet<String>(), newView[CellClasses].classes)
+            assertEquals(emptySet<String>(), newView[CellTopics].topics)
             assertEquals(Unit, newView[CellHeight].height)
             assertEquals(Unit, newView[CellWidth].width)
             assertEquals(
@@ -1299,8 +1338,8 @@ class TableViewTest {
 
         assertEquals(0, count)
 
-        assertEquals(listOf("cc-1"), tv1[CellClasses].classes)
-        assertEquals(listOf("ct-1"), tv1[CellTopics].topics)
+        assertEquals(setOf("cc-1"), tv1[CellClasses].classes)
+        assertEquals(setOf("ct-1"), tv1[CellTopics].topics)
         assertEquals(1000L, tv1[CellHeight].height)
         assertEquals(2000L, tv1[CellWidth].width)
         assertEquals(mapOf("a" to handler), tv1[Resources].resources)
@@ -1308,8 +1347,8 @@ class TableViewTest {
 
         clear(tv1)
 
-        assertEquals(emptyList<String>(), tv1[CellClasses].classes)
-        assertEquals(emptyList<String>(), tv1[CellTopics].topics)
+        assertEquals(emptySet<String>(), tv1[CellClasses].classes)
+        assertEquals(emptySet<String>(), tv1[CellTopics].topics)
         assertEquals(Unit, tv1[CellHeight].height)
         assertEquals(Unit, tv1[CellWidth].width)
         assertEquals(
@@ -1334,25 +1373,25 @@ class TableViewTest {
         on(tv1["A"], skipHistory = true) events {
             count += count()
 
-            assertEquals(listOf("cc-1"), oldView["A"][CellClasses].classes)
-            assertEquals(listOf("ct-1"), oldView["A"][CellTopics].topics)
+            assertEquals(setOf("cc-1"), oldView["A"][CellClasses].classes)
+            assertEquals(setOf("ct-1"), oldView["A"][CellTopics].topics)
             assertEquals(1000L, oldView["A"][CellWidth].width)
 
-            assertEquals(emptyList<String>(), newView["A"][CellClasses].classes)
-            assertEquals(emptyList<String>(), newView["A"][CellTopics].topics)
+            assertEquals(emptySet<String>(), newView["A"][CellClasses].classes)
+            assertEquals(emptySet<String>(), newView["A"][CellTopics].topics)
             assertEquals(Unit, newView["A"][CellWidth].width)
         }
 
         assertEquals(0, count)
 
-        assertEquals(listOf("cc-1"), tv1["A"][CellClasses].classes)
-        assertEquals(listOf("ct-1"), tv1["A"][CellTopics].topics)
+        assertEquals(setOf("cc-1"), tv1["A"][CellClasses].classes)
+        assertEquals(setOf("ct-1"), tv1["A"][CellTopics].topics)
         assertEquals(1000L, tv1["A"][CellWidth].width)
 
         clear(tv1["A"])
 
-        assertEquals(emptyList<String>(), tv1["A"][CellClasses].classes)
-        assertEquals(emptyList<String>(), tv1["A"][CellTopics].topics)
+        assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
+        assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
         assertEquals(Unit, tv1["A"][CellWidth].width)
 
         assertEquals(3, count)
@@ -1371,25 +1410,25 @@ class TableViewTest {
         on(tv1[1], skipHistory = true) events {
             count += count()
 
-            assertEquals(listOf("cc-1"), oldView[1][CellClasses].classes)
-            assertEquals(listOf("ct-1"), oldView[1][CellTopics].topics)
+            assertEquals(setOf("cc-1"), oldView[1][CellClasses].classes)
+            assertEquals(setOf("ct-1"), oldView[1][CellTopics].topics)
             assertEquals(1000L, oldView[1][CellHeight].height)
 
-            assertEquals(emptyList<String>(), newView[1][CellClasses].classes)
-            assertEquals(emptyList<String>(), newView[1][CellTopics].topics)
+            assertEquals(emptySet<String>(), newView[1][CellClasses].classes)
+            assertEquals(emptySet<String>(), newView[1][CellTopics].topics)
             assertEquals(Unit, newView[1][CellHeight].height)
         }
 
         assertEquals(0, count)
 
-        assertEquals(listOf("cc-1"), tv1[1][CellClasses].classes)
-        assertEquals(listOf("ct-1"), tv1[1][CellTopics].topics)
+        assertEquals(setOf("cc-1"), tv1[1][CellClasses].classes)
+        assertEquals(setOf("ct-1"), tv1[1][CellTopics].topics)
         assertEquals(1000L, tv1[1][CellHeight].height)
 
         clear(tv1[1])
 
-        assertEquals(emptyList<String>(), tv1[1][CellClasses].classes)
-        assertEquals(emptyList<String>(), tv1[1][CellTopics].topics)
+        assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
+        assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
         assertEquals(Unit, tv1[1][CellHeight].height)
 
         assertEquals(3, count)
@@ -1411,14 +1450,14 @@ class TableViewTest {
         on(tv1["A", 1], skipHistory = true) events {
             count += count()
 
-            assertEquals(listOf("cc-1"), oldView["A", 1][CellClasses].classes)
-            assertEquals(listOf("ct-1"), oldView["A", 1][CellTopics].topics)
+            assertEquals(setOf("cc-1"), oldView["A", 1][CellClasses].classes)
+            assertEquals(setOf("ct-1"), oldView["A", 1][CellTopics].topics)
             assertEquals(1000L, oldView["A", 1][CellHeight].height)
             assertEquals(2000L, oldView["A", 1][CellWidth].width)
             assertEquals(ct, oldView["A", 1][CellTransformer].function)
 
-            assertEquals(emptyList<String>(), newView["A", 1][CellClasses].classes)
-            assertEquals(emptyList<String>(), newView["A", 1][CellTopics].topics)
+            assertEquals(emptySet<String>(), newView["A", 1][CellClasses].classes)
+            assertEquals(emptySet<String>(), newView["A", 1][CellTopics].topics)
             assertEquals(Unit, newView["A", 1][CellHeight].height)
             assertEquals(Unit, newView["A", 1][CellWidth].width)
             assertEquals(Unit, newView["A", 1][CellTransformer].function)
@@ -1426,16 +1465,16 @@ class TableViewTest {
 
         assertEquals(0, count)
 
-        assertEquals(listOf("cc-1"), tv1["A", 1][CellClasses].classes)
-        assertEquals(listOf("ct-1"), tv1["A", 1][CellTopics].topics)
+        assertEquals(setOf("cc-1"), tv1["A", 1][CellClasses].classes)
+        assertEquals(setOf("ct-1"), tv1["A", 1][CellTopics].topics)
         assertEquals(1000L, tv1["A", 1][CellHeight].height)
         assertEquals(2000L, tv1["A", 1][CellWidth].width)
         assertEquals(ct, tv1["A", 1][CellTransformer].function)
 
         clear(tv1["A", 1])
 
-        assertEquals(emptyList<String>(), tv1["A", 1][CellClasses].classes)
-        assertEquals(emptyList<String>(), tv1["A", 1][CellTopics].topics)
+        assertEquals(emptySet<String>(), tv1["A", 1][CellClasses].classes)
+        assertEquals(emptySet<String>(), tv1["A", 1][CellTopics].topics)
         assertEquals(Unit, tv1["A", 1][CellHeight].height)
         assertEquals(Unit, tv1["A", 1][CellWidth].width)
         assertEquals(Unit, tv1["A", 1][CellTransformer].function)
