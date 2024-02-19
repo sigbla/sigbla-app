@@ -1167,15 +1167,15 @@ class TableViewListenerTest {
                         }
 
                         is CellClasses<*> -> {
-                            assertEquals(emptyList(), (it.oldValue as CellClasses<*>).classes)
-                            assertEquals(listOf("cell-classes-1"), (it.newValue as CellClasses<*>).classes)
+                            assertEquals(emptySet(), (it.oldValue as CellClasses<*>).classes)
+                            assertEquals(setOf("cell-classes-1"), (it.newValue as CellClasses<*>).classes)
                             assertEquals(oldView["A", 1], (it.oldValue as CellClasses<*>).source)
                             assertEquals(newView["A", 1], (it.newValue as CellClasses<*>).source)
                         }
 
                         is CellTopics<*> -> {
-                            assertEquals(emptyList(), (it.oldValue as CellTopics<*>).topics)
-                            assertEquals(listOf("cell-topics-1"), (it.newValue as CellTopics<*>).topics)
+                            assertEquals(emptySet(), (it.oldValue as CellTopics<*>).topics)
+                            assertEquals(setOf("cell-topics-1"), (it.newValue as CellTopics<*>).topics)
                             assertEquals(oldView["A", 1], (it.oldValue as CellTopics<*>).source)
                             assertEquals(newView["A", 1], (it.newValue as CellTopics<*>).source)
                         }
@@ -1208,15 +1208,15 @@ class TableViewListenerTest {
                         }
 
                         is CellClasses<*> -> {
-                            assertEquals(listOf("cell-classes-1"), (it.oldValue as CellClasses<*>).classes)
-                            assertEquals(listOf("cell-classes-2"), (it.newValue as CellClasses<*>).classes)
+                            assertEquals(setOf("cell-classes-1"), (it.oldValue as CellClasses<*>).classes)
+                            assertEquals(setOf("cell-classes-2"), (it.newValue as CellClasses<*>).classes)
                             assertEquals(oldView["A", 1], (it.oldValue as CellClasses<*>).source)
                             assertEquals(newView["A", 1], (it.newValue as CellClasses<*>).source)
                         }
 
                         is CellTopics<*> -> {
-                            assertEquals(listOf("cell-topics-1"), (it.oldValue as CellTopics<*>).topics)
-                            assertEquals(listOf("cell-topics-2"), (it.newValue as CellTopics<*>).topics)
+                            assertEquals(setOf("cell-topics-1"), (it.oldValue as CellTopics<*>).topics)
+                            assertEquals(setOf("cell-topics-2"), (it.newValue as CellTopics<*>).topics)
                             assertEquals(oldView["A", 1], (it.oldValue as CellTopics<*>).source)
                             assertEquals(newView["A", 1], (it.newValue as CellTopics<*>).source)
                         }
@@ -1270,15 +1270,15 @@ class TableViewListenerTest {
                         }
 
                         is CellClasses<*> -> {
-                            assertEquals(emptyList(), (it.oldValue as CellClasses<*>).classes)
-                            assertEquals(listOf("cell-classes-1"), (it.newValue as CellClasses<*>).classes)
+                            assertEquals(emptySet(), (it.oldValue as CellClasses<*>).classes)
+                            assertEquals(setOf("cell-classes-1"), (it.newValue as CellClasses<*>).classes)
                             assertEquals(oldView["A"], (it.oldValue as CellClasses<*>).source)
                             assertEquals(newView["A"], (it.newValue as CellClasses<*>).source)
                         }
 
                         is CellTopics<*> -> {
-                            assertEquals(emptyList(), (it.oldValue as CellTopics<*>).topics)
-                            assertEquals(listOf("cell-topics-1"), (it.newValue as CellTopics<*>).topics)
+                            assertEquals(emptySet(), (it.oldValue as CellTopics<*>).topics)
+                            assertEquals(setOf("cell-topics-1"), (it.newValue as CellTopics<*>).topics)
                             assertEquals(oldView["A"], (it.oldValue as CellTopics<*>).source)
                             assertEquals(newView["A"], (it.newValue as CellTopics<*>).source)
                         }
@@ -1304,15 +1304,15 @@ class TableViewListenerTest {
                         }
 
                         is CellClasses<*> -> {
-                            assertEquals(listOf("cell-classes-1"), (it.oldValue as CellClasses<*>).classes)
-                            assertEquals(listOf("cell-classes-2"), (it.newValue as CellClasses<*>).classes)
+                            assertEquals(setOf("cell-classes-1"), (it.oldValue as CellClasses<*>).classes)
+                            assertEquals(setOf("cell-classes-2"), (it.newValue as CellClasses<*>).classes)
                             assertEquals(oldView["A"], (it.oldValue as CellClasses<*>).source)
                             assertEquals(newView["A"], (it.newValue as CellClasses<*>).source)
                         }
 
                         is CellTopics<*> -> {
-                            assertEquals(listOf("cell-topics-1"), (it.oldValue as CellTopics<*>).topics)
-                            assertEquals(listOf("cell-topics-2"), (it.newValue as CellTopics<*>).topics)
+                            assertEquals(setOf("cell-topics-1"), (it.oldValue as CellTopics<*>).topics)
+                            assertEquals(setOf("cell-topics-2"), (it.newValue as CellTopics<*>).topics)
                             assertEquals(oldView["A"], (it.oldValue as CellTopics<*>).source)
                             assertEquals(newView["A"], (it.newValue as CellTopics<*>).source)
                         }
@@ -1366,15 +1366,15 @@ class TableViewListenerTest {
                         }
 
                         is CellClasses<*> -> {
-                            assertEquals(emptyList(), (it.oldValue as CellClasses<*>).classes)
-                            assertEquals(listOf("cell-classes-1"), (it.newValue as CellClasses<*>).classes)
+                            assertEquals(emptySet(), (it.oldValue as CellClasses<*>).classes)
+                            assertEquals(setOf("cell-classes-1"), (it.newValue as CellClasses<*>).classes)
                             assertEquals(oldView[1], (it.oldValue as CellClasses<*>).source)
                             assertEquals(newView[1], (it.newValue as CellClasses<*>).source)
                         }
 
                         is CellTopics<*> -> {
-                            assertEquals(emptyList(), (it.oldValue as CellTopics<*>).topics)
-                            assertEquals(listOf("cell-topics-1"), (it.newValue as CellTopics<*>).topics)
+                            assertEquals(emptySet(), (it.oldValue as CellTopics<*>).topics)
+                            assertEquals(setOf("cell-topics-1"), (it.newValue as CellTopics<*>).topics)
                             assertEquals(oldView[1], (it.oldValue as CellTopics<*>).source)
                             assertEquals(newView[1], (it.newValue as CellTopics<*>).source)
                         }
@@ -1400,15 +1400,15 @@ class TableViewListenerTest {
                         }
 
                         is CellClasses<*> -> {
-                            assertEquals(listOf("cell-classes-1"), (it.oldValue as CellClasses<*>).classes)
-                            assertEquals(listOf("cell-classes-2"), (it.newValue as CellClasses<*>).classes)
+                            assertEquals(setOf("cell-classes-1"), (it.oldValue as CellClasses<*>).classes)
+                            assertEquals(setOf("cell-classes-2"), (it.newValue as CellClasses<*>).classes)
                             assertEquals(oldView[1], (it.oldValue as CellClasses<*>).source)
                             assertEquals(newView[1], (it.newValue as CellClasses<*>).source)
                         }
 
                         is CellTopics<*> -> {
-                            assertEquals(listOf("cell-topics-1"), (it.oldValue as CellTopics<*>).topics)
-                            assertEquals(listOf("cell-topics-2"), (it.newValue as CellTopics<*>).topics)
+                            assertEquals(setOf("cell-topics-1"), (it.oldValue as CellTopics<*>).topics)
+                            assertEquals(setOf("cell-topics-2"), (it.newValue as CellTopics<*>).topics)
                             assertEquals(oldView[1], (it.oldValue as CellTopics<*>).source)
                             assertEquals(newView[1], (it.newValue as CellTopics<*>).source)
                         }
@@ -1477,15 +1477,15 @@ class TableViewListenerTest {
                         }
 
                         is CellClasses<*> -> {
-                            assertEquals(emptyList(), (it.oldValue as CellClasses<*>).classes)
-                            assertEquals(listOf("cell-classes-1"), (it.newValue as CellClasses<*>).classes)
+                            assertEquals(emptySet(), (it.oldValue as CellClasses<*>).classes)
+                            assertEquals(setOf("cell-classes-1"), (it.newValue as CellClasses<*>).classes)
                             assertEquals(oldView, (it.oldValue as CellClasses<*>).source)
                             assertEquals(newView, (it.newValue as CellClasses<*>).source)
                         }
 
                         is CellTopics<*> -> {
-                            assertEquals(emptyList(), (it.oldValue as CellTopics<*>).topics)
-                            assertEquals(listOf("cell-topics-1"), (it.newValue as CellTopics<*>).topics)
+                            assertEquals(emptySet(), (it.oldValue as CellTopics<*>).topics)
+                            assertEquals(setOf("cell-topics-1"), (it.newValue as CellTopics<*>).topics)
                             assertEquals(oldView, (it.oldValue as CellTopics<*>).source)
                             assertEquals(newView, (it.newValue as CellTopics<*>).source)
                         }
@@ -1532,15 +1532,15 @@ class TableViewListenerTest {
                         }
 
                         is CellClasses<*> -> {
-                            assertEquals(listOf("cell-classes-1"), (it.oldValue as CellClasses<*>).classes)
-                            assertEquals(listOf("cell-classes-2"), (it.newValue as CellClasses<*>).classes)
+                            assertEquals(setOf("cell-classes-1"), (it.oldValue as CellClasses<*>).classes)
+                            assertEquals(setOf("cell-classes-2"), (it.newValue as CellClasses<*>).classes)
                             assertEquals(oldView, (it.oldValue as CellClasses<*>).source)
                             assertEquals(newView, (it.newValue as CellClasses<*>).source)
                         }
 
                         is CellTopics<*> -> {
-                            assertEquals(listOf("cell-topics-1"), (it.oldValue as CellTopics<*>).topics)
-                            assertEquals(listOf("cell-topics-2"), (it.newValue as CellTopics<*>).topics)
+                            assertEquals(setOf("cell-topics-1"), (it.oldValue as CellTopics<*>).topics)
+                            assertEquals(setOf("cell-topics-2"), (it.newValue as CellTopics<*>).topics)
                             assertEquals(oldView, (it.oldValue as CellTopics<*>).source)
                             assertEquals(newView, (it.newValue as CellTopics<*>).source)
                         }
@@ -1745,14 +1745,14 @@ class TableViewListenerTest {
                     is CellClasses<*> -> {
                         val old = it.oldValue as CellClasses<*>
                         val new = it.newValue as CellClasses<*>
-                        assertEquals(emptyList(), old.classes)
-                        assertEquals(listOf("cc-1"), new.classes)
+                        assertEquals(emptySet(), old.classes)
+                        assertEquals(setOf("cc-1"), new.classes)
                     }
                     is CellTopics<*> -> {
                         val old = it.oldValue as CellTopics<*>
                         val new = it.newValue as CellTopics<*>
-                        assertEquals(emptyList(), old.topics)
-                        assertEquals(listOf("ct-1"), new.topics)
+                        assertEquals(emptySet(), old.topics)
+                        assertEquals(setOf("ct-1"), new.topics)
                     }
                     is CellTransformer<*> -> {
                         TODO()
@@ -1792,14 +1792,14 @@ class TableViewListenerTest {
                     is CellClasses<*> -> {
                         val old = it.oldValue as CellClasses<*>
                         val new = it.newValue as CellClasses<*>
-                        assertEquals(emptyList(), old.classes)
-                        assertEquals(listOf("cc-1"), new.classes)
+                        assertEquals(emptySet(), old.classes)
+                        assertEquals(setOf("cc-1"), new.classes)
                     }
                     is CellTopics<*> -> {
                         val old = it.oldValue as CellTopics<*>
                         val new = it.newValue as CellTopics<*>
-                        assertEquals(emptyList(), old.topics)
-                        assertEquals(listOf("ct-1"), new.topics)
+                        assertEquals(emptySet(), old.topics)
+                        assertEquals(setOf("ct-1"), new.topics)
                     }
                     is CellTransformer<*> -> {
                         TODO()
@@ -1841,14 +1841,14 @@ class TableViewListenerTest {
                     is CellClasses<*> -> {
                         val old = it.oldValue as CellClasses<*>
                         val new = it.newValue as CellClasses<*>
-                        assertEquals(emptyList(), old.classes)
-                        assertEquals(listOf("cc-1"), new.classes)
+                        assertEquals(emptySet(), old.classes)
+                        assertEquals(setOf("cc-1"), new.classes)
                     }
                     is CellTopics<*> -> {
                         val old = it.oldValue as CellTopics<*>
                         val new = it.newValue as CellTopics<*>
-                        assertEquals(emptyList(), old.topics)
-                        assertEquals(listOf("ct-1"), new.topics)
+                        assertEquals(emptySet(), old.topics)
+                        assertEquals(setOf("ct-1"), new.topics)
                     }
                     is CellTransformer<*> -> {
                         val old = it.oldValue as CellTransformer<*>
