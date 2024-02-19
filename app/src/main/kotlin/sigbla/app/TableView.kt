@@ -2576,15 +2576,41 @@ class Resources internal constructor(
     internal val _resources: PMap<String, Pair<Long, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>
 ): Iterable<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>> {
     val resources: Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> by lazy {
-        _resources.sortedBy { it.component2().first }.map { it.component1() to it.component2().second }.toMap(LinkedHashMap())
+        _resources.sortedBy { it.component2().first }.associateTo(LinkedHashMap()) { it.component1() to it.component2().second }
     }
 
-    operator fun plus(resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>): Resources = Resources(source, _resources.put(resource.first, RESOURCE_COUNTER.getAndIncrement() to resource.second))
-    operator fun plus(resources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>): Resources = Resources(source, resources.fold(_resources) {acc, resource -> acc.put(resource.first, RESOURCE_COUNTER.getAndIncrement() to resource.second)})
+    operator fun plus(resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>): Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> =
+        _resources
+            .put(resource.first, RESOURCE_COUNTER.getAndIncrement() to resource.second)
+            .sortedBy { it.component2().first }
+            .associateTo(LinkedHashMap()) { it.component1() to it.component2().second }
 
-    operator fun minus(resource: String): Resources = Resources(source, _resources.remove(resource))
-    operator fun minus(resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>): Resources = Resources(source, if (_resources[resource.first]?.second == resource.second) _resources.remove(resource.first) else _resources)
-    operator fun minus(resources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>): Resources = Resources(source, resources.fold(_resources) {acc, resource -> if (acc[resource.first]?.second == resource.second) acc.remove(resource.first) else acc})
+    operator fun plus(resources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>): Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> =
+        resources
+            .fold(_resources) { acc, resource ->
+                acc.put(
+                    resource.first,
+                    RESOURCE_COUNTER.getAndIncrement() to resource.second
+                )
+            }
+            .sortedBy { it.component2().first }
+            .associateTo(LinkedHashMap()) { it.component1() to it.component2().second }
+
+    operator fun minus(resource: String): Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> =
+        _resources
+            .remove(resource)
+            .sortedBy { it.component2().first }
+            .associateTo(LinkedHashMap()) { it.component1() to it.component2().second }
+
+    operator fun minus(resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>): Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> =
+        (if (_resources[resource.first]?.second == resource.second) _resources.remove(resource.first) else _resources)
+            .sortedBy { it.component2().first }
+            .associateTo(LinkedHashMap()) { it.component1() to it.component2().second }
+
+    operator fun minus(resources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>): Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> =
+        resources.fold(_resources) {acc, resource -> if (acc[resource.first]?.second == resource.second) acc.remove(resource.first) else acc}
+            .sortedBy { it.component2().first }
+            .associateTo(LinkedHashMap()) { it.component1() to it.component2().second }
 
     override fun iterator(): Iterator<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>> = resources.map { Pair(it.key, it.value) }.iterator()
 

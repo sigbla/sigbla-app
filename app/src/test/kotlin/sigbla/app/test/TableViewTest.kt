@@ -1800,30 +1800,40 @@ class TableViewTest {
         }
 
         val unitResource = tv1[Resources]
+        assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), unitResource.resources)
 
         val h1 = getHandler()
-        val r1 = unitResource + ("h1" to h1)
+        tv1[Resources] = unitResource + ("h1" to h1)
+
+        val r1 = tv1[Resources]
         assertEquals(mapOf("h1" to h1), r1.resources)
 
         val h2 = getHandler()
         val h3 = getHandler()
-        val r2 = unitResource + listOf("h2" to h2, "h3" to h3)
+        tv1[Resources] = unitResource + listOf("h2" to h2, "h3" to h3)
+
+        val r2 = tv1[Resources]
         assertEquals(mapOf("h2" to h2, "h3" to h3), r2.resources)
         assertEquals(listOf("h2" to h2, "h3" to h3), r2.iterator().asSequence().toList())
 
-        val r3 = r1 + r2
-        assertEquals(listOf("h1" to h1, "h2" to h2, "h3" to h3), r3)
+        tv1[Resources] = r1 + r2
+        val r3 = tv1[Resources]
+        assertEquals(mapOf("h1" to h1, "h2" to h2, "h3" to h3), r3.resources)
 
-        val r4 = r2 - "h2"
+        tv1[Resources] = r2 - "h2"
+        val r4 = tv1[Resources]
         assertEquals(mapOf("h3" to h3), r4.resources)
 
-        val r5 = r2 - ("h2" to getHandler())
+        tv1[Resources] = r2 - ("h2" to getHandler())
+        val r5 = tv1[Resources]
         assertEquals(mapOf("h2" to h2, "h3" to h3), r5.resources)
 
-        val r6 = r2 - ("h2" to h2)
+        tv1[Resources] = r2 - ("h2" to h2)
+        val r6 = tv1[Resources]
         assertEquals(mapOf("h3" to h3), r6.resources)
 
-        val r7 = r2 - setOf("h2" to getHandler(), "h3" to h3)
+        tv1[Resources] = r2 - setOf("h2" to getHandler(), "h3" to h3)
+        val r7 = tv1[Resources]
         assertEquals(mapOf("h2" to h2), r7.resources)
     }
 }
