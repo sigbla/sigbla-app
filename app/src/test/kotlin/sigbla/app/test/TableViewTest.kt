@@ -1749,4 +1749,42 @@ class TableViewTest {
         assertFailsWith<InvalidCellWidthException> { pixelWidth2 / 1.0 }
         assertFailsWith<InvalidCellWidthException> { pixelWidth2 % 1.0 }
     }
+
+    @Test
+    fun `resources plus minus`() {
+        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+
+        fun getHandler(): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
+            return {
+                call.respondText("")
+            }
+        }
+
+        val unitResource = tv1[Resources]
+
+        val h1 = getHandler()
+        val r1 = unitResource + ("h1" to h1)
+        assertEquals(mapOf("h1" to h1), r1.resources)
+
+        val h2 = getHandler()
+        val h3 = getHandler()
+        val r2 = unitResource + listOf("h2" to h2, "h3" to h3)
+        assertEquals(mapOf("h2" to h2, "h3" to h3), r2.resources)
+        assertEquals(listOf("h2" to h2, "h3" to h3), r2.iterator().asSequence().toList())
+
+        val r3 = r1 + r2
+        assertEquals(listOf("h1" to h1, "h2" to h2, "h3" to h3), r3)
+
+        val r4 = r2 - "h2"
+        assertEquals(mapOf("h3" to h3), r4.resources)
+
+        val r5 = r2 - ("h2" to getHandler())
+        assertEquals(mapOf("h2" to h2, "h3" to h3), r5.resources)
+
+        val r6 = r2 - ("h2" to h2)
+        assertEquals(mapOf("h3" to h3), r6.resources)
+
+        val r7 = r2 - setOf("h2" to getHandler(), "h3" to h3)
+        assertEquals(mapOf("h2" to h2), r7.resources)
+    }
 }
