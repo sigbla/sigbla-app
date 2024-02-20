@@ -15,7 +15,6 @@ import java.util.concurrent.ThreadLocalRandom
 import kotlin.io.path.*
 import org.junit.Assert.*
 import sigbla.app.exceptions.InvalidStorageException
-import kotlin.test.assertFailsWith
 
 class TableStorageTest {
     @After
@@ -163,8 +162,28 @@ class TableStorageTest {
 
         tmpFile.writeBytes(ByteArray(100) { 0 })
 
-        assertFailsWith(InvalidStorageException::class, "Unsupported file type") {
+        try {
             load(tmpFile to Table[null])
+            assertTrue(false)
+        } catch (ex: InvalidStorageException) {
+            assertEquals("Unsupported file type", ex.message)
+        }
+
+        deleteFolder(tmpFolder)
+    }
+
+    @Test
+    fun `version unsupported`() {
+        val tmpFolder = Files.createTempDirectory("sigbla-test")
+        val tmpFile = File(tmpFolder.toFile(),"test-${System.currentTimeMillis()}.sigt")
+
+        tmpFile.writeBytes("519b1a02000000".chunked(2).map { it.toInt(16).toByte() }.toByteArray())
+
+        try {
+            load(tmpFile to Table[null])
+            assertTrue(false)
+        } catch (ex: InvalidStorageException) {
+            assertEquals("Table file version 2 not supported, please upgrade Sigbla", ex.message)
         }
 
         deleteFolder(tmpFolder)

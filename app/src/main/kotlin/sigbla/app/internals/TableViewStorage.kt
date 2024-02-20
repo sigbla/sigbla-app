@@ -56,11 +56,18 @@ internal fun load1(
     val tableView = resources.second
 
     Files.newByteChannel(file.toPath(), StandardOpenOption.READ).use { sbc ->
-        val magic = "519b1b01".chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+        val magic = "519b1b".chunked(2).map { it.toInt(16).toByte() }.toByteArray()
         val actualMagic = ByteArray(magic.size)
         sbc.read(ByteBuffer.wrap(actualMagic))
 
         if (!magic.contentEquals(actualMagic)) throw InvalidStorageException("Unsupported file type")
+
+        val fileVersion = ByteArray(1).let {
+            if (sbc.read(ByteBuffer.wrap(it)) != it.size) throw InvalidStorageException("Unable to read version")
+            it
+        }
+
+        if (fileVersion[0] != 1.toByte()) throw InvalidStorageException("Table view file version ${fileVersion[0]} not supported, please upgrade Sigbla")
 
         val options = ByteArray(1).let {
             if (sbc.read(ByteBuffer.wrap(it)) != it.size) throw InvalidStorageException("Unable to read options")

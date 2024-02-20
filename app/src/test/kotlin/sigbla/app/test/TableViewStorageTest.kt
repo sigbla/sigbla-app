@@ -14,7 +14,6 @@ import java.io.File
 import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import java.util.concurrent.ThreadLocalRandom
-import kotlin.test.assertFailsWith
 
 class TableViewStorageTest {
     @After
@@ -299,8 +298,28 @@ class TableViewStorageTest {
 
         tmpFile.writeBytes(ByteArray(100) { 0 })
 
-        assertFailsWith(InvalidStorageException::class, "Unsupported file type") {
+        try {
             load(tmpFile to TableView[null])
+            assertTrue(false)
+        } catch (ex: InvalidStorageException) {
+            assertEquals("Unsupported file type", ex.message)
+        }
+
+        deleteFolder(tmpFolder)
+    }
+
+    @Test
+    fun `version unsupported`() {
+        val tmpFolder = Files.createTempDirectory("sigbla-test")
+        val tmpFile = File(tmpFolder.toFile(),"test-${System.currentTimeMillis()}.sigv")
+
+        tmpFile.writeBytes("519b1b02000000".chunked(2).map { it.toInt(16).toByte() }.toByteArray())
+
+        try {
+            load(tmpFile to TableView[null])
+            assertTrue(false)
+        } catch (ex: InvalidStorageException) {
+            assertEquals("Table view file version 2 not supported, please upgrade Sigbla", ex.message)
         }
 
         deleteFolder(tmpFolder)
