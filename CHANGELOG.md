@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 
 This project is versioned following the [major release].[last 2 digits in release year].[minor release] format.
 
+## v1.24.2 - 2024-02-20 - Odd Dust
+
+The general theme of this release is various minor API tidy-ups and improvements/fixes with increased test coverage,
+plus added functionality within view related classes. The changes have focused on TableView.kt and related functionality.
+
+### Added
+
+- Various TableView, ColumnView, RowView, and CellView API improvements
+- Various improvements to the APIs on view meta classes: CellClasses, CellTopics, Resources, etc
+- Various test case improvements, better coverage
+- Various related documentation improvements
+- clear(TableView) added to TableViewOps.kt
+
+### Fixed
+
+- Fixed bug on CellView iterator to ensure no elements on empty cell
+- Fixed bug on CellView.set for UnitCellTransformer case
+- Other minor bugs
+
+### Changed
+
+- Change invoke parameter signature on CellView and other view related classes to match general pattern, improve ease of use
+
+### Removed
+
+- Some convenience functions on TableView.kt (and related) to ensure a better overall API structure, matching Table
+
 ## v1.24.1 - 2024-01-18 - Plain Hill
 
 The general theme of this release is various minor API tidy-ups and improvements/fixes with increased test coverage,
