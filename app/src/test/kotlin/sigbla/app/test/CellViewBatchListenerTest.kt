@@ -967,6 +967,44 @@ class CellViewBatchListenerTest {
     }
 
     @Test
+    fun `recursive batching`() {
+        val t = TableView[object {}.javaClass.enclosingMethod.name]
+
+        batch(t) {
+            t["A", 1][CellHeight] = 20
+            t["A", 1][CellWidth] = 25
+        }
+
+        var heightChange: Number = 0
+        var widthChange: Number = 0
+
+        batch(t) {
+            on(t["A", 1]) {
+                skipHistory = true
+
+                events {
+                    heightChange = newView["A", 1].derived.cellHeight - oldView["A", 1].derived.cellHeight
+                    widthChange = newView["A", 1].derived.cellWidth - oldView["A", 1].derived.cellWidth
+                }
+            }
+
+            t["A", 1][CellHeight] = 40
+            t["A", 1][CellWidth] = 50
+
+            batch(t) {
+                t["A", 1][CellHeight] = 110
+                t["A", 1][CellWidth] = 100
+            }
+
+            Assert.assertEquals(0, heightChange)
+            Assert.assertEquals(0, widthChange)
+        }
+
+        Assert.assertEquals(90L, heightChange)
+        Assert.assertEquals(75L, widthChange)
+    }
+
+    @Test
     fun `listener ordering`() {
         val t = TableView[object {}.javaClass.enclosingMethod.name]
 
