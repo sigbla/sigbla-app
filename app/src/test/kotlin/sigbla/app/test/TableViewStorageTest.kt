@@ -13,6 +13,7 @@ import sigbla.app.exceptions.InvalidStorageException
 import java.io.File
 import java.lang.IllegalArgumentException
 import java.nio.file.Files
+import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
 class TableViewStorageTest {
@@ -289,6 +290,190 @@ class TableViewStorageTest {
         assertFalse(it6.hasNext())
 
         deleteFolder(tmpFolder)
+    }
+
+    @Test
+    fun `implied filename`() {
+        val name = UUID.randomUUID().toString()
+        val file = File("$name.sigv")
+
+        assertFalse(file.exists())
+
+        val tableView1 = TableView[name]
+
+        tableView1[CellHeight] = 100
+        tableView1[CellWidth] = 200
+        tableView1[CellClasses] = listOf("A", "AB", "ABC")
+        tableView1[CellTopics] = listOf("B", "BB", "BBB")
+
+        tableView1["A"][CellWidth] = 200
+        tableView1["A"][CellClasses] = listOf("A", "AB", "ABC")
+        tableView1["A"][CellTopics] = listOf("B", "BB", "BBB")
+
+        tableView1[1][CellHeight] = 100
+        tableView1[1][CellClasses] = listOf("A", "AB", "ABC")
+        tableView1[1][CellTopics] = listOf("B", "BB", "BBB")
+
+        tableView1["A", 1][CellHeight] = 100
+        tableView1["A", 1][CellWidth] = 200
+        tableView1["A", 1][CellClasses] = listOf("A", "AB", "ABC")
+        tableView1["A", 1][CellTopics] = listOf("B", "BB", "BBB")
+
+        save(tableView1)
+
+        val tableView2 = clone(tableView1, "Storage test")
+
+        TableView.delete(tableView1.name!!)
+
+        val tableView3 = TableView[name]
+
+        load(tableView3)
+
+        assertTrue(file.exists())
+        file.delete()
+
+        assertEquals(tableView2[CellHeight], tableView3[CellHeight])
+        assertEquals(tableView2[CellWidth], tableView3[CellWidth])
+        assertEquals(tableView2[CellClasses], tableView3[CellClasses])
+        assertEquals(tableView2[CellTopics], tableView3[CellTopics])
+
+        val it1 = tableView2.columnViews.iterator()
+        val it2 = tableView3.columnViews.iterator()
+
+        while (it1.hasNext() && it2.hasNext()) {
+            val v1 = it1.next()
+            val v2 = it2.next()
+
+            assertEquals(v1[CellWidth], v2[CellWidth])
+            assertEquals(v1[CellClasses], v2[CellClasses])
+            assertEquals(v1[CellTopics], v2[CellTopics])
+        }
+
+        assertFalse(it1.hasNext())
+        assertFalse(it2.hasNext())
+
+        val it3 = tableView2.rowViews.iterator()
+        val it4 = tableView3.rowViews.iterator()
+
+        while (it3.hasNext() && it4.hasNext()) {
+            val v1 = it3.next()
+            val v2 = it4.next()
+
+            assertEquals(v1[CellHeight], v2[CellHeight])
+            assertEquals(v1[CellClasses], v2[CellClasses])
+            assertEquals(v1[CellTopics], v2[CellTopics])
+        }
+
+        assertFalse(it3.hasNext())
+        assertFalse(it4.hasNext())
+
+        val it5 = tableView2.cellViews.iterator()
+        val it6 = tableView3.cellViews.iterator()
+
+        while (it5.hasNext() && it6.hasNext()) {
+            val v1 = it5.next()
+            val v2 = it6.next()
+
+            assertEquals(v1[CellHeight], v2[CellHeight])
+            assertEquals(v1[CellWidth], v2[CellWidth])
+            assertEquals(v1[CellClasses], v2[CellClasses])
+            assertEquals(v1[CellTopics], v2[CellTopics])
+        }
+
+        assertFalse(it5.hasNext())
+        assertFalse(it6.hasNext())
+    }
+
+    @Test
+    fun `string filename`() {
+        val name = UUID.randomUUID().toString()
+        val file = File("$name.sigv")
+
+        assertFalse(file.exists())
+
+        val tableView1 = TableView[name]
+
+        tableView1[CellHeight] = 100
+        tableView1[CellWidth] = 200
+        tableView1[CellClasses] = listOf("A", "AB", "ABC")
+        tableView1[CellTopics] = listOf("B", "BB", "BBB")
+
+        tableView1["A"][CellWidth] = 200
+        tableView1["A"][CellClasses] = listOf("A", "AB", "ABC")
+        tableView1["A"][CellTopics] = listOf("B", "BB", "BBB")
+
+        tableView1[1][CellHeight] = 100
+        tableView1[1][CellClasses] = listOf("A", "AB", "ABC")
+        tableView1[1][CellTopics] = listOf("B", "BB", "BBB")
+
+        tableView1["A", 1][CellHeight] = 100
+        tableView1["A", 1][CellWidth] = 200
+        tableView1["A", 1][CellClasses] = listOf("A", "AB", "ABC")
+        tableView1["A", 1][CellTopics] = listOf("B", "BB", "BBB")
+
+        save(tableView1 to name)
+
+        val tableView2 = clone(tableView1, "Storage test")
+
+        TableView.delete(tableView1.name!!)
+
+        val tableView3 = TableView[name]
+
+        load(name to tableView3)
+
+        assertTrue(file.exists())
+        file.delete()
+
+        assertEquals(tableView2[CellHeight], tableView3[CellHeight])
+        assertEquals(tableView2[CellWidth], tableView3[CellWidth])
+        assertEquals(tableView2[CellClasses], tableView3[CellClasses])
+        assertEquals(tableView2[CellTopics], tableView3[CellTopics])
+
+        val it1 = tableView2.columnViews.iterator()
+        val it2 = tableView3.columnViews.iterator()
+
+        while (it1.hasNext() && it2.hasNext()) {
+            val v1 = it1.next()
+            val v2 = it2.next()
+
+            assertEquals(v1[CellWidth], v2[CellWidth])
+            assertEquals(v1[CellClasses], v2[CellClasses])
+            assertEquals(v1[CellTopics], v2[CellTopics])
+        }
+
+        assertFalse(it1.hasNext())
+        assertFalse(it2.hasNext())
+
+        val it3 = tableView2.rowViews.iterator()
+        val it4 = tableView3.rowViews.iterator()
+
+        while (it3.hasNext() && it4.hasNext()) {
+            val v1 = it3.next()
+            val v2 = it4.next()
+
+            assertEquals(v1[CellHeight], v2[CellHeight])
+            assertEquals(v1[CellClasses], v2[CellClasses])
+            assertEquals(v1[CellTopics], v2[CellTopics])
+        }
+
+        assertFalse(it3.hasNext())
+        assertFalse(it4.hasNext())
+
+        val it5 = tableView2.cellViews.iterator()
+        val it6 = tableView3.cellViews.iterator()
+
+        while (it5.hasNext() && it6.hasNext()) {
+            val v1 = it5.next()
+            val v2 = it6.next()
+
+            assertEquals(v1[CellHeight], v2[CellHeight])
+            assertEquals(v1[CellWidth], v2[CellWidth])
+            assertEquals(v1[CellClasses], v2[CellClasses])
+            assertEquals(v1[CellTopics], v2[CellTopics])
+        }
+
+        assertFalse(it5.hasNext())
+        assertFalse(it6.hasNext())
     }
 
     @Test
