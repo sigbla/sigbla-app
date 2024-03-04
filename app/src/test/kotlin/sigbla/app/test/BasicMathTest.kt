@@ -3,7 +3,7 @@
 package sigbla.app.test
 
 import sigbla.app.*
-import org.junit.After
+import org.junit.AfterClass
 import org.junit.Assert.*
 import org.junit.Test
 import sigbla.app.exceptions.InvalidCellException
@@ -15,15 +15,10 @@ import kotlin.reflect.KClass
 import kotlin.test.assertFailsWith
 
 class BasicMathTest {
-    @After
-    fun cleanup() {
-        Table.names.forEach { Table.delete(it) }
-    }
-
     @Test
     fun `basic table math`() {
         // Testing math between number and cell
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         fun typeValue(clazz: KClass<*>): Int {
             return when (clazz) {
@@ -820,7 +815,7 @@ class BasicMathTest {
 
     @Test
     fun `unit cell as`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         assertNull(t["Val1", 0].asLong)
         assertNull(t["Val1", 0].asDouble)
@@ -871,7 +866,7 @@ class BasicMathTest {
 
     @Test
     fun `not numeric cells`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val values = listOf(1, 2L, 3F, 4.0, BigInteger.TWO, BigDecimal.TEN)
 
@@ -886,7 +881,7 @@ class BasicMathTest {
 
     @Test
     fun `unsupported number`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["Val1", 0] = 1
 
@@ -990,6 +985,14 @@ class BasicMathTest {
             assertFailsWith<UnsupportedOperationException> { value * short }
             assertFailsWith<UnsupportedOperationException> { value / short }
             assertFailsWith<UnsupportedOperationException> { value % short }
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
         }
     }
 }

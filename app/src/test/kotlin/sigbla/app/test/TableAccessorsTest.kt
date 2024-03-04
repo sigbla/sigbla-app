@@ -5,16 +5,11 @@ package sigbla.app.test
 import sigbla.app.*
 import org.junit.Assert.*
 import org.junit.Test
-import org.junit.After
+import org.junit.AfterClass
 import java.math.BigDecimal
 import java.math.BigInteger
 
 class TableAccessorsTest {
-    @After
-    fun cleanup() {
-        Table.names.forEach { Table.delete(it) }
-    }
-
     @Test
     fun `cell accessors`() {
         val cell = Table[null].let {
@@ -22,7 +17,7 @@ class TableAccessorsTest {
             it["A", 0]
         }
 
-        val table = Table[object {}.javaClass.enclosingMethod.name]
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         table["L1", Int.MAX_VALUE] = cell
         assertEquals(cell, table["L1", Int.MAX_VALUE].value)
@@ -929,7 +924,7 @@ class TableAccessorsTest {
     fun `string accessors`() {
         val cell = "string"
 
-        val table = Table[object {}.javaClass.enclosingMethod.name]
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         table["L1", Int.MAX_VALUE] = cell
         assertEquals(cell, table["L1", Int.MAX_VALUE].value)
@@ -1836,7 +1831,7 @@ class TableAccessorsTest {
     fun `int accessors`() {
         val cell = Int.MAX_VALUE
 
-        val table = Table[object {}.javaClass.enclosingMethod.name]
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         table["L1", Int.MAX_VALUE] = cell
         assertEquals(cell.toLong(), table["L1", Int.MAX_VALUE].value)
@@ -2743,7 +2738,7 @@ class TableAccessorsTest {
     fun `long accessors`() {
         val cell = Long.MAX_VALUE
 
-        val table = Table[object {}.javaClass.enclosingMethod.name]
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         table["L1", Int.MAX_VALUE] = cell
         assertEquals(cell, table["L1", Int.MAX_VALUE].value)
@@ -3650,7 +3645,7 @@ class TableAccessorsTest {
     fun `float accessors`() {
         val cell = Float.MAX_VALUE
 
-        val table = Table[object {}.javaClass.enclosingMethod.name]
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         table["L1", Int.MAX_VALUE] = cell
         assertEquals(cell.toDouble(), table["L1", Int.MAX_VALUE].value)
@@ -4557,7 +4552,7 @@ class TableAccessorsTest {
     fun `double accessors`() {
         val cell = Double.MAX_VALUE
 
-        val table = Table[object {}.javaClass.enclosingMethod.name]
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         table["L1", Int.MAX_VALUE] = cell
         assertEquals(cell, table["L1", Int.MAX_VALUE].value)
@@ -5464,7 +5459,7 @@ class TableAccessorsTest {
     fun `bigint accessors`() {
         val cell = BigInteger.TEN
 
-        val table = Table[object {}.javaClass.enclosingMethod.name]
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         table["L1", Int.MAX_VALUE] = cell
         assertEquals(cell, table["L1", Int.MAX_VALUE].value)
@@ -6371,7 +6366,7 @@ class TableAccessorsTest {
     fun `bigdecimal accessors`() {
         val cell = BigDecimal.TEN
 
-        val table = Table[object {}.javaClass.enclosingMethod.name]
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         table["L1", Int.MAX_VALUE] = cell
         assertEquals(cell, table["L1", Int.MAX_VALUE].value)
@@ -7278,7 +7273,7 @@ class TableAccessorsTest {
     fun `number accessors`() {
         val cell = 123 as Number
 
-        val table = Table[object {}.javaClass.enclosingMethod.name]
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         table["L1", Int.MAX_VALUE] = cell
         assertEquals(cell.toLong(), table["L1", Int.MAX_VALUE].value)
@@ -8185,7 +8180,7 @@ class TableAccessorsTest {
     fun `boolean accessors`() {
         val cell = true
 
-        val table = Table[object {}.javaClass.enclosingMethod.name]
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         table["L1", Int.MAX_VALUE] = cell
         assertEquals(cell, table["L1", Int.MAX_VALUE].value)
@@ -9086,5 +9081,13 @@ class TableAccessorsTest {
 
         table[table["L1", Int.MAX_VALUE]] = { cell }
         assertEquals(cell, table[table["L1", Int.MAX_VALUE]].value)
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+        }
     }
 }

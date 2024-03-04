@@ -4,7 +4,7 @@ package sigbla.app.test
 
 import io.ktor.server.application.*
 import io.ktor.util.pipeline.*
-import org.junit.After
+import org.junit.AfterClass
 import org.junit.Assert
 import org.junit.Test
 import sigbla.app.*
@@ -16,15 +16,9 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class CellViewBatchListenerTest {
-    @After
-    fun cleanup() {
-        Table.names.forEach { Table.delete(it) }
-        TableView.names.forEach { TableView.delete(it) }
-    }
-
     @Test
     fun `subscribe and unsubscribe cellview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -89,7 +83,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `subscribe and unsubscribe columnview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -154,7 +148,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `subscribe and unsubscribe rowview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -219,7 +213,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `subscribe and unsubscribe tableview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -270,7 +264,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `subscribe to filled table and unsubscribe cellview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -335,7 +329,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `subscribe to filled table and unsubscribe columnview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -400,7 +394,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `subscribe to filled table and unsubscribe rowview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -465,7 +459,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `subscribe to filled table and unsubscribe tableview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -516,7 +510,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `subscribe and instant unsubscribe cellview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -545,7 +539,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `subscribe and instant unsubscribe columnview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -574,7 +568,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `subscribe and instant unsubscribe rowview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -603,7 +597,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `subscribe and instant unsubscribe tableview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -634,7 +628,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `subscribe to filled table and instant unsubscribe cellview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -671,7 +665,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `subscribe to filled table and instant unsubscribe columnview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -708,7 +702,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `subscribe to filled table and instant unsubscribe rowview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -745,7 +739,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `subscribe to filled table and instant unsubscribe tableview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -786,7 +780,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `listener ref with name and order`() {
-        val t = TableView[object {}.javaClass.enclosingMethod.name]
+        val t = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         batch(t) {
             val ref = on(t["A", 1]) {
@@ -803,7 +797,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `listener ref without name and order`() {
-        val t = TableView[object {}.javaClass.enclosingMethod.name]
+        val t = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         batch(t) {
             val ref = on(t["A", 1]) {}
@@ -817,7 +811,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `listener loop support`() {
-        val t = TableView[object {}.javaClass.enclosingMethod.name]
+        val t = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val ref2 = batch(t) {
             val ref1 = on(t["A", 0]) {
@@ -854,7 +848,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `table clone and events`() {
-        val t1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val t1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var t1EventCount = 0
         var t2EventCount = 0
@@ -932,7 +926,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `table events with old and new snapshots`() {
-        val t = TableView[object {}.javaClass.enclosingMethod.name]
+        val t = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         batch(t) {
             t["A", 1][CellHeight] = 20
@@ -968,7 +962,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `recursive batching`() {
-        val t = TableView[object {}.javaClass.enclosingMethod.name]
+        val t = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         batch(t) {
             t["A", 1][CellHeight] = 20
@@ -1006,7 +1000,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `listener ordering`() {
-        val t = TableView[object {}.javaClass.enclosingMethod.name]
+        val t = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val generator = AtomicInteger()
 
@@ -1062,7 +1056,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `listener order difference propagation`() {
-        val t = TableView[object {}.javaClass.enclosingMethod.name]
+        val t = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var v1Old: Long? = null
         var v2Old: Long? = null
@@ -1157,7 +1151,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `old table is an empty clone of source table on first pass`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val tv = TableView[t]
 
         batch(t) {
@@ -1197,7 +1191,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `old and new table is a clone of source table`() {
-        val t = TableView[object {}.javaClass.enclosingMethod.name]
+        val t = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         batch(t) {
             t["A", 0][CellWidth] = DEFAULT_CELL_WIDTH
@@ -1243,7 +1237,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `event properties`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         batch(tv1) {
             tv1["A", 1][CellHeight] = 100
@@ -1272,7 +1266,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `event values cellview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val ct1: Cell<*>.() -> Any? = {}
         val ct2: Cell<*>.() -> Any? = {}
@@ -1386,7 +1380,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `event values columnview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val ct1: Cell<*>.() -> Any? = {}
         val ct2: Cell<*>.() -> Any? = {}
@@ -1491,7 +1485,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `event values rowview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val ct1: Cell<*>.() -> Any? = {}
         val ct2: Cell<*>.() -> Any? = {}
@@ -1596,7 +1590,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `event values tableview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val t1 = Table[null]
         val t2 = Table[null]
@@ -1753,7 +1747,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `type filtering for subscriptions`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val t1 = Table[null]
         val t2 = Table[null]
@@ -1905,7 +1899,7 @@ class CellViewBatchListenerTest {
 
     @Test
     fun `type filtering for chained subscriptions`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount1 = 0
         var eventCount2 = 0
@@ -1939,5 +1933,14 @@ class CellViewBatchListenerTest {
 
         assertEquals(2, eventCount1)
         assertEquals(2, eventCount2)
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+            TableView.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { TableView.delete(it) }
+        }
     }
 }

@@ -2,20 +2,15 @@
  * See LICENSE file for licensing details. */
 package sigbla.app.test
 
-import org.junit.After
+import org.junit.AfterClass
 import org.junit.Assert.*
 import org.junit.Test
 import sigbla.app.*
 
-class TableRowCopy {
-    @After
-    fun cleanup() {
-        Table.names.forEach { Table.delete(it) }
-    }
-
+class TableRowCopyTest {
     @Test
     fun `overwrite rows within same table`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["A", 1] = "A1"
@@ -181,7 +176,7 @@ class TableRowCopy {
 
     @Test
     fun `overwrite sparse rows within same table`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["A", 1] = "A1"
@@ -345,8 +340,8 @@ class TableRowCopy {
 
     @Test
     fun `overwrite rows between tables with rows`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         t1["A", 0] = "A0_0"
         t1["A", 1] = "A1_0"
@@ -522,8 +517,8 @@ class TableRowCopy {
 
     @Test
     fun `overwrite sparse rows between tables with rows`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         t1["A", 0] = "A0_0"
         t1["A", 1] = "A1_0"
@@ -695,8 +690,8 @@ class TableRowCopy {
 
     @Test
     fun `overwrite rows between tables without rows`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         t1["A", 0] = "A0_0"
         t1["A", 1] = "A1_0"
@@ -858,8 +853,8 @@ class TableRowCopy {
 
     @Test
     fun `overwrite sparse rows between tables without rows`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         t1["A", 0] = "A0_0"
         t1["A", 1] = "A1_0"
@@ -1018,7 +1013,7 @@ class TableRowCopy {
 
     @Test
     fun `copy rows within same table`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["A", 1] = "A1"
@@ -1220,7 +1215,7 @@ class TableRowCopy {
 
     @Test
     fun `copy sparse rows within same table`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["A", 1] = "A1"
@@ -1420,7 +1415,7 @@ class TableRowCopy {
 
     @Test
     fun `copy rows within same table with overlap`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["A", 1] = "A1"
@@ -1598,7 +1593,7 @@ class TableRowCopy {
 
     @Test
     fun `copy sparse rows within same table with overlap`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["A", 1] = "A1"
@@ -1774,8 +1769,8 @@ class TableRowCopy {
 
     @Test
     fun `copy rows to different table with rows`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         t1["A", 0] = "A0_0"
         t1["A", 1] = "A1_0"
@@ -2022,8 +2017,8 @@ class TableRowCopy {
 
     @Test
     fun `copy sparse rows to different table with rows`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         t1["A", 0] = "A0_0"
         t1["A", 1] = "A1_0"
@@ -2266,8 +2261,8 @@ class TableRowCopy {
 
     @Test
     fun `copy rows to different table without rows`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         t1["A", 0] = "A0_0"
         t1["A", 1] = "A1_0"
@@ -2506,8 +2501,8 @@ class TableRowCopy {
 
     @Test
     fun `copy sparse rows to different table without rows`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         t1["A", 0] = "A0_0"
         t1["A", 1] = "A1_0"
@@ -2738,5 +2733,13 @@ class TableRowCopy {
         assertEquals(listOf("B3_0", "B2_0", "B1_0"), valuesOf<Any>(t2["B"]).toList())
         assertEquals(listOf(-2L, 3L, 5L), indexesOf(t2["A"]).toList())
         assertEquals(listOf(-2L, 0L, 5L), indexesOf(t2["B"]).toList())
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+        }
     }
 }

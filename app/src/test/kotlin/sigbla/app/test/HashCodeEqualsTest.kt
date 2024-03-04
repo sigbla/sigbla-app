@@ -5,7 +5,7 @@ package sigbla.app.test
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
-import org.junit.After
+import org.junit.AfterClass
 import org.junit.Test
 import sigbla.app.*
 import java.util.*
@@ -15,16 +15,10 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class HashCodeEqualsTest {
-    @After
-    fun cleanup() {
-        Table.names.forEach { Table.delete(it) }
-        TableView.names.forEach { TableView.delete(it) }
-    }
-
     @Test
     fun `column header`() {
-        val table1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val table2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val table1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val table2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         val labels = mutableListOf<String>()
 
@@ -56,8 +50,8 @@ class HashCodeEqualsTest {
 
     @Test
     fun `column range`() {
-        val table1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val table2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val table1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val table2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         val range1a = table1["A", "B", "C"]..table1["D", "E", "F"]
         val range1b = table1["A", "B", "C"]..table1["D", "E", "F"]
@@ -72,8 +66,8 @@ class HashCodeEqualsTest {
 
     @Test
     fun `row index`() {
-        val table1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val table2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val table1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val table2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         for (indexRelation in IndexRelation.entries) {
             val index = ThreadLocalRandom.current().nextLong()
@@ -91,8 +85,8 @@ class HashCodeEqualsTest {
 
     @Test
     fun `row range`() {
-        val table1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val table2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val table1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val table2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         for (i in 0..100) {
             val index1 = ThreadLocalRandom.current().nextLong()
@@ -144,8 +138,8 @@ class HashCodeEqualsTest {
 
     @Test
     fun `cell view, column view, row view, derived`() {
-        val tableView1 = TableView[object {}.javaClass.enclosingMethod.name + " 1"]
-        val tableView2 = TableView[object {}.javaClass.enclosingMethod.name + " 2"]
+        val tableView1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val tableView2 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         val labels = mutableListOf<String>()
 
@@ -196,7 +190,7 @@ class HashCodeEqualsTest {
         val handler1 = getHandler()
         val handler2 = getHandler()
 
-        val tableView1 = TableView[object {}.javaClass.enclosingMethod.name + " 1"]
+        val tableView1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
 
         val unitCellHeight1 = tableView1[CellHeight].also { it { 100 } }
         val pixelCellHeight1 = tableView1[CellHeight]
@@ -213,7 +207,7 @@ class HashCodeEqualsTest {
         val emptyResources1 = tableView1[Resources].also { it { listOf("B" to handler1, "A" to handler2) } }
         val filledResources1 = tableView1[Resources]
 
-        val tableView2 = TableView[object {}.javaClass.enclosingMethod.name + " 2"]
+        val tableView2 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         val unitCellHeight2 = tableView2[CellHeight].also { it { 100 } }
         val pixelCellHeight2 = tableView2[CellHeight]
@@ -255,7 +249,7 @@ class HashCodeEqualsTest {
 
     @Test
     fun events() {
-        val name = object {}.javaClass.enclosingMethod.name
+        val name = "${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"
 
         assertTrue(name.isNotEmpty())
 
@@ -305,5 +299,14 @@ class HashCodeEqualsTest {
 
         tableView[Table] = table
         tableView[Table] = table
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+            TableView.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { TableView.delete(it) }
+        }
     }
 }

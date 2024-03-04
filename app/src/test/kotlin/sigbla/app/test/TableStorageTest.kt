@@ -3,7 +3,7 @@
 package sigbla.app.test
 
 import sigbla.app.*
-import org.junit.After
+import org.junit.AfterClass
 import org.junit.Test
 import java.io.File
 import java.lang.IllegalArgumentException
@@ -15,13 +15,9 @@ import java.util.concurrent.ThreadLocalRandom
 import kotlin.io.path.*
 import org.junit.Assert.*
 import sigbla.app.exceptions.InvalidStorageException
+import java.util.*
 
 class TableStorageTest {
-    @After
-    fun cleanup() {
-        Table.names.forEach { Table.delete(it) }
-    }
-
     private fun deleteFolder(folder: Path) {
         folder.listDirectoryEntries().forEach {
             it.deleteExisting()
@@ -36,19 +32,11 @@ class TableStorageTest {
 
         val table1 = Table["Storage Test"]
 
-        print(table1)
-
         save(table1 to tmpFile, compress = false)
-
-        println()
 
         val table2 = Table[null]
 
         load(tmpFile to table2)
-
-        println()
-
-        print(table2)
 
         val it1 = table1.iterator()
         val it2 = table2.iterator()
@@ -70,19 +58,11 @@ class TableStorageTest {
 
         val table1 = Table["Storage Test"]
 
-        print(table1)
-
         save(table1 to tmpFile, compress = true)
-
-        println()
 
         val table2 = Table[null]
 
         load(tmpFile to table2)
-
-        println()
-
-        print(table2)
 
         val it1 = table1.iterator()
         val it2 = table2.iterator()
@@ -111,11 +91,7 @@ class TableStorageTest {
         table1["B"]
         table1["D", "E", 0] = 400
 
-        print(table1)
-
         save(table1 to tmpFile, compress = false)
-
-        println()
 
         val table2 = Table[null]
 
@@ -129,7 +105,6 @@ class TableStorageTest {
         ).iterator()
 
         load(tmpFile to table2) {
-            println("$this -> ${this.joinToString { "${it.index}:${it.value}" }}")
             val table1Column = table1Columns.next()
             assertEquals(table1Column.header, header)
             assertEquals(table1Column[0], this[0])
@@ -137,10 +112,6 @@ class TableStorageTest {
         }
 
         assertFalse(table1Columns.hasNext())
-
-        println()
-
-        print(table2)
 
         val it1 = table1.iterator()
         val it2 = table2.iterator()
@@ -153,6 +124,167 @@ class TableStorageTest {
         assertFalse(it2.hasNext())
 
         deleteFolder(tmpFolder)
+    }
+
+    @Test
+    fun `basic storage test - simple table - with compress`() {
+        val tmpFolder = Files.createTempDirectory("sigbla-test")
+        val tmpFile = File(tmpFolder.toFile(),"test-${System.currentTimeMillis()}")
+
+        val table1 = Table["Storage Test"]
+
+        table1["A"][0] = 100
+        table1["A", "B"][0] = 200
+        table1["A", "C"][0] = 250
+        table1["A", "B", "C"][0] = 300
+        table1["B"]
+        table1["D", "E", 0] = 400
+
+        save(table1 to tmpFile, compress = true)
+
+        val table2 = Table[null]
+
+        val table1Columns = listOf(
+            table1["A"],
+            table1["A", "B"],
+            table1["A", "C"],
+            table1["A", "B", "C"],
+            table1["B"],
+            table1["D", "E"]
+        ).iterator()
+
+        load(tmpFile to table2) {
+            val table1Column = table1Columns.next()
+            assertEquals(table1Column.header, header)
+            assertEquals(table1Column[0], this[0])
+            return@load this
+        }
+
+        assertFalse(table1Columns.hasNext())
+
+        val it1 = table1.iterator()
+        val it2 = table2.iterator()
+
+        while (it1.hasNext() && it2.hasNext()) {
+            assertEquals(it1.next(), it2.next())
+        }
+
+        assertFalse(it1.hasNext())
+        assertFalse(it2.hasNext())
+
+        deleteFolder(tmpFolder)
+    }
+
+    @Test
+    fun `implied filename`() {
+        val name = UUID.randomUUID().toString()
+        val file = File("$name.sigt")
+
+        assertFalse(file.exists())
+
+        val table1 = Table[name]
+
+        table1["A"][0] = 100
+        table1["A", "B"][0] = 200
+        table1["A", "C"][0] = 250
+        table1["A", "B", "C"][0] = 300
+        table1["B"]
+        table1["D", "E", 0] = 400
+
+        save(table1)
+
+        val table2 = clone(table1, "Storage test")
+
+        Table.delete(table1.name!!)
+
+        val table3 = Table[name]
+
+        val table2Columns = listOf(
+            table2["A"],
+            table2["A", "B"],
+            table2["A", "C"],
+            table2["A", "B", "C"],
+            table2["B"],
+            table2["D", "E"]
+        ).iterator()
+
+        load(table3) {
+            val table2Column = table2Columns.next()
+            assertEquals(table2Column.header, header)
+            assertEquals(table2Column[0], this[0])
+            return@load this
+        }
+
+        assertTrue(file.exists())
+        file.delete()
+
+        assertFalse(table2Columns.hasNext())
+
+        val it1 = table2.iterator()
+        val it2 = table3.iterator()
+
+        while (it1.hasNext() && it2.hasNext()) {
+            assertEquals(it1.next(), it2.next())
+        }
+
+        assertFalse(it1.hasNext())
+        assertFalse(it2.hasNext())
+    }
+
+    @Test
+    fun `string filename`() {
+        val name = UUID.randomUUID().toString()
+        val file = File("$name.sigt")
+
+        assertFalse(file.exists())
+
+        val table1 = Table[name]
+
+        table1["A"][0] = 100
+        table1["A", "B"][0] = 200
+        table1["A", "C"][0] = 250
+        table1["A", "B", "C"][0] = 300
+        table1["B"]
+        table1["D", "E", 0] = 400
+
+        save(table1 to name)
+
+        val table2 = clone(table1, "Storage test")
+
+        Table.delete(table1.name!!)
+
+        val table3 = Table[name]
+
+        val table2Columns = listOf(
+            table2["A"],
+            table2["A", "B"],
+            table2["A", "C"],
+            table2["A", "B", "C"],
+            table2["B"],
+            table2["D", "E"]
+        ).iterator()
+
+        load(name to table3) {
+            val table2Column = table2Columns.next()
+            assertEquals(table2Column.header, header)
+            assertEquals(table2Column[0], this[0])
+            return@load this
+        }
+
+        assertTrue(file.exists())
+        file.delete()
+
+        assertFalse(table2Columns.hasNext())
+
+        val it1 = table2.iterator()
+        val it2 = table3.iterator()
+
+        while (it1.hasNext() && it2.hasNext()) {
+            assertEquals(it1.next(), it2.next())
+        }
+
+        assertFalse(it1.hasNext())
+        assertFalse(it2.hasNext())
     }
 
     @Test
@@ -185,64 +317,6 @@ class TableStorageTest {
         } catch (ex: InvalidStorageException) {
             assertEquals("Table file version 2 not supported, please upgrade Sigbla", ex.message)
         }
-
-        deleteFolder(tmpFolder)
-    }
-
-    @Test
-    fun `basic storage test - simple table - with compress`() {
-        val tmpFolder = Files.createTempDirectory("sigbla-test")
-        val tmpFile = File(tmpFolder.toFile(),"test-${System.currentTimeMillis()}")
-
-        val table1 = Table["Storage Test"]
-
-        table1["A"][0] = 100
-        table1["A", "B"][0] = 200
-        table1["A", "C"][0] = 250
-        table1["A", "B", "C"][0] = 300
-        table1["B"]
-        table1["D", "E", 0] = 400
-
-        print(table1)
-
-        save(table1 to tmpFile, compress = true)
-
-        println()
-
-        val table2 = Table[null]
-
-        val table1Columns = listOf(
-            table1["A"],
-            table1["A", "B"],
-            table1["A", "C"],
-            table1["A", "B", "C"],
-            table1["B"],
-            table1["D", "E"]
-        ).iterator()
-
-        load(tmpFile to table2) {
-            println("$this -> ${this.joinToString { "${it.index}:${it.value}" }}")
-            val table1Column = table1Columns.next()
-            assertEquals(table1Column.header, header)
-            assertEquals(table1Column[0], this[0])
-            return@load this
-        }
-
-        assertFalse(table1Columns.hasNext())
-
-        println()
-
-        print(table2)
-
-        val it1 = table1.iterator()
-        val it2 = table2.iterator()
-
-        while (it1.hasNext() && it2.hasNext()) {
-            assertEquals(it1.next(), it2.next())
-        }
-
-        assertFalse(it1.hasNext())
-        assertFalse(it2.hasNext())
 
         deleteFolder(tmpFolder)
     }
@@ -341,5 +415,13 @@ class TableStorageTest {
         }
 
         deleteFolder(tmpFolder)
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+        }
     }
 }

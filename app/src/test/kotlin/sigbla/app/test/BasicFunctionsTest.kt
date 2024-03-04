@@ -3,22 +3,17 @@
 package sigbla.app.test
 
 import sigbla.app.*
-import org.junit.After
+import org.junit.AfterClass
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class BasicFunctionsTest {
-    @After
-    fun cleanup() {
-        Table.names.forEach { Table.delete(it) }
-    }
-
     // TODO Also need to test the various params on these functions, such as init, empty, etc..
 
     @Test
     fun `sum with defaults`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = 100
         t["A", 1] = 200
@@ -46,7 +41,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `sum with predicate`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = 100
         t["A", 1] = 200
@@ -74,7 +69,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `sum with valueOf`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = 100
         t["A", 1] = 200
@@ -84,7 +79,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `max with defaults`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["B", 0] = 100
         t["A", 1] = 200
@@ -112,7 +107,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `max with predicate`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["B", 0] = 100
         t["A", 1] = 200
@@ -140,7 +135,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `max with valueOf`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = 100
         t["A", 1] = 200
@@ -150,7 +145,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `min with defaults`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["B", 0] = 200
         t["A", 1] = 100
@@ -178,7 +173,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `min with predicate`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["B", 0] = 200
         t["A", 1] = 100
@@ -206,7 +201,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `min with valueOf`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = 100
         t["A", 1] = 200
@@ -216,7 +211,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `count with defaults`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["B", 0] = 200
         t["A", 1] = 100
@@ -244,7 +239,7 @@ class BasicFunctionsTest {
 
     @Test
     fun `count with predicate`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["B", 0] = 200
         t["A", 1] = 100
@@ -272,11 +267,19 @@ class BasicFunctionsTest {
 
     @Test
     fun `count with valueOf`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = 100
         t["A", 1] = 200
 
         assertEquals(2L, valueOf<Long>(count(t["A", 0]..t["A", 1])))
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+        }
     }
 }

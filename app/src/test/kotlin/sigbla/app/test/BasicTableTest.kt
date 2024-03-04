@@ -9,7 +9,7 @@ package sigbla.app.test
 
 import org.junit.Assert.*
 import org.junit.Test
-import org.junit.After
+import org.junit.AfterClass
 import sigbla.app.Precision
 import sigbla.app.IndexRelation
 import sigbla.app.Table
@@ -29,14 +29,9 @@ import kotlin.test.assertFailsWith
 //       Never do "import sigbla.app.*" in this class!
 
 class BasicTableTest {
-    @After
-    fun cleanup() {
-        Table.names.forEach { Table.delete(it) }
-    }
-
     @Test
     fun `basic table ops 1`() {
-        val name = object {}.javaClass.enclosingMethod.name
+        val name = "${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"
         val t = Table[name]
         assertTrue(Table.names.contains(name))
 
@@ -140,7 +135,7 @@ class BasicTableTest {
 
     @Test
     fun `basic table ops 2`() {
-        val name = object {}.javaClass.enclosingMethod.name
+        val name = "${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"
         val t = Table[name]
         assertTrue(Table.names.contains(name))
 
@@ -239,7 +234,7 @@ class BasicTableTest {
 
     @Test
     fun `basic table ops 3`() {
-        val name = object {}.javaClass.enclosingMethod.name
+        val name = "${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"
         val t = Table[name]
         assertTrue(Table.names.contains(name))
 
@@ -367,7 +362,7 @@ class BasicTableTest {
     @Test
     fun `basic table math 1`() {
         // Testing math between cells
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val values = listOf(1, 2L, 3F, 4.0, BigInteger.TWO, BigDecimal.TEN)
 
@@ -628,7 +623,7 @@ class BasicTableTest {
     @Test
     fun `basic table math 2`() {
         // Testing math between cell and number
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val values = listOf(1, 2L, 3F, 4.0, BigInteger.TWO, BigDecimal.TEN)
 
@@ -901,7 +896,7 @@ class BasicTableTest {
 
     @Test
     fun `basic cell fetch`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         t["A", 11] = "A 11"
         t["A", 12] = "A 12"
         t["A", 13] = "A 13"
@@ -929,5 +924,13 @@ class BasicTableTest {
         assertEquals("B 11", valueOf<Any>(t["B", IndexRelation.BEFORE, 12]))
         assertEquals("B 13", valueOf<Any>(t["B"] after 12))
         assertEquals("B 13", valueOf<Any>(t["B", IndexRelation.AFTER, 12]))
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+        }
     }
 }
