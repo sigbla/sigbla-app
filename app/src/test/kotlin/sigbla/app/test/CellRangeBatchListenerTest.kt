@@ -327,6 +327,33 @@ class CellRangeBatchListenerTest {
     }
 
     @Test
+    fun `recursive batching`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 1] = 1
+
+        var change: Number = 0
+
+        on(t["A", 1]..t["A", 1]) {
+            skipHistory = true
+
+            events {
+                change = newTable["A", 1] - oldTable["A", 1]
+            }
+        }
+
+        batch(t) {
+            t["A", 1] = 2
+
+            batch(t) {
+                t["A", 1] = 4
+            }
+        }
+
+        Assert.assertEquals(3L, change)
+    }
+
+    @Test
     fun `listener ordering`() {
         val t = Table[object {}.javaClass.enclosingMethod.name]
 

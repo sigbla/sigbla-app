@@ -26,7 +26,9 @@ internal object Registry {
     fun deleteTable(table: Table?) {
         if (table == null) return
 
-        table.closed = true;
+        tables.remove(table.name, table)
+
+        table.closed = true
 
         if (table !is BaseTable) throw InvalidTableException("Unsupported table type")
 

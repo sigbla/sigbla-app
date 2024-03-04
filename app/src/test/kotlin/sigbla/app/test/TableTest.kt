@@ -2273,4 +2273,186 @@ class TableTest {
             }
         }
     }
+
+    @Test
+    fun `non-columntocolumnaction move`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 1] = "A1"
+        t["B", 1] = "B1"
+
+        move(t["A"], ColumnActionOrder.AFTER, t["B"])
+
+        assertEquals(listOf(listOf("B"), listOf("A")), t.columns.map { it.header.labels }.toList())
+
+        move(t["A"], ColumnActionOrder.BEFORE, t["B"])
+
+        assertEquals(listOf(listOf("A"), listOf("B")), t.columns.map { it.header.labels }.toList())
+
+        move(t["A"], ColumnActionOrder.TO, t["B"], "C", "D")
+
+        assertEquals(listOf(listOf("C", "D")), t.columns.map { it.header.labels }.toList())
+
+        move(t["C", "D"], ColumnActionOrder.TO, t["C", "D"], Header["A0", "A1"])
+
+        assertEquals(listOf(listOf("A0", "A1")), t.columns.map { it.header.labels }.toList())
+    }
+
+    @Test
+    fun `non-columntocolumnaction copy`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 1] = "A1"
+        t["B", 1] = "B1"
+
+        copy(t["A"], ColumnActionOrder.AFTER, t["B"])
+
+        assertEquals(listOf(listOf("B"), listOf("A")), t.columns.map { it.header.labels }.toList())
+
+        copy(t["A"], ColumnActionOrder.BEFORE, t["B"])
+
+        assertEquals(listOf(listOf("A"), listOf("B")), t.columns.map { it.header.labels }.toList())
+
+        copy(t["A"], ColumnActionOrder.TO, t["B"], "C", "D")
+
+        assertEquals(listOf(listOf("A"), listOf("C", "D")), t.columns.map { it.header.labels }.toList())
+
+        copy(t["C", "D"], ColumnActionOrder.TO, t["C", "D"], Header["A0", "A1"])
+
+        assertEquals(listOf(listOf("A"), listOf("A0", "A1")), t.columns.map { it.header.labels }.toList())
+    }
+
+    @Test
+    fun `non-columntotableaction move`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
+        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+
+        t1["A", 1] = "A1"
+        t2["B", 1] = "B1"
+
+        move(t1["A"], t2)
+
+        assertEquals(listOf(listOf("B"), listOf("A")), t2.columns.map { it.header.labels }.toList())
+
+        move(t2["B"], t1, "C", "D")
+
+        assertEquals(listOf(listOf("C", "D")), t1.columns.map { it.header.labels }.toList())
+
+        move(t2["A"], t1, Header["A0", "A1"])
+
+        assertEquals(listOf(listOf("C", "D"), listOf("A0", "A1")), t1.columns.map { it.header.labels }.toList())
+    }
+
+    @Test
+    fun `non-columntotableaction copy`() {
+        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
+        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+
+        t1["A", 1] = "A1"
+        t2["B", 1] = "B1"
+
+        copy(t1["A"], t2)
+
+        assertEquals(listOf(listOf("B"), listOf("A")), t2.columns.map { it.header.labels }.toList())
+
+        copy(t2["B"], t1, "C", "D")
+
+        assertEquals(listOf(listOf("A"), listOf("C", "D")), t1.columns.map { it.header.labels }.toList())
+
+        copy(t2["A"], t1, Header["A0", "A1"])
+
+        assertEquals(listOf(listOf("A"), listOf("C", "D"), listOf("A0", "A1")), t1.columns.map { it.header.labels }.toList())
+    }
+
+    @Test
+    fun `non-rowtorowaction move`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 1] = "A1"
+        t["A", 2] = "A2"
+
+        move(t[1], RowActionOrder.AFTER, t[2])
+
+        assertEquals(listOf(2L, 3L), t.indexes.toList())
+
+        move(t[3], RowActionOrder.BEFORE, t[2])
+
+        assertEquals(listOf(1L, 2L), t.indexes.toList())
+
+        move(t[2], RowActionOrder.TO, t[1])
+
+        assertEquals(listOf(1L), t.indexes.toList())
+    }
+
+    @Test
+    fun `non-rowtorowaction copy`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 1] = "A1"
+        t["A", 2] = "A2"
+
+        copy(t[1], RowActionOrder.AFTER, t[2])
+
+        assertEquals(listOf(1L, 2L, 3L), t.indexes.toList())
+
+        copy(t[3], RowActionOrder.BEFORE, t[2])
+
+        assertEquals(listOf(0L, 1L, 2L, 3L), t.indexes.toList())
+
+        copy(t[3], RowActionOrder.TO, t[0])
+
+        assertEquals(listOf(0L, 1L, 2L, 3L), t.indexes.toList())
+    }
+
+    @Test
+    fun `column rename`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 1] = "A1"
+
+        rename(t["A"], "B", "C")
+
+        assertEquals(listOf(listOf("B", "C")), t.columns.map { it.header.labels }.toList())
+
+        rename(t["B", "C"], Header["D"])
+
+        assertEquals(listOf(listOf("D")), t.columns.map { it.header.labels }.toList())
+    }
+
+    @Test
+    fun `table remove`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        assertTrue(Table.names.contains(t.name))
+
+        remove(t)
+
+        assertFalse(Table.names.contains(t.name))
+    }
+
+    @Test
+    fun `column remove`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 1] = "A1"
+
+        assertTrue(t.columns.map { it.header }.contains(Header["A"]))
+
+        remove(t["A"])
+
+        assertFalse(t.columns.map { it.header }.contains(Header["A"]))
+    }
+
+    @Test
+    fun `row remove`() {
+        val t = Table[object {}.javaClass.enclosingMethod.name]
+
+        t["A", 1] = "A1"
+
+        assertTrue(t.indexes.contains(1L))
+
+        remove(t[1])
+
+        assertFalse(t.indexes.contains(1L))
+    }
 }
