@@ -28,9 +28,9 @@
 fun generateForCellView() {
     println("@Test")
     println("fun `cellview accessors`() {")
+    println("val table = Table[\"\${this.javaClass.simpleName} \${object {}.javaClass.enclosingMethod.name}\"]")
 
     println("""
-        val table = Table[object {}.javaClass.enclosingMethod.name]
         val row = table[Long.MIN_VALUE]
         
         val tableView = TableView[table]
@@ -836,9 +836,9 @@ fun generateForCellView() {
 fun generateForColumnView() {
     println("@Test")
     println("fun `columnview accessors`() {")
+    println("val table = Table[\"\${this.javaClass.simpleName} \${object {}.javaClass.enclosingMethod.name}\"]")
 
     println("""
-        val table = Table[object {}.javaClass.enclosingMethod.name]
         
         val tableView = TableView[table]
 
@@ -956,9 +956,9 @@ fun generateForColumnView() {
 fun generateForRowView() {
     println("@Test")
     println("fun `rowview accessors`() {")
+    println("val table = Table[\"\${this.javaClass.simpleName} \${object {}.javaClass.enclosingMethod.name}\"]")
 
     println("""
-        val table = Table[object {}.javaClass.enclosingMethod.name]
         
         val tableView = TableView[table]
 

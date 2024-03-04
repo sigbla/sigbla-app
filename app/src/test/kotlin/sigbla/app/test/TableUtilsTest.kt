@@ -2,7 +2,7 @@
  * See LICENSE file for licensing details. */
 package sigbla.app.test
 
-import org.junit.After
+import org.junit.AfterClass
 import org.junit.Test
 import sigbla.app.*
 import java.io.FileReader
@@ -10,14 +10,9 @@ import java.io.StringWriter
 import kotlin.test.assertEquals
 
 class TableUtilsTest {
-    @After
-    fun cleanup() {
-        Table.names.forEach { Table.delete(it) }
-    }
-
     @Test
     fun `print table`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         for (column1 in (0..10).map { i -> "C1_$i" }) {
             for (column2 in (0..10).map { i -> "C2_$i" }) {
@@ -41,6 +36,14 @@ class TableUtilsTest {
 
         for (line in 0..103) {
             assertEquals(testLines[line], actualLines[line])
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
         }
     }
 }

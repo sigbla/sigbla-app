@@ -5,7 +5,7 @@ package sigbla.app.test
 import sigbla.app.*
 import org.junit.Assert.*
 import org.junit.Test
-import org.junit.After
+import org.junit.AfterClass
 import sigbla.app.exceptions.InvalidCellException
 import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.exceptions.InvalidRowException
@@ -17,14 +17,9 @@ import kotlin.concurrent.thread
 import kotlin.test.assertFailsWith
 
 class TableTest {
-    @After
-    fun cleanup() {
-        Table.names.forEach { Table.delete(it) }
-    }
-
     @Test
     fun `registry test`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val t2 = Table.fromRegistry(t1.name!!)
         assertEquals(t1, t2)
         assertTrue(t1 === t2)
@@ -43,13 +38,14 @@ class TableTest {
         assertFalse(t1 === t3)
         assertEquals(t1.name, t3.name)
 
-        assertEquals(1, Table.names.size)
-        assertEquals(t1.name, Table.names.first())
+        // Because we run tests in parallel, this can't be tested
+        //assertEquals(1, Table.names.size)
+        //assertEquals(t1.name, Table.names.first())
     }
 
     @Test
     fun `cell range`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         assertTrue((t1["F", 0]..t1["G", 0]).isEmpty())
 
@@ -106,8 +102,8 @@ class TableTest {
 
     @Test
     fun `invalid cell range`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         val c1 = t1["A", 0]
         val c2 = t2["A", 1]
@@ -117,7 +113,7 @@ class TableTest {
 
     @Test
     fun `column range`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         for (c in listOf("D", "A", "B", "C")) {
             for (r in -100..100) {
@@ -150,8 +146,8 @@ class TableTest {
 
     @Test
     fun `invalid column range`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         val c1 = t1["A"]
         val c2 = t2["B"]
@@ -161,7 +157,7 @@ class TableTest {
 
     @Test
     fun `row range`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         for (c in listOf("D", "A", "B", "C")) {
             for (r in -100..100) {
@@ -186,8 +182,8 @@ class TableTest {
 
     @Test
     fun `invalid row range`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         val r1 = t1[0]
         val r2 = t2[10]
@@ -207,7 +203,7 @@ class TableTest {
 
     @Test
     fun `clone table values`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         for (c in listOf("A", "B", "C", "D")) {
             for (r in 1..100) {
@@ -256,7 +252,7 @@ class TableTest {
 
     @Test
     fun `compare cell to values`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         t["Long", 0] = 100L
         t["Double", 0] = 100.0
         t["BigInteger", 0] = BigInteger("100")
@@ -467,7 +463,7 @@ class TableTest {
 
     @Test
     fun `table iterator`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["A", 1] = "A1"
@@ -485,7 +481,7 @@ class TableTest {
 
     @Test
     fun `column iterator`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["A", 1] = "A1"
@@ -503,7 +499,7 @@ class TableTest {
 
     @Test
     fun `row iterator`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["B", 0] = "B0"
@@ -521,7 +517,7 @@ class TableTest {
 
     @Test
     fun `cell iterator`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["B", 0] = "B0"
@@ -539,7 +535,7 @@ class TableTest {
 
     @Test
     fun `table clear`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["B", 0] = "B0"
@@ -569,7 +565,7 @@ class TableTest {
 
     @Test
     fun `column clear`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["B", 0] = "B0"
@@ -593,7 +589,7 @@ class TableTest {
 
     @Test
     fun `row clear`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["B", 0] = "B0"
@@ -617,7 +613,7 @@ class TableTest {
 
     @Test
     fun `valuesOf sequence`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["B", 0] = "B0"
@@ -662,7 +658,7 @@ class TableTest {
 
     @Test
     fun `headersOf sequence`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["B", 0] = "B0"
@@ -677,7 +673,7 @@ class TableTest {
 
     @Test
     fun `table headers`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["B", 0] = "B0"
@@ -753,7 +749,7 @@ class TableTest {
 
     @Test
     fun `row headers`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["B", 0] = "B0"
@@ -827,7 +823,7 @@ class TableTest {
 
     @Test
     fun `table indexes`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["A", 1] = "A1"
@@ -869,7 +865,7 @@ class TableTest {
 
     @Test
     fun `column index relation get`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         assertEquals(UnitCell::class, (t["A"] before -100L)::class)
         assertEquals(UnitCell::class, (t["A"] atOrBefore -100L)::class)
@@ -1028,7 +1024,7 @@ class TableTest {
 
     @Test
     fun `cell invoke`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A"][1L] = BigDecimal.ONE
         assertEquals(t["A"][1L], t["A"][2L] { BigDecimal.ONE })
@@ -1092,7 +1088,7 @@ class TableTest {
 
     @Test
     fun `equality checks`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t1["A", 1] = "A1"
         t1["A", 2] = "A2"
@@ -1121,7 +1117,7 @@ class TableTest {
 
     @Test
     fun `batching commit`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val t2 = batch(t1) {
             t1["A", 1] = "A1"
@@ -1153,7 +1149,7 @@ class TableTest {
 
     @Test
     fun `nested batching`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var count = 0
 
@@ -1202,7 +1198,7 @@ class TableTest {
 
     @Test
     fun `batching abort`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         var t2: Table? = null
 
         assertFailsWith(RuntimeException::class) {
@@ -1229,7 +1225,7 @@ class TableTest {
 
     @Test
     fun `batching threads`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t1["A", 1] = "A1"
         t1["A", 2] = "A2"
@@ -1304,7 +1300,7 @@ class TableTest {
 
     @Test
     fun `table compact`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", -1] = "A-1"
         t["A", 2] = "A2"
@@ -1348,7 +1344,7 @@ class TableTest {
 
     @Test
     fun `column left right`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["B", 0] = "B0"
@@ -1392,7 +1388,7 @@ class TableTest {
 
     @Test
     fun `column internal swap`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["A", 2] = "A2"
@@ -1461,8 +1457,8 @@ class TableTest {
 
     @Test
     fun `column external swap`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         t1["A", 0] = "A0-1"
         t1["A", 2] = "A2-1"
@@ -1552,7 +1548,7 @@ class TableTest {
 
     @Test
     fun `row internal swap`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["A", 2] = "A2"
@@ -1635,8 +1631,8 @@ class TableTest {
 
     @Test
     fun `row external swap`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         t1["A", 0] = "A0-1"
         t1["A", 2] = "A2-1"
@@ -1763,7 +1759,7 @@ class TableTest {
 
     @Test
     fun `table column sort`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = 300
         t["A", 1] = 400
@@ -1856,7 +1852,7 @@ class TableTest {
 
     @Test
     fun `table row sort`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = 300
         t["A", 1] = 400
@@ -1940,7 +1936,7 @@ class TableTest {
 
     @Test
     fun `table index relation infix`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", -100] = "A -100"
         t["A", 0] = "A 0"
@@ -1984,7 +1980,7 @@ class TableTest {
 
     @Test
     fun `row index relation iterator`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "A0"
         t["B", 1] = "B1"
@@ -2005,7 +2001,7 @@ class TableTest {
 
     @Test
     fun `row compare and sort`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val rAt0 = t at 0L
         val rAtOrBefore0 = t atOrBefore 0L
@@ -2060,7 +2056,7 @@ class TableTest {
 
     @Test
     fun `table set`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "Cell"
 
@@ -2132,7 +2128,7 @@ class TableTest {
 
     @Test
     fun `column set`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "Cell"
 
@@ -2204,7 +2200,7 @@ class TableTest {
 
     @Test
     fun `row set`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "Cell"
 
@@ -2276,7 +2272,7 @@ class TableTest {
 
     @Test
     fun `non-columntocolumnaction move`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 1] = "A1"
         t["B", 1] = "B1"
@@ -2300,7 +2296,7 @@ class TableTest {
 
     @Test
     fun `non-columntocolumnaction copy`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 1] = "A1"
         t["B", 1] = "B1"
@@ -2324,8 +2320,8 @@ class TableTest {
 
     @Test
     fun `non-columntotableaction move`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         t1["A", 1] = "A1"
         t2["B", 1] = "B1"
@@ -2345,8 +2341,8 @@ class TableTest {
 
     @Test
     fun `non-columntotableaction copy`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         t1["A", 1] = "A1"
         t2["B", 1] = "B1"
@@ -2366,7 +2362,7 @@ class TableTest {
 
     @Test
     fun `non-rowtorowaction move`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 1] = "A1"
         t["A", 2] = "A2"
@@ -2386,7 +2382,7 @@ class TableTest {
 
     @Test
     fun `non-rowtorowaction copy`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 1] = "A1"
         t["A", 2] = "A2"
@@ -2406,7 +2402,7 @@ class TableTest {
 
     @Test
     fun `column rename`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 1] = "A1"
 
@@ -2421,7 +2417,7 @@ class TableTest {
 
     @Test
     fun `table remove`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         assertTrue(Table.names.contains(t.name))
 
@@ -2432,7 +2428,7 @@ class TableTest {
 
     @Test
     fun `column remove`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 1] = "A1"
 
@@ -2445,7 +2441,7 @@ class TableTest {
 
     @Test
     fun `row remove`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 1] = "A1"
 
@@ -2454,5 +2450,13 @@ class TableTest {
         remove(t[1])
 
         assertFalse(t.indexes.contains(1L))
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+        }
     }
 }

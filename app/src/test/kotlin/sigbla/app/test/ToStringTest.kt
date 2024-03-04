@@ -5,7 +5,7 @@ package sigbla.app.test
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
-import org.junit.After
+import org.junit.AfterClass
 import org.junit.Test
 import sigbla.app.*
 import java.util.*
@@ -14,15 +14,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class ToStringTest {
-    @After
-    fun cleanup() {
-        Table.names.forEach { Table.delete(it) }
-        TableView.names.forEach { TableView.delete(it) }
-    }
-
     @Test
     fun `column header`() {
-        val table = Table[object {}.javaClass.enclosingMethod.name]
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val labels = mutableListOf<String>()
 
@@ -43,7 +37,7 @@ class ToStringTest {
 
     @Test
     fun `column range`() {
-        val table = Table[object {}.javaClass.enclosingMethod.name]
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val range = table["A", "B", "C"]..table["D", "E", "F"]
 
@@ -52,7 +46,7 @@ class ToStringTest {
 
     @Test
     fun `row index`() {
-        val table = Table[object {}.javaClass.enclosingMethod.name]
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         for (indexRelation in IndexRelation.entries) {
             val index = ThreadLocalRandom.current().nextLong()
@@ -64,7 +58,7 @@ class ToStringTest {
 
     @Test
     fun `row range`() {
-        val table = Table[object {}.javaClass.enclosingMethod.name]
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         for (i in 0..100) {
             val index1 = ThreadLocalRandom.current().nextLong()
@@ -103,7 +97,7 @@ class ToStringTest {
 
     @Test
     fun `cell view, column view, row view, derived`() {
-        val tableView = TableView[object {}.javaClass.enclosingMethod.name]
+        val tableView = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val labels = mutableListOf<String>()
 
@@ -130,7 +124,7 @@ class ToStringTest {
 
     @Test
     fun `meta classes`() {
-        val tableView = TableView[object {}.javaClass.enclosingMethod.name]
+        val tableView = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val unitCellHeight = tableView[CellHeight].also { it { 100 } }
         val pixelCellHeight = tableView[CellHeight]
@@ -186,7 +180,7 @@ class ToStringTest {
 
     @Test
     fun events() {
-        val name = object {}.javaClass.enclosingMethod.name
+        val name = "${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"
 
         assertTrue(name.isNotEmpty())
 
@@ -204,7 +198,7 @@ class ToStringTest {
 
         table["A", 0] = "2"
 
-        assertEquals("TableListenerReference[${object {}.javaClass.enclosingMethod.name}, order=100, allowLoop=true]", tableListenerRef.toString())
+        assertEquals("TableListenerReference[${"${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"}, order=100, allowLoop=true]", tableListenerRef.toString())
 
         val tableViewListenerRef = on(tableView, name = tableView.name, skipHistory = true, order = 200, allowLoop = true) events {
             forEach {
@@ -214,6 +208,15 @@ class ToStringTest {
 
         tableView[Table] = table
 
-        assertEquals("TableViewListenerReference[${object {}.javaClass.enclosingMethod.name} view, order=200, allowLoop=true]", tableViewListenerRef.toString())
+        assertEquals("TableViewListenerReference[${"${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"} view, order=200, allowLoop=true]", tableViewListenerRef.toString())
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+            TableView.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { TableView.delete(it) }
+        }
     }
 }

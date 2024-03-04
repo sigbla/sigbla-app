@@ -4,7 +4,7 @@ package sigbla.app.test
 
 import sigbla.app.*
 import sigbla.app.exceptions.ListenerLoopException
-import org.junit.After
+import org.junit.AfterClass
 import org.junit.Assert
 import org.junit.Test
 import sigbla.app.exceptions.InvalidCellException
@@ -16,15 +16,10 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class RowListenerTest {
-    @After
-    fun cleanup() {
-        Table.names.forEach { Table.delete(it) }
-    }
-
     // TODO Ensure we test this subscribe and unsubscribe test below on all onAny functions
     @Test
     fun `subscribe and unsubscribe`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -57,7 +52,7 @@ class RowListenerTest {
 
     @Test
     fun `subscribe to filled table and unsubscribe`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -90,7 +85,7 @@ class RowListenerTest {
 
     @Test
     fun `subscribe and instant unsubscribe`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -111,7 +106,7 @@ class RowListenerTest {
 
     @Test
     fun `subscribe to filled table and instant unsubscribe`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -134,7 +129,7 @@ class RowListenerTest {
 
     @Test
     fun `listener ref with name and order`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val ref = on(t[1]) {
             name = "Name A"
             order = 123
@@ -148,7 +143,7 @@ class RowListenerTest {
 
     @Test
     fun `listener ref without name and order`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val ref = on(t[1]) {}
 
         assertNull(ref.name)
@@ -159,7 +154,7 @@ class RowListenerTest {
 
     @Test
     fun `listener loop support`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val ref1 = on(t[0]) {
             events {
@@ -195,7 +190,7 @@ class RowListenerTest {
 
     @Test
     fun `table clone and events`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var t1EventCount = 0
         var t2EventCount = 0
@@ -256,7 +251,7 @@ class RowListenerTest {
 
     @Test
     fun `table events with old and new snapshots`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 1] = 1
 
@@ -279,7 +274,7 @@ class RowListenerTest {
 
     @Test
     fun `listener ordering`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val generator = AtomicInteger()
 
@@ -332,7 +327,7 @@ class RowListenerTest {
 
     @Test
     fun `listener order difference propagation`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var v1Old: Any? = null
         var v2Old: Any? = null
@@ -426,7 +421,7 @@ class RowListenerTest {
 
     @Test
     fun `old table is an empty clone of source table on first pass`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = 100
 
@@ -461,7 +456,7 @@ class RowListenerTest {
 
     @Test
     fun `old and new table is a clone of source table`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = 100
 
@@ -503,7 +498,7 @@ class RowListenerTest {
 
     @Test
     fun `type filtering for subscriptions`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount1 = 0
         var eventCount2 = 0
@@ -593,7 +588,7 @@ class RowListenerTest {
 
     @Test
     fun `type filtering for chained subscriptions`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount1 = 0
         var eventCount2 = 0
@@ -628,7 +623,7 @@ class RowListenerTest {
 
     @Test
     fun `type filtering for chained subscriptions without type filter`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount1 = 0
         var eventCount2 = 0
@@ -661,7 +656,7 @@ class RowListenerTest {
 
     @Test
     fun `only at index subscriptions`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         for (type in IndexRelation.entries) {
             if (type == IndexRelation.AT) {
@@ -671,6 +666,14 @@ class RowListenerTest {
                     on(t1[type, 1]) {}
                 }
             }
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
         }
     }
 }

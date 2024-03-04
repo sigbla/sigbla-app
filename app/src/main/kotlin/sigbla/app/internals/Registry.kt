@@ -26,7 +26,7 @@ internal object Registry {
     fun deleteTable(table: Table?) {
         if (table == null) return
 
-        tables.remove(table.name, table)
+        if (table.name != null) tables.remove(table.name, table)
 
         table.closed = true
 

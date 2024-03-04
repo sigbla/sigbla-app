@@ -3,7 +3,7 @@
 package sigbla.app.test
 
 import sigbla.app.*
-import org.junit.After
+import org.junit.AfterClass
 import org.junit.Test
 import java.io.File
 import java.lang.IllegalArgumentException
@@ -18,11 +18,6 @@ import sigbla.app.exceptions.InvalidStorageException
 import java.util.*
 
 class TableStorageTest {
-    @After
-    fun cleanup() {
-        Table.names.forEach { Table.delete(it) }
-    }
-
     private fun deleteFolder(folder: Path) {
         folder.listDirectoryEntries().forEach {
             it.deleteExisting()
@@ -420,5 +415,13 @@ class TableStorageTest {
         }
 
         deleteFolder(tmpFolder)
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+        }
     }
 }

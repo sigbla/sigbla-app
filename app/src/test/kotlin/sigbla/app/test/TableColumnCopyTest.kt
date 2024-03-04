@@ -5,17 +5,12 @@ package sigbla.app.test
 import sigbla.app.*
 import org.junit.Assert.*
 import org.junit.Test
-import org.junit.After
+import org.junit.AfterClass
 
-class TableColumnCopy {
-    @After
-    fun cleanup() {
-        Table.names.forEach { Table.delete(it) }
-    }
-
+class TableColumnCopyTest {
     @Test
     fun `copy columns within same table`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "First"
         t["B", 0] = "Middle"
@@ -146,7 +141,7 @@ class TableColumnCopy {
 
     @Test
     fun `overwrite columns within same table`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A0", 0] = "First"
         t["B", 0] = "Middle 1"
@@ -301,8 +296,8 @@ class TableColumnCopy {
 
     @Test
     fun `copy columns between tables with columns`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         t1["A", 0] = "First"
         t1["B", 0] = "Middle"
@@ -417,8 +412,8 @@ class TableColumnCopy {
 
     @Test
     fun `overwrite columns between tables with columns`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         t1["A", 0] = "First 1"
         t1["B", 0] = "Middle 1"
@@ -551,7 +546,7 @@ class TableColumnCopy {
 
     @Test
     fun `copy columns to end of same table`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = "First"
         t["B", 0] = "Middle"
@@ -639,8 +634,8 @@ class TableColumnCopy {
 
     @Test
     fun `copy columns to end of different table with columns`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         t1["A", 0] = "First"
         t1["B", 0] = "Middle"
@@ -756,8 +751,8 @@ class TableColumnCopy {
 
     @Test
     fun `copy columns to end of different table without columns`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name + " 1"]
-        val t2 = Table[object {}.javaClass.enclosingMethod.name + " 2"]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val t2 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         t1["A", 0] = "First"
         t1["B", 0] = "Middle"
@@ -868,4 +863,11 @@ class TableColumnCopy {
     }
 
     // TODO Test events with multiple rows/columns, i.e., multiple events
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+        }
+    }
 }

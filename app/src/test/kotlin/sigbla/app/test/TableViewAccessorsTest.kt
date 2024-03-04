@@ -5,17 +5,12 @@ package sigbla.app.test
 import sigbla.app.*
 import org.junit.Assert.*
 import org.junit.Test
-import org.junit.After
+import org.junit.AfterClass
 
 class TableViewAccessorsTest {
-    @After
-    fun cleanup() {
-        Table.names.forEach { Table.delete(it) }
-    }
-
     @Test
     fun `cellview accessors`() {
-        val table = Table[object {}.javaClass.enclosingMethod.name]
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val row = table[Long.MIN_VALUE]
 
         val tableView = TableView[table]
@@ -1254,7 +1249,7 @@ class TableViewAccessorsTest {
 
     @Test
     fun `columnview accessors`() {
-        val table = Table[object {}.javaClass.enclosingMethod.name]
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val tableView = TableView[table]
 
@@ -1382,7 +1377,7 @@ class TableViewAccessorsTest {
 
     @Test
     fun `rowview accessors`() {
-        val table = Table[object {}.javaClass.enclosingMethod.name]
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val tableView = TableView[table]
 
@@ -1443,5 +1438,13 @@ class TableViewAccessorsTest {
 
         tableView[tableView[3000]] { sourceRowView }
         compare(tableView[tableView[3000]])
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+        }
     }
 }

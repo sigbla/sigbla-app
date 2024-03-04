@@ -3,7 +3,7 @@
 package sigbla.app.test
 
 import sigbla.app.*
-import org.junit.After
+import org.junit.AfterClass
 import org.junit.Test
 import java.nio.file.Path
 import kotlin.io.path.deleteExisting
@@ -17,12 +17,6 @@ import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
 class TableViewStorageTest {
-    @After
-    fun cleanup() {
-        Table.names.forEach { Table.delete(it) }
-        TableView.names.forEach { TableView.delete(it) }
-    }
-
     private fun deleteFolder(folder: Path) {
         folder.listDirectoryEntries().forEach {
             it.deleteExisting()
@@ -775,5 +769,14 @@ class TableViewStorageTest {
         }
 
         deleteFolder(tmpFolder)
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+            TableView.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { TableView.delete(it) }
+        }
     }
 }

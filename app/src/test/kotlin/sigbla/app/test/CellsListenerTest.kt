@@ -4,7 +4,7 @@ package sigbla.app.test
 
 import sigbla.app.*
 import sigbla.app.exceptions.ListenerLoopException
-import org.junit.After
+import org.junit.AfterClass
 import org.junit.Assert
 import org.junit.Test
 import sigbla.app.exceptions.InvalidCellException
@@ -15,15 +15,10 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class CellsListenerTest {
-    @After
-    fun cleanup() {
-        Table.names.forEach { Table.delete(it) }
-    }
-
     // TODO Ensure we test this subscribe and unsubscribe test below on all onAny functions
     @Test
     fun `subscribe and unsubscribe 1`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -56,7 +51,7 @@ class CellsListenerTest {
 
     @Test
     fun `subscribe and unsubscribe 2`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -90,7 +85,7 @@ class CellsListenerTest {
 
     @Test
     fun `expected duplicates on empty table`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -111,7 +106,7 @@ class CellsListenerTest {
 
     @Test
     fun `expected duplicates on prefilled table`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -132,7 +127,7 @@ class CellsListenerTest {
 
     @Test
     fun `subscribe to filled table and unsubscribe`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -165,7 +160,7 @@ class CellsListenerTest {
 
     @Test
     fun `subscribe and instant unsubscribe 1`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -186,7 +181,7 @@ class CellsListenerTest {
 
     @Test
     fun `subscribe and instant unsubscribe 2`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -207,7 +202,7 @@ class CellsListenerTest {
 
     @Test
     fun `subscribe to filled table and instant unsubscribe 1`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -230,7 +225,7 @@ class CellsListenerTest {
 
     @Test
     fun `subscribe to filled table and instant unsubscribe 2`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount = 0
 
@@ -253,7 +248,7 @@ class CellsListenerTest {
 
     @Test
     fun `listener ref with name and order 1`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val ref = on(t["A", 0]) {
             name = "Name A"
             order = 123
@@ -267,7 +262,7 @@ class CellsListenerTest {
 
     @Test
     fun `listener ref with name and order 2`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val ref = on(t["A", 0] or t["A", 1]) {
             name = "Name A"
             order = 123
@@ -281,7 +276,7 @@ class CellsListenerTest {
 
     @Test
     fun `listener ref without name and order 1`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val ref = on(t["A", 1]) {}
 
         assertNull(ref.name)
@@ -292,7 +287,7 @@ class CellsListenerTest {
 
     @Test
     fun `listener ref without name and order 2`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val ref = on(t["A", 0] or t["A", 1]) {}
 
         assertNull(ref.name)
@@ -303,7 +298,7 @@ class CellsListenerTest {
 
     @Test
     fun `listener loop support`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val ref1 = on(t["A", 0] or t["A", 1]) {
             events {
@@ -339,7 +334,7 @@ class CellsListenerTest {
 
     @Test
     fun `table clone and events`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var t1EventCount = 0
         var t2EventCount = 0
@@ -416,7 +411,7 @@ class CellsListenerTest {
 
     @Test
     fun `table events with old and new snapshots 1`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 1] = 1
 
@@ -439,7 +434,7 @@ class CellsListenerTest {
 
     @Test
     fun `table events with old and new snapshots 2`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 1] = 1
 
@@ -462,7 +457,7 @@ class CellsListenerTest {
 
     @Test
     fun `listener ordering 1`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val generator = AtomicInteger()
 
@@ -515,7 +510,7 @@ class CellsListenerTest {
 
     @Test
     fun `listener ordering 2`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val generator = AtomicInteger()
 
@@ -568,7 +563,7 @@ class CellsListenerTest {
 
     @Test
     fun `listener order difference propagation 1`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var v1Old: Any? = null
         var v2Old: Any? = null
@@ -662,7 +657,7 @@ class CellsListenerTest {
 
     @Test
     fun `listener order difference propagation 2`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var v1Old: Any? = null
         var v2Old: Any? = null
@@ -756,7 +751,7 @@ class CellsListenerTest {
 
     @Test
     fun `old table is an empty clone of source table on first pass 1`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = 100
 
@@ -791,7 +786,7 @@ class CellsListenerTest {
 
     @Test
     fun `old table is an empty clone of source table on first pass 2`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = 100
 
@@ -826,7 +821,7 @@ class CellsListenerTest {
 
     @Test
     fun `old and new table is a clone of source table 1`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = 100
 
@@ -868,7 +863,7 @@ class CellsListenerTest {
 
     @Test
     fun `old and new table is a clone of source table 2`() {
-        val t = Table[object {}.javaClass.enclosingMethod.name]
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A", 0] = 100
 
@@ -910,7 +905,7 @@ class CellsListenerTest {
 
     @Test
     fun `type filtering for subscriptions`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount1 = 0
         var eventCount2 = 0
@@ -1000,7 +995,7 @@ class CellsListenerTest {
 
     @Test
     fun `type filtering for chained subscriptions 1`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount1 = 0
         var eventCount2 = 0
@@ -1035,7 +1030,7 @@ class CellsListenerTest {
 
     @Test
     fun `type filtering for chained subscriptions without type filter 1`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount1 = 0
         var eventCount2 = 0
@@ -1068,7 +1063,7 @@ class CellsListenerTest {
 
     @Test
     fun `type filtering for chained subscriptions 2`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount1 = 0
         var eventCount2 = 0
@@ -1100,7 +1095,7 @@ class CellsListenerTest {
 
     @Test
     fun `type filtering for chained subscriptions without type filter 2`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         var eventCount1 = 0
         var eventCount2 = 0
@@ -1130,4 +1125,11 @@ class CellsListenerTest {
     }
 
     // TODO Add more combinations between cells, table, columns, rows, cellrange, etc..
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+        }
+    }
 }

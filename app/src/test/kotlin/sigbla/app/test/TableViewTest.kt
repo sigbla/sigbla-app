@@ -5,7 +5,7 @@ package sigbla.app.test
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
-import org.junit.After
+import org.junit.AfterClass
 import org.junit.Assert.*
 import org.junit.Test
 import sigbla.app.*
@@ -17,15 +17,9 @@ import java.io.File
 import kotlin.test.assertFailsWith
 
 class TableViewTest {
-    @After
-    fun cleanup() {
-        TableView.names.forEach { TableView.delete(it) }
-        Table.names.forEach { Table.delete(it) }
-    }
-
     @Test
     fun `registry test`() {
-        val t1 = TableView[object {}.javaClass.enclosingMethod.name, Table[null]]
+        val t1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}", Table[null]]
         val t2 = TableView.fromRegistry(t1.name!!)
         assertEquals(t1, t2)
         assertTrue(t1 === t2)
@@ -44,8 +38,9 @@ class TableViewTest {
         assertFalse(t1 === t3)
         assertEquals(t1.name, t3.name)
 
-        assertEquals(1, TableView.names.size)
-        assertEquals(t1.name, TableView.names.first())
+        // Because we run tests in parallel, this can't be tested
+        //assertEquals(1, TableView.names.size)
+        //assertEquals(t1.name, TableView.names.first())
     }
 
     @Test
@@ -68,7 +63,7 @@ class TableViewTest {
 
     @Test
     fun `table view params`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val tv1 = TableView[t1]
 
         assertEquals(UnitCellHeight::class, tv1[CellHeight]::class)
@@ -144,7 +139,7 @@ class TableViewTest {
 
     @Test
     fun `column view params`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val tv1 = TableView[t1]
 
         assertEquals(UnitCellWidth::class, tv1["A"][CellWidth]::class)
@@ -222,7 +217,7 @@ class TableViewTest {
 
     @Test
     fun `row view params`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val tv1 = TableView[t1]
 
         assertEquals(UnitCellHeight::class, tv1[1][CellHeight]::class)
@@ -300,7 +295,7 @@ class TableViewTest {
 
     @Test
     fun `cell view params`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val tv1 = TableView[t1]
 
         assertEquals(UnitCellHeight::class, tv1["A"][1][CellHeight]::class)
@@ -389,7 +384,7 @@ class TableViewTest {
 
     @Test
     fun `derived view params`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val tv1 = TableView[t1]
 
         t1["A", 1] = 1
@@ -454,7 +449,7 @@ class TableViewTest {
     /*
     @Test
     fun `table view swaps`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val tv1 = TableView[t1]
         val tv2 = TableView["t2"]
@@ -577,7 +572,7 @@ class TableViewTest {
 
     @Test
     fun `tableview invoke 1`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         // TODO Add CellTransformer when supported
 
         val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
@@ -650,8 +645,8 @@ class TableViewTest {
 
     @Test
     fun `tableview invoke 2`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name + " 1"]
-        val tv2 = TableView[object {}.javaClass.enclosingMethod.name + " 2"]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
+        val tv2 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         // TODO Add CellTransformer when supported
 
@@ -766,7 +761,7 @@ class TableViewTest {
 
     @Test
     fun `columnview invoke 1`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         // TODO Add CellTransformer when supported
 
         tv1["A"][CellWidth] {
@@ -812,7 +807,7 @@ class TableViewTest {
 
     @Test
     fun `columnview invoke 2`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         // TODO Add CellTransformer when supported
 
         tv1["A"] {
@@ -875,7 +870,7 @@ class TableViewTest {
 
     @Test
     fun `rowview invoke 1`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         // TODO Add CellTransformer when supported
 
         tv1[1][CellHeight] {
@@ -921,7 +916,7 @@ class TableViewTest {
 
     @Test
     fun `rowview invoke 2`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         // TODO Add CellTransformer when supported
 
         tv1[1] {
@@ -983,7 +978,7 @@ class TableViewTest {
 
     @Test
     fun `cellview invoke 1`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val ct: Cell<*>.() -> Any? = {}
 
         tv1["A", 1][CellHeight] {
@@ -1045,7 +1040,7 @@ class TableViewTest {
 
     @Test
     fun `cellview invoke 2`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val ct: Cell<*>.() -> Any? = {}
 
         tv1["A", 1] {
@@ -1136,7 +1131,7 @@ class TableViewTest {
 
     @Test
     fun `tableview resources`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         fun getHandler1(): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
             return {
@@ -1187,7 +1182,7 @@ class TableViewTest {
 
     @Test
     fun `tableview js and css resources`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         assertTrue(jsHandlers.isEmpty())
         assertTrue(cssHandlers.isEmpty())
@@ -1242,7 +1237,7 @@ class TableViewTest {
 
     @Test
     fun `only valid row index relation getters and setters`() {
-        val t1 = Table[object {}.javaClass.enclosingMethod.name]
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val tv1 = TableView[t1]
 
         for (ir in IndexRelation.entries) {
@@ -1300,7 +1295,7 @@ class TableViewTest {
 
     @Test
     fun `clear tableview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val t = Table[null]
         val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
             call.respondText(text = "Response 1")
@@ -1362,7 +1357,7 @@ class TableViewTest {
 
     @Test
     fun `clear columnview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         tv1["A"][CellClasses] = "cc-1"
         tv1["A"][CellTopics] = "ct-1"
@@ -1399,7 +1394,7 @@ class TableViewTest {
 
     @Test
     fun `clear rowview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         tv1[1][CellClasses] = "cc-1"
         tv1[1][CellTopics] = "ct-1"
@@ -1436,7 +1431,7 @@ class TableViewTest {
 
     @Test
     fun `clear cellview`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         tv1["A", 1][CellHeight] = 1000
         tv1["A", 1][CellWidth] = 2000
@@ -1485,7 +1480,7 @@ class TableViewTest {
     @Test
     fun `tableview iterator`() {
         val t1 = Table[null]
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val it1 = tv1.iterator()
         tv1[Table] = t1
@@ -1504,7 +1499,7 @@ class TableViewTest {
     @Test
     fun `cellview iterator`() {
         val t1 = Table[null]
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val it1 = tv1["A", 0].iterator()
         tv1[Table] = t1
@@ -1527,7 +1522,7 @@ class TableViewTest {
     @Test
     fun `derivedcellview iterator`() {
         val t1 = Table[null]
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val it1 = tv1["A", 0].derived.iterator()
         tv1[Table] = t1
@@ -1550,7 +1545,7 @@ class TableViewTest {
     @Test
     fun `columnview iterator`() {
         val t1 = Table[null]
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         // This will trigger path when ref.table is null
         val it1 = tv1["A"].iterator()
@@ -1579,7 +1574,7 @@ class TableViewTest {
     @Test
     fun `derivedcolumnview iterator`() {
         val t1 = Table[null]
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         // This will trigger path when ref.table is null
         val it1 = tv1["A"].derived.iterator()
@@ -1608,7 +1603,7 @@ class TableViewTest {
     @Test
     fun `rowview iterator`() {
         val t1 = Table[null]
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val it1 = tv1[0].iterator()
         tv1[Table] = t1
@@ -1627,7 +1622,7 @@ class TableViewTest {
     @Test
     fun `derivedrowview iterator`() {
         val t1 = Table[null]
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val it1 = tv1[0].derived.iterator()
         tv1[Table] = t1
@@ -1645,7 +1640,7 @@ class TableViewTest {
 
     @Test
     fun `cellheight math`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val unitHeight = tv1[CellHeight]
         assertFalse(unitHeight.isNumeric)
@@ -1718,7 +1713,7 @@ class TableViewTest {
 
     @Test
     fun `cellwidth math`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val unitWidth = tv1[CellWidth]
         assertFalse(unitWidth.isNumeric)
@@ -1791,7 +1786,7 @@ class TableViewTest {
 
     @Test
     fun `resources plus minus`() {
-        val tv1 = TableView[object {}.javaClass.enclosingMethod.name]
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         fun getHandler(): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
             return {
@@ -1835,5 +1830,14 @@ class TableViewTest {
         tv1[Resources] = r2 - setOf("h2" to getHandler(), "h3" to h3)
         val r7 = tv1[Resources]
         assertEquals(mapOf("h2" to h2), r7.resources)
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun cleanup(): Unit {
+            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+            TableView.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { TableView.delete(it) }
+        }
     }
 }

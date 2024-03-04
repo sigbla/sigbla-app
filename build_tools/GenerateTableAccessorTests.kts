@@ -29,7 +29,7 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
 
     println(cellGenerator)
     println()
-    println("val table = Table[object {}.javaClass.enclosingMethod.name]")
+    println("val table = Table[\"\${this.javaClass.simpleName} \${object {}.javaClass.enclosingMethod.name}\"]")
 
     for (i in 1..5) {
         val headers = (1..i).fold(mutableListOf<String>()) { acc, i -> acc.apply { add("\"L$i\"") } }
