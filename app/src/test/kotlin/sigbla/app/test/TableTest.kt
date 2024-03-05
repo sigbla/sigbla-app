@@ -24,7 +24,7 @@ class TableTest {
         assertEquals(t1, t2)
         assertTrue(t1 === t2)
 
-        Table.delete(t1.name!!)
+        remove(t1)
 
         assertFailsWith(InvalidTableException::class) {
             Table.fromRegistry(t1.name!!)
@@ -2456,7 +2456,7 @@ class TableTest {
         @JvmStatic
         @AfterClass
         fun cleanup(): Unit {
-            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+            Table.tables.filter { it.name?.startsWith(Companion::class.java.declaringClass.simpleName) == true }.forEach { remove(it) }
         }
     }
 }

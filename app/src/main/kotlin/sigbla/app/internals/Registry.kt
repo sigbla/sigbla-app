@@ -5,28 +5,25 @@ package sigbla.app.internals
 import sigbla.app.*
 import sigbla.app.TableRef
 import sigbla.app.exceptions.InvalidTableException
-import sigbla.app.exceptions.InvalidTableViewException
 import java.util.*
 import java.util.concurrent.ConcurrentSkipListMap
 
 internal object Registry {
-    private val tables: SortedMap<String, Table> = ConcurrentSkipListMap()
-    private val views: SortedMap<String, TableView> = ConcurrentSkipListMap()
+    private val _tables: SortedMap<String, Table> = ConcurrentSkipListMap()
+    private val _views: SortedMap<String, TableView> = ConcurrentSkipListMap()
 
-    fun setTable(name: String, table: Table) = deleteTable(tables.put(name, table))
+    fun setTable(name: String, table: Table) = _tables.put(name, table)?.also { shutdownTable(it, false) }
 
-    fun getTable(name: String): Table? = tables[name]
+    fun getTable(name: String): Table? = _tables[name]
 
-    fun getTable(name: String, init: (String) -> Table): Table = tables.computeIfAbsent(name, init)
+    fun getTable(name: String, init: (String) -> Table): Table = _tables.computeIfAbsent(name, init)
 
-    fun tableNames(): SortedSet<String> = Collections.unmodifiableSortedSet(tables.keys.toSortedSet())
+    val tables: Set<Table> get() = Collections.unmodifiableSet(_tables.values.toSet())
 
-    fun deleteTable(name: String) = deleteTable(tables.remove(name))
+    val tableNames: SortedSet<String> get() = Collections.unmodifiableSortedSet(_tables.keys.toSortedSet())
 
-    fun deleteTable(table: Table?) {
-        if (table == null) return
-
-        if (table.name != null) tables.remove(table.name, table)
+    fun shutdownTable(table: Table, remove: Boolean) {
+        if (remove && table.name != null) _tables.remove(table.name, table)
 
         table.closed = true
 
@@ -36,20 +33,22 @@ internal object Registry {
         table.tableRef.set(TableRef(version = Long.MAX_VALUE))
     }
 
-    fun setView(name: String, view: TableView) = deleteView(views.put(name, view))
+    fun setView(name: String, view: TableView) = _views.put(name, view)?.also { shutdownView(it, false) }
 
-    fun getView(name: String): TableView? = views[name]
+    fun getView(name: String): TableView? = _views[name]
 
-    fun getView(name: String, init: (String) -> TableView): TableView = views.computeIfAbsent(name, init)
+    fun getView(name: String, init: (String) -> TableView): TableView = _views.computeIfAbsent(name, init)
 
-    fun viewNames(): SortedSet<String> = Collections.unmodifiableSortedSet(views.keys.toSortedSet())
+    val views: Set<TableView> get() = Collections.unmodifiableSet(_views.values.toSet())
 
-    fun deleteView(name: String) = deleteView(views.remove(name))
+    val viewNames: SortedSet<String> get() = Collections.unmodifiableSortedSet(_views.keys.toSortedSet())
 
-    private fun deleteView(view: TableView?) {
-        if (view == null) return
+    fun shutdownView(view: TableView, remove: Boolean) {
+        if (remove && view.name != null) _views.remove(view.name, view)
+
+        // TODO view.closed = true
 
         view.eventProcessor.shutdown()
-        view.tableViewRef.set(TableViewRef())
+        view.tableViewRef.set(TableViewRef(version = Long.MAX_VALUE))
     }
 }

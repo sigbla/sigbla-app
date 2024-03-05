@@ -2016,7 +2016,7 @@ fun rename(column: Column, vararg withName: String): Unit = move(column to colum
 
 // TODO rename(table: Table, withName: String)..
 
-fun remove(table: Table) = Registry.deleteTable(table)
+fun remove(table: Table) = Registry.shutdownTable(table, true)
 
 fun remove(column: Column) = move(column to Table[null])
 

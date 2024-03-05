@@ -34,6 +34,7 @@ class BasicTableTest {
         val name = "${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"
         val t = Table[name]
         assertTrue(Table.names.contains(name))
+        assertTrue(Table.tables.mapNotNull { it.name }.contains(name))
 
         t["A"][1] = "String"
         t["B"][2] = 123L
@@ -129,8 +130,9 @@ class BasicTableTest {
         assertEquals(Unit, valueOf<Any>(t["F"][5]))
         assertEquals(Unit, valueOf<Any>(t["F"][6]))
 
-        Table.delete(name)
+        Table.remove(name)
         assertFalse(Table.names.contains(name))
+        assertFalse(Table.tables.mapNotNull { it.name }.contains(name))
     }
 
     @Test
@@ -228,7 +230,7 @@ class BasicTableTest {
         assertEquals(Unit, valueOf<Any>(t["E"][5]))
         assertEquals(Unit, valueOf<Any>(t["E"][6]))
 
-        Table.delete(name)
+        Table.remove(name)
         assertFalse(Table.names.contains(name))
     }
 
@@ -930,7 +932,7 @@ class BasicTableTest {
         @JvmStatic
         @AfterClass
         fun cleanup(): Unit {
-            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+            Table.tables.filter { it.name?.startsWith(Companion::class.java.declaringClass.simpleName) == true }.forEach { remove(it) }
         }
     }
 }

@@ -1739,8 +1739,8 @@ class ColumnViewListenerTest {
         @JvmStatic
         @AfterClass
         fun cleanup(): Unit {
-            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
-            TableView.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { TableView.delete(it) }
+            Table.tables.filter { it.name?.startsWith(Companion::class.java.declaringClass.simpleName) == true }.forEach { remove(it) }
+            TableView.views.filter { it.name?.startsWith(Companion::class.java.declaringClass.simpleName) == true }.forEach { remove(it) }
         }
     }
 }

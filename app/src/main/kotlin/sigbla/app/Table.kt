@@ -1039,9 +1039,11 @@ abstract class Table(val name: String?, internal val source: Table?) : Iterable<
 
         fun fromRegistry(name: String, init: (name: String) -> Table) = Registry.getTable(name, init)
 
-        val names: SortedSet<String> get() = Registry.tableNames()
+        fun remove(name: String) = Registry.shutdownTable(fromRegistry(name), true)
 
-        fun delete(name: String) = Registry.deleteTable(name)
+        val names: SortedSet<String> get() = Registry.tableNames
+
+        val tables: Set<Table> get() = Registry.tables
     }
 }
 

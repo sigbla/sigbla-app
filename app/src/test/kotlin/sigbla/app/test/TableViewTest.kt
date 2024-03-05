@@ -24,7 +24,13 @@ class TableViewTest {
         assertEquals(t1, t2)
         assertTrue(t1 === t2)
 
-        TableView.delete(t1.name!!)
+        assertTrue(TableView.names.contains(t1.name!!))
+        assertTrue(TableView.views.mapNotNull { it.name }.contains(t1.name!!))
+
+        remove(t1)
+
+        assertFalse(TableView.names.contains(t1.name!!))
+        assertFalse(TableView.views.mapNotNull { it.name }.contains(t1.name!!))
 
         assertFailsWith(InvalidTableViewException::class) {
             TableView.fromRegistry(t1.name!!)
@@ -1836,8 +1842,8 @@ class TableViewTest {
         @JvmStatic
         @AfterClass
         fun cleanup(): Unit {
-            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
-            TableView.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { TableView.delete(it) }
+            Table.tables.filter { it.name?.startsWith(Companion::class.java.declaringClass.simpleName) == true }.forEach { remove(it) }
+            TableView.views.filter { it.name?.startsWith(Companion::class.java.declaringClass.simpleName) == true }.forEach { remove(it) }
         }
     }
 }
