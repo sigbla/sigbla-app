@@ -17,7 +17,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 
 // TODO Should this be sealed rather than abstract? Or just a normal class with no BaseTable?
-abstract class Table(val name: String?, internal val source: Table?) : Iterable<Cell<*>> {
+abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> {
     abstract val closed: Boolean
 
     abstract val headers: Sequence<Header>

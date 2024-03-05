@@ -235,6 +235,9 @@ class TableTest {
 
         val t2 = clone(t1, "tableClone2")
 
+        assertTrue(Table.tables.contains(t2))
+        assertTrue(Table.names.contains("tableClone2"))
+
         for (c in listOf("A", "B", "C")) {
             for (r in 1..100) {
                 t2[c][r] = "$c$r B1"
@@ -270,6 +273,27 @@ class TableTest {
                 assertEquals("$c$r A1", valueOf<Any>(t2[c][r]))
             }
         }
+    }
+
+    @Test
+    fun `clone is not closed`() {
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t1["A", 0] = "A0v1"
+
+        remove(t1)
+
+        assertTrue(t1.closed)
+
+        val t2 = clone(t1)
+
+        assertTrue(t1 === t2.source)
+        assertTrue(t2.source?.closed == true)
+        assertFalse(t2.closed)
+
+        t2["A", 0] = "A0v2"
+
+        assertEquals("A0v2", t2["A", 0].value)
     }
 
     @Test
