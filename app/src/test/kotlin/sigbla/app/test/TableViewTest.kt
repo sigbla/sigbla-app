@@ -777,8 +777,7 @@ class TableViewTest {
         assertEquals(setOf("400"), tv1[CellTopics].topics)
         assertEquals(mapOf("a" to handler), tv1[Resources].resources)
 
-        // Don't have access to actual source table with tv1 { tv2 } above..
-        assertNotEquals(t2, tv1[Table].source)
+        assertEquals(t2, tv1[Table].source)
     }
 
     @Test
@@ -1852,6 +1851,74 @@ class TableViewTest {
         tv1[Resources] = r2 - setOf("h2" to getHandler(), "h3" to h3)
         val r7 = tv1[Resources]
         assertEquals(mapOf("h2" to h2), r7.resources)
+    }
+
+    @Test
+    fun `transformed table cache`() {
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+        val tv = TableView[null]
+
+        val tt1 = tv[Table]
+        val tt2 = tv[Table]
+
+        assertTrue(tt1 === tt2)
+
+        tv[Table] = t1
+        t1["A", 0] = "A0"
+
+        val tt3 = tv[Table]
+        val tt4 = tv[Table]
+
+        assertFalse(tt2 === tt3)
+        assertTrue(tt3 === tt4)
+
+        assertEquals(Unit, tt1["A", 0].value)
+        assertEquals(Unit, tt2["A", 0].value)
+        assertEquals("A0", tt3["A", 0].value)
+        assertEquals("A0", tt4["A", 0].value)
+
+        tv["A", 0][CellTransformer] = {
+            "A0v2"
+        }
+
+        val tt5 = tv[Table]
+        val tt6 = tv[Table]
+
+        assertFalse(tt4 === tt5)
+        assertTrue(tt5 === tt6)
+
+        assertEquals("A0", tt3["A", 0].value)
+        assertEquals("A0", tt4["A", 0].value)
+
+        assertEquals("A0v2", tt5["A", 0].value)
+        assertEquals("A0v2", tt6["A", 0].value)
+
+        assertEquals("A0", t1["A", 0].value)
+
+        val t2 = Table[null]
+        t2["B", 0] = "B0"
+
+        tv[Table] = t2
+
+        val tt7 = tv[Table]
+        val tt8 = tv[Table]
+
+        assertFalse(tt6 === tt7)
+        assertTrue(tt7 === tt8)
+
+        assertEquals("A0v2", tt8["A", 0].value)
+        assertEquals("B0", tt8["B", 0].value)
+
+        tv[Table] = null
+
+        val tt9 = tv[Table]
+        val tt10 = tv[Table]
+
+        assertFalse(tt8 === tt9)
+        assertTrue(tt9 === tt10)
+
+        assertEquals("A0v2", tt10["A", 0].value)
+        assertEquals(Unit, tt10["B", 0].value)
     }
 
     companion object {

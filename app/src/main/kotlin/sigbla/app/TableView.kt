@@ -14,6 +14,7 @@ import sigbla.app.pds.kollection.ImmutableSet as PSet
 import kotlin.collections.LinkedHashMap
 import io.ktor.server.application.*
 import io.ktor.util.pipeline.*
+import java.lang.ref.WeakReference
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.ThreadLocalRandom
@@ -54,7 +55,7 @@ internal data class TableViewRef(
     val cellTransformers: PMap<Pair<Header, Long>, Cell<*>.() -> Any?> = PHashMap(),
     val table: Table? = null,
 
-    val version: Long = Long.MIN_VALUE,
+    val version: Long = Long.MIN_VALUE
 )
 
 // TODO Consider if we need a DerivedTableView as well?
@@ -126,18 +127,31 @@ class TableView internal constructor(
 
     // TODO Consider if get(table: Table) and set(..: Table, ..) should be included for symmetry?
 
+    private var transformedTableRef: Triple<Long, Long?, WeakReference<Table>>? = null
+
     operator fun get(table: Table.Companion): Table {
-        val ref = tableViewRef.get()
-        val table = ref.table?.let { it.makeClone() } ?: BaseTable(name = null, source = null, onRegistry = false)
+        synchronized(eventProcessor) {
+            val ref = tableViewRef.get()
+            val originalTable = ref.table
+            val table = originalTable?.let { it.makeClone() } ?: BaseTable(name = null, source = null, onRegistry = false)
 
-        // TODO Look into making this lazy? Or at least cache it
-        ref.cellTransformers.forEach {
-            val key = it.component1()
-            val init = it.component2()
-            table[key.first][key.second] = init
+            if (transformedTableRef != null
+                && transformedTableRef!!.first == ref.version
+                && transformedTableRef!!.second == originalTable?.tableRef?.get()?.version) {
+                val cachedTable = transformedTableRef!!.third.get()
+                if (cachedTable != null) return cachedTable
+            }
+
+            ref.cellTransformers.forEach {
+                val key = it.component1()
+                val init = it.component2()
+                table[key.first][key.second] = init
+            }
+
+            transformedTableRef = Triple(ref.version, originalTable?.tableRef?.get()?.version, WeakReference(table))
+
+            return table
         }
-
-        return table
     }
 
     operator fun set(table: Table.Companion, newTable: Table?) {
