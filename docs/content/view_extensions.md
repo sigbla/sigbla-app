@@ -223,9 +223,9 @@ order they are added in.
 It's also possible to have multiple classes and topics per assignment:
 
 ``` kotlin
-tableView["D"][CellClasses] = listOf("cc1-d", "cc2-d")
-tableView[2][CellClasses] = listOf("cc1-2", "cc2-2")
-tableView["D", 2][CellClasses] = listOf("cc1-d2", "cc2-d2")
+tableView["D"][CellClasses] = setOf("cc1-d", "cc2-d")
+tableView[2][CellClasses] = setOf("cc1-2", "cc2-2")
+tableView["D", 2][CellClasses] = setOf("cc1-d2", "cc2-d2")
 
 println("Cell classes on tableView[\"D\", 2]: " + tableView["D", 2].derived.cellClasses)
 
@@ -323,7 +323,7 @@ TableView[Port] = 8080
 val table = Table["MyTable"]
 val tableView = TableView[table]
 
-tableView["A", 0][CellTopics] = listOf("topic1", "topic2")
+tableView["A", 0][CellTopics] = setOf("topic1", "topic2")
 
 table["A", 0] = "A0"
 
@@ -460,6 +460,3 @@ fun main() {
     println(url)
 }
 ```
-
-You'll notice we're making use of subscriptions on views with `on<CellTransformer<*>>(this) { .. }`, something we'll
-cover in more detail in the next chapter.

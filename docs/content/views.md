@@ -183,7 +183,7 @@ of these definitions as they existed when creating the instance.
 ``` kotlin
 val derivedCellView = TableView[null]["A", 1].derived
 
-val cell: Cell<*>? = derivedCellView.cell
+val cell: Cell<*> = derivedCellView.cell
 val cellHeight: Long = derivedCellView.cellHeight
 val cellWidth: Long = derivedCellView.cellWidth
 val cellView: CellView = derivedCellView.cellView
@@ -228,8 +228,8 @@ tableView[CellWidth] = 200
 As with the index on a `Cell`, convenience functions allow you to define height and width using `Int`, but internally
 they are all stored as a `Long`.
 
-Coming back to the `DerivedCellView` properties, you'll notice you have access to the `Cell` it represents, but as a
-nullable variant. This is because the table view might not be connected with a table, making nulls needed.
+Coming back to the `DerivedCellView` properties, you'll notice you have access to the `Cell` it represents. The cell
+returned includes any cell transformations as covered below.
 
 There's also something called `CellClasses` and `CellTopics`, which we'll come back to in the chapter on view
 extensions. While topics require a bit more context, we can say classes contain CSS classes we want to apply to the
