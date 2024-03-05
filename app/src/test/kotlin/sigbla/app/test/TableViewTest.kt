@@ -44,6 +44,12 @@ class TableViewTest {
         assertFalse(t1 === t3)
         assertEquals(t1.name, t3.name)
 
+        TableView.remove(t3.name!!)
+
+        assertFailsWith(InvalidTableViewException::class) {
+            TableView.fromRegistry(t3.name!!)
+        }
+
         // Because we run tests in parallel, this can't be tested
         //assertEquals(1, TableView.names.size)
         //assertEquals(t1.name, TableView.names.first())
