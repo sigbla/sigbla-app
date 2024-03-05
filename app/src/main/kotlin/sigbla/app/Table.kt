@@ -18,9 +18,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 // TODO Should this be sealed rather than abstract? Or just a normal class with no BaseTable?
 abstract class Table(val name: String?, internal val source: Table?) : Iterable<Cell<*>> {
-    @Volatile
-    var closed: Boolean = false
-        internal set
+    abstract val closed: Boolean
 
     abstract val headers: Sequence<Header>
 
@@ -1090,6 +1088,8 @@ class BaseTable internal constructor(
         if (name != null && onRegistry) Registry.setTable(name, this)
     }
 
+    override val closed: Boolean get() = tableRef.closed
+
     override val headers: Sequence<Header>
         get() = tableRef.get().headers.filter { !it.second.prenatal }.map { it.first }
 
@@ -1100,7 +1100,6 @@ class BaseTable internal constructor(
         get() = tableRef.get().indexes
 
     override fun get(header: Header): Column {
-        if (closed) throw InvalidTableException("Table is closed")
         if (header.labels.isEmpty()) throw InvalidColumnException("Empty header")
 
         val columnMeta = tableRef.get().columns[header] ?: tableRef.updateAndGet {

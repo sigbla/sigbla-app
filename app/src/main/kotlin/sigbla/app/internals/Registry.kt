@@ -23,14 +23,12 @@ internal object Registry {
     val tableNames: SortedSet<String> get() = Collections.unmodifiableSortedSet(_tables.keys.toSortedSet())
 
     fun shutdownTable(table: Table, remove: Boolean) {
-        if (remove && table.name != null) _tables.remove(table.name, table)
-
-        table.closed = true
-
         if (table !is BaseTable) throw InvalidTableException("Unsupported table type")
 
-        table.eventProcessor.shutdown()
-        table.tableRef.set(TableRef(version = Long.MAX_VALUE))
+        synchronized(table.eventProcessor) {
+            if (remove && table.name != null) _tables.remove(table.name, table)
+            table.tableRef.closed = true
+        }
     }
 
     fun setView(name: String, view: TableView) = _views.put(name, view)?.also { shutdownView(it, false) }
@@ -44,11 +42,9 @@ internal object Registry {
     val viewNames: SortedSet<String> get() = Collections.unmodifiableSortedSet(_views.keys.toSortedSet())
 
     fun shutdownView(view: TableView, remove: Boolean) {
-        if (remove && view.name != null) _views.remove(view.name, view)
-
-        // TODO view.closed = true
-
-        view.eventProcessor.shutdown()
-        view.tableViewRef.set(TableViewRef(version = Long.MAX_VALUE))
+        synchronized(view.eventProcessor) {
+            if (remove && view.name != null) _views.remove(view.name, view)
+            view.tableViewRef.closed = true
+        }
     }
 }

@@ -6,10 +6,7 @@ import sigbla.app.*
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.AfterClass
-import sigbla.app.exceptions.InvalidCellException
-import sigbla.app.exceptions.InvalidColumnException
-import sigbla.app.exceptions.InvalidRowException
-import sigbla.app.exceptions.InvalidTableException
+import sigbla.app.exceptions.*
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.concurrent.atomic.AtomicReference
@@ -21,16 +18,27 @@ class TableTest {
     fun `registry test`() {
         val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val t2 = Table.fromRegistry(t1.name!!)
+
+        t1["A", 1] = "A1"
+
         assertEquals(t1, t2)
         assertTrue(t1 === t2)
 
         assertTrue(Table.names.contains(t1.name!!))
         assertTrue(Table.tables.mapNotNull { it.name }.contains(t1.name!!))
+        assertFalse(t1.closed)
 
         remove(t1)
 
         assertFalse(Table.names.contains(t1.name!!))
         assertFalse(Table.tables.mapNotNull { it.name }.contains(t1.name!!))
+        assertTrue(t1.closed)
+
+        assertEquals("A1", t1["A", 1].value)
+
+        assertFailsWith<InvalidRefException> {
+            t1["A", 1] = "A1"
+        }
 
         assertFailsWith(InvalidTableException::class) {
             Table.fromRegistry(t1.name!!)
@@ -39,6 +47,8 @@ class TableTest {
         val t3 = Table.fromRegistry(t1.name!!) {
             Table[t1.name]
         }
+
+        t3["A", 1] = "A1"
 
         assertNotEquals(t1, t3)
         assertFalse(t1 === t3)
