@@ -3,7 +3,7 @@
 Sigbla functions provided various types of calculations with the result assigned to a given cell. When the input
 to these functions update, the calculations are redone and the result updated.
 
-The set of functions currently available out of the box is limited, but will expand over time. They are described below
+The functions currently available out of the box is limited, but will expand over time. They are described below
 together with a basic example.
 
 ## Count
@@ -132,4 +132,42 @@ print(table)
 // 4      |300    |       
 // 5      |       |100    
 // 6      |       |250    
+```
+
+## Removing a function
+
+Once a function is assigned to a cell, it will remain until the cell is overwritten. Below is an example of how we
+might do just that to remove the sum function.
+
+``` kotlin
+val table = Table[null]
+
+table["A", 0] = 100
+table["A", 1] = 200
+table["A", 2] = 300
+
+table["Sum", 0] = sum(table["A"])
+
+print(table)
+
+// Output:
+//     |A   |Sum
+// 0   |100 |600
+// 1   |200 |
+// 2   |300 |
+
+// Examples of how to remove the sum function on ["Sum", 0]
+// remove(table["Sum"])
+// clear(table["Sum"])
+table["Sum", 0] = null
+
+table["A", 0] = 400
+
+print(table)
+
+// Output:
+//     |A   |Sum
+// 0   |400 |
+// 1   |200 |
+// 2   |300 |
 ```
