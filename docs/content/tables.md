@@ -280,7 +280,8 @@ view connections, and you can use it as any other table. By default, the cloned 
 the original table, but is not put on the registry. If you give it a new name, with `clone(table, "new name")`, it will
 be placed on the registry.
 
-The original table remains as is, unchanged.
+The original table remains as is, unchanged. It's also possible to obtain the original table from the clone through the
+`table.source` property. This will be `null` if the table isn't a clone.
 
 ``` kotlin
 val table1 = Table["MyTable"]

@@ -66,6 +66,79 @@ class TableViewTest {
     }
 
     @Test
+    fun `clone tableview values`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        for (c in listOf("A", "B", "C", "D")) {
+            for (r in 1..100) {
+                tv1[c][r][CellTransformer] = { "$c$r A1" }
+            }
+        }
+
+        val tv2 = clone(tv1, "tableViewClone2")
+
+        assertTrue(TableView.views.contains(tv2))
+        assertTrue(TableView.names.contains("tableViewClone2"))
+
+        for (c in listOf("A", "B", "C")) {
+            for (r in 1..100) {
+                tv2[c][r][CellTransformer] = { "$c$r B1" }
+            }
+        }
+
+        for (c in listOf("D")) {
+            for (r in 1..100) {
+                tv1[c][r][CellTransformer] = { "$c$r A2" }
+            }
+        }
+
+        for (c in listOf("A", "B", "C")) {
+            for (r in 1..100) {
+                assertEquals("$c$r A1", valueOf<Any>(tv1[Table][c][r]))
+            }
+        }
+
+        for (c in listOf("A", "B", "C")) {
+            for (r in 1..100) {
+                assertEquals("$c$r B1", valueOf<Any>(tv2[Table][c][r]))
+            }
+        }
+
+        for (c in listOf("D")) {
+            for (r in 1..100) {
+                assertEquals("$c$r A2", valueOf<Any>(tv1[Table][c][r]))
+            }
+        }
+
+        for (c in listOf("D")) {
+            for (r in 1..100) {
+                assertEquals("$c$r A1", valueOf<Any>(tv2[Table][c][r]))
+            }
+        }
+    }
+
+    @Test
+    fun `clone is not closed`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        tv1["A", 0][CellTransformer] = { "A0v1" }
+
+        remove(tv1)
+
+        assertTrue(tv1.closed)
+
+        val tv2 = clone(tv1)
+
+        assertTrue(tv1 === tv2.source)
+        assertTrue(tv2.source?.closed == true)
+        assertFalse(tv2.closed)
+
+        tv2["A", 0][CellTransformer] = { "A0v2" }
+
+        assertEquals("A0v2", tv2[Table]["A", 0].value)
+    }
+
+    @Test
     fun `define host`() {
         TableView[Host] = "192.168.0.1"
         assertEquals("192.168.0.1", TableView[Host])

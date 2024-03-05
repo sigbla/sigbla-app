@@ -61,11 +61,12 @@ internal data class TableViewRef(
 // TODO Consider if we need a DerivedTableView as well?
 class TableView internal constructor(
     val name: String?,
+    val source: TableView?,
     onRegistry: Boolean = true,
     internal val tableViewRef: RefHolder<TableViewRef>,
     internal val eventProcessor: TableViewEventProcessor = TableViewEventProcessor()
 ) : Iterable<DerivedCellView> {
-    internal constructor(name: String?, table: Table?) : this(name, tableViewRef = RefHolder(TableViewRef(table = table)))
+    internal constructor(name: String?, table: Table?) : this(name, null, tableViewRef = RefHolder(TableViewRef(table = table)))
     internal constructor(table: Table) : this(table.name, table)
     internal constructor(name: String?) : this(name, if (name == null) null else Registry.getTable(name))
 
@@ -1039,7 +1040,7 @@ class TableView internal constructor(
         }
     }
 
-    internal fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableViewRef = tableViewRef.get()) = TableView(name, onRegistry, RefHolder(ref))
+    internal fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableViewRef = tableViewRef.get()) = TableView(name, this, onRegistry, RefHolder(ref))
 
     override fun toString() = "TableView[$name]"
 
