@@ -9,10 +9,7 @@ import org.junit.AfterClass
 import org.junit.Assert.*
 import org.junit.Test
 import sigbla.app.*
-import sigbla.app.exceptions.InvalidCellHeightException
-import sigbla.app.exceptions.InvalidCellWidthException
-import sigbla.app.exceptions.InvalidRowException
-import sigbla.app.exceptions.InvalidTableViewException
+import sigbla.app.exceptions.*
 import java.io.File
 import kotlin.test.assertFailsWith
 
@@ -21,8 +18,12 @@ class TableViewTest {
     fun `registry test`() {
         val t1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}", Table[null]]
         val t2 = TableView.fromRegistry(t1.name!!)
+
+        t1["A", 1][CellHeight] = 250
+
         assertEquals(t1, t2)
         assertTrue(t1 === t2)
+        assertFalse(t1.closed)
 
         assertTrue(TableView.names.contains(t1.name!!))
         assertTrue(TableView.views.mapNotNull { it.name }.contains(t1.name!!))
@@ -31,6 +32,14 @@ class TableViewTest {
 
         assertFalse(TableView.names.contains(t1.name!!))
         assertFalse(TableView.views.mapNotNull { it.name }.contains(t1.name!!))
+        assertTrue(t1.closed)
+
+        assertFailsWith<InvalidRefException> {
+            t1["A", 1]
+        }
+        assertFailsWith<InvalidRefException> {
+            t1["A", 1][CellHeight] = 250
+        }
 
         assertFailsWith(InvalidTableViewException::class) {
             TableView.fromRegistry(t1.name!!)
@@ -39,6 +48,8 @@ class TableViewTest {
         val t3 = TableView.fromRegistry(t1.name!!) {
             TableView[t1.name]
         }
+
+        t3["A", 1][CellHeight] = 250
 
         assertNotEquals(t1, t3)
         assertFalse(t1 === t3)

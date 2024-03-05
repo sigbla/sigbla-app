@@ -72,6 +72,8 @@ class TableView internal constructor(
         if (name != null && onRegistry) Registry.setView(name, this)
     }
 
+    val closed: Boolean get() = tableViewRef.closed
+
     val columnViews: Sequence<ColumnView>
         get() = tableViewRef.get()
             .columnViews
