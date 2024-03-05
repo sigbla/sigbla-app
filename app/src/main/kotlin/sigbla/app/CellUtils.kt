@@ -16,7 +16,7 @@ fun valueOf(source: Cell<*>.() -> Any?, typeFilter: KClass<*>): Any? {
     val table = BaseTable(null, null, false, RefHolder(TableRef())) as Table
     table["valueOf", 0L].source()
     val value = valueOf(table["valueOf", 0L], typeFilter)
-    Registry.deleteTable(table) // Clean up
+    Registry.shutdownTable(table, true) // Clean up
     return value
 }
 

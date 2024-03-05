@@ -1048,9 +1048,11 @@ class TableView internal constructor(
 
         fun fromRegistry(name: String, init: (String) -> TableView): TableView = Registry.getView(name, init)
 
-        val names: SortedSet<String> get() = Registry.viewNames()
+        fun remove(name: String) = Registry.shutdownView(fromRegistry(name), true)
 
-        fun delete(name: String) = Registry.deleteView(name)
+        val names: SortedSet<String> get() = Registry.viewNames
+
+        val views: Set<TableView> get() = Registry.views
 
         // TODO Consider a operator get/set(resources: Resources, ..) on this level as well to allow for global resources
 

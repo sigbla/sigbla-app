@@ -195,7 +195,7 @@ class TableStorageTest {
 
         val table2 = clone(table1, "Storage test")
 
-        Table.delete(table1.name!!)
+        remove(table1)
 
         val table3 = Table[name]
 
@@ -251,7 +251,7 @@ class TableStorageTest {
 
         val table2 = clone(table1, "Storage test")
 
-        Table.delete(table1.name!!)
+        remove(table1)
 
         val table3 = Table[name]
 
@@ -421,7 +421,7 @@ class TableStorageTest {
         @JvmStatic
         @AfterClass
         fun cleanup(): Unit {
-            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+            Table.tables.filter { it.name?.startsWith(Companion::class.java.declaringClass.simpleName) == true }.forEach { remove(it) }
         }
     }
 }

@@ -24,7 +24,13 @@ class TableTest {
         assertEquals(t1, t2)
         assertTrue(t1 === t2)
 
-        Table.delete(t1.name!!)
+        assertTrue(Table.names.contains(t1.name!!))
+        assertTrue(Table.tables.mapNotNull { it.name }.contains(t1.name!!))
+
+        remove(t1)
+
+        assertFalse(Table.names.contains(t1.name!!))
+        assertFalse(Table.tables.mapNotNull { it.name }.contains(t1.name!!))
 
         assertFailsWith(InvalidTableException::class) {
             Table.fromRegistry(t1.name!!)
@@ -37,6 +43,12 @@ class TableTest {
         assertNotEquals(t1, t3)
         assertFalse(t1 === t3)
         assertEquals(t1.name, t3.name)
+
+        Table.remove(t3.name!!)
+
+        assertFailsWith(InvalidTableException::class) {
+            Table.fromRegistry(t3.name!!)
+        }
 
         // Because we run tests in parallel, this can't be tested
         //assertEquals(1, Table.names.size)
@@ -2456,7 +2468,7 @@ class TableTest {
         @JvmStatic
         @AfterClass
         fun cleanup(): Unit {
-            Table.names.filter { it.startsWith(Companion::class.java.declaringClass.simpleName) }.forEach { Table.delete(it) }
+            Table.tables.filter { it.name?.startsWith(Companion::class.java.declaringClass.simpleName) == true }.forEach { remove(it) }
         }
     }
 }

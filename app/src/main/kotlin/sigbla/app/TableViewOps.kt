@@ -4,12 +4,19 @@ package sigbla.app
 
 import io.ktor.server.engine.*
 import sigbla.app.exceptions.InvalidTableViewException
+import sigbla.app.internals.Registry
 import sigbla.app.internals.SigblaBackend
 import sigbla.app.internals.load1
 import sigbla.app.internals.save1
 import java.io.File
 import java.net.URL
 import kotlin.reflect.KClass
+
+// TODO Consider a reset(tableView) as well to remove all styling?
+
+fun remove(tableView: TableView) = Registry.shutdownView(tableView, true)
+
+// ---
 
 fun clear(tableView: TableView) = tableView { null }
 
