@@ -34,9 +34,8 @@ class TableTest {
         assertFalse(Table.tables.mapNotNull { it.name }.contains(t1.name!!))
         assertTrue(t1.closed)
 
-        assertFailsWith<InvalidRefException> {
-            t1["A", 1]
-        }
+        assertEquals("A1", t1["A", 1].value)
+
         assertFailsWith<InvalidRefException> {
             t1["A", 1] = "A1"
         }

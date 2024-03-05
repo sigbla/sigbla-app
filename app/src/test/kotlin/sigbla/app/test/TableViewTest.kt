@@ -34,9 +34,8 @@ class TableViewTest {
         assertFalse(TableView.views.mapNotNull { it.name }.contains(t1.name!!))
         assertTrue(t1.closed)
 
-        assertFailsWith<InvalidRefException> {
-            t1["A", 1]
-        }
+        assertEquals(250L, t1["A", 1][CellHeight].height)
+
         assertFailsWith<InvalidRefException> {
             t1["A", 1][CellHeight] = 250
         }

@@ -27,9 +27,6 @@ internal object Registry {
 
         synchronized(table.eventProcessor) {
             if (remove && table.name != null) _tables.remove(table.name, table)
-
-            table.eventProcessor.shutdown()
-            table.tableRef.set(TableRef(version = Long.MAX_VALUE))
             table.tableRef.closed = true
         }
     }
@@ -47,9 +44,6 @@ internal object Registry {
     fun shutdownView(view: TableView, remove: Boolean) {
         synchronized(view.eventProcessor) {
             if (remove && view.name != null) _views.remove(view.name, view)
-
-            view.eventProcessor.shutdown()
-            view.tableViewRef.set(TableViewRef(version = Long.MAX_VALUE))
             view.tableViewRef.closed = true
         }
     }

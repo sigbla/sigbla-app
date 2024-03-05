@@ -22,7 +22,6 @@ internal class RefHolder<V>(@Volatile private var ref: V) {
     }
 
     fun get(): V {
-        if (closed) throw InvalidRefException("Reference is closed")
         return local.get() ?: ref
     }
 
