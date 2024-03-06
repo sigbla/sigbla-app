@@ -534,7 +534,6 @@ internal class TableViewEventProcessor {
                     .values
                     .forEach { listenerRef ->
                         val rowBatch = Collections.unmodifiableList(batch.filter {
-                            // TODO This filtering will need to take into account the index relation if supported?
                             val newValueIndex = indexFromViewRelated(it.newValue)
                             val oldValueIndex = indexFromViewRelated(it.oldValue)
                             return@filter newValueIndex == listenerRef.listenerReference.rowView.index

@@ -1412,7 +1412,6 @@ class CellView(
 }
 
 internal fun createDerivedCellViewFromRef(ref: TableViewRef, columnView: ColumnView, index: Long): DerivedCellView {
-    // TODO Consider if this and other Derived.. instances should operate on clones
     val columnHeader = columnView.header
     val cellViewMeta = ref.cellViews[Pair(columnHeader, index)]
     val defaultCellViewMeta = ref.defaultCellView
@@ -1457,7 +1456,6 @@ class DerivedCellView internal constructor(
         get() = columnView[index]
 
     // Note: This is assigned on init to preserve the derived nature of the class
-    // TODO: This should use a ref to ensure snapshot across multiple derived cell views
     val cell: Cell<*> = tableView[Table].let { it[columnView.header][index] }
 
     val cellClasses: CellClasses<DerivedCellView> by lazy {

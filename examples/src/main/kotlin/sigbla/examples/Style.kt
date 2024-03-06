@@ -210,24 +210,6 @@ fun main() {
 
     }
 
-    /*
-    tableView[Header["A"], 1] = {
-        cellHeight = null
-        cellWidth = 100
-        /*
-        // TODO
-        transformer = {
-            destination.cell?.let {
-                // TODO it `=` ..
-                it.table[it] = div {
-                    style = "color: red"
-                    +it.toString()
-                }
-            }
-        }
-         */
-    }
-     */
     tableView[Header["A"], 1][CellHeight] = null
     tableView[Header["A"], 1][CellWidth] = 100
 
@@ -248,12 +230,6 @@ fun main() {
     tableView[CellHeight] = 100L
     val height = tableView[CellHeight] + 100
     tableView[CellHeight] = height
-
-    /*
-    tableView[Header["A"]] = {
-        cellWidth = 100
-    }
-     */
 
     val url = show(tableView)
     println(url)

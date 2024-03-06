@@ -13,7 +13,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class CellsBatchListenerTest {
-    // TODO Ensure we test this subscribe and unsubscribe test below on all onAny functions
     @Test
     fun `subscribe and unsubscribe 1`() {
         val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
@@ -1234,7 +1233,6 @@ class CellsBatchListenerTest {
         assertEquals("Original value A1", t1["A", 1].value)
     }
 
-    // TODO Add more combinations between cells, table, columns, rows, cellrange, etc..
     companion object {
         @JvmStatic
         @AfterClass

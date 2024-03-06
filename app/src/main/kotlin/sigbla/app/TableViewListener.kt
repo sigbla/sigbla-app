@@ -52,7 +52,6 @@ class TableViewEventReceiver<S, T>(
 internal val newViewRefs = Collections.synchronizedMap(WeakHashMap<Sequence<TableViewListenerEvent<*>>, TableView>())
 internal val oldViewRefs = Collections.synchronizedMap(WeakHashMap<Sequence<TableViewListenerEvent<*>>, TableView>())
 
-// TODO See if val Sequence<TableListenerEvent<*, *>>.newView: TableView by lazy { .. } is a better option? Check lifecycle..
 val Sequence<TableViewListenerEvent<*>>.newView: TableView
     get() {
         val view = newViewRefs[this]

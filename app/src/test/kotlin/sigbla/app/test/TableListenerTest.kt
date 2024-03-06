@@ -16,7 +16,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class TableListenerTest {
-    // TODO Ensure we test this subscribe and unsubscribe test below on all onAny functions
     @Test
     fun `subscribe and unsubscribe`() {
         val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]

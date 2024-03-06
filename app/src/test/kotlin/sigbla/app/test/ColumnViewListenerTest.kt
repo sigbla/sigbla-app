@@ -18,7 +18,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class ColumnViewListenerTest {
-    // TODO Ensure we test this subscribe and unsubscribe test below on all onAny functions
     @Test
     fun `subscribe and unsubscribe cellview`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]

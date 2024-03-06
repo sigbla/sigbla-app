@@ -8,13 +8,18 @@ import java.util.concurrent.ThreadLocalRandom
 
 fun main() {
     val table = Table["test"]
+    val tableView = TableView[table]
 
     fun cell(x: Int, y: Int, black: Boolean) {
-        // TODO Change this to use a view transformer when that is available..
-        table[x.toString(), y] = div {
-            if (black) style = "background-color: black; width: 100%; height: 100%"
-            else "background-color: white; width: 100%; height: 100%"
+        tableView[x.toString(), y][CellTransformer] = {
+            val black = this.value == true
+
+            div {
+                if (black) style = "background-color: black; width: 100%; height: 100%"
+                else "background-color: white; width: 100%; height: 100%"
+            }
         }
+        table[x.toString(), y] = black
     }
 
     val maxHeaders = 99
@@ -27,7 +32,6 @@ fun main() {
         }
     }
 
-    val tableView = TableView[table]
     val url = show(tableView)
     println(url)
 
