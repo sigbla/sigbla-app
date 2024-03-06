@@ -266,6 +266,56 @@ The `filter { it.isNumeric }.forEach { it { it * 2 } }` operation might not make
 after you've covered the chapter on cells, so for now, just understand that it will multiply all cells that contain
 a number with two and update the table value with the result.
 
+## Table registry
+
+If you've already created a table with `Table["name"]`, you can obtain a reference to this same table through the
+registry by calling `Table.fromRegistry("name")`. However, if you redo `Table["name"]` a new table is created
+that will replace the old table of the same name in the registry.
+
+Also note that if a table is replaced in the registry, the old table will be closed, something you can check by looking
+at the `closed` property on a table as shown below.
+
+``` kotlin
+val table1 = Table["name"]
+val table2 = Table["name"]
+
+println(table1.closed)
+
+// Output:
+// true
+
+println(table2.closed)
+
+// Output:
+// false
+```
+
+A table that is closed can not be updated, and an `InvalidRefException` will be thrown if you try. You may still read
+existing data from a closed table. If you clone it, as described next, you are able to modify the clone.
+
+Note that you can also remove (and close) a table from the registry with either `remove(table)` or `Table.remove("name")`.
+
+Tables with no name, created with `Table[null]`, are not put on the registry.
+
+If you call `Table.fromRegistry("name")` and there is no table with that name in the registry, an `InvalidTableException`
+will be thrown. If you want to provide a fallback generator that will create the table if not found, you may do so as
+shown below.
+
+``` kotlin
+val table = Table.fromRegistry("name") {
+    // Generate new table
+    Table[null]
+}
+```
+
+Be careful not to generate the new table with a name itself, like `Table["name"]` instead of `Table[null]` within the
+generator, because that will put that table on the registry as well (unless that's what you really wanted). The
+returned table will have the name provided to `fromRegistry`, and now be available within the registry as well.
+
+The returned table when calling `Table.fromRegistry` with a generator, is, if the generator is used, a clone of the
+table returned by the generator. It's therefore possible to have the generator return an existing table without this
+causing any sort of naming conflict or other overlap.
+
 ## Cloning a table
 
 Internally in tables, data is stored in what is known as "persistent data structures". This is not persistence, as in

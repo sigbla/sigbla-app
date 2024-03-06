@@ -383,7 +383,7 @@ any case it helps with debugging and testing UI transformations as you gain acce
 Finally, it's worth noting that cell transformers are currently only supported directly tied to a `CellView`. Extending
 this support to other reference types is being considered.
 
-## Saving and cloning
+## Saving, cloning and registry
 
 Back in the chapter on tables we said tables can be saved and loaded to disk using the `save` and `load` functions. The
 same is the case for a table view, with functions taking the same type of parameters and operating in a similar
@@ -395,6 +395,9 @@ When saving a table, it will use the file extension `sigt`, while views will use
 The table view can also be cloned using the `clone` function. As we'll cover later, you can have listeners on a table
 view, and these listeners are, as with the table, not cloned when cloning a view. The use of cell transformers on the
 other hand is included in the cloned view, sharing the same instance references.
+
+Also, much like on tables, table views also have a registry, available through `TableView.fromRegistry` and related
+functions. The behaviour is comparable to that of tables.
 
 ## Interacting with the UI
 

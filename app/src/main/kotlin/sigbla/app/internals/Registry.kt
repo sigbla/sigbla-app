@@ -16,7 +16,9 @@ internal object Registry {
 
     fun getTable(name: String): Table? = _tables[name]
 
-    fun getTable(name: String, init: (String) -> Table): Table = _tables.computeIfAbsent(name, init)
+    fun getTable(name: String, init: (String) -> Table): Table = _tables.computeIfAbsent(name) {
+        init(it).makeClone(name = it, onRegistry = false)
+    }
 
     val tables: Set<Table> get() = Collections.unmodifiableSet(_tables.values.toSet())
 
@@ -35,7 +37,9 @@ internal object Registry {
 
     fun getView(name: String): TableView? = _views[name]
 
-    fun getView(name: String, init: (String) -> TableView): TableView = _views.computeIfAbsent(name, init)
+    fun getView(name: String, init: (String) -> TableView): TableView = _views.computeIfAbsent(name) {
+        init(it).makeClone(name = it, onRegistry = false)
+    }
 
     val views: Set<TableView> get() = Collections.unmodifiableSet(_views.values.toSet())
 
