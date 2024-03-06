@@ -45,8 +45,11 @@ class TableViewTest {
         }
 
         val t3 = TableView.fromRegistry(t1.name!!) {
-            TableView[t1.name]
+            TableView[null]
         }
+
+        assertTrue(TableView.names.contains(t1.name))
+        assertTrue(TableView.views.contains(t3))
 
         t3["A", 1][CellHeight] = 250
 
@@ -60,9 +63,19 @@ class TableViewTest {
             TableView.fromRegistry(t3.name!!)
         }
 
-        // Because we run tests in parallel, this can't be tested
-        //assertEquals(1, TableView.names.size)
-        //assertEquals(t1.name, TableView.names.first())
+        val t4 = TableView.fromRegistry(t3.name!!) {
+            TableView[t3.name!! + " extra"]
+        }
+
+        assertTrue(TableView.names.contains(t4.name))
+        assertTrue(TableView.views.contains(t4))
+
+        assertTrue(TableView.names.contains(t4.name + " extra"))
+        val t5 = TableView.fromRegistry(t4.name + " extra")
+
+        assertTrue(TableView.views.contains(t5))
+
+        assertTrue(t4.source === t5)
     }
 
     @Test

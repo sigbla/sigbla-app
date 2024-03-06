@@ -45,8 +45,11 @@ class TableTest {
         }
 
         val t3 = Table.fromRegistry(t1.name!!) {
-            Table[t1.name]
+            Table[null]
         }
+
+        assertTrue(Table.names.contains(t1.name))
+        assertTrue(Table.tables.contains(t3))
 
         t3["A", 1] = "A1"
 
@@ -60,9 +63,19 @@ class TableTest {
             Table.fromRegistry(t3.name!!)
         }
 
-        // Because we run tests in parallel, this can't be tested
-        //assertEquals(1, Table.names.size)
-        //assertEquals(t1.name, Table.names.first())
+        val t4 = Table.fromRegistry(t3.name!!) {
+            Table[t3.name!! + " extra"]
+        }
+
+        assertTrue(Table.names.contains(t4.name))
+        assertTrue(Table.tables.contains(t4))
+
+        assertTrue(Table.names.contains(t4.name + " extra"))
+        val t5 = Table.fromRegistry(t4.name + " extra")
+
+        assertTrue(Table.tables.contains(t5))
+
+        assertTrue(t4.source === t5)
     }
 
     @Test
