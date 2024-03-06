@@ -1342,7 +1342,6 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: Header) {
             acc.put(header, ColumnMeta(columnOrder, prenatal))
         }
 
-        // TODO Find a more efficient approach
         val removeColumnCells = ref.columnCells.keys().filter { !newColumnMap.containsKey(it) }
 
         ref.copy(
@@ -1543,7 +1542,6 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: Header) {
             acc.put(header, ColumnMeta(columnOrder, prenatal))
         }
 
-        // TODO Find a more efficient approach
         val removeColumnCells = ref.columnCells.keys().filter { !newColumnMap.containsKey(it) }
 
         ref.copy(
@@ -2014,7 +2012,7 @@ fun rename(column: Column, withName: Header): Unit = move(column to column, with
 
 fun rename(column: Column, vararg withName: String): Unit = move(column to column, *withName)
 
-// TODO rename(table: Table, withName: String)..
+// ---
 
 fun remove(table: Table) = Registry.shutdownTable(table, true)
 

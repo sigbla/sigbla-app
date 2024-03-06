@@ -157,6 +157,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     open val asBigDecimal: BigDecimal? by lazy { asBigDecimal(Precision.mathContext) }
     open fun asBigDecimal(mathContext: MathContext): BigDecimal? = null
     open val asNumber: Number? = null
+    // TODO open val asBoolean: Boolean? = null
 
     operator fun plus(that: Cell<*>): Number {
         return when (val v = that.value) {

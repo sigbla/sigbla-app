@@ -341,11 +341,6 @@ fun main() {
         }
     }
 
-    // TODO Introduce an off function as well?
-    // table.off(listenerRef)
-    // table.off("Name")
-    // table.off(table["A"][1])
-
     on<Any, Number>(table) {
         name = "H"
 
@@ -387,20 +382,8 @@ fun main() {
     on<Any, Any>(table["A"][1]..table["A"][2]) {}
     on<Any, Any>(table["A"][1]) {}
 
-    // TODO Maybe a onColumn for when columns are added/moved/copied?
-
     val tableView = TableView[table]
-    // TODO Maybe it is better if we could do tableView["A"] instead of tableView[table["A"]], and similar..
-//    tableView[table["A"]] = columnStyle {
-//        width = 100
-//    }
-//    tableView[table["A", "B"]] = columnStyle {}
-//
-//    tableView[table[1]] = rowStyle {}
-//
-//    tableView[table["A"][1]] = cellStyle {}
 
-    // WIP
     table["DST", 0] {
         val destination = this
         on<Any, Number>(table) {
@@ -455,32 +438,6 @@ fun main() {
     table[1]["A", "B"] = {
 
     }
-
-    // TODO
-    /*
-    on(table["A"] or table["B", 1] or table["C", 1]..table["C", 10] or etc) calc {
-        source["D", 0] = ...
-        newTable[..] = ...
-        oldTable[..] = ...
-    }
-
-    or rely on Table, Row, Column, CellRange, Cell having Iterable<Cell<*>> implementations
-    on(table["A"], table["B", 1], table["C", 1]..table["C", 10], etc) calc {
-        source["D", 0] = ...
-        newTable[..] = ...
-        oldTable[..] = ...
-    }
-
-    It's probably best to use infix or, as it allows for better type-safty, and we can
-    also introduce infix and:
-
-    or = trigger on any update on either of the defined inputs
-    and = trigger when all defined inputs have updates
-
-    Example:
-
-    on((table["input", 1] or table["input", 2]) and table["button", 1]) ..
-     */
 
     val url = show(tableView)
     println(url)

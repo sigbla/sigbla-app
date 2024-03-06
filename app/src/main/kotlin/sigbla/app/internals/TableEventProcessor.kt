@@ -310,8 +310,6 @@ internal class TableEventProcessor {
                     it.column.header,
                     ref.columns[it.column.header]?.columnOrder ?: it.column.order
                 )
-                // TODO While this will always be a UnitCell on the old table,
-                //  still need to take into account the index relation..?
                 TableListenerEvent(UnitCell(oldColumn, it.index), it) as TableListenerEvent<Any, Any>
             })
         }

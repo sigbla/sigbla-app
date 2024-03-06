@@ -55,7 +55,6 @@ class TableEventReceiver<S, O, N>(
 internal val newTableRefs = Collections.synchronizedMap(WeakHashMap<Sequence<TableListenerEvent<*, *>>, Table>())
 internal val oldTableRefs = Collections.synchronizedMap(WeakHashMap<Sequence<TableListenerEvent<*, *>>, Table>())
 
-// TODO See if val Sequence<TableListenerEvent<*, *>>.newTable: Table by lazy { .. } is a better option? Check lifecycle..
 val Sequence<TableListenerEvent<*, *>>.newTable: Table
     get() {
         val table = newTableRefs[this]
