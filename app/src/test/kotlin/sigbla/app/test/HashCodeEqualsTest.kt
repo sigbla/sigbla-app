@@ -8,11 +8,14 @@ import io.ktor.util.pipeline.*
 import org.junit.AfterClass
 import org.junit.Test
 import sigbla.app.*
+import java.math.BigDecimal
+import java.math.BigInteger
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import kotlin.test.assertFalse
 
 class HashCodeEqualsTest {
     @Test
@@ -204,6 +207,10 @@ class HashCodeEqualsTest {
         val emptyCellTopics1 = tableView1[CellTopics].also { it { listOf("B", "A") } }
         val filledCellTopics1 = tableView1[CellTopics]
 
+        val cellTransformerFunction: Cell<*>.() -> Any? = { this }
+        val emptyCellTransformer1 = tableView1["A", 1][CellTransformer].also { it { cellTransformerFunction } }
+        val filledCellTransformer1 = tableView1["A", 1][CellTransformer]
+
         val emptyResources1 = tableView1[Resources].also { it { listOf("B" to handler1, "A" to handler2) } }
         val filledResources1 = tableView1[Resources]
 
@@ -221,19 +228,118 @@ class HashCodeEqualsTest {
         val emptyCellTopics2 = tableView2[CellTopics].also { it { listOf("B", "A") } }
         val filledCellTopics2 = tableView2[CellTopics]
 
+        val emptyCellTransformer2 = tableView2["A", 1][CellTransformer].also { it { cellTransformerFunction } }
+        val filledCellTransformer2 = tableView2["A", 1][CellTransformer]
+
         val emptyResources2 = tableView2[Resources].also { it { listOf("B" to handler1, "A" to handler2) } }
         val filledResources2 = tableView2[Resources]
 
-        assertEquals(unitCellHeight1, unitCellHeight2)
-        assertEquals(pixelCellHeight1, pixelCellHeight2)
-        assertEquals(unitCellWidth1, unitCellWidth2)
-        assertEquals(pixelCellWidth1, pixelCellWidth2)
-        assertEquals(emptyCellClasses1, emptyCellClasses2)
-        assertEquals(filledCellClasses1, filledCellClasses2)
-        assertEquals(emptyCellTopics1, emptyCellTopics2)
-        assertEquals(filledCellTopics1, filledCellTopics2)
-        assertEquals(emptyResources1, emptyResources2)
-        assertEquals(filledResources1, filledResources2)
+        assertNotEquals(unitCellHeight1, unitCellHeight2)
+        assertEquals(unitCellHeight1.height, unitCellHeight2.height)
+        assertTrue(unitCellHeight1 in unitCellHeight2)
+        assertTrue(unitCellHeight2 in unitCellHeight1)
+
+        assertNotEquals(pixelCellHeight1, pixelCellHeight2)
+        assertEquals(pixelCellHeight1.height, pixelCellHeight2.height)
+        assertTrue(pixelCellHeight1 in pixelCellHeight2)
+        assertTrue(pixelCellHeight2 in pixelCellHeight1)
+
+        assertTrue(null in unitCellHeight1)
+        assertTrue(Unit in unitCellHeight1)
+        assertTrue(100 in pixelCellHeight1)
+        assertTrue(100L in pixelCellHeight2)
+
+        assertNotEquals(unitCellWidth1, unitCellWidth2)
+        assertEquals(unitCellWidth1.width, unitCellWidth2.width)
+        assertTrue(unitCellWidth1 in unitCellWidth2)
+        assertTrue(unitCellWidth2 in unitCellWidth1)
+
+        assertNotEquals(pixelCellWidth1, pixelCellWidth2)
+        assertEquals(pixelCellWidth1.width, pixelCellWidth2.width)
+        assertTrue(pixelCellWidth1 in pixelCellWidth2)
+        assertTrue(pixelCellWidth2 in pixelCellWidth1)
+
+        assertTrue(null in unitCellWidth1)
+        assertTrue(Unit in unitCellWidth1)
+        assertTrue(100 in pixelCellWidth1)
+        assertTrue(100L in pixelCellWidth2)
+
+        assertNotEquals(emptyCellClasses1, emptyCellClasses2)
+        assertEquals(emptyCellClasses1.classes, emptyCellClasses2.classes)
+        assertTrue(emptyCellClasses1 in emptyCellClasses2)
+        assertTrue(emptyCellClasses2 in emptyCellClasses1)
+
+        assertNotEquals(filledCellClasses1, filledCellClasses2)
+        assertEquals(filledCellClasses1.classes, filledCellClasses2.classes)
+        assertTrue(filledCellClasses1 in filledCellClasses2)
+        assertTrue(filledCellClasses2 in filledCellClasses1)
+
+        assertTrue(emptyCellClasses1 in filledCellClasses1)
+        assertTrue(filledCellClasses1 !in emptyCellClasses1)
+
+        assertTrue("A" in filledCellClasses1)
+        assertFalse("A" in emptyCellClasses1)
+        assertFalse("C" in filledCellClasses1)
+        assertTrue(setOf("A", "B") in filledCellClasses1)
+        assertTrue(listOf("A", "B") in filledCellClasses1)
+        assertFalse(setOf("A", "B", "C") in filledCellClasses1)
+        assertFalse(listOf("A", "B", "C") in filledCellClasses1)
+
+        assertNotEquals(emptyCellTopics1, emptyCellTopics2)
+        assertEquals(emptyCellTopics1.topics, emptyCellTopics2.topics)
+        assertTrue(emptyCellTopics1 in emptyCellTopics2)
+        assertTrue(emptyCellTopics2 in emptyCellTopics1)
+
+        assertNotEquals(filledCellTopics1, filledCellTopics2)
+        assertEquals(filledCellTopics1.topics, filledCellTopics2.topics)
+        assertTrue(filledCellTopics1 in filledCellTopics2)
+        assertTrue(filledCellTopics2 in filledCellTopics1)
+
+        assertTrue(emptyCellTopics1 in filledCellTopics1)
+        assertTrue(filledCellTopics1 !in emptyCellTopics1)
+
+        assertTrue("A" in filledCellTopics1)
+        assertFalse("A" in emptyCellTopics1)
+        assertFalse("C" in filledCellTopics1)
+        assertTrue(setOf("A", "B") in filledCellTopics1)
+        assertTrue(listOf("A", "B") in filledCellTopics1)
+        assertFalse(setOf("A", "B", "C") in filledCellTopics1)
+        assertFalse(listOf("A", "B", "C") in filledCellTopics1)
+
+        assertNotEquals(emptyCellTransformer1, emptyCellTransformer2)
+        assertEquals(emptyCellTransformer1.function, emptyCellTransformer2.function)
+        assertTrue(emptyCellTransformer1 in emptyCellTransformer2)
+        assertTrue(emptyCellTransformer2 in emptyCellTransformer1)
+        assertFalse(emptyCellTransformer1 in filledCellTransformer1)
+        assertTrue(null in emptyCellTransformer2)
+        assertTrue(Unit in emptyCellTransformer2)
+
+        assertNotEquals(filledCellTransformer1, filledCellTransformer2)
+        assertEquals(filledCellTransformer1.function, filledCellTransformer2.function)
+        assertTrue(filledCellTransformer1 in filledCellTransformer2)
+        assertTrue(filledCellTransformer2 in filledCellTransformer1)
+        assertTrue(cellTransformerFunction in filledCellTransformer1)
+        assertTrue(filledCellTransformer1.function in filledCellTransformer2)
+
+        assertNotEquals(emptyResources1, emptyResources2)
+        assertEquals(emptyResources1.resources, emptyResources2.resources)
+        assertTrue(emptyResources1 in emptyResources2)
+
+        assertNotEquals(filledResources1, filledResources2)
+        assertEquals(filledResources1.resources, filledResources2.resources)
+
+        assertTrue(emptyResources1 in filledResources1)
+        assertTrue(filledCellClasses1 !in emptyCellClasses1)
+
+        assertFalse("B" to handler1 in emptyResources1)
+        assertTrue("B" to handler1 in filledResources1)
+        assertTrue(listOf("B" to handler1, "A" to handler2) in filledResources2)
+        assertFalse(listOf("B" to handler1, "A" to handler2) in emptyResources2)
+        assertTrue(setOf("B" to handler1) in filledResources2)
+        assertFalse(listOf("A" to handler1, "B" to handler1) in filledResources2)
+        assertTrue(mapOf("B" to handler1, "A" to handler2) in filledResources2)
+        assertTrue(mapOf("B" to handler1) in filledResources2)
+        assertFalse(mapOf("B" to handler1) in emptyResources2)
 
         assertEquals(unitCellHeight1.hashCode(), unitCellHeight2.hashCode())
         assertEquals(pixelCellHeight1.hashCode(), pixelCellHeight2.hashCode())
@@ -243,6 +349,8 @@ class HashCodeEqualsTest {
         assertEquals(filledCellClasses1.hashCode(), filledCellClasses2.hashCode())
         assertEquals(emptyCellTopics1.hashCode(), emptyCellTopics2.hashCode())
         assertEquals(filledCellTopics1.hashCode(), filledCellTopics2.hashCode())
+        assertEquals(emptyCellTransformer1.hashCode(), emptyCellTransformer2.hashCode())
+        assertEquals(filledCellTransformer1.hashCode(), filledCellTransformer2.hashCode())
         assertEquals(emptyResources1.hashCode(), emptyResources2.hashCode())
         assertEquals(filledResources1.hashCode(), filledResources2.hashCode())
     }
@@ -299,6 +407,111 @@ class HashCodeEqualsTest {
 
         tableView[Table] = table
         tableView[Table] = table
+    }
+
+    @Test
+    fun `values in cells`() {
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        table["Unit", 0] = null
+        table["Boolean", 0] = true
+        table["String", 0] = "string"
+        table["Long", 0] = 100L
+        table["Double", 0] = 200.0
+        table["BigInteger", 0] = BigInteger.TEN
+        table["BigDecimal", 0] = BigDecimal.ONE
+
+        val unit = table["Unit", 0]
+        val boolean = table["Boolean", 0]
+        val string = table["String", 0]
+        val long = table["Long", 0]
+        val double = table["Double", 0]
+        val bigint = table["BigInteger", 0]
+        val bigdec = table["BigDecimal", 0]
+
+        // Most of these are false because UnitCells aren't included in iterators
+        assertFalse(unit in table)
+        assertFalse(null in table)
+        assertFalse(unit in table[0])
+        assertFalse(null in table[0])
+        assertFalse(unit in table["Unit"])
+        assertFalse(null in table["Unit"])
+        assertTrue(unit in table["Unit", 0])
+        assertTrue(null in table["Unit", 0])
+
+        assertTrue(boolean in table)
+        assertTrue(true in table)
+        assertTrue(boolean in table[0])
+        assertTrue(true in table[0])
+        assertTrue(boolean in table["Boolean"])
+        assertTrue(true in table["Boolean"])
+        assertTrue(boolean in table["Boolean", 0])
+        assertTrue(true in table["Boolean", 0])
+
+        assertTrue(string in table)
+        assertTrue("string" in table)
+        assertTrue(string in table[0])
+        assertTrue("string" in table[0])
+        assertTrue(string in table["String"])
+        assertTrue("string" in table["String"])
+        assertTrue(string in table["String", 0])
+        assertTrue("string" in table["String", 0])
+
+        assertTrue(long in table)
+        assertTrue(100L in table)
+        assertTrue(long in table[0])
+        assertTrue(100L in table[0])
+        assertTrue(long in table["Long"])
+        assertTrue(100L in table["Long"])
+        assertTrue(long in table["Long", 0])
+        assertTrue(100L in table["Long", 0])
+
+        assertTrue(100 in table)
+        assertTrue(100 in table[0])
+        assertTrue(100 in table["Long"])
+        assertTrue(100 in table["Long", 0])
+
+        assertTrue(double in table)
+        assertTrue(200.0 in table)
+        assertTrue(double in table[0])
+        assertTrue(200.0 in table[0])
+        assertTrue(double in table["Double"])
+        assertTrue(200.0 in table["Double"])
+        assertTrue(double in table["Double", 0])
+        assertTrue(200.0 in table["Double", 0])
+
+        assertTrue(200F in table)
+        assertTrue(200F in table[0])
+        assertTrue(200F in table["Double"])
+        assertTrue(200F in table["Double", 0])
+
+        assertTrue(bigint in table)
+        assertTrue(BigInteger.TEN in table)
+        assertTrue(bigint in table[0])
+        assertTrue(BigInteger.TEN in table[0])
+        assertTrue(bigint in table["BigInteger"])
+        assertTrue(BigInteger.TEN in table["BigInteger"])
+        assertTrue(bigint in table["BigInteger", 0])
+        assertTrue(BigInteger.TEN in table["BigInteger", 0])
+
+        assertTrue(10 in table)
+        assertTrue(10 in table[0])
+        assertTrue(10 in table["BigInteger"])
+        assertTrue(10 in table["BigInteger", 0])
+
+        assertTrue(bigdec in table)
+        assertTrue(BigDecimal.ONE in table)
+        assertTrue(bigdec in table[0])
+        assertTrue(BigDecimal.ONE in table[0])
+        assertTrue(bigdec in table["BigDecimal"])
+        assertTrue(BigDecimal.ONE in table["BigDecimal"])
+        assertTrue(bigdec in table["BigDecimal", 0])
+        assertTrue(BigDecimal.ONE in table["BigDecimal", 0])
+
+        assertTrue(1 in table)
+        assertTrue(1 in table[0])
+        assertTrue(1 in table["BigDecimal"])
+        assertTrue(1 in table["BigDecimal", 0])
     }
 
     companion object {

@@ -237,6 +237,10 @@ abstract class Column internal constructor(
         return ColumnRange(this, other)
     }
 
+    operator fun contains(that: Any?): Boolean {
+        return iterator().asSequence().any { that in it }
+    }
+
     override fun compareTo(other: Column): Int {
         return order.compareTo(other.order)
     }

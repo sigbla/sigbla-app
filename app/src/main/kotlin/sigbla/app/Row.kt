@@ -73,6 +73,10 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
         return RowRange(this, other)
     }
 
+    operator fun contains(that: Any?): Boolean {
+        return iterator().asSequence().any { that in it }
+    }
+
     override fun iterator(): Iterator<Cell<*>> {
         val ref = table.tableRef.get()
         val columnCellMap = ref.columnCells

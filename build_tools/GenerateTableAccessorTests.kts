@@ -23,7 +23,7 @@
 // Values:
 // Cell, String, Int, Long, Float, Double, BigInteger, BigDecimal, Number
 
-fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell") {
+fun generateForX(type: String, cellGenerator: String, cellValue: String) {
     println("@Test")
     println("fun `$type accessors`() {")
 
@@ -465,7 +465,7 @@ fun generateForCell() {
             it["A", 0] = "A0"
             it["A", 0]
         }
-    """.trimIndent())
+    """.trimIndent(), "cell.value")
 }
 
 fun generateForString() {

@@ -107,7 +107,7 @@ class TableStorageTest {
         load(tmpFile to table2) {
             val table1Column = table1Columns.next()
             assertEquals(table1Column.header, header)
-            assertEquals(table1Column[0], this[0])
+            assertEquals(table1Column[0].value, this[0].value)
             return@load this
         }
 
@@ -117,7 +117,7 @@ class TableStorageTest {
         val it2 = table2.iterator()
 
         while (it1.hasNext() && it2.hasNext()) {
-            assertEquals(it1.next(), it2.next())
+            assertEquals(it1.next().value, it2.next().value)
         }
 
         assertFalse(it1.hasNext())
@@ -156,7 +156,7 @@ class TableStorageTest {
         load(tmpFile to table2) {
             val table1Column = table1Columns.next()
             assertEquals(table1Column.header, header)
-            assertEquals(table1Column[0], this[0])
+            assertEquals(table1Column[0].value, this[0].value)
             return@load this
         }
 
@@ -166,7 +166,7 @@ class TableStorageTest {
         val it2 = table2.iterator()
 
         while (it1.hasNext() && it2.hasNext()) {
-            assertEquals(it1.next(), it2.next())
+            assertEquals(it1.next().value, it2.next().value)
         }
 
         assertFalse(it1.hasNext())
@@ -211,7 +211,7 @@ class TableStorageTest {
         load(table3) {
             val table2Column = table2Columns.next()
             assertEquals(table2Column.header, header)
-            assertEquals(table2Column[0], this[0])
+            assertEquals(table2Column[0].value, this[0].value)
             return@load this
         }
 
@@ -224,7 +224,7 @@ class TableStorageTest {
         val it2 = table3.iterator()
 
         while (it1.hasNext() && it2.hasNext()) {
-            assertEquals(it1.next(), it2.next())
+            assertEquals(it1.next().value, it2.next().value)
         }
 
         assertFalse(it1.hasNext())
@@ -267,7 +267,7 @@ class TableStorageTest {
         load(name to table3) {
             val table2Column = table2Columns.next()
             assertEquals(table2Column.header, header)
-            assertEquals(table2Column[0], this[0])
+            assertEquals(table2Column[0].value, this[0].value)
             return@load this
         }
 
@@ -280,7 +280,7 @@ class TableStorageTest {
         val it2 = table3.iterator()
 
         while (it1.hasNext() && it2.hasNext()) {
-            assertEquals(it1.next(), it2.next())
+            assertEquals(it1.next().value, it2.next().value)
         }
 
         assertFalse(it1.hasNext())
@@ -407,7 +407,7 @@ class TableStorageTest {
                 val c2 = it2.next()
                 assertEquals(c1.column.header, c2.column.header)
                 assertEquals(c1.index, c2.index)
-                assertEquals(c1, c2)
+                assertEquals(c1.value, c2.value)
             }
 
             assertFalse(it1.hasNext())
