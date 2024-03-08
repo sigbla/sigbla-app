@@ -317,18 +317,17 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
             // Cell case
             other is Cell<*> -> compareTo(other.value)
 
-            // Null cases (TODO value is never null?)
-            other == null -> if (value == null) 0 else 1
-            value == null -> -1
-
-            // Unit cases
+            // Null/Unit cases
+            other == null -> if (value == Unit) 0 else 1
             other == Unit -> if (value == Unit) 0 else 1
             value == Unit -> -1
 
             // Number case
             other is Number -> if (value is Number) {
                 when (val v = this - other) {
+                    is Int -> v.compareTo(0)
                     is Long -> v.compareTo(0L)
+                    is Float -> v.compareTo(0F)
                     is Double -> v.compareTo(0.0)
                     is BigInteger -> v.compareTo(BigInteger.ZERO)
                     is BigDecimal -> v.compareTo(BigDecimal.ZERO)
@@ -345,7 +344,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
         return CellRange(this, that)
     }
 
-    operator fun contains(that: Any): Boolean {
+    operator fun contains(that: Any?): Boolean {
         return compareTo(that) == 0
     }
 
@@ -391,12 +390,22 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
 
     override fun iterator(): Iterator<Cell<*>> = if (this is UnitCell) emptyList<Cell<*>>().iterator() else listOf(this).iterator()
 
-    // TODO Add functionality to make this symmetric? Add to BasicMath?
-    override fun equals(other: Any?) = this.compareTo(other) == 0
+    override fun toString() = this.value.toString()
 
     override fun hashCode() = Objects.hash(this.value)
 
-    override fun toString() = this.value.toString()
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Cell<*>
+
+        if (column != other.column) return false
+        if (index != other.index) return false
+        if (value != other.value) return false
+
+        return true
+    }
 }
 
 class UnitCell internal constructor(column: Column, index: Long) : Cell<Unit>(column, index) {
@@ -709,6 +718,19 @@ class BigDecimalCell internal constructor(column: Column, index: Long, override 
 
 class WebContent internal constructor(val content: String) {
     override fun toString() = content
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as WebContent
+
+        return content == other.content
+    }
+
+    override fun hashCode(): Int {
+        return content.hashCode()
+    }
 }
 
 internal fun String.toWebContent() = WebContent(this)

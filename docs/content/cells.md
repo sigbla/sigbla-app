@@ -124,7 +124,7 @@ row.iterator()
 cell.iterator()
 ```
 
-Note that `UnitCell` does however show up in event subscriptions, something covered in the next chapter.
+Note that `UnitCell` does however show up in event subscriptions, something covered in the chapter on table subscriptions.
 
 Often you wouldn't bother calling the `iterator()` function, and instead just use other sequence related functions
 such as `filter`, `map`, and `forEach` directly. But it is worth knowing that iterators return stable snapshots of the
@@ -159,8 +159,12 @@ print(table)
 
 ## Equality and value comparisons
 
-Cells are compared based on the value they contain. It doesn't matter if they belong to different tables, columns or
-rows. If the value in one cell is equal to a value in another cell, these cells are considered equal.
+Cells, when using `==` to compare them, are equal to other cells if they belong to the same table, column, index and
+hold the same value. But you can also compare cells against their value by using the `in` operator.
+
+When using the `in` operator, cells are compared based on the value they contain. It doesn't matter if they belong to
+different tables, columns or rows. If the value in one cell rank equal to a value in another cell, these cells are
+considered equal when using the `in` operator.
 
 ``` kotlin
 val t1 = Table[null]
@@ -173,15 +177,19 @@ fun assert(value: Boolean) {
 t1["A", 1] = BigInteger.TEN
 t2["B", 2] = BigInteger.TEN
 
-assert(t1["A", 1] == t2["B", 2])
+assert(t1["A", 1] != t2["B", 2])
+assert(t1["A", 1] in t2["B", 2])
+assert(BigInteger.TEN in t2["B", 2])
 
 assert(t1["A", 1].table != t2["B", 2].table)
 assert(t1["A", 1].index != t2["B", 2].index)
 assert(t1["A", 1].column.header != t2["B", 2].column.header)
 ```
 
-To fully understand equality of cells, we first need to understand how one cell compares to another, so let's start
-with an example:
+You see above we can also compare one cell's value against another cell with `in` when doing `t1["A", 1] in t2["B", 2]`.
+
+To fully understand the `in` equality of cells, we first need to understand how one cell ranks against another, so let's
+start with an example:
 
 ``` kotlin
 val table = Table[null]
@@ -233,11 +241,11 @@ sorted list.
 **Rule 3:** A numeric cell, when compared against another numeric cell, is ranked according to the difference between the
 two values they represent. Hence, our BigInteger cell with a value of zero is the first numeric cell in our sorted list,
 followed by the BigDecimal cell with a value of 10, and so on, from low to high. Two cells with no difference are, like
-when we did the equals check in the earlier example, considered equal.
+when we did the `in` check in the earlier example, considered equal.
 
-**Rule 4:** If we have multiple cells that aren't numeric (and not a unit cell), and because of rule 2 rank the highest, they
-are sorted among themselves by doing a string comparison. Strings are compared like all other strings are in Kotlin, and
-for cell types like `WebCell`, we obtain the string with a `toString` function call.
+**Rule 4:** If we have multiple cells that aren't numeric (and not a unit cell), and because of rule 2 rank the highest,
+they are sorted among themselves by doing a string comparison. Strings are compared like all other strings are in Kotlin,
+and for cell types like `WebCell`, we obtain the string with a `toString` function call.
 
 We can see from rule 3 that we don't have any type preference between numbers. It's simply down to the numeric difference.
 
@@ -246,6 +254,77 @@ which would follow the same ruleset, for example `table["Types", 5] <= 10` which
 
 If you wanted to compare the values using other rules, you can obtain the underlying value on the cell directly from
 `cell.value`.
+
+Because of these rules, we are able to give ourselves some flexibility when checking if a value is `in` a cell without
+needing to know the exact numerical type. Say we want to check if a cell contains the numeric value of 10, without
+needing to be concerned if this is a `Long`, `BigInteger`, or `BigDecimal`:
+
+``` kotlin
+val table = Table[null]
+
+table["A", 1] = BigInteger.TEN
+
+println("Long 10 in cell: ${10L in table["A", 1]}")
+println("BigInteger 10 in cell: ${BigInteger.TEN in table["A", 1]}")
+println("BigDecimal 10 in cell: ${BigDecimal.TEN in table["A", 1]}")
+
+// Output:
+// Long 10 in cell: true
+// BigInteger 10 in cell: true
+// BigDecimal 10 in cell: true
+
+println("Long 10 == cell.value: ${10L == table["A", 1].value}")
+println("BigInteger 10 == cell.value: ${BigInteger.TEN == table["A", 1].value}")
+println("BigDecimal 10 == cell.value: ${BigDecimal.TEN == table["A", 1].value}")
+
+// Output:
+// Long 10 == cell.value: false
+// BigInteger 10 == cell.value: true
+// BigDecimal 10 == cell.value: false
+```
+
+## Checking if values are in a table, column or row
+
+Much like we can use `in` on a cell to check if a value is held by the cell according to the above rules, we can also
+use `in` like this on a table, column or row, so check if they hold cells that contain this value:
+
+``` kotlin
+val table = Table[null]
+
+table["A", 0] = BigInteger.TEN
+table["B", 1] = BigDecimal.ONE
+table["C", 2] = "some string"
+
+println("10 in table: ${10 in table}")
+println("1 in row: ${1 in table[1]}")
+println("string in column: ${"some string" in table["C"]}")
+
+// Output:
+// 10 in table: true
+// 1 in row: true
+// string in column: true
+```
+
+Under the hood, what this does is iterate over the contained cells, and checking if they contain the value with `in` on
+those particular cells. One thing worth noting is that, because iterators don't include empty cells, we can't check if
+a cell is empty that way. We can however check if a cell is empty with `in` if we do so directly against the empty cell:
+
+``` kotlin
+val table = Table[null]
+
+val emptyCell = table["A", 0]
+
+println(null in emptyCell)
+println(Unit in emptyCell)
+println(emptyCell is UnitCell)
+
+// Output:
+// true
+// true
+// true
+```
+
+You'll notice that both `Unit` and `null` can be used with `in` against the empty `UnitCell`.
 
 ## Immutability
 

@@ -983,7 +983,9 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
 
     operator fun contains(column: Column): Boolean = contains(column.header)
 
-    fun contains(vararg header: String): Boolean = contains(Header(*header))
+    operator fun contains(that: Any?) = iterator().asSequence().any { that in it }
+
+    // -----
 
     override fun iterator(): Iterator<Cell<*>> {
         val ref = tableRef.get()

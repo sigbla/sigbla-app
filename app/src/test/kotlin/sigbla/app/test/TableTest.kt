@@ -748,12 +748,12 @@ class TableTest {
         t["C", 0]
         t["D", 0]
 
-        assertTrue(t.contains("A"))
+        assertTrue(Header["A"] in t)
         assertTrue(Header["B"] in t)
         assertTrue(t["B"] in t)
-        assertFalse(t.contains("C"))
-        assertFalse(t.contains(Header["D"]))
-        assertFalse(t.contains(t["D"]))
+        assertTrue(Header["C"] !in t)
+        assertFalse(Header["D"] in t)
+        assertFalse(t["D"] in t)
 
         val headers2 = t.headers
         val columns2 = t.columns
@@ -766,10 +766,10 @@ class TableTest {
         t["C", 0] = "C0"
         t["D", 0] = "D0"
 
-        assertTrue(t.contains("A"))
-        assertTrue(t.contains(Header["B"]))
-        assertTrue(t.contains("C"))
-        assertTrue(t.contains(Header["D"]))
+        assertTrue(Header["A"] in t)
+        assertTrue(Header["B"] in t)
+        assertTrue(Header["C"] in t)
+        assertTrue(Header["D"] in t)
 
         val headers3 = t.headers
         val columns3 = t.columns
@@ -824,10 +824,10 @@ class TableTest {
         t["C", 0]
         t["D", 0]
 
-        assertTrue(t.contains("A"))
+        assertTrue(Header["A"] in t)
         assertTrue(Header["B"] in t)
-        assertFalse(t.contains("C"))
-        assertFalse(t.contains(Header["D"]))
+        assertTrue(Header["C"] !in t)
+        assertFalse(Header["D"] in t)
 
         val headers2 = t[0].headers
         val columns2 = t[0].columns
@@ -840,10 +840,10 @@ class TableTest {
         t["C", 0] = "C0"
         t["D", 0] = "D0"
 
-        assertTrue(t.contains("A"))
-        assertTrue(t.contains(Header["B"]))
-        assertTrue(t.contains("C"))
-        assertTrue(t.contains(Header["D"]))
+        assertTrue(Header["A"] in t)
+        assertTrue(Header["B"] in t)
+        assertTrue(Header["C"] in t)
+        assertFalse(Header["D"] !in t)
 
         val headers3 = t[0].headers
         val columns3 = t[0].columns
@@ -1086,63 +1086,63 @@ class TableTest {
         val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A"][1L] = BigDecimal.ONE
-        assertEquals(t["A"][1L], t["A"][2L] { BigDecimal.ONE })
+        assertEquals(t["A"][1L].value, t["A"][2L] { BigDecimal.ONE })
 
-        assertEquals(t["A", 1L], t["A", 2L])
+        assertEquals(t["A", 1L].value, t["A", 2L].value)
 
         t["A"][1L] = BigInteger.TWO
-        assertEquals(t["A"][1L], t["A"][2L] { BigInteger.TWO })
+        assertEquals(t["A"][1L].value, t["A"][2L] { BigInteger.TWO })
 
-        assertEquals(t["A", 1L], t["A", 2L])
+        assertEquals(t["A", 1L].value, t["A", 2L].value)
 
         t["A"][1L] = 3.0
-        assertEquals(t["A"][1L], t["A"][2L] { 3.0 })
+        assertEquals(t["A"][1L].value, t["A"][2L] { 3.0 })
 
-        assertEquals(t["A", 1L], t["A", 2L])
+        assertEquals(t["A", 1L].value, t["A", 2L].value)
 
         t["A"][1L] = 4L
-        assertEquals(t["A"][1L], t["A"][2L] { 4L })
+        assertEquals(t["A"][1L].value, t["A"][2L] { 4L })
 
-        assertEquals(t["A", 1L], t["A", 2L])
+        assertEquals(t["A", 1L].value, t["A", 2L].value)
 
         t["A"][1L] = 5 as Number
-        assertEquals(t["A"][1L], t["A"][2L] { 5 as Number })
+        assertEquals(t["A"][1L].value, t["A"][2L] { 5L as Number })
 
-        assertEquals(t["A", 1L], t["A", 2L])
+        assertEquals(t["A", 1L].value, t["A", 2L].value)
 
         t["A"][1L] = "6"
-        assertEquals(t["A"][1L], t["A"][2L] { "6" })
+        assertEquals(t["A"][1L].value, t["A"][2L] { "6" })
 
-        assertEquals(t["A", 1L], t["A", 2L])
+        assertEquals(t["A", 1L].value, t["A", 2L].value)
 
         t["B", 3L] = "Cell"
         t["A"][1L] = t["B", 3L]
-        assertEquals(t["A"][1L], t["A"][2L] { t["B", 3L] })
+        assertEquals(t["A"][1L].value, (t["A"][2L] { t["B", 3L] } as Cell<*>).value)
 
-        assertEquals(t["A", 1L], t["A", 2L])
+        assertEquals(t["A", 1L].value, t["A", 2L].value)
 
         assertEquals(Unit, t["A"][2L] { Unit })
 
-        assertEquals(t["A", 1L], t["A", 2L])
+        assertEquals(t["A", 1L].value, t["A", 2L].value)
 
         t["A"][1L] = null
         assertNull(t["A"][2L] { null })
 
-        assertEquals(t["A", 1L], t["A", 2L])
+        assertEquals(t["A", 1L].value, t["A", 2L].value)
 
         for (i in 1..10) t["B", i] = i
 
         t["A"][1L] = sum(t["B",1]..t["B", 10])
         t["A"][2L] { sum(t["B",1]..t["B", 10]) }
 
-        assertEquals(t["A", 1L], t["A", 2L])
+        assertEquals(t["A", 1L].value, t["A", 2L].value)
 
         assertEquals(55L, t["A", 2L].value)
 
         t["B", 1] = 2
 
         assertEquals(56L, t["A", 2L].value)
-        assertEquals(t["A", 1L], t["A", 2L])
+        assertEquals(t["A", 1L].value, t["A", 2L].value)
     }
 
     @Test
@@ -1199,7 +1199,7 @@ class TableTest {
         assertTrue(it2.hasNext())
 
         while (it1.hasNext() && it2.hasNext()) {
-            assertEquals(it1.next(), it2.next())
+            assertEquals(it1.next().value, it2.next().value)
         }
 
         assertFalse(it1.hasNext())
@@ -1248,7 +1248,7 @@ class TableTest {
         assertTrue(it2.hasNext())
 
         while (it1.hasNext() && it2.hasNext()) {
-            assertEquals(it1.next(), it2.next())
+            assertEquals(it1.next().value, it2.next().value)
         }
 
         assertFalse(it1.hasNext())
@@ -1874,7 +1874,7 @@ class TableTest {
 
         assertEquals(9, events.size)
         assertEquals(9, events.count { it.newValue.column.header == it.oldValue.column.header })
-        assertEquals(9, events.count { it.newValue == it.oldValue })
+        assertEquals(9, events.count { it.newValue.value == it.oldValue.value })
         assertEquals(3, events.count { it.newValue.column.header[0] == "A" })
         assertEquals(3, events.count { it.newValue.column.header[0] == "B" })
         assertEquals(3, events.count { it.newValue.column.header[0] == "C" })
@@ -1888,7 +1888,7 @@ class TableTest {
         assertEquals(listOf("A", "B", "C"), t.headers.map { it[0] }.toList())
         assertEquals(9, events.size)
         assertEquals(9, events.count { it.newValue.column.header == it.oldValue.column.header })
-        assertEquals(9, events.count { it.newValue == it.oldValue })
+        assertEquals(9, events.count { it.newValue.value == it.oldValue.value })
         assertEquals(3, events.count { it.newValue.column.header[0] == "A" })
         assertEquals(3, events.count { it.newValue.column.header[0] == "B" })
         assertEquals(3, events.count { it.newValue.column.header[0] == "C" })
@@ -1902,7 +1902,7 @@ class TableTest {
         assertEquals(listOf("C", "B", "A"), t.headers.map { it[0] }.toList())
         assertEquals(9, events.size)
         assertEquals(9, events.count { it.newValue.column.header == it.oldValue.column.header })
-        assertEquals(9, events.count { it.newValue == it.oldValue })
+        assertEquals(9, events.count { it.newValue.value == it.oldValue.value })
         assertEquals(3, events.count { it.newValue.column.header[0] == "A" })
         assertEquals(3, events.count { it.newValue.column.header[0] == "B" })
         assertEquals(3, events.count { it.newValue.column.header[0] == "C" })
@@ -1958,7 +1958,7 @@ class TableTest {
         assertEquals(listOf("A", "B", "C"), t.headers.map { it[0] }.toList())
         assertEquals(6, events.size)
         assertEquals(6, events.count { it.newValue.column.header == it.oldValue.column.header })
-        assertEquals(6, events.count { it.newValue != it.oldValue })
+        assertEquals(6, events.count { it.newValue.value != it.oldValue.value })
         assertEquals(2, events.count { it.newValue.column.header[0] == "A" })
         assertEquals(2, events.count { it.newValue.column.header[0] == "B" })
         assertEquals(2, events.count { it.newValue.column.header[0] == "C" })
@@ -1972,7 +1972,7 @@ class TableTest {
         assertEquals(listOf("A", "B", "C"), t.headers.map { it[0] }.toList())
         assertEquals(6, events.size)
         assertEquals(6, events.count { it.newValue.column.header == it.oldValue.column.header })
-        assertEquals(6, events.count { it.newValue != it.oldValue })
+        assertEquals(6, events.count { it.newValue.value != it.oldValue.value })
         assertEquals(2, events.count { it.newValue.column.header[0] == "A" })
         assertEquals(2, events.count { it.newValue.column.header[0] == "B" })
         assertEquals(2, events.count { it.newValue.column.header[0] == "C" })
@@ -1985,7 +1985,7 @@ class TableTest {
         assertEquals(listOf("A", "B", "C"), t.headers.map { it[0] }.toList())
         assertEquals(9, events.size)
         assertEquals(9, events.count { it.newValue.column.header == it.oldValue.column.header })
-        assertEquals(6, events.count { it.newValue != it.oldValue })
+        assertEquals(6, events.count { it.newValue.value != it.oldValue.value })
         assertEquals(3, events.count { it.newValue.column.header[0] == "A" })
         assertEquals(3, events.count { it.newValue.column.header[0] == "B" })
         assertEquals(3, events.count { it.newValue.column.header[0] == "C" })
@@ -2179,6 +2179,8 @@ class TableTest {
 
                 if (value is Int)
                     assertEquals(value.toLong(), t["A"][0].value)
+                else if (value is Cell<*>)
+                    assertEquals(value.value, t["A"][0].value)
                 else
                     assertEquals(value, t["A"][0].value)
             }
@@ -2251,6 +2253,8 @@ class TableTest {
 
                 if (value is Int)
                     assertEquals(value.toLong(), t["A"][0].value)
+                else if (value is Cell<*>)
+                    assertEquals(value.value, t["A"][0].value)
                 else
                     assertEquals(value, t["A"][0].value)
             }
@@ -2323,6 +2327,8 @@ class TableTest {
 
                 if (value is Int)
                     assertEquals(value.toLong(), t["A"][0].value)
+                else if (value is Cell<*>)
+                    assertEquals(value.value, t["A"][0].value)
                 else
                     assertEquals(value, t["A"][0].value)
             }

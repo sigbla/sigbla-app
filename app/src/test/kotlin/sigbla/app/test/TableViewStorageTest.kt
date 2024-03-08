@@ -147,10 +147,10 @@ class TableViewStorageTest {
 
         load(tmpFile to tableView2)
 
-        assertEquals(tableView1[CellHeight], tableView2[CellHeight])
-        assertEquals(tableView1[CellWidth], tableView2[CellWidth])
-        assertEquals(tableView1[CellClasses], tableView2[CellClasses])
-        assertEquals(tableView1[CellTopics], tableView2[CellTopics])
+        assertEquals(tableView1[CellHeight].height, tableView2[CellHeight].height)
+        assertEquals(tableView1[CellWidth].width, tableView2[CellWidth].width)
+        assertEquals(tableView1[CellClasses].classes, tableView2[CellClasses].classes)
+        assertEquals(tableView1[CellTopics].topics, tableView2[CellTopics].topics)
 
         val it1 = tableView1.columnViews.iterator()
         val it2 = tableView2.columnViews.iterator()
@@ -159,9 +159,9 @@ class TableViewStorageTest {
             val v1 = it1.next()
             val v2 = it2.next()
 
-            assertEquals(v1[CellWidth], v2[CellWidth])
-            assertEquals(v1[CellClasses], v2[CellClasses])
-            assertEquals(v1[CellTopics], v2[CellTopics])
+            assertEquals(v1[CellWidth].width, v2[CellWidth].width)
+            assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
+            assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
         }
 
         assertFalse(it1.hasNext())
@@ -174,9 +174,9 @@ class TableViewStorageTest {
             val v1 = it3.next()
             val v2 = it4.next()
 
-            assertEquals(v1[CellHeight], v2[CellHeight])
-            assertEquals(v1[CellClasses], v2[CellClasses])
-            assertEquals(v1[CellTopics], v2[CellTopics])
+            assertEquals(v1[CellHeight].height, v2[CellHeight].height)
+            assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
+            assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
         }
 
         assertFalse(it3.hasNext())
@@ -189,10 +189,10 @@ class TableViewStorageTest {
             val v1 = it5.next()
             val v2 = it6.next()
 
-            assertEquals(v1[CellHeight], v2[CellHeight])
-            assertEquals(v1[CellWidth], v2[CellWidth])
-            assertEquals(v1[CellClasses], v2[CellClasses])
-            assertEquals(v1[CellTopics], v2[CellTopics])
+            assertEquals(v1[CellHeight].height, v2[CellHeight].height)
+            assertEquals(v1[CellWidth].width, v2[CellWidth].width)
+            assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
+            assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
         }
 
         assertFalse(it5.hasNext())
@@ -232,10 +232,10 @@ class TableViewStorageTest {
 
         load(tmpFile to tableView2)
 
-        assertEquals(tableView1[CellHeight], tableView2[CellHeight])
-        assertEquals(tableView1[CellWidth], tableView2[CellWidth])
-        assertEquals(tableView1[CellClasses], tableView2[CellClasses])
-        assertEquals(tableView1[CellTopics], tableView2[CellTopics])
+        assertEquals(tableView1[CellHeight].height, tableView2[CellHeight].height)
+        assertEquals(tableView1[CellWidth].width, tableView2[CellWidth].width)
+        assertEquals(tableView1[CellClasses].classes, tableView2[CellClasses].classes)
+        assertEquals(tableView1[CellTopics].topics, tableView2[CellTopics].topics)
 
         val it1 = tableView1.columnViews.iterator()
         val it2 = tableView2.columnViews.iterator()
@@ -244,9 +244,9 @@ class TableViewStorageTest {
             val v1 = it1.next()
             val v2 = it2.next()
 
-            assertEquals(v1[CellWidth], v2[CellWidth])
-            assertEquals(v1[CellClasses], v2[CellClasses])
-            assertEquals(v1[CellTopics], v2[CellTopics])
+            assertEquals(v1[CellWidth].width, v2[CellWidth].width)
+            assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
+            assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
         }
 
         assertFalse(it1.hasNext())
@@ -259,9 +259,9 @@ class TableViewStorageTest {
             val v1 = it3.next()
             val v2 = it4.next()
 
-            assertEquals(v1[CellHeight], v2[CellHeight])
-            assertEquals(v1[CellClasses], v2[CellClasses])
-            assertEquals(v1[CellTopics], v2[CellTopics])
+            assertEquals(v1[CellHeight].height, v2[CellHeight].height)
+            assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
+            assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
         }
 
         assertFalse(it3.hasNext())
@@ -274,10 +274,10 @@ class TableViewStorageTest {
             val v1 = it5.next()
             val v2 = it6.next()
 
-            assertEquals(v1[CellHeight], v2[CellHeight])
-            assertEquals(v1[CellWidth], v2[CellWidth])
-            assertEquals(v1[CellClasses], v2[CellClasses])
-            assertEquals(v1[CellTopics], v2[CellTopics])
+            assertEquals(v1[CellHeight].height, v2[CellHeight].height)
+            assertEquals(v1[CellWidth].width, v2[CellWidth].width)
+            assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
+            assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
         }
 
         assertFalse(it5.hasNext())
@@ -326,10 +326,10 @@ class TableViewStorageTest {
         assertTrue(file.exists())
         file.delete()
 
-        assertEquals(tableView2[CellHeight], tableView3[CellHeight])
-        assertEquals(tableView2[CellWidth], tableView3[CellWidth])
-        assertEquals(tableView2[CellClasses], tableView3[CellClasses])
-        assertEquals(tableView2[CellTopics], tableView3[CellTopics])
+        assertEquals(tableView2[CellHeight].height, tableView3[CellHeight].height)
+        assertEquals(tableView2[CellWidth].width, tableView3[CellWidth].width)
+        assertEquals(tableView2[CellClasses].classes, tableView3[CellClasses].classes)
+        assertEquals(tableView2[CellTopics].topics, tableView3[CellTopics].topics)
 
         val it1 = tableView2.columnViews.iterator()
         val it2 = tableView3.columnViews.iterator()
@@ -338,9 +338,9 @@ class TableViewStorageTest {
             val v1 = it1.next()
             val v2 = it2.next()
 
-            assertEquals(v1[CellWidth], v2[CellWidth])
-            assertEquals(v1[CellClasses], v2[CellClasses])
-            assertEquals(v1[CellTopics], v2[CellTopics])
+            assertEquals(v1[CellWidth].width, v2[CellWidth].width)
+            assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
+            assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
         }
 
         assertFalse(it1.hasNext())
@@ -353,9 +353,9 @@ class TableViewStorageTest {
             val v1 = it3.next()
             val v2 = it4.next()
 
-            assertEquals(v1[CellHeight], v2[CellHeight])
-            assertEquals(v1[CellClasses], v2[CellClasses])
-            assertEquals(v1[CellTopics], v2[CellTopics])
+            assertEquals(v1[CellHeight].height, v2[CellHeight].height)
+            assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
+            assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
         }
 
         assertFalse(it3.hasNext())
@@ -368,10 +368,10 @@ class TableViewStorageTest {
             val v1 = it5.next()
             val v2 = it6.next()
 
-            assertEquals(v1[CellHeight], v2[CellHeight])
-            assertEquals(v1[CellWidth], v2[CellWidth])
-            assertEquals(v1[CellClasses], v2[CellClasses])
-            assertEquals(v1[CellTopics], v2[CellTopics])
+            assertEquals(v1[CellHeight].height, v2[CellHeight].height)
+            assertEquals(v1[CellWidth].width, v2[CellWidth].width)
+            assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
+            assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
         }
 
         assertFalse(it5.hasNext())
@@ -418,10 +418,10 @@ class TableViewStorageTest {
         assertTrue(file.exists())
         file.delete()
 
-        assertEquals(tableView2[CellHeight], tableView3[CellHeight])
-        assertEquals(tableView2[CellWidth], tableView3[CellWidth])
-        assertEquals(tableView2[CellClasses], tableView3[CellClasses])
-        assertEquals(tableView2[CellTopics], tableView3[CellTopics])
+        assertEquals(tableView2[CellHeight].height, tableView3[CellHeight].height)
+        assertEquals(tableView2[CellWidth].width, tableView3[CellWidth].width)
+        assertEquals(tableView2[CellClasses].classes, tableView3[CellClasses].classes)
+        assertEquals(tableView2[CellTopics].topics, tableView3[CellTopics].topics)
 
         val it1 = tableView2.columnViews.iterator()
         val it2 = tableView3.columnViews.iterator()
@@ -430,9 +430,9 @@ class TableViewStorageTest {
             val v1 = it1.next()
             val v2 = it2.next()
 
-            assertEquals(v1[CellWidth], v2[CellWidth])
-            assertEquals(v1[CellClasses], v2[CellClasses])
-            assertEquals(v1[CellTopics], v2[CellTopics])
+            assertEquals(v1[CellWidth].width, v2[CellWidth].width)
+            assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
+            assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
         }
 
         assertFalse(it1.hasNext())
@@ -445,9 +445,9 @@ class TableViewStorageTest {
             val v1 = it3.next()
             val v2 = it4.next()
 
-            assertEquals(v1[CellHeight], v2[CellHeight])
-            assertEquals(v1[CellClasses], v2[CellClasses])
-            assertEquals(v1[CellTopics], v2[CellTopics])
+            assertEquals(v1[CellHeight].height, v2[CellHeight].height)
+            assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
+            assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
         }
 
         assertFalse(it3.hasNext())
@@ -460,10 +460,10 @@ class TableViewStorageTest {
             val v1 = it5.next()
             val v2 = it6.next()
 
-            assertEquals(v1[CellHeight], v2[CellHeight])
-            assertEquals(v1[CellWidth], v2[CellWidth])
-            assertEquals(v1[CellClasses], v2[CellClasses])
-            assertEquals(v1[CellTopics], v2[CellTopics])
+            assertEquals(v1[CellHeight].height, v2[CellHeight].height)
+            assertEquals(v1[CellWidth].width, v2[CellWidth].width)
+            assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
+            assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
         }
 
         assertFalse(it5.hasNext())
@@ -706,10 +706,10 @@ class TableViewStorageTest {
 
             println("Comparing table views")
 
-            assertEquals(tableView1[CellHeight], tableView2[CellHeight])
-            assertEquals(tableView1[CellWidth], tableView2[CellWidth])
-            assertEquals(tableView1[CellClasses], tableView2[CellClasses])
-            assertEquals(tableView1[CellTopics], tableView2[CellTopics])
+            assertEquals(tableView1[CellHeight].height, tableView2[CellHeight].height)
+            assertEquals(tableView1[CellWidth].width, tableView2[CellWidth].width)
+            assertEquals(tableView1[CellClasses].classes, tableView2[CellClasses].classes)
+            assertEquals(tableView1[CellTopics].topics, tableView2[CellTopics].topics)
 
             val it1 = tableView1.columnViews.sortedBy { it.header }.iterator()
             val it2 = tableView2.columnViews.sortedBy { it.header }.iterator()
@@ -719,9 +719,9 @@ class TableViewStorageTest {
                 val v2 = it2.next()
 
                 assertEquals(v1.header, v2.header)
-                assertEquals(v1[CellWidth], v2[CellWidth])
-                assertEquals(v1[CellClasses], v2[CellClasses])
-                assertEquals(v1[CellTopics], v2[CellTopics])
+                assertEquals(v1[CellWidth].width, v2[CellWidth].width)
+                assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
+                assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
             }
 
             assertFalse(it1.hasNext())
@@ -735,9 +735,9 @@ class TableViewStorageTest {
                 val v2 = it4.next()
 
                 assertEquals(v1.index, v2.index)
-                assertEquals(v1[CellHeight], v2[CellHeight])
-                assertEquals(v1[CellClasses], v2[CellClasses])
-                assertEquals(v1[CellTopics], v2[CellTopics])
+                assertEquals(v1[CellHeight].height, v2[CellHeight].height)
+                assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
+                assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
             }
 
             assertFalse(it3.hasNext())
@@ -758,10 +758,10 @@ class TableViewStorageTest {
 
                 assertEquals(v1.columnView.header, v2.columnView.header)
                 assertEquals(v1.index, v2.index)
-                assertEquals(v1[CellHeight], v2[CellHeight])
-                assertEquals(v1[CellWidth], v2[CellWidth])
-                assertEquals(v1[CellClasses], v2[CellClasses])
-                assertEquals(v1[CellTopics], v2[CellTopics])
+                assertEquals(v1[CellHeight].height, v2[CellHeight].height)
+                assertEquals(v1[CellWidth].width, v2[CellWidth].width)
+                assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
+                assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
             }
 
             assertFalse(it5.hasNext())

@@ -2193,23 +2193,37 @@ sealed class CellHeight<S, T> {
         return value
     }
 
-    override fun equals(other: Any?): Boolean {
+    operator fun contains(other: Any?): Boolean {
         val height = this.height
 
-        return when {
-            other is CellHeight<*, *> -> height == other.height
-            other is Number -> if (height is Number) {
+        return when (other) {
+            is CellHeight<*, *> -> height == other.height
+            is Number -> if (height is Number) {
                 when (val v = this - other) {
                     is Int -> v == 0
                     is Long -> v == 0L
                     else -> throw InvalidCellHeightException("Unsupported type: ${v::class}")
                 }
             } else false
-            else -> height == other
+            is Unit -> height == Unit
+            null -> height == Unit
+            else -> this == other
         }
     }
 
     override fun hashCode() = Objects.hash(this.height)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CellHeight<*, *>
+
+        if (source != other.source) return false
+        if (height != other.height) return false
+
+        return true
+    }
 
     companion object
 }
@@ -2373,25 +2387,37 @@ sealed class CellWidth<S, T> {
         return value
     }
 
-    // TODO Add functionality to make this symmetric?
-    override fun equals(other: Any?): Boolean {
-        val height = this.width
+    operator fun contains(other: Any?): Boolean {
+        val width = this.width
 
         return when (other) {
-            is CellWidth<*, *> -> height == other.width
-            is Number -> if (height is Number) {
+            is CellWidth<*, *> -> width == other.width
+            is Number -> if (width is Number) {
                 when (val v = this - other) {
                     is Int -> v == 0
                     is Long -> v == 0L
-                    else -> throw InvalidCellWidthException("Unsupported type: ${v::class}")
+                    else -> throw InvalidCellHeightException("Unsupported type: ${v::class}")
                 }
             } else false
-
-            else -> height == other
+            is Unit -> width == Unit
+            null -> width == Unit
+            else -> this == other
         }
     }
 
     override fun hashCode() = Objects.hash(this.width)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CellWidth<*, *>
+
+        if (source != other.source) return false
+        if (width != other.width) return false
+
+        return true
+    }
 
     companion object
 }
@@ -2470,14 +2496,25 @@ class CellClasses<S> internal constructor(
         return value
     }
 
-    override fun equals(other: Any?): Boolean {
-        // TODO Add functionality to make this symmetric, i.e. "some string" == some CellClasses containing just "some string" must return true, etc..
+    operator fun contains(other: Any?): Boolean {
         return when (other) {
-            is CellClasses<*> -> _classes == other._classes
-            is String -> _classes.contains(other) && _classes.size == 1
-            is Iterable<*> -> other.toSet().let { _classes.containsAll(it) && _classes.size == it.size }
-            else -> _classes == other
+            is CellClasses<*> -> contains(other._classes)
+            is String -> _classes.contains(other)
+            is Collection<*> -> _classes.containsAll(other)
+            else -> this == other
         }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CellClasses<*>
+
+        if (source != other.source) return false
+        if (_classes != other._classes) return false
+
+        return true
     }
 
     override fun hashCode() = Objects.hash(this._classes)
@@ -2522,14 +2559,25 @@ class CellTopics<S> internal constructor(
         return value
     }
 
-    override fun equals(other: Any?): Boolean {
-        // TODO Add functionality to make this symmetric, i.e. "some string" == some CellTopics containing just "some string" must return true, etc..
+    operator fun contains(other: Any?): Boolean {
         return when (other) {
-            is CellTopics<*> -> _topics == other._topics
-            is String -> _topics.contains(other) && _topics.size == 1
-            is Iterable<*> -> other.toSet().let { _topics.containsAll(it) && _topics.size == it.size }
-            else -> _topics == other
+            is CellTopics<*> -> contains(other._topics)
+            is String -> _topics.contains(other)
+            is Collection<*> -> _topics.containsAll(other)
+            else -> this == other
         }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CellTopics<*>
+
+        if (source != other.source) return false
+        if (_topics != other._topics) return false
+
+        return true
     }
 
     override fun hashCode() = Objects.hash(this._topics)
@@ -2569,6 +2617,30 @@ sealed class CellTransformer<T> {
         return value
     }
 
+    operator fun contains(other: Any?): Boolean {
+        return when (other) {
+            is CellTransformer<*> -> this.function == other.function
+            is Function1<*, *> -> this.function == other
+            is Unit -> this.function == Unit
+            null -> this.function == Unit
+            else -> this == other
+        }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CellTransformer<*>
+
+        if (source != other.source) return false
+        if (function != other.function) return false
+
+        return true
+    }
+
+    override fun hashCode() = Objects.hashCode(this.function)
+
     companion object
 }
 
@@ -2577,14 +2649,14 @@ class UnitCellTransformer internal constructor(
 ): CellTransformer<Unit>() {
     override val function = Unit
 
-    // TODO Equals, hashCode, toString?
+    override fun toString() = "UnitCellTransformer"
 }
 
 class FunctionCellTransformer internal constructor(
     override val source: CellView,
     override val function: Cell<*>.() -> Any?
 ): CellTransformer<Cell<*>.() -> Any?>() {
-    // TODO Equals, hashCode, toString?
+    override fun toString() = "FunctionCellTransformer[$function]"
 }
 
 // TODO Should introduce a generic type S like else where..?
@@ -2648,30 +2720,38 @@ class Resources internal constructor(
         return value
     }
 
-    override fun equals(other: Any?): Boolean {
-        // TODO Add functionality to make this symmetric, i.e. "some string" == some CellTopics containing just "some string" must return true, etc..
+    operator fun contains(other: Any?): Boolean {
         return when (other) {
-            is Resources -> _resources.all { other._resources[it.component1()]?.second == it.component2().second } && _resources.size() == other._resources.size()
-            is Map<*,*> -> _resources.all { other[it.component1()] == it.component2() } && _resources.size() == other.size
-            is Pair<*,*> -> other.first is String && _resources[other.first as String] == other.second && _resources.size() == 1
-            is Iterable<*> -> {
+            is Resources -> other._resources.all { _resources[it.component1()]?.second == it.component2().second }
+            is Map<*,*> -> other.entries.all { it.key is String && _resources[it.key as String]?.second == it.value }
+            is Pair<*,*> -> other.first is String && _resources[other.first as String]?.second == other.second
+            is Collection<*> -> {
                 val otherList = other.toList()
-                if (otherList.size != _resources.size()) return false
                 val otherMap = otherList.filterIsInstance<Pair<*, *>>().fold(mutableMapOf<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>()) {
                     acc, pair -> acc[pair.first as String] = pair.second as suspend PipelineContext<*, ApplicationCall>.() -> Unit; acc
                 }
                 if (otherMap.size != otherList.size) return false
-                if (otherMap.size != _resources.size()) return false
-                _resources.all { otherMap[it.component1()] == it.component2() }
+                return contains(otherMap)
             }
-            else -> _resources == other
+            else -> this == other
         }
     }
 
-    override fun hashCode() = Objects.hash(this._resources.map { it.component1() to it.component2().second })
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Resources
+
+        if (source != other.source) return false
+        if (_resources != other._resources) return false
+
+        return true
+    }
+
+    override fun hashCode() = Objects.hash(this.resources)
 
     override fun toString() = "Resources[${resources.keys.joinToString(limit = 30)}]"
-
     companion object {
         internal val RESOURCE_COUNTER = AtomicLong()
     }

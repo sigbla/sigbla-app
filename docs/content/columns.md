@@ -46,6 +46,9 @@ instead evaluate to true as it has been assigned to already.
 
 Because we created column A first, by doing `table["A"]`, when we put data into it, it will show as the first column.
 This is the case also when assigning data to it last, as shown next. It's the order they are created in that matters.
+Because of this, when checking if a column is in a table you might want to do `Header["A"] in table` rather than
+`table["A"] in table`, as that doesn't risk creating any new columns. We'll cover `Header` in more detail in the next
+section below.
 
 ``` kotlin
 val table = Table["MyTable"]
