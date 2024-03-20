@@ -1268,8 +1268,8 @@ class TableViewBatchListenerTest {
     fun `event values cellview`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
-        val ct1: Cell<*>.() -> Any? = {}
-        val ct2: Cell<*>.() -> Any? = {}
+        val ct1: Cell<*>.() -> Unit = {}
+        val ct2: Cell<*>.() -> Unit = {}
 
         batch(tv1) {
             tv1["A", 1][CellHeight] = 25
@@ -1382,8 +1382,8 @@ class TableViewBatchListenerTest {
     fun `event values columnview`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
-        val ct1: Cell<*>.() -> Any? = {}
-        val ct2: Cell<*>.() -> Any? = {}
+        val ct1: Cell<*>.() -> Unit = {}
+        val ct2: Cell<*>.() -> Unit = {}
 
         batch(tv1) {
             //tv1["A"][CellHeight] = 25
@@ -1482,8 +1482,8 @@ class TableViewBatchListenerTest {
     fun `event values rowview`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
-        val ct1: Cell<*>.() -> Any? = {}
-        val ct2: Cell<*>.() -> Any? = {}
+        val ct1: Cell<*>.() -> Unit = {}
+        val ct2: Cell<*>.() -> Unit = {}
 
         batch(tv1) {
             tv1[1][CellHeight] = 25
@@ -1585,8 +1585,8 @@ class TableViewBatchListenerTest {
         val t1 = Table[null]
         val t2 = Table[null]
 
-        val ct1: Cell<*>.() -> Any? = {}
-        val ct2: Cell<*>.() -> Any? = {}
+        val ct1: Cell<*>.() -> Unit = {}
+        val ct2: Cell<*>.() -> Unit = {}
 
         val r1: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "a" to {}
         val r2: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "b" to {}
@@ -1737,8 +1737,8 @@ class TableViewBatchListenerTest {
         val t1 = Table[null]
         val t2 = Table[null]
 
-        val ct1: Cell<*>.() -> Any? = {}
-        val ct2: Cell<*>.() -> Any? = {}
+        val ct1: Cell<*>.() -> Unit = {}
+        val ct2: Cell<*>.() -> Unit = {}
 
         val r1: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "a" to {}
         val r2: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "b" to {}

@@ -43,7 +43,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
     operator fun set(header: Header, value: BigInteger) = table[header].set(this, value)
     operator fun set(header: Header, value: BigDecimal) = table[header].set(this, value)
     operator fun set(header: Header, value: Number) = table[header].set(this, value)
-    operator fun set(header: Header, init: Cell<*>.() -> Any?) = table[header][this] { init() }
+    operator fun set(header: Header, init: Cell<*>.() -> Unit) = table[header][this].init()
 
     operator fun set(column: Column, value: Cell<*>?) = table[column].set(this, value)
     operator fun set(column: Column, value: Boolean) = table[column].set(this, value)
@@ -55,7 +55,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
     operator fun set(column: Column, value: BigInteger) = table[column].set(this, value)
     operator fun set(column: Column, value: BigDecimal) = table[column].set(this, value)
     operator fun set(column: Column, value: Number) = table[column].set(this, value)
-    operator fun set(column: Column, init: Cell<*>.() -> Any?) = table[column][this] { init() }
+    operator fun set(column: Column, init: Cell<*>.() -> Unit) = table[column][this].init()
 
     operator fun set(vararg header: String, value: Cell<*>?) = table[Header(*header)].set(this, value)
     operator fun set(vararg header: String, value: Boolean) = table[Header(*header)].set(this, value)
@@ -67,7 +67,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
     operator fun set(vararg header: String, value: BigInteger) = table[Header(*header)].set(this, value)
     operator fun set(vararg header: String, value: BigDecimal) = table[Header(*header)].set(this, value)
     operator fun set(vararg header: String, value: Number) = table[Header(*header)].set(this, value)
-    operator fun set(vararg header: String, init: Cell<*>.() -> Any?) = table[Header(*header)][this] { init() }
+    operator fun set(vararg header: String, init: Cell<*>.() -> Unit) = table[Header(*header)][this].init()
 
     operator fun rangeTo(other: Row): RowRange {
         return RowRange(this, other)

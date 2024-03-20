@@ -79,6 +79,9 @@ fun tableViewFromViewRelated(value: Any?): TableView = when (value) {
     is CellClasses<*> -> tableViewFromViewRelated(value.source)
     is CellTopics<*> -> tableViewFromViewRelated(value.source)
     is CellTransformer<*> -> tableViewFromViewRelated(value.source)
+    is ColumnTransformer<*> -> tableViewFromViewRelated(value.source)
+    is RowTransformer<*> -> tableViewFromViewRelated(value.source)
+    is TableTransformer<*> -> tableViewFromViewRelated(value.source)
     is Resources -> tableViewFromViewRelated(value.source)
     is SourceTable -> value.source
     else -> throw InvalidValueException("Unknown type: ${value?.javaClass}")
@@ -95,6 +98,9 @@ fun columnViewFromViewRelated(value: Any?): ColumnView? = when (value) {
     is CellClasses<*> -> columnViewFromViewRelated(value.source)
     is CellTopics<*> -> columnViewFromViewRelated(value.source)
     is CellTransformer<*> -> columnViewFromViewRelated(value.source)
+    is ColumnTransformer<*> -> columnViewFromViewRelated(value.source)
+    is RowTransformer<*> -> columnViewFromViewRelated(value.source)
+    is TableTransformer<*> -> columnViewFromViewRelated(value.source)
     is Resources -> columnViewFromViewRelated(value.source)
     is SourceTable -> null
     else -> throw InvalidValueException("Unsupported type: ${value?.javaClass}")
@@ -111,6 +117,9 @@ fun indexFromViewRelated(value: Any?): Long? = when (value) {
     is CellClasses<*> -> indexFromViewRelated(value.source)
     is CellTopics<*> -> indexFromViewRelated(value.source)
     is CellTransformer<*> -> indexFromViewRelated(value.source)
+    is ColumnTransformer<*> -> indexFromViewRelated(value.source)
+    is RowTransformer<*> -> indexFromViewRelated(value.source)
+    is TableTransformer<*> -> indexFromViewRelated(value.source)
     is Resources -> indexFromViewRelated(value.source)
     is SourceTable -> null
     else -> throw InvalidValueException("Unsupported type: ${value?.javaClass}")
@@ -122,6 +131,9 @@ fun sourceFromViewEventRelated(value: Any?): Any = when (value) {
     is CellClasses<*> -> value.source!!
     is CellTopics<*> -> value.source!!
     is CellTransformer<*> -> value.source
+    is ColumnTransformer<*> -> value.source
+    is RowTransformer<*> -> value.source
+    is TableTransformer<*> -> value.source
     is Resources -> value.source
     is SourceTable -> value.source
     else -> throw InvalidValueException("Unsupported type: ${value?.javaClass}")
@@ -160,6 +172,9 @@ internal fun relatedFromViewRelated(tableView: TableView, value: Any?): Any = wh
         else -> throw InvalidValueException("Unsupported source: ${source?.javaClass}")
     }
     is CellTransformer<*> -> tableView[value.source][CellTransformer]
+    is ColumnTransformer<*> -> tableView[value.source][ColumnTransformer]
+    is RowTransformer<*> -> tableView[value.source][RowTransformer]
+    is TableTransformer<*> -> tableView[TableTransformer]
     is Resources -> tableView[Resources]
     is SourceTable -> SourceTable(tableView, tableView.tableViewRef.get().table)
     else -> throw InvalidValueException("Unknown type: ${value?.javaClass}")
@@ -176,6 +191,9 @@ internal fun refVersionFromViewRelated(value: Any?): Long = when (value) {
     is CellClasses<*> -> refVersionFromViewRelated(value.source)
     is CellTopics<*> -> refVersionFromViewRelated(value.source)
     is CellTransformer<*> -> refVersionFromViewRelated(value.source)
+    is ColumnTransformer<*> -> refVersionFromViewRelated(value.source)
+    is RowTransformer<*> -> refVersionFromViewRelated(value.source)
+    is TableTransformer<*> -> refVersionFromViewRelated(value.source)
     is Resources -> refVersionFromViewRelated(value.source)
     is SourceTable -> refVersionFromViewRelated(value.source)
     else -> throw InvalidValueException("Unsupported type: ${value?.javaClass}")
@@ -188,6 +206,9 @@ internal fun cellOrResourceOrSourceTableOrFalseFromViewRelated(value: Any?): Any
     is CellClasses<*> -> cellOrResourceOrSourceTableOrFalseFromViewRelated(value.source)
     is CellTopics<*> -> cellOrResourceOrSourceTableOrFalseFromViewRelated(value.source)
     is CellTransformer<*> -> cellOrResourceOrSourceTableOrFalseFromViewRelated(value.source)
+    is ColumnTransformer<*> -> cellOrResourceOrSourceTableOrFalseFromViewRelated(value.source)
+    is RowTransformer<*> -> cellOrResourceOrSourceTableOrFalseFromViewRelated(value.source)
+    is TableTransformer<*> -> cellOrResourceOrSourceTableOrFalseFromViewRelated(value.source)
     is SourceTable -> value
     is Resources -> value
     else -> false

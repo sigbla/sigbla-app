@@ -1130,8 +1130,8 @@ class TableViewListenerTest {
     fun `event values cellview`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
-        val ct1: Cell<*>.() -> Any? = {}
-        val ct2: Cell<*>.() -> Any? = {}
+        val ct1: Cell<*>.() -> Unit = {}
+        val ct2: Cell<*>.() -> Unit = {}
 
         tv1["A", 1][CellHeight] = 25
         tv1["A", 1][CellWidth] = 30
@@ -1240,8 +1240,8 @@ class TableViewListenerTest {
     fun `event values columnview`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
-        val ct1: Cell<*>.() -> Any? = {}
-        val ct2: Cell<*>.() -> Any? = {}
+        val ct1: Cell<*>.() -> Unit = {}
+        val ct2: Cell<*>.() -> Unit = {}
 
         //tv1["A"][CellHeight] = 25
         tv1["A"][CellWidth] = 30
@@ -1336,8 +1336,8 @@ class TableViewListenerTest {
     fun `event values rowview`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
-        val ct1: Cell<*>.() -> Any? = {}
-        val ct2: Cell<*>.() -> Any? = {}
+        val ct1: Cell<*>.() -> Unit = {}
+        val ct2: Cell<*>.() -> Unit = {}
 
         tv1[1][CellHeight] = 25
         //tv1[1][CellWidth] = 30
@@ -1435,8 +1435,8 @@ class TableViewListenerTest {
         val t1 = Table[null]
         val t2 = Table[null]
 
-        val ct1: Cell<*>.() -> Any? = {}
-        val ct2: Cell<*>.() -> Any? = {}
+        val ct1: Cell<*>.() -> Unit = {}
+        val ct2: Cell<*>.() -> Unit = {}
 
         val r1: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "a" to {}
         val r2: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "b" to {}
@@ -1583,8 +1583,8 @@ class TableViewListenerTest {
         val t1 = Table[null]
         val t2 = Table[null]
 
-        val ct1: Cell<*>.() -> Any? = {}
-        val ct2: Cell<*>.() -> Any? = {}
+        val ct1: Cell<*>.() -> Unit = {}
+        val ct2: Cell<*>.() -> Unit = {}
 
         val r1: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "a" to {}
         val r2: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "b" to {}
@@ -1728,6 +1728,7 @@ class TableViewListenerTest {
     fun `columnview on header`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
+        val ct: Column.() -> Unit = {}
         var count = 0
 
         on(tv1["B"], skipHistory = true) events {
@@ -1747,8 +1748,11 @@ class TableViewListenerTest {
                         assertEquals(emptySet(), old.topics)
                         assertEquals(setOf("ct-1"), new.topics)
                     }
-                    is CellTransformer<*> -> {
-                        TODO()
+                    is ColumnTransformer<*> -> {
+                        val old = it.oldValue as ColumnTransformer<*>
+                        val new = it.newValue as ColumnTransformer<*>
+                        assertEquals(Unit, old.function)
+                        assertEquals(ct, new.function)
                     }
                     is CellWidth<*, *> -> {
                         val old = it.oldValue as CellWidth<*, *>
@@ -1763,18 +1767,19 @@ class TableViewListenerTest {
 
         tv1["A"][CellClasses] = "cc-1"
         tv1["A"][CellTopics] = "ct-1"
-        //tv1["A"][CellTransformer] = TODO
+        tv1["A"][ColumnTransformer] = ct
         tv1["A"][CellWidth] = 1000
 
         assertEquals(0, count)
         tv1["B"] = tv1["A"]
-        assertEquals(3, count)
+        assertEquals(4, count)
     }
 
     @Test
     fun `rowview on row`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
+        val rt: Row.() -> Unit = {}
         var count = 0
 
         on(tv1[2], skipHistory = true) events {
@@ -1794,8 +1799,11 @@ class TableViewListenerTest {
                         assertEquals(emptySet(), old.topics)
                         assertEquals(setOf("ct-1"), new.topics)
                     }
-                    is CellTransformer<*> -> {
-                        TODO()
+                    is RowTransformer<*> -> {
+                        val old = it.oldValue as RowTransformer<*>
+                        val new = it.newValue as RowTransformer<*>
+                        assertEquals(Unit, old.function)
+                        assertEquals(rt, new.function)
                     }
                     is CellHeight<*, *> -> {
                         val old = it.oldValue as CellHeight<*, *>
@@ -1810,12 +1818,12 @@ class TableViewListenerTest {
 
         tv1[1][CellClasses] = "cc-1"
         tv1[1][CellTopics] = "ct-1"
-        //tv1[1][CellTransformer] = TODO
+        tv1[1][RowTransformer] = rt
         tv1[1][CellHeight] = 1000
 
         assertEquals(0, count)
         tv1[2] = tv1[1]
-        assertEquals(3, count)
+        assertEquals(4, count)
     }
 
     @Test
@@ -1824,7 +1832,7 @@ class TableViewListenerTest {
 
         var count = 0
 
-        val ct: Cell<*>.() -> Any? = {}
+        val ct: Cell<*>.() -> Unit = {}
 
         on(tv1["B", 2], skipHistory = true) events {
             count += count()

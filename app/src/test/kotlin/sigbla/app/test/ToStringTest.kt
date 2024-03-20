@@ -150,12 +150,12 @@ class ToStringTest {
         assertEquals("CellTopics[]", emptyCellTopics.toString())
         assertEquals("CellTopics[A, B]", filledCellTopics.toString())
 
-        val cellTransformerFunction: Cell<*>.() -> Any? = { this }
+        val cellTransformerFunction: Cell<*>.() -> Unit = { }
         val emptyCellTransformer = tableView["A", 1][CellTransformer].also { it { cellTransformerFunction } }
         val filledCellTransformer = tableView["A", 1][CellTransformer]
 
         assertEquals("UnitCellTransformer", emptyCellTransformer.toString())
-        assertEquals("FunctionCellTransformer[sigbla.app.Cell<*>.() -> sigbla.app.Cell<*>]", filledCellTransformer.toString())
+        assertEquals("FunctionCellTransformer[sigbla.app.Cell<*>.() -> kotlin.Unit]", filledCellTransformer.toString())
 
         fun getHandler(): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
             return {

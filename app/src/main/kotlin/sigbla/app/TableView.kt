@@ -52,7 +52,12 @@ internal data class TableViewRef(
     val cellViews: PMap<Pair<Header, Long>, ViewMeta> = PHashMap(),
 
     val resources: PMap<String, Pair<Long, suspend PipelineContext<*, ApplicationCall>.() -> Unit>> = PHashMap(),
-    val cellTransformers: PMap<Pair<Header, Long>, Cell<*>.() -> Any?> = PHashMap(),
+
+    val tableTransformer: (Table.() -> Unit)? = null,
+    val columnTransformers: PMap<Header, Column.() -> Unit> = PHashMap(),
+    val rowTransformers: PMap<Long, Row.() -> Unit> = PHashMap(),
+    val cellTransformers: PMap<Pair<Header, Long>, Cell<*>.() -> Unit> = PHashMap(),
+
     val table: Table? = null,
 
     val version: Long = Long.MIN_VALUE
@@ -134,7 +139,6 @@ class TableView internal constructor(
         synchronized(eventProcessor) {
             val ref = tableViewRef.get()
             val originalTable = ref.table
-            val table = originalTable?.let { it.makeClone() } ?: BaseTable(name = null, source = null, onRegistry = false)
 
             if (transformedTableRef != null
                 && transformedTableRef!!.first == ref.version
@@ -143,10 +147,26 @@ class TableView internal constructor(
                 if (cachedTable != null) return cachedTable
             }
 
+            val table = originalTable?.makeClone() ?: BaseTable(name = null, source = null, onRegistry = false)
+
+            ref.tableTransformer?.invoke(table)
+
+            ref.columnTransformers.forEach {
+                val header = it.component1()
+                val init = it.component2()
+                table[header].init()
+            }
+
+            ref.rowTransformers.forEach {
+                val index = it.component1()
+                val init = it.component2()
+                table[index].init()
+            }
+
             ref.cellTransformers.forEach {
                 val key = it.component1()
                 val init = it.component2()
-                table[key.first][key.second] = init
+                table[key.first][key.second].init()
             }
 
             transformedTableRef = Triple(ref.version, originalTable?.tableRef?.get()?.version, WeakReference(table))
@@ -172,6 +192,41 @@ class TableView internal constructor(
             eventProcessor.publish(listOf(TableViewListenerEvent<SourceTable>(
                 SourceTable(old, oldRef.table), SourceTable(new, newRef.table)
             )) as List<TableViewListenerEvent<Any>>)
+        }
+    }
+
+    operator fun get(table: TableTransformer.Companion): TableTransformer<*> {
+        val ref = tableViewRef.get()
+        val function = ref.tableTransformer ?: return UnitTableTransformer(this)
+        return FunctionTableTransformer(this, function)
+    }
+
+    operator fun set(table: TableTransformer.Companion, tableTransformer: TableTransformer<*>?) {
+        setTableTransformer(tableTransformer?.function as? (Table.() -> Unit)?)
+    }
+
+    operator fun set(table: TableTransformer.Companion, tableTransformer: Table.() -> Unit) {
+        setTableTransformer(tableTransformer)
+    }
+
+    private fun setTableTransformer(transformer: (Table.() -> Unit)?) {
+        synchronized(eventProcessor) {
+            val (oldRef, newRef) = tableViewRef.refAction {
+                it.copy(
+                    tableTransformer = transformer,
+                    version = it.version + 1L
+                )
+            }
+
+            if (!eventProcessor.haveListeners()) return
+
+            val oldView = makeClone(ref = oldRef)
+            val newView = makeClone(ref = newRef)
+
+            val old = oldView[TableTransformer]
+            val new = newView[TableTransformer]
+
+            eventProcessor.publish(listOf(TableViewListenerEvent<TableTransformer<*>>(old, new)) as List<TableViewListenerEvent<Any>>)
         }
     }
 
@@ -502,8 +557,8 @@ class TableView internal constructor(
         this[cell.column][cell.index] = view
     }
 
-    operator fun set(cell: Cell<*>, function: CellView.() -> Any?) {
-        this[cell.column][cell.index] { function() }
+    operator fun set(cell: Cell<*>, function: CellView.() -> Unit) {
+        this[cell.column][cell.index].function()
     }
 
     // -----
@@ -512,8 +567,8 @@ class TableView internal constructor(
         this[cellView.columnView][cellView.index] = view
     }
 
-    operator fun set(cellView: CellView, function: CellView.() -> Any?) {
-        this[cellView.columnView][cellView.index] { function() }
+    operator fun set(cellView: CellView, function: CellView.() -> Unit) {
+        this[cellView.columnView][cellView.index].function()
     }
 
     // -----
@@ -521,13 +576,19 @@ class TableView internal constructor(
     operator fun set(header: Header, view: ColumnView?) {
         synchronized(eventProcessor) {
             val (oldRef, newRef) = tableViewRef.refAction {
-                val viewMeta = if (view == null) null else view.tableView.tableViewRef.get().columnViews[view.header]
+                val otherRef = if (view == null) null else view.tableView.tableViewRef.get()
+                val viewMeta = if (otherRef == null) null else otherRef.columnViews[view!!.header]
+                val transformer = if (otherRef == null) null else otherRef.columnTransformers[view!!.header]
 
                 it.copy(
                     columnViews = if (viewMeta != null)
                         it.columnViews.put(header, viewMeta)
                     else
                         it.columnViews.remove(header),
+                    columnTransformers = if (transformer != null)
+                        it.columnTransformers.put(header, transformer)
+                    else
+                        it.columnTransformers.remove(header),
                     version = it.version + 1L
                 )
             }
@@ -543,7 +604,8 @@ class TableView internal constructor(
             eventProcessor.publish(listOf(
                 TableViewListenerEvent(oldColumnView[CellClasses], newColumnView[CellClasses]),
                 TableViewListenerEvent(oldColumnView[CellTopics], newColumnView[CellTopics]),
-                TableViewListenerEvent(oldColumnView[CellWidth], newColumnView[CellWidth])
+                TableViewListenerEvent(oldColumnView[CellWidth], newColumnView[CellWidth]),
+                TableViewListenerEvent(oldColumnView[ColumnTransformer], newColumnView[ColumnTransformer])
             ))
         }
     }
@@ -552,38 +614,38 @@ class TableView internal constructor(
 
     operator fun set(columnView: ColumnView, view: ColumnView?) = set(columnView.header, view)
 
-    operator fun set(header: Header, function: ColumnView.() -> Any?) {
-        this[header] { function() }
+    operator fun set(header: Header, function: ColumnView.() -> Unit) {
+        this[header].function()
     }
 
-    operator fun set(column: Column, function: ColumnView.() -> Any?) {
-        this[column] { function() }
+    operator fun set(column: Column, function: ColumnView.() -> Unit) {
+        this[column].function()
     }
 
-    operator fun set(columnView: ColumnView, function: ColumnView.() -> Any?) {
-        this[columnView] { function() }
+    operator fun set(columnView: ColumnView, function: ColumnView.() -> Unit) {
+        this[columnView].function()
     }
 
     // -----
 
-    operator fun set(header1: String, function: ColumnView.() -> Any?) {
-        this[header1] { function() }
+    operator fun set(header1: String, function: ColumnView.() -> Unit) {
+        this[header1].function()
     }
 
-    operator fun set(header1: String, header2: String, function: ColumnView.() -> Any?) {
-        this[header1, header2] { function() }
+    operator fun set(header1: String, header2: String, function: ColumnView.() -> Unit) {
+        this[header1, header2].function()
     }
 
-    operator fun set(header1: String, header2: String, header3: String, function: ColumnView.() -> Any?) {
-        this[header1, header2, header3] { function() }
+    operator fun set(header1: String, header2: String, header3: String, function: ColumnView.() -> Unit) {
+        this[header1, header2, header3].function()
     }
 
-    operator fun set(header1: String, header2: String, header3: String, header4: String, function: ColumnView.() -> Any?) {
-        this[header1, header2, header3, header4] { function() }
+    operator fun set(header1: String, header2: String, header3: String, header4: String, function: ColumnView.() -> Unit) {
+        this[header1, header2, header3, header4].function()
     }
 
-    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, function: ColumnView.() -> Any?) {
-        this[header1, header2, header3, header4, header5] { function() }
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, function: ColumnView.() -> Unit) {
+        this[header1, header2, header3, header4, header5].function()
     }
 
     // -----
@@ -591,13 +653,19 @@ class TableView internal constructor(
     operator fun set(index: Long, view: RowView?) {
         synchronized(eventProcessor) {
             val (oldRef, newRef) = tableViewRef.refAction {
-                val viewMeta = if (view == null) null else view.tableView.tableViewRef.get().rowViews[view.index]
+                val otherRef = if (view == null) null else view.tableView.tableViewRef.get()
+                val viewMeta = if (otherRef == null) null else otherRef.rowViews[view!!.index]
+                val transformer = if (otherRef == null) null else otherRef.rowTransformers[view!!.index]
 
                 it.copy(
                     rowViews = if (viewMeta != null)
                         it.rowViews.put(index, viewMeta)
                     else
                         it.rowViews.remove(index),
+                    rowTransformers = if (transformer != null)
+                        it.rowTransformers.put(index, transformer)
+                    else
+                        it.rowTransformers.remove(index),
                     version = it.version + 1L
                 )
             }
@@ -614,7 +682,8 @@ class TableView internal constructor(
             eventProcessor.publish(listOf(
                 TableViewListenerEvent(oldRowView[CellClasses], newRowView[CellClasses]),
                 TableViewListenerEvent(oldRowView[CellHeight], newRowView[CellHeight]),
-                TableViewListenerEvent(oldRowView[CellTopics], newRowView[CellTopics])
+                TableViewListenerEvent(oldRowView[CellTopics], newRowView[CellTopics]),
+                TableViewListenerEvent(oldRowView[RowTransformer], newRowView[RowTransformer])
             ))
         }
     }
@@ -628,20 +697,20 @@ class TableView internal constructor(
         set(row.index, view)
     }
 
-    operator fun set(index: Int, function: RowView.() -> Any?) {
-        this[index] { function() }
+    operator fun set(index: Int, function: RowView.() -> Unit) {
+        this[index].function()
     }
 
-    operator fun set(index: Long, function: RowView.() -> Any?) {
-        this[index] { function() }
+    operator fun set(index: Long, function: RowView.() -> Unit) {
+        this[index].function()
     }
 
-    operator fun set(rowView: RowView, function: RowView.() -> Any?) {
-        this[rowView] { function() }
+    operator fun set(rowView: RowView, function: RowView.() -> Unit) {
+        this[rowView].function()
     }
 
-    operator fun set(row: Row, function: RowView.() -> Any?) {
-        this[row] { function() }
+    operator fun set(row: Row, function: RowView.() -> Unit) {
+        this[row].function()
     }
 
     // -----
@@ -701,8 +770,9 @@ class TableView internal constructor(
             val cell = Pair(header, index)
 
             val (oldRef, newRef) = tableViewRef.refAction {
-                val viewMeta = if (view == null) null else view.tableView.tableViewRef.get().cellViews[sourceCell!!]
-                val transformer = if (view == null) null else view.tableView.tableViewRef.get().cellTransformers[sourceCell!!]
+                val otherRef = if (view == null) null else view.tableView.tableViewRef.get()
+                val viewMeta = if (otherRef == null) null else otherRef.cellViews[sourceCell!!]
+                val transformer = if (otherRef == null) null else otherRef.cellTransformers[sourceCell!!]
 
                 it.copy(
                     cellViews = if (viewMeta != null)
@@ -737,59 +807,59 @@ class TableView internal constructor(
 
     // -----
 
-    operator fun set(header: Header, index: Int, function: CellView.() -> Any?) {
-        this[header][index] { function() }
+    operator fun set(header: Header, index: Int, function: CellView.() -> Unit) {
+        this[header][index].function()
     }
 
-    operator fun set(header: Header, index: Long, function: CellView.() -> Any?) {
-        this[header][index] { function() }
+    operator fun set(header: Header, index: Long, function: CellView.() -> Unit) {
+        this[header][index].function()
     }
 
-    operator fun set(header: Header, row: Row, function: CellView.() -> Any?) {
+    operator fun set(header: Header, row: Row, function: CellView.() -> Unit) {
         // No IR.AT check here because this is actually a get before set
-        this[header][row] { function() }
+        this[header][row].function()
     }
 
-    operator fun set(header: Header, rowView: RowView, function: CellView.() -> Any?) {
-        this[header][rowView] { function() }
+    operator fun set(header: Header, rowView: RowView, function: CellView.() -> Unit) {
+        this[header][rowView].function()
     }
 
     // -----
 
-    operator fun set(column: Column, index: Int, function: CellView.() -> Any?) {
-        this[column][index] { function() }
+    operator fun set(column: Column, index: Int, function: CellView.() -> Unit) {
+        this[column][index].function()
     }
 
-    operator fun set(column: Column, index: Long, function: CellView.() -> Any?) {
-        this[column][index] { function() }
+    operator fun set(column: Column, index: Long, function: CellView.() -> Unit) {
+        this[column][index].function()
     }
 
-    operator fun set(column: Column, row: Row, function: CellView.() -> Any?) {
+    operator fun set(column: Column, row: Row, function: CellView.() -> Unit) {
         // No IR.AT check here because this is actually a get before set
-        this[column][row] { function() }
+        this[column][row].function()
     }
 
-    operator fun set(column: Column, rowView: RowView, function: CellView.() -> Any?) {
-        this[column][rowView] { function() }
+    operator fun set(column: Column, rowView: RowView, function: CellView.() -> Unit) {
+        this[column][rowView].function()
     }
 
     // -----
 
-    operator fun set(columnView: ColumnView, index: Int, function: CellView.() -> Any?) {
-        this[columnView][index] { function() }
+    operator fun set(columnView: ColumnView, index: Int, function: CellView.() -> Unit) {
+        this[columnView][index].function()
     }
 
-    operator fun set(columnView: ColumnView, index: Long, function: CellView.() -> Any?) {
-        this[columnView][index] { function() }
+    operator fun set(columnView: ColumnView, index: Long, function: CellView.() -> Unit) {
+        this[columnView][index].function()
     }
 
-    operator fun set(columnView: ColumnView, row: Row, function: CellView.() -> Any?) {
+    operator fun set(columnView: ColumnView, row: Row, function: CellView.() -> Unit) {
         // No IR.AT check here because this is actually a get before set
-        this[columnView][row] { function() }
+        this[columnView][row].function()
     }
 
-    operator fun set(columnView: ColumnView, rowView: RowView, function: CellView.() -> Any?) {
-        this[columnView][rowView] { function() }
+    operator fun set(columnView: ColumnView, rowView: RowView, function: CellView.() -> Unit) {
+        this[columnView][rowView].function()
     }
 
     // -----
@@ -866,73 +936,73 @@ class TableView internal constructor(
 
     // -----
 
-    operator fun set(header1: String, index: Long, function: CellView.() -> Any?) {
-        this[header1][index] { function() }
+    operator fun set(header1: String, index: Long, function: CellView.() -> Unit) {
+        this[header1][index].function()
     }
 
-    operator fun set(header1: String, header2: String, index: Long, function: CellView.() -> Any?) {
-        this[header1, header2][index] { function() }
+    operator fun set(header1: String, header2: String, index: Long, function: CellView.() -> Unit) {
+        this[header1, header2][index].function()
     }
 
-    operator fun set(header1: String, header2: String, header3: String, index: Long, function: CellView.() -> Any?) {
-        this[header1, header2, header3][index] { function() }
+    operator fun set(header1: String, header2: String, header3: String, index: Long, function: CellView.() -> Unit) {
+        this[header1, header2, header3][index].function()
     }
 
-    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, function: CellView.() -> Any?) {
-        this[header1, header2, header3, header4][index] { function() }
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, function: CellView.() -> Unit) {
+        this[header1, header2, header3, header4][index].function()
     }
 
-    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, function: CellView.() -> Any?) {
-        this[header1, header2, header3, header4, header5][index] { function() }
-    }
-
-    // -----
-
-    operator fun set(header1: String, row: Row, function: CellView.() -> Any?) {
-        // No IR.AT check here because this is actually a get before set
-        this[header1][row] { function() }
-    }
-
-    operator fun set(header1: String, header2: String, row: Row, function: CellView.() -> Any?) {
-        // No IR.AT check here because this is actually a get before set
-        this[header1, header2][row] { function() }
-    }
-
-    operator fun set(header1: String, header2: String, header3: String, row: Row, function: CellView.() -> Any?) {
-        // No IR.AT check here because this is actually a get before set
-        this[header1, header2, header3][row] { function() }
-    }
-
-    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, function: CellView.() -> Any?) {
-        // No IR.AT check here because this is actually a get before set
-        this[header1, header2, header3, header4][row] { function() }
-    }
-
-    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, function: CellView.() -> Any?) {
-        // No IR.AT check here because this is actually a get before set
-        this[header1, header2, header3, header4, header5][row] { function() }
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, function: CellView.() -> Unit) {
+        this[header1, header2, header3, header4, header5][index].function()
     }
 
     // -----
 
-    operator fun set(header1: String, rowView: RowView, function: CellView.() -> Any?) {
-        this[header1][rowView] { function() }
+    operator fun set(header1: String, row: Row, function: CellView.() -> Unit) {
+        // No IR.AT check here because this is actually a get before set
+        this[header1][row].function()
     }
 
-    operator fun set(header1: String, header2: String, rowView: RowView, function: CellView.() -> Any?) {
-        this[header1, header2][rowView] { function() }
+    operator fun set(header1: String, header2: String, row: Row, function: CellView.() -> Unit) {
+        // No IR.AT check here because this is actually a get before set
+        this[header1, header2][row].function()
     }
 
-    operator fun set(header1: String, header2: String, header3: String, rowView: RowView, function: CellView.() -> Any?) {
-        this[header1, header2, header3][rowView] { function() }
+    operator fun set(header1: String, header2: String, header3: String, row: Row, function: CellView.() -> Unit) {
+        // No IR.AT check here because this is actually a get before set
+        this[header1, header2, header3][row].function()
     }
 
-    operator fun set(header1: String, header2: String, header3: String, header4: String, rowView: RowView, function: CellView.() -> Any?) {
-        this[header1, header2, header3, header4][rowView] { function() }
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, function: CellView.() -> Unit) {
+        // No IR.AT check here because this is actually a get before set
+        this[header1, header2, header3, header4][row].function()
     }
 
-    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, rowView: RowView, function: CellView.() -> Any?) {
-        this[header1, header2, header3, header4, header5][rowView] { function() }
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, function: CellView.() -> Unit) {
+        // No IR.AT check here because this is actually a get before set
+        this[header1, header2, header3, header4, header5][row].function()
+    }
+
+    // -----
+
+    operator fun set(header1: String, rowView: RowView, function: CellView.() -> Unit) {
+        this[header1][rowView].function()
+    }
+
+    operator fun set(header1: String, header2: String, rowView: RowView, function: CellView.() -> Unit) {
+        this[header1, header2][rowView].function()
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, rowView: RowView, function: CellView.() -> Unit) {
+        this[header1, header2, header3][rowView].function()
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, rowView: RowView, function: CellView.() -> Unit) {
+        this[header1, header2, header3, header4][rowView].function()
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, rowView: RowView, function: CellView.() -> Unit) {
+        this[header1, header2, header3, header4, header5][rowView].function()
     }
 
     // -----
@@ -959,24 +1029,24 @@ class TableView internal constructor(
 
     // -----
 
-    operator fun set(header1: String, index: Int, function: CellView.() -> Any?) {
-        this[header1][index] { function() }
+    operator fun set(header1: String, index: Int, function: CellView.() -> Unit) {
+        this[header1][index].function()
     }
 
-    operator fun set(header1: String, header2: String, index: Int, function: CellView.() -> Any?) {
-        this[header1, header2][index] { function() }
+    operator fun set(header1: String, header2: String, index: Int, function: CellView.() -> Unit) {
+        this[header1, header2][index].function()
     }
 
-    operator fun set(header1: String, header2: String, header3: String, index: Int, function: CellView.() -> Any?) {
-        this[header1, header2, header3][index] { function() }
+    operator fun set(header1: String, header2: String, header3: String, index: Int, function: CellView.() -> Unit) {
+        this[header1, header2, header3][index].function()
     }
 
-    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, function: CellView.() -> Any?) {
-        this[header1, header2, header3, header4][index] { function() }
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, function: CellView.() -> Unit) {
+        this[header1, header2, header3, header4][index].function()
     }
 
-    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, function: CellView.() -> Any?) {
-        this[header1, header2, header3, header4, header5][index] { function() }
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, function: CellView.() -> Unit) {
+        this[header1, header2, header3, header4, header5][index].function()
     }
 
     // -----
@@ -1007,10 +1077,10 @@ class TableView internal constructor(
             is CellWidth<*, *> -> { this[CellWidth] = value; value }
             is CellClasses<*> -> { this[CellClasses] = value; value }
             is CellTopics<*> -> { this[CellTopics] = value; value }
+            is TableTransformer<*> -> { this[TableTransformer] = value; value }
             is Resources -> { this[Resources] = value; value }
             is Unit -> { /* no assignment */ Unit }
             is Function1<*, *> -> { invoke(value as TableView.() -> Any?) }
-            // TODO CellTransformer?
             is Table -> { this[Table] = value; value }
             is TableView -> {
                 batch(this) {
@@ -1018,8 +1088,8 @@ class TableView internal constructor(
                     this[CellWidth] = value[CellWidth]
                     this[CellClasses] = value[CellClasses]
                     this[CellTopics] = value[CellTopics]
+                    this[TableTransformer] = value[TableTransformer]
                     this[Resources] = value[Resources]
-                    // TODO this[CellTransformer] = value[CellTransformer]
                     this[Table] = value[Table]
                 }
                 null
@@ -1030,8 +1100,8 @@ class TableView internal constructor(
                     this[CellWidth] = null
                     this[CellClasses] = null
                     this[CellTopics] = null
+                    this[TableTransformer] = null
                     this[Resources] = null
-                    // TODO this[CellTransformer] = null
                     this[Table] = null
                 }
                 null
@@ -1323,14 +1393,14 @@ class CellView(
     }
 
     operator fun set(cell: CellTransformer.Companion, cellTransformer: CellTransformer<*>?) {
-        setCellTransformer(cellTransformer?.function as? (Cell<*>.() -> Any?)?)
+        setCellTransformer(cellTransformer?.function as? (Cell<*>.() -> Unit)?)
     }
 
-    operator fun set(cell: CellTransformer.Companion, cellTransformer: Cell<*>.() -> Any?) {
+    operator fun set(cell: CellTransformer.Companion, cellTransformer: Cell<*>.() -> Unit) {
         setCellTransformer(cellTransformer)
     }
 
-    private fun setCellTransformer(transformer: (Cell<*>.() -> Any?)?) {
+    private fun setCellTransformer(transformer: (Cell<*>.() -> Unit)?) {
         synchronized(columnView.tableView.eventProcessor) {
             val (oldRef, newRef) = columnView.tableView.tableViewRef.refAction {
                 val key = Pair(columnView.header, index)
@@ -1500,6 +1570,41 @@ class ColumnView internal constructor(
         if (header !== emptyHeader) tableView.tableViewRef.get().table?.get(header)
     }
 
+    operator fun get(column: ColumnTransformer.Companion): ColumnTransformer<*> {
+        val ref = tableView.tableViewRef.get()
+        val function = ref.columnTransformers[header] ?: return UnitColumnTransformer(this)
+        return FunctionColumnTransformer(this, function)
+    }
+
+    operator fun set(column: ColumnTransformer.Companion, columnTransformer: ColumnTransformer<*>?) {
+        setColumnTransformer(columnTransformer?.function as? (Column.() -> Unit)?)
+    }
+
+    operator fun set(column: ColumnTransformer.Companion, columnTransformer: Column.() -> Unit) {
+        setColumnTransformer(columnTransformer)
+    }
+
+    private fun setColumnTransformer(transformer: (Column.() -> Unit)?) {
+        synchronized(tableView.eventProcessor) {
+            val (oldRef, newRef) = tableView.tableViewRef.refAction {
+                it.copy(
+                    columnTransformers = if (transformer == null) it.columnTransformers.remove(header) else it.columnTransformers.put(header, transformer),
+                    version = it.version + 1L
+                )
+            }
+
+            if (!tableView.eventProcessor.haveListeners()) return
+
+            val oldView = tableView.makeClone(ref = oldRef)
+            val newView = tableView.makeClone(ref = newRef)
+
+            val old = oldView[header][ColumnTransformer]
+            val new = newView[header][ColumnTransformer]
+
+            tableView.eventProcessor.publish(listOf(TableViewListenerEvent<ColumnTransformer<*>>(old, new)) as List<TableViewListenerEvent<Any>>)
+        }
+    }
+
     operator fun get(cellWidth: CellWidth.Companion): CellWidth<ColumnView, *> {
         val ref = tableView.tableViewRef.get()
         return when (val width = ref.columnViews[header]?.cellWidth) {
@@ -1636,9 +1741,9 @@ class ColumnView internal constructor(
             is CellWidth<*, *> -> { tableView[this][CellWidth] = value; value }
             is CellClasses<*> -> { tableView[this][CellClasses] = value; value }
             is CellTopics<*> -> { tableView[this][CellTopics] = value; value }
+            is ColumnTransformer<*> -> { tableView[this][ColumnTransformer] = value; value }
             is Unit -> { /* no assignment */ Unit }
             is Function1<*, *> -> { invoke(value as ColumnView.() -> Any?) }
-            // TODO CellTransformer?
             null -> { tableView[this] = null; null }
             else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
         }
@@ -1681,16 +1786,16 @@ class ColumnView internal constructor(
 
     operator fun set(rowView: RowView, view: CellView?) { this[rowView.index] = view }
 
-    operator fun set(index: Long, function: CellView.() -> Any?) { this[index] { function() } }
+    operator fun set(index: Long, function: CellView.() -> Unit) { this[index].function() }
 
-    operator fun set(index: Int, function: CellView.() -> Any?) { this[index] { function() } }
+    operator fun set(index: Int, function: CellView.() -> Unit) { this[index].function() }
 
-    operator fun set(row: Row, function: CellView.() -> Any?) {
+    operator fun set(row: Row, function: CellView.() -> Unit) {
         // No IR.AT check here because this is actually a get before set
-        this[row] { function() }
+        this[row].function()
     }
 
-    operator fun set(rowView: RowView, function: CellView.() -> Any?) { this[rowView.index] { function() } }
+    operator fun set(rowView: RowView, function: CellView.() -> Unit) { this[rowView.index].function() }
 
     override fun iterator(): Iterator<DerivedCellView> {
         val ref = tableView.tableViewRef.get()
@@ -1797,6 +1902,41 @@ class RowView internal constructor(
     val tableView: TableView,
     val index: Long
 ) : Iterable<DerivedCellView> {
+    operator fun get(row: RowTransformer.Companion): RowTransformer<*> {
+        val ref = tableView.tableViewRef.get()
+        val function = ref.rowTransformers[index] ?: return UnitRowTransformer(this)
+        return FunctionRowTransformer(this, function)
+    }
+
+    operator fun set(row: RowTransformer.Companion, rowTransformer: RowTransformer<*>?) {
+        setRowTransformer(rowTransformer?.function as? (Row.() -> Unit)?)
+    }
+
+    operator fun set(row: RowTransformer.Companion, rowTransformer: Row.() -> Unit) {
+        setRowTransformer(rowTransformer)
+    }
+
+    private fun setRowTransformer(transformer: (Row.() -> Unit)?) {
+        synchronized(tableView.eventProcessor) {
+            val (oldRef, newRef) = tableView.tableViewRef.refAction {
+                it.copy(
+                    rowTransformers = if (transformer == null) it.rowTransformers.remove(index) else it.rowTransformers.put(index, transformer),
+                    version = it.version + 1L
+                )
+            }
+
+            if (!tableView.eventProcessor.haveListeners()) return
+
+            val oldView = tableView.makeClone(ref = oldRef)
+            val newView = tableView.makeClone(ref = newRef)
+
+            val old = oldView[index][RowTransformer]
+            val new = newView[index][RowTransformer]
+
+            tableView.eventProcessor.publish(listOf(TableViewListenerEvent<RowTransformer<*>>(old, new)) as List<TableViewListenerEvent<Any>>)
+        }
+    }
+
     operator fun get(cellHeight: CellHeight.Companion): CellHeight<RowView, *> {
         val ref = tableView.tableViewRef.get()
         return when (val height = ref.rowViews[index]?.cellHeight) {
@@ -1933,9 +2073,9 @@ class RowView internal constructor(
             is CellHeight<*, *> -> { tableView[this][CellHeight] = value; value }
             is CellClasses<*> -> { tableView[this][CellClasses] = value; value }
             is CellTopics<*> -> { tableView[this][CellTopics] = value; value }
+            is RowTransformer<*> -> { tableView[this][RowTransformer] = value; value }
             is Unit -> { /* no assignment */ Unit }
             is Function1<*, *> -> { invoke(value as RowView.() -> Any?) }
-            // TODO CellTransformer?
             null -> { tableView[this] = null; null }
             else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
         }
@@ -1972,13 +2112,13 @@ class RowView internal constructor(
 
     operator fun set(column: Column, view: CellView?) { tableView[column.header, index] = view }
 
-    operator fun set(vararg header: String, function: CellView.() -> Any?) { tableView[Header(*header), index] { function() } }
+    operator fun set(vararg header: String, function: CellView.() -> Unit) { tableView[Header(*header), index].function() }
 
-    operator fun set(header: Header, function: CellView.() -> Any?) { tableView[header, index] { function() } }
+    operator fun set(header: Header, function: CellView.() -> Unit) { tableView[header, index].function() }
 
-    operator fun set(columnView: ColumnView, function: CellView.() -> Any?) { tableView[columnView.header, index] { function() } }
+    operator fun set(columnView: ColumnView, function: CellView.() -> Unit) { tableView[columnView.header, index].function() }
 
-    operator fun set(column: Column, function: CellView.() -> Any?) { tableView[column.header, index] { function() } }
+    operator fun set(column: Column, function: CellView.() -> Unit) { tableView[column.header, index].function() }
 
     override fun iterator(): Iterator<DerivedCellView> {
         val ref = tableView.tableViewRef.get()
@@ -2587,32 +2727,192 @@ class CellTopics<S> internal constructor(
     companion object
 }
 
-// TODO Should introduce a generic type S like else where..
-sealed class CellTransformer<T> {
-    abstract val source: CellView
-    abstract val function: T
+sealed class Transformer<S, T>(val source: S, val function: T)
 
+abstract class TableTransformer<T>(source: TableView, function: T): Transformer<TableView, T>(source, function) {
+    operator fun invoke(function: TableTransformer<*>.() -> Any?): Any? {
+        val value = this.function()
+        val transformer = when(value) {
+            is FunctionTableTransformer -> value.function
+            is UnitTableTransformer -> null
+            is Unit -> { /* no assignment */ return Unit }
+            is Function1<*, *> -> value as Table.() -> Unit
+            null -> null
+            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
+        }
+
+        if (transformer == null) source[TableTransformer] = null else source[TableTransformer] = transformer
+
+        return value
+    }
+
+    operator fun contains(other: Any?): Boolean {
+        return when (other) {
+            is TableTransformer<*> -> this.function == other.function
+            is Function1<*, *> -> this.function == other
+            is Unit -> this.function == Unit
+            null -> this.function == Unit
+            else -> this == other
+        }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as TableTransformer<*>
+
+        if (source != other.source) return false
+        if (function != other.function) return false
+
+        return true
+    }
+
+    override fun hashCode() = Objects.hashCode(this.function)
+
+    companion object
+}
+
+class UnitTableTransformer internal constructor(
+    source: TableView
+): TableTransformer<Unit>(source, Unit) {
+    override fun toString() = "UnitTableTransformer"
+}
+
+class FunctionTableTransformer internal constructor(
+    source: TableView,
+    function: Table.() -> Unit
+): TableTransformer<Table.() -> Unit>(source, function) {
+    override fun toString() = "FunctionTableTransformer[$function]"
+}
+
+abstract class ColumnTransformer<T>(source: ColumnView, function: T): Transformer<ColumnView, T>(source, function) {
+    operator fun invoke(function: ColumnTransformer<*>.() -> Any?): Any? {
+        val value = this.function()
+        val transformer = when(value) {
+            is FunctionColumnTransformer -> value.function
+            is UnitColumnTransformer -> null
+            is Unit -> { /* no assignment */ return Unit }
+            is Function1<*, *> -> value as Column.() -> Unit
+            null -> null
+            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
+        }
+
+        if (transformer == null) source[ColumnTransformer] = null else source[ColumnTransformer] = transformer
+
+        return value
+    }
+
+    operator fun contains(other: Any?): Boolean {
+        return when (other) {
+            is ColumnTransformer<*> -> this.function == other.function
+            is Function1<*, *> -> this.function == other
+            is Unit -> this.function == Unit
+            null -> this.function == Unit
+            else -> this == other
+        }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ColumnTransformer<*>
+
+        if (source != other.source) return false
+        if (function != other.function) return false
+
+        return true
+    }
+
+    override fun hashCode() = Objects.hashCode(this.function)
+
+    companion object
+}
+
+class UnitColumnTransformer internal constructor(
+    source: ColumnView
+): ColumnTransformer<Unit>(source, Unit) {
+    override fun toString() = "UnitColumnTransformer"
+}
+
+class FunctionColumnTransformer internal constructor(
+    source: ColumnView,
+    function: Column.() -> Unit
+): ColumnTransformer<Column.() -> Unit>(source, function) {
+    override fun toString() = "FunctionColumnTransformer[$function]"
+}
+
+abstract class RowTransformer<T>(source: RowView, function: T): Transformer<RowView, T>(source, function) {
+    operator fun invoke(function: RowTransformer<*>.() -> Any?): Any? {
+        val value = this.function()
+        val transformer = when(value) {
+            is FunctionRowTransformer -> value.function
+            is UnitRowTransformer -> null
+            is Unit -> { /* no assignment */ return Unit }
+            is Function1<*, *> -> value as Row.() -> Unit
+            null -> null
+            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
+        }
+
+        if (transformer == null) source[RowTransformer] = null else source[RowTransformer] = transformer
+
+        return value
+    }
+
+    operator fun contains(other: Any?): Boolean {
+        return when (other) {
+            is RowTransformer<*> -> this.function == other.function
+            is Function1<*, *> -> this.function == other
+            is Unit -> this.function == Unit
+            null -> this.function == Unit
+            else -> this == other
+        }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as RowTransformer<*>
+
+        if (source != other.source) return false
+        if (function != other.function) return false
+
+        return true
+    }
+
+    override fun hashCode() = Objects.hashCode(this.function)
+
+    companion object
+}
+
+class UnitRowTransformer internal constructor(
+    source: RowView
+): RowTransformer<Unit>(source, Unit) {
+    override fun toString() = "UnitRowTransformer"
+}
+
+class FunctionRowTransformer internal constructor(
+    source: RowView,
+    function: Row.() -> Unit
+): RowTransformer<Row.() -> Unit>(source, function) {
+    override fun toString() = "FunctionRowTransformer[$function]"
+}
+
+abstract class CellTransformer<T>(source: CellView, function: T): Transformer<CellView, T>(source, function) {
     operator fun invoke(function: CellTransformer<*>.() -> Any?): Any? {
         val value = this.function()
         val transformer = when(value) {
             is FunctionCellTransformer -> value.function
             is UnitCellTransformer -> null
             is Unit -> { /* no assignment */ return Unit }
-            is Function1<*, *> -> value as Cell<*>.() -> Any?
+            is Function1<*, *> -> value as Cell<*>.() -> Unit
             null -> null
             else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
         }
 
         if (transformer == null) source[CellTransformer] = null else source[CellTransformer] = transformer
-        /*
-        // TODO
-        when (val source = source) {
-            is TableView -> if (transformer == null) source[CellTransformer] = null else source[CellTransformer] = transformer
-            is ColumnView -> if (transformer == null) source[CellTransformer] = null else source[CellTransformer] = transformer
-            is RowView -> if (transformer == null) source[CellTransformer] = null else source[CellTransformer] = transformer
-            is CellView -> if (transformer == null) source[CellTransformer] = null else source[CellTransformer] = transformer
-        }
-         */
 
         return value
     }
@@ -2645,17 +2945,15 @@ sealed class CellTransformer<T> {
 }
 
 class UnitCellTransformer internal constructor(
-    override val source: CellView
-): CellTransformer<Unit>() {
-    override val function = Unit
-
+    source: CellView
+): CellTransformer<Unit>(source, Unit) {
     override fun toString() = "UnitCellTransformer"
 }
 
 class FunctionCellTransformer internal constructor(
-    override val source: CellView,
-    override val function: Cell<*>.() -> Any?
-): CellTransformer<Cell<*>.() -> Any?>() {
+    source: CellView,
+    function: Cell<*>.() -> Unit
+): CellTransformer<Cell<*>.() -> Unit>(source, function) {
     override fun toString() = "FunctionCellTransformer[$function]"
 }
 
