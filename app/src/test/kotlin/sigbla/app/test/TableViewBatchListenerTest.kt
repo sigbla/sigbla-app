@@ -1382,15 +1382,15 @@ class TableViewBatchListenerTest {
     fun `event values columnview`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
-        val ct1: Cell<*>.() -> Unit = {}
-        val ct2: Cell<*>.() -> Unit = {}
+        val ct1: Column.() -> Unit = {}
+        val ct2: Column.() -> Unit = {}
 
         batch(tv1) {
             //tv1["A"][CellHeight] = 25
             tv1["A"][CellWidth] = 30
             tv1["A"][CellClasses] = "cell-classes-1"
             tv1["A"][CellTopics] = "cell-topics-1"
-            //tv1["A"][CellTransformer] = ct1
+            tv1["A"][ColumnTransformer] = ct1
         }
 
         var init = true
@@ -1420,14 +1420,12 @@ class TableViewBatchListenerTest {
                                 assertEquals(oldView["A"], (it.oldValue as CellTopics<*>).source)
                                 assertEquals(newView["A"], (it.newValue as CellTopics<*>).source)
                             }
-                            /*
-                            is CellTransformer<*> -> {
-                                assertEquals(Unit, (it.oldValue as CellTransformer<*>).function)
-                                assertEquals(ct1, (it.newValue as CellTransformer<*>).function)
-                                assertEquals(oldView["A"], (it.oldValue as CellTransformer<*>).source)
-                                assertEquals(newView["A"], (it.newValue as CellTransformer<*>).source)
+                            is ColumnTransformer<*> -> {
+                                assertEquals(Unit, (it.oldValue as ColumnTransformer<*>).function)
+                                assertEquals(ct1, (it.newValue as ColumnTransformer<*>).function)
+                                assertEquals(oldView["A"], (it.oldValue as ColumnTransformer<*>).source)
+                                assertEquals(newView["A"], (it.newValue as ColumnTransformer<*>).source)
                             }
-                             */
                             else -> assertTrue(false)
                         }
                     }
@@ -1454,14 +1452,12 @@ class TableViewBatchListenerTest {
                                 assertEquals(oldView["A"], (it.oldValue as CellTopics<*>).source)
                                 assertEquals(newView["A"], (it.newValue as CellTopics<*>).source)
                             }
-                            /*
-                            is CellTransformer<*> -> {
-                                assertEquals(ct1, (it.oldValue as CellTransformer<*>).function)
-                                assertEquals(ct2, (it.newValue as CellTransformer<*>).function)
-                                assertEquals(oldView["A"], (it.oldValue as CellTransformer<*>).source)
-                                assertEquals(newView["A"], (it.newValue as CellTransformer<*>).source)
+                            is ColumnTransformer<*> -> {
+                                assertEquals(ct1, (it.oldValue as ColumnTransformer<*>).function)
+                                assertEquals(ct2, (it.newValue as ColumnTransformer<*>).function)
+                                assertEquals(oldView["A"], (it.oldValue as ColumnTransformer<*>).source)
+                                assertEquals(newView["A"], (it.newValue as ColumnTransformer<*>).source)
                             }
-                             */
                             else -> assertTrue(false)
                         }
                     }
@@ -1474,7 +1470,7 @@ class TableViewBatchListenerTest {
             tv1["A"][CellWidth] = 60
             tv1["A"][CellClasses] = "cell-classes-2"
             tv1["A"][CellTopics] = "cell-topics-2"
-            //tv1["A"][CellTransformer] = ct2
+            tv1["A"][ColumnTransformer] = ct2
         }
     }
 
@@ -1482,15 +1478,15 @@ class TableViewBatchListenerTest {
     fun `event values rowview`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
-        val ct1: Cell<*>.() -> Unit = {}
-        val ct2: Cell<*>.() -> Unit = {}
+        val rt1: Row.() -> Unit = {}
+        val rt2: Row.() -> Unit = {}
 
         batch(tv1) {
             tv1[1][CellHeight] = 25
             //tv1[1][CellWidth] = 30
             tv1[1][CellClasses] = "cell-classes-1"
             tv1[1][CellTopics] = "cell-topics-1"
-            //tv1[1][CellTransformer] = ct1
+            tv1[1][RowTransformer] = rt1
         }
 
         var init = true
@@ -1520,14 +1516,12 @@ class TableViewBatchListenerTest {
                                 assertEquals(oldView[1], (it.oldValue as CellTopics<*>).source)
                                 assertEquals(newView[1], (it.newValue as CellTopics<*>).source)
                             }
-                            /*
-                            is CellTransformer<*> -> {
-                                assertEquals(Unit, (it.oldValue as CellTransformer<*>).function)
-                                assertEquals(ct1, (it.newValue as CellTransformer<*>).function)
-                                assertEquals(oldView[1], (it.oldValue as CellTransformer<*>).source)
-                                assertEquals(newView[1], (it.newValue as CellTransformer<*>).source)
+                            is RowTransformer<*> -> {
+                                assertEquals(Unit, (it.oldValue as RowTransformer<*>).function)
+                                assertEquals(rt1, (it.newValue as RowTransformer<*>).function)
+                                assertEquals(oldView[1], (it.oldValue as RowTransformer<*>).source)
+                                assertEquals(newView[1], (it.newValue as RowTransformer<*>).source)
                             }
-                             */
                             else -> assertTrue(false)
                         }
                     }
@@ -1554,14 +1548,12 @@ class TableViewBatchListenerTest {
                                 assertEquals(oldView[1], (it.oldValue as CellTopics<*>).source)
                                 assertEquals(newView[1], (it.newValue as CellTopics<*>).source)
                             }
-                            /*
-                            is CellTransformer<*> -> {
-                                assertEquals(ct1, (it.oldValue as CellTransformer<*>).function)
-                                assertEquals(ct2, (it.newValue as CellTransformer<*>).function)
-                                assertEquals(oldView[1], (it.oldValue as CellTransformer<*>).source)
-                                assertEquals(newView[1], (it.newValue as CellTransformer<*>).source)
+                            is RowTransformer<*> -> {
+                                assertEquals(rt1, (it.oldValue as RowTransformer<*>).function)
+                                assertEquals(rt2, (it.newValue as RowTransformer<*>).function)
+                                assertEquals(oldView[1], (it.oldValue as RowTransformer<*>).source)
+                                assertEquals(newView[1], (it.newValue as RowTransformer<*>).source)
                             }
-                             */
                             else -> assertTrue(false)
                         }
                     }
@@ -1574,7 +1566,7 @@ class TableViewBatchListenerTest {
             //tv1[1][CellWidth] = 60
             tv1[1][CellClasses] = "cell-classes-2"
             tv1[1][CellTopics] = "cell-topics-2"
-            //tv1[1][CellTransformer] = ct2
+            tv1[1][RowTransformer] = rt2
         }
     }
 
@@ -1585,8 +1577,8 @@ class TableViewBatchListenerTest {
         val t1 = Table[null]
         val t2 = Table[null]
 
-        val ct1: Cell<*>.() -> Unit = {}
-        val ct2: Cell<*>.() -> Unit = {}
+        val tt1: Table.() -> Unit = {}
+        val tt2: Table.() -> Unit = {}
 
         val r1: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "a" to {}
         val r2: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "b" to {}
@@ -1596,7 +1588,7 @@ class TableViewBatchListenerTest {
             tv1[CellWidth] = 30
             tv1[CellClasses] = "cell-classes-1"
             tv1[CellTopics] = "cell-topics-1"
-            //tv1[CellTransformer] = ct1
+            tv1[TableTransformer] = tt1
             tv1[Resources] = r1
             tv1[Table] = t1
         }
@@ -1635,14 +1627,12 @@ class TableViewBatchListenerTest {
                                 assertEquals(oldView, (it.oldValue as CellTopics<*>).source)
                                 assertEquals(newView, (it.newValue as CellTopics<*>).source)
                             }
-                            /*
-                            is CellTransformer<*> -> {
-                                assertEquals(Unit, (it.oldValue as CellTransformer<*>).function)
-                                assertEquals(ct1, (it.newValue as CellTransformer<*>).function)
-                                assertEquals(oldView, (it.oldValue as CellTransformer<*>).source)
-                                assertEquals(newView, (it.newValue as CellTransformer<*>).source)
+                            is TableTransformer<*> -> {
+                                assertEquals(Unit, (it.oldValue as TableTransformer<*>).function)
+                                assertEquals(tt1, (it.newValue as TableTransformer<*>).function)
+                                assertEquals(oldView, (it.oldValue as TableTransformer<*>).source)
+                                assertEquals(newView, (it.newValue as TableTransformer<*>).source)
                             }
-                             */
                             is Resources -> {
                                 assertEquals(emptyMap(), (it.oldValue as Resources).resources)
                                 assertEquals(mapOf(r1), (it.newValue as Resources).resources)
@@ -1690,14 +1680,12 @@ class TableViewBatchListenerTest {
                                 assertEquals(oldView, (it.oldValue as CellTopics<*>).source)
                                 assertEquals(newView, (it.newValue as CellTopics<*>).source)
                             }
-                            /*
-                            is CellTransformer<*> -> {
-                                assertEquals(ct1, (it.oldValue as CellTransformer<*>).function)
-                                assertEquals(ct2, (it.newValue as CellTransformer<*>).function)
-                                assertEquals(oldView, (it.oldValue as CellTransformer<*>).source)
-                                assertEquals(newView, (it.newValue as CellTransformer<*>).source)
+                            is TableTransformer<*> -> {
+                                assertEquals(tt1, (it.oldValue as TableTransformer<*>).function)
+                                assertEquals(tt2, (it.newValue as TableTransformer<*>).function)
+                                assertEquals(oldView, (it.oldValue as TableTransformer<*>).source)
+                                assertEquals(newView, (it.newValue as TableTransformer<*>).source)
                             }
-                             */
                             is Resources -> {
                                 assertEquals(mapOf(r1), (it.oldValue as Resources).resources)
                                 assertEquals(mapOf(r2), (it.newValue as Resources).resources)
@@ -1724,7 +1712,7 @@ class TableViewBatchListenerTest {
             tv1[CellWidth] = 60
             tv1[CellClasses] = "cell-classes-2"
             tv1[CellTopics] = "cell-topics-2"
-            //tv1[CellTransformer] = ct2
+            tv1[TableTransformer] = tt2
             tv1[Resources] = r2
             tv1[Table] = t2
         }
@@ -1737,8 +1725,8 @@ class TableViewBatchListenerTest {
         val t1 = Table[null]
         val t2 = Table[null]
 
-        val ct1: Cell<*>.() -> Unit = {}
-        val ct2: Cell<*>.() -> Unit = {}
+        val tt1: Table.() -> Unit = {}
+        val tt2: Table.() -> Unit = {}
 
         val r1: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "a" to {}
         val r2: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "b" to {}
@@ -1748,7 +1736,7 @@ class TableViewBatchListenerTest {
             tv1[CellWidth] = 30
             tv1[CellClasses] = "cell-classes-1"
             tv1[CellTopics] = "cell-topics-1"
-            //tv1[CellTransformer] = ct1
+            tv1[TableTransformer] = tt1
             tv1[Resources] = r1
             tv1[Table] = t1
         }
@@ -1759,6 +1747,7 @@ class TableViewBatchListenerTest {
         var eventCount4 = 0
         var eventCount5 = 0
         var eventCount6 = 0
+        var eventCount7 = 0
 
         on<CellHeight<*, *>>(tv1) events {
             eventCount1 += count()
@@ -1784,12 +1773,17 @@ class TableViewBatchListenerTest {
             eventCount6 += count()
         }
 
+        on<TableTransformer<*>>(tv1) events {
+            eventCount7 += count()
+        }
+
         assertEquals(1, eventCount1)
         assertEquals(1, eventCount2)
         assertEquals(1, eventCount3)
         assertEquals(1, eventCount4)
         assertEquals(1, eventCount5)
         assertEquals(1, eventCount6)
+        assertEquals(1, eventCount7)
 
         batch(tv1) {
             tv1[CellHeight] = 45
@@ -1801,6 +1795,7 @@ class TableViewBatchListenerTest {
         assertEquals(1, eventCount4)
         assertEquals(1, eventCount5)
         assertEquals(1, eventCount6)
+        assertEquals(1, eventCount7)
 
         batch(tv1) {
             tv1[CellWidth] = 60
@@ -1812,6 +1807,7 @@ class TableViewBatchListenerTest {
         assertEquals(1, eventCount4)
         assertEquals(1, eventCount5)
         assertEquals(1, eventCount6)
+        assertEquals(1, eventCount7)
 
         batch(tv1) {
             tv1[CellClasses] = "cell-classes-2"
@@ -1823,6 +1819,7 @@ class TableViewBatchListenerTest {
         assertEquals(1, eventCount4)
         assertEquals(1, eventCount5)
         assertEquals(1, eventCount6)
+        assertEquals(1, eventCount7)
 
         batch(tv1) {
             tv1[CellTopics] = "cell-topics-2"
@@ -1834,6 +1831,7 @@ class TableViewBatchListenerTest {
         assertEquals(2, eventCount4)
         assertEquals(1, eventCount5)
         assertEquals(1, eventCount6)
+        assertEquals(1, eventCount7)
 
         batch(tv1) {
             tv1[Resources] = r2
@@ -1845,6 +1843,7 @@ class TableViewBatchListenerTest {
         assertEquals(2, eventCount4)
         assertEquals(2, eventCount5)
         assertEquals(1, eventCount6)
+        assertEquals(1, eventCount7)
 
         batch(tv1) {
             tv1[Table] = t2
@@ -1856,6 +1855,19 @@ class TableViewBatchListenerTest {
         assertEquals(2, eventCount4)
         assertEquals(2, eventCount5)
         assertEquals(2, eventCount6)
+        assertEquals(1, eventCount7)
+
+        batch(tv1) {
+            tv1[TableTransformer] = tt2
+        }
+
+        assertEquals(2, eventCount1)
+        assertEquals(2, eventCount2)
+        assertEquals(2, eventCount3)
+        assertEquals(2, eventCount4)
+        assertEquals(2, eventCount5)
+        assertEquals(2, eventCount6)
+        assertEquals(2, eventCount7)
     }
 
     @Test
