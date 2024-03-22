@@ -12,15 +12,18 @@ the various types of metadata we can store on views.
 Whenever metadata is updated on a view, if we subscribe to it, we get told about it. Below we list all the various
 metadata types currently supported on a view.
 
-| Type            | Subtypes                                     | Assignable on                            |
-|-----------------|----------------------------------------------|------------------------------------------|
-| CellClasses     | N/A                                          | TableView, ColumnView, RowView, CellView |
-| CellHeight      | UnitCellHeight, PixelCellHeight              | TableView, RowView, CellView             |
-| CellTopics      | N/A                                          | TableView, ColumnView, RowView, CellView |
-| CellTransformer | UnitCellTransformer, FunctionCellTransformer | CellView                                 |
-| CellWidth       | UnitCellWidth, PixelCellWidth                | TableView, ColumnView, CellView          |
-| Resources       | N/A                                          | TableView                                |
-| Table           | SourceTable <sup>*</sup>                     | TableView                                |
+| Type              | Subtypes                                         | Assignable on                            |
+|-------------------|--------------------------------------------------|------------------------------------------|
+| CellClasses       | N/A                                              | TableView, ColumnView, RowView, CellView |
+| CellHeight        | UnitCellHeight, PixelCellHeight                  | TableView, RowView, CellView             |
+| CellTopics        | N/A                                              | TableView, ColumnView, RowView, CellView |
+| TableTransformer  | UnitTableTransformer, FunctionTableTransformer   | TableView                                |
+| ColumnTransformer | UnitColumnTransformer, FunctionColumnTransformer | ColumnView                               |
+| RowTransformer    | UnitRowTransformer, FunctionRowTransformer       | RowView                                  |
+| CellTransformer   | UnitCellTransformer, FunctionCellTransformer     | CellView                                 |
+| CellWidth         | UnitCellWidth, PixelCellWidth                    | TableView, ColumnView, CellView          |
+| Resources         | N/A                                              | TableView                                |
+| Table             | SourceTable <sup>*</sup>                         | TableView                                |
 
 <sup>*</sup> SourceTable is not a subtype of Table, but instead a container of the table for event purposes.
 

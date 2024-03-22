@@ -384,9 +384,9 @@ fun clickableCellCounter(sourceCell: Cell<*>): CellView.() -> Unit = {
         }
     }
 
-    val transformer: Cell<*>.() -> Any? = {
+    val transformer: Cell<*>.() -> Unit = {
         val value = this.toString()
-        div("click-cell") {
+        this.table[this] = div("click-cell") {
             attributes["callback"] = callback
             +value
         }
@@ -407,14 +407,14 @@ fun clickableCellCounter(sourceCell: Cell<*>): CellView.() -> Unit = {
                     if (data.action === "preparing") {
                         const cell = data.target.querySelector("div");
                         if (cell == null) return;
-    
+
                         const callback = cell.attributes.getNamedItem("callback").value;
                         if (callback === null || callback === undefined || callback.trim() === "") return;
-    
+
                         const onclick = async (e) => {
                             await fetch(callback, { method: "POST" });
                         }
-    
+
                         cell.onclick = onclick;
                     }
                 });
