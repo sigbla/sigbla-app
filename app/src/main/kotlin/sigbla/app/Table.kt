@@ -173,7 +173,7 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
         this[column][index] = value
     }
 
-    operator fun set(column: Column, index: Long, init: Cell<*>.() -> Any?) = this[column][index] { init() }
+    operator fun set(column: Column, index: Long, init: Cell<*>.() -> Unit) = this[column][index].init()
 
     // -----
 
@@ -209,7 +209,7 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
         this[column][index] = value
     }
 
-    operator fun set(column: Column, index: Int, init: Cell<*>.() -> Any?) = this[column][index] { init() }
+    operator fun set(column: Column, index: Int, init: Cell<*>.() -> Unit) = this[column][index].init()
 
     // -----
 
@@ -245,7 +245,7 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
         this[header][index] = value
     }
 
-    operator fun set(header: Header, index: Long, init: Cell<*>.() -> Any?) = this[header][index] { init() }
+    operator fun set(header: Header, index: Long, init: Cell<*>.() -> Unit) = this[header][index].init()
 
     // -----
 
@@ -281,7 +281,7 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
         this[header][index] = value
     }
 
-    operator fun set(header: Header, index: Int, init: Cell<*>.() -> Any?) = this[header][index] { init() }
+    operator fun set(header: Header, index: Int, init: Cell<*>.() -> Unit) = this[header][index].init()
 
     // -----
 
@@ -317,7 +317,7 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
         this[column][row] = value
     }
 
-    operator fun set(column: Column, row: Row, init: Cell<*>.() -> Any?) = this[column][row] { init() }
+    operator fun set(column: Column, row: Row, init: Cell<*>.() -> Unit) = this[column][row].init()
 
     // -----
 
@@ -353,7 +353,7 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
         this[header][row] = value
     }
 
-    operator fun set(header: Header, row: Row, init: Cell<*>.() -> Any?) = this[header][row] { init() }
+    operator fun set(header: Header, row: Row, init: Cell<*>.() -> Unit) = this[header][row].init()
 
     // -----
 
@@ -389,43 +389,43 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
         this[cell.column][cell.index] = value
     }
 
-    operator fun set(cell: Cell<*>, init: Cell<*>.() -> Any?) = this[cell.column][cell.index] { init() }
+    operator fun set(cell: Cell<*>, init: Cell<*>.() -> Unit) = this[cell.column][cell.index].init()
 
     // -----
 
-    operator fun set(header1: String, index: Long, init: Cell<*>.() -> Any?) = this[header1][index] { init() }
+    operator fun set(header1: String, index: Long, init: Cell<*>.() -> Unit) = this[header1][index].init()
 
-    operator fun set(header1: String, header2: String, index: Long, init: Cell<*>.() -> Any?) = this[header1, header2][index] { init() }
+    operator fun set(header1: String, header2: String, index: Long, init: Cell<*>.() -> Unit) = this[header1, header2][index].init()
 
-    operator fun set(header1: String, header2: String, header3: String, index: Long, init: Cell<*>.() -> Any?) = this[header1, header2, header3][index] { init() }
+    operator fun set(header1: String, header2: String, header3: String, index: Long, init: Cell<*>.() -> Unit) = this[header1, header2, header3][index].init()
 
-    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, init: Cell<*>.() -> Any?) = this[header1, header2, header3, header4][index] { init() }
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, init: Cell<*>.() -> Unit) = this[header1, header2, header3, header4][index].init()
 
-    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, init: Cell<*>.() -> Any?) = this[header1, header2, header3, header4, header5][index] { init() }
-
-    // -----
-
-    operator fun set(header1: String, index: Int, init: Cell<*>.() -> Any?) = this[header1][index] { init() }
-
-    operator fun set(header1: String, header2: String, index: Int, init: Cell<*>.() -> Any?) = this[header1, header2][index] { init() }
-
-    operator fun set(header1: String, header2: String, header3: String, index: Int, init: Cell<*>.() -> Any?) = this[header1, header2, header3][index] { init() }
-
-    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, init: Cell<*>.() -> Any?) = this[header1, header2, header3, header4][index] { init() }
-
-    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, init: Cell<*>.() -> Any?) = this[header1, header2, header3, header4, header5][index] { init() }
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, init: Cell<*>.() -> Unit) = this[header1, header2, header3, header4, header5][index].init()
 
     // -----
 
-    operator fun set(header1: String, row: Row, init: Cell<*>.() -> Any?) = this[header1][row] { init() }
+    operator fun set(header1: String, index: Int, init: Cell<*>.() -> Unit) = this[header1][index].init()
 
-    operator fun set(header1: String, header2: String, row: Row, init: Cell<*>.() -> Any?) = this[header1, header2][row] { init() }
+    operator fun set(header1: String, header2: String, index: Int, init: Cell<*>.() -> Unit) = this[header1, header2][index].init()
 
-    operator fun set(header1: String, header2: String, header3: String, row: Row, init: Cell<*>.() -> Any?) = this[header1, header2, header3][row] { init() }
+    operator fun set(header1: String, header2: String, header3: String, index: Int, init: Cell<*>.() -> Unit) = this[header1, header2, header3][index].init()
 
-    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, init: Cell<*>.() -> Any?) = this[header1, header2, header3, header4][row] { init() }
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, init: Cell<*>.() -> Unit) = this[header1, header2, header3, header4][index].init()
 
-    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, init: Cell<*>.() -> Any?) = this[header1, header2, header3, header4, header5][row] { init() }
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, init: Cell<*>.() -> Unit) = this[header1, header2, header3, header4, header5][index].init()
+
+    // -----
+
+    operator fun set(header1: String, row: Row, init: Cell<*>.() -> Unit) = this[header1][row].init()
+
+    operator fun set(header1: String, header2: String, row: Row, init: Cell<*>.() -> Unit) = this[header1, header2][row].init()
+
+    operator fun set(header1: String, header2: String, header3: String, row: Row, init: Cell<*>.() -> Unit) = this[header1, header2, header3][row].init()
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, init: Cell<*>.() -> Unit) = this[header1, header2, header3, header4][row].init()
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, init: Cell<*>.() -> Unit) = this[header1, header2, header3, header4, header5][row].init()
 
     // -----
 

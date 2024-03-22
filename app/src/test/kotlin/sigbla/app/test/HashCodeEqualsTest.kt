@@ -207,7 +207,19 @@ class HashCodeEqualsTest {
         val emptyCellTopics1 = tableView1[CellTopics].also { it { listOf("B", "A") } }
         val filledCellTopics1 = tableView1[CellTopics]
 
-        val cellTransformerFunction: Cell<*>.() -> Any? = { this }
+        val tableTransformerFunction: Table.() -> Unit = { }
+        val emptyTableTransformer1 = tableView1[TableTransformer].also { it { tableTransformerFunction } }
+        val filledTableTransformer1 = tableView1[TableTransformer]
+
+        val columnTransformerFunction: Column.() -> Unit = { }
+        val emptyColumnTransformer1 = tableView1["A"][ColumnTransformer].also { it { columnTransformerFunction } }
+        val filledColumnTransformer1 = tableView1["A"][ColumnTransformer]
+
+        val rowTransformerFunction: Row.() -> Unit = { }
+        val emptyRowTransformer1 = tableView1[1][RowTransformer].also { it { rowTransformerFunction } }
+        val filledRowTransformer1 = tableView1[1][RowTransformer]
+
+        val cellTransformerFunction: Cell<*>.() -> Unit = { }
         val emptyCellTransformer1 = tableView1["A", 1][CellTransformer].also { it { cellTransformerFunction } }
         val filledCellTransformer1 = tableView1["A", 1][CellTransformer]
 
@@ -227,6 +239,15 @@ class HashCodeEqualsTest {
 
         val emptyCellTopics2 = tableView2[CellTopics].also { it { listOf("B", "A") } }
         val filledCellTopics2 = tableView2[CellTopics]
+
+        val emptyTableTransformer2 = tableView2[TableTransformer].also { it { tableTransformerFunction } }
+        val filledTableTransformer2 = tableView2[TableTransformer]
+
+        val emptyColumnTransformer2 = tableView2["A"][ColumnTransformer].also { it { columnTransformerFunction } }
+        val filledColumnTransformer2 = tableView2["A"][ColumnTransformer]
+
+        val emptyRowTransformer2 = tableView2[1][RowTransformer].also { it { rowTransformerFunction } }
+        val filledRowTransformer2 = tableView2[1][RowTransformer]
 
         val emptyCellTransformer2 = tableView2["A", 1][CellTransformer].also { it { cellTransformerFunction } }
         val filledCellTransformer2 = tableView2["A", 1][CellTransformer]
@@ -306,6 +327,51 @@ class HashCodeEqualsTest {
         assertFalse(setOf("A", "B", "C") in filledCellTopics1)
         assertFalse(listOf("A", "B", "C") in filledCellTopics1)
 
+        assertNotEquals(emptyTableTransformer1, emptyTableTransformer2)
+        assertEquals(emptyTableTransformer1.function, emptyTableTransformer2.function)
+        assertTrue(emptyTableTransformer1 in emptyTableTransformer2)
+        assertTrue(emptyTableTransformer2 in emptyTableTransformer1)
+        assertFalse(emptyTableTransformer1 in filledTableTransformer1)
+        assertTrue(null in emptyTableTransformer2)
+        assertTrue(Unit in emptyTableTransformer2)
+
+        assertNotEquals(filledTableTransformer1, filledTableTransformer2)
+        assertEquals(filledTableTransformer1.function, filledTableTransformer2.function)
+        assertTrue(filledTableTransformer1 in filledTableTransformer2)
+        assertTrue(filledTableTransformer2 in filledTableTransformer1)
+        assertTrue(tableTransformerFunction in filledTableTransformer1)
+        assertTrue(filledTableTransformer1.function in filledTableTransformer2)
+
+        assertNotEquals(emptyColumnTransformer1, emptyColumnTransformer2)
+        assertEquals(emptyColumnTransformer1.function, emptyColumnTransformer2.function)
+        assertTrue(emptyColumnTransformer1 in emptyColumnTransformer2)
+        assertTrue(emptyColumnTransformer2 in emptyColumnTransformer1)
+        assertFalse(emptyColumnTransformer1 in filledColumnTransformer1)
+        assertTrue(null in emptyColumnTransformer2)
+        assertTrue(Unit in emptyColumnTransformer2)
+
+        assertNotEquals(filledColumnTransformer1, filledColumnTransformer2)
+        assertEquals(filledColumnTransformer1.function, filledColumnTransformer2.function)
+        assertTrue(filledColumnTransformer1 in filledColumnTransformer2)
+        assertTrue(filledColumnTransformer2 in filledColumnTransformer1)
+        assertTrue(columnTransformerFunction in filledColumnTransformer1)
+        assertTrue(filledColumnTransformer1.function in filledColumnTransformer2)
+
+        assertNotEquals(emptyRowTransformer1, emptyRowTransformer2)
+        assertEquals(emptyRowTransformer1.function, emptyRowTransformer2.function)
+        assertTrue(emptyRowTransformer1 in emptyRowTransformer2)
+        assertTrue(emptyRowTransformer2 in emptyRowTransformer1)
+        assertFalse(emptyRowTransformer1 in filledRowTransformer1)
+        assertTrue(null in emptyRowTransformer2)
+        assertTrue(Unit in emptyRowTransformer2)
+
+        assertNotEquals(filledRowTransformer1, filledRowTransformer2)
+        assertEquals(filledRowTransformer1.function, filledRowTransformer2.function)
+        assertTrue(filledRowTransformer1 in filledRowTransformer2)
+        assertTrue(filledRowTransformer2 in filledRowTransformer1)
+        assertTrue(rowTransformerFunction in filledRowTransformer1)
+        assertTrue(filledRowTransformer1.function in filledRowTransformer2)
+
         assertNotEquals(emptyCellTransformer1, emptyCellTransformer2)
         assertEquals(emptyCellTransformer1.function, emptyCellTransformer2.function)
         assertTrue(emptyCellTransformer1 in emptyCellTransformer2)
@@ -349,6 +415,12 @@ class HashCodeEqualsTest {
         assertEquals(filledCellClasses1.hashCode(), filledCellClasses2.hashCode())
         assertEquals(emptyCellTopics1.hashCode(), emptyCellTopics2.hashCode())
         assertEquals(filledCellTopics1.hashCode(), filledCellTopics2.hashCode())
+        assertEquals(emptyTableTransformer1.hashCode(), emptyTableTransformer2.hashCode())
+        assertEquals(filledTableTransformer1.hashCode(), filledTableTransformer2.hashCode())
+        assertEquals(emptyColumnTransformer1.hashCode(), emptyColumnTransformer2.hashCode())
+        assertEquals(filledColumnTransformer1.hashCode(), filledColumnTransformer2.hashCode())
+        assertEquals(emptyRowTransformer1.hashCode(), emptyRowTransformer2.hashCode())
+        assertEquals(filledRowTransformer1.hashCode(), filledRowTransformer2.hashCode())
         assertEquals(emptyCellTransformer1.hashCode(), emptyCellTransformer2.hashCode())
         assertEquals(filledCellTransformer1.hashCode(), filledCellTransformer2.hashCode())
         assertEquals(emptyResources1.hashCode(), emptyResources2.hashCode())

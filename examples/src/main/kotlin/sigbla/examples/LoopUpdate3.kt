@@ -14,9 +14,11 @@ fun main() {
         tableView[x.toString(), y][CellTransformer] = {
             val black = this.value == true
 
-            div {
-                if (black) style = "background-color: black; width: 100%; height: 100%"
-                else "background-color: white; width: 100%; height: 100%"
+            this.table[this] = div {
+                style = if (black)
+                    "background-color: black; width: 100%; height: 100%"
+                else
+                    "background-color: white; width: 100%; height: 100%"
             }
         }
         table[x.toString(), y] = black

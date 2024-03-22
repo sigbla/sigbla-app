@@ -10,9 +10,9 @@ inline fun <reified T> valueOf(cell: Cell<*>): T? = valueOf(cell, T::class) as T
 
 fun valueOf(cell: Cell<*>, typeFilter: KClass<*>): Any? = if (typeFilter.isInstance(cell.value)) cell.value else null
 
-inline fun <reified T> valueOf(noinline source: Cell<*>.() -> Any?): T? = valueOf(source, T::class) as T?
+inline fun <reified T> valueOf(noinline source: Cell<*>.() -> Unit): T? = valueOf(source, T::class) as T?
 
-fun valueOf(source: Cell<*>.() -> Any?, typeFilter: KClass<*>): Any? {
+fun valueOf(source: Cell<*>.() -> Unit, typeFilter: KClass<*>): Any? {
     val table = BaseTable(null, null, false, RefHolder(TableRef())) as Table
     table["valueOf", 0L].source()
     val value = valueOf(table["valueOf", 0L], typeFilter)

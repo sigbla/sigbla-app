@@ -365,7 +365,7 @@ As we can see from the example, `cellA1v1` keeps its original value, also after 
 change the cell type in a table by simply assigning the value of the type you need.
 
 It's worth noting that we could do `table["A", 1] { "Second value" }` above instead of first assigning this to
-`cellA1v1`. Doing `table["A", 1] = { "Second value" }` also works.
+`cellA1v1`.
 
 ## Utility functions and properties
 

@@ -290,15 +290,18 @@ iterator2.forEach {
 // DerivedCellView(columnView=[B], index=2, cellHeight=20, cellWidth=100, tableView=TableView[null], cellView=[B]:2, cell=200, cellClasses=[], cellTopics=[])
 ```
 
-## Cell transformations
+## Transformations
 
-A table view allows us to define something called cell transformers on selected cell views. A cell transformer allows us
-to change how a cell is presented in the view. It doesn't in any way change the original cell from the underlying table,
-but potentially transforms the cell into another cell.
+A table view allows us to define something called transformers. A transformer allows us to change how a view is presented.
+It doesn't in any way change the original underlying table, but potentially transforms what cells to display and how.
 
 Back when introducing `WebCell` in the chapter on cells, we said it was somewhat problematic to embed HTML content
 directly into a table for the purposes of changing how the content is presented, as it ties the data with the view.
-Cell transformers allow us to break this link.
+Transformers allow us to break this link.
+
+There are transformers at different levels of the hierarchy. You can on a view have table, column, row, and cell transformers.
+They also act in that order, with the table transformer running first, followed by column transformers, row transformers,
+and finally cell transformers.
 
 We can with a transformer take cell values and transform them into whatever we want, which could include HTML
 content for the purpose of elevating or changing how data is viewed, again without this impacting the original cell data.
@@ -306,31 +309,36 @@ content for the purpose of elevating or changing how data is viewed, again witho
 Here's an example that changes the text color to red if the number is negative, otherwise green:
 
 ``` kotlin
-val table = Table["Transformers"]
-val tableView = TableView[table]
+fun main() {
+    val table = Table["Transformers"]
+    val tableView = TableView[table]
 
-table["A", 0] = 100
-table["A", 1] = -100
+    table["A", 0] = 100
+    table["A", 1] = -100
 
-table["A"].forEach {
-    tableView[it][CellTransformer] = {
-        if (!isNumeric) it
-        else if (asDouble!! > 0) div {
+    table["A"].forEach {
+        tableView[it][CellTransformer] = cellTransformer
+    }
+
+    val url = show(tableView)
+    println(url)
+}
+
+val cellTransformer: Cell<*>.() -> Unit = {
+    if (isNumeric) {
+        table[this] = if (this > 0) div {
             p {
                 attributes += "style" to "color: green; text-align: right"
-                +it.toString()
+                +value.toString()
             }
         } else div {
             p {
                 attributes += "style" to "color: red; text-align: right"
-                +it.toString()
+                +value.toString()
             }
         }
     }
 }
-
-val url = show(tableView)
-println(url)
 ```
 
 This is, as explained for the `WebCell` in the chapter on cells using `kotlinx.html` so an `import kotlinx.html.*` is
@@ -344,11 +352,73 @@ perform the transformation, which would cause us to obtain a reference to a `Fun
 adding it do a `tableView[ref][CellTransformer]`, with ref being one of the possible references, such as a `CellView`.
 If no transformer was defined on the reference, we'd obtain a `UnitCellTransformer`, indicating no transformation.
 
-The type T on FunctionCellTransformer is `Cell<*>.() -> Any?`, indicating that anything can be returned from it. However,
-whatever is returned must be accepted as a cell value on a table.
+The type T on FunctionCellTransformer is `Cell<*>.() -> Unit`, indicating that the function is given a cell on which it
+can operate.
 
-It's also important that the transformation function is pure, hence should always return the same output given the
-same input. If they don't, unexpected behavior is to be assumed.
+In the above example we used cell transformers, and we assigned these cell transformers directly to the cells we wanted
+to transform. We might not know in advance what cells we want to transform, or we might want to apply a transformation
+across many cells. The next example shows us doing this on the whole table:
+
+``` kotlin
+import sigbla.app.*
+import kotlinx.html.*
+
+fun main() {
+    val table = Table["Transformers"]
+    val tableView = TableView[table]
+
+    table["A", 0] = 100
+    table["A", 1] = -100
+
+    tableView[TableTransformer] = tableTransformer
+
+    val url = show(tableView)
+    println(url)
+}
+
+val tableTransformer: Table.() -> Unit = {
+    forEach { it.cellTransformer() }
+}
+
+val cellTransformer: Cell<*>.() -> Unit = {
+    if (isNumeric) {
+        table[this] = if (this > 0) div {
+            p {
+                attributes += "style" to "color: green; text-align: right"
+                +value.toString()
+            }
+        } else div {
+            p {
+                attributes += "style" to "color: red; text-align: right"
+                +value.toString()
+            }
+        }
+    }
+}
+```
+
+Using a column transformer, we can limit the transformation to just the defined column:
+
+``` kotlin
+val columnTransformer: Column.() -> Unit = {
+    forEach { it.cellTransformer() }
+}
+
+tableView["A"][ColumnTransformer] = columnTransformer
+```
+
+And similarly with a row transformer on just the defined row:
+
+``` kotlin
+val rowTransformer: Row.() -> Unit = {
+    forEach { it.cellTransformer() }
+}
+
+tableView[1][RowTransformer] = rowTransformer
+```
+
+When using `forEach` above we iterate over cells with values, but there's nothing stopping a transformer to operate
+on cells that don't exist in the source table. This allows a transformer to fill in empty cells if that's what you need.
 
 You can obtain a `Table` instance from a table view that apply all the transformations defined by calling
 `tableView[Table]`:
@@ -361,7 +431,9 @@ table["A", 0] = 100
 table["A", 1] = -100
 
 table["A"].forEach {
-    tableView[it][CellTransformer] = { if (isNumeric) it * 2 else it }
+    tableView[it][CellTransformer] = {
+        if (isNumeric) this.table[this] = this * 2
+    }
 }
 
 val transformedTable = tableView[Table]
@@ -374,14 +446,11 @@ print(transformedTable)
 // 1    |-200 
 ```
 
-The returned table, `transformedTable`, is a clone of the table tied to the view, here `table`. If no table was tied to
-the view, then an empty table would have been returned.
+The returned table, `transformedTable`, is a clone of the table tied to the view, here `table`, with the transformations
+applied. If no table was tied to the view, then an empty table would have been returned.
 
 This makes views somewhat useful outside just UIs, as they can be used to apply transformation for data purposes. In
 any case it helps with debugging and testing UI transformations as you gain access to what the UI would receive.
-
-Finally, it's worth noting that cell transformers are currently only supported directly tied to a `CellView`. Extending
-this support to other reference types is being considered.
 
 ## Saving, cloning and registry
 

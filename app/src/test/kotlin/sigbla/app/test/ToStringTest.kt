@@ -150,12 +150,33 @@ class ToStringTest {
         assertEquals("CellTopics[]", emptyCellTopics.toString())
         assertEquals("CellTopics[A, B]", filledCellTopics.toString())
 
-        val cellTransformerFunction: Cell<*>.() -> Any? = { this }
+        val tableTransformerFunction: Table.() -> Unit = { }
+        val emptyTableTransformer = tableView[TableTransformer].also { it { tableTransformerFunction } }
+        val filledTableTransformer = tableView[TableTransformer]
+
+        assertEquals("UnitTableTransformer", emptyTableTransformer.toString())
+        assertEquals("FunctionTableTransformer[sigbla.app.Table.() -> kotlin.Unit]", filledTableTransformer.toString())
+
+        val columnTransformerFunction: Column.() -> Unit = { }
+        val emptyColumnTransformer = tableView["A"][ColumnTransformer].also { it { columnTransformerFunction } }
+        val filledColumnTransformer = tableView["A"][ColumnTransformer]
+
+        assertEquals("UnitColumnTransformer", emptyColumnTransformer.toString())
+        assertEquals("FunctionColumnTransformer[sigbla.app.Column.() -> kotlin.Unit]", filledColumnTransformer.toString())
+
+        val rowTransformerFunction: Row.() -> Unit = { }
+        val emptyRowTransformer = tableView[1][RowTransformer].also { it { rowTransformerFunction } }
+        val filledRowTransformer = tableView[1][RowTransformer]
+
+        assertEquals("UnitRowTransformer", emptyRowTransformer.toString())
+        assertEquals("FunctionRowTransformer[sigbla.app.Row.() -> kotlin.Unit]", filledRowTransformer.toString())
+
+        val cellTransformerFunction: Cell<*>.() -> Unit = { }
         val emptyCellTransformer = tableView["A", 1][CellTransformer].also { it { cellTransformerFunction } }
         val filledCellTransformer = tableView["A", 1][CellTransformer]
 
         assertEquals("UnitCellTransformer", emptyCellTransformer.toString())
-        assertEquals("FunctionCellTransformer[sigbla.app.Cell<*>.() -> sigbla.app.Cell<*>]", filledCellTransformer.toString())
+        assertEquals("FunctionCellTransformer[sigbla.app.Cell<*>.() -> kotlin.Unit]", filledCellTransformer.toString())
 
         fun getHandler(): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
             return {

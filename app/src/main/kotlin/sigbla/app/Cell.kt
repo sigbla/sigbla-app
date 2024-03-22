@@ -742,12 +742,12 @@ class WebCell internal constructor(column: Column, index: Long, override val val
 
 fun div(
     classes : String? = null, block : DIV.() -> Unit = {}
-): Cell<*>.() -> WebCell = {
+): Cell<*>.() -> Unit = {
     val builder = HTMLStreamBuilder(StringBuilder(256), prettyPrint = false, xhtmlCompatible = false)
         .onFinalizeMap { sb, _ -> sb.toString() }
         .delayed()
 
-    WebCell(
+    table[this] = WebCell(
         column,
         index,
         builder.div(classes, block).toWebContent()

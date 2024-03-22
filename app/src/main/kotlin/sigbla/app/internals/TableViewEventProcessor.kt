@@ -205,6 +205,24 @@ internal class TableViewEventProcessor {
                 )
             }.flatten()
 
+            val tableTransformerEvents = listOfNotNull(ref.tableTransformer).asSequence().map {
+                TableViewListenerEvent(oldTableView[TableTransformer], newTableView[TableTransformer])
+            }
+
+            val columnTransformerEvents = ref.columnTransformers.keys().asSequence().map {
+                val oldColumnView = oldTableView[it]
+                val newColumnView = newTableView[it]
+
+                TableViewListenerEvent(oldColumnView[ColumnTransformer], newColumnView[ColumnTransformer])
+            }
+
+            val rowTransformerEvents = ref.rowTransformers.keys().asSequence().map {
+                val oldRowView = oldTableView[it]
+                val newRowView = newTableView[it]
+
+                TableViewListenerEvent(oldRowView[RowTransformer], newRowView[RowTransformer])
+            }
+
             val cellTransformerEvents = ref.cellTransformers.keys().asSequence().map {
                 val oldCellView = oldTableView[it.first, it.second]
                 val newCellView = newTableView[it.first, it.second]
@@ -212,7 +230,15 @@ internal class TableViewEventProcessor {
                 TableViewListenerEvent(oldCellView[CellTransformer], newCellView[CellTransformer])
             }
 
-            listenerRefEvent.listenerEvent((tableEvents + columnEvents + rowEvents + cellEvents + cellTransformerEvents) as Sequence<TableViewListenerEvent<Any>>)
+            listenerRefEvent.listenerEvent(
+                (tableEvents
+                    + columnEvents
+                    + rowEvents
+                    + cellEvents
+                    + tableTransformerEvents
+                    + columnTransformerEvents
+                    + rowTransformerEvents
+                    + cellTransformerEvents) as Sequence<TableViewListenerEvent<Any>>)
         }
 
         return listenerRef
@@ -279,6 +305,13 @@ internal class TableViewEventProcessor {
                     )
                 }.flatten()
 
+            val columnTransformerEvents = listOfNotNull(ref.columnTransformers[columnView.header]).asSequence().map {
+                val oldColumnView = oldTableView[columnView.header]
+                val newColumnView = newTableView[columnView.header]
+
+                TableViewListenerEvent(oldColumnView[ColumnTransformer], newColumnView[ColumnTransformer])
+            }
+
             val cellTransformerEvents = ref.cellTransformers.keys().asSequence()
                 .filter { it.first == columnView.header }
                 .map {
@@ -288,7 +321,11 @@ internal class TableViewEventProcessor {
                     TableViewListenerEvent(oldCellView[CellTransformer], newCellView[CellTransformer])
                 }
 
-            listenerRefEvent.listenerEvent((columnEvents + cellEvents + cellTransformerEvents) as Sequence<TableViewListenerEvent<Any>>)
+            listenerRefEvent.listenerEvent(
+                (columnEvents
+                        + cellEvents
+                        + columnTransformerEvents
+                        + cellTransformerEvents) as Sequence<TableViewListenerEvent<Any>>)
         }
 
         return listenerRef
@@ -355,6 +392,13 @@ internal class TableViewEventProcessor {
                     )
                 }.flatten()
 
+            val rowTransformerEvents = listOfNotNull(ref.rowTransformers[rowView.index]).asSequence().map {
+                val oldRowView = oldTableView[rowView.index]
+                val newRowView = newTableView[rowView.index]
+
+                TableViewListenerEvent(oldRowView[RowTransformer], newRowView[RowTransformer])
+            }
+
             val cellTransformerEvents = ref.cellTransformers.keys().asSequence()
                 .filter { it.second == rowView.index }
                 .map {
@@ -364,7 +408,11 @@ internal class TableViewEventProcessor {
                     TableViewListenerEvent(oldCellView[CellTransformer], newCellView[CellTransformer])
                 }
 
-            listenerRefEvent.listenerEvent((rowEvents + cellEvents + cellTransformerEvents) as Sequence<TableViewListenerEvent<Any>>)
+            listenerRefEvent.listenerEvent(
+                (rowEvents
+                        + cellEvents
+                        + rowTransformerEvents
+                        + cellTransformerEvents) as Sequence<TableViewListenerEvent<Any>>)
         }
 
         return listenerRef

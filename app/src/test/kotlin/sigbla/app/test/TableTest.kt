@@ -2137,14 +2137,14 @@ class TableTest {
 
         fun assignFunction(row: Row, v: Any) {
             when (v) {
-                is Cell<*> -> t["A", row] = { v }
-                is String -> t["A", row] = { v }
-                is Double -> t["A", row] = { v }
-                is Long -> t["A", row] = { v }
-                is BigInteger -> t["A", row] = { v }
-                is BigDecimal -> t["A", row] = { v }
-                is Number -> t["A", row] = { v }
-                is Boolean -> t["A", row] = { v }
+                is Cell<*> -> t["A", row] = { this { v } }
+                is String -> t["A", row] = { this { v } }
+                is Double -> t["A", row] = { this { v } }
+                is Long -> t["A", row] = { this { v } }
+                is BigInteger -> t["A", row] = { this { v } }
+                is BigDecimal -> t["A", row] = { this { v } }
+                is Number -> t["A", row] = { this { v } }
+                is Boolean -> t["A", row] = { this { v } }
                 else -> throw Exception()
             }
         }
@@ -2211,14 +2211,14 @@ class TableTest {
 
         fun assignFunction(row: Row, v: Any) {
             when (v) {
-                is Cell<*> -> t["A"][row] = { v }
-                is String -> t["A"][row] = { v }
-                is Double -> t["A"][row] = { v }
-                is Long -> t["A"][row] = { v }
-                is BigInteger -> t["A"][row] = { v }
-                is BigDecimal -> t["A"][row] = { v }
-                is Number -> t["A"][row] = { v }
-                is Boolean -> t["A"][row] = { v }
+                is Cell<*> -> t["A"][row] = { this { v } }
+                is String -> t["A"][row] = { this { v } }
+                is Double -> t["A"][row] = { this { v } }
+                is Long -> t["A"][row] = { this { v } }
+                is BigInteger -> t["A"][row] = { this { v } }
+                is BigDecimal -> t["A"][row] = { this { v } }
+                is Number -> t["A"][row] = { this { v } }
+                is Boolean -> t["A"][row] = { this { v } }
                 else -> throw Exception()
             }
         }
@@ -2285,14 +2285,14 @@ class TableTest {
 
         fun assignFunction(row: Row, v: Any) {
             when (v) {
-                is Cell<*> -> t[row]["A"] = { v }
-                is String -> t[row]["A"] = { v }
-                is Double -> t[row]["A"] = { v }
-                is Long -> t[row]["A"] = { v }
-                is BigInteger -> t[row]["A"] = { v }
-                is BigDecimal -> t[row]["A"] = { v }
-                is Number -> t[row]["A"] = { v }
-                is Boolean -> t[row]["A"] = { v }
+                is Cell<*> -> t[row]["A"] = { this { v } }
+                is String -> t[row]["A"] = { this { v } }
+                is Double -> t[row]["A"] = { this { v } }
+                is Long -> t[row]["A"] = { this { v } }
+                is BigInteger -> t[row]["A"] = { this { v } }
+                is BigDecimal -> t[row]["A"] = { this { v } }
+                is Number -> t[row]["A"] = { this { v } }
+                is Boolean -> t[row]["A"] = { this { v } }
                 else -> throw Exception()
             }
         }

@@ -12,18 +12,37 @@ fun main() {
     val tableView = TableView[table]
 
     fun cell(x: Int, y: Int, black: Boolean) {
+        /*
         table[x.toString(), y] = div {
             if (black) style = "background-color: black; width: 100%; height: 100%"
             else "background-color: white; width: 100%; height: 100%"
         }
         tableView[x.toString(), y][CellClasses] = if (black) "black" else "white"
+         */
+        table[x.toString(), y] = black
     }
 
+    tableView[TableTransformer] = {
+        forEach {
+            if (true in it) {
+                this[it] = div {
+                    style = "background-color: black; width: 100%; height: 100%"
+                }
+            } else {
+                this[it] = div {
+                    style = "background-color: white; width: 100%; height: 100%"
+                }
+            }
+        }
+    }
+
+    /*
     for (x in 0..99) {
         for (y in 0..99) {
             cell(x, y, true)
         }
     }
+     */
 
     batch(tableView) {
         tableView[CellWidth] = 10

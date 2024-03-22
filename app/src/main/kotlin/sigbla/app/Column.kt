@@ -158,7 +158,7 @@ abstract class Column internal constructor(
         }
     }
 
-    operator fun set(index: Long, init: Cell<*>.() -> Any?) = this[index] { init() }
+    operator fun set(index: Long, init: Cell<*>.() -> Unit) = this[index].init()
 
     // ---
 
@@ -178,7 +178,7 @@ abstract class Column internal constructor(
 
     operator fun set(index: Int, value: Number) = set(index.toLong(), value)
 
-    operator fun set(index: Int, init: Cell<*>.() -> Any?) = this[index] { init() }
+    operator fun set(index: Int, init: Cell<*>.() -> Unit) = this[index].init()
 
     // ---
 
@@ -222,9 +222,9 @@ abstract class Column internal constructor(
         set(row.index, value)
     }
 
-    operator fun set(row: Row, init: Cell<*>.() -> Any?) {
+    operator fun set(row: Row, init: Cell<*>.() -> Unit) {
         // No IR.AT check here because this is actually a get before set
-        this[row.indexRelation, row.index] { init() }
+        this[row.indexRelation, row.index].init()
     }
 
     // ---

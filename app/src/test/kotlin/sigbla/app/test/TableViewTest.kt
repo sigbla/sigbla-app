@@ -84,7 +84,7 @@ class TableViewTest {
 
         for (c in listOf("A", "B", "C", "D")) {
             for (r in 1..100) {
-                tv1[c][r][CellTransformer] = { "$c$r A1" }
+                tv1[c][r][CellTransformer] = { this { "$c$r A1" } }
             }
         }
 
@@ -95,13 +95,13 @@ class TableViewTest {
 
         for (c in listOf("A", "B", "C")) {
             for (r in 1..100) {
-                tv2[c][r][CellTransformer] = { "$c$r B1" }
+                tv2[c][r][CellTransformer] = { this { "$c$r B1" } }
             }
         }
 
         for (c in listOf("D")) {
             for (r in 1..100) {
-                tv1[c][r][CellTransformer] = { "$c$r A2" }
+                tv1[c][r][CellTransformer] = { this { "$c$r A2" } }
             }
         }
 
@@ -134,7 +134,7 @@ class TableViewTest {
     fun `clone is not closed`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
-        tv1["A", 0][CellTransformer] = { "A0v1" }
+        tv1["A", 0][CellTransformer] = { this { "A0v1" } }
 
         remove(tv1)
 
@@ -146,7 +146,7 @@ class TableViewTest {
         assertTrue(tv2.source?.closed == true)
         assertFalse(tv2.closed)
 
-        tv2["A", 0][CellTransformer] = { "A0v2" }
+        tv2["A", 0][CellTransformer] = { this { "A0v2" } }
 
         assertEquals("A0v2", tv2[Table]["A", 0].value)
     }
@@ -681,7 +681,7 @@ class TableViewTest {
     @Test
     fun `tableview invoke 1`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
-        // TODO Add CellTransformer when supported
+        val tt: Table.() -> Unit = {}
 
         val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
             call.respondText(text = "Response 1")
@@ -702,6 +702,10 @@ class TableViewTest {
         tv1[Resources] {
             "a" to handler
         }
+        tv1[TableTransformer] {
+            tt
+        }
+
         // TODO Consider impact of supporting:
         //      tv1[Table] { table }
         //      It would imply doing table1 { table2 },
@@ -712,6 +716,7 @@ class TableViewTest {
         assertEquals(setOf("300"), tv1[CellClasses].classes)
         assertEquals(setOf("400"), tv1[CellTopics].topics)
         assertEquals(mapOf("a" to handler), tv1[Resources].resources)
+        assertEquals(tt, tv1[TableTransformer].function)
 
         tv1[CellClasses] {
             setOf("500", "600")
@@ -728,18 +733,21 @@ class TableViewTest {
         tv1[CellClasses] { }
         tv1[CellTopics] { }
         tv1[Resources] { }
+        tv1[TableTransformer] { }
 
         assertEquals(100L, tv1[CellHeight].height)
         assertEquals(200L, tv1[CellWidth].width)
         assertEquals(setOf("500", "600"), tv1[CellClasses].classes)
         assertEquals(setOf("700", "800"), tv1[CellTopics].topics)
         assertEquals(mapOf("a" to handler), tv1[Resources].resources)
+        assertEquals(tt, tv1[TableTransformer].function)
 
         tv1[CellHeight] { null }
         tv1[CellWidth] { null }
         tv1[CellClasses] { null }
         tv1[CellTopics] { null }
         tv1[Resources] { null }
+        tv1[TableTransformer] { null }
 
         assertEquals(Unit, tv1[CellHeight].height)
         assertEquals(Unit, tv1[CellWidth].width)
@@ -749,6 +757,7 @@ class TableViewTest {
             emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(),
             tv1[Resources].resources
         )
+        assertEquals(Unit, tv1[TableTransformer].function)
     }
 
     @Test
@@ -756,7 +765,7 @@ class TableViewTest {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
         val tv2 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
-        // TODO Add CellTransformer when supported
+        val tt: Table.() -> Unit = {}
 
         val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
             call.respondText(text = "Response 1")
@@ -777,6 +786,9 @@ class TableViewTest {
         tv1 {
             tv2[Resources]
         }
+        tv1 {
+            tv2[TableTransformer]
+        }
         val t1 = tv1 {
             tv2[Table]
         } as Table
@@ -789,6 +801,7 @@ class TableViewTest {
             emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(),
             tv1[Resources].resources
         )
+        assertEquals(Unit, tv1[TableTransformer].function)
         assertEquals(t1, tv1[Table].source)
 
         tv2[CellHeight] {
@@ -805,6 +818,9 @@ class TableViewTest {
         }
         tv2[Resources] {
             "a" to handler
+        }
+        tv2[TableTransformer] {
+            tt
         }
         tv2[Table] = t1
 
@@ -823,6 +839,9 @@ class TableViewTest {
         tv1 {
             tv2[Resources]
         }
+        tv1 {
+            tv2[TableTransformer]
+        }
         val t2 = tv1 {
             tv2[Table]
         } as Table
@@ -832,6 +851,7 @@ class TableViewTest {
         assertEquals(setOf("300"), tv1[CellClasses].classes)
         assertEquals(setOf("400"), tv1[CellTopics].topics)
         assertEquals(mapOf("a" to handler), tv1[Resources].resources)
+        assertEquals(tt, tv1[TableTransformer].function)
         assertEquals(t2, tv1[Table].source)
 
         tv1 { }
@@ -841,6 +861,7 @@ class TableViewTest {
         assertEquals(setOf("300"), tv1[CellClasses].classes)
         assertEquals(setOf("400"), tv1[CellTopics].topics)
         assertEquals(mapOf("a" to handler), tv1[Resources].resources)
+        assertEquals(tt, tv1[TableTransformer].function)
         assertEquals(t2, tv1[Table].source)
 
         tv1 { null }
@@ -853,6 +874,7 @@ class TableViewTest {
             emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(),
             tv1[Resources].resources
         )
+        assertEquals(Unit, tv1[TableTransformer].function)
         assertEquals(null, tv1[Table].source)
 
         tv1 { tv2 }
@@ -862,6 +884,7 @@ class TableViewTest {
         assertEquals(setOf("300"), tv1[CellClasses].classes)
         assertEquals(setOf("400"), tv1[CellTopics].topics)
         assertEquals(mapOf("a" to handler), tv1[Resources].resources)
+        assertEquals(tt, tv1[TableTransformer].function)
 
         assertEquals(t2, tv1[Table].source)
     }
@@ -869,7 +892,7 @@ class TableViewTest {
     @Test
     fun `columnview invoke 1`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
-        // TODO Add CellTransformer when supported
+        val ct: Column.() -> Unit = {}
 
         tv1["A"][CellWidth] {
             200
@@ -880,10 +903,14 @@ class TableViewTest {
         tv1["A"][CellTopics] {
             "400"
         }
+        tv1["A"][ColumnTransformer] {
+            ct
+        }
 
         assertEquals(200L, tv1["A"][CellWidth].width)
         assertEquals(setOf("300"), tv1["A"][CellClasses].classes)
         assertEquals(setOf("400"), tv1["A"][CellTopics].topics)
+        assertEquals(ct, tv1["A"][ColumnTransformer].function)
 
         tv1["A"][CellClasses] {
             setOf("500", "600")
@@ -898,24 +925,28 @@ class TableViewTest {
         tv1["A"][CellWidth] { }
         tv1["A"][CellClasses] { }
         tv1["A"][CellTopics] { }
+        tv1["A"][ColumnTransformer] { }
 
         assertEquals(200L, tv1["A"][CellWidth].width)
         assertEquals(setOf("500", "600"), tv1["A"][CellClasses].classes)
         assertEquals(setOf("700", "800"), tv1["A"][CellTopics].topics)
+        assertEquals(ct, tv1["A"][ColumnTransformer].function)
 
         tv1["A"][CellWidth] { null }
         tv1["A"][CellClasses] { null }
         tv1["A"][CellTopics] { null }
+        tv1["A"][ColumnTransformer] { null }
 
         assertEquals(Unit, tv1["A"][CellWidth].width)
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
+        assertEquals(Unit, tv1["A"][ColumnTransformer].function)
     }
 
     @Test
     fun `columnview invoke 2`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
-        // TODO Add CellTransformer when supported
+        val ct: Column.() -> Unit = {}
 
         tv1["A"] {
             tv1["B"][CellWidth]
@@ -926,11 +957,15 @@ class TableViewTest {
         tv1["A"] {
             tv1["B"][CellTopics]
         }
+        tv1["A"] {
+            tv1["B"][ColumnTransformer]
+        }
         tv1["A"] { }
 
         assertEquals(Unit, tv1["A"][CellWidth].width)
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
+        assertEquals(Unit, tv1["A"][ColumnTransformer].function)
 
         tv1["B"][CellWidth] {
             200
@@ -941,6 +976,9 @@ class TableViewTest {
         tv1["B"][CellTopics] {
             "400"
         }
+        tv1["B"][ColumnTransformer] {
+            ct
+        }
 
         tv1["A"] {
             tv1["B"][CellWidth]
@@ -951,34 +989,41 @@ class TableViewTest {
         tv1["A"] {
             tv1["B"][CellTopics]
         }
+        tv1["A"] {
+            tv1["B"][ColumnTransformer]
+        }
 
         assertEquals(200L, tv1["A"][CellWidth].width)
         assertEquals(setOf("300"), tv1["A"][CellClasses].classes)
         assertEquals(setOf("400"), tv1["A"][CellTopics].topics)
+        assertEquals(ct, tv1["A"][ColumnTransformer].function)
 
         tv1["A"] { }
 
         assertEquals(200L, tv1["A"][CellWidth].width)
         assertEquals(setOf("300"), tv1["A"][CellClasses].classes)
         assertEquals(setOf("400"), tv1["A"][CellTopics].topics)
+        assertEquals(ct, tv1["A"][ColumnTransformer].function)
 
         tv1["A"] { null }
 
         assertEquals(Unit, tv1["A"][CellWidth].width)
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
+        assertEquals(Unit, tv1["A"][ColumnTransformer].function)
 
         tv1["A"] { tv1["B"] }
 
         assertEquals(200L, tv1["A"][CellWidth].width)
         assertEquals(setOf("300"), tv1["A"][CellClasses].classes)
         assertEquals(setOf("400"), tv1["A"][CellTopics].topics)
+        assertEquals(ct, tv1["A"][ColumnTransformer].function)
     }
 
     @Test
     fun `rowview invoke 1`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
-        // TODO Add CellTransformer when supported
+        val rt: Row.() -> Unit = {}
 
         tv1[1][CellHeight] {
             200
@@ -989,10 +1034,14 @@ class TableViewTest {
         tv1[1][CellTopics] {
             "400"
         }
+        tv1[1][RowTransformer] {
+            rt
+        }
 
         assertEquals(200L, tv1[1][CellHeight].height)
         assertEquals(setOf("300"), tv1[1][CellClasses].classes)
         assertEquals(setOf("400"), tv1[1][CellTopics].topics)
+        assertEquals(rt, tv1[1][RowTransformer].function)
 
         tv1[1][CellClasses] {
             setOf("500", "600")
@@ -1007,24 +1056,28 @@ class TableViewTest {
         tv1[1][CellHeight] { }
         tv1[1][CellClasses] { }
         tv1[1][CellTopics] { }
+        tv1[1][RowTransformer] { }
 
         assertEquals(200L, tv1[1][CellHeight].height)
         assertEquals(setOf("500", "600"), tv1[1][CellClasses].classes)
         assertEquals(setOf("700", "800"), tv1[1][CellTopics].topics)
+        assertEquals(rt, tv1[1][RowTransformer].function)
 
         tv1[1][CellHeight] { null }
         tv1[1][CellClasses] { null }
         tv1[1][CellTopics] { null }
+        tv1[1][RowTransformer] { null }
 
         assertEquals(Unit, tv1[1][CellHeight].height)
         assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
+        assertEquals(Unit, tv1[1][RowTransformer].function)
     }
 
     @Test
     fun `rowview invoke 2`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
-        // TODO Add CellTransformer when supported
+        val rt: Row.() -> Unit = {}
 
         tv1[1] {
             tv1[2][CellHeight]
@@ -1035,11 +1088,15 @@ class TableViewTest {
         tv1[1] {
             tv1[2][CellTopics]
         }
+        tv1[1] {
+            tv1[2][RowTransformer]
+        }
         tv1[1] { }
 
         assertEquals(Unit, tv1[1][CellHeight].height)
         assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
+        assertEquals(Unit, tv1[1][RowTransformer].function)
 
         tv1[2][CellHeight] {
             200
@@ -1050,6 +1107,9 @@ class TableViewTest {
         tv1[2][CellTopics] {
             "400"
         }
+        tv1[2][RowTransformer] {
+            rt
+        }
         tv1[1] {
             tv1[2][CellHeight]
         }
@@ -1059,34 +1119,41 @@ class TableViewTest {
         tv1[1] {
             tv1[2][CellTopics]
         }
+        tv1[1] {
+            tv1[2][RowTransformer]
+        }
 
         assertEquals(200L, tv1[1][CellHeight].height)
         assertEquals(setOf("300"), tv1[1][CellClasses].classes)
         assertEquals(setOf("400"), tv1[1][CellTopics].topics)
+        assertEquals(rt, tv1[1][RowTransformer].function)
 
         tv1[1] { }
 
         assertEquals(200L, tv1[1][CellHeight].height)
         assertEquals(setOf("300"), tv1[1][CellClasses].classes)
         assertEquals(setOf("400"), tv1[1][CellTopics].topics)
+        assertEquals(rt, tv1[1][RowTransformer].function)
 
         tv1[1] { null }
 
         assertEquals(Unit, tv1[1][CellHeight].height)
         assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
+        assertEquals(Unit, tv1[1][RowTransformer].function)
 
         tv1[1] { tv1[2] }
 
         assertEquals(200L, tv1[1][CellHeight].height)
         assertEquals(setOf("300"), tv1[1][CellClasses].classes)
         assertEquals(setOf("400"), tv1[1][CellTopics].topics)
+        assertEquals(rt, tv1[1][RowTransformer].function)
     }
 
     @Test
     fun `cellview invoke 1`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
-        val ct: Cell<*>.() -> Any? = {}
+        val ct: Cell<*>.() -> Unit = {}
 
         tv1["A", 1][CellHeight] {
             100
@@ -1148,7 +1215,7 @@ class TableViewTest {
     @Test
     fun `cellview invoke 2`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
-        val ct: Cell<*>.() -> Any? = {}
+        val ct: Cell<*>.() -> Unit = {}
 
         tv1["A", 1] {
             tv1["B", 1][CellHeight]
@@ -1408,10 +1475,13 @@ class TableViewTest {
             call.respondText(text = "Response 1")
         }
 
+        val tt: Table.() -> Unit = {}
+
         tv1[CellClasses] = "cc-1"
         tv1[CellTopics] = "ct-1"
         tv1[CellHeight] = 1000
         tv1[CellWidth] = 2000
+        tv1[TableTransformer] = tt
         tv1[Resources] = "a" to handler
         tv1[Table] = t
 
@@ -1424,6 +1494,7 @@ class TableViewTest {
             assertEquals(setOf("ct-1"), oldView[CellTopics].topics)
             assertEquals(1000L, oldView[CellHeight].height)
             assertEquals(2000L, oldView[CellWidth].width)
+            assertEquals(tt, oldView[TableTransformer].function)
             assertEquals(mapOf("a" to handler), oldView[Resources].resources)
             assertEquals(t, oldView[Table].source)
 
@@ -1431,6 +1502,7 @@ class TableViewTest {
             assertEquals(emptySet<String>(), newView[CellTopics].topics)
             assertEquals(Unit, newView[CellHeight].height)
             assertEquals(Unit, newView[CellWidth].width)
+            assertEquals(Unit, newView[TableTransformer].function)
             assertEquals(
                 emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(),
                 newView[Resources].resources
@@ -1444,6 +1516,7 @@ class TableViewTest {
         assertEquals(setOf("ct-1"), tv1[CellTopics].topics)
         assertEquals(1000L, tv1[CellHeight].height)
         assertEquals(2000L, tv1[CellWidth].width)
+        assertEquals(tt, tv1[TableTransformer].function)
         assertEquals(mapOf("a" to handler), tv1[Resources].resources)
         assertEquals(t, tv1[Table].source)
 
@@ -1453,22 +1526,26 @@ class TableViewTest {
         assertEquals(emptySet<String>(), tv1[CellTopics].topics)
         assertEquals(Unit, tv1[CellHeight].height)
         assertEquals(Unit, tv1[CellWidth].width)
+        assertEquals(Unit, tv1[TableTransformer].function)
         assertEquals(
             emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(),
             tv1[Resources].resources
         )
         assertEquals(null, tv1[Table].source)
 
-        assertEquals(6, count)
+        assertEquals(7, count)
     }
 
     @Test
     fun `clear columnview`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
+        val ct: Column.() -> Unit = {}
+
         tv1["A"][CellClasses] = "cc-1"
         tv1["A"][CellTopics] = "ct-1"
         tv1["A"][CellWidth] = 1000
+        tv1["A"][ColumnTransformer] = ct
 
         var count = 0
 
@@ -1478,10 +1555,12 @@ class TableViewTest {
             assertEquals(setOf("cc-1"), oldView["A"][CellClasses].classes)
             assertEquals(setOf("ct-1"), oldView["A"][CellTopics].topics)
             assertEquals(1000L, oldView["A"][CellWidth].width)
+            assertEquals(ct, oldView["A"][ColumnTransformer].function)
 
             assertEquals(emptySet<String>(), newView["A"][CellClasses].classes)
             assertEquals(emptySet<String>(), newView["A"][CellTopics].topics)
             assertEquals(Unit, newView["A"][CellWidth].width)
+            assertEquals(Unit, newView["A"][ColumnTransformer].function)
         }
 
         assertEquals(0, count)
@@ -1489,23 +1568,27 @@ class TableViewTest {
         assertEquals(setOf("cc-1"), tv1["A"][CellClasses].classes)
         assertEquals(setOf("ct-1"), tv1["A"][CellTopics].topics)
         assertEquals(1000L, tv1["A"][CellWidth].width)
+        assertEquals(ct, tv1["A"][ColumnTransformer].function)
 
         clear(tv1["A"])
 
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
         assertEquals(Unit, tv1["A"][CellWidth].width)
+        assertEquals(Unit, tv1["A"][ColumnTransformer].function)
 
-        assertEquals(3, count)
+        assertEquals(4, count)
     }
 
     @Test
     fun `clear rowview`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+        val rt: Row.() -> Unit = {}
 
         tv1[1][CellClasses] = "cc-1"
         tv1[1][CellTopics] = "ct-1"
         tv1[1][CellHeight] = 1000
+        tv1[1][RowTransformer] = rt
 
         var count = 0
 
@@ -1515,10 +1598,12 @@ class TableViewTest {
             assertEquals(setOf("cc-1"), oldView[1][CellClasses].classes)
             assertEquals(setOf("ct-1"), oldView[1][CellTopics].topics)
             assertEquals(1000L, oldView[1][CellHeight].height)
+            assertEquals(rt, oldView[1][RowTransformer].function)
 
             assertEquals(emptySet<String>(), newView[1][CellClasses].classes)
             assertEquals(emptySet<String>(), newView[1][CellTopics].topics)
             assertEquals(Unit, newView[1][CellHeight].height)
+            assertEquals(Unit, newView[1][RowTransformer].function)
         }
 
         assertEquals(0, count)
@@ -1526,14 +1611,16 @@ class TableViewTest {
         assertEquals(setOf("cc-1"), tv1[1][CellClasses].classes)
         assertEquals(setOf("ct-1"), tv1[1][CellTopics].topics)
         assertEquals(1000L, tv1[1][CellHeight].height)
+        assertEquals(rt, tv1[1][RowTransformer].function)
 
         clear(tv1[1])
 
         assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
         assertEquals(Unit, tv1[1][CellHeight].height)
+        assertEquals(Unit, tv1[1][RowTransformer].function)
 
-        assertEquals(3, count)
+        assertEquals(4, count)
     }
 
     @Test
@@ -1544,7 +1631,7 @@ class TableViewTest {
         tv1["A", 1][CellWidth] = 2000
         tv1["A", 1][CellClasses] = "cc-1"
         tv1["A", 1][CellTopics] = "ct-1"
-        val ct: Cell<*>.() -> Any? = {}
+        val ct: Cell<*>.() -> Unit = {}
         tv1["A", 1][CellTransformer] = ct
 
         var count = 0
@@ -1964,7 +2051,7 @@ class TableViewTest {
         assertEquals("A0", tt4["A", 0].value)
 
         tv["A", 0][CellTransformer] = {
-            "A0v2"
+            this { "A0v2" }
         }
 
         val tt5 = tv[Table]
@@ -2005,6 +2092,45 @@ class TableViewTest {
 
         assertEquals("A0v2", tt10["A", 0].value)
         assertEquals(Unit, tt10["B", 0].value)
+    }
+
+    @Test
+    fun `transformers`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+        val tv = TableView[t]
+
+        tv[TableTransformer] = {
+            assertFalse(this == t)
+            assertTrue(this.source == t)
+
+            this["TableTransformer", 0] = "TableTransformer 0"
+        }
+
+        tv["ColumnTransformer"][ColumnTransformer] = {
+            assertFalse(this.table == t)
+            assertTrue(this.table.source == t)
+
+            this[0] = "ColumnTransformer 0"
+        }
+
+        tv[0][RowTransformer] = {
+            assertFalse(this.table == t)
+            assertTrue(this.table.source == t)
+
+            this["RowTransformer"] = "RowTransformer 0"
+        }
+
+        tv["CellTransformer", 0][CellTransformer] = {
+            assertFalse(this.table == t)
+            assertTrue(this.table.source == t)
+
+            this { "CellTransformer 0" }
+        }
+
+        assertTrue("TableTransformer 0" in tv[Table]["TableTransformer"][0])
+        assertTrue("ColumnTransformer 0" in tv[Table]["ColumnTransformer"][0])
+        assertTrue("RowTransformer 0" in tv[Table]["RowTransformer"][0])
+        assertTrue("CellTransformer 0" in tv[Table]["CellTransformer"][0])
     }
 
     companion object {
