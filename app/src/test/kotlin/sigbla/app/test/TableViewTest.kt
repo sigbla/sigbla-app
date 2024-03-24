@@ -2133,6 +2133,168 @@ class TableViewTest {
         assertTrue("CellTransformer 0" in tv[Table]["CellTransformer"][0])
     }
 
+    @Test
+    fun `cell height contains`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val unitCellHeight = tv1[CellHeight].also { it { 100 } }
+        val filledCellHeight = tv1[CellHeight]
+
+        assertTrue(unitCellHeight in unitCellHeight)
+        assertTrue(filledCellHeight in filledCellHeight)
+        assertFalse(unitCellHeight in filledCellHeight)
+        assertFalse(filledCellHeight in unitCellHeight)
+        assertTrue(100 in filledCellHeight)
+        assertTrue(100L in filledCellHeight)
+        assertFalse(100 in unitCellHeight)
+        assertFalse(100L in unitCellHeight)
+        assertTrue(Unit in unitCellHeight)
+        assertTrue(null in unitCellHeight)
+        assertFalse(Unit in filledCellHeight)
+        assertFalse(null in filledCellHeight)
+    }
+
+    @Test
+    fun `cell width contains`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val unitCellWidth = tv1[CellWidth].also { it { 100 } }
+        val filledCellWidth = tv1[CellWidth]
+
+        assertTrue(unitCellWidth in unitCellWidth)
+        assertTrue(filledCellWidth in filledCellWidth)
+        assertFalse(unitCellWidth in filledCellWidth)
+        assertFalse(filledCellWidth in unitCellWidth)
+        assertTrue(100 in filledCellWidth)
+        assertTrue(100L in filledCellWidth)
+        assertFalse(100 in unitCellWidth)
+        assertFalse(100L in unitCellWidth)
+        assertTrue(Unit in unitCellWidth)
+        assertTrue(null in unitCellWidth)
+        assertFalse(Unit in filledCellWidth)
+        assertFalse(null in filledCellWidth)
+    }
+
+    @Test
+    fun `cell classes contains`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val unitCellClasses = tv1[CellClasses].also { it { listOf("A", "B") } }
+        val filledCellClasses = tv1[CellClasses]
+
+        assertTrue(unitCellClasses in unitCellClasses)
+        assertTrue(filledCellClasses in filledCellClasses)
+        assertTrue(unitCellClasses in filledCellClasses)
+        assertFalse(filledCellClasses in unitCellClasses)
+        assertTrue("A" in filledCellClasses)
+        assertTrue("B" in filledCellClasses)
+        assertFalse("A" in unitCellClasses)
+        assertFalse("B" in unitCellClasses)
+        assertTrue(emptyList<String>() in unitCellClasses)
+        assertTrue(listOf("A") in filledCellClasses)
+        assertTrue(listOf("B") in filledCellClasses)
+        assertTrue(setOf("A", "B") in filledCellClasses)
+        assertFalse(setOf("A", "B", "C") in filledCellClasses)
+    }
+
+    @Test
+    fun `cell topics contains`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val unitCellTopics = tv1[CellTopics].also { it { listOf("A", "B") } }
+        val filledCellTopics = tv1[CellTopics]
+
+        assertTrue(unitCellTopics in unitCellTopics)
+        assertTrue(filledCellTopics in filledCellTopics)
+        assertTrue(unitCellTopics in filledCellTopics)
+        assertFalse(filledCellTopics in unitCellTopics)
+        assertTrue("A" in filledCellTopics)
+        assertTrue("B" in filledCellTopics)
+        assertFalse("A" in unitCellTopics)
+        assertFalse("B" in unitCellTopics)
+        assertTrue(emptyList<String>() in unitCellTopics)
+        assertTrue(listOf("A") in filledCellTopics)
+        assertTrue(listOf("B") in filledCellTopics)
+        assertTrue(setOf("A", "B") in filledCellTopics)
+        assertFalse(setOf("A", "B", "C") in filledCellTopics)
+    }
+
+    @Test
+    fun `table transformer contains`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val tt: Table.() -> Unit = {}
+        val unitTableTransformer = tv1[TableTransformer].also { it { tt } }
+        val filledTableTransformer = tv1[TableTransformer]
+
+        assertTrue(unitTableTransformer in unitTableTransformer)
+        assertTrue(Unit in unitTableTransformer)
+        assertTrue(null in unitTableTransformer)
+        assertFalse(tt in unitTableTransformer)
+
+        assertTrue(filledTableTransformer in filledTableTransformer)
+        assertTrue(tt in filledTableTransformer)
+        assertFalse(Unit in filledTableTransformer)
+        assertFalse(null in filledTableTransformer)
+    }
+
+    @Test
+    fun `column transformer contains`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val ct: Column.() -> Unit = {}
+        val unitColumnTransformer = tv1["A"][ColumnTransformer].also { it { ct } }
+        val filledColumnTransformer = tv1["A"][ColumnTransformer]
+
+        assertTrue(unitColumnTransformer in unitColumnTransformer)
+        assertTrue(Unit in unitColumnTransformer)
+        assertTrue(null in unitColumnTransformer)
+        assertFalse(ct in unitColumnTransformer)
+
+        assertTrue(filledColumnTransformer in filledColumnTransformer)
+        assertTrue(ct in filledColumnTransformer)
+        assertFalse(Unit in filledColumnTransformer)
+        assertFalse(null in filledColumnTransformer)
+    }
+
+    @Test
+    fun `row transformer contains`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val rt: Row.() -> Unit = {}
+        val unitRowTransformer = tv1[1][RowTransformer].also { it { rt } }
+        val filledRowTransformer = tv1[1][RowTransformer]
+
+        assertTrue(unitRowTransformer in unitRowTransformer)
+        assertTrue(Unit in unitRowTransformer)
+        assertTrue(null in unitRowTransformer)
+        assertFalse(rt in unitRowTransformer)
+
+        assertTrue(filledRowTransformer in filledRowTransformer)
+        assertTrue(rt in filledRowTransformer)
+        assertFalse(Unit in filledRowTransformer)
+        assertFalse(null in filledRowTransformer)
+    }
+
+    @Test
+    fun `cell transformer contains`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val ct: Cell<*>.() -> Unit = {}
+        val unitCellTransformer = tv1["A", 1][CellTransformer].also { it { ct } }
+        val filledCellTransformer = tv1["A", 1][CellTransformer]
+
+        assertTrue(unitCellTransformer in unitCellTransformer)
+        assertTrue(Unit in unitCellTransformer)
+        assertTrue(null in unitCellTransformer)
+        assertFalse(ct in unitCellTransformer)
+
+        assertTrue(filledCellTransformer in filledCellTransformer)
+        assertTrue(ct in filledCellTransformer)
+        assertFalse(Unit in filledCellTransformer)
+        assertFalse(null in filledCellTransformer)
+    }
+
     companion object {
         @JvmStatic
         @AfterClass
