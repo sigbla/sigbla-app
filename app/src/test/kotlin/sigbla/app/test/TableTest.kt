@@ -2516,6 +2516,185 @@ class TableTest {
         assertFalse(t.indexes.contains(1L))
     }
 
+    @Test
+    fun `cell contains`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["A", 1] = 100
+        t["A", 2] = true
+        t["A", 3] = false
+        t["A", 4] = "String A"
+        t["A", 5] = "String B"
+        t["A", 6] = "String B"
+
+        assertTrue(100 in t["A", 1])
+        assertTrue(100L in t["A", 1])
+        assertFalse(200 in t["A", 1])
+        assertFalse(200L in t["A", 1])
+
+        assertTrue(true in t["A", 2])
+        assertTrue(false in t["A", 3])
+        assertFalse(true in t["A", 3])
+        assertFalse(false in t["A", 2])
+
+        assertTrue("String A" in t["A", 4])
+        assertTrue("String B" in t["A", 5])
+        assertFalse("String A" in t["A", 5])
+        assertFalse("String B" in t["A", 4])
+
+        assertTrue(Unit in t["A", 7])
+        assertFalse(Unit in t["A", 6])
+
+        assertTrue(t["A", 6] in t["A", 5])
+        assertFalse(t["A", 3] in t["A", 5])
+    }
+
+    @Test
+    fun `cell range contains`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["A", 1] = 100
+        t["A", 2] = true
+        t["A", 3] = false
+        t["A", 4] = "String A"
+        t["A", 5] = "String B"
+        t["A", 6] = "String B"
+
+        assertTrue(100 in t["A", 1]..t["A", 2])
+        assertTrue(100L in t["A", 1]..t["A", 2])
+        assertFalse(200 in t["A", 2]..t["A", 3])
+        assertFalse(200L in t["A", 2]..t["A", 3])
+
+        assertTrue(true in t["A", 2]..t["A", 3])
+        assertTrue(false in t["A", 3]..t["A", 2])
+        assertFalse(true in t["A", 4]..t["A", 5])
+        assertFalse(false in t["A", 5]..t["A", 4])
+
+        assertTrue("String A" in t["A", 4]..t["A", 5])
+        assertTrue("String B" in t["A", 5]..t["A", 4])
+        assertFalse("String A" in t["A", 1]..t["A", 3])
+        assertFalse("String B" in t["A", 1]..t["A", 3])
+
+        assertTrue(t["A", 6] in t["A", 5]..t["A", 6])
+        assertFalse(t["A", 6] in t["A", 5]..t["A", 2])
+    }
+
+    @Test
+    fun `column contains`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["A", 1] = 100
+        t["A", 2] = true
+        t["A", 3] = false
+        t["A", 4] = "String A"
+        t["A", 5] = "String B"
+        t["A", 6] = "String B"
+
+        assertTrue(100 in t["A"])
+        assertTrue(100L in t["A"])
+        assertFalse(200 in t["B"])
+        assertFalse(200L in t["B"])
+
+        assertTrue(true in t["A"])
+        assertTrue(false in t["A"])
+        assertFalse(true in t["B"])
+        assertFalse(false in t["B"])
+
+        assertTrue("String A" in t["A"])
+        assertTrue("String B" in t["A"])
+        assertFalse("String A" in t["B"])
+        assertFalse("String B" in t["B"])
+
+        assertTrue(t["A", 6] in t["A"])
+        assertFalse(t["A", 3] in t["B"])
+        assertFalse(null in t["B"])
+    }
+
+    @Test
+    fun `column range contains`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["A", 1] = 100
+        t["A", 2] = true
+        t["A", 3] = false
+        t["A", 4] = "String A"
+        t["A", 5] = "String B"
+        t["A", 6] = "String B"
+
+        assertTrue(100 in t["A"]..t["A"])
+        assertTrue(100L in t["A"]..t["A"])
+        assertFalse(200 in t["B"]..t["A"])
+        assertFalse(200L in t["B"]..t["A"])
+
+        assertTrue(true in t["A"]..t["A"])
+        assertTrue(false in t["A"]..t["A"])
+        assertFalse(true in t["C"]..t["B"])
+        assertFalse(false in t["C"]..t["B"])
+
+        assertTrue("String A" in t["A"]..t["A"])
+        assertTrue("String B" in t["A"]..t["A"])
+        assertFalse("String A" in t["C"]..t["B"])
+        assertFalse("String B" in t["C"]..t["B"])
+    }
+
+    @Test
+    fun `row contains`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["A", 1] = 100
+        t["B", 1] = true
+        t["C", 1] = false
+        t["D", 1] = "String A"
+        t["E", 1] = "String B"
+        t["F", 1] = "String B"
+
+        assertTrue(100 in t[1])
+        assertTrue(100L in t[1])
+        assertFalse(200 in t[2])
+        assertFalse(200L in t[2])
+
+        assertTrue(true in t[1])
+        assertTrue(false in t[1])
+        assertFalse(true in t[2])
+        assertFalse(false in t[2])
+
+        assertTrue("String A" in t[1])
+        assertTrue("String B" in t[1])
+        assertFalse("String A" in t[2])
+        assertFalse("String B" in t[2])
+
+        assertTrue(t["F", 1] in t[1])
+        assertFalse(t["C", 1] in t[2])
+        assertFalse(null in t[2])
+    }
+
+    @Test
+    fun `row range contains`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["A", 1] = 100
+        t["B", 1] = true
+        t["C", 1] = false
+        t["D", 1] = "String A"
+        t["E", 1] = "String B"
+        t["F", 1] = "String B"
+
+        assertTrue(100 in t[1]..t[1])
+        assertTrue(100L in t[1]..t[1])
+        assertFalse(200 in t[3]..t[2])
+        assertFalse(200L in t[3]..t[2])
+
+        assertTrue(true in t[1]..t[1])
+        assertTrue(false in t[1]..t[1])
+        assertFalse(true in t[3]..t[2])
+        assertFalse(false in t[3]..t[2])
+
+        assertTrue("String A" in t[0]..t[1])
+        assertTrue("String B" in t[1]..t[0])
+        assertFalse("String A" in t[3]..t[2])
+        assertFalse("String B" in t[2]..t[3])
+    }
+
     companion object {
         @JvmStatic
         @AfterClass
