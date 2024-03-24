@@ -73,9 +73,11 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
         return RowRange(this, other)
     }
 
-    operator fun contains(that: Any?): Boolean {
-        return iterator().asSequence().any { that in it }
-    }
+    operator fun contains(that: Number): Boolean = any { that in it }
+    operator fun contains(that: Boolean): Boolean = any { that in it }
+    operator fun contains(that: String): Boolean = any { that in it }
+    operator fun contains(that: Unit): Boolean = any { that in it }
+    operator fun contains(that: Cell<*>?): Boolean = any { that in it }
 
     override fun iterator(): Iterator<Cell<*>> {
         val ref = table.tableRef.get()
@@ -169,6 +171,10 @@ class RowRange(override val start: Row, override val endInclusive: Row) : Closed
                 .iterator()
         }
     }
+
+    operator fun contains(that: Number): Boolean = any { that in it }
+    operator fun contains(that: Boolean): Boolean = any { that in it }
+    operator fun contains(that: String): Boolean = any { that in it }
 
     override fun contains(value: Row): Boolean {
         return !(value.index < min(start.index, endInclusive.index) || value.index > max(start.index, endInclusive.index))

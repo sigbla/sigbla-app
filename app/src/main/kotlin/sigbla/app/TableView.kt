@@ -2333,23 +2333,10 @@ sealed class CellHeight<S, T> {
         return value
     }
 
-    operator fun contains(other: Any?): Boolean {
-        val height = this.height
-
-        return when (other) {
-            is CellHeight<*, *> -> height == other.height
-            is Number -> if (height is Number) {
-                when (val v = this - other) {
-                    is Int -> v == 0
-                    is Long -> v == 0L
-                    else -> throw InvalidCellHeightException("Unsupported type: ${v::class}")
-                }
-            } else false
-            is Unit -> height == Unit
-            null -> height == Unit
-            else -> this == other
-        }
-    }
+    operator fun contains(other: CellHeight<*, *>) = height == other.height
+    operator fun contains(other: Int) = (height as? Long) == other.toLong()
+    operator fun contains(other: Long) = (height as? Long) == other
+    operator fun contains(other: Unit?) = height is Unit
 
     override fun hashCode() = Objects.hash(this.height)
 
@@ -2527,23 +2514,10 @@ sealed class CellWidth<S, T> {
         return value
     }
 
-    operator fun contains(other: Any?): Boolean {
-        val width = this.width
-
-        return when (other) {
-            is CellWidth<*, *> -> width == other.width
-            is Number -> if (width is Number) {
-                when (val v = this - other) {
-                    is Int -> v == 0
-                    is Long -> v == 0L
-                    else -> throw InvalidCellHeightException("Unsupported type: ${v::class}")
-                }
-            } else false
-            is Unit -> width == Unit
-            null -> width == Unit
-            else -> this == other
-        }
-    }
+    operator fun contains(other: CellWidth<*, *>) = width == other.width
+    operator fun contains(other: Int) = (width as? Long) == other.toLong()
+    operator fun contains(other: Long) = (width as? Long) == other
+    operator fun contains(other: Unit?) = width is Unit
 
     override fun hashCode() = Objects.hash(this.width)
 
@@ -2636,14 +2610,9 @@ class CellClasses<S> internal constructor(
         return value
     }
 
-    operator fun contains(other: Any?): Boolean {
-        return when (other) {
-            is CellClasses<*> -> contains(other._classes)
-            is String -> _classes.contains(other)
-            is Collection<*> -> _classes.containsAll(other)
-            else -> this == other
-        }
-    }
+    operator fun contains(other: CellClasses<*>) = _classes.containsAll(other._classes)
+    operator fun contains(other: String) = _classes.contains(other)
+    operator fun contains(other: Collection<*>) = _classes.containsAll(other)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -2699,14 +2668,9 @@ class CellTopics<S> internal constructor(
         return value
     }
 
-    operator fun contains(other: Any?): Boolean {
-        return when (other) {
-            is CellTopics<*> -> contains(other._topics)
-            is String -> _topics.contains(other)
-            is Collection<*> -> _topics.containsAll(other)
-            else -> this == other
-        }
-    }
+    operator fun contains(other: CellTopics<*>) = _topics.containsAll(other._topics)
+    operator fun contains(other: String) = _topics.contains(other)
+    operator fun contains(other: Collection<*>) = _topics.containsAll(other)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -2746,15 +2710,9 @@ abstract class TableTransformer<T>(source: TableView, function: T): Transformer<
         return value
     }
 
-    operator fun contains(other: Any?): Boolean {
-        return when (other) {
-            is TableTransformer<*> -> this.function == other.function
-            is Function1<*, *> -> this.function == other
-            is Unit -> this.function == Unit
-            null -> this.function == Unit
-            else -> this == other
-        }
-    }
+    operator fun contains(other: TableTransformer<*>) = function == other.function
+    operator fun contains(other: Table.() -> Unit) = function == other
+    operator fun contains(other: Unit?) = function is Unit
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -2803,15 +2761,9 @@ abstract class ColumnTransformer<T>(source: ColumnView, function: T): Transforme
         return value
     }
 
-    operator fun contains(other: Any?): Boolean {
-        return when (other) {
-            is ColumnTransformer<*> -> this.function == other.function
-            is Function1<*, *> -> this.function == other
-            is Unit -> this.function == Unit
-            null -> this.function == Unit
-            else -> this == other
-        }
-    }
+    operator fun contains(other: ColumnTransformer<*>) = function == other.function
+    operator fun contains(other: Column.() -> Unit) = function == other
+    operator fun contains(other: Unit?) = function is Unit
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -2860,15 +2812,9 @@ abstract class RowTransformer<T>(source: RowView, function: T): Transformer<RowV
         return value
     }
 
-    operator fun contains(other: Any?): Boolean {
-        return when (other) {
-            is RowTransformer<*> -> this.function == other.function
-            is Function1<*, *> -> this.function == other
-            is Unit -> this.function == Unit
-            null -> this.function == Unit
-            else -> this == other
-        }
-    }
+    operator fun contains(other: RowTransformer<*>) = function == other.function
+    operator fun contains(other: Row.() -> Unit) = function == other
+    operator fun contains(other: Unit?) = function is Unit
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -2917,15 +2863,9 @@ abstract class CellTransformer<T>(source: CellView, function: T): Transformer<Ce
         return value
     }
 
-    operator fun contains(other: Any?): Boolean {
-        return when (other) {
-            is CellTransformer<*> -> this.function == other.function
-            is Function1<*, *> -> this.function == other
-            is Unit -> this.function == Unit
-            null -> this.function == Unit
-            else -> this == other
-        }
-    }
+    operator fun contains(other: CellTransformer<*>) = function == other.function
+    operator fun contains(other: Cell<*>.() -> Unit) = function == other
+    operator fun contains(other: Unit?) = function is Unit
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -3018,22 +2958,10 @@ class Resources internal constructor(
         return value
     }
 
-    operator fun contains(other: Any?): Boolean {
-        return when (other) {
-            is Resources -> other._resources.all { _resources[it.component1()]?.second == it.component2().second }
-            is Map<*,*> -> other.entries.all { it.key is String && _resources[it.key as String]?.second == it.value }
-            is Pair<*,*> -> other.first is String && _resources[other.first as String]?.second == other.second
-            is Collection<*> -> {
-                val otherList = other.toList()
-                val otherMap = otherList.filterIsInstance<Pair<*, *>>().fold(mutableMapOf<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>()) {
-                    acc, pair -> acc[pair.first as String] = pair.second as suspend PipelineContext<*, ApplicationCall>.() -> Unit; acc
-                }
-                if (otherMap.size != otherList.size) return false
-                return contains(otherMap)
-            }
-            else -> this == other
-        }
-    }
+    operator fun contains(other: Resources) = other._resources.all { _resources[it.component1()]?.second == it.component2().second }
+    operator fun contains(other: Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>) = other.entries.all { _resources[it.key]?.second == it.value }
+    operator fun contains(other: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>) = _resources[other.first]?.second == other.second
+    operator fun contains(other: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>) = other.all { _resources[it.first]?.second == it.second }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

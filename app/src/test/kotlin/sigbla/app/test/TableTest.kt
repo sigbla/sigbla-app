@@ -125,7 +125,6 @@ class TableTest {
 
         t1.forEach {
             assertTrue(it in t1["D", -100]..t1["E", 100])
-            assertTrue(it.value in t1["D", -100]..t1["E", 100])
         }
 
         assertFalse(t1["G", 0] in t1["D", -100]..t1["E", 100])

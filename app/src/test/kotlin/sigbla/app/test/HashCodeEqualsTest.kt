@@ -340,7 +340,7 @@ class HashCodeEqualsTest {
         assertTrue(filledTableTransformer1 in filledTableTransformer2)
         assertTrue(filledTableTransformer2 in filledTableTransformer1)
         assertTrue(tableTransformerFunction in filledTableTransformer1)
-        assertTrue(filledTableTransformer1.function in filledTableTransformer2)
+        assertTrue((filledTableTransformer1.function as? Table.() -> Unit)!! in filledTableTransformer2)
 
         assertNotEquals(emptyColumnTransformer1, emptyColumnTransformer2)
         assertEquals(emptyColumnTransformer1.function, emptyColumnTransformer2.function)
@@ -355,7 +355,7 @@ class HashCodeEqualsTest {
         assertTrue(filledColumnTransformer1 in filledColumnTransformer2)
         assertTrue(filledColumnTransformer2 in filledColumnTransformer1)
         assertTrue(columnTransformerFunction in filledColumnTransformer1)
-        assertTrue(filledColumnTransformer1.function in filledColumnTransformer2)
+        assertTrue((filledColumnTransformer1.function as? Column.() -> Unit)!! in filledColumnTransformer2)
 
         assertNotEquals(emptyRowTransformer1, emptyRowTransformer2)
         assertEquals(emptyRowTransformer1.function, emptyRowTransformer2.function)
@@ -370,7 +370,7 @@ class HashCodeEqualsTest {
         assertTrue(filledRowTransformer1 in filledRowTransformer2)
         assertTrue(filledRowTransformer2 in filledRowTransformer1)
         assertTrue(rowTransformerFunction in filledRowTransformer1)
-        assertTrue(filledRowTransformer1.function in filledRowTransformer2)
+        assertTrue((filledRowTransformer1.function as? Row.() -> Unit)!! in filledRowTransformer2)
 
         assertNotEquals(emptyCellTransformer1, emptyCellTransformer2)
         assertEquals(emptyCellTransformer1.function, emptyCellTransformer2.function)
@@ -385,7 +385,7 @@ class HashCodeEqualsTest {
         assertTrue(filledCellTransformer1 in filledCellTransformer2)
         assertTrue(filledCellTransformer2 in filledCellTransformer1)
         assertTrue(cellTransformerFunction in filledCellTransformer1)
-        assertTrue(filledCellTransformer1.function in filledCellTransformer2)
+        assertTrue((filledCellTransformer1.function as? Cell<*>.() -> Unit)!! in filledCellTransformer2)
 
         assertNotEquals(emptyResources1, emptyResources2)
         assertEquals(emptyResources1.resources, emptyResources2.resources)
