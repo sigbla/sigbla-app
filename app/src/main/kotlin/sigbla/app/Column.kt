@@ -237,9 +237,10 @@ abstract class Column internal constructor(
         return ColumnRange(this, other)
     }
 
-    operator fun contains(that: Any?): Boolean {
-        return iterator().asSequence().any { that in it }
-    }
+    operator fun contains(that: Number): Boolean = any { that in it }
+    operator fun contains(that: Boolean): Boolean = any { that in it }
+    operator fun contains(that: String): Boolean = any { that in it }
+    operator fun contains(that: Cell<*>?): Boolean = any { that in it }
 
     override fun compareTo(other: Column): Int {
         return order.compareTo(other.order)
@@ -421,6 +422,10 @@ class ColumnRange(override val start: Column, override val endInclusive: Column)
             .map { BaseColumn(table, it.first, it.second.columnOrder) }
             .iterator()
     }
+
+    operator fun contains(that: Number): Boolean = any { that in it }
+    operator fun contains(that: Boolean): Boolean = any { that in it }
+    operator fun contains(that: String): Boolean = any { that in it }
 
     override fun contains(value: Column): Boolean {
         val ref = table.tableRef.get()

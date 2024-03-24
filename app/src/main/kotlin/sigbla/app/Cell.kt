@@ -113,13 +113,9 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
             .iterator()
     }
 
-    operator fun contains(value: Any?): Boolean {
-        iterator().forEach {
-            if (it.value == value) return true
-        }
-
-        return false
-    }
+    operator fun contains(that: Number): Boolean = any { that in it }
+    operator fun contains(that: Boolean): Boolean = any { that in it }
+    operator fun contains(that: String): Boolean = any { that in it }
 
     override fun contains(value: Cell<*>): Boolean {
         if (value.index < min(start.index, endInclusive.index) || value.index > max(start.index, endInclusive.index)) {
@@ -344,9 +340,11 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
         return CellRange(this, that)
     }
 
-    operator fun contains(that: Any?): Boolean {
-        return compareTo(that) == 0
-    }
+    operator fun contains(that: Number): Boolean = compareTo(that) == 0
+    operator fun contains(that: Boolean): Boolean = compareTo(that) == 0
+    operator fun contains(that: String): Boolean = compareTo(that) == 0
+    operator fun contains(that: Unit): Boolean = compareTo(that) == 0
+    operator fun contains(that: Cell<*>?): Boolean = compareTo(that) == 0
 
     operator fun invoke(function: Cell<*>.() -> Any?): Any? {
         return when (val value = function()) {
