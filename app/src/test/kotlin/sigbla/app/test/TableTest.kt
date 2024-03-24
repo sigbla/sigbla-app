@@ -2695,6 +2695,33 @@ class TableTest {
         assertFalse("String B" in t[2]..t[3])
     }
 
+    @Test
+    fun `table contains`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["A", 1] = 100
+        t["B", 2] = true
+        t["C", 3] = false
+        t["D", 4] = "String A"
+        t["E", 5] = "String B"
+        t["F", 6] = "String B"
+
+        assertTrue(100 in t)
+        assertTrue(100L in t)
+        assertFalse(200 in t)
+        assertFalse(200L in t)
+
+        assertTrue(true in t)
+        assertTrue(false in t)
+
+        assertTrue("String A" in t)
+        assertTrue("String B" in t)
+        assertFalse("String C" in t)
+
+        assertTrue(t["A", 1] in t)
+        assertFalse(t["A", 3] in t)
+    }
+
     companion object {
         @JvmStatic
         @AfterClass

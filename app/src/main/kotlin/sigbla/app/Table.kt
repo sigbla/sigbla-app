@@ -986,7 +986,6 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
     operator fun contains(that: Number): Boolean = any { that in it }
     operator fun contains(that: Boolean): Boolean = any { that in it }
     operator fun contains(that: String): Boolean = any { that in it }
-    operator fun contains(that: Unit): Boolean = any { that in it }
     operator fun contains(that: Cell<*>?): Boolean = any { that in it }
 
     // -----
