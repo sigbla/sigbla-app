@@ -2295,6 +2295,44 @@ class TableViewTest {
         assertFalse(null in filledCellTransformer)
     }
 
+    @Test
+    fun `resources contains`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        fun getHandler(): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
+            return {
+                call.respondText("")
+            }
+        }
+
+        val handler1 = getHandler()
+        val handler2 = getHandler()
+        val handler3 = getHandler()
+
+        val unitResource = tv1[Resources].also { it { listOf("a" to handler1, "b" to handler2) } }
+        val filledResource = tv1[Resources]
+
+        assertTrue(unitResource in unitResource)
+        assertTrue(filledResource in filledResource)
+
+        assertTrue(emptyMap() in unitResource)
+        assertTrue(emptyMap() in filledResource)
+        assertFalse(mapOf("a" to handler1) in unitResource)
+        assertTrue(mapOf("a" to handler1) in filledResource)
+        assertTrue(mapOf("b" to handler2) in filledResource)
+        assertTrue(mapOf("a" to handler1, "b" to handler2) in filledResource)
+        assertFalse(mapOf("c" to handler3) in filledResource)
+        assertFalse(mapOf("a" to handler1, "c" to handler3) in filledResource)
+
+        assertTrue("a" to handler1 in filledResource)
+        assertFalse("b" to handler1 in filledResource)
+        assertFalse("b" to handler2 in unitResource)
+
+        assertTrue(listOf("a" to handler1, "b" to handler2) in filledResource)
+        assertFalse(listOf("a" to handler1, "b" to handler2) in unitResource)
+        assertFalse(listOf("c" to handler1, "b" to handler2) in filledResource)
+    }
+
     companion object {
         @JvmStatic
         @AfterClass
