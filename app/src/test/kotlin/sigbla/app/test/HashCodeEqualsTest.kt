@@ -204,7 +204,7 @@ class HashCodeEqualsTest {
         val emptyCellClasses1 = tableView1[CellClasses].also { it(listOf("B", "A")) }
         val filledCellClasses1 = tableView1[CellClasses]
 
-        val emptyCellTopics1 = tableView1[CellTopics].also { it { listOf("B", "A") } }
+        val emptyCellTopics1 = tableView1[CellTopics].also { it (listOf("B", "A")) }
         val filledCellTopics1 = tableView1[CellTopics]
 
         val tableTransformerFunction: Table.() -> Unit = { }
@@ -237,7 +237,7 @@ class HashCodeEqualsTest {
         val emptyCellClasses2 = tableView2[CellClasses].also { it(listOf("B", "A")) }
         val filledCellClasses2 = tableView2[CellClasses]
 
-        val emptyCellTopics2 = tableView2[CellTopics].also { it { listOf("B", "A") } }
+        val emptyCellTopics2 = tableView2[CellTopics].also { it (listOf("B", "A")) }
         val filledCellTopics2 = tableView2[CellTopics]
 
         val emptyTableTransformer2 = tableView2[TableTransformer].also { it { tableTransformerFunction } }

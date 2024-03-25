@@ -144,7 +144,7 @@ class ToStringTest {
         assertEquals("CellClasses[]", emptyCellClasses.toString())
         assertEquals("CellClasses[A, B]", filledCellClasses.toString())
 
-        val emptyCellTopics = tableView[CellTopics].also { it { listOf("B", "A") } }
+        val emptyCellTopics = tableView[CellTopics].also { it(listOf("B", "A")) }
         val filledCellTopics = tableView[CellTopics]
 
         assertEquals("CellTopics[]", emptyCellTopics.toString())
