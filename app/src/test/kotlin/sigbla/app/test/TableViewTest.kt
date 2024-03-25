@@ -2336,6 +2336,51 @@ class TableViewTest {
                 is CellView -> assertEquals(sortedSetOf("D", "E"), source[CellClasses].classes)
             }
 
+            cc(Unit)
+
+            when (val source = cc.source) {
+                is TableView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+                is ColumnView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+                is RowView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+                is CellView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+            }
+        }
+
+        for (cc in listOf(tv1[CellClasses], tv1["A"][CellClasses], tv1[1][CellClasses], tv1["A", 1][CellClasses])) {
+            when (val source = cc.source) {
+                is TableView -> source[CellClasses] = cc1
+                is ColumnView -> source[CellClasses] = cc1
+                is RowView -> source[CellClasses] = cc1
+                is CellView -> source[CellClasses] = cc1
+            }
+
+            cc(null as Collection<String>?)
+
+            when (val source = cc.source) {
+                is TableView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+                is ColumnView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+                is RowView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+                is CellView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+            }
+
+            cc(null as String?)
+
+            when (val source = cc.source) {
+                is TableView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+                is ColumnView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+                is RowView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+                is CellView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+            }
+
+            cc(null as CellClasses<*>?)
+
+            when (val source = cc.source) {
+                is TableView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+                is ColumnView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+                is RowView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+                is CellView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+            }
+
             cc(null as Unit?)
 
             when (val source = cc.source) {
