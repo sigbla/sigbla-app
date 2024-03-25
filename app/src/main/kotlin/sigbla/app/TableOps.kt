@@ -2028,7 +2028,7 @@ fun clear(column: Column): Unit = batch(column.table) { column.forEach { clear(i
 
 fun clear(row: Row): Unit = batch(row.table) { row.forEach { clear(it) } }
 
-fun clear(cell: Cell<*>) = cell { null }
+fun clear(cell: Cell<*>): Unit { cell() }
 
 fun clone(table: Table): Table = table.makeClone()
 

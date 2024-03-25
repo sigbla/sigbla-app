@@ -346,44 +346,41 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     operator fun contains(that: Unit): Boolean = compareTo(that) == 0
     operator fun contains(that: Cell<*>?): Boolean = compareTo(that) == 0
 
-    operator fun invoke(function: Cell<*>.() -> Any?): Any? {
-        return when (val value = function()) {
-            is BigDecimal -> {
-                table[this] = value; value
-            }
-            is BigInteger -> {
-                table[this] = value; value
-            }
-            is Double -> {
-                table[this] = value; value
-            }
-            is Long -> {
-                table[this] = value; value
-            }
-            is Number -> {
-                table[this] = value; value
-            }
-            is String -> {
-                table[this] = value; value
-            }
-            is Boolean -> {
-                table[this] = value; value
-            }
-            is Cell<*> -> {
-                table[this] = value; value
-            }
-            is Unit -> {
-                /* no assignment */
-                Unit
-            }
-            is Function1<*, *> -> {
-                invoke(value as Cell<*>.() -> Any?)
-            }
-            null -> {
-                table[this] = null; null
-            }
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
+    operator fun invoke(newValue: BigDecimal?): BigDecimal? {
+        if (newValue == null) table[this] = null else table[this] = newValue
+        return newValue
+    }
+    operator fun invoke(newValue: BigInteger?): BigInteger? {
+        if (newValue == null) table[this] = null else table[this] = newValue
+        return newValue
+    }
+    operator fun invoke(newValue: Double?): Double? {
+        if (newValue == null) table[this] = null else table[this] = newValue
+        return newValue
+    }
+    operator fun invoke(newValue: Long?): Long? {
+        if (newValue == null) table[this] = null else table[this] = newValue
+        return newValue
+    }
+    operator fun invoke(newValue: Number?): Number? {
+        if (newValue == null) table[this] = null else table[this] = newValue
+        return newValue
+    }
+    operator fun invoke(newValue: String?): String? {
+        if (newValue == null) table[this] = null else table[this] = newValue
+        return newValue
+    }
+    operator fun invoke(newValue: Boolean?): Boolean? {
+        if (newValue == null) table[this] = null else table[this] = newValue
+        return newValue
+    }
+    operator fun invoke(newValue: Cell<*>?): Cell<*>? {
+        table[this] = newValue
+        return newValue
+    }
+    operator fun invoke(newValue: Unit? = null): Unit? {
+        table[this] = null
+        return newValue
     }
 
     override fun iterator(): Iterator<Cell<*>> = if (this is UnitCell) emptyList<Cell<*>>().iterator() else listOf(this).iterator()

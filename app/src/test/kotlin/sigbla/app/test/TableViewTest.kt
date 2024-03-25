@@ -84,7 +84,7 @@ class TableViewTest {
 
         for (c in listOf("A", "B", "C", "D")) {
             for (r in 1..100) {
-                tv1[c][r][CellTransformer] = { this { "$c$r A1" } }
+                tv1[c][r][CellTransformer] = { this("$c$r A1") }
             }
         }
 
@@ -95,13 +95,13 @@ class TableViewTest {
 
         for (c in listOf("A", "B", "C")) {
             for (r in 1..100) {
-                tv2[c][r][CellTransformer] = { this { "$c$r B1" } }
+                tv2[c][r][CellTransformer] = { this("$c$r B1") }
             }
         }
 
         for (c in listOf("D")) {
             for (r in 1..100) {
-                tv1[c][r][CellTransformer] = { this { "$c$r A2" } }
+                tv1[c][r][CellTransformer] = { this("$c$r A2") }
             }
         }
 
@@ -134,7 +134,7 @@ class TableViewTest {
     fun `clone is not closed`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
-        tv1["A", 0][CellTransformer] = { this { "A0v1" } }
+        tv1["A", 0][CellTransformer] = { this("A0v1") }
 
         remove(tv1)
 
@@ -146,7 +146,7 @@ class TableViewTest {
         assertTrue(tv2.source?.closed == true)
         assertFalse(tv2.closed)
 
-        tv2["A", 0][CellTransformer] = { this { "A0v2" } }
+        tv2["A", 0][CellTransformer] = { this("A0v2") }
 
         assertEquals("A0v2", tv2[Table]["A", 0].value)
     }
@@ -2050,9 +2050,7 @@ class TableViewTest {
         assertEquals("A0", tt3["A", 0].value)
         assertEquals("A0", tt4["A", 0].value)
 
-        tv["A", 0][CellTransformer] = {
-            this { "A0v2" }
-        }
+        tv["A", 0][CellTransformer] = { this("A0v2") }
 
         val tt5 = tv[Table]
         val tt6 = tv[Table]
@@ -2124,7 +2122,7 @@ class TableViewTest {
             assertFalse(this.table == t)
             assertTrue(this.table.source == t)
 
-            this { "CellTransformer 0" }
+            this("CellTransformer 0")
         }
 
         assertTrue("TableTransformer 0" in tv[Table]["TableTransformer"][0])

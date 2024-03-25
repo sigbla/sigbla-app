@@ -66,7 +66,7 @@ private inline fun <reified O, reified N> cellFunction(
         this.name = name
         this.order = order
 
-        cell { init }
+        cell(init)
 
         val destinationCount = AtomicInteger()
 
@@ -77,9 +77,9 @@ private inline fun <reified O, reified N> cellFunction(
                 val newValue = cells.asSequence().map { newTable[it] }.calc()
 
                 when {
-                    newValue != null -> cell { newValue }
-                    empty != null -> cell { empty }
-                    else -> cell { null }
+                    newValue != null -> cell(newValue)
+                    empty != null -> cell(empty)
+                    else -> cell()
                 }
             }
         }

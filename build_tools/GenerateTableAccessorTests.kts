@@ -9,7 +9,7 @@
 // table[int|long|row][header|column] = value
 // table[cell] = value
 
-// + the Cell<*>.() -> Any? assignment pattern
+// + invoke assignment pattern
 
 // + these read cases with index relations
 
@@ -41,13 +41,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[${headers.joinToString()}, Int.MAX_VALUE] { cell }")
+        println("table[${headers.joinToString()}, Int.MAX_VALUE](cell)")
         println("assertEquals($cellValue, table[${headers.joinToString()}, Int.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[${headers.joinToString()}, IndexRelation.AT, Int.MAX_VALUE].value)")
         println("clear(table)")
 
         println()
-        println("table[${headers.joinToString()}, Int.MAX_VALUE] = { this { cell } }")
+        println("table[${headers.joinToString()}, Int.MAX_VALUE] = { this(cell) }")
         println("assertEquals($cellValue, table[${headers.joinToString()}, Int.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[${headers.joinToString()}, IndexRelation.AT, Int.MAX_VALUE].value)")
         println("clear(table)")
@@ -60,13 +60,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[${headers.joinToString()}, Long.MAX_VALUE] { cell }")
+        println("table[${headers.joinToString()}, Long.MAX_VALUE](cell)")
         println("assertEquals($cellValue, table[${headers.joinToString()}, Long.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[${headers.joinToString()}, IndexRelation.AT, Long.MAX_VALUE].value)")
         println("clear(table)")
 
         println()
-        println("table[${headers.joinToString()}, Long.MAX_VALUE] = { this { cell } }")
+        println("table[${headers.joinToString()}, Long.MAX_VALUE] = { this(cell) }")
         println("assertEquals($cellValue, table[${headers.joinToString()}, Long.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[${headers.joinToString()}, IndexRelation.AT, Long.MAX_VALUE].value)")
         println("clear(table)")
@@ -78,12 +78,12 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[${headers.joinToString()}, table[Long.MAX_VALUE]] { cell }")
+        println("table[${headers.joinToString()}, table[Long.MAX_VALUE]](cell)")
         println("assertEquals($cellValue, table[${headers.joinToString()}, table[Long.MAX_VALUE]].value)")
         println("clear(table)")
 
         println()
-        println("table[${headers.joinToString()}, table[Long.MAX_VALUE]] = { this { cell } }")
+        println("table[${headers.joinToString()}, table[Long.MAX_VALUE]] = { this(cell) }")
         println("assertEquals($cellValue, table[${headers.joinToString()}, table[Long.MAX_VALUE]].value)")
         println("clear(table)")
 
@@ -95,13 +95,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[${headers.joinToString()}][Int.MAX_VALUE] { cell }")
+        println("table[${headers.joinToString()}][Int.MAX_VALUE](cell)")
         println("assertEquals($cellValue, table[${headers.joinToString()}][Int.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[${headers.joinToString()}][IndexRelation.AT, Int.MAX_VALUE].value)")
         println("clear(table)")
 
         println()
-        println("table[${headers.joinToString()}][Int.MAX_VALUE] = { this { cell } }")
+        println("table[${headers.joinToString()}][Int.MAX_VALUE] = { this(cell) }")
         println("assertEquals($cellValue, table[${headers.joinToString()}][Int.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[${headers.joinToString()}][IndexRelation.AT, Int.MAX_VALUE].value)")
         println("clear(table)")
@@ -114,13 +114,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[${headers.joinToString()}][Long.MAX_VALUE] { cell }")
+        println("table[${headers.joinToString()}][Long.MAX_VALUE](cell)")
         println("assertEquals($cellValue, table[${headers.joinToString()}][Long.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[${headers.joinToString()}][IndexRelation.AT, Long.MAX_VALUE].value)")
         println("clear(table)")
 
         println()
-        println("table[${headers.joinToString()}][Long.MAX_VALUE] = { this { cell } }")
+        println("table[${headers.joinToString()}][Long.MAX_VALUE] = { this(cell) }")
         println("assertEquals($cellValue, table[${headers.joinToString()}][Long.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[${headers.joinToString()}][IndexRelation.AT, Long.MAX_VALUE].value)")
         println("clear(table)")
@@ -132,12 +132,12 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[${headers.joinToString()}][table[Long.MAX_VALUE]] { cell }")
+        println("table[${headers.joinToString()}][table[Long.MAX_VALUE]](cell)")
         println("assertEquals($cellValue, table[${headers.joinToString()}][table[Long.MAX_VALUE]].value)")
         println("clear(table)")
 
         println()
-        println("table[${headers.joinToString()}][table[Long.MAX_VALUE]] = { this { cell } }")
+        println("table[${headers.joinToString()}][table[Long.MAX_VALUE]] = { this(cell) }")
         println("assertEquals($cellValue, table[${headers.joinToString()}][table[Long.MAX_VALUE]].value)")
         println("clear(table)")
 
@@ -149,13 +149,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[Int.MAX_VALUE][${headers.joinToString()}] { cell }")
+        println("table[Int.MAX_VALUE][${headers.joinToString()}](cell)")
         println("assertEquals($cellValue, table[Int.MAX_VALUE][${headers.joinToString()}].value)")
         println("assertEquals($cellValue, table[IndexRelation.AT, Int.MAX_VALUE][${headers.joinToString()}].value)")
         println("clear(table)")
 
         println()
-        println("table[Int.MAX_VALUE][${headers.joinToString()}] = { this { cell } }")
+        println("table[Int.MAX_VALUE][${headers.joinToString()}] = { this(cell) }")
         println("assertEquals($cellValue, table[Int.MAX_VALUE][${headers.joinToString()}].value)")
         println("assertEquals($cellValue, table[IndexRelation.AT, Int.MAX_VALUE][${headers.joinToString()}].value)")
         println("clear(table)")
@@ -168,13 +168,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[Long.MAX_VALUE][${headers.joinToString()}] { cell }")
+        println("table[Long.MAX_VALUE][${headers.joinToString()}](cell)")
         println("assertEquals($cellValue, table[Long.MAX_VALUE][${headers.joinToString()}].value)")
         println("assertEquals($cellValue, table[IndexRelation.AT, Long.MAX_VALUE][${headers.joinToString()}].value)")
         println("clear(table)")
 
         println()
-        println("table[Long.MAX_VALUE][${headers.joinToString()}] = { this { cell } }")
+        println("table[Long.MAX_VALUE][${headers.joinToString()}] = { this(cell) }")
         println("assertEquals($cellValue, table[Long.MAX_VALUE][${headers.joinToString()}].value)")
         println("assertEquals($cellValue, table[IndexRelation.AT, Long.MAX_VALUE][${headers.joinToString()}].value)")
         println("clear(table)")
@@ -186,12 +186,12 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[table[Long.MAX_VALUE]][${headers.joinToString()}] { cell }")
+        println("table[table[Long.MAX_VALUE]][${headers.joinToString()}](cell)")
         println("assertEquals($cellValue, table[table[Long.MAX_VALUE]][${headers.joinToString()}].value)")
         println("clear(table)")
 
         println()
-        println("table[table[Long.MAX_VALUE]][${headers.joinToString()}] = { this { cell } }")
+        println("table[table[Long.MAX_VALUE]][${headers.joinToString()}] = { this(cell) }")
         println("assertEquals($cellValue, table[table[Long.MAX_VALUE]][${headers.joinToString()}].value)")
         println("clear(table)")
     }
@@ -206,13 +206,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[Header[${headers.joinToString()}], Int.MAX_VALUE] { cell }")
+        println("table[Header[${headers.joinToString()}], Int.MAX_VALUE](cell)")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}], Int.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}], IndexRelation.AT, Int.MAX_VALUE].value)")
         println("clear(table)")
 
         println()
-        println("table[Header[${headers.joinToString()}], Int.MAX_VALUE] = { this { cell } }")
+        println("table[Header[${headers.joinToString()}], Int.MAX_VALUE] = { this(cell) }")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}], Int.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}], IndexRelation.AT, Int.MAX_VALUE].value)")
         println("clear(table)")
@@ -225,13 +225,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[Header[${headers.joinToString()}], Long.MAX_VALUE] { cell }")
+        println("table[Header[${headers.joinToString()}], Long.MAX_VALUE](cell)")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}], Long.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}], IndexRelation.AT, Long.MAX_VALUE].value)")
         println("clear(table)")
 
         println()
-        println("table[Header[${headers.joinToString()}], Long.MAX_VALUE] = { this { cell } }")
+        println("table[Header[${headers.joinToString()}], Long.MAX_VALUE] = { this(cell) }")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}], Long.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}], IndexRelation.AT, Long.MAX_VALUE].value)")
         println("clear(table)")
@@ -243,12 +243,12 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[Header[${headers.joinToString()}], table[Long.MAX_VALUE]] { cell }")
+        println("table[Header[${headers.joinToString()}], table[Long.MAX_VALUE]](cell)")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}], table[Long.MAX_VALUE]].value)")
         println("clear(table)")
 
         println()
-        println("table[Header[${headers.joinToString()}], table[Long.MAX_VALUE]] = { this { cell } }")
+        println("table[Header[${headers.joinToString()}], table[Long.MAX_VALUE]] = { this(cell) }")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}], table[Long.MAX_VALUE]].value)")
         println("clear(table)")
 
@@ -260,13 +260,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[table[Header[${headers.joinToString()}]], Int.MAX_VALUE] { cell }")
+        println("table[table[Header[${headers.joinToString()}]], Int.MAX_VALUE](cell)")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]], Int.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]], IndexRelation.AT, Int.MAX_VALUE].value)")
         println("clear(table)")
 
         println()
-        println("table[table[Header[${headers.joinToString()}]], Int.MAX_VALUE] = { this { cell } }")
+        println("table[table[Header[${headers.joinToString()}]], Int.MAX_VALUE] = { this(cell) }")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]], Int.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]], IndexRelation.AT, Int.MAX_VALUE].value)")
         println("clear(table)")
@@ -279,13 +279,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[table[Header[${headers.joinToString()}]], Long.MAX_VALUE] { cell }")
+        println("table[table[Header[${headers.joinToString()}]], Long.MAX_VALUE](cell)")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]], Long.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]], IndexRelation.AT, Long.MAX_VALUE].value)")
         println("clear(table)")
 
         println()
-        println("table[table[Header[${headers.joinToString()}]], Long.MAX_VALUE] = { this { cell } }")
+        println("table[table[Header[${headers.joinToString()}]], Long.MAX_VALUE] = { this(cell) }")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]], Long.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]], IndexRelation.AT, Long.MAX_VALUE].value)")
         println("clear(table)")
@@ -297,12 +297,12 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[table[Header[${headers.joinToString()}]], table[Long.MAX_VALUE]] { cell }")
+        println("table[table[Header[${headers.joinToString()}]], table[Long.MAX_VALUE]](cell)")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]], table[Long.MAX_VALUE]].value)")
         println("clear(table)")
 
         println()
-        println("table[table[Header[${headers.joinToString()}]], table[Long.MAX_VALUE]] = { this { cell } }")
+        println("table[table[Header[${headers.joinToString()}]], table[Long.MAX_VALUE]] = { this(cell) }")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]], table[Long.MAX_VALUE]].value)")
         println("clear(table)")
 
@@ -314,13 +314,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[Header[${headers.joinToString()}]][Int.MAX_VALUE] { cell }")
+        println("table[Header[${headers.joinToString()}]][Int.MAX_VALUE](cell)")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}]][Int.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}]][IndexRelation.AT, Int.MAX_VALUE].value)")
         println("clear(table)")
 
         println()
-        println("table[Header[${headers.joinToString()}]][Int.MAX_VALUE] = { this { cell } }")
+        println("table[Header[${headers.joinToString()}]][Int.MAX_VALUE] = { this(cell) }")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}]][Int.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}]][IndexRelation.AT, Int.MAX_VALUE].value)")
         println("clear(table)")
@@ -333,13 +333,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[Header[${headers.joinToString()}]][Long.MAX_VALUE] { cell }")
+        println("table[Header[${headers.joinToString()}]][Long.MAX_VALUE](cell)")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}]][Long.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}]][IndexRelation.AT, Long.MAX_VALUE].value)")
         println("clear(table)")
 
         println()
-        println("table[Header[${headers.joinToString()}]][Long.MAX_VALUE] = { this { cell } }")
+        println("table[Header[${headers.joinToString()}]][Long.MAX_VALUE] = { this(cell) }")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}]][Long.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}]][IndexRelation.AT, Long.MAX_VALUE].value)")
         println("clear(table)")
@@ -351,12 +351,12 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[Header[${headers.joinToString()}]][table[Long.MAX_VALUE]] { cell }")
+        println("table[Header[${headers.joinToString()}]][table[Long.MAX_VALUE]](cell)")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}]][table[Long.MAX_VALUE]].value)")
         println("clear(table)")
 
         println()
-        println("table[Header[${headers.joinToString()}]][table[Long.MAX_VALUE]] = { this { cell } }")
+        println("table[Header[${headers.joinToString()}]][table[Long.MAX_VALUE]] = { this(cell) }")
         println("assertEquals($cellValue, table[Header[${headers.joinToString()}]][table[Long.MAX_VALUE]].value)")
         println("clear(table)")
 
@@ -368,13 +368,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[table[Header[${headers.joinToString()}]]][Int.MAX_VALUE] { cell }")
+        println("table[table[Header[${headers.joinToString()}]]][Int.MAX_VALUE](cell)")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]]][Int.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]]][IndexRelation.AT, Int.MAX_VALUE].value)")
         println("clear(table)")
 
         println()
-        println("table[table[Header[${headers.joinToString()}]]][Int.MAX_VALUE] = { this { cell } }")
+        println("table[table[Header[${headers.joinToString()}]]][Int.MAX_VALUE] = { this(cell) }")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]]][Int.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]]][IndexRelation.AT, Int.MAX_VALUE].value)")
         println("clear(table)")
@@ -387,13 +387,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[table[Header[${headers.joinToString()}]]][Long.MAX_VALUE] { cell }")
+        println("table[table[Header[${headers.joinToString()}]]][Long.MAX_VALUE](cell)")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]]][Long.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]]][IndexRelation.AT, Long.MAX_VALUE].value)")
         println("clear(table)")
 
         println()
-        println("table[table[Header[${headers.joinToString()}]]][Long.MAX_VALUE] = { this { cell } }")
+        println("table[table[Header[${headers.joinToString()}]]][Long.MAX_VALUE] = { this(cell) }")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]]][Long.MAX_VALUE].value)")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]]][IndexRelation.AT, Long.MAX_VALUE].value)")
         println("clear(table)")
@@ -405,12 +405,12 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[table[Header[${headers.joinToString()}]]][table[Long.MAX_VALUE]] { cell }")
+        println("table[table[Header[${headers.joinToString()}]]][table[Long.MAX_VALUE]](cell)")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]]][table[Long.MAX_VALUE]].value)")
         println("clear(table)")
 
         println()
-        println("table[table[Header[${headers.joinToString()}]]][table[Long.MAX_VALUE]] = { this { cell } }")
+        println("table[table[Header[${headers.joinToString()}]]][table[Long.MAX_VALUE]] = { this(cell) }")
         println("assertEquals($cellValue, table[table[Header[${headers.joinToString()}]]][table[Long.MAX_VALUE]].value)")
         println("clear(table)")
 
@@ -422,13 +422,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[Int.MAX_VALUE][Header[${headers.joinToString()}]] { cell }")
+        println("table[Int.MAX_VALUE][Header[${headers.joinToString()}]](cell)")
         println("assertEquals($cellValue, table[Int.MAX_VALUE][Header[${headers.joinToString()}]].value)")
         println("assertEquals($cellValue, table[IndexRelation.AT, Int.MAX_VALUE][Header[${headers.joinToString()}]].value)")
         println("clear(table)")
 
         println()
-        println("table[Int.MAX_VALUE][Header[${headers.joinToString()}]] = { this { cell } }")
+        println("table[Int.MAX_VALUE][Header[${headers.joinToString()}]] = { this(cell) }")
         println("assertEquals($cellValue, table[Int.MAX_VALUE][Header[${headers.joinToString()}]].value)")
         println("assertEquals($cellValue, table[IndexRelation.AT, Int.MAX_VALUE][Header[${headers.joinToString()}]].value)")
         println("clear(table)")
@@ -441,13 +441,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[Long.MAX_VALUE][Header[${headers.joinToString()}]] { cell }")
+        println("table[Long.MAX_VALUE][Header[${headers.joinToString()}]](cell)")
         println("assertEquals($cellValue, table[Long.MAX_VALUE][Header[${headers.joinToString()}]].value)")
         println("assertEquals($cellValue, table[IndexRelation.AT, Long.MAX_VALUE][Header[${headers.joinToString()}]].value)")
         println("clear(table)")
 
         println()
-        println("table[Long.MAX_VALUE][Header[${headers.joinToString()}]] = { this { cell } }")
+        println("table[Long.MAX_VALUE][Header[${headers.joinToString()}]] = { this(cell) }")
         println("assertEquals($cellValue, table[Long.MAX_VALUE][Header[${headers.joinToString()}]].value)")
         println("assertEquals($cellValue, table[IndexRelation.AT, Long.MAX_VALUE][Header[${headers.joinToString()}]].value)")
         println("clear(table)")
@@ -459,12 +459,12 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[table[Long.MAX_VALUE]][Header[${headers.joinToString()}]] { cell }")
+        println("table[table[Long.MAX_VALUE]][Header[${headers.joinToString()}]](cell)")
         println("assertEquals($cellValue, table[table[Long.MAX_VALUE]][Header[${headers.joinToString()}]].value)")
         println("clear(table)")
 
         println()
-        println("table[table[Long.MAX_VALUE]][Header[${headers.joinToString()}]] = { this { cell } }")
+        println("table[table[Long.MAX_VALUE]][Header[${headers.joinToString()}]] = { this(cell) }")
         println("assertEquals($cellValue, table[table[Long.MAX_VALUE]][Header[${headers.joinToString()}]].value)")
         println("clear(table)")
 
@@ -476,13 +476,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[Int.MAX_VALUE][table[Header[${headers.joinToString()}]]] { cell }")
+        println("table[Int.MAX_VALUE][table[Header[${headers.joinToString()}]]](cell)")
         println("assertEquals($cellValue, table[Int.MAX_VALUE][table[Header[${headers.joinToString()}]]].value)")
         println("assertEquals($cellValue, table[IndexRelation.AT, Int.MAX_VALUE][table[Header[${headers.joinToString()}]]].value)")
         println("clear(table)")
 
         println()
-        println("table[Int.MAX_VALUE][table[Header[${headers.joinToString()}]]] = { this { cell } }")
+        println("table[Int.MAX_VALUE][table[Header[${headers.joinToString()}]]] = { this(cell) }")
         println("assertEquals($cellValue, table[Int.MAX_VALUE][table[Header[${headers.joinToString()}]]].value)")
         println("assertEquals($cellValue, table[IndexRelation.AT, Int.MAX_VALUE][table[Header[${headers.joinToString()}]]].value)")
         println("clear(table)")
@@ -495,13 +495,13 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[Long.MAX_VALUE][table[Header[${headers.joinToString()}]]] { cell }")
+        println("table[Long.MAX_VALUE][table[Header[${headers.joinToString()}]]](cell)")
         println("assertEquals($cellValue, table[Long.MAX_VALUE][table[Header[${headers.joinToString()}]]].value)")
         println("assertEquals($cellValue, table[IndexRelation.AT, Long.MAX_VALUE][table[Header[${headers.joinToString()}]]].value)")
         println("clear(table)")
 
         println()
-        println("table[Long.MAX_VALUE][table[Header[${headers.joinToString()}]]] = { this { cell } }")
+        println("table[Long.MAX_VALUE][table[Header[${headers.joinToString()}]]] = { this(cell) }")
         println("assertEquals($cellValue, table[Long.MAX_VALUE][table[Header[${headers.joinToString()}]]].value)")
         println("assertEquals($cellValue, table[IndexRelation.AT, Long.MAX_VALUE][table[Header[${headers.joinToString()}]]].value)")
         println("clear(table)")
@@ -513,12 +513,12 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
         println("clear(table)")
 
         println()
-        println("table[table[Long.MAX_VALUE]][table[Header[${headers.joinToString()}]]] { cell }")
+        println("table[table[Long.MAX_VALUE]][table[Header[${headers.joinToString()}]]](cell)")
         println("assertEquals($cellValue, table[table[Long.MAX_VALUE]][table[Header[${headers.joinToString()}]]].value)")
         println("clear(table)")
 
         println()
-        println("table[table[Long.MAX_VALUE]][table[Header[${headers.joinToString()}]]] = { this { cell } }")
+        println("table[table[Long.MAX_VALUE]][table[Header[${headers.joinToString()}]]] = { this(cell) }")
         println("assertEquals($cellValue, table[table[Long.MAX_VALUE]][table[Header[${headers.joinToString()}]]].value)")
         println("clear(table)")
     }
@@ -530,12 +530,12 @@ fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell"
     println("clear(table)")
 
     println()
-    println("table[table[\"L1\", Int.MAX_VALUE]] { cell }")
+    println("table[table[\"L1\", Int.MAX_VALUE]](cell)")
     println("assertEquals($cellValue, table[table[\"L1\", Int.MAX_VALUE]].value)")
     println("clear(table)")
 
     println()
-    println("table[table[\"L1\", Int.MAX_VALUE]] = { this { cell } }")
+    println("table[table[\"L1\", Int.MAX_VALUE]] = { this(cell) }")
     println("assertEquals($cellValue, table[table[\"L1\", Int.MAX_VALUE]].value)")
     println("clear(table)")
 
