@@ -138,7 +138,7 @@ class ToStringTest {
         assertEquals("UnitCellWidth", unitCellWidth.toString())
         assertEquals("PixelCellWidth[100]", pixelCellWidth.toString())
 
-        val emptyCellClasses = tableView[CellClasses].also { it { listOf("B", "A") } }
+        val emptyCellClasses = tableView[CellClasses].also { it(listOf("B", "A")) }
         val filledCellClasses = tableView[CellClasses]
 
         assertEquals("CellClasses[]", emptyCellClasses.toString())

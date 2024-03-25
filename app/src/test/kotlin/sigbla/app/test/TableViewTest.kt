@@ -693,9 +693,7 @@ class TableViewTest {
         tv1[CellWidth] {
             200
         }
-        tv1[CellClasses] {
-            "300"
-        }
+        tv1[CellClasses]("300")
         tv1[CellTopics] {
             "400"
         }
@@ -718,9 +716,7 @@ class TableViewTest {
         assertEquals(mapOf("a" to handler), tv1[Resources].resources)
         assertEquals(tt, tv1[TableTransformer].function)
 
-        tv1[CellClasses] {
-            setOf("500", "600")
-        }
+        tv1[CellClasses](setOf("500", "600"))
         tv1[CellTopics] {
             setOf("700", "800")
         }
@@ -730,7 +726,6 @@ class TableViewTest {
 
         tv1[CellHeight] { }
         tv1[CellWidth] { }
-        tv1[CellClasses] { }
         tv1[CellTopics] { }
         tv1[Resources] { }
         tv1[TableTransformer] { }
@@ -744,7 +739,7 @@ class TableViewTest {
 
         tv1[CellHeight] { null }
         tv1[CellWidth] { null }
-        tv1[CellClasses] { null }
+        tv1[CellClasses](null as Unit?)
         tv1[CellTopics] { null }
         tv1[Resources] { null }
         tv1[TableTransformer] { null }
@@ -810,9 +805,7 @@ class TableViewTest {
         tv2[CellWidth] {
             200
         }
-        tv2[CellClasses] {
-            "300"
-        }
+        tv2[CellClasses]("300")
         tv2[CellTopics] {
             "400"
         }
@@ -897,9 +890,7 @@ class TableViewTest {
         tv1["A"][CellWidth] {
             200
         }
-        tv1["A"][CellClasses] {
-            "300"
-        }
+        tv1["A"][CellClasses]("300")
         tv1["A"][CellTopics] {
             "400"
         }
@@ -912,9 +903,7 @@ class TableViewTest {
         assertEquals(setOf("400"), tv1["A"][CellTopics].topics)
         assertEquals(ct, tv1["A"][ColumnTransformer].function)
 
-        tv1["A"][CellClasses] {
-            setOf("500", "600")
-        }
+        tv1["A"][CellClasses](setOf("500", "600"))
         tv1["A"][CellTopics] {
             setOf("700", "800")
         }
@@ -923,7 +912,6 @@ class TableViewTest {
         assertEquals(setOf("700", "800"), tv1["A"][CellTopics].topics)
 
         tv1["A"][CellWidth] { }
-        tv1["A"][CellClasses] { }
         tv1["A"][CellTopics] { }
         tv1["A"][ColumnTransformer] { }
 
@@ -933,7 +921,7 @@ class TableViewTest {
         assertEquals(ct, tv1["A"][ColumnTransformer].function)
 
         tv1["A"][CellWidth] { null }
-        tv1["A"][CellClasses] { null }
+        tv1["A"][CellClasses](null as Unit?)
         tv1["A"][CellTopics] { null }
         tv1["A"][ColumnTransformer] { null }
 
@@ -970,9 +958,7 @@ class TableViewTest {
         tv1["B"][CellWidth] {
             200
         }
-        tv1["B"][CellClasses] {
-            "300"
-        }
+        tv1["B"][CellClasses]("300")
         tv1["B"][CellTopics] {
             "400"
         }
@@ -1028,9 +1014,7 @@ class TableViewTest {
         tv1[1][CellHeight] {
             200
         }
-        tv1[1][CellClasses] {
-            "300"
-        }
+        tv1[1][CellClasses]("300")
         tv1[1][CellTopics] {
             "400"
         }
@@ -1043,9 +1027,7 @@ class TableViewTest {
         assertEquals(setOf("400"), tv1[1][CellTopics].topics)
         assertEquals(rt, tv1[1][RowTransformer].function)
 
-        tv1[1][CellClasses] {
-            setOf("500", "600")
-        }
+        tv1[1][CellClasses](setOf("500", "600"))
         tv1[1][CellTopics] {
             setOf("700", "800")
         }
@@ -1054,7 +1036,6 @@ class TableViewTest {
         assertEquals(setOf("700", "800"), tv1[1][CellTopics].topics)
 
         tv1[1][CellHeight] { }
-        tv1[1][CellClasses] { }
         tv1[1][CellTopics] { }
         tv1[1][RowTransformer] { }
 
@@ -1064,7 +1045,7 @@ class TableViewTest {
         assertEquals(rt, tv1[1][RowTransformer].function)
 
         tv1[1][CellHeight] { null }
-        tv1[1][CellClasses] { null }
+        tv1[1][CellClasses](null as Unit?)
         tv1[1][CellTopics] { null }
         tv1[1][RowTransformer] { null }
 
@@ -1101,9 +1082,7 @@ class TableViewTest {
         tv1[2][CellHeight] {
             200
         }
-        tv1[2][CellClasses] {
-            "300"
-        }
+        tv1[2][CellClasses]("300")
         tv1[2][CellTopics] {
             "400"
         }
@@ -1161,9 +1140,7 @@ class TableViewTest {
         tv1["A", 1][CellWidth] {
             200
         }
-        tv1["A", 1][CellClasses] {
-            "300"
-        }
+        tv1["A", 1][CellClasses]("300")
         tv1["A", 1][CellTopics] {
             "400"
         }
@@ -1177,9 +1154,7 @@ class TableViewTest {
         assertEquals(setOf("400"), tv1["A", 1][CellTopics].topics)
         assertEquals(ct, tv1["A", 1][CellTransformer].function)
 
-        tv1["A", 1][CellClasses] {
-            setOf("500", "600")
-        }
+        tv1["A", 1][CellClasses](setOf("500", "600"))
         tv1["A", 1][CellTopics] {
             setOf("700", "800")
         }
@@ -1189,7 +1164,6 @@ class TableViewTest {
 
         tv1["A", 1][CellHeight] { }
         tv1["A", 1][CellWidth] { }
-        tv1["A", 1][CellClasses] { }
         tv1["A", 1][CellTopics] { }
         tv1["A", 1][CellTransformer] { }
 
@@ -1201,7 +1175,7 @@ class TableViewTest {
 
         tv1["A", 1][CellHeight] { null }
         tv1["A", 1][CellWidth] { null }
-        tv1["A", 1][CellClasses] { null }
+        tv1["A", 1][CellClasses](null as Unit?)
         tv1["A", 1][CellTopics] { null }
         tv1["A", 1][CellTransformer] { null }
 
@@ -1246,9 +1220,7 @@ class TableViewTest {
         tv1["B", 1][CellWidth] {
             200
         }
-        tv1["B", 1][CellClasses] {
-            "300"
-        }
+        tv1["B", 1][CellClasses]("300")
         tv1["B", 1][CellTopics] {
             "400"
         }
@@ -2177,7 +2149,7 @@ class TableViewTest {
     fun `cell classes contains`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
-        val unitCellClasses = tv1[CellClasses].also { it { listOf("A", "B") } }
+        val unitCellClasses = tv1[CellClasses].also { it(listOf("A", "B")) }
         val filledCellClasses = tv1[CellClasses]
 
         assertTrue(unitCellClasses in unitCellClasses)

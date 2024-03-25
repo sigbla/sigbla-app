@@ -2589,25 +2589,48 @@ class CellClasses<S> internal constructor(
     operator fun minus(topics: Collection<String>): SortedSet<String> = (topics.fold(this._classes) { acc, topic -> acc - topic }).toSortedSet()
     override fun iterator(): Iterator<String> = classes.iterator()
 
-    operator fun invoke(function: CellClasses<*>.() -> Any?): Any? {
-        val value = this.function()
-        val classes = when(value) {
-            is Unit -> /* no assignment */ return Unit
-            is String -> setOf(value)
-            is Collection<*> -> value as Collection<String>
-            is CellClasses<*> -> value.classes
-            null -> null
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
+    operator fun invoke(newValue: Collection<String>?): Collection<String>? {
+        when (source) {
+            is TableView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is ColumnView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is RowView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is CellView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
         }
 
-        when (val source = source) {
-            is TableView -> if (classes == null) source[CellClasses] = null else source[CellClasses] = classes
-            is ColumnView -> if (classes == null) source[CellClasses] = null else source[CellClasses] = classes
-            is RowView -> if (classes == null) source[CellClasses] = null else source[CellClasses] = classes
-            is CellView -> if (classes == null) source[CellClasses] = null else source[CellClasses] = classes
+        return newValue
+    }
+
+    operator fun invoke(newValue: String?): String? {
+        when (source) {
+            is TableView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is ColumnView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is RowView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is CellView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
         }
 
-        return value
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellClasses<*>?): CellClasses<*>? {
+        when (source) {
+            is TableView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is ColumnView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is RowView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is CellView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+        }
+
+        return newValue
+    }
+
+    operator fun invoke(newValue: Unit? = null): Unit? {
+        when (source) {
+            is TableView -> source[CellClasses] = null
+            is ColumnView -> source[CellClasses] = null
+            is RowView -> source[CellClasses] = null
+            is CellView -> source[CellClasses] = null
+        }
+
+        return newValue
     }
 
     operator fun contains(other: CellClasses<*>) = _classes.containsAll(other._classes)
