@@ -195,7 +195,7 @@ class HashCodeEqualsTest {
 
         val tableView1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
 
-        val unitCellHeight1 = tableView1[CellHeight].also { it { 100 } }
+        val unitCellHeight1 = tableView1[CellHeight].also { it(100) }
         val pixelCellHeight1 = tableView1[CellHeight]
 
         val unitCellWidth1 = tableView1[CellWidth].also { it { 100 } }
@@ -228,7 +228,7 @@ class HashCodeEqualsTest {
 
         val tableView2 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
-        val unitCellHeight2 = tableView2[CellHeight].also { it { 100 } }
+        val unitCellHeight2 = tableView2[CellHeight].also { it(100) }
         val pixelCellHeight2 = tableView2[CellHeight]
 
         val unitCellWidth2 = tableView2[CellWidth].also { it { 100 } }

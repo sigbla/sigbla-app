@@ -687,9 +687,7 @@ class TableViewTest {
             call.respondText(text = "Response 1")
         }
 
-        tv1[CellHeight] {
-            100
-        }
+        tv1[CellHeight](100)
         tv1[CellWidth] {
             200
         }
@@ -719,7 +717,6 @@ class TableViewTest {
         assertEquals(setOf("500", "600"), tv1[CellClasses].classes)
         assertEquals(setOf("700", "800"), tv1[CellTopics].topics)
 
-        tv1[CellHeight] { }
         tv1[CellWidth] { }
         tv1[Resources] { }
         tv1[TableTransformer] { }
@@ -731,7 +728,7 @@ class TableViewTest {
         assertEquals(mapOf("a" to handler), tv1[Resources].resources)
         assertEquals(tt, tv1[TableTransformer].function)
 
-        tv1[CellHeight] { null }
+        tv1[CellHeight](null as Unit?)
         tv1[CellWidth] { null }
         tv1[CellClasses](null as Unit?)
         tv1[CellTopics](null as Unit?)
@@ -793,9 +790,7 @@ class TableViewTest {
         assertEquals(Unit, tv1[TableTransformer].function)
         assertEquals(t1, tv1[Table].source)
 
-        tv2[CellHeight] {
-            100
-        }
+        tv2[CellHeight](100)
         tv2[CellWidth] {
             200
         }
@@ -996,9 +991,7 @@ class TableViewTest {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val rt: Row.() -> Unit = {}
 
-        tv1[1][CellHeight] {
-            200
-        }
+        tv1[1][CellHeight](200)
         tv1[1][CellClasses]("300")
         tv1[1][CellTopics]("400")
         tv1[1][RowTransformer] {
@@ -1016,7 +1009,6 @@ class TableViewTest {
         assertEquals(setOf("500", "600"), tv1[1][CellClasses].classes)
         assertEquals(setOf("700", "800"), tv1[1][CellTopics].topics)
 
-        tv1[1][CellHeight] { }
         tv1[1][RowTransformer] { }
 
         assertEquals(200L, tv1[1][CellHeight].height)
@@ -1024,7 +1016,7 @@ class TableViewTest {
         assertEquals(setOf("700", "800"), tv1[1][CellTopics].topics)
         assertEquals(rt, tv1[1][RowTransformer].function)
 
-        tv1[1][CellHeight] { null }
+        tv1[1][CellHeight](null as Unit?)
         tv1[1][CellClasses](null as Unit?)
         tv1[1][CellTopics](null as Unit?)
         tv1[1][RowTransformer] { null }
@@ -1059,9 +1051,7 @@ class TableViewTest {
         assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
         assertEquals(Unit, tv1[1][RowTransformer].function)
 
-        tv1[2][CellHeight] {
-            200
-        }
+        tv1[2][CellHeight](200)
         tv1[2][CellClasses]("300")
         tv1[2][CellTopics]("400")
         tv1[2][RowTransformer] {
@@ -1112,9 +1102,7 @@ class TableViewTest {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val ct: Cell<*>.() -> Unit = {}
 
-        tv1["A", 1][CellHeight] {
-            100
-        }
+        tv1["A", 1][CellHeight](100)
         tv1["A", 1][CellWidth] {
             200
         }
@@ -1136,7 +1124,6 @@ class TableViewTest {
         assertEquals(setOf("500", "600"), tv1["A", 1][CellClasses].classes)
         assertEquals(setOf("700", "800"), tv1["A", 1][CellTopics].topics)
 
-        tv1["A", 1][CellHeight] { }
         tv1["A", 1][CellWidth] { }
         tv1["A", 1][CellTransformer] { }
 
@@ -1146,7 +1133,7 @@ class TableViewTest {
         assertEquals(setOf("700", "800"), tv1["A", 1][CellTopics].topics)
         assertEquals(ct, tv1["A", 1][CellTransformer].function)
 
-        tv1["A", 1][CellHeight] { null }
+        tv1["A", 1][CellHeight](null as Unit?)
         tv1["A", 1][CellWidth] { null }
         tv1["A", 1][CellClasses](null as Unit?)
         tv1["A", 1][CellTopics](null as Unit?)
@@ -1187,9 +1174,7 @@ class TableViewTest {
         assertEquals(emptySet<String>(), tv1["A", 1][CellTopics].topics)
         assertEquals(Unit, tv1["A", 1][CellTransformer].function)
 
-        tv1["B", 1][CellHeight] {
-            100
-        }
+        tv1["B", 1][CellHeight](100)
         tv1["B", 1][CellWidth] {
             200
         }
@@ -2078,7 +2063,7 @@ class TableViewTest {
     fun `cell height contains`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
-        val unitCellHeight = tv1[CellHeight].also { it { 100 } }
+        val unitCellHeight = tv1[CellHeight].also { it(100) }
         val filledCellHeight = tv1[CellHeight]
 
         assertTrue(unitCellHeight in unitCellHeight)
@@ -2448,6 +2433,64 @@ class TableViewTest {
                 is ColumnView -> assertEquals(sortedSetOf<String>(), source[CellTopics].topics)
                 is RowView -> assertEquals(sortedSetOf<String>(), source[CellTopics].topics)
                 is CellView -> assertEquals(sortedSetOf<String>(), source[CellTopics].topics)
+            }
+        }
+    }
+
+    @Test
+    fun `cell height invoke`() {
+        val ch1 = TableView[null][CellHeight].let { it(111); it.source[CellHeight] }
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        for (ch in listOf(tv1[CellHeight], tv1[1][CellHeight], tv1["A", 1][CellHeight])) {
+            ch(222)
+
+            when (val source = ch.source) {
+                is TableView -> assertEquals(222L, source[CellHeight].height)
+                is RowView -> assertEquals(222L, source[CellHeight].height)
+                is CellView -> assertEquals(222L, source[CellHeight].height)
+            }
+
+            ch(ch1)
+
+            when (val source = ch.source) {
+                is TableView -> assertEquals(111L, source[CellHeight].height)
+                is RowView -> assertEquals(111L, source[CellHeight].height)
+                is CellView -> assertEquals(111L, source[CellHeight].height)
+            }
+
+            ch(Unit)
+
+            when (val source = ch.source) {
+                is TableView -> assertEquals(Unit, source[CellHeight].height)
+                is RowView -> assertEquals(Unit, source[CellHeight].height)
+                is CellView -> assertEquals(Unit, source[CellHeight].height)
+            }
+        }
+
+        for (ch in listOf(tv1[CellHeight], tv1[1][CellHeight], tv1["A", 1][CellHeight])) {
+            ch(null as Long?)
+
+            when (val source = ch.source) {
+                is TableView -> assertEquals(Unit, source[CellHeight].height)
+                is RowView -> assertEquals(Unit, source[CellHeight].height)
+                is CellView -> assertEquals(Unit, source[CellHeight].height)
+            }
+
+            ch(null as CellHeight<*, *>?)
+
+            when (val source = ch.source) {
+                is TableView -> assertEquals(Unit, source[CellHeight].height)
+                is RowView -> assertEquals(Unit, source[CellHeight].height)
+                is CellView -> assertEquals(Unit, source[CellHeight].height)
+            }
+
+            ch(null as Unit?)
+
+            when (val source = ch.source) {
+                is TableView -> assertEquals(Unit, source[CellHeight].height)
+                is RowView -> assertEquals(Unit, source[CellHeight].height)
+                is CellView -> assertEquals(Unit, source[CellHeight].height)
             }
         }
     }

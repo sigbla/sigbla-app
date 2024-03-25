@@ -2310,27 +2310,34 @@ sealed class CellHeight<S, T> {
     open operator fun rem(that: Int): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
     open operator fun rem(that: Long): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
 
-    operator fun invoke(function: CellHeight<*,*>.() -> Any?): Any? {
-        val value = this.function()
-        val longValue = when(value) {
-            is Unit -> /* no assignment */ return Unit
-            is Int -> value.toLong()
-            is Long -> value
-            is CellHeight<*,*> -> when (val height = value.height) {
-                is Number -> height.toLong()
-                else -> null
-            }
-            null -> null
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
-
+    operator fun invoke(newValue: CellHeight<*, *>?): CellHeight<*, *>? {
         when (val source = source) {
-            is TableView -> if (longValue == null) source[CellHeight] = null else source[CellHeight] = longValue
-            is RowView -> if (longValue == null) source[CellHeight] = null else source[CellHeight] = longValue
-            is CellView -> if (longValue == null) source[CellHeight] = null else source[CellHeight] = longValue
+            is TableView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
+            is RowView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
+            is CellView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
         }
 
-        return value
+        return newValue
+    }
+
+    operator fun invoke(newValue: Long?): Long? {
+        when (val source = source) {
+            is TableView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
+            is RowView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
+            is CellView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
+        }
+
+        return newValue
+    }
+
+    operator fun invoke(newValue: Unit? = null): Unit? {
+        when (val source = source) {
+            is TableView -> source[CellHeight] = null
+            is RowView -> source[CellHeight] = null
+            is CellView -> source[CellHeight] = null
+        }
+
+        return newValue
     }
 
     operator fun contains(other: CellHeight<*, *>) = height == other.height

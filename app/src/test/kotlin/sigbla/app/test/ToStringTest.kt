@@ -126,7 +126,7 @@ class ToStringTest {
     fun `meta classes`() {
         val tableView = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
-        val unitCellHeight = tableView[CellHeight].also { it { 100 } }
+        val unitCellHeight = tableView[CellHeight].also { it(100) }
         val pixelCellHeight = tableView[CellHeight]
 
         assertEquals("UnitCellHeight", unitCellHeight.toString())
