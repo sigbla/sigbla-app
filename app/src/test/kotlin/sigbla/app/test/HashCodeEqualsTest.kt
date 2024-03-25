@@ -198,7 +198,7 @@ class HashCodeEqualsTest {
         val unitCellHeight1 = tableView1[CellHeight].also { it(100) }
         val pixelCellHeight1 = tableView1[CellHeight]
 
-        val unitCellWidth1 = tableView1[CellWidth].also { it { 100 } }
+        val unitCellWidth1 = tableView1[CellWidth].also { it(100) }
         val pixelCellWidth1 = tableView1[CellWidth]
 
         val emptyCellClasses1 = tableView1[CellClasses].also { it(listOf("B", "A")) }
@@ -231,7 +231,7 @@ class HashCodeEqualsTest {
         val unitCellHeight2 = tableView2[CellHeight].also { it(100) }
         val pixelCellHeight2 = tableView2[CellHeight]
 
-        val unitCellWidth2 = tableView2[CellWidth].also { it { 100 } }
+        val unitCellWidth2 = tableView2[CellWidth].also { it(100) }
         val pixelCellWidth2 = tableView2[CellWidth]
 
         val emptyCellClasses2 = tableView2[CellClasses].also { it(listOf("B", "A")) }

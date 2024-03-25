@@ -132,7 +132,7 @@ class ToStringTest {
         assertEquals("UnitCellHeight", unitCellHeight.toString())
         assertEquals("PixelCellHeight[100]", pixelCellHeight.toString())
 
-        val unitCellWidth = tableView[CellWidth].also { it { 100 } }
+        val unitCellWidth = tableView[CellWidth].also { it(100) }
         val pixelCellWidth = tableView[CellWidth]
 
         assertEquals("UnitCellWidth", unitCellWidth.toString())

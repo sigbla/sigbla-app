@@ -2498,27 +2498,34 @@ sealed class CellWidth<S, T> {
     open operator fun rem(that: Int): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
     open operator fun rem(that: Long): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
 
-    operator fun invoke(function: CellWidth<*,*>.() -> Any?): Any? {
-        val value = this.function()
-        val longValue = when(value) {
-            is Unit -> /* no assignment */ return Unit
-            is Int -> value.toLong()
-            is Long -> value
-            is CellWidth<*,*> -> when (val width = value.width) {
-                is Number -> width.toLong()
-                else -> null
-            }
-            null -> null
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
-
+    operator fun invoke(newValue: CellWidth<*, *>?): CellWidth<*, *>? {
         when (val source = source) {
-            is TableView -> if (longValue == null) source[CellWidth] = null else source[CellWidth] = longValue
-            is ColumnView -> if (longValue == null) source[CellWidth] = null else source[CellWidth] = longValue
-            is CellView -> if (longValue == null) source[CellWidth] = null else source[CellWidth] = longValue
+            is TableView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
+            is ColumnView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
+            is CellView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
         }
 
-        return value
+        return newValue
+    }
+
+    operator fun invoke(newValue: Long?): Long? {
+        when (val source = source) {
+            is TableView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
+            is ColumnView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
+            is CellView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
+        }
+
+        return newValue
+    }
+
+    operator fun invoke(newValue: Unit? = null): Unit? {
+        when (val source = source) {
+            is TableView -> source[CellWidth] = null
+            is ColumnView -> source[CellWidth] = null
+            is CellView -> source[CellWidth] = null
+        }
+
+        return newValue
     }
 
     operator fun contains(other: CellWidth<*, *>) = width == other.width
