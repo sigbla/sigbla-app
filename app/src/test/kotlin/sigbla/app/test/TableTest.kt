@@ -2721,6 +2721,35 @@ class TableTest {
         assertFalse(t["A", 3] in t)
     }
 
+    @Test
+    fun `invoke nulls`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["A", 0](BigDecimal.ONE)
+        t["A", 1](BigInteger.TWO)
+        t["A", 2](3.0)
+        t["A", 3](4L)
+        t["A", 4](5 as Number)
+        t["A", 5]("6")
+        t["A", 6](true)
+        t["A", 7](t["A", 7])
+        t["A", 8](Unit)
+
+        assertEquals(7, t.count())
+
+        assertEquals(BigDecimal.ONE, t["A", 0].also { it(null as BigDecimal?) }.value)
+        assertEquals(BigInteger.TWO, t["A", 1].also { it(null as BigInteger?) }.value)
+        assertEquals(3.0, t["A", 2].also { it(null as Double?) }.value)
+        assertEquals(4L, t["A", 3].also { it(null as Long?) }.value)
+        assertEquals(5L, t["A", 4].also { it(null as Number?) }.value)
+        assertEquals("6", t["A", 5].also { it(null as String?) }.value)
+        assertEquals(true, t["A", 6].also { it(null as Boolean?) }.value)
+        assertEquals(Unit, t["A", 7].also { it(null as Cell<*>?) }.value)
+        assertEquals(Unit, t["A", 8].also { it(null as Unit?) }.value)
+
+        assertEquals(0, t.count())
+    }
+
     companion object {
         @JvmStatic
         @AfterClass
