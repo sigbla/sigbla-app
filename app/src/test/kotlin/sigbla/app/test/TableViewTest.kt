@@ -2303,6 +2303,50 @@ class TableViewTest {
         assertFalse(listOf("c" to handler1, "b" to handler2) in filledResource)
     }
 
+    @Test
+    fun `cell classes invoke`() {
+        val cc1 = TableView[null][CellClasses].let { it(listOf("D", "E")); it.source[CellClasses] }
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        for (cc in listOf(tv1[CellClasses], tv1["A"][CellClasses], tv1[1][CellClasses], tv1["A", 1][CellClasses])) {
+            cc(listOf("A", "B"))
+
+            when (val source = cc.source) {
+                is TableView -> assertEquals(sortedSetOf("A", "B"), source[CellClasses].classes)
+                is ColumnView -> assertEquals(sortedSetOf("A", "B"), source[CellClasses].classes)
+                is RowView -> assertEquals(sortedSetOf("A", "B"), source[CellClasses].classes)
+                is CellView -> assertEquals(sortedSetOf("A", "B"), source[CellClasses].classes)
+            }
+
+            cc("C")
+
+            when (val source = cc.source) {
+                is TableView -> assertEquals(sortedSetOf("C"), source[CellClasses].classes)
+                is ColumnView -> assertEquals(sortedSetOf("C"), source[CellClasses].classes)
+                is RowView -> assertEquals(sortedSetOf("C"), source[CellClasses].classes)
+                is CellView -> assertEquals(sortedSetOf("C"), source[CellClasses].classes)
+            }
+
+            cc(cc1)
+
+            when (val source = cc.source) {
+                is TableView -> assertEquals(sortedSetOf("D", "E"), source[CellClasses].classes)
+                is ColumnView -> assertEquals(sortedSetOf("D", "E"), source[CellClasses].classes)
+                is RowView -> assertEquals(sortedSetOf("D", "E"), source[CellClasses].classes)
+                is CellView -> assertEquals(sortedSetOf("D", "E"), source[CellClasses].classes)
+            }
+
+            cc(null as Unit?)
+
+            when (val source = cc.source) {
+                is TableView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+                is ColumnView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+                is RowView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+                is CellView -> assertEquals(sortedSetOf<String>(), source[CellClasses].classes)
+            }
+        }
+    }
+
     companion object {
         @JvmStatic
         @AfterClass
