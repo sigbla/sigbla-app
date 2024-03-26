@@ -2904,20 +2904,19 @@ class FunctionRowTransformer internal constructor(
 }
 
 abstract class CellTransformer<T>(source: CellView, function: T): Transformer<CellView, T>(source, function) {
-    operator fun invoke(function: CellTransformer<*>.() -> Any?): Any? {
-        val value = this.function()
-        val transformer = when(value) {
-            is FunctionCellTransformer -> value.function
-            is UnitCellTransformer -> null
-            is Unit -> { /* no assignment */ return Unit }
-            is Function1<*, *> -> value as Cell<*>.() -> Unit
-            null -> null
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
+    operator fun invoke(newValue: CellTransformer<*>?): CellTransformer<*>? {
+        source[CellTransformer] = newValue
+        return newValue
+    }
 
-        if (transformer == null) source[CellTransformer] = null else source[CellTransformer] = transformer
+    operator fun invoke(newValue: (Cell<*>.() -> Unit)?): (Cell<*>.() -> Unit)? {
+        if (newValue == null) source[CellTransformer] = null else source[CellTransformer] = newValue
+        return newValue
+    }
 
-        return value
+    operator fun invoke(newValue: Unit? = null): Unit? {
+        source[CellTransformer] = null
+        return newValue
     }
 
     operator fun contains(other: CellTransformer<*>) = function == other.function
