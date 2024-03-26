@@ -2804,21 +2804,21 @@ class FunctionTableTransformer internal constructor(
 }
 
 abstract class ColumnTransformer<T>(source: ColumnView, function: T): Transformer<ColumnView, T>(source, function) {
-    operator fun invoke(function: ColumnTransformer<*>.() -> Any?): Any? {
-        val value = this.function()
-        val transformer = when(value) {
-            is FunctionColumnTransformer -> value.function
-            is UnitColumnTransformer -> null
-            is Unit -> { /* no assignment */ return Unit }
-            is Function1<*, *> -> value as Column.() -> Unit
-            null -> null
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
-
-        if (transformer == null) source[ColumnTransformer] = null else source[ColumnTransformer] = transformer
-
-        return value
+    operator fun invoke(newValue: ColumnTransformer<*>?): ColumnTransformer<*>? {
+        source[ColumnTransformer] = newValue
+        return newValue
     }
+
+    operator fun invoke(newValue: (Column.() -> Unit)?): (Column.() -> Unit)? {
+        if (newValue == null) source[ColumnTransformer] = null else source[ColumnTransformer] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Unit? = null): Unit? {
+        source[ColumnTransformer] = null
+        return newValue
+    }
+
 
     operator fun contains(other: ColumnTransformer<*>) = function == other.function
     operator fun contains(other: Column.() -> Unit) = function == other

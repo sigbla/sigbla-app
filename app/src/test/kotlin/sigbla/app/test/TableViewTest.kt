@@ -867,9 +867,7 @@ class TableViewTest {
         tv1["A"][CellWidth](200)
         tv1["A"][CellClasses]("300")
         tv1["A"][CellTopics]("400")
-        tv1["A"][ColumnTransformer] {
-            ct
-        }
+        tv1["A"][ColumnTransformer](ct)
 
         assertEquals(200L, tv1["A"][CellWidth].width)
         assertEquals(setOf("300"), tv1["A"][CellClasses].classes)
@@ -879,11 +877,6 @@ class TableViewTest {
         tv1["A"][CellClasses](setOf("500", "600"))
         tv1["A"][CellTopics](setOf("700", "800"))
 
-        assertEquals(setOf("500", "600"), tv1["A"][CellClasses].classes)
-        assertEquals(setOf("700", "800"), tv1["A"][CellTopics].topics)
-
-        tv1["A"][ColumnTransformer] { }
-
         assertEquals(200L, tv1["A"][CellWidth].width)
         assertEquals(setOf("500", "600"), tv1["A"][CellClasses].classes)
         assertEquals(setOf("700", "800"), tv1["A"][CellTopics].topics)
@@ -892,7 +885,7 @@ class TableViewTest {
         tv1["A"][CellWidth](null as Unit?)
         tv1["A"][CellClasses](null as Unit?)
         tv1["A"][CellTopics](null as Unit?)
-        tv1["A"][ColumnTransformer] { null }
+        tv1["A"][ColumnTransformer](null as Unit?)
 
         assertEquals(Unit, tv1["A"][CellWidth].width)
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
@@ -927,9 +920,7 @@ class TableViewTest {
         tv1["B"][CellWidth](200)
         tv1["B"][CellClasses]("300")
         tv1["B"][CellTopics]("400")
-        tv1["B"][ColumnTransformer] {
-            ct
-        }
+        tv1["B"][ColumnTransformer](ct)
 
         tv1["A"] {
             tv1["B"][CellWidth]
@@ -2149,7 +2140,7 @@ class TableViewTest {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val ct: Column.() -> Unit = {}
-        val unitColumnTransformer = tv1["A"][ColumnTransformer].also { it { ct } }
+        val unitColumnTransformer = tv1["A"][ColumnTransformer].also { it(ct) }
         val filledColumnTransformer = tv1["A"][ColumnTransformer]
 
         assertTrue(unitColumnTransformer in unitColumnTransformer)
@@ -2543,6 +2534,15 @@ class TableViewTest {
         tv1[TableTransformer](tt1)
         assertEquals(tt1, tv1[TableTransformer].function)
 
+        tv1[TableTransformer](null as TableTransformer<*>?)
+        assertEquals(Unit, tv1[TableTransformer].function)
+
+        tv1[TableTransformer](tt1)
+        assertEquals(tt1, tv1[TableTransformer].function)
+
+        tv1[TableTransformer](null as (Table.() -> Unit)?)
+        assertEquals(Unit, tv1[TableTransformer].function)
+
         tv1[TableTransformer](tt3)
         assertEquals(tt2, tv1[TableTransformer].function)
 
@@ -2554,6 +2554,38 @@ class TableViewTest {
 
         tv1[TableTransformer](null as Unit?)
         assertEquals(Unit, tv1[TableTransformer].function)
+    }
+
+    @Test
+    fun `column transformer invoke`() {
+        val ct1: Column.() -> Unit = {}
+        val ct2: Column.() -> Unit = {}
+        val ct3 = TableView[null]["A"][ColumnTransformer].let { it(ct2); it.source[ColumnTransformer] }
+        val cv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]["A"]
+
+        cv1[ColumnTransformer](ct1)
+        assertEquals(ct1, cv1[ColumnTransformer].function)
+
+        cv1[ColumnTransformer](null as ColumnTransformer<*>?)
+        assertEquals(Unit, cv1[ColumnTransformer].function)
+
+        cv1[ColumnTransformer](ct1)
+        assertEquals(ct1, cv1[ColumnTransformer].function)
+
+        cv1[ColumnTransformer](null as (Column.() -> Unit)?)
+        assertEquals(Unit, cv1[ColumnTransformer].function)
+
+        cv1[ColumnTransformer](ct3)
+        assertEquals(ct2, cv1[ColumnTransformer].function)
+
+        cv1[ColumnTransformer](Unit)
+        assertEquals(Unit, cv1[ColumnTransformer].function)
+
+        cv1[ColumnTransformer](ct2)
+        assertEquals(ct2, cv1[ColumnTransformer].function)
+
+        cv1[ColumnTransformer](null as Unit?)
+        assertEquals(Unit, cv1[ColumnTransformer].function)
     }
 
     companion object {
