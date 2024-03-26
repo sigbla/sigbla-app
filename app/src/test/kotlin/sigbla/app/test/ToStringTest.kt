@@ -184,7 +184,7 @@ class ToStringTest {
             }
         }
 
-        val emptyResources = tableView[Resources].also { it { listOf("B" to getHandler(), "A" to getHandler()) } }
+        val emptyResources = tableView[Resources].also { it(listOf("B" to getHandler(), "A" to getHandler())) }
         val filledResources = tableView[Resources]
 
         assertEquals("Resources[]", emptyResources.toString())

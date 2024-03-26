@@ -223,7 +223,7 @@ class HashCodeEqualsTest {
         val emptyCellTransformer1 = tableView1["A", 1][CellTransformer].also { it(cellTransformerFunction) }
         val filledCellTransformer1 = tableView1["A", 1][CellTransformer]
 
-        val emptyResources1 = tableView1[Resources].also { it { listOf("B" to handler1, "A" to handler2) } }
+        val emptyResources1 = tableView1[Resources].also { it(listOf("B" to handler1, "A" to handler2)) }
         val filledResources1 = tableView1[Resources]
 
         val tableView2 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
@@ -252,7 +252,7 @@ class HashCodeEqualsTest {
         val emptyCellTransformer2 = tableView2["A", 1][CellTransformer].also { it(cellTransformerFunction) }
         val filledCellTransformer2 = tableView2["A", 1][CellTransformer]
 
-        val emptyResources2 = tableView2[Resources].also { it { listOf("B" to handler1, "A" to handler2) } }
+        val emptyResources2 = tableView2[Resources].also { it(listOf("B" to handler1, "A" to handler2)) }
         val filledResources2 = tableView2[Resources]
 
         assertNotEquals(unitCellHeight1, unitCellHeight2)

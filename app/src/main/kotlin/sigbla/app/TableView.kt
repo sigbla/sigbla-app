@@ -2997,21 +2997,29 @@ class Resources internal constructor(
 
     override fun iterator(): Iterator<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>> = resources.map { Pair(it.key, it.value) }.iterator()
 
-    operator fun invoke(function: Resources.() -> Any?): Any? {
-        val value = this.function()
-        val resources = when(value) {
-            is Unit -> /* no assignment */ return Unit
-            is Map<*, *> -> value as Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>
-            is Pair<*, *> -> mapOf(value as Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>)
-            is Collection<*> -> (value as Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>).toMap()
-            is Resources -> value.resources
-            null -> null
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
+    operator fun invoke(newValue: Resources?): Resources? {
+        source[Resources] = newValue
+        return newValue
+    }
 
-        if (resources == null) source[Resources] = null else source[Resources] = resources
+    operator fun invoke(newValue: Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>?): Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>? {
+        if (newValue == null) source[Resources] = null else source[Resources] = newValue
+        return newValue
+    }
 
-        return value
+    operator fun invoke(newValue: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>?): Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>? {
+        if (newValue == null) source[Resources] = null else source[Resources] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>?): Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>? {
+        if (newValue == null) source[Resources] = null else source[Resources] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Unit? = null): Unit? {
+        source[Resources] = null
+        return newValue
     }
 
     operator fun contains(other: Resources) = other._resources.all { _resources[it.component1()]?.second == it.component2().second }

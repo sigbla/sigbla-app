@@ -691,9 +691,7 @@ class TableViewTest {
         tv1[CellWidth](200)
         tv1[CellClasses]("300")
         tv1[CellTopics]("400")
-        tv1[Resources] {
-            "a" to handler
-        }
+        tv1[Resources]("a" to handler)
         tv1[TableTransformer](tt)
 
         // TODO Consider impact of supporting:
@@ -710,10 +708,6 @@ class TableViewTest {
 
         tv1[CellClasses](setOf("500", "600"))
         tv1[CellTopics](setOf("700", "800"))
-        assertEquals(setOf("500", "600"), tv1[CellClasses].classes)
-        assertEquals(setOf("700", "800"), tv1[CellTopics].topics)
-
-        tv1[Resources] { }
 
         assertEquals(100L, tv1[CellHeight].height)
         assertEquals(200L, tv1[CellWidth].width)
@@ -726,7 +720,7 @@ class TableViewTest {
         tv1[CellWidth](null as Unit?)
         tv1[CellClasses](null as Unit?)
         tv1[CellTopics](null as Unit?)
-        tv1[Resources] { null }
+        tv1[Resources](null as Unit?)
         tv1[TableTransformer](null as Unit?)
 
         assertEquals(Unit, tv1[CellHeight].height)
@@ -788,9 +782,7 @@ class TableViewTest {
         tv2[CellWidth](200)
         tv2[CellClasses]("300")
         tv2[CellTopics]("400")
-        tv2[Resources] {
-            "a" to handler
-        }
+        tv2[Resources]("a" to handler)
         tv2[TableTransformer](tt)
         tv2[Table] = t1
 
@@ -1214,25 +1206,22 @@ class TableViewTest {
         assertEquals(mapOf("foo/bar" to handler1), resources2.resources)
         assertNotEquals(mapOf("foo/bar" to handler2), resources2.resources)
 
-        tv1[Resources] { /* no assignment */ }
-        assertEquals(mapOf("foo/bar" to handler1), tv1[Resources].resources)
-
-        tv1[Resources] { mapOf("fiz/buz" to handler2) }
+        tv1[Resources](mapOf("fiz/buz" to handler2))
         assertEquals(mapOf("fiz/buz" to handler2), tv1[Resources].resources)
 
-        tv1[Resources] { "fiz/buz" to handler1 }
+        tv1[Resources]("fiz/buz" to handler1)
         assertEquals(mapOf("fiz/buz" to handler1), tv1[Resources].resources)
 
-        tv1[Resources] { listOf("foo/bar" to handler2) }
+        tv1[Resources](listOf("foo/bar" to handler2))
         assertEquals(mapOf("foo/bar" to handler2), tv1[Resources].resources)
 
-        tv1[Resources] { resources1 }
+        tv1[Resources](resources1)
         assertEquals(
             emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(),
             tv1[Resources].resources
         )
 
-        tv1[Resources] { resources2 }
+        tv1[Resources](resources2)
         assertEquals(mapOf("foo/bar" to handler1), tv1[Resources].resources)
     }
 
@@ -1249,42 +1238,36 @@ class TableViewTest {
             }
         }
 
-        tv1[Resources] {
-            this + ("other/resource" to getHandler1())
-        }
+        tv1[Resources](tv1[Resources] + ("other/resource" to getHandler1()))
 
         assertTrue(jsHandlers.isEmpty())
         assertTrue(cssHandlers.isEmpty())
 
-        tv1[Resources] {
-            this + ("js/resource.js" to jsResource("/js/resource.js"))
-        }
+        tv1[Resources](tv1[Resources] + ("js/resource.js" to jsResource("/js/resource.js")))
 
         assertEquals(1, jsHandlers.size)
         assertTrue(cssHandlers.isEmpty())
 
-        tv1[Resources] {
-            this + ("css/resource.css" to cssResource("/css/resource.css"))
-        }
+        tv1[Resources](tv1[Resources] + ("css/resource.css" to cssResource("/css/resource.css")))
 
         assertEquals(1, jsHandlers.size)
         assertEquals(1, cssHandlers.size)
 
-        tv1[Resources] {
+        tv1[Resources].apply {
             val tmpFile = File.createTempFile("tmpJsFile", ".js")
             tmpFile.deleteOnExit()
             this.javaClass.getResourceAsStream("/js/resource.js").buffered().transferTo(tmpFile.outputStream())
-            this + ("js/resource2.js" to jsFile(tmpFile))
+            this(this + ("js/resource2.js" to jsFile(tmpFile)))
         }
 
         assertEquals(2, jsHandlers.size)
         assertEquals(1, cssHandlers.size)
 
-        tv1[Resources] {
+        tv1[Resources].apply {
             val tmpFile = File.createTempFile("tmpCssFile", ".css")
             tmpFile.deleteOnExit()
             this.javaClass.getResourceAsStream("/css/resource.css").buffered().transferTo(tmpFile.outputStream())
-            this + ("css/resource2.css" to cssFile(tmpFile))
+            this(this + ("css/resource2.css" to cssFile(tmpFile)))
         }
 
         assertEquals(2, jsHandlers.size)
@@ -2189,7 +2172,7 @@ class TableViewTest {
         val handler2 = getHandler()
         val handler3 = getHandler()
 
-        val unitResource = tv1[Resources].also { it { listOf("a" to handler1, "b" to handler2) } }
+        val unitResource = tv1[Resources].also { it(listOf("a" to handler1, "b" to handler2)) }
         val filledResource = tv1[Resources]
 
         assertTrue(unitResource in unitResource)
@@ -2633,6 +2616,55 @@ class TableViewTest {
 
         cv1[CellTransformer](null as Unit?)
         assertEquals(Unit, cv1[CellTransformer].function)
+    }
+
+    @Test
+    fun `resources invoke`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        fun getHandler(): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
+            return {
+                call.respondText("")
+            }
+        }
+
+        val handler1 = getHandler()
+        val handler2 = getHandler()
+        val handler3 = getHandler()
+
+        val r1 = TableView[null][Resources].let { it("a" to handler1); it.source[Resources] }
+
+        tv1[Resources](r1)
+        assertEquals(mapOf("a" to handler1), tv1[Resources].resources)
+
+        tv1[Resources](null as Resources?)
+        assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), tv1[Resources].resources)
+
+        tv1[Resources](mapOf("b" to handler2))
+        assertEquals(mapOf("b" to handler2), tv1[Resources].resources)
+
+        tv1[Resources](null as Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>?)
+        assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), tv1[Resources].resources)
+
+        tv1[Resources]("c" to handler3)
+        assertEquals(mapOf("c" to handler3), tv1[Resources].resources)
+
+        tv1[Resources](null as Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>?)
+        assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), tv1[Resources].resources)
+
+        tv1[Resources](listOf("a" to handler1, "c" to handler3))
+        assertEquals(mapOf("a" to handler1, "c" to handler3), tv1[Resources].resources)
+
+        tv1[Resources](null as Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>?)
+        assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), tv1[Resources].resources)
+
+        tv1[Resources](listOf("a" to handler1, "c" to handler3))
+        tv1[Resources](Unit)
+        assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), tv1[Resources].resources)
+
+        tv1[Resources](listOf("a" to handler1, "c" to handler3))
+        tv1[Resources](null as Unit?)
+        assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), tv1[Resources].resources)
     }
 
     companion object {
