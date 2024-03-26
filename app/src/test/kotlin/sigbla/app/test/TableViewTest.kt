@@ -2533,6 +2533,29 @@ class TableViewTest {
         }
     }
 
+    @Test
+    fun `table transformer invoke`() {
+        val tt1: Table.() -> Unit = {}
+        val tt2: Table.() -> Unit = {}
+        val tt3 = TableView[null][TableTransformer].let { it(tt2); it.source[TableTransformer] }
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        tv1[TableTransformer](tt1)
+        assertEquals(tt1, tv1[TableTransformer].function)
+
+        tv1[TableTransformer](tt3)
+        assertEquals(tt2, tv1[TableTransformer].function)
+
+        tv1[TableTransformer](Unit)
+        assertEquals(Unit, tv1[TableTransformer].function)
+
+        tv1[TableTransformer](tt2)
+        assertEquals(tt2, tv1[TableTransformer].function)
+
+        tv1[TableTransformer](null as Unit?)
+        assertEquals(Unit, tv1[TableTransformer].function)
+    }
+
     companion object {
         @JvmStatic
         @AfterClass
