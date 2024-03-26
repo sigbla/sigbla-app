@@ -221,364 +221,364 @@ class TableViewAccessorsTest {
         tableView[rowView]["L1", "L2", "L3", "L4", "L5"] = sourceCellView
         compare(tableView[rowView]["L1", "L2", "L3", "L4", "L5"])
 
-        tableView["L1", Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", Int.MAX_VALUE])
 
-        tableView["L1", Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", Long.MAX_VALUE])
 
-        tableView["L1", row] = { this { sourceCellView } }
+        tableView["L1", row] = { this(sourceCellView) }
         compare(tableView["L1", row])
 
-        tableView["L1", rowView] = { this { sourceCellView } }
+        tableView["L1", rowView] = { this(sourceCellView) }
         compare(tableView["L1", rowView])
 
-        tableView["L1"][Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1"][Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1"][Int.MAX_VALUE])
 
-        tableView["L1"][Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1"][Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1"][Long.MAX_VALUE])
 
-        tableView["L1"][row] = { this { sourceCellView } }
+        tableView["L1"][row] = { this(sourceCellView) }
         compare(tableView["L1"][row])
 
-        tableView["L1"][rowView] = { this { sourceCellView } }
+        tableView["L1"][rowView] = { this(sourceCellView) }
         compare(tableView["L1"][rowView])
 
-        tableView[Int.MAX_VALUE]["L1"] = { this { sourceCellView } }
+        tableView[Int.MAX_VALUE]["L1"] = { this(sourceCellView) }
         compare(tableView[Int.MAX_VALUE]["L1"])
 
-        tableView[Long.MAX_VALUE]["L1"] = { this { sourceCellView } }
+        tableView[Long.MAX_VALUE]["L1"] = { this(sourceCellView) }
         compare(tableView[Long.MAX_VALUE]["L1"])
 
-        tableView[row]["L1"] = { this { sourceCellView } }
+        tableView[row]["L1"] = { this(sourceCellView) }
         compare(tableView[row]["L1"])
 
-        tableView[rowView]["L1"] = { this { sourceCellView } }
+        tableView[rowView]["L1"] = { this(sourceCellView) }
         compare(tableView[rowView]["L1"])
 
-        tableView["L1", "L2", Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", "L2", Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", "L2", Int.MAX_VALUE])
 
-        tableView["L1", "L2", Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", "L2", Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", "L2", Long.MAX_VALUE])
 
-        tableView["L1", "L2", row] = { this { sourceCellView } }
+        tableView["L1", "L2", row] = { this(sourceCellView) }
         compare(tableView["L1", "L2", row])
 
-        tableView["L1", "L2", rowView] = { this { sourceCellView } }
+        tableView["L1", "L2", rowView] = { this(sourceCellView) }
         compare(tableView["L1", "L2", rowView])
 
-        tableView["L1", "L2"][Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", "L2"][Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", "L2"][Int.MAX_VALUE])
 
-        tableView["L1", "L2"][Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", "L2"][Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", "L2"][Long.MAX_VALUE])
 
-        tableView["L1", "L2"][row] = { this { sourceCellView } }
+        tableView["L1", "L2"][row] = { this(sourceCellView) }
         compare(tableView["L1", "L2"][row])
 
-        tableView["L1", "L2"][rowView] = { this { sourceCellView } }
+        tableView["L1", "L2"][rowView] = { this(sourceCellView) }
         compare(tableView["L1", "L2"][rowView])
 
-        tableView[Int.MAX_VALUE]["L1", "L2"] = { this { sourceCellView } }
+        tableView[Int.MAX_VALUE]["L1", "L2"] = { this(sourceCellView) }
         compare(tableView[Int.MAX_VALUE]["L1", "L2"])
 
-        tableView[Long.MAX_VALUE]["L1", "L2"] = { this { sourceCellView } }
+        tableView[Long.MAX_VALUE]["L1", "L2"] = { this(sourceCellView) }
         compare(tableView[Long.MAX_VALUE]["L1", "L2"])
 
-        tableView[row]["L1", "L2"] = { this { sourceCellView } }
+        tableView[row]["L1", "L2"] = { this(sourceCellView) }
         compare(tableView[row]["L1", "L2"])
 
-        tableView[rowView]["L1", "L2"] = { this { sourceCellView } }
+        tableView[rowView]["L1", "L2"] = { this(sourceCellView) }
         compare(tableView[rowView]["L1", "L2"])
 
-        tableView["L1", "L2", "L3", Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", Int.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", Long.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", row] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", row] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", row])
 
-        tableView["L1", "L2", "L3", rowView] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", rowView] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", rowView])
 
-        tableView["L1", "L2", "L3"][Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3"][Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3"][Int.MAX_VALUE])
 
-        tableView["L1", "L2", "L3"][Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3"][Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3"][Long.MAX_VALUE])
 
-        tableView["L1", "L2", "L3"][row] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3"][row] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3"][row])
 
-        tableView["L1", "L2", "L3"][rowView] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3"][rowView] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3"][rowView])
 
-        tableView[Int.MAX_VALUE]["L1", "L2", "L3"] = { this { sourceCellView } }
+        tableView[Int.MAX_VALUE]["L1", "L2", "L3"] = { this(sourceCellView) }
         compare(tableView[Int.MAX_VALUE]["L1", "L2", "L3"])
 
-        tableView[Long.MAX_VALUE]["L1", "L2", "L3"] = { this { sourceCellView } }
+        tableView[Long.MAX_VALUE]["L1", "L2", "L3"] = { this(sourceCellView) }
         compare(tableView[Long.MAX_VALUE]["L1", "L2", "L3"])
 
-        tableView[row]["L1", "L2", "L3"] = { this { sourceCellView } }
+        tableView[row]["L1", "L2", "L3"] = { this(sourceCellView) }
         compare(tableView[row]["L1", "L2", "L3"])
 
-        tableView[rowView]["L1", "L2", "L3"] = { this { sourceCellView } }
+        tableView[rowView]["L1", "L2", "L3"] = { this(sourceCellView) }
         compare(tableView[rowView]["L1", "L2", "L3"])
 
-        tableView["L1", "L2", "L3", "L4", Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", "L4", Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", "L4", Int.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", "L4", Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", "L4", Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", "L4", Long.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", "L4", row] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", "L4", row] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", "L4", row])
 
-        tableView["L1", "L2", "L3", "L4", rowView] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", "L4", rowView] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", "L4", rowView])
 
-        tableView["L1", "L2", "L3", "L4"][Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", "L4"][Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", "L4"][Int.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", "L4"][Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", "L4"][Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", "L4"][Long.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", "L4"][row] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", "L4"][row] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", "L4"][row])
 
-        tableView["L1", "L2", "L3", "L4"][rowView] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", "L4"][rowView] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", "L4"][rowView])
 
-        tableView[Int.MAX_VALUE]["L1", "L2", "L3", "L4"] = { this { sourceCellView } }
+        tableView[Int.MAX_VALUE]["L1", "L2", "L3", "L4"] = { this(sourceCellView) }
         compare(tableView[Int.MAX_VALUE]["L1", "L2", "L3", "L4"])
 
-        tableView[Long.MAX_VALUE]["L1", "L2", "L3", "L4"] = { this { sourceCellView } }
+        tableView[Long.MAX_VALUE]["L1", "L2", "L3", "L4"] = { this(sourceCellView) }
         compare(tableView[Long.MAX_VALUE]["L1", "L2", "L3", "L4"])
 
-        tableView[row]["L1", "L2", "L3", "L4"] = { this { sourceCellView } }
+        tableView[row]["L1", "L2", "L3", "L4"] = { this(sourceCellView) }
         compare(tableView[row]["L1", "L2", "L3", "L4"])
 
-        tableView[rowView]["L1", "L2", "L3", "L4"] = { this { sourceCellView } }
+        tableView[rowView]["L1", "L2", "L3", "L4"] = { this(sourceCellView) }
         compare(tableView[rowView]["L1", "L2", "L3", "L4"])
 
-        tableView["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", "L4", "L5", row] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", "L4", "L5", row] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", "L4", "L5", row])
 
-        tableView["L1", "L2", "L3", "L4", "L5", rowView] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", "L4", "L5", rowView] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", "L4", "L5", rowView])
 
-        tableView["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", "L4", "L5"][row] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", "L4", "L5"][row] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", "L4", "L5"][row])
 
-        tableView["L1", "L2", "L3", "L4", "L5"][rowView] = { this { sourceCellView } }
+        tableView["L1", "L2", "L3", "L4", "L5"][rowView] = { this(sourceCellView) }
         compare(tableView["L1", "L2", "L3", "L4", "L5"][rowView])
 
-        tableView[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"] = { this { sourceCellView } }
+        tableView[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"] = { this(sourceCellView) }
         compare(tableView[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"])
 
-        tableView[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"] = { this { sourceCellView } }
+        tableView[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"] = { this(sourceCellView) }
         compare(tableView[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"])
 
-        tableView[row]["L1", "L2", "L3", "L4", "L5"] = { this { sourceCellView } }
+        tableView[row]["L1", "L2", "L3", "L4", "L5"] = { this(sourceCellView) }
         compare(tableView[row]["L1", "L2", "L3", "L4", "L5"])
 
-        tableView[rowView]["L1", "L2", "L3", "L4", "L5"] = { this { sourceCellView } }
+        tableView[rowView]["L1", "L2", "L3", "L4", "L5"] = { this(sourceCellView) }
         compare(tableView[rowView]["L1", "L2", "L3", "L4", "L5"])
 
-        tableView["L1", Int.MAX_VALUE] { sourceCellView }
+        tableView["L1", Int.MAX_VALUE](sourceCellView)
         compare(tableView["L1", Int.MAX_VALUE])
 
-        tableView["L1", Long.MAX_VALUE] { sourceCellView }
+        tableView["L1", Long.MAX_VALUE](sourceCellView)
         compare(tableView["L1", Long.MAX_VALUE])
 
-        tableView["L1", row] { sourceCellView }
+        tableView["L1", row](sourceCellView)
         compare(tableView["L1", row])
 
-        tableView["L1", rowView] { sourceCellView }
+        tableView["L1", rowView](sourceCellView)
         compare(tableView["L1", rowView])
 
-        tableView["L1"][Int.MAX_VALUE] { sourceCellView }
+        tableView["L1"][Int.MAX_VALUE](sourceCellView)
         compare(tableView["L1"][Int.MAX_VALUE])
 
-        tableView["L1"][Long.MAX_VALUE] { sourceCellView }
+        tableView["L1"][Long.MAX_VALUE](sourceCellView)
         compare(tableView["L1"][Long.MAX_VALUE])
 
-        tableView["L1"][row] { sourceCellView }
+        tableView["L1"][row](sourceCellView)
         compare(tableView["L1"][row])
 
-        tableView["L1"][rowView] { sourceCellView }
+        tableView["L1"][rowView](sourceCellView)
         compare(tableView["L1"][rowView])
 
-        tableView[Int.MAX_VALUE]["L1"] { sourceCellView }
+        tableView[Int.MAX_VALUE]["L1"](sourceCellView)
         compare(tableView[Int.MAX_VALUE]["L1"])
 
-        tableView[Long.MAX_VALUE]["L1"] { sourceCellView }
+        tableView[Long.MAX_VALUE]["L1"](sourceCellView)
         compare(tableView[Long.MAX_VALUE]["L1"])
 
-        tableView[row]["L1"] { sourceCellView }
+        tableView[row]["L1"](sourceCellView)
         compare(tableView[row]["L1"])
 
-        tableView[rowView]["L1"] { sourceCellView }
+        tableView[rowView]["L1"](sourceCellView)
         compare(tableView[rowView]["L1"])
 
-        tableView["L1", "L2", Int.MAX_VALUE] { sourceCellView }
+        tableView["L1", "L2", Int.MAX_VALUE](sourceCellView)
         compare(tableView["L1", "L2", Int.MAX_VALUE])
 
-        tableView["L1", "L2", Long.MAX_VALUE] { sourceCellView }
+        tableView["L1", "L2", Long.MAX_VALUE](sourceCellView)
         compare(tableView["L1", "L2", Long.MAX_VALUE])
 
-        tableView["L1", "L2", row] { sourceCellView }
+        tableView["L1", "L2", row](sourceCellView)
         compare(tableView["L1", "L2", row])
 
-        tableView["L1", "L2", rowView] { sourceCellView }
+        tableView["L1", "L2", rowView](sourceCellView)
         compare(tableView["L1", "L2", rowView])
 
-        tableView["L1", "L2"][Int.MAX_VALUE] { sourceCellView }
+        tableView["L1", "L2"][Int.MAX_VALUE](sourceCellView)
         compare(tableView["L1", "L2"][Int.MAX_VALUE])
 
-        tableView["L1", "L2"][Long.MAX_VALUE] { sourceCellView }
+        tableView["L1", "L2"][Long.MAX_VALUE](sourceCellView)
         compare(tableView["L1", "L2"][Long.MAX_VALUE])
 
-        tableView["L1", "L2"][row] { sourceCellView }
+        tableView["L1", "L2"][row](sourceCellView)
         compare(tableView["L1", "L2"][row])
 
-        tableView["L1", "L2"][rowView] { sourceCellView }
+        tableView["L1", "L2"][rowView](sourceCellView)
         compare(tableView["L1", "L2"][rowView])
 
-        tableView[Int.MAX_VALUE]["L1", "L2"] { sourceCellView }
+        tableView[Int.MAX_VALUE]["L1", "L2"](sourceCellView)
         compare(tableView[Int.MAX_VALUE]["L1", "L2"])
 
-        tableView[Long.MAX_VALUE]["L1", "L2"] { sourceCellView }
+        tableView[Long.MAX_VALUE]["L1", "L2"](sourceCellView)
         compare(tableView[Long.MAX_VALUE]["L1", "L2"])
 
-        tableView[row]["L1", "L2"] { sourceCellView }
+        tableView[row]["L1", "L2"](sourceCellView)
         compare(tableView[row]["L1", "L2"])
 
-        tableView[rowView]["L1", "L2"] { sourceCellView }
+        tableView[rowView]["L1", "L2"](sourceCellView)
         compare(tableView[rowView]["L1", "L2"])
 
-        tableView["L1", "L2", "L3", Int.MAX_VALUE] { sourceCellView }
+        tableView["L1", "L2", "L3", Int.MAX_VALUE](sourceCellView)
         compare(tableView["L1", "L2", "L3", Int.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", Long.MAX_VALUE] { sourceCellView }
+        tableView["L1", "L2", "L3", Long.MAX_VALUE](sourceCellView)
         compare(tableView["L1", "L2", "L3", Long.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", row] { sourceCellView }
+        tableView["L1", "L2", "L3", row](sourceCellView)
         compare(tableView["L1", "L2", "L3", row])
 
-        tableView["L1", "L2", "L3", rowView] { sourceCellView }
+        tableView["L1", "L2", "L3", rowView](sourceCellView)
         compare(tableView["L1", "L2", "L3", rowView])
 
-        tableView["L1", "L2", "L3"][Int.MAX_VALUE] { sourceCellView }
+        tableView["L1", "L2", "L3"][Int.MAX_VALUE](sourceCellView)
         compare(tableView["L1", "L2", "L3"][Int.MAX_VALUE])
 
-        tableView["L1", "L2", "L3"][Long.MAX_VALUE] { sourceCellView }
+        tableView["L1", "L2", "L3"][Long.MAX_VALUE](sourceCellView)
         compare(tableView["L1", "L2", "L3"][Long.MAX_VALUE])
 
-        tableView["L1", "L2", "L3"][row] { sourceCellView }
+        tableView["L1", "L2", "L3"][row](sourceCellView)
         compare(tableView["L1", "L2", "L3"][row])
 
-        tableView["L1", "L2", "L3"][rowView] { sourceCellView }
+        tableView["L1", "L2", "L3"][rowView](sourceCellView)
         compare(tableView["L1", "L2", "L3"][rowView])
 
-        tableView[Int.MAX_VALUE]["L1", "L2", "L3"] { sourceCellView }
+        tableView[Int.MAX_VALUE]["L1", "L2", "L3"](sourceCellView)
         compare(tableView[Int.MAX_VALUE]["L1", "L2", "L3"])
 
-        tableView[Long.MAX_VALUE]["L1", "L2", "L3"] { sourceCellView }
+        tableView[Long.MAX_VALUE]["L1", "L2", "L3"](sourceCellView)
         compare(tableView[Long.MAX_VALUE]["L1", "L2", "L3"])
 
-        tableView[row]["L1", "L2", "L3"] { sourceCellView }
+        tableView[row]["L1", "L2", "L3"](sourceCellView)
         compare(tableView[row]["L1", "L2", "L3"])
 
-        tableView[rowView]["L1", "L2", "L3"] { sourceCellView }
+        tableView[rowView]["L1", "L2", "L3"](sourceCellView)
         compare(tableView[rowView]["L1", "L2", "L3"])
 
-        tableView["L1", "L2", "L3", "L4", Int.MAX_VALUE] { sourceCellView }
+        tableView["L1", "L2", "L3", "L4", Int.MAX_VALUE](sourceCellView)
         compare(tableView["L1", "L2", "L3", "L4", Int.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", "L4", Long.MAX_VALUE] { sourceCellView }
+        tableView["L1", "L2", "L3", "L4", Long.MAX_VALUE](sourceCellView)
         compare(tableView["L1", "L2", "L3", "L4", Long.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", "L4", row] { sourceCellView }
+        tableView["L1", "L2", "L3", "L4", row](sourceCellView)
         compare(tableView["L1", "L2", "L3", "L4", row])
 
-        tableView["L1", "L2", "L3", "L4", rowView] { sourceCellView }
+        tableView["L1", "L2", "L3", "L4", rowView](sourceCellView)
         compare(tableView["L1", "L2", "L3", "L4", rowView])
 
-        tableView["L1", "L2", "L3", "L4"][Int.MAX_VALUE] { sourceCellView }
+        tableView["L1", "L2", "L3", "L4"][Int.MAX_VALUE](sourceCellView)
         compare(tableView["L1", "L2", "L3", "L4"][Int.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", "L4"][Long.MAX_VALUE] { sourceCellView }
+        tableView["L1", "L2", "L3", "L4"][Long.MAX_VALUE](sourceCellView)
         compare(tableView["L1", "L2", "L3", "L4"][Long.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", "L4"][row] { sourceCellView }
+        tableView["L1", "L2", "L3", "L4"][row](sourceCellView)
         compare(tableView["L1", "L2", "L3", "L4"][row])
 
-        tableView["L1", "L2", "L3", "L4"][rowView] { sourceCellView }
+        tableView["L1", "L2", "L3", "L4"][rowView](sourceCellView)
         compare(tableView["L1", "L2", "L3", "L4"][rowView])
 
-        tableView[Int.MAX_VALUE]["L1", "L2", "L3", "L4"] { sourceCellView }
+        tableView[Int.MAX_VALUE]["L1", "L2", "L3", "L4"](sourceCellView)
         compare(tableView[Int.MAX_VALUE]["L1", "L2", "L3", "L4"])
 
-        tableView[Long.MAX_VALUE]["L1", "L2", "L3", "L4"] { sourceCellView }
+        tableView[Long.MAX_VALUE]["L1", "L2", "L3", "L4"](sourceCellView)
         compare(tableView[Long.MAX_VALUE]["L1", "L2", "L3", "L4"])
 
-        tableView[row]["L1", "L2", "L3", "L4"] { sourceCellView }
+        tableView[row]["L1", "L2", "L3", "L4"](sourceCellView)
         compare(tableView[row]["L1", "L2", "L3", "L4"])
 
-        tableView[rowView]["L1", "L2", "L3", "L4"] { sourceCellView }
+        tableView[rowView]["L1", "L2", "L3", "L4"](sourceCellView)
         compare(tableView[rowView]["L1", "L2", "L3", "L4"])
 
-        tableView["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE] { sourceCellView }
+        tableView["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE](sourceCellView)
         compare(tableView["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE] { sourceCellView }
+        tableView["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE](sourceCellView)
         compare(tableView["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", "L4", "L5", row] { sourceCellView }
+        tableView["L1", "L2", "L3", "L4", "L5", row](sourceCellView)
         compare(tableView["L1", "L2", "L3", "L4", "L5", row])
 
-        tableView["L1", "L2", "L3", "L4", "L5", rowView] { sourceCellView }
+        tableView["L1", "L2", "L3", "L4", "L5", rowView](sourceCellView)
         compare(tableView["L1", "L2", "L3", "L4", "L5", rowView])
 
-        tableView["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE] { sourceCellView }
+        tableView["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE](sourceCellView)
         compare(tableView["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE] { sourceCellView }
+        tableView["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE](sourceCellView)
         compare(tableView["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE])
 
-        tableView["L1", "L2", "L3", "L4", "L5"][row] { sourceCellView }
+        tableView["L1", "L2", "L3", "L4", "L5"][row](sourceCellView)
         compare(tableView["L1", "L2", "L3", "L4", "L5"][row])
 
-        tableView["L1", "L2", "L3", "L4", "L5"][rowView] { sourceCellView }
+        tableView["L1", "L2", "L3", "L4", "L5"][rowView](sourceCellView)
         compare(tableView["L1", "L2", "L3", "L4", "L5"][rowView])
 
-        tableView[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"] { sourceCellView }
+        tableView[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"](sourceCellView)
         compare(tableView[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"])
 
-        tableView[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"] { sourceCellView }
+        tableView[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"](sourceCellView)
         compare(tableView[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"])
 
-        tableView[row]["L1", "L2", "L3", "L4", "L5"] { sourceCellView }
+        tableView[row]["L1", "L2", "L3", "L4", "L5"](sourceCellView)
         compare(tableView[row]["L1", "L2", "L3", "L4", "L5"])
 
-        tableView[rowView]["L1", "L2", "L3", "L4", "L5"] { sourceCellView }
+        tableView[rowView]["L1", "L2", "L3", "L4", "L5"](sourceCellView)
         compare(tableView[rowView]["L1", "L2", "L3", "L4", "L5"])
 
         tableView[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE] = sourceCellView
@@ -797,453 +797,453 @@ class TableViewAccessorsTest {
         tableView[rowView][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = sourceCellView
         compare(tableView[rowView][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5"], row] = { this { sourceCellView } }
+        tableView[Header["L1", "L2", "L3", "L4", "L5"], row] = { this(sourceCellView) }
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5"], row])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5"], rowView] = { this { sourceCellView } }
+        tableView[Header["L1", "L2", "L3", "L4", "L5"], rowView] = { this(sourceCellView) }
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5"], rowView])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5"]][row] = { this { sourceCellView } }
+        tableView[Header["L1", "L2", "L3", "L4", "L5"]][row] = { this(sourceCellView) }
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5"]][row])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5"]][rowView] = { this { sourceCellView } }
+        tableView[Header["L1", "L2", "L3", "L4", "L5"]][rowView] = { this(sourceCellView) }
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5"]][rowView])
 
-        tableView[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]] = { this { sourceCellView } }
+        tableView[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]] = { this(sourceCellView) }
         compare(tableView[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]])
 
-        tableView[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]] = { this { sourceCellView } }
+        tableView[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]] = { this(sourceCellView) }
         compare(tableView[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]])
 
-        tableView[row][Header["L1", "L2", "L3", "L4", "L5"]] = { this { sourceCellView } }
+        tableView[row][Header["L1", "L2", "L3", "L4", "L5"]] = { this(sourceCellView) }
         compare(tableView[row][Header["L1", "L2", "L3", "L4", "L5"]])
 
-        tableView[rowView][Header["L1", "L2", "L3", "L4", "L5"]] = { this { sourceCellView } }
+        tableView[rowView][Header["L1", "L2", "L3", "L4", "L5"]] = { this(sourceCellView) }
         compare(tableView[rowView][Header["L1", "L2", "L3", "L4", "L5"]])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], row] = { this { sourceCellView } }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], row] = { this(sourceCellView) }
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], row])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], rowView] = { this { sourceCellView } }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], rowView] = { this(sourceCellView) }
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], rowView])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][row] = { this { sourceCellView } }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][row] = { this(sourceCellView) }
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][row])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][rowView] = { this { sourceCellView } }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][rowView] = { this(sourceCellView) }
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][rowView])
 
-        tableView[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]] = { this { sourceCellView } }
+        tableView[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]] = { this(sourceCellView) }
         compare(tableView[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]])
 
-        tableView[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]] = { this { sourceCellView } }
+        tableView[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]] = { this(sourceCellView) }
         compare(tableView[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]])
 
-        tableView[row][table[Header["L1", "L2", "L3", "L4", "L5"]]] = { this { sourceCellView } }
+        tableView[row][table[Header["L1", "L2", "L3", "L4", "L5"]]] = { this(sourceCellView) }
         compare(tableView[row][table[Header["L1", "L2", "L3", "L4", "L5"]]])
 
-        tableView[rowView][table[Header["L1", "L2", "L3", "L4", "L5"]]] = { this { sourceCellView } }
+        tableView[rowView][table[Header["L1", "L2", "L3", "L4", "L5"]]] = { this(sourceCellView) }
         compare(tableView[rowView][table[Header["L1", "L2", "L3", "L4", "L5"]]])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], row] = { this { sourceCellView } }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], row] = { this(sourceCellView) }
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], row])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], rowView] = { this { sourceCellView } }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], rowView] = { this(sourceCellView) }
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], rowView])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][row] = { this { sourceCellView } }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][row] = { this(sourceCellView) }
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][row])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][rowView] = { this { sourceCellView } }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][rowView] = { this(sourceCellView) }
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][rowView])
 
-        tableView[Int.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5"]]] = { this { sourceCellView } }
+        tableView[Int.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5"]]] = { this(sourceCellView) }
         compare(tableView[Int.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5"]]])
 
-        tableView[Long.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5"]]] = { this { sourceCellView } }
+        tableView[Long.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5"]]] = { this(sourceCellView) }
         compare(tableView[Long.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5"]]])
 
-        tableView[row][tableView[Header["L1", "L2", "L3", "L4", "L5"]]] = { this { sourceCellView } }
+        tableView[row][tableView[Header["L1", "L2", "L3", "L4", "L5"]]] = { this(sourceCellView) }
         compare(tableView[row][tableView[Header["L1", "L2", "L3", "L4", "L5"]]])
 
-        tableView[rowView][tableView[Header["L1", "L2", "L3", "L4", "L5"]]] = { this { sourceCellView } }
+        tableView[rowView][tableView[Header["L1", "L2", "L3", "L4", "L5"]]] = { this(sourceCellView) }
         compare(tableView[rowView][tableView[Header["L1", "L2", "L3", "L4", "L5"]]])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], row] = { this { sourceCellView } }
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], row] = { this(sourceCellView) }
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], row])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], rowView] = { this { sourceCellView } }
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], rowView] = { this(sourceCellView) }
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], rowView])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][row] = { this { sourceCellView } }
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][row] = { this(sourceCellView) }
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][row])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][rowView] = { this { sourceCellView } }
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][rowView] = { this(sourceCellView) }
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][rowView])
 
-        tableView[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = { this { sourceCellView } }
+        tableView[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = { this(sourceCellView) }
         compare(tableView[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]])
 
-        tableView[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = { this { sourceCellView } }
+        tableView[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = { this(sourceCellView) }
         compare(tableView[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]])
 
-        tableView[row][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = { this { sourceCellView } }
+        tableView[row][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = { this(sourceCellView) }
         compare(tableView[row][Header["L1", "L2", "L3", "L4", "L5", "L6"]])
 
-        tableView[rowView][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = { this { sourceCellView } }
+        tableView[rowView][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = { this(sourceCellView) }
         compare(tableView[rowView][Header["L1", "L2", "L3", "L4", "L5", "L6"]])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], row] = { this { sourceCellView } }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], row] = { this(sourceCellView) }
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], row])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], rowView] = { this { sourceCellView } }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], rowView] = { this(sourceCellView) }
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], rowView])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][row] = { this { sourceCellView } }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][row] = { this(sourceCellView) }
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][row])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][rowView] = { this { sourceCellView } }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][rowView] = { this(sourceCellView) }
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][rowView])
 
-        tableView[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this { sourceCellView } }
+        tableView[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this(sourceCellView) }
         compare(tableView[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
 
-        tableView[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this { sourceCellView } }
+        tableView[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this(sourceCellView) }
         compare(tableView[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
 
-        tableView[row][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this { sourceCellView } }
+        tableView[row][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this(sourceCellView) }
         compare(tableView[row][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
 
-        tableView[rowView][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this { sourceCellView } }
+        tableView[rowView][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this(sourceCellView) }
         compare(tableView[rowView][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], row] = { this { sourceCellView } }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], row] = { this(sourceCellView) }
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], row])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], rowView] = { this { sourceCellView } }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], rowView] = { this(sourceCellView) }
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], rowView])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE] = { this { sourceCellView } }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE] = { this { sourceCellView } }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE] = { this(sourceCellView) }
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][row] = { this { sourceCellView } }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][row] = { this(sourceCellView) }
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][row])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][rowView] = { this { sourceCellView } }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][rowView] = { this(sourceCellView) }
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][rowView])
 
-        tableView[Int.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this { sourceCellView } }
+        tableView[Int.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this(sourceCellView) }
         compare(tableView[Int.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
 
-        tableView[Long.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this { sourceCellView } }
+        tableView[Long.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this(sourceCellView) }
         compare(tableView[Long.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
 
-        tableView[row][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this { sourceCellView } }
+        tableView[row][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this(sourceCellView) }
         compare(tableView[row][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
 
-        tableView[rowView][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this { sourceCellView } }
+        tableView[rowView][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this(sourceCellView) }
         compare(tableView[rowView][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE] { sourceCellView }
+        tableView[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE](sourceCellView)
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE] { sourceCellView }
+        tableView[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE](sourceCellView)
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5"], row] { sourceCellView }
+        tableView[Header["L1", "L2", "L3", "L4", "L5"], row](sourceCellView)
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5"], row])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5"], rowView] { sourceCellView }
+        tableView[Header["L1", "L2", "L3", "L4", "L5"], rowView](sourceCellView)
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5"], rowView])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE] { sourceCellView }
+        tableView[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE](sourceCellView)
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE] { sourceCellView }
+        tableView[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE](sourceCellView)
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5"]][row] { sourceCellView }
+        tableView[Header["L1", "L2", "L3", "L4", "L5"]][row](sourceCellView)
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5"]][row])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5"]][rowView] { sourceCellView }
+        tableView[Header["L1", "L2", "L3", "L4", "L5"]][rowView](sourceCellView)
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5"]][rowView])
 
-        tableView[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]] { sourceCellView }
+        tableView[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]](sourceCellView)
         compare(tableView[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]])
 
-        tableView[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]] { sourceCellView }
+        tableView[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]](sourceCellView)
         compare(tableView[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]])
 
-        tableView[row][Header["L1", "L2", "L3", "L4", "L5"]] { sourceCellView }
+        tableView[row][Header["L1", "L2", "L3", "L4", "L5"]](sourceCellView)
         compare(tableView[row][Header["L1", "L2", "L3", "L4", "L5"]])
 
-        tableView[rowView][Header["L1", "L2", "L3", "L4", "L5"]] { sourceCellView }
+        tableView[rowView][Header["L1", "L2", "L3", "L4", "L5"]](sourceCellView)
         compare(tableView[rowView][Header["L1", "L2", "L3", "L4", "L5"]])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE] { sourceCellView }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE](sourceCellView)
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE] { sourceCellView }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE](sourceCellView)
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], row] { sourceCellView }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], row](sourceCellView)
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], row])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], rowView] { sourceCellView }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], rowView](sourceCellView)
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]], rowView])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE] { sourceCellView }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE](sourceCellView)
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE] { sourceCellView }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE](sourceCellView)
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][row] { sourceCellView }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][row](sourceCellView)
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][row])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][rowView] { sourceCellView }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][rowView](sourceCellView)
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5"]]][rowView])
 
-        tableView[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]] { sourceCellView }
+        tableView[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]](sourceCellView)
         compare(tableView[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]])
 
-        tableView[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]] { sourceCellView }
+        tableView[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]](sourceCellView)
         compare(tableView[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]])
 
-        tableView[row][table[Header["L1", "L2", "L3", "L4", "L5"]]] { sourceCellView }
+        tableView[row][table[Header["L1", "L2", "L3", "L4", "L5"]]](sourceCellView)
         compare(tableView[row][table[Header["L1", "L2", "L3", "L4", "L5"]]])
 
-        tableView[rowView][table[Header["L1", "L2", "L3", "L4", "L5"]]] { sourceCellView }
+        tableView[rowView][table[Header["L1", "L2", "L3", "L4", "L5"]]](sourceCellView)
         compare(tableView[rowView][table[Header["L1", "L2", "L3", "L4", "L5"]]])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE] { sourceCellView }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE](sourceCellView)
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE] { sourceCellView }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE](sourceCellView)
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], row] { sourceCellView }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], row](sourceCellView)
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], row])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], rowView] { sourceCellView }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], rowView](sourceCellView)
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]], rowView])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE] { sourceCellView }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE](sourceCellView)
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE] { sourceCellView }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE](sourceCellView)
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][row] { sourceCellView }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][row](sourceCellView)
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][row])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][rowView] { sourceCellView }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][rowView](sourceCellView)
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5"]]][rowView])
 
-        tableView[Int.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5"]]] { sourceCellView }
+        tableView[Int.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5"]]](sourceCellView)
         compare(tableView[Int.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5"]]])
 
-        tableView[Long.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5"]]] { sourceCellView }
+        tableView[Long.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5"]]](sourceCellView)
         compare(tableView[Long.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5"]]])
 
-        tableView[row][tableView[Header["L1", "L2", "L3", "L4", "L5"]]] { sourceCellView }
+        tableView[row][tableView[Header["L1", "L2", "L3", "L4", "L5"]]](sourceCellView)
         compare(tableView[row][tableView[Header["L1", "L2", "L3", "L4", "L5"]]])
 
-        tableView[rowView][tableView[Header["L1", "L2", "L3", "L4", "L5"]]] { sourceCellView }
+        tableView[rowView][tableView[Header["L1", "L2", "L3", "L4", "L5"]]](sourceCellView)
         compare(tableView[rowView][tableView[Header["L1", "L2", "L3", "L4", "L5"]]])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE] { sourceCellView }
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE](sourceCellView)
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE] { sourceCellView }
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE](sourceCellView)
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], row] { sourceCellView }
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], row](sourceCellView)
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], row])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], rowView] { sourceCellView }
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], rowView](sourceCellView)
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"], rowView])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE] { sourceCellView }
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE](sourceCellView)
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE] { sourceCellView }
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE](sourceCellView)
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][row] { sourceCellView }
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][row](sourceCellView)
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][row])
 
-        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][rowView] { sourceCellView }
+        tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][rowView](sourceCellView)
         compare(tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]][rowView])
 
-        tableView[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]] { sourceCellView }
+        tableView[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]](sourceCellView)
         compare(tableView[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]])
 
-        tableView[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]] { sourceCellView }
+        tableView[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]](sourceCellView)
         compare(tableView[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]])
 
-        tableView[row][Header["L1", "L2", "L3", "L4", "L5", "L6"]] { sourceCellView }
+        tableView[row][Header["L1", "L2", "L3", "L4", "L5", "L6"]](sourceCellView)
         compare(tableView[row][Header["L1", "L2", "L3", "L4", "L5", "L6"]])
 
-        tableView[rowView][Header["L1", "L2", "L3", "L4", "L5", "L6"]] { sourceCellView }
+        tableView[rowView][Header["L1", "L2", "L3", "L4", "L5", "L6"]](sourceCellView)
         compare(tableView[rowView][Header["L1", "L2", "L3", "L4", "L5", "L6"]])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE] { sourceCellView }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE](sourceCellView)
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE] { sourceCellView }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE](sourceCellView)
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], row] { sourceCellView }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], row](sourceCellView)
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], row])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], rowView] { sourceCellView }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], rowView](sourceCellView)
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], rowView])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE] { sourceCellView }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE](sourceCellView)
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE] { sourceCellView }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE](sourceCellView)
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][row] { sourceCellView }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][row](sourceCellView)
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][row])
 
-        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][rowView] { sourceCellView }
+        tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][rowView](sourceCellView)
         compare(tableView[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][rowView])
 
-        tableView[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] { sourceCellView }
+        tableView[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]](sourceCellView)
         compare(tableView[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
 
-        tableView[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] { sourceCellView }
+        tableView[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]](sourceCellView)
         compare(tableView[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
 
-        tableView[row][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] { sourceCellView }
+        tableView[row][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]](sourceCellView)
         compare(tableView[row][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
 
-        tableView[rowView][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] { sourceCellView }
+        tableView[rowView][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]](sourceCellView)
         compare(tableView[rowView][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE] { sourceCellView }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE](sourceCellView)
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE] { sourceCellView }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE](sourceCellView)
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], row] { sourceCellView }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], row](sourceCellView)
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], row])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], rowView] { sourceCellView }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], rowView](sourceCellView)
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]], rowView])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE] { sourceCellView }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE](sourceCellView)
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE] { sourceCellView }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE](sourceCellView)
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][row] { sourceCellView }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][row](sourceCellView)
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][row])
 
-        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][rowView] { sourceCellView }
+        tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][rowView](sourceCellView)
         compare(tableView[tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][rowView])
 
-        tableView[Int.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] { sourceCellView }
+        tableView[Int.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]](sourceCellView)
         compare(tableView[Int.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
 
-        tableView[Long.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] { sourceCellView }
+        tableView[Long.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]](sourceCellView)
         compare(tableView[Long.MAX_VALUE][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
 
-        tableView[row][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] { sourceCellView }
+        tableView[row][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]](sourceCellView)
         compare(tableView[row][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
 
-        tableView[rowView][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] { sourceCellView }
+        tableView[rowView][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]](sourceCellView)
         compare(tableView[rowView][tableView[Header["L1", "L2", "L3", "L4", "L5", "L6"]]])
         tableView[tableView["L1", 1000]] = sourceCellView
         compare(tableView[tableView["L1", 1000]])
 
-        tableView[tableView["L1", 1001]] = { this { sourceCellView } }
+        tableView[tableView["L1", 1001]] = { this(sourceCellView) }
         compare(tableView[tableView["L1", 1001]])
 
-        tableView[tableView["L1", 1002]] { sourceCellView }
+        tableView[tableView["L1", 1002]](sourceCellView)
         compare(tableView[tableView["L1", 1002]])
 
         tableView[table["L1", 2000]] = sourceCellView
         compare(tableView[table["L1", 2000]])
 
-        tableView[table["L1", 2001]] = { this { sourceCellView } }
+        tableView[table["L1", 2001]] = { this(sourceCellView) }
         compare(tableView[table["L1", 2001]])
 
-        tableView[table["L1", 2002]] { sourceCellView }
+        tableView[table["L1", 2002]](sourceCellView)
         compare(tableView[table["L1", 2002]])
     }
 

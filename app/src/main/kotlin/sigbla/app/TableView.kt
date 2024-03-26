@@ -1423,19 +1423,39 @@ class CellView(
         }
     }
 
-    operator fun invoke(function: CellView.() -> Any?): Any? {
-        return when (val value = function()) {
-            is CellView -> { tableView[this] = value; value }
-            is CellHeight<*, *> -> { tableView[this][CellHeight] = value; value }
-            is CellWidth<*, *> -> { tableView[this][CellWidth] = value; value }
-            is CellClasses<*> -> { tableView[this][CellClasses] = value; value }
-            is CellTopics<*> -> { tableView[this][CellTopics] = value; value }
-            is CellTransformer<*> -> { tableView[this][CellTransformer] = value; value }
-            is Unit -> { /* no assignment */ Unit }
-            is Function1<*, *> -> { invoke(value as CellView.() -> Any?) }
-            null -> { tableView[this] = null; null }
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
+    operator fun invoke(newValue: CellView?): CellView? {
+        tableView[this] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellHeight<*, *>?): CellHeight<*, *>? {
+        tableView[this][CellHeight] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellWidth<*, *>?): CellWidth<*, *>? {
+        tableView[this][CellWidth] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellClasses<*>?): CellClasses<*>? {
+        tableView[this][CellClasses] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellTopics<*>?): CellTopics<*>? {
+        tableView[this][CellTopics] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellTransformer<*>?): CellTransformer<*>? {
+        tableView[this][CellTransformer] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Unit? = null): Unit? {
+        tableView[this] = null
+        return newValue
     }
 
     val tableView: TableView

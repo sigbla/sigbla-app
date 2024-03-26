@@ -59,7 +59,7 @@ internal fun button(
             val b = Button(cellView, text)
             b.action()
             if (b.modified) {
-                cellView { button(id, b.text, action) }
+                cellView.(button(id, b.text, action))()
                 call.respondText { "false" }
             } else {
                 call.respondText { "true" }
@@ -150,7 +150,7 @@ internal fun checkBox(
             val cb = CheckBox(cellView, text, newChecked)
             cb.action()
             if (cb.modified || newChecked != checked) {
-                cellView { checkBox(id, cb.text, cb.checked, action) }
+                cellView.(checkBox(id, cb.text, cb.checked, action))()
                 call.respondText { "false" }
             } else {
                 call.respondText { "true" }
@@ -245,7 +245,7 @@ internal fun radio(
             val r = Radio(cellView, text, newSelected)
             r.action()
             if (r.modified || newSelected != selected) {
-                cellView { radio(id, r.text, r.selected, action) }
+                cellView.(radio(id, r.text, r.selected, action))()
                 call.respondText { "false" }
             } else {
                 call.respondText { "true" }
@@ -332,7 +332,7 @@ internal fun textField(
             val tf = TextField(cellView, newText)
             tf.action()
             if (tf.modified || newText != text) {
-                cellView { textField(id, tf.text, action) }
+                cellView.(textField(id, tf.text, action))()
                 call.respondText { "false" }
             } else {
                 call.respondText { "true" }

@@ -24,7 +24,7 @@ fun clear(columnView: ColumnView) = columnView { null }
 
 fun clear(rowView: RowView) = rowView { null }
 
-fun clear(cellView: CellView) = cellView { null }
+fun clear(cellView: CellView): Unit { cellView() }
 
 // ---
 

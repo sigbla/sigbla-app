@@ -1101,22 +1101,11 @@ class TableViewTest {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val ct: Cell<*>.() -> Unit = {}
 
-        tv1["A", 1] {
-            tv1["B", 1][CellHeight]
-        }
-        tv1["A", 1] {
-            tv1["B", 1][CellWidth]
-        }
-        tv1["A", 1] {
-            tv1["B", 1][CellClasses]
-        }
-        tv1["A", 1] {
-            tv1["B", 1][CellTopics]
-        }
-        tv1["A", 1] {
-            tv1["B", 1][CellTransformer]
-        }
-        tv1["A", 1] { }
+        tv1["A", 1](tv1["B", 1][CellHeight])
+        tv1["A", 1](tv1["B", 1][CellWidth])
+        tv1["A", 1](tv1["B", 1][CellClasses])
+        tv1["A", 1](tv1["B", 1][CellTopics])
+        tv1["A", 1](tv1["B", 1][CellTransformer])
 
         assertEquals(Unit, tv1["A", 1][CellHeight].height)
         assertEquals(Unit, tv1["A", 1][CellWidth].width)
@@ -1130,21 +1119,11 @@ class TableViewTest {
         tv1["B", 1][CellTopics]("400")
         tv1["B", 1][CellTransformer](ct)
 
-        tv1["A", 1] {
-            tv1["B", 1][CellHeight]
-        }
-        tv1["A", 1] {
-            tv1["B", 1][CellWidth]
-        }
-        tv1["A", 1] {
-            tv1["B", 1][CellClasses]
-        }
-        tv1["A", 1] {
-            tv1["B", 1][CellTopics]
-        }
-        tv1["A", 1] {
-            tv1["B", 1][CellTransformer]
-        }
+        tv1["A", 1](tv1["B", 1][CellHeight])
+        tv1["A", 1](tv1["B", 1][CellWidth])
+        tv1["A", 1](tv1["B", 1][CellClasses])
+        tv1["A", 1](tv1["B", 1][CellTopics])
+        tv1["A", 1](tv1["B", 1][CellTransformer])
 
         assertEquals(100L, tv1["A", 1][CellHeight].height)
         assertEquals(200L, tv1["A", 1][CellWidth].width)
@@ -1152,15 +1131,13 @@ class TableViewTest {
         assertEquals(setOf("400"), tv1["A", 1][CellTopics].topics)
         assertEquals(ct, tv1["A", 1][CellTransformer].function)
 
-        tv1["A", 1] { }
-
         assertEquals(100L, tv1["A", 1][CellHeight].height)
         assertEquals(200L, tv1["A", 1][CellWidth].width)
         assertEquals(setOf("300"), tv1["A", 1][CellClasses].classes)
         assertEquals(setOf("400"), tv1["A", 1][CellTopics].topics)
         assertEquals(ct, tv1["A", 1][CellTransformer].function)
 
-        tv1["A", 1] { null }
+        tv1["A", 1](null as Unit?)
 
         assertEquals(Unit, tv1["A", 1][CellHeight].height)
         assertEquals(Unit, tv1["A", 1][CellWidth].width)
@@ -1168,7 +1145,7 @@ class TableViewTest {
         assertEquals(emptySet<String>(), tv1["A", 1][CellTopics].topics)
         assertEquals(Unit, tv1["A", 1][CellTransformer].function)
 
-        tv1["A", 1] { tv1["B", 1] }
+        tv1["A", 1](tv1["B", 1])
 
         assertEquals(100L, tv1["A", 1][CellHeight].height)
         assertEquals(200L, tv1["A", 1][CellWidth].width)
@@ -1304,15 +1281,15 @@ class TableViewTest {
             if (ir == IndexRelation.AT) {
                 tv1["A"][t1[ir, 0]] = tv1["A"][t1[ir, 0]]
                 tv1["A"][t1[ir, 0]] = { tv1["A"][t1[ir, 0]] }
-                tv1["A"][t1[ir, 0]] { tv1["A"][t1[ir, 0]] }
+                tv1["A"][t1[ir, 0]](tv1["A"][t1[ir, 0]])
                 assertEquals(CellView::class, tv1["A"][t1[ir, 0]]::class)
             } else {
                 assertFailsWith<InvalidRowException> { tv1["A"][t1[ir, 0]] }
                 val validRow = t1[IndexRelation.AT, 0]
                 val cellView = tv1["A"][validRow]
                 assertFailsWith<InvalidRowException> { tv1["A"][t1[ir, 0]] = cellView }
-                assertFailsWith<InvalidRowException> { tv1["A"][t1[ir, 0]] = { cellView } }
-                assertFailsWith<InvalidRowException> { tv1["A"][t1[ir, 0]] { cellView } }
+                assertFailsWith<InvalidRowException> { tv1["A"][t1[ir, 0]] = { this(cellView) } }
+                assertFailsWith<InvalidRowException> { tv1["A"][t1[ir, 0]](cellView) }
             }
 
             // RowView
@@ -1326,8 +1303,8 @@ class TableViewTest {
                 val cellView = tv1[validRow]["A"]
 
                 assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]]["A"] = cellView }
-                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]]["A"] = { cellView } }
-                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]]["A"] { cellView } }
+                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]]["A"] = { this(cellView) } }
+                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]]["A"](cellView) }
             }
         }
     }

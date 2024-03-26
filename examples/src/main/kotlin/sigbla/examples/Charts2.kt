@@ -37,23 +37,19 @@ fun main() {
 
     Thread.sleep(10000)
 
-    tableView["B", 0] {
-        line(
-            //title,
-            labels,
-            "Series A" to dataset1,
-            "Series B" to dataset2
-        )
-    }
+    tableView["B", 0] = line(
+        //title,
+        labels,
+        "Series A" to dataset1,
+        "Series B" to dataset2
+    )
 
-    tableView["C", 0] {
-        bar(
-            title,
-            labels,
-            "Series A" to dataset1,
-            "Series B" to dataset2
-        )
-    }
+    tableView["C", 0] = bar(
+        title,
+        labels,
+        "Series A" to dataset1,
+        "Series B" to dataset2
+    )
 
     Thread.sleep(10000)
 

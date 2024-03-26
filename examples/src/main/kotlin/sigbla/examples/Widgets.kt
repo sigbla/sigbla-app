@@ -17,21 +17,17 @@ fun main() {
         text = table["B", 0].toString()
     }
 
-    tableView["A", 1] {
-        checkBox("Check me") {
-            println("Checkbox action: ${checked}")
-            text = if (checked) "I'm checked! =)" else "I'm not checked :("
-        }
+    tableView["A", 1] = checkBox("Check me") {
+        println("Checkbox action: ${checked}")
+        text = if (checked) "I'm checked! =)" else "I'm not checked :("
     }
 
     fun radioMaker(index: Int, otherIndex: Int, selected: Boolean?) {
-        tableView["A", index] {
-            radio(if (selected == null) "I'm a radio button" else if (selected) "I'm selected! =)" else "I'm not selected :(") {
-                println("Radio action: ${this.selected}")
-                text = if (this.selected) "I'm selected! =)" else "I'm not selected :("
+        tableView["A", index] = radio(if (selected == null) "I'm a radio button" else if (selected) "I'm selected! =)" else "I'm not selected :(") {
+            println("Radio action: ${this.selected}")
+            text = if (this.selected) "I'm selected! =)" else "I'm not selected :("
 
-                if (this.selected) radioMaker(otherIndex, index, false)
-            }
+            if (this.selected) radioMaker(otherIndex, index, false)
         }
     }
 
