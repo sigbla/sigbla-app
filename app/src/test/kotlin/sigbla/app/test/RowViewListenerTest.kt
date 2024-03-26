@@ -1720,7 +1720,7 @@ class RowViewListenerTest {
         on<CellWidth<*,*>>(tv1[1], name = "Listener 1") events {
             eventCount1 += count()
             forEach {
-                oldView[it.columnView!!, it.index!!][CellWidth] { 100 }
+                oldView[it.columnView!!, it.index!!][CellWidth](100)
                 newView[it.columnView!!, it.index!!][CellWidth] = 200
             }
         }

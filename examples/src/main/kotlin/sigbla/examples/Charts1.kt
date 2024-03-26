@@ -19,21 +19,17 @@ fun main() {
     tableView["A"][CellWidth] = 350
     tableView["B"][CellWidth] = 350
 
-    tableView["A", 0] {
-        line(
-            listOf("X 1", "X 2", "X 3"),
-            "Series A" to listOf(2.0, 1.5, 1.0),
-            "Series B" to listOf(3.0, 2.5, 1.7)
-        )
-    }
+    tableView["A", 0] = line(
+        listOf("X 1", "X 2", "X 3"),
+        "Series A" to listOf(2.0, 1.5, 1.0),
+        "Series B" to listOf(3.0, 2.5, 1.7)
+    )
 
-    tableView["B", 0] {
-        bar(
-            listOf("X 1", "X 2", "X 3"),
-            "Series A" to listOf(2.0, 1.5, 1.0),
-            "Series B" to listOf(3.0, 2.5, 1.7)
-        )
-    }
+    tableView["B", 0] = bar(
+        listOf("X 1", "X 2", "X 3"),
+        "Series A" to listOf(2.0, 1.5, 1.0),
+        "Series B" to listOf(3.0, 2.5, 1.7)
+    )
 
     val url = show(tableView)
     println(url)

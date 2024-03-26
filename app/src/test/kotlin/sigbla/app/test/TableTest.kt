@@ -1085,54 +1085,53 @@ class TableTest {
         val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         t["A"][1L] = BigDecimal.ONE
-        assertEquals(t["A"][1L].value, t["A"][2L] { BigDecimal.ONE })
+        assertEquals(t["A"][1L].value, t["A"][2L](BigDecimal.ONE))
 
         assertEquals(t["A", 1L].value, t["A", 2L].value)
 
         t["A"][1L] = BigInteger.TWO
-        assertEquals(t["A"][1L].value, t["A"][2L] { BigInteger.TWO })
+        assertEquals(t["A"][1L].value, t["A"][2L](BigInteger.TWO))
 
         assertEquals(t["A", 1L].value, t["A", 2L].value)
 
         t["A"][1L] = 3.0
-        assertEquals(t["A"][1L].value, t["A"][2L] { 3.0 })
+        assertEquals(t["A"][1L].value, t["A"][2L](3.0))
 
         assertEquals(t["A", 1L].value, t["A", 2L].value)
 
         t["A"][1L] = 4L
-        assertEquals(t["A"][1L].value, t["A"][2L] { 4L })
+        assertEquals(t["A"][1L].value, t["A"][2L](4L))
 
         assertEquals(t["A", 1L].value, t["A", 2L].value)
 
         t["A"][1L] = 5 as Number
-        assertEquals(t["A"][1L].value, t["A"][2L] { 5L as Number })
+        assertEquals(t["A"][1L].value, t["A"][2L](5L as Number))
 
         assertEquals(t["A", 1L].value, t["A", 2L].value)
 
         t["A"][1L] = "6"
-        assertEquals(t["A"][1L].value, t["A"][2L] { "6" })
+        assertEquals(t["A"][1L].value, t["A"][2L]("6"))
 
         assertEquals(t["A", 1L].value, t["A", 2L].value)
 
         t["B", 3L] = "Cell"
         t["A"][1L] = t["B", 3L]
-        assertEquals(t["A"][1L].value, (t["A"][2L] { t["B", 3L] } as Cell<*>).value)
+        assertEquals(t["A"][1L].value, (t["A"][2L](t["B", 3L]) as Cell<*>).value)
 
         assertEquals(t["A", 1L].value, t["A", 2L].value)
 
-        assertEquals(Unit, t["A"][2L] { Unit })
+        assertEquals(Unit, t["A"][2L](Unit))
 
-        assertEquals(t["A", 1L].value, t["A", 2L].value)
+        assertNotEquals(t["A", 1L].value, t["A", 2L].value)
 
         t["A"][1L] = null
-        assertNull(t["A"][2L] { null })
 
         assertEquals(t["A", 1L].value, t["A", 2L].value)
 
         for (i in 1..10) t["B", i] = i
 
         t["A"][1L] = sum(t["B",1]..t["B", 10])
-        t["A"][2L] { sum(t["B",1]..t["B", 10]) }
+        t["A"][2L](t["A"][1L])
 
         assertEquals(t["A", 1L].value, t["A", 2L].value)
 
@@ -1140,8 +1139,8 @@ class TableTest {
 
         t["B", 1] = 2
 
-        assertEquals(56L, t["A", 2L].value)
-        assertEquals(t["A", 1L].value, t["A", 2L].value)
+        assertEquals(55L, t["A", 2L].value)
+        assertNotEquals(t["A", 1L].value, t["A", 2L].value)
     }
 
     @Test
@@ -2136,14 +2135,14 @@ class TableTest {
 
         fun assignFunction(row: Row, v: Any) {
             when (v) {
-                is Cell<*> -> t["A", row] = { this { v } }
-                is String -> t["A", row] = { this { v } }
-                is Double -> t["A", row] = { this { v } }
-                is Long -> t["A", row] = { this { v } }
-                is BigInteger -> t["A", row] = { this { v } }
-                is BigDecimal -> t["A", row] = { this { v } }
-                is Number -> t["A", row] = { this { v } }
-                is Boolean -> t["A", row] = { this { v } }
+                is Cell<*> -> t["A", row] = { this(v) }
+                is String -> t["A", row] = { this(v) }
+                is Double -> t["A", row] = { this(v) }
+                is Long -> t["A", row] = { this(v) }
+                is BigInteger -> t["A", row] = { this(v) }
+                is BigDecimal -> t["A", row] = { this(v) }
+                is Number -> t["A", row] = { this(v) }
+                is Boolean -> t["A", row] = { this(v) }
                 else -> throw Exception()
             }
         }
@@ -2210,14 +2209,14 @@ class TableTest {
 
         fun assignFunction(row: Row, v: Any) {
             when (v) {
-                is Cell<*> -> t["A"][row] = { this { v } }
-                is String -> t["A"][row] = { this { v } }
-                is Double -> t["A"][row] = { this { v } }
-                is Long -> t["A"][row] = { this { v } }
-                is BigInteger -> t["A"][row] = { this { v } }
-                is BigDecimal -> t["A"][row] = { this { v } }
-                is Number -> t["A"][row] = { this { v } }
-                is Boolean -> t["A"][row] = { this { v } }
+                is Cell<*> -> t["A"][row] = { this(v) }
+                is String -> t["A"][row] = { this(v) }
+                is Double -> t["A"][row] = { this(v) }
+                is Long -> t["A"][row] = { this(v) }
+                is BigInteger -> t["A"][row] = { this(v) }
+                is BigDecimal -> t["A"][row] = { this(v) }
+                is Number -> t["A"][row] = { this(v) }
+                is Boolean -> t["A"][row] = { this(v) }
                 else -> throw Exception()
             }
         }
@@ -2284,14 +2283,14 @@ class TableTest {
 
         fun assignFunction(row: Row, v: Any) {
             when (v) {
-                is Cell<*> -> t[row]["A"] = { this { v } }
-                is String -> t[row]["A"] = { this { v } }
-                is Double -> t[row]["A"] = { this { v } }
-                is Long -> t[row]["A"] = { this { v } }
-                is BigInteger -> t[row]["A"] = { this { v } }
-                is BigDecimal -> t[row]["A"] = { this { v } }
-                is Number -> t[row]["A"] = { this { v } }
-                is Boolean -> t[row]["A"] = { this { v } }
+                is Cell<*> -> t[row]["A"] = { this(v) }
+                is String -> t[row]["A"] = { this(v) }
+                is Double -> t[row]["A"] = { this(v) }
+                is Long -> t[row]["A"] = { this(v) }
+                is BigInteger -> t[row]["A"] = { this(v) }
+                is BigDecimal -> t[row]["A"] = { this(v) }
+                is Number -> t[row]["A"] = { this(v) }
+                is Boolean -> t[row]["A"] = { this(v) }
                 else -> throw Exception()
             }
         }
@@ -2720,6 +2719,35 @@ class TableTest {
 
         assertTrue(t["A", 1] in t)
         assertFalse(t["A", 3] in t)
+    }
+
+    @Test
+    fun `invoke nulls`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["A", 0](BigDecimal.ONE)
+        t["A", 1](BigInteger.TWO)
+        t["A", 2](3.0)
+        t["A", 3](4L)
+        t["A", 4](5 as Number)
+        t["A", 5]("6")
+        t["A", 6](true)
+        t["A", 7](t["A", 7])
+        t["A", 8](Unit)
+
+        assertEquals(7, t.count())
+
+        assertEquals(BigDecimal.ONE, t["A", 0].also { it(null as BigDecimal?) }.value)
+        assertEquals(BigInteger.TWO, t["A", 1].also { it(null as BigInteger?) }.value)
+        assertEquals(3.0, t["A", 2].also { it(null as Double?) }.value)
+        assertEquals(4L, t["A", 3].also { it(null as Long?) }.value)
+        assertEquals(5L, t["A", 4].also { it(null as Number?) }.value)
+        assertEquals("6", t["A", 5].also { it(null as String?) }.value)
+        assertEquals(true, t["A", 6].also { it(null as Boolean?) }.value)
+        assertEquals(Unit, t["A", 7].also { it(null as Cell<*>?) }.value)
+        assertEquals(Unit, t["A", 8].also { it(null as Unit?) }.value)
+
+        assertEquals(0, t.count())
     }
 
     companion object {

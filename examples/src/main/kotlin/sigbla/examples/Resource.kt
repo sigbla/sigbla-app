@@ -33,26 +33,26 @@ fun main() {
         call.respondText(text = "Works!")
     })
 
-    tableView[Resources] {
+    tableView[Resources].apply {
         val tmpFile = File.createTempFile("sigbla", "txt")
         tmpFile.deleteOnExit()
         tmpFile.writeText("sigbla data app file resource")
-        this + ("static-file/sigbla.txt" to staticFile(tmpFile))
+        this(this + ("static-file/sigbla.txt" to staticFile(tmpFile)))
     }
 
     val url = show(tableView)
     println(url)
 
-    tableView[Resources] {
-        this + ("static-resource/magpie.jpg" to staticResource("/test-folder/magpie.jpg"))
+    tableView[Resources].apply {
+        this(this + ("static-resource/magpie.jpg" to staticResource("/test-folder/magpie.jpg")))
     }
 
-    tableView[Resources] {
-        this + ("js/test.js" to jsResource("/test-folder/test.js"))
+    tableView[Resources].apply {
+        this(this + ("js/test.js" to jsResource("/test-folder/test.js")))
     }
 
-    tableView[Resources] {
-        this + ("css/test.css" to cssResource("/test-folder/test.css"))
+    tableView[Resources].apply {
+        this(this + ("css/test.css" to cssResource("/test-folder/test.css")))
     }
 
     tableView["A", 0][CellTopics] = "resourceTopic1"

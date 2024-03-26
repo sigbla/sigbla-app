@@ -1106,7 +1106,7 @@ class CellsBatchListenerTest {
         on<Any, String>(t1["A", 1] or t1["A", 2], name = "Listener 1") events {
             eventCount1 += count()
             forEach {
-                oldTable[it.oldValue] { it.oldValue.value.toString().toLongOrNull() }
+                oldTable[it.oldValue](it.oldValue.value.toString().toLongOrNull())
                 newTable[it.newValue] = it.newValue.value.toLong()
             }
         }
@@ -1180,7 +1180,7 @@ class CellsBatchListenerTest {
         on<Any, String>(t1["A", 1], name = "Listener 1") events {
             eventCount1 += count()
             forEach {
-                oldTable[it.oldValue] { it.oldValue.value.toString().toLongOrNull() }
+                oldTable[it.oldValue](it.oldValue.value.toString().toLongOrNull())
                 newTable[it.newValue] = it.newValue.value.toLong()
             }
         }

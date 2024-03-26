@@ -18,13 +18,13 @@ fun remove(tableView: TableView) = Registry.shutdownView(tableView, true)
 
 // ---
 
-fun clear(tableView: TableView) = tableView { null }
+fun clear(tableView: TableView): Unit { tableView(Unit) }
 
-fun clear(columnView: ColumnView) = columnView { null }
+fun clear(columnView: ColumnView): Unit { columnView(Unit) }
 
-fun clear(rowView: RowView) = rowView { null }
+fun clear(rowView: RowView): Unit { rowView(Unit) }
 
-fun clear(cellView: CellView) = cellView { null }
+fun clear(cellView: CellView): Unit { cellView(Unit) }
 
 // ---
 

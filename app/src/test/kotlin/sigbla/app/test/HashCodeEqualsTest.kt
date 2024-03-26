@@ -195,64 +195,64 @@ class HashCodeEqualsTest {
 
         val tableView1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 1"]
 
-        val unitCellHeight1 = tableView1[CellHeight].also { it { 100 } }
+        val unitCellHeight1 = tableView1[CellHeight].also { it(100) }
         val pixelCellHeight1 = tableView1[CellHeight]
 
-        val unitCellWidth1 = tableView1[CellWidth].also { it { 100 } }
+        val unitCellWidth1 = tableView1[CellWidth].also { it(100) }
         val pixelCellWidth1 = tableView1[CellWidth]
 
-        val emptyCellClasses1 = tableView1[CellClasses].also { it { listOf("B", "A") } }
+        val emptyCellClasses1 = tableView1[CellClasses].also { it(listOf("B", "A")) }
         val filledCellClasses1 = tableView1[CellClasses]
 
-        val emptyCellTopics1 = tableView1[CellTopics].also { it { listOf("B", "A") } }
+        val emptyCellTopics1 = tableView1[CellTopics].also { it (listOf("B", "A")) }
         val filledCellTopics1 = tableView1[CellTopics]
 
         val tableTransformerFunction: Table.() -> Unit = { }
-        val emptyTableTransformer1 = tableView1[TableTransformer].also { it { tableTransformerFunction } }
+        val emptyTableTransformer1 = tableView1[TableTransformer].also { it(tableTransformerFunction) }
         val filledTableTransformer1 = tableView1[TableTransformer]
 
         val columnTransformerFunction: Column.() -> Unit = { }
-        val emptyColumnTransformer1 = tableView1["A"][ColumnTransformer].also { it { columnTransformerFunction } }
+        val emptyColumnTransformer1 = tableView1["A"][ColumnTransformer].also { it(columnTransformerFunction) }
         val filledColumnTransformer1 = tableView1["A"][ColumnTransformer]
 
         val rowTransformerFunction: Row.() -> Unit = { }
-        val emptyRowTransformer1 = tableView1[1][RowTransformer].also { it { rowTransformerFunction } }
+        val emptyRowTransformer1 = tableView1[1][RowTransformer].also { it(rowTransformerFunction) }
         val filledRowTransformer1 = tableView1[1][RowTransformer]
 
         val cellTransformerFunction: Cell<*>.() -> Unit = { }
-        val emptyCellTransformer1 = tableView1["A", 1][CellTransformer].also { it { cellTransformerFunction } }
+        val emptyCellTransformer1 = tableView1["A", 1][CellTransformer].also { it(cellTransformerFunction) }
         val filledCellTransformer1 = tableView1["A", 1][CellTransformer]
 
-        val emptyResources1 = tableView1[Resources].also { it { listOf("B" to handler1, "A" to handler2) } }
+        val emptyResources1 = tableView1[Resources].also { it(listOf("B" to handler1, "A" to handler2)) }
         val filledResources1 = tableView1[Resources]
 
         val tableView2 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
-        val unitCellHeight2 = tableView2[CellHeight].also { it { 100 } }
+        val unitCellHeight2 = tableView2[CellHeight].also { it(100) }
         val pixelCellHeight2 = tableView2[CellHeight]
 
-        val unitCellWidth2 = tableView2[CellWidth].also { it { 100 } }
+        val unitCellWidth2 = tableView2[CellWidth].also { it(100) }
         val pixelCellWidth2 = tableView2[CellWidth]
 
-        val emptyCellClasses2 = tableView2[CellClasses].also { it { listOf("B", "A") } }
+        val emptyCellClasses2 = tableView2[CellClasses].also { it(listOf("B", "A")) }
         val filledCellClasses2 = tableView2[CellClasses]
 
-        val emptyCellTopics2 = tableView2[CellTopics].also { it { listOf("B", "A") } }
+        val emptyCellTopics2 = tableView2[CellTopics].also { it (listOf("B", "A")) }
         val filledCellTopics2 = tableView2[CellTopics]
 
-        val emptyTableTransformer2 = tableView2[TableTransformer].also { it { tableTransformerFunction } }
+        val emptyTableTransformer2 = tableView2[TableTransformer].also { it(tableTransformerFunction) }
         val filledTableTransformer2 = tableView2[TableTransformer]
 
-        val emptyColumnTransformer2 = tableView2["A"][ColumnTransformer].also { it { columnTransformerFunction } }
+        val emptyColumnTransformer2 = tableView2["A"][ColumnTransformer].also { it(columnTransformerFunction) }
         val filledColumnTransformer2 = tableView2["A"][ColumnTransformer]
 
-        val emptyRowTransformer2 = tableView2[1][RowTransformer].also { it { rowTransformerFunction } }
+        val emptyRowTransformer2 = tableView2[1][RowTransformer].also { it(rowTransformerFunction) }
         val filledRowTransformer2 = tableView2[1][RowTransformer]
 
-        val emptyCellTransformer2 = tableView2["A", 1][CellTransformer].also { it { cellTransformerFunction } }
+        val emptyCellTransformer2 = tableView2["A", 1][CellTransformer].also { it(cellTransformerFunction) }
         val filledCellTransformer2 = tableView2["A", 1][CellTransformer]
 
-        val emptyResources2 = tableView2[Resources].also { it { listOf("B" to handler1, "A" to handler2) } }
+        val emptyResources2 = tableView2[Resources].also { it(listOf("B" to handler1, "A" to handler2)) }
         val filledResources2 = tableView2[Resources]
 
         assertNotEquals(unitCellHeight1, unitCellHeight2)

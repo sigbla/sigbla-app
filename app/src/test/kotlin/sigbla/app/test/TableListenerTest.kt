@@ -595,7 +595,7 @@ class TableListenerTest {
         on<Any, String>(t1, name = "Listener 1") events {
             eventCount1 += count()
             forEach {
-                oldTable[it.oldValue] { it.oldValue.value.toString().toLongOrNull() }
+                oldTable[it.oldValue](it.oldValue.value.toString().toLongOrNull())
                 newTable[it.newValue] = it.newValue.value.toLong()
             }
         }

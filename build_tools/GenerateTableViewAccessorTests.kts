@@ -12,18 +12,18 @@
 // tableView[cellview] = value
 // tableView[cell] = value
 
-// + the CellView.() -> Any? assignment pattern
+// + invoke assignment pattern
 
 // ColumnView value:
 // tableView[label1, label2, label3, labelX] = value
 // tableView[header|column|columnview] = value
 
-// + the ColumnView.() -> Any? assignment pattern
+// + invoke assignment pattern
 
 // RowView value:
 // tableView[int|long|row|rowview] = value
 
-// + the RowView.() -> Any? assignment pattern
+// + invoke assignment pattern
 
 fun generateForCellView() {
     println("@Test")
@@ -131,62 +131,62 @@ fun generateForCellView() {
 
         // tableView[label1, label2, label3, labelX, int] = value
         println()
-        println("tableView[${headers.joinToString()}, Int.MAX_VALUE] = { this { sourceCellView } }")
+        println("tableView[${headers.joinToString()}, Int.MAX_VALUE] = { this(sourceCellView) }")
         println("compare(tableView[${headers.joinToString()}, Int.MAX_VALUE])")
 
         // tableView[label1, label2, label3, labelX, long] = value
         println()
-        println("tableView[${headers.joinToString()}, Long.MAX_VALUE] = { this { sourceCellView } }")
+        println("tableView[${headers.joinToString()}, Long.MAX_VALUE] = { this(sourceCellView) }")
         println("compare(tableView[${headers.joinToString()}, Long.MAX_VALUE])")
 
         // tableView[label1, label2, label3, labelX, row] = value
         println()
-        println("tableView[${headers.joinToString()}, row] = { this { sourceCellView } }")
+        println("tableView[${headers.joinToString()}, row] = { this(sourceCellView) }")
         println("compare(tableView[${headers.joinToString()}, row])")
 
         // tableView[label1, label2, label3, labelX, rowview] = value
         println()
-        println("tableView[${headers.joinToString()}, rowView] = { this { sourceCellView } }")
+        println("tableView[${headers.joinToString()}, rowView] = { this(sourceCellView) }")
         println("compare(tableView[${headers.joinToString()}, rowView])")
 
         // tableView[label1, label2, label3, labelX][int] = value
         println()
-        println("tableView[${headers.joinToString()}][Int.MAX_VALUE] = { this { sourceCellView } }")
+        println("tableView[${headers.joinToString()}][Int.MAX_VALUE] = { this(sourceCellView) }")
         println("compare(tableView[${headers.joinToString()}][Int.MAX_VALUE])")
 
         // tableView[label1, label2, label3, labelX][long] = value
         println()
-        println("tableView[${headers.joinToString()}][Long.MAX_VALUE] = { this { sourceCellView } }")
+        println("tableView[${headers.joinToString()}][Long.MAX_VALUE] = { this(sourceCellView) }")
         println("compare(tableView[${headers.joinToString()}][Long.MAX_VALUE])")
 
         // tableView[label1, label2, label3, labelX][row] = value
         println()
-        println("tableView[${headers.joinToString()}][row] = { this { sourceCellView } }")
+        println("tableView[${headers.joinToString()}][row] = { this(sourceCellView) }")
         println("compare(tableView[${headers.joinToString()}][row])")
 
         // tableView[label1, label2, label3, labelX][rowview] = value
         println()
-        println("tableView[${headers.joinToString()}][rowView] = { this { sourceCellView } }")
+        println("tableView[${headers.joinToString()}][rowView] = { this(sourceCellView) }")
         println("compare(tableView[${headers.joinToString()}][rowView])")
 
         // tableView[int][label1, label2, label3, labelX] = value
         println()
-        println("tableView[Int.MAX_VALUE][${headers.joinToString()}] = { this { sourceCellView } }")
+        println("tableView[Int.MAX_VALUE][${headers.joinToString()}] = { this(sourceCellView) }")
         println("compare(tableView[Int.MAX_VALUE][${headers.joinToString()}])")
 
         // tableView[long][label1, label2, label3, labelX] = value
         println()
-        println("tableView[Long.MAX_VALUE][${headers.joinToString()}] = { this { sourceCellView } }")
+        println("tableView[Long.MAX_VALUE][${headers.joinToString()}] = { this(sourceCellView) }")
         println("compare(tableView[Long.MAX_VALUE][${headers.joinToString()}])")
 
         // tableView[row][label1, label2, label3, labelX] = value
         println()
-        println("tableView[row][${headers.joinToString()}] = { this { sourceCellView } }")
+        println("tableView[row][${headers.joinToString()}] = { this(sourceCellView) }")
         println("compare(tableView[row][${headers.joinToString()}])")
 
         // tableView[rowview][label1, label2, label3, labelX] = value
         println()
-        println("tableView[rowView][${headers.joinToString()}] = { this { sourceCellView } }")
+        println("tableView[rowView][${headers.joinToString()}] = { this(sourceCellView) }")
         println("compare(tableView[rowView][${headers.joinToString()}])")
     }
 
@@ -195,62 +195,62 @@ fun generateForCellView() {
 
         // tableView[label1, label2, label3, labelX, int] = value
         println()
-        println("tableView[${headers.joinToString()}, Int.MAX_VALUE] { sourceCellView }")
+        println("tableView[${headers.joinToString()}, Int.MAX_VALUE](sourceCellView)")
         println("compare(tableView[${headers.joinToString()}, Int.MAX_VALUE])")
 
         // tableView[label1, label2, label3, labelX, long] = value
         println()
-        println("tableView[${headers.joinToString()}, Long.MAX_VALUE] { sourceCellView }")
+        println("tableView[${headers.joinToString()}, Long.MAX_VALUE](sourceCellView)")
         println("compare(tableView[${headers.joinToString()}, Long.MAX_VALUE])")
 
         // tableView[label1, label2, label3, labelX, row] = value
         println()
-        println("tableView[${headers.joinToString()}, row] { sourceCellView }")
+        println("tableView[${headers.joinToString()}, row](sourceCellView)")
         println("compare(tableView[${headers.joinToString()}, row])")
 
         // tableView[label1, label2, label3, labelX, rowview] = value
         println()
-        println("tableView[${headers.joinToString()}, rowView] { sourceCellView }")
+        println("tableView[${headers.joinToString()}, rowView](sourceCellView)")
         println("compare(tableView[${headers.joinToString()}, rowView])")
 
         // tableView[label1, label2, label3, labelX][int] = value
         println()
-        println("tableView[${headers.joinToString()}][Int.MAX_VALUE] { sourceCellView }")
+        println("tableView[${headers.joinToString()}][Int.MAX_VALUE](sourceCellView)")
         println("compare(tableView[${headers.joinToString()}][Int.MAX_VALUE])")
 
         // tableView[label1, label2, label3, labelX][long] = value
         println()
-        println("tableView[${headers.joinToString()}][Long.MAX_VALUE] { sourceCellView }")
+        println("tableView[${headers.joinToString()}][Long.MAX_VALUE](sourceCellView)")
         println("compare(tableView[${headers.joinToString()}][Long.MAX_VALUE])")
 
         // tableView[label1, label2, label3, labelX][row] = value
         println()
-        println("tableView[${headers.joinToString()}][row] { sourceCellView }")
+        println("tableView[${headers.joinToString()}][row](sourceCellView)")
         println("compare(tableView[${headers.joinToString()}][row])")
 
         // tableView[label1, label2, label3, labelX][rowview] = value
         println()
-        println("tableView[${headers.joinToString()}][rowView] { sourceCellView }")
+        println("tableView[${headers.joinToString()}][rowView](sourceCellView)")
         println("compare(tableView[${headers.joinToString()}][rowView])")
 
         // tableView[int][label1, label2, label3, labelX] = value
         println()
-        println("tableView[Int.MAX_VALUE][${headers.joinToString()}] { sourceCellView }")
+        println("tableView[Int.MAX_VALUE][${headers.joinToString()}](sourceCellView)")
         println("compare(tableView[Int.MAX_VALUE][${headers.joinToString()}])")
 
         // tableView[long][label1, label2, label3, labelX] = value
         println()
-        println("tableView[Long.MAX_VALUE][${headers.joinToString()}] { sourceCellView }")
+        println("tableView[Long.MAX_VALUE][${headers.joinToString()}](sourceCellView)")
         println("compare(tableView[Long.MAX_VALUE][${headers.joinToString()}])")
 
         // tableView[row][label1, label2, label3, labelX] = value
         println()
-        println("tableView[row][${headers.joinToString()}] { sourceCellView }")
+        println("tableView[row][${headers.joinToString()}](sourceCellView)")
         println("compare(tableView[row][${headers.joinToString()}])")
 
         // tableView[rowview][label1, label2, label3, labelX] = value
         println()
-        println("tableView[rowView][${headers.joinToString()}] { sourceCellView }")
+        println("tableView[rowView][${headers.joinToString()}](sourceCellView)")
         println("compare(tableView[rowView][${headers.joinToString()}])")
     }
 
@@ -444,182 +444,182 @@ fun generateForCellView() {
 
         // tableView[header, int] = value
         println()
-        println("tableView[Header[${headers.joinToString()}], Int.MAX_VALUE] = { this { sourceCellView } }")
+        println("tableView[Header[${headers.joinToString()}], Int.MAX_VALUE] = { this(sourceCellView) }")
         println("compare(tableView[Header[${headers.joinToString()}], Int.MAX_VALUE])")
 
         // tableView[header, long] = value
         println()
-        println("tableView[Header[${headers.joinToString()}], Long.MAX_VALUE] = { this { sourceCellView } }")
+        println("tableView[Header[${headers.joinToString()}], Long.MAX_VALUE] = { this(sourceCellView) }")
         println("compare(tableView[Header[${headers.joinToString()}], Long.MAX_VALUE])")
 
         // tableView[header, row] = value
         println()
-        println("tableView[Header[${headers.joinToString()}], row] = { this { sourceCellView } }")
+        println("tableView[Header[${headers.joinToString()}], row] = { this(sourceCellView) }")
         println("compare(tableView[Header[${headers.joinToString()}], row])")
 
         // tableView[header, rowview] = value
         println()
-        println("tableView[Header[${headers.joinToString()}], rowView] = { this { sourceCellView } }")
+        println("tableView[Header[${headers.joinToString()}], rowView] = { this(sourceCellView) }")
         println("compare(tableView[Header[${headers.joinToString()}], rowView])")
 
         // tableView[header][int] = value
         println()
-        println("tableView[Header[${headers.joinToString()}]][Int.MAX_VALUE] = { this { sourceCellView } }")
+        println("tableView[Header[${headers.joinToString()}]][Int.MAX_VALUE] = { this(sourceCellView) }")
         println("compare(tableView[Header[${headers.joinToString()}]][Int.MAX_VALUE])")
 
         // tableView[header][long] = value
         println()
-        println("tableView[Header[${headers.joinToString()}]][Long.MAX_VALUE] = { this { sourceCellView } }")
+        println("tableView[Header[${headers.joinToString()}]][Long.MAX_VALUE] = { this(sourceCellView) }")
         println("compare(tableView[Header[${headers.joinToString()}]][Long.MAX_VALUE])")
 
         // tableView[header][row] = value
         println()
-        println("tableView[Header[${headers.joinToString()}]][row] = { this { sourceCellView } }")
+        println("tableView[Header[${headers.joinToString()}]][row] = { this(sourceCellView) }")
         println("compare(tableView[Header[${headers.joinToString()}]][row])")
 
         // tableView[header][rowview] = value
         println()
-        println("tableView[Header[${headers.joinToString()}]][rowView] = { this { sourceCellView } }")
+        println("tableView[Header[${headers.joinToString()}]][rowView] = { this(sourceCellView) }")
         println("compare(tableView[Header[${headers.joinToString()}]][rowView])")
 
         // tableView[int][header] = value
         println()
-        println("tableView[Int.MAX_VALUE][Header[${headers.joinToString()}]] = { this { sourceCellView } }")
+        println("tableView[Int.MAX_VALUE][Header[${headers.joinToString()}]] = { this(sourceCellView) }")
         println("compare(tableView[Int.MAX_VALUE][Header[${headers.joinToString()}]])")
 
         // tableView[long][header] = value
         println()
-        println("tableView[Long.MAX_VALUE][Header[${headers.joinToString()}]] = { this { sourceCellView } }")
+        println("tableView[Long.MAX_VALUE][Header[${headers.joinToString()}]] = { this(sourceCellView) }")
         println("compare(tableView[Long.MAX_VALUE][Header[${headers.joinToString()}]])")
 
         // tableView[row][header] = value
         println()
-        println("tableView[row][Header[${headers.joinToString()}]] = { this { sourceCellView } }")
+        println("tableView[row][Header[${headers.joinToString()}]] = { this(sourceCellView) }")
         println("compare(tableView[row][Header[${headers.joinToString()}]])")
 
         // tableView[rowview][header] = value
         println()
-        println("tableView[rowView][Header[${headers.joinToString()}]] = { this { sourceCellView } }")
+        println("tableView[rowView][Header[${headers.joinToString()}]] = { this(sourceCellView) }")
         println("compare(tableView[rowView][Header[${headers.joinToString()}]])")
 
         // tableView[column, int] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]], Int.MAX_VALUE] = { this { sourceCellView } }")
+        println("tableView[table[Header[${headers.joinToString()}]], Int.MAX_VALUE] = { this(sourceCellView) }")
         println("compare(tableView[table[Header[${headers.joinToString()}]], Int.MAX_VALUE])")
 
         // tableView[column, long] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]], Long.MAX_VALUE] = { this { sourceCellView } }")
+        println("tableView[table[Header[${headers.joinToString()}]], Long.MAX_VALUE] = { this(sourceCellView) }")
         println("compare(tableView[table[Header[${headers.joinToString()}]], Long.MAX_VALUE])")
 
         // tableView[column, row] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]], row] = { this { sourceCellView } }")
+        println("tableView[table[Header[${headers.joinToString()}]], row] = { this(sourceCellView) }")
         println("compare(tableView[table[Header[${headers.joinToString()}]], row])")
 
         // tableView[column, rowview] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]], rowView] = { this { sourceCellView } }")
+        println("tableView[table[Header[${headers.joinToString()}]], rowView] = { this(sourceCellView) }")
         println("compare(tableView[table[Header[${headers.joinToString()}]], rowView])")
 
         // tableView[column][int] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]]][Int.MAX_VALUE] = { this { sourceCellView } }")
+        println("tableView[table[Header[${headers.joinToString()}]]][Int.MAX_VALUE] = { this(sourceCellView) }")
         println("compare(tableView[table[Header[${headers.joinToString()}]]][Int.MAX_VALUE])")
 
         // tableView[column][long] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]]][Long.MAX_VALUE] = { this { sourceCellView } }")
+        println("tableView[table[Header[${headers.joinToString()}]]][Long.MAX_VALUE] = { this(sourceCellView) }")
         println("compare(tableView[table[Header[${headers.joinToString()}]]][Long.MAX_VALUE])")
 
         // tableView[column][row] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]]][row] = { this { sourceCellView } }")
+        println("tableView[table[Header[${headers.joinToString()}]]][row] = { this(sourceCellView) }")
         println("compare(tableView[table[Header[${headers.joinToString()}]]][row])")
 
         // tableView[column][rowview] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]]][rowView] = { this { sourceCellView } }")
+        println("tableView[table[Header[${headers.joinToString()}]]][rowView] = { this(sourceCellView) }")
         println("compare(tableView[table[Header[${headers.joinToString()}]]][rowView])")
 
         // tableView[int][column] = value
         println()
-        println("tableView[Int.MAX_VALUE][table[Header[${headers.joinToString()}]]] = { this { sourceCellView } }")
+        println("tableView[Int.MAX_VALUE][table[Header[${headers.joinToString()}]]] = { this(sourceCellView) }")
         println("compare(tableView[Int.MAX_VALUE][table[Header[${headers.joinToString()}]]])")
 
         // tableView[long][column] = value
         println()
-        println("tableView[Long.MAX_VALUE][table[Header[${headers.joinToString()}]]] = { this { sourceCellView } }")
+        println("tableView[Long.MAX_VALUE][table[Header[${headers.joinToString()}]]] = { this(sourceCellView) }")
         println("compare(tableView[Long.MAX_VALUE][table[Header[${headers.joinToString()}]]])")
 
         // tableView[row][column] = value
         println()
-        println("tableView[row][table[Header[${headers.joinToString()}]]] = { this { sourceCellView } }")
+        println("tableView[row][table[Header[${headers.joinToString()}]]] = { this(sourceCellView) }")
         println("compare(tableView[row][table[Header[${headers.joinToString()}]]])")
 
         // tableView[rowview][column] = value
         println()
-        println("tableView[rowView][table[Header[${headers.joinToString()}]]] = { this { sourceCellView } }")
+        println("tableView[rowView][table[Header[${headers.joinToString()}]]] = { this(sourceCellView) }")
         println("compare(tableView[rowView][table[Header[${headers.joinToString()}]]])")
 
         // tableView[columnView, int] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]], Int.MAX_VALUE] = { this { sourceCellView } }")
+        println("tableView[tableView[Header[${headers.joinToString()}]], Int.MAX_VALUE] = { this(sourceCellView) }")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]], Int.MAX_VALUE])")
 
         // tableView[columnView, long] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]], Long.MAX_VALUE] = { this { sourceCellView } }")
+        println("tableView[tableView[Header[${headers.joinToString()}]], Long.MAX_VALUE] = { this(sourceCellView) }")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]], Long.MAX_VALUE])")
 
         // tableView[columnView, row] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]], row] = { this { sourceCellView } }")
+        println("tableView[tableView[Header[${headers.joinToString()}]], row] = { this(sourceCellView) }")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]], row])")
 
         // tableView[columnView, rowview] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]], rowView] = { this { sourceCellView } }")
+        println("tableView[tableView[Header[${headers.joinToString()}]], rowView] = { this(sourceCellView) }")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]], rowView])")
 
         // tableView[columnView][int] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]]][Int.MAX_VALUE] = { this { sourceCellView } }")
+        println("tableView[tableView[Header[${headers.joinToString()}]]][Int.MAX_VALUE] = { this(sourceCellView) }")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]]][Int.MAX_VALUE])")
 
         // tableView[columnView][long] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]]][Long.MAX_VALUE] = { this { sourceCellView } }")
+        println("tableView[tableView[Header[${headers.joinToString()}]]][Long.MAX_VALUE] = { this(sourceCellView) }")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]]][Long.MAX_VALUE])")
 
         // tableView[columnView][row] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]]][row] = { this { sourceCellView } }")
+        println("tableView[tableView[Header[${headers.joinToString()}]]][row] = { this(sourceCellView) }")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]]][row])")
 
         // tableView[columnView][rowview] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]]][rowView] = { this { sourceCellView } }")
+        println("tableView[tableView[Header[${headers.joinToString()}]]][rowView] = { this(sourceCellView) }")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]]][rowView])")
 
         // tableView[int][columnView] = value
         println()
-        println("tableView[Int.MAX_VALUE][tableView[Header[${headers.joinToString()}]]] = { this { sourceCellView } }")
+        println("tableView[Int.MAX_VALUE][tableView[Header[${headers.joinToString()}]]] = { this(sourceCellView) }")
         println("compare(tableView[Int.MAX_VALUE][tableView[Header[${headers.joinToString()}]]])")
 
         // tableView[long][columnView] = value
         println()
-        println("tableView[Long.MAX_VALUE][tableView[Header[${headers.joinToString()}]]] = { this { sourceCellView } }")
+        println("tableView[Long.MAX_VALUE][tableView[Header[${headers.joinToString()}]]] = { this(sourceCellView) }")
         println("compare(tableView[Long.MAX_VALUE][tableView[Header[${headers.joinToString()}]]])")
 
         // tableView[row][columnView] = value
         println()
-        println("tableView[row][tableView[Header[${headers.joinToString()}]]] = { this { sourceCellView } }")
+        println("tableView[row][tableView[Header[${headers.joinToString()}]]] = { this(sourceCellView) }")
         println("compare(tableView[row][tableView[Header[${headers.joinToString()}]]])")
 
         // tableView[rowview][columnView] = value
         println()
-        println("tableView[rowView][tableView[Header[${headers.joinToString()}]]] = { this { sourceCellView } }")
+        println("tableView[rowView][tableView[Header[${headers.joinToString()}]]] = { this(sourceCellView) }")
         println("compare(tableView[rowView][tableView[Header[${headers.joinToString()}]]])")
 
     }
@@ -629,182 +629,182 @@ fun generateForCellView() {
 
         // tableView[header, int] = value
         println()
-        println("tableView[Header[${headers.joinToString()}], Int.MAX_VALUE] { sourceCellView }")
+        println("tableView[Header[${headers.joinToString()}], Int.MAX_VALUE](sourceCellView)")
         println("compare(tableView[Header[${headers.joinToString()}], Int.MAX_VALUE])")
 
         // tableView[header, long] = value
         println()
-        println("tableView[Header[${headers.joinToString()}], Long.MAX_VALUE] { sourceCellView }")
+        println("tableView[Header[${headers.joinToString()}], Long.MAX_VALUE](sourceCellView)")
         println("compare(tableView[Header[${headers.joinToString()}], Long.MAX_VALUE])")
 
         // tableView[header, row] = value
         println()
-        println("tableView[Header[${headers.joinToString()}], row] { sourceCellView }")
+        println("tableView[Header[${headers.joinToString()}], row](sourceCellView)")
         println("compare(tableView[Header[${headers.joinToString()}], row])")
 
         // tableView[header, rowview] = value
         println()
-        println("tableView[Header[${headers.joinToString()}], rowView] { sourceCellView }")
+        println("tableView[Header[${headers.joinToString()}], rowView](sourceCellView)")
         println("compare(tableView[Header[${headers.joinToString()}], rowView])")
 
         // tableView[header][int] = value
         println()
-        println("tableView[Header[${headers.joinToString()}]][Int.MAX_VALUE] { sourceCellView }")
+        println("tableView[Header[${headers.joinToString()}]][Int.MAX_VALUE](sourceCellView)")
         println("compare(tableView[Header[${headers.joinToString()}]][Int.MAX_VALUE])")
 
         // tableView[header][long] = value
         println()
-        println("tableView[Header[${headers.joinToString()}]][Long.MAX_VALUE] { sourceCellView }")
+        println("tableView[Header[${headers.joinToString()}]][Long.MAX_VALUE](sourceCellView)")
         println("compare(tableView[Header[${headers.joinToString()}]][Long.MAX_VALUE])")
 
         // tableView[header][row] = value
         println()
-        println("tableView[Header[${headers.joinToString()}]][row] { sourceCellView }")
+        println("tableView[Header[${headers.joinToString()}]][row](sourceCellView)")
         println("compare(tableView[Header[${headers.joinToString()}]][row])")
 
         // tableView[header][rowview] = value
         println()
-        println("tableView[Header[${headers.joinToString()}]][rowView] { sourceCellView }")
+        println("tableView[Header[${headers.joinToString()}]][rowView](sourceCellView)")
         println("compare(tableView[Header[${headers.joinToString()}]][rowView])")
 
         // tableView[int][header] = value
         println()
-        println("tableView[Int.MAX_VALUE][Header[${headers.joinToString()}]] { sourceCellView }")
+        println("tableView[Int.MAX_VALUE][Header[${headers.joinToString()}]](sourceCellView)")
         println("compare(tableView[Int.MAX_VALUE][Header[${headers.joinToString()}]])")
 
         // tableView[long][header] = value
         println()
-        println("tableView[Long.MAX_VALUE][Header[${headers.joinToString()}]] { sourceCellView }")
+        println("tableView[Long.MAX_VALUE][Header[${headers.joinToString()}]](sourceCellView)")
         println("compare(tableView[Long.MAX_VALUE][Header[${headers.joinToString()}]])")
 
         // tableView[row][header] = value
         println()
-        println("tableView[row][Header[${headers.joinToString()}]] { sourceCellView }")
+        println("tableView[row][Header[${headers.joinToString()}]](sourceCellView)")
         println("compare(tableView[row][Header[${headers.joinToString()}]])")
 
         // tableView[rowview][header] = value
         println()
-        println("tableView[rowView][Header[${headers.joinToString()}]] { sourceCellView }")
+        println("tableView[rowView][Header[${headers.joinToString()}]](sourceCellView)")
         println("compare(tableView[rowView][Header[${headers.joinToString()}]])")
 
         // tableView[column, int] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]], Int.MAX_VALUE] { sourceCellView }")
+        println("tableView[table[Header[${headers.joinToString()}]], Int.MAX_VALUE](sourceCellView)")
         println("compare(tableView[table[Header[${headers.joinToString()}]], Int.MAX_VALUE])")
 
         // tableView[column, long] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]], Long.MAX_VALUE] { sourceCellView }")
+        println("tableView[table[Header[${headers.joinToString()}]], Long.MAX_VALUE](sourceCellView)")
         println("compare(tableView[table[Header[${headers.joinToString()}]], Long.MAX_VALUE])")
 
         // tableView[column, row] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]], row] { sourceCellView }")
+        println("tableView[table[Header[${headers.joinToString()}]], row](sourceCellView)")
         println("compare(tableView[table[Header[${headers.joinToString()}]], row])")
 
         // tableView[column, rowview] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]], rowView] { sourceCellView }")
+        println("tableView[table[Header[${headers.joinToString()}]], rowView](sourceCellView)")
         println("compare(tableView[table[Header[${headers.joinToString()}]], rowView])")
 
         // tableView[column][int] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]]][Int.MAX_VALUE] { sourceCellView }")
+        println("tableView[table[Header[${headers.joinToString()}]]][Int.MAX_VALUE](sourceCellView)")
         println("compare(tableView[table[Header[${headers.joinToString()}]]][Int.MAX_VALUE])")
 
         // tableView[column][long] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]]][Long.MAX_VALUE] { sourceCellView }")
+        println("tableView[table[Header[${headers.joinToString()}]]][Long.MAX_VALUE](sourceCellView)")
         println("compare(tableView[table[Header[${headers.joinToString()}]]][Long.MAX_VALUE])")
 
         // tableView[column][row] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]]][row] { sourceCellView }")
+        println("tableView[table[Header[${headers.joinToString()}]]][row](sourceCellView)")
         println("compare(tableView[table[Header[${headers.joinToString()}]]][row])")
 
         // tableView[column][rowview] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]]][rowView] { sourceCellView }")
+        println("tableView[table[Header[${headers.joinToString()}]]][rowView](sourceCellView)")
         println("compare(tableView[table[Header[${headers.joinToString()}]]][rowView])")
 
         // tableView[int][column] = value
         println()
-        println("tableView[Int.MAX_VALUE][table[Header[${headers.joinToString()}]]] { sourceCellView }")
+        println("tableView[Int.MAX_VALUE][table[Header[${headers.joinToString()}]]](sourceCellView)")
         println("compare(tableView[Int.MAX_VALUE][table[Header[${headers.joinToString()}]]])")
 
         // tableView[long][column] = value
         println()
-        println("tableView[Long.MAX_VALUE][table[Header[${headers.joinToString()}]]] { sourceCellView }")
+        println("tableView[Long.MAX_VALUE][table[Header[${headers.joinToString()}]]](sourceCellView)")
         println("compare(tableView[Long.MAX_VALUE][table[Header[${headers.joinToString()}]]])")
 
         // tableView[row][column] = value
         println()
-        println("tableView[row][table[Header[${headers.joinToString()}]]] { sourceCellView }")
+        println("tableView[row][table[Header[${headers.joinToString()}]]](sourceCellView)")
         println("compare(tableView[row][table[Header[${headers.joinToString()}]]])")
 
         // tableView[rowview][column] = value
         println()
-        println("tableView[rowView][table[Header[${headers.joinToString()}]]] { sourceCellView }")
+        println("tableView[rowView][table[Header[${headers.joinToString()}]]](sourceCellView)")
         println("compare(tableView[rowView][table[Header[${headers.joinToString()}]]])")
 
         // tableView[columnView, int] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]], Int.MAX_VALUE] { sourceCellView }")
+        println("tableView[tableView[Header[${headers.joinToString()}]], Int.MAX_VALUE](sourceCellView)")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]], Int.MAX_VALUE])")
 
         // tableView[columnView, long] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]], Long.MAX_VALUE] { sourceCellView }")
+        println("tableView[tableView[Header[${headers.joinToString()}]], Long.MAX_VALUE](sourceCellView)")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]], Long.MAX_VALUE])")
 
         // tableView[columnView, row] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]], row] { sourceCellView }")
+        println("tableView[tableView[Header[${headers.joinToString()}]], row](sourceCellView)")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]], row])")
 
         // tableView[columnView, rowview] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]], rowView] { sourceCellView }")
+        println("tableView[tableView[Header[${headers.joinToString()}]], rowView](sourceCellView)")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]], rowView])")
 
         // tableView[columnView][int] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]]][Int.MAX_VALUE] { sourceCellView }")
+        println("tableView[tableView[Header[${headers.joinToString()}]]][Int.MAX_VALUE](sourceCellView)")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]]][Int.MAX_VALUE])")
 
         // tableView[columnView][long] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]]][Long.MAX_VALUE] { sourceCellView }")
+        println("tableView[tableView[Header[${headers.joinToString()}]]][Long.MAX_VALUE](sourceCellView)")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]]][Long.MAX_VALUE])")
 
         // tableView[columnView][row] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]]][row] { sourceCellView }")
+        println("tableView[tableView[Header[${headers.joinToString()}]]][row](sourceCellView)")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]]][row])")
 
         // tableView[columnView][rowview] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]]][rowView] { sourceCellView }")
+        println("tableView[tableView[Header[${headers.joinToString()}]]][rowView](sourceCellView)")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]]][rowView])")
 
         // tableView[int][columnView] = value
         println()
-        println("tableView[Int.MAX_VALUE][tableView[Header[${headers.joinToString()}]]] { sourceCellView }")
+        println("tableView[Int.MAX_VALUE][tableView[Header[${headers.joinToString()}]]](sourceCellView)")
         println("compare(tableView[Int.MAX_VALUE][tableView[Header[${headers.joinToString()}]]])")
 
         // tableView[long][columnView] = value
         println()
-        println("tableView[Long.MAX_VALUE][tableView[Header[${headers.joinToString()}]]] { sourceCellView }")
+        println("tableView[Long.MAX_VALUE][tableView[Header[${headers.joinToString()}]]](sourceCellView)")
         println("compare(tableView[Long.MAX_VALUE][tableView[Header[${headers.joinToString()}]]])")
 
         // tableView[row][columnView] = value
         println()
-        println("tableView[row][tableView[Header[${headers.joinToString()}]]] { sourceCellView }")
+        println("tableView[row][tableView[Header[${headers.joinToString()}]]](sourceCellView)")
         println("compare(tableView[row][tableView[Header[${headers.joinToString()}]]])")
 
         // tableView[rowview][columnView] = value
         println()
-        println("tableView[rowView][tableView[Header[${headers.joinToString()}]]] { sourceCellView }")
+        println("tableView[rowView][tableView[Header[${headers.joinToString()}]]](sourceCellView)")
         println("compare(tableView[rowView][tableView[Header[${headers.joinToString()}]]])")
 
     }
@@ -813,19 +813,19 @@ fun generateForCellView() {
             tableView[tableView["L1", 1000]] = sourceCellView
             compare(tableView[tableView["L1", 1000]])
 
-            tableView[tableView["L1", 1001]] = { this { sourceCellView } }
+            tableView[tableView["L1", 1001]] = { this(sourceCellView) }
             compare(tableView[tableView["L1", 1001]])
 
-            tableView[tableView["L1", 1002]] { sourceCellView }
+            tableView[tableView["L1", 1002]](sourceCellView)
             compare(tableView[tableView["L1", 1002]])
 
             tableView[table["L1", 2000]] = sourceCellView
             compare(tableView[table["L1", 2000]])
 
-            tableView[table["L1", 2001]] = { this { sourceCellView } }
+            tableView[table["L1", 2001]] = { this(sourceCellView) }
             compare(tableView[table["L1", 2001]])
 
-            tableView[table["L1", 2002]] { sourceCellView }
+            tableView[table["L1", 2002]](sourceCellView)
             compare(tableView[table["L1", 2002]])
     """.trimIndent())
 
@@ -879,7 +879,7 @@ fun generateForColumnView() {
 
         // tableView[label1, label2, label3, labelX] = value
         println()
-        println("tableView[${headers.joinToString()}] = { this { sourceColumnView } }")
+        println("tableView[${headers.joinToString()}] = { this(sourceColumnView) }")
         println("compare(tableView[${headers.joinToString()}])")
     }
 
@@ -888,7 +888,7 @@ fun generateForColumnView() {
 
         // tableView[label1, label2, label3, labelX] = value
         println()
-        println("tableView[${headers.joinToString()}] { sourceColumnView }")
+        println("tableView[${headers.joinToString()}](sourceColumnView)")
         println("compare(tableView[${headers.joinToString()}])")
     }
 
@@ -916,17 +916,17 @@ fun generateForColumnView() {
 
         // tableView[header] = value
         println()
-        println("tableView[Header[${headers.joinToString()}]] = { this { sourceColumnView } }")
+        println("tableView[Header[${headers.joinToString()}]] = { this(sourceColumnView) }")
         println("compare(tableView[Header[${headers.joinToString()}]])")
 
         // tableView[column] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]]] = { this { sourceColumnView } }")
+        println("tableView[table[Header[${headers.joinToString()}]]] = { this(sourceColumnView) }")
         println("compare(tableView[table[Header[${headers.joinToString()}]]])")
 
         // tableView[columnView] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]]] = { this { sourceColumnView } }")
+        println("tableView[tableView[Header[${headers.joinToString()}]]] = { this(sourceColumnView) }")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]]])")
     }
 
@@ -935,17 +935,17 @@ fun generateForColumnView() {
 
         // tableView[header] = value
         println()
-        println("tableView[Header[${headers.joinToString()}]] { sourceColumnView }")
+        println("tableView[Header[${headers.joinToString()}]](sourceColumnView)")
         println("compare(tableView[Header[${headers.joinToString()}]])")
 
         // tableView[column] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]]] { sourceColumnView }")
+        println("tableView[table[Header[${headers.joinToString()}]]](sourceColumnView)")
         println("compare(tableView[table[Header[${headers.joinToString()}]]])")
 
         // tableView[columnView] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]]] { sourceColumnView }")
+        println("tableView[tableView[Header[${headers.joinToString()}]]](sourceColumnView)")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]]])")
     }
 
@@ -1007,42 +1007,42 @@ fun generateForRowView() {
 
     // tableView[int] = value
     println()
-    println("tableView[Int.MAX_VALUE] = { this { sourceRowView } }")
+    println("tableView[Int.MAX_VALUE] = { this(sourceRowView) }")
     println("compare(tableView[Int.MAX_VALUE])")
 
     // tableView[long] = value
     println()
-    println("tableView[Long.MAX_VALUE] = { this { sourceRowView } }")
+    println("tableView[Long.MAX_VALUE] = { this(sourceRowView) }")
     println("compare(tableView[Long.MAX_VALUE])")
 
     // tableView[row] = value
     println()
-    println("tableView[table[2000]] = { this { sourceRowView } }")
+    println("tableView[table[2000]] = { this(sourceRowView) }")
     println("compare(tableView[table[2000]])")
 
     // tableView[rowview] = value
     println()
-    println("tableView[tableView[3000]] = { this { sourceRowView } }")
+    println("tableView[tableView[3000]] = { this(sourceRowView) }")
     println("compare(tableView[tableView[3000]])")
 
     // tableView[int] = value
     println()
-    println("tableView[Int.MAX_VALUE] { sourceRowView }")
+    println("tableView[Int.MAX_VALUE](sourceRowView)")
     println("compare(tableView[Int.MAX_VALUE])")
 
     // tableView[long] = value
     println()
-    println("tableView[Long.MAX_VALUE] { sourceRowView }")
+    println("tableView[Long.MAX_VALUE](sourceRowView)")
     println("compare(tableView[Long.MAX_VALUE])")
 
     // tableView[row] = value
     println()
-    println("tableView[table[2000]] { sourceRowView }")
+    println("tableView[table[2000]](sourceRowView)")
     println("compare(tableView[table[2000]])")
 
     // tableView[rowview] = value
     println()
-    println("tableView[tableView[3000]] { sourceRowView }")
+    println("tableView[tableView[3000]](sourceRowView)")
     println("compare(tableView[tableView[3000]])")
 
     println("}")

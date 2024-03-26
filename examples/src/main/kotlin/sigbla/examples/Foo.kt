@@ -384,7 +384,7 @@ fun main() {
 
     val tableView = TableView[table]
 
-    table["DST", 0] {
+    table["DST", 0] = {
         val destination = this
         on<Any, Number>(table) {
             name = "L"
@@ -415,7 +415,7 @@ fun main() {
         }
     }
 
-    table["DIV", 1] {
+    table["DIV", 1] = {
         val destination = this
         this.table[this] = div {
             +"Pre Event"

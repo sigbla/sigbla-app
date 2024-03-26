@@ -1071,43 +1071,69 @@ class TableView internal constructor(
         }
     }
 
-    operator fun invoke(function: TableView.() -> Any?): Any? {
-        return when (val value = function()) {
-            is CellHeight<*, *> -> { this[CellHeight] = value; value }
-            is CellWidth<*, *> -> { this[CellWidth] = value; value }
-            is CellClasses<*> -> { this[CellClasses] = value; value }
-            is CellTopics<*> -> { this[CellTopics] = value; value }
-            is TableTransformer<*> -> { this[TableTransformer] = value; value }
-            is Resources -> { this[Resources] = value; value }
-            is Unit -> { /* no assignment */ Unit }
-            is Function1<*, *> -> { invoke(value as TableView.() -> Any?) }
-            is Table -> { this[Table] = value; value }
-            is TableView -> {
-                batch(this) {
-                    this[CellHeight] = value[CellHeight]
-                    this[CellWidth] = value[CellWidth]
-                    this[CellClasses] = value[CellClasses]
-                    this[CellTopics] = value[CellTopics]
-                    this[TableTransformer] = value[TableTransformer]
-                    this[Resources] = value[Resources]
-                    this[Table] = value[Table]
-                }
-                null
+    operator fun invoke(newValue: TableView?): TableView? {
+        if (newValue != null) {
+            batch(this) {
+                this[CellHeight] = newValue[CellHeight]
+                this[CellWidth] = newValue[CellWidth]
+                this[CellClasses] = newValue[CellClasses]
+                this[CellTopics] = newValue[CellTopics]
+                this[TableTransformer] = newValue[TableTransformer]
+                this[Resources] = newValue[Resources]
+                this[Table] = newValue[Table]
             }
-            null -> {
-                batch(this) {
-                    this[CellHeight] = null
-                    this[CellWidth] = null
-                    this[CellClasses] = null
-                    this[CellTopics] = null
-                    this[TableTransformer] = null
-                    this[Resources] = null
-                    this[Table] = null
-                }
-                null
+        } else {
+            batch(this) {
+                this[CellHeight] = null
+                this[CellWidth] = null
+                this[CellClasses] = null
+                this[CellTopics] = null
+                this[TableTransformer] = null
+                this[Resources] = null
+                this[Table] = null
             }
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
         }
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellHeight<*, *>?): CellHeight<*, *>? {
+        this[CellHeight] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellWidth<*, *>?): CellWidth<*, *>? {
+        this[CellWidth] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellClasses<*>?): CellClasses<*>? {
+        this[CellClasses] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellTopics<*>?): CellTopics<*>? {
+        this[CellTopics] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: TableTransformer<*>?): TableTransformer<*>? {
+        this[TableTransformer] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Resources?): Resources? {
+        this[Resources] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Table?): Table? {
+        this[Table] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Unit?): Unit? {
+        invoke(null as TableView?)
+        return newValue
     }
 
     internal fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableViewRef = tableViewRef.get()) = TableView(name, this, onRegistry, RefHolder(ref))
@@ -1423,19 +1449,39 @@ class CellView(
         }
     }
 
-    operator fun invoke(function: CellView.() -> Any?): Any? {
-        return when (val value = function()) {
-            is CellView -> { tableView[this] = value; value }
-            is CellHeight<*, *> -> { tableView[this][CellHeight] = value; value }
-            is CellWidth<*, *> -> { tableView[this][CellWidth] = value; value }
-            is CellClasses<*> -> { tableView[this][CellClasses] = value; value }
-            is CellTopics<*> -> { tableView[this][CellTopics] = value; value }
-            is CellTransformer<*> -> { tableView[this][CellTransformer] = value; value }
-            is Unit -> { /* no assignment */ Unit }
-            is Function1<*, *> -> { invoke(value as CellView.() -> Any?) }
-            null -> { tableView[this] = null; null }
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
+    operator fun invoke(newValue: CellView?): CellView? {
+        tableView[this] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellHeight<*, *>?): CellHeight<*, *>? {
+        tableView[this][CellHeight] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellWidth<*, *>?): CellWidth<*, *>? {
+        tableView[this][CellWidth] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellClasses<*>?): CellClasses<*>? {
+        tableView[this][CellClasses] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellTopics<*>?): CellTopics<*>? {
+        tableView[this][CellTopics] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellTransformer<*>?): CellTransformer<*>? {
+        tableView[this][CellTransformer] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Unit?): Unit? {
+        tableView[this] = null
+        return newValue
     }
 
     val tableView: TableView
@@ -1735,18 +1781,34 @@ class ColumnView internal constructor(
         }
     }
 
-    operator fun invoke(function: ColumnView.() -> Any?): Any? {
-        return when (val value = function()) {
-            is ColumnView -> { tableView[this] = value; value }
-            is CellWidth<*, *> -> { tableView[this][CellWidth] = value; value }
-            is CellClasses<*> -> { tableView[this][CellClasses] = value; value }
-            is CellTopics<*> -> { tableView[this][CellTopics] = value; value }
-            is ColumnTransformer<*> -> { tableView[this][ColumnTransformer] = value; value }
-            is Unit -> { /* no assignment */ Unit }
-            is Function1<*, *> -> { invoke(value as ColumnView.() -> Any?) }
-            null -> { tableView[this] = null; null }
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
+    operator fun invoke(newValue: ColumnView?): ColumnView? {
+        tableView[this] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellWidth<*, *>?): CellWidth<*, *>? {
+        tableView[this][CellWidth] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellClasses<*>?): CellClasses<*>? {
+        tableView[this][CellClasses] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellTopics<*>?): CellTopics<*>? {
+        tableView[this][CellTopics] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: ColumnTransformer<*>?): ColumnTransformer<*>? {
+        tableView[this][ColumnTransformer] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Unit?): Unit? {
+        tableView[this] = null
+        return newValue
     }
 
     // Note: cellViews return the defined CellViews, while the ColumnView iterator
@@ -2067,18 +2129,34 @@ class RowView internal constructor(
         }
     }
 
-    operator fun invoke(function: RowView.() -> Any?): Any? {
-        return when (val value = function()) {
-            is RowView -> { tableView[this] = value; value }
-            is CellHeight<*, *> -> { tableView[this][CellHeight] = value; value }
-            is CellClasses<*> -> { tableView[this][CellClasses] = value; value }
-            is CellTopics<*> -> { tableView[this][CellTopics] = value; value }
-            is RowTransformer<*> -> { tableView[this][RowTransformer] = value; value }
-            is Unit -> { /* no assignment */ Unit }
-            is Function1<*, *> -> { invoke(value as RowView.() -> Any?) }
-            null -> { tableView[this] = null; null }
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
+    operator fun invoke(newValue: RowView?): RowView? {
+        tableView[this] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellHeight<*, *>?): CellHeight<*, *>? {
+        tableView[this][CellHeight] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellClasses<*>?): CellClasses<*>? {
+        tableView[this][CellClasses] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellTopics<*>?): CellTopics<*>? {
+        tableView[this][CellTopics] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: RowTransformer<*>?): RowTransformer<*>? {
+        tableView[this][RowTransformer] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Unit?): Unit? {
+        tableView[this] = null
+        return newValue
     }
 
     // Note: cellViews return the defined CellViews, while the RowView iterator
@@ -2310,27 +2388,34 @@ sealed class CellHeight<S, T> {
     open operator fun rem(that: Int): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
     open operator fun rem(that: Long): Number = throw InvalidCellHeightException("CellHeight not numeric at $source")
 
-    operator fun invoke(function: CellHeight<*,*>.() -> Any?): Any? {
-        val value = this.function()
-        val longValue = when(value) {
-            is Unit -> /* no assignment */ return Unit
-            is Int -> value.toLong()
-            is Long -> value
-            is CellHeight<*,*> -> when (val height = value.height) {
-                is Number -> height.toLong()
-                else -> null
-            }
-            null -> null
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
-
+    operator fun invoke(newValue: CellHeight<*, *>?): CellHeight<*, *>? {
         when (val source = source) {
-            is TableView -> if (longValue == null) source[CellHeight] = null else source[CellHeight] = longValue
-            is RowView -> if (longValue == null) source[CellHeight] = null else source[CellHeight] = longValue
-            is CellView -> if (longValue == null) source[CellHeight] = null else source[CellHeight] = longValue
+            is TableView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
+            is RowView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
+            is CellView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
         }
 
-        return value
+        return newValue
+    }
+
+    operator fun invoke(newValue: Long?): Long? {
+        when (val source = source) {
+            is TableView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
+            is RowView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
+            is CellView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
+        }
+
+        return newValue
+    }
+
+    operator fun invoke(newValue: Unit?): Unit? {
+        when (val source = source) {
+            is TableView -> source[CellHeight] = null
+            is RowView -> source[CellHeight] = null
+            is CellView -> source[CellHeight] = null
+        }
+
+        return newValue
     }
 
     operator fun contains(other: CellHeight<*, *>) = height == other.height
@@ -2491,27 +2576,34 @@ sealed class CellWidth<S, T> {
     open operator fun rem(that: Int): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
     open operator fun rem(that: Long): Number = throw InvalidCellWidthException("CellWidth not numeric at $source")
 
-    operator fun invoke(function: CellWidth<*,*>.() -> Any?): Any? {
-        val value = this.function()
-        val longValue = when(value) {
-            is Unit -> /* no assignment */ return Unit
-            is Int -> value.toLong()
-            is Long -> value
-            is CellWidth<*,*> -> when (val width = value.width) {
-                is Number -> width.toLong()
-                else -> null
-            }
-            null -> null
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
-
+    operator fun invoke(newValue: CellWidth<*, *>?): CellWidth<*, *>? {
         when (val source = source) {
-            is TableView -> if (longValue == null) source[CellWidth] = null else source[CellWidth] = longValue
-            is ColumnView -> if (longValue == null) source[CellWidth] = null else source[CellWidth] = longValue
-            is CellView -> if (longValue == null) source[CellWidth] = null else source[CellWidth] = longValue
+            is TableView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
+            is ColumnView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
+            is CellView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
         }
 
-        return value
+        return newValue
+    }
+
+    operator fun invoke(newValue: Long?): Long? {
+        when (val source = source) {
+            is TableView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
+            is ColumnView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
+            is CellView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
+        }
+
+        return newValue
+    }
+
+    operator fun invoke(newValue: Unit?): Unit? {
+        when (val source = source) {
+            is TableView -> source[CellWidth] = null
+            is ColumnView -> source[CellWidth] = null
+            is CellView -> source[CellWidth] = null
+        }
+
+        return newValue
     }
 
     operator fun contains(other: CellWidth<*, *>) = width == other.width
@@ -2589,25 +2681,48 @@ class CellClasses<S> internal constructor(
     operator fun minus(topics: Collection<String>): SortedSet<String> = (topics.fold(this._classes) { acc, topic -> acc - topic }).toSortedSet()
     override fun iterator(): Iterator<String> = classes.iterator()
 
-    operator fun invoke(function: CellClasses<*>.() -> Any?): Any? {
-        val value = this.function()
-        val classes = when(value) {
-            is Unit -> /* no assignment */ return Unit
-            is String -> setOf(value)
-            is Collection<*> -> value as Collection<String>
-            is CellClasses<*> -> value.classes
-            null -> null
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
+    operator fun invoke(newValue: Collection<String>?): Collection<String>? {
+        when (source) {
+            is TableView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is ColumnView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is RowView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is CellView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
         }
 
-        when (val source = source) {
-            is TableView -> if (classes == null) source[CellClasses] = null else source[CellClasses] = classes
-            is ColumnView -> if (classes == null) source[CellClasses] = null else source[CellClasses] = classes
-            is RowView -> if (classes == null) source[CellClasses] = null else source[CellClasses] = classes
-            is CellView -> if (classes == null) source[CellClasses] = null else source[CellClasses] = classes
+        return newValue
+    }
+
+    operator fun invoke(newValue: String?): String? {
+        when (source) {
+            is TableView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is ColumnView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is RowView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is CellView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
         }
 
-        return value
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellClasses<*>?): CellClasses<*>? {
+        when (source) {
+            is TableView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is ColumnView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is RowView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is CellView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+        }
+
+        return newValue
+    }
+
+    operator fun invoke(newValue: Unit?): Unit? {
+        when (source) {
+            is TableView -> source[CellClasses] = null
+            is ColumnView -> source[CellClasses] = null
+            is RowView -> source[CellClasses] = null
+            is CellView -> source[CellClasses] = null
+        }
+
+        return newValue
     }
 
     operator fun contains(other: CellClasses<*>) = _classes.containsAll(other._classes)
@@ -2647,25 +2762,48 @@ class CellTopics<S> internal constructor(
     operator fun minus(topics: Collection<String>): SortedSet<String> = (topics.fold(this._topics) { acc, topic -> acc - topic }).toSortedSet()
     override fun iterator(): Iterator<String> = topics.iterator()
 
-    operator fun invoke(function: CellTopics<*>.() -> Any?): Any? {
-        val value = this.function()
-        val topics = when(value) {
-            is Unit -> /* no assignment */ return Unit
-            is String -> setOf(value)
-            is Collection<*> -> value as Collection<String>
-            is CellTopics<*> -> value.topics
-            null -> null
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
+    operator fun invoke(newValue: Collection<String>?): Collection<String>? {
+        when (source) {
+            is TableView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
+            is ColumnView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
+            is RowView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
+            is CellView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
         }
 
-        when (val source = source) {
-            is TableView -> if (topics == null) source[CellTopics] = null else source[CellTopics] = topics
-            is ColumnView -> if (topics == null) source[CellTopics] = null else source[CellTopics] = topics
-            is RowView -> if (topics == null) source[CellTopics] = null else source[CellTopics] = topics
-            is CellView -> if (topics == null) source[CellTopics] = null else source[CellTopics] = topics
+        return newValue
+    }
+
+    operator fun invoke(newValue: String?): String? {
+        when (source) {
+            is TableView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
+            is ColumnView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
+            is RowView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
+            is CellView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
         }
 
-        return value
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellTopics<*>?): CellTopics<*>? {
+        when (source) {
+            is TableView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
+            is ColumnView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
+            is RowView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
+            is CellView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
+        }
+
+        return newValue
+    }
+
+    operator fun invoke(newValue: Unit?): Unit? {
+        when (source) {
+            is TableView -> source[CellTopics] = null
+            is ColumnView -> source[CellTopics] = null
+            is RowView -> source[CellTopics] = null
+            is CellView -> source[CellTopics] = null
+        }
+
+        return newValue
     }
 
     operator fun contains(other: CellTopics<*>) = _topics.containsAll(other._topics)
@@ -2694,20 +2832,19 @@ class CellTopics<S> internal constructor(
 sealed class Transformer<S, T>(val source: S, val function: T)
 
 abstract class TableTransformer<T>(source: TableView, function: T): Transformer<TableView, T>(source, function) {
-    operator fun invoke(function: TableTransformer<*>.() -> Any?): Any? {
-        val value = this.function()
-        val transformer = when(value) {
-            is FunctionTableTransformer -> value.function
-            is UnitTableTransformer -> null
-            is Unit -> { /* no assignment */ return Unit }
-            is Function1<*, *> -> value as Table.() -> Unit
-            null -> null
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
+    operator fun invoke(newValue: TableTransformer<*>?): TableTransformer<*>? {
+        source[TableTransformer] = newValue
+        return newValue
+    }
 
-        if (transformer == null) source[TableTransformer] = null else source[TableTransformer] = transformer
+    operator fun invoke(newValue: (Table.() -> Unit)?): (Table.() -> Unit)? {
+        if (newValue == null) source[TableTransformer] = null else source[TableTransformer] = newValue
+        return newValue
+    }
 
-        return value
+    operator fun invoke(newValue: Unit?): Unit? {
+        source[TableTransformer] = null
+        return newValue
     }
 
     operator fun contains(other: TableTransformer<*>) = function == other.function
@@ -2745,20 +2882,19 @@ class FunctionTableTransformer internal constructor(
 }
 
 abstract class ColumnTransformer<T>(source: ColumnView, function: T): Transformer<ColumnView, T>(source, function) {
-    operator fun invoke(function: ColumnTransformer<*>.() -> Any?): Any? {
-        val value = this.function()
-        val transformer = when(value) {
-            is FunctionColumnTransformer -> value.function
-            is UnitColumnTransformer -> null
-            is Unit -> { /* no assignment */ return Unit }
-            is Function1<*, *> -> value as Column.() -> Unit
-            null -> null
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
+    operator fun invoke(newValue: ColumnTransformer<*>?): ColumnTransformer<*>? {
+        source[ColumnTransformer] = newValue
+        return newValue
+    }
 
-        if (transformer == null) source[ColumnTransformer] = null else source[ColumnTransformer] = transformer
+    operator fun invoke(newValue: (Column.() -> Unit)?): (Column.() -> Unit)? {
+        if (newValue == null) source[ColumnTransformer] = null else source[ColumnTransformer] = newValue
+        return newValue
+    }
 
-        return value
+    operator fun invoke(newValue: Unit?): Unit? {
+        source[ColumnTransformer] = null
+        return newValue
     }
 
     operator fun contains(other: ColumnTransformer<*>) = function == other.function
@@ -2796,20 +2932,19 @@ class FunctionColumnTransformer internal constructor(
 }
 
 abstract class RowTransformer<T>(source: RowView, function: T): Transformer<RowView, T>(source, function) {
-    operator fun invoke(function: RowTransformer<*>.() -> Any?): Any? {
-        val value = this.function()
-        val transformer = when(value) {
-            is FunctionRowTransformer -> value.function
-            is UnitRowTransformer -> null
-            is Unit -> { /* no assignment */ return Unit }
-            is Function1<*, *> -> value as Row.() -> Unit
-            null -> null
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
+    operator fun invoke(newValue: RowTransformer<*>?): RowTransformer<*>? {
+        source[RowTransformer] = newValue
+        return newValue
+    }
 
-        if (transformer == null) source[RowTransformer] = null else source[RowTransformer] = transformer
+    operator fun invoke(newValue: (Row.() -> Unit)?): (Row.() -> Unit)? {
+        if (newValue == null) source[RowTransformer] = null else source[RowTransformer] = newValue
+        return newValue
+    }
 
-        return value
+    operator fun invoke(newValue: Unit?): Unit? {
+        source[RowTransformer] = null
+        return newValue
     }
 
     operator fun contains(other: RowTransformer<*>) = function == other.function
@@ -2847,20 +2982,19 @@ class FunctionRowTransformer internal constructor(
 }
 
 abstract class CellTransformer<T>(source: CellView, function: T): Transformer<CellView, T>(source, function) {
-    operator fun invoke(function: CellTransformer<*>.() -> Any?): Any? {
-        val value = this.function()
-        val transformer = when(value) {
-            is FunctionCellTransformer -> value.function
-            is UnitCellTransformer -> null
-            is Unit -> { /* no assignment */ return Unit }
-            is Function1<*, *> -> value as Cell<*>.() -> Unit
-            null -> null
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
+    operator fun invoke(newValue: CellTransformer<*>?): CellTransformer<*>? {
+        source[CellTransformer] = newValue
+        return newValue
+    }
 
-        if (transformer == null) source[CellTransformer] = null else source[CellTransformer] = transformer
+    operator fun invoke(newValue: (Cell<*>.() -> Unit)?): (Cell<*>.() -> Unit)? {
+        if (newValue == null) source[CellTransformer] = null else source[CellTransformer] = newValue
+        return newValue
+    }
 
-        return value
+    operator fun invoke(newValue: Unit?): Unit? {
+        source[CellTransformer] = null
+        return newValue
     }
 
     operator fun contains(other: CellTransformer<*>) = function == other.function
@@ -2941,21 +3075,29 @@ class Resources internal constructor(
 
     override fun iterator(): Iterator<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>> = resources.map { Pair(it.key, it.value) }.iterator()
 
-    operator fun invoke(function: Resources.() -> Any?): Any? {
-        val value = this.function()
-        val resources = when(value) {
-            is Unit -> /* no assignment */ return Unit
-            is Map<*, *> -> value as Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>
-            is Pair<*, *> -> mapOf(value as Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>)
-            is Collection<*> -> (value as Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>).toMap()
-            is Resources -> value.resources
-            null -> null
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
+    operator fun invoke(newValue: Resources?): Resources? {
+        source[Resources] = newValue
+        return newValue
+    }
 
-        if (resources == null) source[Resources] = null else source[Resources] = resources
+    operator fun invoke(newValue: Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>?): Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>? {
+        if (newValue == null) source[Resources] = null else source[Resources] = newValue
+        return newValue
+    }
 
-        return value
+    operator fun invoke(newValue: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>?): Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>? {
+        if (newValue == null) source[Resources] = null else source[Resources] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>?): Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>? {
+        if (newValue == null) source[Resources] = null else source[Resources] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Unit?): Unit? {
+        source[Resources] = null
+        return newValue
     }
 
     operator fun contains(other: Resources) = other._resources.all { _resources[it.component1()]?.second == it.component2().second }
