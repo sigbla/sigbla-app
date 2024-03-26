@@ -969,19 +969,10 @@ class TableViewTest {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val rt: Row.() -> Unit = {}
 
-        tv1[1] {
-            tv1[2][CellHeight]
-        }
-        tv1[1] {
-            tv1[2][CellClasses]
-        }
-        tv1[1] {
-            tv1[2][CellTopics]
-        }
-        tv1[1] {
-            tv1[2][RowTransformer]
-        }
-        tv1[1] { }
+        tv1[1](tv1[2][CellHeight])
+        tv1[1](tv1[2][CellClasses])
+        tv1[1](tv1[2][CellTopics])
+        tv1[1](tv1[2][RowTransformer])
 
         assertEquals(Unit, tv1[1][CellHeight].height)
         assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
@@ -993,39 +984,24 @@ class TableViewTest {
         tv1[2][CellTopics]("400")
         tv1[2][RowTransformer](rt)
 
-        tv1[1] {
-            tv1[2][CellHeight]
-        }
-        tv1[1] {
-            tv1[2][CellClasses]
-        }
-        tv1[1] {
-            tv1[2][CellTopics]
-        }
-        tv1[1] {
-            tv1[2][RowTransformer]
-        }
+        tv1[1](tv1[2][CellHeight])
+        tv1[1](tv1[2][CellClasses])
+        tv1[1](tv1[2][CellTopics])
+        tv1[1](tv1[2][RowTransformer])
 
         assertEquals(200L, tv1[1][CellHeight].height)
         assertEquals(setOf("300"), tv1[1][CellClasses].classes)
         assertEquals(setOf("400"), tv1[1][CellTopics].topics)
         assertEquals(rt, tv1[1][RowTransformer].function)
 
-        tv1[1] { }
-
-        assertEquals(200L, tv1[1][CellHeight].height)
-        assertEquals(setOf("300"), tv1[1][CellClasses].classes)
-        assertEquals(setOf("400"), tv1[1][CellTopics].topics)
-        assertEquals(rt, tv1[1][RowTransformer].function)
-
-        tv1[1] { null }
+        tv1[1](null as Unit?)
 
         assertEquals(Unit, tv1[1][CellHeight].height)
         assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
         assertEquals(Unit, tv1[1][RowTransformer].function)
 
-        tv1[1] { tv1[2] }
+        tv1[1](tv1[2])
 
         assertEquals(200L, tv1[1][CellHeight].height)
         assertEquals(setOf("300"), tv1[1][CellClasses].classes)
@@ -1237,7 +1213,7 @@ class TableViewTest {
             if (ir == IndexRelation.AT) {
                 tv1[t1[ir, 0]] = tv1[t1[ir, 0]]
                 tv1[t1[ir, 0]] = { tv1[t1[ir, 0]] }
-                tv1[t1[ir, 0]] { tv1[t1[ir, 0]] }
+                tv1[t1[ir, 0]](tv1[t1[ir, 0]])
                 assertEquals(RowView::class, tv1[t1[ir, 0]]::class)
 
                 tv1[Header["A"], t1[ir, 0]] = tv1[Header["A"], t1[0]]
@@ -1247,8 +1223,8 @@ class TableViewTest {
                 val validRow = t1[IndexRelation.AT, 0]
                 val rowView = tv1[validRow]
                 assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]] = rowView }
-                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]] = { rowView } }
-                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]] { rowView } }
+                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]] = { this(rowView) } }
+                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]](rowView) }
                 assertFailsWith<InvalidRowException> { tv1[Header["A"], t1[ir, 0]] }
                 assertFailsWith<InvalidRowException> { tv1[Header["A"], t1[ir, 0]] = tv1[Header["A"], t1[0]] }
             }

@@ -1415,28 +1415,28 @@ class TableViewAccessorsTest {
         tableView[tableView[3000]] = sourceRowView
         compare(tableView[tableView[3000]])
 
-        tableView[Int.MAX_VALUE] = { this { sourceRowView } }
+        tableView[Int.MAX_VALUE] = { this(sourceRowView) }
         compare(tableView[Int.MAX_VALUE])
 
-        tableView[Long.MAX_VALUE] = { this { sourceRowView } }
+        tableView[Long.MAX_VALUE] = { this(sourceRowView) }
         compare(tableView[Long.MAX_VALUE])
 
-        tableView[table[2000]] = { this { sourceRowView } }
+        tableView[table[2000]] = { this(sourceRowView) }
         compare(tableView[table[2000]])
 
-        tableView[tableView[3000]] = { this { sourceRowView } }
+        tableView[tableView[3000]] = { this(sourceRowView) }
         compare(tableView[tableView[3000]])
 
-        tableView[Int.MAX_VALUE] { sourceRowView }
+        tableView[Int.MAX_VALUE](sourceRowView)
         compare(tableView[Int.MAX_VALUE])
 
-        tableView[Long.MAX_VALUE] { sourceRowView }
+        tableView[Long.MAX_VALUE](sourceRowView)
         compare(tableView[Long.MAX_VALUE])
 
-        tableView[table[2000]] { sourceRowView }
+        tableView[table[2000]](sourceRowView)
         compare(tableView[table[2000]])
 
-        tableView[tableView[3000]] { sourceRowView }
+        tableView[tableView[3000]](sourceRowView)
         compare(tableView[tableView[3000]])
     }
 

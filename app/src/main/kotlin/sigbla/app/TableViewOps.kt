@@ -22,7 +22,7 @@ fun clear(tableView: TableView) = tableView { null }
 
 fun clear(columnView: ColumnView): Unit { columnView() }
 
-fun clear(rowView: RowView) = rowView { null }
+fun clear(rowView: RowView): Unit { rowView() }
 
 fun clear(cellView: CellView): Unit { cellView() }
 

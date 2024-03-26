@@ -1007,42 +1007,42 @@ fun generateForRowView() {
 
     // tableView[int] = value
     println()
-    println("tableView[Int.MAX_VALUE] = { this { sourceRowView } }")
+    println("tableView[Int.MAX_VALUE] = { this(sourceRowView) }")
     println("compare(tableView[Int.MAX_VALUE])")
 
     // tableView[long] = value
     println()
-    println("tableView[Long.MAX_VALUE] = { this { sourceRowView } }")
+    println("tableView[Long.MAX_VALUE] = { this(sourceRowView) }")
     println("compare(tableView[Long.MAX_VALUE])")
 
     // tableView[row] = value
     println()
-    println("tableView[table[2000]] = { this { sourceRowView } }")
+    println("tableView[table[2000]] = { this(sourceRowView) }")
     println("compare(tableView[table[2000]])")
 
     // tableView[rowview] = value
     println()
-    println("tableView[tableView[3000]] = { this { sourceRowView } }")
+    println("tableView[tableView[3000]] = { this(sourceRowView) }")
     println("compare(tableView[tableView[3000]])")
 
     // tableView[int] = value
     println()
-    println("tableView[Int.MAX_VALUE] { sourceRowView }")
+    println("tableView[Int.MAX_VALUE](sourceRowView)")
     println("compare(tableView[Int.MAX_VALUE])")
 
     // tableView[long] = value
     println()
-    println("tableView[Long.MAX_VALUE] { sourceRowView }")
+    println("tableView[Long.MAX_VALUE](sourceRowView)")
     println("compare(tableView[Long.MAX_VALUE])")
 
     // tableView[row] = value
     println()
-    println("tableView[table[2000]] { sourceRowView }")
+    println("tableView[table[2000]](sourceRowView)")
     println("compare(tableView[table[2000]])")
 
     // tableView[rowview] = value
     println()
-    println("tableView[tableView[3000]] { sourceRowView }")
+    println("tableView[tableView[3000]](sourceRowView)")
     println("compare(tableView[tableView[3000]])")
 
     println("}")

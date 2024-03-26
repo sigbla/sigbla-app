@@ -2103,18 +2103,34 @@ class RowView internal constructor(
         }
     }
 
-    operator fun invoke(function: RowView.() -> Any?): Any? {
-        return when (val value = function()) {
-            is RowView -> { tableView[this] = value; value }
-            is CellHeight<*, *> -> { tableView[this][CellHeight] = value; value }
-            is CellClasses<*> -> { tableView[this][CellClasses] = value; value }
-            is CellTopics<*> -> { tableView[this][CellTopics] = value; value }
-            is RowTransformer<*> -> { tableView[this][RowTransformer] = value; value }
-            is Unit -> { /* no assignment */ Unit }
-            is Function1<*, *> -> { invoke(value as RowView.() -> Any?) }
-            null -> { tableView[this] = null; null }
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
+    operator fun invoke(newValue: RowView?): RowView? {
+        tableView[this] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellHeight<*, *>?): CellHeight<*, *>? {
+        tableView[this][CellHeight] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellClasses<*>?): CellClasses<*>? {
+        tableView[this][CellClasses] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellTopics<*>?): CellTopics<*>? {
+        tableView[this][CellTopics] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: RowTransformer<*>?): RowTransformer<*>? {
+        tableView[this][RowTransformer] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Unit? = null): Unit? {
+        tableView[this] = null
+        return newValue
     }
 
     // Note: cellViews return the defined CellViews, while the RowView iterator
