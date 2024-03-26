@@ -79,7 +79,7 @@ private inline fun <reified O, reified N> cellFunction(
                 when {
                     newValue != null -> cell(newValue)
                     empty != null -> cell(empty)
-                    else -> cell()
+                    else -> cell(Unit)
                 }
             }
         }

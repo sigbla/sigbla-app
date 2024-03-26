@@ -378,7 +378,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
         table[this] = newValue
         return newValue
     }
-    operator fun invoke(newValue: Unit? = null): Unit? {
+    operator fun invoke(newValue: Unit?): Unit? {
         table[this] = null
         return newValue
     }

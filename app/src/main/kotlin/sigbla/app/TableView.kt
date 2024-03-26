@@ -1131,7 +1131,7 @@ class TableView internal constructor(
         return newValue
     }
 
-    operator fun invoke(newValue: Unit? = null): Unit? {
+    operator fun invoke(newValue: Unit?): Unit? {
         invoke(null as TableView?)
         return newValue
     }
@@ -1479,7 +1479,7 @@ class CellView(
         return newValue
     }
 
-    operator fun invoke(newValue: Unit? = null): Unit? {
+    operator fun invoke(newValue: Unit?): Unit? {
         tableView[this] = null
         return newValue
     }
@@ -1806,7 +1806,7 @@ class ColumnView internal constructor(
         return newValue
     }
 
-    operator fun invoke(newValue: Unit? = null): Unit? {
+    operator fun invoke(newValue: Unit?): Unit? {
         tableView[this] = null
         return newValue
     }
@@ -2154,7 +2154,7 @@ class RowView internal constructor(
         return newValue
     }
 
-    operator fun invoke(newValue: Unit? = null): Unit? {
+    operator fun invoke(newValue: Unit?): Unit? {
         tableView[this] = null
         return newValue
     }
@@ -2408,7 +2408,7 @@ sealed class CellHeight<S, T> {
         return newValue
     }
 
-    operator fun invoke(newValue: Unit? = null): Unit? {
+    operator fun invoke(newValue: Unit?): Unit? {
         when (val source = source) {
             is TableView -> source[CellHeight] = null
             is RowView -> source[CellHeight] = null
@@ -2596,7 +2596,7 @@ sealed class CellWidth<S, T> {
         return newValue
     }
 
-    operator fun invoke(newValue: Unit? = null): Unit? {
+    operator fun invoke(newValue: Unit?): Unit? {
         when (val source = source) {
             is TableView -> source[CellWidth] = null
             is ColumnView -> source[CellWidth] = null
@@ -2714,7 +2714,7 @@ class CellClasses<S> internal constructor(
         return newValue
     }
 
-    operator fun invoke(newValue: Unit? = null): Unit? {
+    operator fun invoke(newValue: Unit?): Unit? {
         when (source) {
             is TableView -> source[CellClasses] = null
             is ColumnView -> source[CellClasses] = null
@@ -2795,7 +2795,7 @@ class CellTopics<S> internal constructor(
         return newValue
     }
 
-    operator fun invoke(newValue: Unit? = null): Unit? {
+    operator fun invoke(newValue: Unit?): Unit? {
         when (source) {
             is TableView -> source[CellTopics] = null
             is ColumnView -> source[CellTopics] = null
@@ -2842,7 +2842,7 @@ abstract class TableTransformer<T>(source: TableView, function: T): Transformer<
         return newValue
     }
 
-    operator fun invoke(newValue: Unit? = null): Unit? {
+    operator fun invoke(newValue: Unit?): Unit? {
         source[TableTransformer] = null
         return newValue
     }
@@ -2892,7 +2892,7 @@ abstract class ColumnTransformer<T>(source: ColumnView, function: T): Transforme
         return newValue
     }
 
-    operator fun invoke(newValue: Unit? = null): Unit? {
+    operator fun invoke(newValue: Unit?): Unit? {
         source[ColumnTransformer] = null
         return newValue
     }
@@ -2942,7 +2942,7 @@ abstract class RowTransformer<T>(source: RowView, function: T): Transformer<RowV
         return newValue
     }
 
-    operator fun invoke(newValue: Unit? = null): Unit? {
+    operator fun invoke(newValue: Unit?): Unit? {
         source[RowTransformer] = null
         return newValue
     }
@@ -2992,7 +2992,7 @@ abstract class CellTransformer<T>(source: CellView, function: T): Transformer<Ce
         return newValue
     }
 
-    operator fun invoke(newValue: Unit? = null): Unit? {
+    operator fun invoke(newValue: Unit?): Unit? {
         source[CellTransformer] = null
         return newValue
     }
@@ -3095,7 +3095,7 @@ class Resources internal constructor(
         return newValue
     }
 
-    operator fun invoke(newValue: Unit? = null): Unit? {
+    operator fun invoke(newValue: Unit?): Unit? {
         source[Resources] = null
         return newValue
     }
