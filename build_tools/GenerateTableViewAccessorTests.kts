@@ -18,12 +18,12 @@
 // tableView[label1, label2, label3, labelX] = value
 // tableView[header|column|columnview] = value
 
-// + the ColumnView.() -> Any? assignment pattern
+// + invoke assignment pattern
 
 // RowView value:
 // tableView[int|long|row|rowview] = value
 
-// + the RowView.() -> Any? assignment pattern
+// + invoke assignment pattern
 
 fun generateForCellView() {
     println("@Test")

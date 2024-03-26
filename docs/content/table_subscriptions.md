@@ -192,7 +192,7 @@ on(table["A", 1]) {
             val newCell = it.newValue
 
             if (newCell.isNumeric && newCell < 5) {
-                newCell { newCell + 1 }
+                newCell(newCell + 1)
             }
         }
     }
@@ -253,7 +253,7 @@ on(table["A", 1]) {
             val newCell = it.newValue
 
             if (newCell.isNumeric && newCell < 5) {
-                source { newCell + 1 }
+                source(newCell + 1)
             }
         }
     }
@@ -267,7 +267,7 @@ println("Cell value is: ${table["A", 1]}")
 // Cell value is: 5
 ```
 
-A small change from `newCell { newCell + 1 }` to `source { newCell + 1 }` fixes the problem, as we're now assigning the
+A small change from `newCell(newCell + 1)` to `source(newCell + 1)` fixes the problem, as we're now assigning the
 value to the source cell as we wanted to.
 
 It's worth noting that `source` is not available when doing the shorthand form `on(source) events { .. }`.
@@ -292,7 +292,7 @@ on<Any, Number>(table["A", 1]) {
             val newCell = it.newValue
 
             if (newCell < 5) {
-                source { newCell + 1 }
+                source(newCell + 1)
             }
         }
     }

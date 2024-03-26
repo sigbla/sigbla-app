@@ -246,7 +246,7 @@ clear(table)
 
 load("MyTable" to table) {
     apply {
-        filter { it.isNumeric }.forEach { it { it * 2 } }
+        filter { it.isNumeric }.forEach { it(it * 2) }
     }
 }
 
@@ -262,7 +262,7 @@ print(table)
 //    2   |    |400
 ```
 
-The `filter { it.isNumeric }.forEach { it { it * 2 } }` operation might not make much sense to you yet, but will
+The `filter { it.isNumeric }.forEach { it(it * 2) }` operation might not make much sense to you yet, but will
 after you've covered the chapter on cells, so for now, just understand that it will multiply all cells that contain
 a number with two and update the table value with the result.
 

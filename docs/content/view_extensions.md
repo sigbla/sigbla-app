@@ -255,9 +255,9 @@ An obtained CellClasses or CellTopics instance is immutable just like a Resource
 approach to the above class appending is like so:
 
 ``` kotlin
-tableView["D"][CellClasses] { this + "cc2-d" }
-tableView[2][CellClasses] { this + "cc2-2" }
-tableView["D", 2][CellClasses] { this + "cc2-d2" }
+tableView["D"][CellClasses].apply { this(this + "cc2-d") }
+tableView[2][CellClasses].apply { this(this + "cc2-2") }
+tableView["D", 2][CellClasses].apply { this(this + "cc2-d2") }
 ```
 
 And you can remove a single class like so:
@@ -269,9 +269,9 @@ tableView["D", 2][CellClasses] = tableView["D", 2][CellClasses] - "cc1-d2"
 
 // or
 
-tableView["D"][CellClasses] { this - "cc1-d" }
-tableView[2][CellClasses] { this - "cc1-2" }
-tableView["D", 2][CellClasses] { this - "cc1-d2" }
+tableView["D"][CellClasses].apply { this(this - "cc1-d") }
+tableView[2][CellClasses].apply { this(this - "cc1-2") }
+tableView["D", 2][CellClasses].apply { this(this - "cc1-d2") }
 ```
 
 Clear classes or topics by assigning a null, for example `tableView[2][CellClasses] = null`.
@@ -365,7 +365,7 @@ import io.ktor.server.application.*
 
 fun clickableCellCounter(sourceCell: Cell<*>): CellView.() -> Unit = {
     // Init if needed
-    if (!sourceCell.isNumeric) sourceCell { 0 }
+    if (!sourceCell.isNumeric) sourceCell(0)
 
     // Ensure distinct click service for provided source cell by mixing in column and index
     val callback = "click-service-${sourceCell.column.hashCode()}-${sourceCell.index}"
@@ -376,8 +376,8 @@ fun clickableCellCounter(sourceCell: Cell<*>): CellView.() -> Unit = {
 
             // Get latest cell and apply logic
             sourceCell.table[sourceCell].apply {
-                if (this.isNumeric) this { this + 1 }
-                else this { 1 }
+                if (this.isNumeric) this(this + 1)
+                else this(1)
             }
 
             call.respondText("Click processed")
@@ -395,8 +395,8 @@ fun clickableCellCounter(sourceCell: Cell<*>): CellView.() -> Unit = {
     this[CellTopics] = "click-cell"
     this[CellTransformer] = transformer
 
-    tableView[Resources] {
-        this + listOf(
+    tableView[Resources].apply {
+        this(this + listOf(
             callback to handler,
 
             // If an existing click-service.js resource has been defined,
@@ -427,7 +427,7 @@ fun clickableCellCounter(sourceCell: Cell<*>): CellView.() -> Unit = {
                     .click-cell { height: 100%; }
                 """
             }
-        )
+        ))
     }
 
     // If a new transformation is assigned on the cell view, assume this

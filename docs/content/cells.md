@@ -333,7 +333,7 @@ Like the value they contain, all cell types are immutable. It's not possible to 
 You can however use a cell as a reference within a table, allowing you to do `table[cell] = "new value"`, and because
 the cell contains a reference to its table, you can do `cell.table[cell] = "new value"` as well.
 
-There is a shorthand convenience function for this: `cell { "new value" }`. This however doesn't change the original
+There is a shorthand convenience function for this: `cell("new value")`. This however doesn't change the original
 cell, as shown in this example:
 
 ``` kotlin
@@ -343,7 +343,7 @@ table["A", 1] = "First value"
 
 val cellA1v1 = table["A", 1]
 
-cellA1v1 { "Second value" }
+cellA1v1("Second value")
 
 val cellA1v2 = table["A", 1]
 
@@ -357,14 +357,14 @@ println(cellA1v2)
 print(table)
 
 // Output:
-//              |A            
-// 1            |Second value 
+//              |A
+// 1            |Second value
 ```
 
 As we can see from the example, `cellA1v1` keeps its original value, also after changing the table. You can always
 change the cell type in a table by simply assigning the value of the type you need.
 
-It's worth noting that we could do `table["A", 1] { "Second value" }` above instead of first assigning this to
+It's worth noting that we could do `table["A", 1]("Second value")` above instead of first assigning this to
 `cellA1v1`.
 
 ## Utility functions and properties
