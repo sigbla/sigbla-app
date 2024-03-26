@@ -694,9 +694,7 @@ class TableViewTest {
         tv1[Resources] {
             "a" to handler
         }
-        tv1[TableTransformer] {
-            tt
-        }
+        tv1[TableTransformer](tt)
 
         // TODO Consider impact of supporting:
         //      tv1[Table] { table }
@@ -716,7 +714,6 @@ class TableViewTest {
         assertEquals(setOf("700", "800"), tv1[CellTopics].topics)
 
         tv1[Resources] { }
-        tv1[TableTransformer] { }
 
         assertEquals(100L, tv1[CellHeight].height)
         assertEquals(200L, tv1[CellWidth].width)
@@ -730,7 +727,7 @@ class TableViewTest {
         tv1[CellClasses](null as Unit?)
         tv1[CellTopics](null as Unit?)
         tv1[Resources] { null }
-        tv1[TableTransformer] { null }
+        tv1[TableTransformer](null as Unit?)
 
         assertEquals(Unit, tv1[CellHeight].height)
         assertEquals(Unit, tv1[CellWidth].width)
@@ -794,9 +791,7 @@ class TableViewTest {
         tv2[Resources] {
             "a" to handler
         }
-        tv2[TableTransformer] {
-            tt
-        }
+        tv2[TableTransformer](tt)
         tv2[Table] = t1
 
         tv1 {
@@ -2135,7 +2130,7 @@ class TableViewTest {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val tt: Table.() -> Unit = {}
-        val unitTableTransformer = tv1[TableTransformer].also { it { tt } }
+        val unitTableTransformer = tv1[TableTransformer].also { it(tt) }
         val filledTableTransformer = tv1[TableTransformer]
 
         assertTrue(unitTableTransformer in unitTableTransformer)

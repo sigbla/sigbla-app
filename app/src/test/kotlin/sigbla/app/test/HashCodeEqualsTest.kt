@@ -208,7 +208,7 @@ class HashCodeEqualsTest {
         val filledCellTopics1 = tableView1[CellTopics]
 
         val tableTransformerFunction: Table.() -> Unit = { }
-        val emptyTableTransformer1 = tableView1[TableTransformer].also { it { tableTransformerFunction } }
+        val emptyTableTransformer1 = tableView1[TableTransformer].also { it(tableTransformerFunction) }
         val filledTableTransformer1 = tableView1[TableTransformer]
 
         val columnTransformerFunction: Column.() -> Unit = { }
@@ -240,7 +240,7 @@ class HashCodeEqualsTest {
         val emptyCellTopics2 = tableView2[CellTopics].also { it (listOf("B", "A")) }
         val filledCellTopics2 = tableView2[CellTopics]
 
-        val emptyTableTransformer2 = tableView2[TableTransformer].also { it { tableTransformerFunction } }
+        val emptyTableTransformer2 = tableView2[TableTransformer].also { it(tableTransformerFunction) }
         val filledTableTransformer2 = tableView2[TableTransformer]
 
         val emptyColumnTransformer2 = tableView2["A"][ColumnTransformer].also { it { columnTransformerFunction } }

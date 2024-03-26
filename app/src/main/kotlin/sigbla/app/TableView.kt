@@ -2754,20 +2754,19 @@ class CellTopics<S> internal constructor(
 sealed class Transformer<S, T>(val source: S, val function: T)
 
 abstract class TableTransformer<T>(source: TableView, function: T): Transformer<TableView, T>(source, function) {
-    operator fun invoke(function: TableTransformer<*>.() -> Any?): Any? {
-        val value = this.function()
-        val transformer = when(value) {
-            is FunctionTableTransformer -> value.function
-            is UnitTableTransformer -> null
-            is Unit -> { /* no assignment */ return Unit }
-            is Function1<*, *> -> value as Table.() -> Unit
-            null -> null
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
+    operator fun invoke(newValue: TableTransformer<*>?): TableTransformer<*>? {
+        source[TableTransformer] = newValue
+        return newValue
+    }
 
-        if (transformer == null) source[TableTransformer] = null else source[TableTransformer] = transformer
+    operator fun invoke(newValue: (Table.() -> Unit)?): (Table.() -> Unit)? {
+        if (newValue == null) source[TableTransformer] = null else source[TableTransformer] = newValue
+        return newValue
+    }
 
-        return value
+    operator fun invoke(newValue: Unit? = null): Unit? {
+        source[TableTransformer] = null
+        return newValue
     }
 
     operator fun contains(other: TableTransformer<*>) = function == other.function
