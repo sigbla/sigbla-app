@@ -890,19 +890,10 @@ class TableViewTest {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val ct: Column.() -> Unit = {}
 
-        tv1["A"] {
-            tv1["B"][CellWidth]
-        }
-        tv1["A"] {
-            tv1["B"][CellClasses]
-        }
-        tv1["A"] {
-            tv1["B"][CellTopics]
-        }
-        tv1["A"] {
-            tv1["B"][ColumnTransformer]
-        }
-        tv1["A"] { }
+        tv1["A"](tv1["B"][CellWidth])
+        tv1["A"](tv1["B"][CellClasses])
+        tv1["A"](tv1["B"][CellTopics])
+        tv1["A"](tv1["B"][ColumnTransformer])
 
         assertEquals(Unit, tv1["A"][CellWidth].width)
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
@@ -914,39 +905,24 @@ class TableViewTest {
         tv1["B"][CellTopics]("400")
         tv1["B"][ColumnTransformer](ct)
 
-        tv1["A"] {
-            tv1["B"][CellWidth]
-        }
-        tv1["A"] {
-            tv1["B"][CellClasses]
-        }
-        tv1["A"] {
-            tv1["B"][CellTopics]
-        }
-        tv1["A"] {
-            tv1["B"][ColumnTransformer]
-        }
+        tv1["A"](tv1["B"][CellWidth])
+        tv1["A"](tv1["B"][CellClasses])
+        tv1["A"](tv1["B"][CellTopics])
+        tv1["A"](tv1["B"][ColumnTransformer])
 
         assertEquals(200L, tv1["A"][CellWidth].width)
         assertEquals(setOf("300"), tv1["A"][CellClasses].classes)
         assertEquals(setOf("400"), tv1["A"][CellTopics].topics)
         assertEquals(ct, tv1["A"][ColumnTransformer].function)
 
-        tv1["A"] { }
-
-        assertEquals(200L, tv1["A"][CellWidth].width)
-        assertEquals(setOf("300"), tv1["A"][CellClasses].classes)
-        assertEquals(setOf("400"), tv1["A"][CellTopics].topics)
-        assertEquals(ct, tv1["A"][ColumnTransformer].function)
-
-        tv1["A"] { null }
+        tv1["A"](null as Unit?)
 
         assertEquals(Unit, tv1["A"][CellWidth].width)
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
         assertEquals(Unit, tv1["A"][ColumnTransformer].function)
 
-        tv1["A"] { tv1["B"] }
+        tv1["A"](tv1["B"])
 
         assertEquals(200L, tv1["A"][CellWidth].width)
         assertEquals(setOf("300"), tv1["A"][CellClasses].classes)

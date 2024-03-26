@@ -20,7 +20,7 @@ fun remove(tableView: TableView) = Registry.shutdownView(tableView, true)
 
 fun clear(tableView: TableView) = tableView { null }
 
-fun clear(columnView: ColumnView) = columnView { null }
+fun clear(columnView: ColumnView): Unit { columnView() }
 
 fun clear(rowView: RowView) = rowView { null }
 

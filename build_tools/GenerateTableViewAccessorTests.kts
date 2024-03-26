@@ -879,7 +879,7 @@ fun generateForColumnView() {
 
         // tableView[label1, label2, label3, labelX] = value
         println()
-        println("tableView[${headers.joinToString()}] = { this { sourceColumnView } }")
+        println("tableView[${headers.joinToString()}] = { this(sourceColumnView) }")
         println("compare(tableView[${headers.joinToString()}])")
     }
 
@@ -888,7 +888,7 @@ fun generateForColumnView() {
 
         // tableView[label1, label2, label3, labelX] = value
         println()
-        println("tableView[${headers.joinToString()}] { sourceColumnView }")
+        println("tableView[${headers.joinToString()}](sourceColumnView)")
         println("compare(tableView[${headers.joinToString()}])")
     }
 
@@ -916,17 +916,17 @@ fun generateForColumnView() {
 
         // tableView[header] = value
         println()
-        println("tableView[Header[${headers.joinToString()}]] = { this { sourceColumnView } }")
+        println("tableView[Header[${headers.joinToString()}]] = { this(sourceColumnView) }")
         println("compare(tableView[Header[${headers.joinToString()}]])")
 
         // tableView[column] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]]] = { this { sourceColumnView } }")
+        println("tableView[table[Header[${headers.joinToString()}]]] = { this(sourceColumnView) }")
         println("compare(tableView[table[Header[${headers.joinToString()}]]])")
 
         // tableView[columnView] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]]] = { this { sourceColumnView } }")
+        println("tableView[tableView[Header[${headers.joinToString()}]]] = { this(sourceColumnView) }")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]]])")
     }
 
@@ -935,17 +935,17 @@ fun generateForColumnView() {
 
         // tableView[header] = value
         println()
-        println("tableView[Header[${headers.joinToString()}]] { sourceColumnView }")
+        println("tableView[Header[${headers.joinToString()}]](sourceColumnView)")
         println("compare(tableView[Header[${headers.joinToString()}]])")
 
         // tableView[column] = value
         println()
-        println("tableView[table[Header[${headers.joinToString()}]]] { sourceColumnView }")
+        println("tableView[table[Header[${headers.joinToString()}]]](sourceColumnView)")
         println("compare(tableView[table[Header[${headers.joinToString()}]]])")
 
         // tableView[columnView] = value
         println()
-        println("tableView[tableView[Header[${headers.joinToString()}]]] { sourceColumnView }")
+        println("tableView[tableView[Header[${headers.joinToString()}]]](sourceColumnView)")
         println("compare(tableView[tableView[Header[${headers.joinToString()}]]])")
     }
 
