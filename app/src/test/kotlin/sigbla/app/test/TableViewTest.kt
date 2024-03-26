@@ -745,27 +745,13 @@ class TableViewTest {
             call.respondText(text = "Response 1")
         }
 
-        tv1 {
-            tv2[CellHeight]
-        }
-        tv1 {
-            tv2[CellWidth]
-        }
-        tv1 {
-            tv2[CellClasses]
-        }
-        tv1 {
-            tv2[CellTopics]
-        }
-        tv1 {
-            tv2[Resources]
-        }
-        tv1 {
-            tv2[TableTransformer]
-        }
-        val t1 = tv1 {
-            tv2[Table]
-        } as Table
+        tv1(tv2[CellHeight])
+        tv1(tv2[CellWidth])
+        tv1(tv2[CellClasses])
+        tv1(tv2[CellTopics])
+        tv1(tv2[Resources])
+        tv1(tv2[TableTransformer])
+        val t1 = tv1(tv2[Table]) as Table
 
         assertEquals(Unit, tv1[CellHeight].height)
         assertEquals(Unit, tv1[CellWidth].width)
@@ -786,27 +772,13 @@ class TableViewTest {
         tv2[TableTransformer](tt)
         tv2[Table] = t1
 
-        tv1 {
-            tv2[CellHeight]
-        }
-        tv1 {
-            tv2[CellWidth]
-        }
-        tv1 {
-            tv2[CellClasses]
-        }
-        tv1 {
-            tv2[CellTopics]
-        }
-        tv1 {
-            tv2[Resources]
-        }
-        tv1 {
-            tv2[TableTransformer]
-        }
-        val t2 = tv1 {
-            tv2[Table]
-        } as Table
+        tv1(tv2[CellHeight])
+        tv1(tv2[CellWidth])
+        tv1(tv2[CellClasses])
+        tv1(tv2[CellTopics])
+        tv1(tv2[Resources])
+        tv1(tv2[TableTransformer])
+        val t2 = tv1(tv2[Table]) as Table
 
         assertEquals(100L, tv1[CellHeight].height)
         assertEquals(200L, tv1[CellWidth].width)
@@ -816,17 +788,7 @@ class TableViewTest {
         assertEquals(tt, tv1[TableTransformer].function)
         assertEquals(t2, tv1[Table].source)
 
-        tv1 { }
-
-        assertEquals(100L, tv1[CellHeight].height)
-        assertEquals(200L, tv1[CellWidth].width)
-        assertEquals(setOf("300"), tv1[CellClasses].classes)
-        assertEquals(setOf("400"), tv1[CellTopics].topics)
-        assertEquals(mapOf("a" to handler), tv1[Resources].resources)
-        assertEquals(tt, tv1[TableTransformer].function)
-        assertEquals(t2, tv1[Table].source)
-
-        tv1 { null }
+        tv1(null as Unit?)
 
         assertEquals(Unit, tv1[CellHeight].height)
         assertEquals(Unit, tv1[CellWidth].width)
@@ -839,7 +801,7 @@ class TableViewTest {
         assertEquals(Unit, tv1[TableTransformer].function)
         assertEquals(null, tv1[Table].source)
 
-        tv1 { tv2 }
+        tv1(tv2)
 
         assertEquals(100L, tv1[CellHeight].height)
         assertEquals(200L, tv1[CellWidth].width)

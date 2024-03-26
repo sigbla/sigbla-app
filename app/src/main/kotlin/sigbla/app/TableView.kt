@@ -1071,43 +1071,69 @@ class TableView internal constructor(
         }
     }
 
-    operator fun invoke(function: TableView.() -> Any?): Any? {
-        return when (val value = function()) {
-            is CellHeight<*, *> -> { this[CellHeight] = value; value }
-            is CellWidth<*, *> -> { this[CellWidth] = value; value }
-            is CellClasses<*> -> { this[CellClasses] = value; value }
-            is CellTopics<*> -> { this[CellTopics] = value; value }
-            is TableTransformer<*> -> { this[TableTransformer] = value; value }
-            is Resources -> { this[Resources] = value; value }
-            is Unit -> { /* no assignment */ Unit }
-            is Function1<*, *> -> { invoke(value as TableView.() -> Any?) }
-            is Table -> { this[Table] = value; value }
-            is TableView -> {
-                batch(this) {
-                    this[CellHeight] = value[CellHeight]
-                    this[CellWidth] = value[CellWidth]
-                    this[CellClasses] = value[CellClasses]
-                    this[CellTopics] = value[CellTopics]
-                    this[TableTransformer] = value[TableTransformer]
-                    this[Resources] = value[Resources]
-                    this[Table] = value[Table]
-                }
-                null
+    operator fun invoke(newValue: TableView?): TableView? {
+        if (newValue != null) {
+            batch(this) {
+                this[CellHeight] = newValue[CellHeight]
+                this[CellWidth] = newValue[CellWidth]
+                this[CellClasses] = newValue[CellClasses]
+                this[CellTopics] = newValue[CellTopics]
+                this[TableTransformer] = newValue[TableTransformer]
+                this[Resources] = newValue[Resources]
+                this[Table] = newValue[Table]
             }
-            null -> {
-                batch(this) {
-                    this[CellHeight] = null
-                    this[CellWidth] = null
-                    this[CellClasses] = null
-                    this[CellTopics] = null
-                    this[TableTransformer] = null
-                    this[Resources] = null
-                    this[Table] = null
-                }
-                null
+        } else {
+            batch(this) {
+                this[CellHeight] = null
+                this[CellWidth] = null
+                this[CellClasses] = null
+                this[CellTopics] = null
+                this[TableTransformer] = null
+                this[Resources] = null
+                this[Table] = null
             }
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
         }
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellHeight<*, *>?): CellHeight<*, *>? {
+        this[CellHeight] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellWidth<*, *>?): CellWidth<*, *>? {
+        this[CellWidth] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellClasses<*>?): CellClasses<*>? {
+        this[CellClasses] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: CellTopics<*>?): CellTopics<*>? {
+        this[CellTopics] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: TableTransformer<*>?): TableTransformer<*>? {
+        this[TableTransformer] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Resources?): Resources? {
+        this[Resources] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Table?): Table? {
+        this[Table] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Unit? = null): Unit? {
+        invoke(null as TableView?)
+        return newValue
     }
 
     internal fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableViewRef = tableViewRef.get()) = TableView(name, this, onRegistry, RefHolder(ref))
