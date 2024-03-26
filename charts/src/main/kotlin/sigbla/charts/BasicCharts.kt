@@ -151,13 +151,13 @@ fun line(
         }
     }
 
-    this.tableView[Resources] {
-        this + listOf(
+    this.tableView[Resources].apply {
+        this(this + listOf(
             (callback to handler),
             ("chartjs/charts.js" to jsResource("/chartjs/chart.js")),
             ("sigbla/charts.css" to cssResource("/sigbla/charts.css")),
             ("sigbla/charts.js" to jsResource("/sigbla/charts.js"))
-        )
+        ))
     }
 
     val transformer = div("sigbla-charts") {
@@ -273,13 +273,13 @@ fun bar(
         }
     }
 
-    this.tableView[Resources] {
-        this + listOf(
+    this.tableView[Resources].apply {
+        this(this + listOf(
             (callback to handler),
             ("chartjs/charts.js" to jsResource("/chartjs/chart.js")),
             ("sigbla/charts.css" to cssResource("/sigbla/charts.css")),
             ("sigbla/charts.js" to jsResource("/sigbla/charts.js"))
-        )
+        ))
     }
 
     val transformer = div("sigbla-charts") {

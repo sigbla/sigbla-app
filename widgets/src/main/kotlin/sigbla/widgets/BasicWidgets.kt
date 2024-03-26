@@ -67,12 +67,12 @@ internal fun button(
         }
     }
 
-    this.tableView[Resources] {
-        this + listOf(
+    this.tableView[Resources].apply {
+        this(this + listOf(
             (callback to handler),
             ("sigbla/widgets.css" to cssResource("/widgets.css")),
             ("sigbla/widgets.js" to jsResource("/widgets.js"))
-        )
+        ))
     }
 
     val transformer = div("sigbla-widgets") {
@@ -158,12 +158,12 @@ internal fun checkBox(
         }
     }
 
-    this.tableView[Resources] {
-        this + listOf(
+    this.tableView[Resources].apply {
+        this(this + listOf(
             (callback to handler),
             ("sigbla/widgets.css" to cssResource("/widgets.css")),
             ("sigbla/widgets.js" to jsResource("/widgets.js"))
-        )
+        ))
     }
 
     val transformer = div("sigbla-widgets") {
@@ -253,12 +253,12 @@ internal fun radio(
         }
     }
 
-    this.tableView[Resources] {
-        this + listOf(
+    this.tableView[Resources].apply {
+        this(this + listOf(
             (callback to handler),
             ("sigbla/widgets.css" to cssResource("/widgets.css")),
             ("sigbla/widgets.js" to jsResource("/widgets.js"))
-        )
+        ))
     }
 
     val transformer = div("sigbla-widgets") {
@@ -340,12 +340,12 @@ internal fun textField(
         }
     }
 
-    this.tableView[Resources] {
-        this + listOf(
+    this.tableView[Resources].apply {
+        this(this + listOf(
             (callback to handler),
             ("sigbla/widgets.css" to cssResource("/widgets.css")),
             ("sigbla/widgets.js" to jsResource("/widgets.js"))
-        )
+        ))
     }
 
     val transformer = div("sigbla-widgets") {
