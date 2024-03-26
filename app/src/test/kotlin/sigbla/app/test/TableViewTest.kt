@@ -970,9 +970,7 @@ class TableViewTest {
         tv1[1][CellHeight](200)
         tv1[1][CellClasses]("300")
         tv1[1][CellTopics]("400")
-        tv1[1][RowTransformer] {
-            rt
-        }
+        tv1[1][RowTransformer](rt)
 
         assertEquals(200L, tv1[1][CellHeight].height)
         assertEquals(setOf("300"), tv1[1][CellClasses].classes)
@@ -982,11 +980,6 @@ class TableViewTest {
         tv1[1][CellClasses](setOf("500", "600"))
         tv1[1][CellTopics](setOf("700", "800"))
 
-        assertEquals(setOf("500", "600"), tv1[1][CellClasses].classes)
-        assertEquals(setOf("700", "800"), tv1[1][CellTopics].topics)
-
-        tv1[1][RowTransformer] { }
-
         assertEquals(200L, tv1[1][CellHeight].height)
         assertEquals(setOf("500", "600"), tv1[1][CellClasses].classes)
         assertEquals(setOf("700", "800"), tv1[1][CellTopics].topics)
@@ -995,7 +988,7 @@ class TableViewTest {
         tv1[1][CellHeight](null as Unit?)
         tv1[1][CellClasses](null as Unit?)
         tv1[1][CellTopics](null as Unit?)
-        tv1[1][RowTransformer] { null }
+        tv1[1][RowTransformer](null as Unit?)
 
         assertEquals(Unit, tv1[1][CellHeight].height)
         assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
@@ -1030,9 +1023,8 @@ class TableViewTest {
         tv1[2][CellHeight](200)
         tv1[2][CellClasses]("300")
         tv1[2][CellTopics]("400")
-        tv1[2][RowTransformer] {
-            rt
-        }
+        tv1[2][RowTransformer](rt)
+
         tv1[1] {
             tv1[2][CellHeight]
         }
@@ -2159,7 +2151,7 @@ class TableViewTest {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         val rt: Row.() -> Unit = {}
-        val unitRowTransformer = tv1[1][RowTransformer].also { it { rt } }
+        val unitRowTransformer = tv1[1][RowTransformer].also { it(rt) }
         val filledRowTransformer = tv1[1][RowTransformer]
 
         assertTrue(unitRowTransformer in unitRowTransformer)
@@ -2586,6 +2578,38 @@ class TableViewTest {
 
         cv1[ColumnTransformer](null as Unit?)
         assertEquals(Unit, cv1[ColumnTransformer].function)
+    }
+
+    @Test
+    fun `row transformer invoke`() {
+        val rt1: Row.() -> Unit = {}
+        val rt2: Row.() -> Unit = {}
+        val rt3 = TableView[null][1][RowTransformer].let { it(rt2); it.source[RowTransformer] }
+        val rv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"][1]
+
+        rv1[RowTransformer](rt1)
+        assertEquals(rt1, rv1[RowTransformer].function)
+
+        rv1[RowTransformer](null as RowTransformer<*>?)
+        assertEquals(Unit, rv1[RowTransformer].function)
+
+        rv1[RowTransformer](rt1)
+        assertEquals(rt1, rv1[RowTransformer].function)
+
+        rv1[RowTransformer](null as (Row.() -> Unit)?)
+        assertEquals(Unit, rv1[RowTransformer].function)
+
+        rv1[RowTransformer](rt3)
+        assertEquals(rt2, rv1[RowTransformer].function)
+
+        rv1[RowTransformer](Unit)
+        assertEquals(Unit, rv1[RowTransformer].function)
+
+        rv1[RowTransformer](rt2)
+        assertEquals(rt2, rv1[RowTransformer].function)
+
+        rv1[RowTransformer](null as Unit?)
+        assertEquals(Unit, rv1[RowTransformer].function)
     }
 
     companion object {

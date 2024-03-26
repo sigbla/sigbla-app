@@ -2819,7 +2819,6 @@ abstract class ColumnTransformer<T>(source: ColumnView, function: T): Transforme
         return newValue
     }
 
-
     operator fun contains(other: ColumnTransformer<*>) = function == other.function
     operator fun contains(other: Column.() -> Unit) = function == other
     operator fun contains(other: Unit?) = function is Unit
@@ -2855,20 +2854,19 @@ class FunctionColumnTransformer internal constructor(
 }
 
 abstract class RowTransformer<T>(source: RowView, function: T): Transformer<RowView, T>(source, function) {
-    operator fun invoke(function: RowTransformer<*>.() -> Any?): Any? {
-        val value = this.function()
-        val transformer = when(value) {
-            is FunctionRowTransformer -> value.function
-            is UnitRowTransformer -> null
-            is Unit -> { /* no assignment */ return Unit }
-            is Function1<*, *> -> value as Row.() -> Unit
-            null -> null
-            else -> throw InvalidValueException("Unsupported type: ${value!!::class}")
-        }
+    operator fun invoke(newValue: RowTransformer<*>?): RowTransformer<*>? {
+        source[RowTransformer] = newValue
+        return newValue
+    }
 
-        if (transformer == null) source[RowTransformer] = null else source[RowTransformer] = transformer
+    operator fun invoke(newValue: (Row.() -> Unit)?): (Row.() -> Unit)? {
+        if (newValue == null) source[RowTransformer] = null else source[RowTransformer] = newValue
+        return newValue
+    }
 
-        return value
+    operator fun invoke(newValue: Unit? = null): Unit? {
+        source[RowTransformer] = null
+        return newValue
     }
 
     operator fun contains(other: RowTransformer<*>) = function == other.function
