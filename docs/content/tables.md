@@ -245,9 +245,7 @@ clear(table)
 // should you need to. 
 
 load("MyTable" to table) {
-    apply {
-        filter { it.isNumeric }.forEach { it(it * 2) }
-    }
+    filter { it.isNumeric }.forEach { it(it * 2) }
 }
 
 print(table)
