@@ -345,6 +345,15 @@ class TableStorageTest {
         assertEquals(listOf("A0", "A1"), table2["A"].map { it.toString() })
         assertEquals(listOf("B0"), table2["B"].map { it.toString() })
         assertFalse(Header["C"] in table2)
+
+        val table3 = Table[null]
+
+        load(tmpFile to table3)
+
+        assertEquals(listOf(listOf("A"), listOf("B"), listOf("C")), headersOf(table3).map { it.labels }.toList())
+        assertEquals(listOf("A0", "A1"), table3["A"].map { it.toString() })
+        assertEquals(listOf("B0", "B1"), table3["B"].map { it.toString() })
+        assertEquals(listOf("C0", "C1"), table3["C"].map { it.toString() })
     }
 
     @Test
