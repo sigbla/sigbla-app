@@ -2891,7 +2891,7 @@ fun <R> batch(table: Table, batch: Table.() -> R): R {
 fun load(
     table: Table,
     extension: String = "sigt",
-    filter: Column.() -> Column? = { this }
+    filter: Column.() -> Unit = { }
 ) = load1(
     File(table.name ?: throw InvalidTableException("No table name")) to table,
     extension,
@@ -2911,7 +2911,7 @@ fun save(
 fun load(
     resources: Pair<File, Table>,
     extension: String = "sigt",
-    filter: Column.() -> Column? = { this }
+    filter: Column.() -> Unit = { }
 ) = load1(resources, extension, filter)
 
 fun save(
@@ -2924,7 +2924,7 @@ fun save(
 fun load(
     resources: Pair<String, Table>,
     extension: String = "sigt",
-    filter: Column.() -> Column? = { this }
+    filter: Column.() -> Unit = { }
 ) = load1(
     resources.let { File(it.first) to it.second },
     extension,
