@@ -2,10 +2,8 @@
  * See LICENSE file for licensing details. */
 package sigbla.app.internals
 
+import sigbla.app.*
 import sigbla.app.CellValue
-import sigbla.app.Column
-import sigbla.app.Header
-import sigbla.app.Table
 import sigbla.app.exceptions.InvalidStorageException
 import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
@@ -52,7 +50,7 @@ The point of seed is to remove predictability around the short hash for columns
 internal fun load1(
     resources: Pair<File, Table>,
     extension: String,
-    filter: Column.() -> Column?
+    filter: Column.() -> Unit
 ) {
     val file = resources.first.let {
         if (it.name.endsWith(".$extension", ignoreCase = true)) it else File(it.parent, it.name + ".$extension")
@@ -114,16 +112,17 @@ internal fun load1(
 
                     val columnLocation = headers.first().location ?: throw InvalidStorageException("Missing column location")
                     val header = Header(headers.map { it.section }.reversed())
-                    val column = Table[null][header]
+                    val column = BaseTable(null, table, false, RefHolder(TableRef()))[header]
 
                     fillColumn(file, compressed, column, columnLocation)
+                    column.filter()
 
-                    column.filter()?.let { filteredColumn ->
+                    if (header in column.table) {
                         // Do this to ensure prenatal status is kept if applicable
-                        table[filteredColumn]
+                        table[column]
 
                         // Merge any cells
-                        filteredColumn.forEach { table[it] = it }
+                        column.forEach { table[it] = it }
                     }
                 }
             }

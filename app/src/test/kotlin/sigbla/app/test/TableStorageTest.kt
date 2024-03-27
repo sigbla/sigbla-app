@@ -108,7 +108,6 @@ class TableStorageTest {
             val table1Column = table1Columns.next()
             assertEquals(table1Column.header, header)
             assertEquals(table1Column[0].value, this[0].value)
-            return@load this
         }
 
         assertFalse(table1Columns.hasNext())
@@ -157,7 +156,6 @@ class TableStorageTest {
             val table1Column = table1Columns.next()
             assertEquals(table1Column.header, header)
             assertEquals(table1Column[0].value, this[0].value)
-            return@load this
         }
 
         assertFalse(table1Columns.hasNext())
@@ -212,7 +210,6 @@ class TableStorageTest {
             val table2Column = table2Columns.next()
             assertEquals(table2Column.header, header)
             assertEquals(table2Column[0].value, this[0].value)
-            return@load this
         }
 
         assertTrue(file.exists())
@@ -268,7 +265,6 @@ class TableStorageTest {
             val table2Column = table2Columns.next()
             assertEquals(table2Column.header, header)
             assertEquals(table2Column[0].value, this[0].value)
-            return@load this
         }
 
         assertTrue(file.exists())
@@ -319,6 +315,36 @@ class TableStorageTest {
         }
 
         deleteFolder(tmpFolder)
+    }
+
+    @Test
+    fun `load with column filter`() {
+        val tmpFolder = Files.createTempDirectory("sigbla-test")
+        val tmpFile = File(tmpFolder.toFile(), "test-${System.currentTimeMillis()}")
+
+        val table1 = Table["Storage Test"]
+
+        table1["A", 0] = "A0"
+        table1["A", 1] = "A1"
+        table1["B", 0] = "B0"
+        table1["B", 1] = "B1"
+        table1["C", 0] = "C0"
+        table1["C", 1] = "C1"
+
+        save(table1 to tmpFile)
+
+        val table2 = Table[null]
+
+        load(tmpFile to table2) {
+            assertEquals(table2, table.source)
+            if (header[0] == "C") remove(this)
+            if (header[0] == "B") this[1] = null
+        }
+
+        assertEquals(listOf(listOf("A"), listOf("B")), headersOf(table2).map { it.labels }.toList())
+        assertEquals(listOf("A0", "A1"), table2["A"].map { it.toString() })
+        assertEquals(listOf("B0"), table2["B"].map { it.toString() })
+        assertFalse(Header["C"] in table2)
     }
 
     @Test
