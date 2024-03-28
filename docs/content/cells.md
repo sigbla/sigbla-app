@@ -385,12 +385,16 @@ val b: Double? = table["A", 1].asDouble
 val c: BigInteger? = table["A", 1].asBigInteger
 val d: BigDecimal? = table["A", 1].asBigDecimal
 val e: Number? = table["A", 1].asNumber
+val f: Boolean? = table["A", 1].asBoolean
+val g: String? = table["A", 1].asString
 
 println("$a ${a?.let {it::class} ?: ""}")
 println("$b ${b?.let {it::class} ?: ""}")
 println("$c ${c?.let {it::class} ?: ""}")
 println("$d ${d?.let {it::class} ?: ""}")
 println("$e ${e?.let {it::class} ?: ""}")
+println("$f ${f?.let {it::class} ?: ""}")
+println("$g ${g?.let {it::class} ?: ""}")
 
 // Output:
 // 100 class kotlin.Long
@@ -398,6 +402,8 @@ println("$e ${e?.let {it::class} ?: ""}")
 // 100 class java.math.BigInteger
 // 100 class java.math.BigDecimal
 // 100 class kotlin.Long
+// null 
+// null 
 ```
 
 These are designed to be as friendly as possible, so they aren't going to throw any exceptions. Instead, they will
@@ -414,12 +420,16 @@ val b: Double? = table["A", 1].asDouble
 val c: BigInteger? = table["A", 1].asBigInteger
 val d: BigDecimal? = table["A", 1].asBigDecimal
 val e: Number? = table["A", 1].asNumber
+val f: Boolean? = table["A", 1].asBoolean
+val g: String? = table["A", 1].asString
 
 println("$a ${a?.let {it::class} ?: ""}")
 println("$b ${b?.let {it::class} ?: ""}")
 println("$c ${c?.let {it::class} ?: ""}")
 println("$d ${d?.let {it::class} ?: ""}")
 println("$e ${e?.let {it::class} ?: ""}")
+println("$f ${f?.let {it::class} ?: ""}")
+println("$g ${g?.let {it::class} ?: ""}")
 
 // Output:
 // null 
@@ -427,6 +437,8 @@ println("$e ${e?.let {it::class} ?: ""}")
 // null 
 // null 
 // null 
+// null 
+// not a number class kotlin.String
 ```
 
 Note that these don't try to convert a string to numbers. Even if we assigned "100", doing `asLong` would still return

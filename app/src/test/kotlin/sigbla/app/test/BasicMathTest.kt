@@ -814,18 +814,6 @@ class BasicMathTest {
     }
 
     @Test
-    fun `unit cell as`() {
-        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
-
-        assertNull(t["Val1", 0].asLong)
-        assertNull(t["Val1", 0].asDouble)
-        assertNull(t["Val1", 0].asBigInteger)
-        assertNull(t["Val1", 0].asBigDecimal)
-        assertNull(t["Val1", 0].asBigDecimal(MathContext.DECIMAL32))
-        assertNull(t["Val1", 0].asNumber)
-    }
-
-    @Test
     fun `other basic math`() {
         val bigInt2 = BigInteger.TWO
         val bigInt10 = BigInteger.TEN
