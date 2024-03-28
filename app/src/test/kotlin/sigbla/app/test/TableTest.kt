@@ -9,6 +9,7 @@ import org.junit.AfterClass
 import sigbla.app.exceptions.*
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.math.MathContext
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
 import kotlin.test.assertFailsWith
@@ -2748,6 +2749,52 @@ class TableTest {
         assertEquals(Unit, t["A", 8].also { it(null as Unit?) }.value)
 
         assertEquals(0, t.count())
+    }
+
+    @Test
+    fun `unit cell as`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        assertNull(t["Val1", 0].asLong)
+        assertNull(t["Val1", 0].asDouble)
+        assertNull(t["Val1", 0].asBigInteger)
+        assertNull(t["Val1", 0].asBigDecimal)
+        assertNull(t["Val1", 0].asBigDecimal(MathContext.DECIMAL32))
+        assertNull(t["Val1", 0].asNumber)
+        assertNull(t["Val1", 0].asBoolean)
+        assertNull(t["Val1", 0].asString)
+    }
+
+    @Test
+    fun `boolean cell as`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["Val1", 0] = true
+
+        assertNull(t["Val1", 0].asLong)
+        assertNull(t["Val1", 0].asDouble)
+        assertNull(t["Val1", 0].asBigInteger)
+        assertNull(t["Val1", 0].asBigDecimal)
+        assertNull(t["Val1", 0].asBigDecimal(MathContext.DECIMAL32))
+        assertNull(t["Val1", 0].asNumber)
+        assertEquals(true, t["Val1", 0].asBoolean)
+        assertNull(t["Val1", 0].asString)
+    }
+
+    @Test
+    fun `string cell as`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["Val1", 0] = "string A"
+
+        assertNull(t["Val1", 0].asLong)
+        assertNull(t["Val1", 0].asDouble)
+        assertNull(t["Val1", 0].asBigInteger)
+        assertNull(t["Val1", 0].asBigDecimal)
+        assertNull(t["Val1", 0].asBigDecimal(MathContext.DECIMAL32))
+        assertNull(t["Val1", 0].asNumber)
+        assertNull(t["Val1", 0].asBoolean)
+        assertEquals("string A", t["Val1", 0].asString)
     }
 
     companion object {

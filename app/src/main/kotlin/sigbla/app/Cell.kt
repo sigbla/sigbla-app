@@ -153,7 +153,8 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     open val asBigDecimal: BigDecimal? by lazy { asBigDecimal(Precision.mathContext) }
     open fun asBigDecimal(mathContext: MathContext): BigDecimal? = null
     open val asNumber: Number? = null
-    // TODO open val asBoolean: Boolean? = null
+    open val asString: String? = null
+    open val asBoolean: Boolean? = null
 
     operator fun plus(that: Cell<*>): Number {
         return when (val v = that.value) {
@@ -409,10 +410,13 @@ class UnitCell internal constructor(column: Column, index: Long) : Cell<Unit>(co
     override fun toString() = ""
 }
 
-class BooleanCell internal constructor(column: Column, index: Long, override val value: Boolean) : Cell<Boolean>(column, index)
+class BooleanCell internal constructor(column: Column, index: Long, override val value: Boolean) : Cell<Boolean>(column, index) {
+    override val asBoolean: Boolean = value
+}
 
 class StringCell internal constructor(column: Column, index: Long, override val value: String) : Cell<String>(column, index) {
     override val isText = true
+    override val asString: String = value
 }
 
 class LongCell internal constructor(column: Column, index: Long, override val value: Long) : Cell<Long>(column, index) {
