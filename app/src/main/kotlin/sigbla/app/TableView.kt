@@ -22,8 +22,6 @@ import java.util.concurrent.ThreadLocalRandom
 // A table view is associated with one table, and holds metadata related on how to view a table.
 // This includes among other things column widths, row heights, individual cell dimensions, styling, etc..
 
-// TODO Add transformers outside just CellView?
-
 // TODO Would be good to have something like on<INACTIVE>(tableView) { .. } with something like
 //      on<INACTIVE>(tableView) {
 //        timeout = ...
