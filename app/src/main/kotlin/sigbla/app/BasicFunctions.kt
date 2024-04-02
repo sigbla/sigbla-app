@@ -51,10 +51,10 @@ fun count(
 
 private inline fun <reified O, reified N> cellFunction(
     vararg cells: Iterable<Cell<*>>,
-    init: Number? = null,
-    empty: Number? = null,
-    name: String? = null,
-    order: Long = 0L,
+    init: Number?,
+    empty: Number?,
+    name: String?,
+    order: Long,
     crossinline calc: Sequence<Cell<*>>.() -> Number?
 ): Cell<*>.() -> Unit = {
     val cells = Cells(*cells)

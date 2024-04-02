@@ -9,8 +9,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class BasicFunctionsTest {
-    // TODO Also need to test the various params on these functions, such as init, empty, etc..
-
     @Test
     fun `sum with defaults`() {
         val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
