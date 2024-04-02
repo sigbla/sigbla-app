@@ -9,8 +9,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class BasicFunctionsTest {
-    // TODO Also need to test the various params on these functions, such as init, empty, etc..
-
     @Test
     fun `sum with defaults`() {
         val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
@@ -65,6 +63,24 @@ class BasicFunctionsTest {
         t["A", 0] = 200
 
         assertTrue(t["Sum", 0] is UnitCell)
+    }
+
+    @Test
+    fun `sum with init and empty`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["Sum", 0] = sum(t["A"], init = 333, empty = 0)
+
+        assertTrue(333 in t["Sum", 0])
+
+        t["A", 0] = 100
+        t["A", 1] = 200
+
+        assertTrue(300 in t["Sum", 0])
+
+        clear(t["A"])
+
+        assertTrue(0L in t["Sum", 0])
     }
 
     @Test
@@ -134,6 +150,25 @@ class BasicFunctionsTest {
     }
 
     @Test
+    fun `max with init and empty`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["Max", 0] = max(t["A"], init = 333, empty = 0)
+
+        assertTrue(333 in t["Max", 0])
+
+        t["A", 0] = 100
+        t["A", 1] = 200
+
+        assertTrue(200 in t["Max", 0])
+
+        clear(t["A"])
+
+        assertTrue(0L in t["Max", 0])
+    }
+
+
+    @Test
     fun `max with valueOf`() {
         val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
@@ -200,6 +235,24 @@ class BasicFunctionsTest {
     }
 
     @Test
+    fun `min with init and empty`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["Min", 0] = min(t["A"], init = 333, empty = 0)
+
+        assertTrue(333 in t["Min", 0])
+
+        t["A", 0] = 100
+        t["A", 1] = 200
+
+        assertTrue(100 in t["Min", 0])
+
+        clear(t["A"])
+
+        assertTrue(0L in t["Min", 0])
+    }
+
+    @Test
     fun `min with valueOf`() {
         val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
@@ -263,6 +316,24 @@ class BasicFunctionsTest {
         t["A", 0] = 0
 
         assertTrue(t["Count", 0] is UnitCell)
+    }
+
+    @Test
+    fun `count with init and empty`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["Count", 0] = count(t["A"], init = 333, empty = 0)
+
+        assertTrue(333 in t["Count", 0])
+
+        t["A", 0] = 100
+        t["A", 1] = 200
+
+        assertTrue(2 in t["Count", 0])
+
+        clear(t["A"])
+
+        assertTrue(0L in t["Count", 0])
     }
 
     @Test
