@@ -103,7 +103,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A0", "A1", "A0", "A3"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B0", "B1", "B0", "B3"), valuesOf<Any>(t["B"]).toList())
-        // TODO indexOf test
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t["B"]).toList())
 
         // Copy to last
         copy(t[1] to t[4])
@@ -138,6 +139,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A0", "A1", "A0", "A3", "A1"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B0", "B1", "B0", "B3", "B1"), valuesOf<Any>(t["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(t["B"]).toList())
 
         // Copy to first
         copy(t[3] to t[-1])
@@ -172,6 +175,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A3", "A0", "A1", "A0", "A3", "A1"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B3", "B0", "B1", "B0", "B3", "B1"), valuesOf<Any>(t["B"]).toList())
+        assertEquals(listOf(-1L, 0L, 1L, 2L, 3L, 4L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(-1L, 0L, 1L, 2L, 3L, 4L), indexesOf(t["B"]).toList())
     }
 
     @Test
@@ -233,6 +238,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A0", "A1", "A3"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B1", "B2", "B3"), valuesOf<Any>(t["B"]).toList())
+        assertEquals(listOf(0L, 1L, 3L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(1L, 2L, 3L), indexesOf(t["B"]).toList())
 
         // Copy to in between
         copy(t[0] to t[2])
@@ -267,7 +274,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A0", "A1", "A0", "A3"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B1", "B3"), valuesOf<Any>(t["B"]).toList())
-        // TODO indexOf test
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(1L, 3L), indexesOf(t["B"]).toList())
 
         // Copy to last
         copy(t[1] to t[4])
@@ -302,6 +310,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A0", "A1", "A0", "A3", "A1"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B1", "B3", "B1"), valuesOf<Any>(t["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(1L, 3L, 4L), indexesOf(t["B"]).toList())
 
         // Copy to first
         copy(t[3] to t[-1])
@@ -336,6 +346,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A3", "A0", "A1", "A0", "A3", "A1"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B3", "B1", "B3", "B1"), valuesOf<Any>(t["B"]).toList())
+        assertEquals(listOf(-1L, 0L, 1L, 2L, 3L, 4L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(-1L, 1L, 3L, 4L), indexesOf(t["B"]).toList())
     }
 
     @Test
@@ -426,11 +438,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A0_1", "A1_1", "A0_0", "A3_1"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B0_1", "B1_1", "B0_0", "B3_1"), valuesOf<Any>(t2["B"]).toList())
-        // TODO indexOf test
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t2["B"]).toList())
 
         // Copy to last
         copy(t1[1] to t2[4])
@@ -468,10 +483,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A0_1", "A1_1", "A0_0", "A3_1", "A1_0"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B0_1", "B1_1", "B0_0", "B3_1", "B1_0"), valuesOf<Any>(t2["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(t2["B"]).toList())
 
         // Copy to first
         copy(t1[3] to t2[-1])
@@ -509,10 +528,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A3_0", "A0_1", "A1_1", "A0_0", "A3_1", "A1_0"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B3_0", "B0_1", "B1_1", "B0_0", "B3_1", "B1_0"), valuesOf<Any>(t2["B"]).toList())
+        assertEquals(listOf(-1L, 0L, 1L, 2L, 3L, 4L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(-1L, 0L, 1L, 2L, 3L, 4L), indexesOf(t2["B"]).toList())
     }
 
     @Test
@@ -599,11 +622,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A1_1", "A0_0", "A3_1"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B0_1", "B1_1", "B3_1"), valuesOf<Any>(t2["B"]).toList())
-        // TODO indexOf test
+        assertEquals(listOf(1L, 2L, 3L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(0L, 1L, 3L), indexesOf(t2["B"]).toList())
 
         // Copy to last
         copy(t1[1] to t2[4])
@@ -641,10 +667,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A1_1", "A0_0", "A3_1", "A1_0"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B0_1", "B1_1", "B3_1", "B1_0"), valuesOf<Any>(t2["B"]).toList())
+        assertEquals(listOf(1L, 2L, 3L, 4L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(0L, 1L, 3L, 4L), indexesOf(t2["B"]).toList())
 
         // Copy to first
         copy(t1[3] to t2[-1])
@@ -682,10 +712,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A3_0", "A1_1", "A0_0", "A3_1", "A1_0"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B3_0", "B0_1", "B1_1", "B3_1", "B1_0"), valuesOf<Any>(t2["B"]).toList())
+        assertEquals(listOf(-1L, 1L, 2L, 3L, 4L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(-1L, 0L, 1L, 3L, 4L), indexesOf(t2["B"]).toList())
     }
 
     @Test
@@ -762,11 +796,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A0_0"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B0_0"), valuesOf<Any>(t2["B"]).toList())
-        // TODO indexOf test
+        assertEquals(listOf(2L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(2L), indexesOf(t2["B"]).toList())
 
         // Copy to last
         copy(t1[1] to t2[4])
@@ -804,10 +841,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B0_0", "B1_0"), valuesOf<Any>(t2["B"]).toList())
+        assertEquals(listOf(2L, 4L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(2L, 4L), indexesOf(t2["B"]).toList())
 
         // Copy to first
         copy(t1[3] to t2[0])
@@ -845,10 +886,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A3_0", "A0_0", "A1_0"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B3_0", "B0_0", "B1_0"), valuesOf<Any>(t2["B"]).toList())
+        assertEquals(listOf(0L, 2L, 4L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(0L, 2L, 4L), indexesOf(t2["B"]).toList())
     }
 
     @Test
@@ -923,10 +968,13 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A0_0"), valuesOf<Any>(t2["A"]).toList())
-        // TODO indexOf test
+        assertEquals(listOf(2L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf<Long>(), indexesOf(t2["B"]).toList())
 
         // Copy to last
         copy(t1[1] to t2[4])
@@ -964,10 +1012,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B1_0"), valuesOf<Any>(t2["B"]).toList())
+        assertEquals(listOf(2L, 4L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(4L), indexesOf(t2["B"]).toList())
 
         // Copy to first
         copy(t1[3] to t2[0])
@@ -1005,10 +1057,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A3_0", "A0_0", "A1_0"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B3_0", "B1_0"), valuesOf<Any>(t2["B"]).toList())
+        assertEquals(listOf(0L, 2L, 4L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(0L, 4L), indexesOf(t2["B"]).toList())
     }
 
     @Test
@@ -1086,7 +1142,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A0", "A1", "A2", "A0", "A3"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B0", "B1", "B2", "B0", "B3"), valuesOf<Any>(t["B"]).toList())
-        // TODO indexOf test
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(t["B"]).toList())
 
         // Copy to last
         copy(t[1] after t[4])
@@ -1119,6 +1176,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A0", "A1", "A2", "A0", "A3", "A1"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B0", "B1", "B2", "B0", "B3", "B1"), valuesOf<Any>(t["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L, 5L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L, 5L), indexesOf(t["B"]).toList())
 
         // Copy to first
         copy(t[2] before t[0])
@@ -1151,6 +1210,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A2", "A0", "A1", "A2", "A0", "A3", "A1"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B2", "B0", "B1", "B2", "B0", "B3", "B1"), valuesOf<Any>(t["B"]).toList())
+        assertEquals(listOf(-1L, 0L, 1L, 2L, 3L, 4L, 5L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(-1L, 0L, 1L, 2L, 3L, 4L, 5L), indexesOf(t["B"]).toList())
 
         // Copy to before
         copy(t[4] before t[1])
@@ -1211,6 +1272,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A2", "A0", "A3", "A1", "A2", "A0", "A3", "A1"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B2", "B0", "B3", "B1", "B2", "B0", "B3", "B1"), valuesOf<Any>(t["B"]).toList())
+        assertEquals(listOf(-2L, -1L, 0L, 1L, 2L, 3L, 4L, 5L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(-2L, -1L, 0L, 1L, 2L, 3L, 4L, 5L), indexesOf(t["B"]).toList())
     }
 
     @Test
@@ -1286,7 +1349,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A0", "A1", "A0", "A3"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B1", "B2", "B3"), valuesOf<Any>(t["B"]).toList())
-        // TODO indexOf test
+        assertEquals(listOf(0L, 1L, 3L, 4L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(1L, 2L, 4L), indexesOf(t["B"]).toList())
 
         // Copy to last
         copy(t[1] after t[4])
@@ -1319,6 +1383,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A0", "A1", "A0", "A3", "A1"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B1", "B2", "B3", "B1"), valuesOf<Any>(t["B"]).toList())
+        assertEquals(listOf(0L, 1L, 3L, 4L, 5L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(1L, 2L, 4L, 5L), indexesOf(t["B"]).toList())
 
         // Copy to first
         copy(t[2] before t[0])
@@ -1351,6 +1417,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A0", "A1", "A0", "A3", "A1"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B2", "B1", "B2", "B3", "B1"), valuesOf<Any>(t["B"]).toList())
+        assertEquals(listOf(0L, 1L, 3L, 4L, 5L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(-1L, 1L, 2L, 4L, 5L), indexesOf(t["B"]).toList())
 
         // Copy to before
         copy(t[4] before t[1])
@@ -1411,6 +1479,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A0", "A3", "A1", "A0", "A3", "A1"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B2", "B3", "B1", "B2", "B3", "B1"), valuesOf<Any>(t["B"]).toList())
+        assertEquals(listOf(-1L, 0L, 1L, 3L, 4L, 5L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(-2L, 0L, 1L, 2L, 4L, 5L), indexesOf(t["B"]).toList())
     }
 
     @Test
@@ -1516,7 +1586,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A0", "A2", "A1", "A2", "A3"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B0", "B2", "B1", "B2", "B3"), valuesOf<Any>(t["B"]).toList())
-        // TODO indexOf test
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(t["B"]).toList())
 
         // Copy to before
         copy(t[1] before t[3])
@@ -1589,6 +1660,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A0", "A2", "A1", "A2", "A2", "A3"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B0", "B2", "B1", "B2", "B2", "B3"), valuesOf<Any>(t["B"]).toList())
+        assertEquals(listOf(-1L, 0L, 1L, 2L, 3L, 4L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(-1L, 0L, 1L, 2L, 3L, 4L), indexesOf(t["B"]).toList())
     }
 
     @Test
@@ -1692,7 +1765,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A0", "A1", "A3"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B2", "B1", "B2", "B3"), valuesOf<Any>(t["B"]).toList())
-        // TODO indexOf test
+        assertEquals(listOf(0L, 2L, 4L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(1L, 2L, 3L, 4L), indexesOf(t["B"]).toList())
 
         // Copy to before
         copy(t[1] before t[3])
@@ -1765,6 +1839,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t).toList().map { it.labels })
         assertEquals(listOf("A0", "A1", "A3"), valuesOf<Any>(t["A"]).toList())
         assertEquals(listOf("B2", "B1", "B2", "B2", "B3"), valuesOf<Any>(t["B"]).toList())
+        assertEquals(listOf(-1L, 1L, 4L), indexesOf(t["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(t["B"]).toList())
     }
 
     @Test
@@ -1866,11 +1942,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A0_1", "A1_1", "A2_1", "A0_0", "A3_1"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B0_1", "B1_1", "B2_1", "B0_0", "B3_1"), valuesOf<Any>(t2["B"]).toList())
-        // TODO indexOf test
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L), indexesOf(t2["B"]).toList())
 
         // Copy to last
         copy(t1[1] after t2[4])
@@ -1905,10 +1984,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A0_1", "A1_1", "A2_1", "A0_0", "A3_1", "A1_0"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B0_1", "B1_1", "B2_1", "B0_0", "B3_1", "B1_0"), valuesOf<Any>(t2["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L, 5L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L, 4L, 5L), indexesOf(t2["B"]).toList())
 
         // Copy to first
         copy(t1[3] before t2[0])
@@ -1943,10 +2026,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A3_0", "A0_1", "A1_1", "A2_1", "A0_0", "A3_1", "A1_0"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B3_0", "B0_1", "B1_1", "B2_1", "B0_0", "B3_1", "B1_0"), valuesOf<Any>(t2["B"]).toList())
+        assertEquals(listOf(-1L, 0L, 1L, 2L, 3L, 4L, 5L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(-1L, 0L, 1L, 2L, 3L, 4L, 5L), indexesOf(t2["B"]).toList())
 
         // Copy to before
         copy(t1[2] before t2[1])
@@ -2009,10 +2096,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A3_0", "A0_1", "A2_0", "A1_1", "A2_1", "A0_0", "A3_1", "A1_0"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B3_0", "B0_1", "B2_0", "B1_1", "B2_1", "B0_0", "B3_1", "B1_0"), valuesOf<Any>(t2["B"]).toList())
+        assertEquals(listOf(-2L, -1L, 0L, 1L, 2L, 3L, 4L, 5L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(-2L, -1L, 0L, 1L, 2L, 3L, 4L, 5L), indexesOf(t2["B"]).toList())
     }
 
     @Test
@@ -2110,11 +2201,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A1_1", "A2_1", "A0_0", "A3_1"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B0_1", "B1_1", "B3_1"), valuesOf<Any>(t2["B"]).toList())
-        // TODO indexOf test
+        assertEquals(listOf(1L, 2L, 3L, 4L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(0L, 1L, 4L), indexesOf(t2["B"]).toList())
 
         // Copy to last
         copy(t1[1] after t2[4])
@@ -2149,10 +2243,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A1_1", "A2_1", "A0_0", "A3_1", "A1_0"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B0_1", "B1_1", "B3_1", "B1_0"), valuesOf<Any>(t2["B"]).toList())
+        assertEquals(listOf(1L, 2L, 3L, 4L, 5L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(0L, 1L, 4L, 5L), indexesOf(t2["B"]).toList())
 
         // Copy to first
         copy(t1[3] before t2[0])
@@ -2187,10 +2285,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A3_0", "A1_1", "A2_1", "A0_0", "A3_1", "A1_0"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B3_0", "B0_1", "B1_1", "B3_1", "B1_0"), valuesOf<Any>(t2["B"]).toList())
+        assertEquals(listOf(-1L, 1L, 2L, 3L, 4L, 5L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(-1L, 0L, 1L, 4L, 5L), indexesOf(t2["B"]).toList())
 
         // Copy to before
         copy(t1[2] before t2[1])
@@ -2253,10 +2355,14 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A3_0", "A1_1", "A2_1", "A0_0", "A3_1", "A1_0"), valuesOf<Any>(t2["A"]).toList())
         assertEquals(listOf("B3_0", "B0_1", "B2_0", "B1_1", "B3_1", "B1_0"), valuesOf<Any>(t2["B"]).toList())
+        assertEquals(listOf(-2L, 1L, 2L, 3L, 4L, 5L), indexesOf(t2["A"]).toList())
+        assertEquals(listOf(-2L, -1L, 0L, 1L, 4L, 5L), indexesOf(t2["B"]).toList())
     }
 
     @Test
@@ -2337,6 +2443,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A0_0"), valuesOf<Any>(t2["A"]).toList())
@@ -2380,6 +2488,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0"), valuesOf<Any>(t2["A"]).toList())
@@ -2423,6 +2533,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A3_0", "A0_0", "A1_0"), valuesOf<Any>(t2["A"]).toList())
@@ -2491,6 +2603,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A2_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B0_0", "B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(0L, 1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A3_0", "A2_0", "A0_0", "A1_0"), valuesOf<Any>(t2["A"]).toList())
@@ -2575,6 +2689,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A0_0"), valuesOf<Any>(t2["A"]).toList())
@@ -2616,6 +2732,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0"), valuesOf<Any>(t2["A"]).toList())
@@ -2659,6 +2777,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A3_0", "A0_0", "A1_0"), valuesOf<Any>(t2["A"]).toList())
@@ -2727,6 +2847,8 @@ class TableRowCopyTest {
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t1).toList().map { it.labels })
         assertEquals(listOf("A0_0", "A1_0", "A3_0"), valuesOf<Any>(t1["A"]).toList())
         assertEquals(listOf("B1_0", "B2_0", "B3_0"), valuesOf<Any>(t1["B"]).toList())
+        assertEquals(listOf(0L, 1L, 3L), indexesOf(t1["A"]).toList())
+        assertEquals(listOf(1L, 2L, 3L), indexesOf(t1["B"]).toList())
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(t2).toList().map { it.labels })
         assertEquals(listOf("A3_0", "A0_0", "A1_0"), valuesOf<Any>(t2["A"]).toList())
