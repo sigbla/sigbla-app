@@ -78,16 +78,19 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
     operator fun contains(that: String): Boolean = any { that in it }
     operator fun contains(that: Cell<*>?): Boolean = any { that in it }
 
-    override fun iterator(): Iterator<Cell<*>> {
-        val ref = table.tableRef.get()
+    override fun iterator(): Iterator<Cell<*>> = iterator(table, table.tableRef.get())
+
+    internal fun iterator(table: Table, ref: TableRef): Iterator<Cell<*>> {
         val columnCellMap = ref.columnCells
 
         fun at(header: Header): CellValue<*>? {
+            // We want to throw this exception because ref should contain columnCells
             val values = columnCellMap[header] ?: throw InvalidColumnException("Unable to find column cells for header $header")
             return values[index]
         }
 
         fun firstBefore(header: Header): CellValue<*>? {
+            // We want to throw this exception because ref should contain columnCells
             val values = columnCellMap[header] ?: throw InvalidColumnException("Unable to find column cells for header $header")
             val keys = values.asSortedMap().headMap(index).keys
             if (keys.isEmpty()) return null
@@ -95,6 +98,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
         }
 
         fun firstAfter(header: Header): CellValue<*>? {
+            // We want to throw this exception because ref should contain columnCells
             val values = columnCellMap[header] ?: throw InvalidColumnException("Unable to find column cells for header $header")
             val keys = values.asSortedMap().tailMap(index + 1L).keys
             if (keys.isEmpty()) return null

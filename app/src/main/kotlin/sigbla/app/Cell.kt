@@ -64,9 +64,9 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
     val table: Table
         get() = start.table
 
-    override fun iterator(): Iterator<Cell<*>> {
-        val ref = table.tableRef.get()
+    override fun iterator(): Iterator<Cell<*>> = iterator(table, table.tableRef.get())
 
+    internal fun iterator(table: Table, ref: TableRef): Iterator<Cell<*>> {
         // Because columns might move around, get the latest order
         // It might also mean the column is no longer available
         val currentStart = ref.columns[start.column.header]?.columnOrder ?: return Collections.emptyIterator()
@@ -107,7 +107,9 @@ class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>,
         }
             .flatten()
             .map {
-                ref.columnCells[it.first.header]?.get(it.second)?.toCell(it.first, it.second)
+                // We want to throw this exception because ref should contain columnCells
+                val values = ref.columnCells[it.first.header] ?: throw InvalidColumnException("Unable to find column cells for header ${it.first.header}")
+                values[it.second]?.toCell(it.first, it.second)
             }
             .filterNotNull()
             .iterator()
@@ -384,7 +386,20 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
         return newValue
     }
 
-    override fun iterator(): Iterator<Cell<*>> = if (this is UnitCell) emptyList<Cell<*>>().iterator() else listOf(this).iterator()
+    override fun iterator(): Iterator<Cell<*>> = iterator(table, table.tableRef.get())
+
+    internal fun iterator(table: Table, ref: TableRef): Iterator<Cell<*>> {
+        // Column might have been removed before we call iterator
+        val meta = ref.columns[this.column.header] ?: return emptyList<Cell<*>>().iterator()
+        if (meta.prenatal) return emptyList<Cell<*>>().iterator()
+
+        // We want to throw this exception because ref should contain columnCells
+        val values = ref.columnCells[this.column.header] ?: throw InvalidColumnException("Unable to find column cells for header ${this.column.header}")
+        val cellValue = values[index] ?: return emptyList<Cell<*>>().iterator()
+        val column = BaseColumn(table, this.column.header, meta.columnOrder)
+
+        return listOf(cellValue.toCell(column, index)).iterator()
+    }
 
     override fun toString() = this.value.toString()
 
@@ -756,29 +771,9 @@ fun div(
 class Cells(sources: List<Iterable<Cell<*>>>): Iterable<Cell<*>> {
     constructor(vararg sources: Iterable<Cell<*>>) : this(sources.toList())
 
-    val sources: List<Iterable<Cell<*>>> = sources.flatMap {
-        if (it is Cells) it.sources
-        else when (it) {
-            is Cell<*> -> listOf(it)
-            is Row -> listOf(it)
-            is Column -> listOf(it)
-            is CellRange -> listOf(it)
-            is Table -> listOf(it)
-            // TODO Probably doesn't make sense to have this, since table property doesn't support it?
-            else -> it.toCollection(mutableListOf()) // make a copy
-        }
-    }
+    val sources: List<Iterable<Cell<*>>>
 
-    val table = this.sources.first().let {
-        when (it) {
-            is Cell<*> -> it.table
-            is Row -> it.table
-            is Column -> it.table
-            is CellRange -> it.table
-            is Table -> it
-            else -> throw InvalidValueException("Unsupported source type: ${it::class}")
-        }
-    }
+    val table: Table
 
     init {
         if (sources.isEmpty()) throw InvalidValueException("At least one source needed")
@@ -792,7 +787,6 @@ class Cells(sources: List<Iterable<Cell<*>>>): Iterable<Cell<*>> {
                     is Column -> listOf(iterable.table)
                     is CellRange -> listOf(iterable.table)
                     is Table -> listOf(iterable)
-                    // TODO Probably doesn't make sense to have this, since table property doesn't support it?
                     else -> iterable.map { it.table }.toSet()
                 }
             }
@@ -807,17 +801,37 @@ class Cells(sources: List<Iterable<Cell<*>>>): Iterable<Cell<*>> {
                 if (t1 !== it) throw InvalidTableException("Only a single source table supported")
             }
         }
+
+        this.sources = sources.flatMap {
+            if (it is Cells) it.sources
+            else when (it) {
+                is Cell<*> -> listOf(it)
+                is Row -> listOf(it)
+                is Column -> listOf(it)
+                is CellRange -> listOf(it)
+                is Table -> listOf(it)
+                else -> it.toCollection(mutableListOf()).toList() // make a copy
+            }
+        }
+
+        this.table = tables.first()
     }
 
     override fun iterator(): Iterator<Cell<*>> {
         val ref = table.tableRef.get()
-        // TODO Each iterator should make use of the same reference..
-        // TODO prenatal filter?
-        return sources.asSequence().flatten().mapNotNull {
-            val meta = ref.columns[it.column.header] ?: return@mapNotNull null
-            val column = BaseColumn(table, it.column.header, meta.columnOrder)
-            ref.columnCells[it.column.header]?.get(it.index)?.toCell(column, it.index)
-        }.iterator()
+
+        fun refIterator(iterable: Iterable<Cell<*>>): Iterator<Cell<*>> {
+            return when (iterable) {
+                is Cell<*> -> iterable.iterator(table, ref)
+                is Row -> iterable.iterator(table, ref)
+                is Column -> iterable.iterator(table, ref)
+                is CellRange -> iterable.iterator(table, ref)
+                is Table -> iterable.iterator(table, ref)
+                else -> iterable.asSequence().flatMap { it.iterator(table, ref).asSequence() }.iterator()
+            }
+        }
+
+        return sources.asSequence().flatMap { refIterator(it).asSequence() }.iterator()
     }
 }
 
