@@ -1123,6 +1123,33 @@ class CellsListenerTest {
         assertEquals("Original value A1", t1["A", 1].value)
     }
 
+    @Test
+    fun `capture deleted`() {
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        var eventCount1 = 0
+
+        on(t1["A", 1] or t1["A", 2]) events {
+            eventCount1 += count()
+        }
+
+        t1["A", 1] = "A1"
+
+        assertEquals(1, eventCount1)
+
+        t1["A", 2] = "A2"
+
+        assertEquals(2, eventCount1)
+
+        t1["A", 2] = null
+
+        assertEquals(3, eventCount1)
+
+        clear(t1["A"])
+
+        assertEquals(4, eventCount1)
+    }
+
     companion object {
         @JvmStatic
         @AfterClass

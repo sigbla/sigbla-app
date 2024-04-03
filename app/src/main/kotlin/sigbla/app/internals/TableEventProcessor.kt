@@ -606,8 +606,8 @@ internal class TableEventProcessor {
                     .values
                     .forEach { listenerRef ->
                         val cellRangeBatch = Collections.unmodifiableList(batch.filter {
-                            return@filter listenerRef.listenerReference.cellRange.contains(it.newValue)
-                                    || listenerRef.listenerReference.cellRange.contains(it.oldValue)
+                            return@filter it.newValue.table[listenerRef.listenerReference.cellRange].contains(it.newValue)
+                                    || it.oldValue.table[listenerRef.listenerReference.cellRange].contains(it.oldValue)
                         }.filter { it.newValue.table.tableRef.get().version > listenerRef.version })
 
                         if (cellRangeBatch.isNotEmpty()) {
