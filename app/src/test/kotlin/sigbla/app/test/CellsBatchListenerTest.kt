@@ -57,7 +57,7 @@ class CellsBatchListenerTest {
         var eventCount = 0
 
         val cells: List<Iterable<Cell<*>>> = listOf(t1["A", 1], t1["A", 2], t1["B", 3], t1["C", 4])
-        val ref = on(Cells(cells)) {
+        val ref = on(Cells[cells]) {
             events {
                 eventCount += count()
             }
@@ -385,7 +385,7 @@ class CellsBatchListenerTest {
         var t1EventCount = 0
         var t2EventCount = 0
 
-        var cells1 = Cells(t1["A", 0])
+        var cells1 = Cells[t1["A", 0]]
 
         for (c in listOf("A", "B", "C", "D")) {
             for (r in 1..100) {
@@ -419,7 +419,7 @@ class CellsBatchListenerTest {
             return@batch clone(t1, "tableClone2")
         }
 
-        var cells2 = Cells(t2["A", 0])
+        var cells2 = Cells[t2["A", 0]]
 
         for (c in listOf("A", "B", "C", "D")) {
             for (r in 1..100) {

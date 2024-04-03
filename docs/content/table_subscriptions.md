@@ -38,7 +38,8 @@ However, in the above example, we're seeing something slightly different:
 
 This is, as it indicates, allowing us to subscribe to multiple sources within one listener. This is not limited to
 just cells, but could also have been, for example, `on(table["A"] or table["C"])`. Any combination is supported, as
-long as they are within the same table.
+long as they are within the same table. Using `or` like done above can also be accomplished with the `Cells` class by
+doing `Cells[table["A", 0], table["A", 1]]`.
 
 Zooming out a bit, we find `on(source) events { .. }`. The code within the `{ .. }` block will be executed once per
 change to the defined source. If we have sources that overlap, such as `on(table["A"] or table[1])`, where the two
