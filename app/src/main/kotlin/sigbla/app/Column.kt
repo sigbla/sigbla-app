@@ -5,6 +5,7 @@ package sigbla.app
 import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.IndexRelation.*
 import sigbla.app.exceptions.InvalidRowException
+import sigbla.app.pds.collection.TreeMap as PTreeMap
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -291,8 +292,14 @@ class BaseColumn internal constructor(
 
         synchronized(table.eventProcessor) {
             val (oldRef, newRef) = table.tableRef.refAction {
-                val meta = it.columns[this.header] ?: throw InvalidColumnException("Unable to find column meta for header ${this.header}")
-                val values = it.columnCells[this.header] ?: throw InvalidColumnException("Unable to find column cells for header ${this.header}")
+                val columns = if (it.columns.containsKey(this.header)) it.columns
+                    else it.columns.put(this.header, ColumnMeta(it.columnCounter.getAndIncrement(), true))
+
+                val columnCells = if (it.columnCells.containsKey(this.header)) it.columnCells
+                    else it.columnCells.put(this.header, PTreeMap())
+
+                val meta = columns[this.header] ?: throw InvalidColumnException("Unable to find column meta for header ${this.header}")
+                val values = columnCells[this.header] ?: throw InvalidColumnException("Unable to find column cells for header ${this.header}")
 
                 it.copy(
                     columns = if (meta.prenatal) it.columns.put(
@@ -326,10 +333,11 @@ class BaseColumn internal constructor(
         }
     }
 
-    private fun clear(index: Long): Cell<*> {
+    private fun clear(index: Long) {
         synchronized(table.eventProcessor) {
             val (oldRef, newRef) = table.tableRef.refAction {
-                val meta = it.columns[this.header] ?: throw InvalidColumnException("Unable to find column meta for header ${this.header}")
+                // Return early if column no longer exists
+                val meta = it.columns[this.header] ?: return@refAction it
                 val values = it.columnCells[this.header] ?: throw InvalidColumnException("Unable to find column cells for header ${this.header}")
 
                 it.copy(
@@ -342,6 +350,9 @@ class BaseColumn internal constructor(
                 )
             }
 
+            if (oldRef.version == newRef.version) return
+            if (!table.eventProcessor.haveListeners()) return
+
             val oldTable = this.table.makeClone(ref = oldRef)
             val newTable = this.table.makeClone(ref = newRef)
 
@@ -351,8 +362,6 @@ class BaseColumn internal constructor(
             val old = oldColumn[index]
             val new = newColumn[index] // This will be a unit cell, but with new table and column refs
 
-            if (!table.eventProcessor.haveListeners()) return old
-
             table.eventProcessor.publish(
                 listOf(
                     TableListenerEvent(
@@ -361,8 +370,6 @@ class BaseColumn internal constructor(
                     )
                 ) as List<TableListenerEvent<Any, Any>>
             )
-
-            return old
         }
     }
 
