@@ -2797,6 +2797,84 @@ class TableTest {
         assertEquals("string A", t["Val1", 0].asString)
     }
 
+    @Test
+    fun `recreate column from old ref`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val c = t["A"]
+
+        c[1] = "A1"
+
+        remove(c)
+
+        assertFalse(c in t)
+
+        c[1] = "A1"
+
+        assertEquals("A1", c[1].value)
+
+        remove(c)
+
+        assertFalse(c in t)
+
+        var eventCount = 0
+
+        on(t) events {
+            eventCount += count()
+        }
+
+        assertEquals(0, eventCount)
+
+        c[1] = "A1"
+
+        assertEquals("A1", c[1].value)
+
+        assertEquals(1, eventCount)
+    }
+
+    @Test
+    fun `no-op clear on removed column`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val c = t["A"]
+
+        c[1] = "A1"
+
+        remove(c)
+
+        assertFalse(c in t)
+
+        c[1] = "A1"
+
+        remove(c)
+
+        assertFalse(c in t)
+
+        c[1] = null
+
+        assertFalse(c in t)
+
+        c[1] = "A1"
+
+        var eventCount = 0
+
+        on(t) events {
+            eventCount += count()
+        }
+
+        assertEquals(1, eventCount)
+
+        remove(c)
+
+        assertEquals(2, eventCount)
+
+        assertFalse(c in t)
+
+        c[1] = null
+
+        assertEquals(2, eventCount)
+    }
+
     companion object {
         @JvmStatic
         @AfterClass
