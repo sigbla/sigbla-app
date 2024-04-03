@@ -768,8 +768,8 @@ fun div(
     )
 }
 
-class Cells(sources: List<Iterable<Cell<*>>>): Iterable<Cell<*>> {
-    constructor(vararg sources: Iterable<Cell<*>>) : this(sources.toList())
+class Cells internal constructor(sources: Collection<Iterable<Cell<*>>>): Iterable<Cell<*>> {
+    internal constructor(vararg sources: Iterable<Cell<*>>) : this(sources.toList())
 
     val sources: List<Iterable<Cell<*>>>
 
@@ -832,6 +832,11 @@ class Cells(sources: List<Iterable<Cell<*>>>): Iterable<Cell<*>> {
         }
 
         return sources.asSequence().flatMap { refIterator(it).asSequence() }.iterator()
+    }
+
+    companion object {
+        operator fun get(sources: Collection<Iterable<Cell<*>>>) = Cells(sources)
+        operator fun get(vararg sources: Iterable<Cell<*>>) = Cells(sources.toList())
     }
 }
 
