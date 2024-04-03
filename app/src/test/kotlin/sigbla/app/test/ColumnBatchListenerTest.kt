@@ -727,6 +727,31 @@ class ColumnBatchListenerTest {
         assertEquals("Original value A2", t1["A", 2].value)
     }
 
+    @Test
+    fun `capture deleted`() {
+        val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        var eventCount1 = 0
+
+        on(t1["A"]) events {
+            eventCount1 += count()
+        }
+
+        batch(t1) {
+            t1["A", 1] = "A1"
+            t1["A", 2] = "A2"
+        }
+
+        assertEquals(2, eventCount1)
+
+        batch(t1) {
+            t1["A", 2] = null
+            clear(t1["A"])
+        }
+
+        assertEquals(4, eventCount1)
+    }
+
     companion object {
         @JvmStatic
         @AfterClass
