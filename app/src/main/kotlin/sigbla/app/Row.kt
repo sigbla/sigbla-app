@@ -150,7 +150,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
 
 class BaseRow internal constructor(override val table: Table, override val indexRelation: IndexRelation, override val index: Long) : Row()
 
-class RowRange(override val start: Row, override val endInclusive: Row) : ClosedRange<Row>, Iterable<Row> {
+class RowRange internal constructor(override val start: Row, override val endInclusive: Row) : ClosedRange<Row>, Iterable<Row> {
     init {
         if (start.table !== endInclusive.table) throw InvalidRowException("RowRange must be within same table")
         if (start.indexRelation != IndexRelation.AT) throw InvalidRowException("Only IndexRelation.AT supported in RowRange: $start")
