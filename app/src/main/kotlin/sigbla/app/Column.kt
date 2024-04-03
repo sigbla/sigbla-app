@@ -309,9 +309,11 @@ class BaseColumn internal constructor(
             val oldTable = this.table.makeClone(ref = oldRef)
             val newTable = this.table.makeClone(ref = newRef)
 
-            // TODO This might create a column if it doesn't exist, which we don't want (see events in table ops)
-            val old = oldTable[this.header][index]
-            val new = newTable[this.header][index]
+            val oldColumn = BaseColumn(oldTable, this.header)
+            val newColumn = BaseColumn(newTable, this.header)
+
+            val old = oldColumn[index]
+            val new = newColumn[index]
 
             table.eventProcessor.publish(
                 listOf(
@@ -343,9 +345,11 @@ class BaseColumn internal constructor(
             val oldTable = this.table.makeClone(ref = oldRef)
             val newTable = this.table.makeClone(ref = newRef)
 
-            val old = oldTable[this.header][index]
-            // TODO This will create a column if it doesn't exist, which we don't want (see events in table ops)
-            val new = newTable[this.header][index] // This will be a unit cell, but with new table and column refs
+            val oldColumn = BaseColumn(oldTable, this.header)
+            val newColumn = BaseColumn(newTable, this.header)
+
+            val old = oldColumn[index]
+            val new = newColumn[index] // This will be a unit cell, but with new table and column refs
 
             if (!table.eventProcessor.haveListeners()) return old
 

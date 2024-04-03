@@ -104,7 +104,11 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
 
     operator fun get(column: Column): Column = this[column.header]
 
-    operator fun get(cellRange: CellRange): CellRange = CellRange(this[cellRange.start], this[cellRange.endInclusive], cellRange.order)
+    operator fun get(cellRange: CellRange): CellRange {
+        val startColumn = BaseColumn(this, cellRange.start.column.header)
+        val endInclusiveColumn = BaseColumn(this, cellRange.endInclusive.column.header)
+        return CellRange(startColumn[cellRange.start.index], endInclusiveColumn[cellRange.endInclusive.index], cellRange.order)
+    }
 
     operator fun get(column: Column, index: Long) = this[column][index]
 
