@@ -54,7 +54,7 @@ internal class CellValue<T>(val value: T) {
 
 enum class CellOrder { COLUMN, ROW }
 
-class CellRange(override val start: Cell<*>, override val endInclusive: Cell<*>, val order: CellOrder = CellOrder.COLUMN) : ClosedRange<Cell<*>>, Iterable<Cell<*>> {
+class CellRange internal constructor(override val start: Cell<*>, override val endInclusive: Cell<*>, val order: CellOrder = CellOrder.COLUMN) : ClosedRange<Cell<*>>, Iterable<Cell<*>> {
     init {
         if (start.column.table !== endInclusive.column.table) {
             throw InvalidCellException("CellRange much be within same table")
