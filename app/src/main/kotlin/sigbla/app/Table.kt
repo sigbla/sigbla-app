@@ -989,10 +989,10 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
     operator fun contains(that: Cell<*>?): Boolean = any { that in it }
 
     // -----
+    override fun iterator(): Iterator<Cell<*>> = iterator(this, tableRef.get())
 
-    override fun iterator(): Iterator<Cell<*>> {
-        val ref = tableRef.get()
-        val columnIterator = ref.headers.map { BaseColumn(this, it.first, it.second.columnOrder) }.iterator()
+    internal fun iterator(table: Table, ref: TableRef): Iterator<Cell<*>> {
+        val columnIterator = ref.headers.map { BaseColumn(table, it.first, it.second.columnOrder) }.iterator()
 
         return object : Iterator<Cell<*>> {
             private var cellIterator = nextCellIterator()
@@ -1000,6 +1000,7 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
             private fun nextCellIterator(): Iterator<Cell<*>> {
                 while (columnIterator.hasNext()) {
                     val column = columnIterator.next()
+                    // We want to throw this exception because ref should contain columnCells
                     val values = ref.columnCells[column.header] ?: throw InvalidColumnException("Unable to find column cells for header ${column.header}")
                     val itr = values.asSequence().map { it.component2().toCell(column, it.component1()) }.iterator()
                     if (itr.hasNext()) return itr

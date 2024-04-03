@@ -80,6 +80,8 @@ abstract class Column internal constructor(
 
     abstract operator fun set(index: Long, value: Cell<*>?)
 
+    internal abstract fun iterator(table: Table, ref: TableRef): Iterator<Cell<*>>
+
     infix fun at(index: Long) = get(AT, index)
 
     infix fun atOrBefore(index: Long) = get(AT_OR_BEFORE, index)
@@ -360,9 +362,17 @@ class BaseColumn internal constructor(
         }
     }
 
-    override fun iterator(): Iterator<Cell<*>> {
-        val values = table.tableRef.get().columnCells[this.header] ?: throw InvalidColumnException("Unable to find column cells for header ${this.header}")
-        return values.asSequence().map { it.component2().toCell(this, it.component1()) }.iterator()
+    override fun iterator(): Iterator<Cell<*>> = iterator(table, table.tableRef.get())
+
+    override fun iterator(table: Table, ref: TableRef): Iterator<Cell<*>> {
+        // Column might have been removed before we call iterator
+        val meta = ref.columns[this.header] ?: return emptyList<Cell<*>>().iterator()
+        if (meta.prenatal) return emptyList<Cell<*>>().iterator()
+
+        // We want to throw this exception because ref should contain columnCells
+        val values = ref.columnCells[this.header] ?: throw InvalidColumnException("Unable to find column cells for header ${this.header}")
+        val column = BaseColumn(table, this.header, meta.columnOrder)
+        return values.asSequence().map { it.component2().toCell(column, it.component1()) }.iterator()
     }
 }
 
