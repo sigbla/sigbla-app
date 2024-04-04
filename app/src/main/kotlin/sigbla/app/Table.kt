@@ -1026,7 +1026,7 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
         }
     }
 
-    internal abstract fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableRef = tableRef.get()!!): Table
+    internal abstract fun makeClone(name: String? = this.name, ref: TableRef = tableRef.get()): Table
 
     override fun toString() = "Table[$name]"
 
@@ -1041,13 +1041,12 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
     }
 
     companion object {
-        operator fun get(name: String?): Table = BaseTable(name, null)
+        operator fun get(name: String?): Table {
+            return if (name == null) BaseTable(null, null) // This will not be on the registry
+            else get(name) { BaseTable(null, null) } // This will be on the registry
+        }
 
-        fun fromRegistry(name: String): Table = Registry.getTable(name) ?: throw InvalidTableException("No table by name $name")
-
-        fun fromRegistry(name: String, init: (name: String) -> Table) = Registry.getTable(name, init)
-
-        fun remove(name: String) = Registry.shutdownTable(fromRegistry(name), true)
+        operator fun get(name: String, init: (name: String) -> Table): Table = Registry.getTable(name, init)
 
         val names: SortedSet<String> get() = Registry.tableNames
 
@@ -1090,14 +1089,9 @@ internal data class TableRef(
 class BaseTable internal constructor(
     name: String?,
     source: Table?,
-    onRegistry: Boolean = true,
     override val tableRef: RefHolder<TableRef> = RefHolder(TableRef()),
     override val eventProcessor: TableEventProcessor = TableEventProcessor()
 ) : Table(name, source) {
-    init {
-        if (name != null && onRegistry) Registry.setTable(name, this)
-    }
-
     override val closed: Boolean get() = tableRef.closed
 
     override val headers: Sequence<Header>
@@ -1129,7 +1123,7 @@ class BaseTable internal constructor(
 
     override fun contains(header: Header): Boolean = tableRef.get().columns[header]?.prenatal == false
 
-    override fun makeClone(name: String?, onRegistry: Boolean, ref: TableRef): Table = BaseTable(name, this, onRegistry, RefHolder(ref))
+    override fun makeClone(name: String?, ref: TableRef): Table = BaseTable(name, this, RefHolder(ref))
 
     companion object
 }

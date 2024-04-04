@@ -49,6 +49,8 @@ class TableStorageTest {
         assertFalse(it2.hasNext())
 
         deleteFolder(tmpFolder)
+
+        remove(table1)
     }
 
     @Test
@@ -75,6 +77,8 @@ class TableStorageTest {
         assertFalse(it2.hasNext())
 
         deleteFolder(tmpFolder)
+
+        remove(table1)
     }
 
     @Test
@@ -123,6 +127,8 @@ class TableStorageTest {
         assertFalse(it2.hasNext())
 
         deleteFolder(tmpFolder)
+
+        remove(table1)
     }
 
     @Test
@@ -171,6 +177,8 @@ class TableStorageTest {
         assertFalse(it2.hasNext())
 
         deleteFolder(tmpFolder)
+
+        remove(table1)
     }
 
     @Test
@@ -226,6 +234,9 @@ class TableStorageTest {
 
         assertFalse(it1.hasNext())
         assertFalse(it2.hasNext())
+
+        remove(table2)
+        remove(table3)
     }
 
     @Test
@@ -281,6 +292,9 @@ class TableStorageTest {
 
         assertFalse(it1.hasNext())
         assertFalse(it2.hasNext())
+
+        remove(table2)
+        remove(table3)
     }
 
     @Test
@@ -354,6 +368,8 @@ class TableStorageTest {
         assertEquals(listOf("A0", "A1"), table3["A"].map { it.toString() })
         assertEquals(listOf("B0", "B1"), table3["B"].map { it.toString() })
         assertEquals(listOf("C0", "C1"), table3["C"].map { it.toString() })
+
+        remove(table1)
     }
 
     @Test
@@ -447,6 +463,8 @@ class TableStorageTest {
 
             assertFalse(it1.hasNext())
             assertFalse(it2.hasNext())
+
+            remove(table1)
         }
 
         deleteFolder(tmpFolder)

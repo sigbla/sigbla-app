@@ -2,8 +2,9 @@
  * See LICENSE file for licensing details. */
 package sigbla.app.internals
 
-import sigbla.app.*
-import sigbla.app.TableRef
+import sigbla.app.BaseTable
+import sigbla.app.Table
+import sigbla.app.TableView
 import sigbla.app.exceptions.InvalidTableException
 import java.util.*
 import java.util.concurrent.ConcurrentSkipListMap
@@ -12,12 +13,12 @@ internal object Registry {
     private val _tables: SortedMap<String, Table> = ConcurrentSkipListMap()
     private val _views: SortedMap<String, TableView> = ConcurrentSkipListMap()
 
-    fun setTable(name: String, table: Table) = _tables.put(name, table)?.also { shutdownTable(it, false) }
+    fun setTable(name: String, table: Table) { _tables.put(name, table)?.also { shutdownTable(it, false) } }
 
     fun getTable(name: String): Table? = _tables[name]
 
     fun getTable(name: String, init: (String) -> Table): Table = _tables.computeIfAbsent(name) {
-        init(it).makeClone(name = it, onRegistry = false)
+        init(it).makeClone(name = it)
     }
 
     val tables: Set<Table> get() = Collections.unmodifiableSet(_tables.values.toSet())
@@ -33,12 +34,12 @@ internal object Registry {
         }
     }
 
-    fun setView(name: String, view: TableView) = _views.put(name, view)?.also { shutdownView(it, false) }
+    fun setView(name: String, view: TableView) { _views.put(name, view)?.also { shutdownView(it, false) } }
 
     fun getView(name: String): TableView? = _views[name]
 
     fun getView(name: String, init: (String) -> TableView): TableView = _views.computeIfAbsent(name) {
-        init(it).makeClone(name = it, onRegistry = false)
+        init(it).makeClone(name = it)
     }
 
     val views: Set<TableView> get() = Collections.unmodifiableSet(_views.values.toSet())

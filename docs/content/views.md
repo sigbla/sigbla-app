@@ -465,8 +465,7 @@ The table view can also be cloned using the `clone` function. As we'll cover lat
 view, and these listeners are, as with the table, not cloned when cloning a view. The use of cell transformers on the
 other hand is included in the cloned view, sharing the same instance references.
 
-Also, much like on tables, table views also have a registry, available through `TableView.fromRegistry` and related
-functions. The behaviour is comparable to that of tables.
+Also, much like on tables, table views also have a registry. The behaviour is comparable to that of tables.
 
 ## Interacting with the UI
 

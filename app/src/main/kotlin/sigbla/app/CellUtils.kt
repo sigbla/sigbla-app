@@ -2,7 +2,6 @@
  * See LICENSE file for licensing details. */
 package sigbla.app
 
-import sigbla.app.internals.RefHolder
 import sigbla.app.internals.Registry
 import kotlin.reflect.KClass
 
@@ -13,7 +12,7 @@ fun valueOf(cell: Cell<*>, typeFilter: KClass<*>): Any? = if (typeFilter.isInsta
 inline fun <reified T> valueOf(noinline source: Cell<*>.() -> Unit): T? = valueOf(source, T::class) as T?
 
 fun valueOf(source: Cell<*>.() -> Unit, typeFilter: KClass<*>): Any? {
-    val table = BaseTable(null, null, false, RefHolder(TableRef())) as Table
+    val table = BaseTable(null, null) as Table
     table["valueOf", 0L].source()
     val value = valueOf(table["valueOf", 0L], typeFilter)
     Registry.shutdownTable(table, true) // Clean up

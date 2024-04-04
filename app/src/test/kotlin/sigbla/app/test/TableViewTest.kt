@@ -17,7 +17,7 @@ class TableViewTest {
     @Test
     fun `registry test`() {
         val t1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}", Table[null]]
-        val t2 = TableView.fromRegistry(t1.name!!)
+        val t2 = TableView[t1.name]
 
         t1["A", 1][CellHeight] = 250
 
@@ -25,14 +25,15 @@ class TableViewTest {
         assertTrue(t1 === t2)
         assertFalse(t1.closed)
 
-        assertTrue(TableView.names.contains(t1.name!!))
-        assertTrue(TableView.views.mapNotNull { it.name }.contains(t1.name!!))
+        assertTrue(TableView.names.contains(t1.name))
+        assertTrue(TableView.views.mapNotNull { it.name }.contains(t1.name))
 
         remove(t1)
 
-        assertFalse(TableView.names.contains(t1.name!!))
-        assertFalse(TableView.views.mapNotNull { it.name }.contains(t1.name!!))
+        assertFalse(TableView.names.contains(t1.name))
+        assertFalse(TableView.views.mapNotNull { it.name }.contains(t1.name))
         assertTrue(t1.closed)
+        assertTrue(t2.closed)
 
         assertEquals(250L, t1["A", 1][CellHeight].height)
 
@@ -41,12 +42,11 @@ class TableViewTest {
         }
 
         assertFailsWith(InvalidTableViewException::class) {
-            TableView.fromRegistry(t1.name!!)
+            TableView[t1.name!!, { name -> throw InvalidTableViewException("No table view by name $name")}]
         }
+        assertFalse(TableView.names.contains(t1.name))
 
-        val t3 = TableView.fromRegistry(t1.name!!) {
-            TableView[null]
-        }
+        val t3 = TableView[t1.name!!, { TableView[null] }]
 
         assertTrue(TableView.names.contains(t1.name))
         assertTrue(TableView.views.contains(t3))
@@ -57,21 +57,19 @@ class TableViewTest {
         assertFalse(t1 === t3)
         assertEquals(t1.name, t3.name)
 
-        TableView.remove(t3.name!!)
+        remove(t3)
 
         assertFailsWith(InvalidTableViewException::class) {
-            TableView.fromRegistry(t3.name!!)
+            TableView[t3.name!!, { name -> throw InvalidTableViewException("No table view by name $name")}]
         }
 
-        val t4 = TableView.fromRegistry(t3.name!!) {
-            TableView[t3.name!! + " extra"]
-        }
+        val t4 = TableView[t3.name!!, { TableView[t3.name!! + " extra"] }]
 
         assertTrue(TableView.names.contains(t4.name))
         assertTrue(TableView.views.contains(t4))
 
         assertTrue(TableView.names.contains(t4.name + " extra"))
-        val t5 = TableView.fromRegistry(t4.name + " extra")
+        val t5 = TableView[t4.name + " extra"]
 
         assertTrue(TableView.views.contains(t5))
 
