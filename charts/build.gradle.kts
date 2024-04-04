@@ -5,6 +5,7 @@ plugins {
     signing
 }
 
+// TODO Remove, look at impact? (+ elsewhere)
 group = "sigbla.charts"
 
 kotlin {

@@ -6,6 +6,7 @@ plugins {
     signing
 }
 
+// TODO Remove, look at impact?
 group = "sigbla.app"
 
 kotlin {
