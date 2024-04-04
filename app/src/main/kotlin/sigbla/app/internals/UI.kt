@@ -37,6 +37,7 @@ internal object SigblaBackend {
     private val port: Int
     private val blockingThread: Thread
 
+    // TODO Add a ping event regularly on all listeners
     private val listeners: ConcurrentMap<WebSocketSession, SigblaClient> = ConcurrentHashMap()
     private val viewRefs: ConcurrentMap<String, Triple<TableView, TableViewListenerReference, TableListenerReference?>> = ConcurrentHashMap()
 
@@ -95,6 +96,7 @@ internal object SigblaBackend {
                                 ContentType.Text.Html,
                                 HttpStatusCode.OK
                             ) {
+                                // TODO Replace title with table view name?
                                 this.javaClass.getResource("/table/table.html").readText().replace("\${title}", ref)
                             }
                         }
@@ -648,6 +650,8 @@ internal object SigblaBackend {
                 }
             }
         }
+
+        // TODO Clean up listeners if a tableview is removed
 
         return urlGenerator(engine, view, ref)
     }

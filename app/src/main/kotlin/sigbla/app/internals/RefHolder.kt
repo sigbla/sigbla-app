@@ -39,6 +39,7 @@ internal class RefHolder<V>(@Volatile private var ref: V) {
         // Dev testing
         //if (prev is sigbla.app.TableRef && next is sigbla.app.TableRef && prev.version >= next.version) throw sigbla.app.exceptions.SigblaAppException()
         // TODO Consider if we want some kind of testing mode for the above..?
+        //      Look at using assert() and enable this when running tests, unless there's some performance impact overall also when disabled?
 
         set(next)
         return Pair(prev, next)
