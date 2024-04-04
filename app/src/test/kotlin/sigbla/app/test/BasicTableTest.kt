@@ -130,7 +130,7 @@ class BasicTableTest {
         assertEquals(Unit, valueOf<Any>(t["F"][5]))
         assertEquals(Unit, valueOf<Any>(t["F"][6]))
 
-        Table.remove(name)
+        remove(t)
         assertFalse(Table.names.contains(name))
         assertFalse(Table.tables.mapNotNull { it.name }.contains(name))
     }
@@ -230,7 +230,7 @@ class BasicTableTest {
         assertEquals(Unit, valueOf<Any>(t["E"][5]))
         assertEquals(Unit, valueOf<Any>(t["E"][6]))
 
-        Table.remove(name)
+        remove(t)
         assertFalse(Table.names.contains(name))
     }
 

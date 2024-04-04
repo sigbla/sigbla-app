@@ -65,17 +65,12 @@ internal data class TableViewRef(
 class TableView internal constructor(
     val name: String?,
     val source: TableView?,
-    onRegistry: Boolean = true,
     internal val tableViewRef: RefHolder<TableViewRef>,
     internal val eventProcessor: TableViewEventProcessor = TableViewEventProcessor()
 ) : Iterable<DerivedCellView> {
     internal constructor(name: String?, table: Table?) : this(name, null, tableViewRef = RefHolder(TableViewRef(table = table)))
     internal constructor(table: Table) : this(table.name, table)
     internal constructor(name: String?) : this(name, if (name == null) null else Registry.getTable(name))
-
-    init {
-        if (name != null && onRegistry) Registry.setView(name, this)
-    }
 
     val closed: Boolean get() = tableViewRef.closed
 
@@ -145,7 +140,7 @@ class TableView internal constructor(
                 if (cachedTable != null) return cachedTable
             }
 
-            val table = originalTable?.makeClone() ?: BaseTable(name = null, source = null, onRegistry = false)
+            val table = originalTable?.makeClone() ?: BaseTable(name = null, source = null)
 
             ref.tableTransformer?.invoke(table)
 
@@ -1134,7 +1129,7 @@ class TableView internal constructor(
         return newValue
     }
 
-    internal fun makeClone(name: String? = this.name, onRegistry: Boolean = false, ref: TableViewRef = tableViewRef.get()) = TableView(name, this, onRegistry, RefHolder(ref))
+    internal fun makeClone(name: String? = this.name, ref: TableViewRef = tableViewRef.get()) = TableView(name, this, RefHolder(ref))
 
     override fun toString() = "TableView[$name]"
 
@@ -1149,17 +1144,16 @@ class TableView internal constructor(
     }
 
     companion object {
-        operator fun get(name: String?): TableView = TableView(name)
+        operator fun get(name: String?): TableView {
+            return if (name == null) TableView(null) // This will not be on the registry
+            else get(name) { TableView(null) } // This will be on the registry
+        }
 
-        operator fun get(table: Table): TableView = TableView(table)
+        operator fun get(name: String, init: (name: String) -> TableView): TableView = Registry.getView(name, init)
 
-        operator fun get(name: String, table: Table): TableView = TableView(name, table)
+        operator fun get(table: Table): TableView = get(table.name).apply { this[Table] = table }
 
-        fun fromRegistry(name: String): TableView = Registry.getView(name) ?: throw InvalidTableViewException("No table view by name $name")
-
-        fun fromRegistry(name: String, init: (String) -> TableView): TableView = Registry.getView(name, init)
-
-        fun remove(name: String) = Registry.shutdownView(fromRegistry(name), true)
+        operator fun get(name: String, table: Table): TableView = get(name).apply { this[Table] = table }
 
         val names: SortedSet<String> get() = Registry.viewNames
 

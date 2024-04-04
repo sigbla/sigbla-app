@@ -266,53 +266,65 @@ a number with two and update the table value with the result.
 
 ## Table registry
 
-If you've already created a table with `Table["name"]`, you can obtain a reference to this same table through the
-registry by calling `Table.fromRegistry("name")`. However, if you redo `Table["name"]` a new table is created
-that will replace the old table of the same name in the registry.
+The first time you call `Table["name"]` the table is created and placed on the registry. Hence, if you call
+`Table["name"]` again, you'll be given the existing table on that name.
 
-Also note that if a table is replaced in the registry, the old table will be closed, something you can check by looking
-at the `closed` property on a table as shown below.
+You remove a table from the registry with `remove(table)`, also causing the existing table to be closed, something you
+can check by looking at the `closed` property on a table as shown below.
 
 ``` kotlin
 val table1 = Table["name"]
-val table2 = Table["name"]
+
+println(table1.closed)
+
+// Output:
+// false
+
+// This will close the table and remove it from the registry
+remove(table1)
 
 println(table1.closed)
 
 // Output:
 // true
-
-println(table2.closed)
-
-// Output:
-// false
 ```
 
 A table that is closed can not be updated, and an `InvalidRefException` will be thrown if you try. You may still read
 existing data from a closed table. If you clone it, as described next, you are able to modify the clone.
 
-Note that you can also remove (and close) a table from the registry with either `remove(table)` or `Table.remove("name")`.
-
 Tables with no name, created with `Table[null]`, are not put on the registry.
 
-If you call `Table.fromRegistry("name")` and there is no table with that name in the registry, an `InvalidTableException`
-will be thrown. If you want to provide a fallback generator that will create the table if not found, you may do so as
-shown below.
+If you want to provide some logic to initialize a table when created (i.e., it's not already on the registry), you can
+do that as shown next:
 
 ``` kotlin
-val table = Table.fromRegistry("name") {
+val table = Table["name", { name ->
     // Generate new table
     Table[null]
-}
+}]
 ```
 
 Be careful not to generate the new table with a name itself, like `Table["name"]` instead of `Table[null]` within the
 generator, because that will put that table on the registry as well (unless that's what you really wanted). The
-returned table will have the name provided to `fromRegistry`, and now be available within the registry as well.
+returned table will have the name provided, and now be available within the registry.
 
-The returned table when calling `Table.fromRegistry` with a generator, is, if the generator is used, a clone of the
+The returned table when calling `Table[..]` with a generator, is, if the generator is used, a clone of the
 table returned by the generator. It's therefore possible to have the generator return an existing table without this
-causing any sort of naming conflict or other overlap.
+causing any sort of naming conflict or other overlap. An example of this is shown next:
+
+``` kotlin
+val sourceTable = Table["source"]
+val derivedTable = Table["derived", { sourceTable }]
+```
+
+Doing the above is comparable to using clone with name, as shown next. The difference is that when using `clone` with a
+name, the cloned table will replace any existing table in the registry with the provided name. We'll cover cloning in
+more detail in the next section.
+
+``` kotlin
+val sourceTable = Table["source"]
+val derivedTable = clone(sourceTable, "derived")
+```
 
 ## Cloning a table
 

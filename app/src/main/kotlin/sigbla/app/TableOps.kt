@@ -2032,7 +2032,7 @@ fun clear(cell: Cell<*>): Unit { cell(Unit) }
 
 fun clone(table: Table): Table = table.makeClone()
 
-fun clone(table: Table, withName: String?): Table = table.makeClone(withName, true)
+fun clone(table: Table, withName: String): Table = table.makeClone(withName).also { Registry.setTable(withName, it) }
 
 // ---
 

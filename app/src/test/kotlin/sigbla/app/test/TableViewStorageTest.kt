@@ -68,6 +68,8 @@ class TableViewStorageTest {
         assertFalse(it6.hasNext())
 
         deleteFolder(tmpFolder)
+
+        remove(tableView1)
     }
 
     @Test
@@ -114,6 +116,8 @@ class TableViewStorageTest {
         assertFalse(it6.hasNext())
 
         deleteFolder(tmpFolder)
+
+        remove(tableView1)
     }
 
     @Test
@@ -199,6 +203,8 @@ class TableViewStorageTest {
         assertFalse(it6.hasNext())
 
         deleteFolder(tmpFolder)
+
+        remove(tableView1)
     }
 
     @Test
@@ -284,6 +290,8 @@ class TableViewStorageTest {
         assertFalse(it6.hasNext())
 
         deleteFolder(tmpFolder)
+
+        remove(tableView1)
     }
 
     @Test
@@ -376,6 +384,9 @@ class TableViewStorageTest {
 
         assertFalse(it5.hasNext())
         assertFalse(it6.hasNext())
+
+        remove(tableView2)
+        remove(tableView3)
     }
 
     @Test
@@ -468,6 +479,9 @@ class TableViewStorageTest {
 
         assertFalse(it5.hasNext())
         assertFalse(it6.hasNext())
+
+        remove(tableView2)
+        remove(tableView3)
     }
 
     @Test
@@ -766,6 +780,8 @@ class TableViewStorageTest {
 
             assertFalse(it5.hasNext())
             assertFalse(it6.hasNext())
+
+            remove(tableView1)
         }
 
         deleteFolder(tmpFolder)

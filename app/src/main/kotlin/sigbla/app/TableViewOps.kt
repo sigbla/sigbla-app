@@ -30,7 +30,7 @@ fun clear(cellView: CellView): Unit { cellView(Unit) }
 
 fun clone(tableView: TableView): TableView = tableView.makeClone()
 
-fun clone(tableView: TableView, name: String): TableView = tableView.makeClone(name, true)
+fun clone(tableView: TableView, withName: String): TableView = tableView.makeClone(withName).also { Registry.setView(withName, it) }
 
 fun show(
     tableView: TableView,

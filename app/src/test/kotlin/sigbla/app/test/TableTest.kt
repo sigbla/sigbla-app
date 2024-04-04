@@ -18,36 +18,37 @@ class TableTest {
     @Test
     fun `registry test`() {
         val t1 = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
-        val t2 = Table.fromRegistry(t1.name!!)
+        val t2 = Table[t1.name]
 
         t1["A", 1] = "A1"
 
         assertEquals(t1, t2)
         assertTrue(t1 === t2)
 
-        assertTrue(Table.names.contains(t1.name!!))
-        assertTrue(Table.tables.mapNotNull { it.name }.contains(t1.name!!))
+        assertTrue(Table.names.contains(t1.name))
+        assertTrue(Table.tables.mapNotNull { it.name }.contains(t1.name))
         assertFalse(t1.closed)
 
         remove(t1)
 
-        assertFalse(Table.names.contains(t1.name!!))
-        assertFalse(Table.tables.mapNotNull { it.name }.contains(t1.name!!))
+        assertFalse(Table.names.contains(t1.name))
+        assertFalse(Table.tables.mapNotNull { it.name }.contains(t1.name))
         assertTrue(t1.closed)
+        assertTrue(t2.closed)
 
         assertEquals("A1", t1["A", 1].value)
+        assertEquals("A1", t2["A", 1].value)
 
         assertFailsWith<InvalidRefException> {
             t1["A", 1] = "A1"
         }
 
         assertFailsWith(InvalidTableException::class) {
-            Table.fromRegistry(t1.name!!)
+            Table[t1.name!!, { name -> throw InvalidTableException("No table by name $name") }]
         }
+        assertFalse(Table.names.contains(t1.name))
 
-        val t3 = Table.fromRegistry(t1.name!!) {
-            Table[null]
-        }
+        val t3 = Table[t1.name!!, { Table[null] }]
 
         assertTrue(Table.names.contains(t1.name))
         assertTrue(Table.tables.contains(t3))
@@ -58,21 +59,19 @@ class TableTest {
         assertFalse(t1 === t3)
         assertEquals(t1.name, t3.name)
 
-        Table.remove(t3.name!!)
+        remove(t3)
 
         assertFailsWith(InvalidTableException::class) {
-            Table.fromRegistry(t3.name!!)
+            Table[t3.name!!, { name -> throw InvalidTableException("No table by name $name") }]
         }
 
-        val t4 = Table.fromRegistry(t3.name!!) {
-            Table[t3.name!! + " extra"]
-        }
+        val t4 = Table[t3.name!!, { name -> Table["$name extra"] }]
 
         assertTrue(Table.names.contains(t4.name))
         assertTrue(Table.tables.contains(t4))
 
         assertTrue(Table.names.contains(t4.name + " extra"))
-        val t5 = Table.fromRegistry(t4.name + " extra")
+        val t5 = Table[t4.name + " extra", { name -> throw InvalidTableException("No table by name $name") }]
 
         assertTrue(Table.tables.contains(t5))
 
@@ -1155,19 +1154,19 @@ class TableTest {
 
         val t2 = clone(t1)
 
-        assertEquals(t1, Table.fromRegistry(t1.name!!))
-        assertTrue(t1 === Table.fromRegistry(t1.name!!))
+        assertEquals(t1, Table[t1.name])
+        assertTrue(t1 === Table[t1.name])
         assertNotEquals(t1, t2)
-        assertNotEquals(t2, Table.fromRegistry(t1.name!!))
+        assertNotEquals(t2, Table[t1.name])
 
-        assertEquals(t1["A"], Table.fromRegistry(t1.name!!)["A"])
+        assertEquals(t1["A"], Table[t1.name]["A"])
         assertNotEquals(t1["A"], t1["B"])
         assertNotEquals(t1["A"], t2["A"])
 
         assertEquals(t1["A"].header, t2["A"].header)
         assertNotEquals(t1["A"].header, t1["B"].header)
 
-        assertEquals(t1[1], Table.fromRegistry(t1.name!!)[1])
+        assertEquals(t1[1], Table[t1.name][1])
         assertNotEquals(t1[1], t1[2])
         assertNotEquals(t1[1], t2[1])
         assertEquals(t1[1].index, t2[1].index)
