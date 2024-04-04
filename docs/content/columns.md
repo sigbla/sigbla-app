@@ -127,9 +127,9 @@ assert(columnT1C1.order < columnT1C2.order)
 assert(columnT1C1.table == table1)
 
 // It's also worth noting that a table is only equal to itself:
-assert(table1 == Table.fromRegistry("MyTable1"))
-assert(table2 == Table.fromRegistry("MyTable2"))
-assert(table2 != Table.fromRegistry("MyTable1"))
+assert(table1 == Table["MyTable1"])
+assert(table2 == Table["MyTable2"])
+assert(table2 != Table["MyTable1"])
 ```
 
 ## Navigating between columns
@@ -382,7 +382,7 @@ print(table)
 // Copy to a new table
 copy(table["C"] to Table["NewTable"])
 
-print(Table.fromRegistry("NewTable"))
+print(Table["NewTable"])
 
 // Output:
 //    |C

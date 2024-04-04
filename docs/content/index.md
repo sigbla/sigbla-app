@@ -99,7 +99,7 @@ val table = Table["MyTable"]
 ```
 
 This creates a table, named MyTable. The name is optional, and could be `null`, but by giving it a name we can easily
-find it later through the built-in registry. You can obtain a reference to an existing table by doing `Table.fromRegistry(name)`.
+find it later through the built-in registry by simply calling `Table["MyTable"]` again.
 
 ``` kotlin
 table["Column A", 0] = 100
