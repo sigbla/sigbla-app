@@ -211,7 +211,7 @@ internal class TableEventProcessor {
             val newTable = table.makeClone(ref = ref)
             listenerRefEvent.version = ref.version
             listenerRefEvent.listenerEvent(newTable.asSequence().map {
-                val oldColumn = BaseColumn(
+                val oldColumn = Column(
                     oldTable,
                     it.column.header,
                     ref.columns[it.column.header]?.columnOrder ?: it.column.order
@@ -257,7 +257,7 @@ internal class TableEventProcessor {
             val newTable = column.table.makeClone(ref = ref)
             listenerRefEvent.version = ref.version
             listenerRefEvent.listenerEvent(newTable[column].asSequence().map {
-                val oldColumn = BaseColumn(
+                val oldColumn = Column(
                     oldTable,
                     it.column.header,
                     ref.columns[it.column.header]?.columnOrder ?: it.column.order
@@ -305,7 +305,7 @@ internal class TableEventProcessor {
             val newTable = row.table.makeClone(ref = ref)
             listenerRefEvent.version = ref.version
             listenerRefEvent.listenerEvent(newTable[row].asSequence().map {
-                val oldColumn = BaseColumn(
+                val oldColumn = Column(
                     oldTable,
                     it.column.header,
                     ref.columns[it.column.header]?.columnOrder ?: it.column.order
@@ -351,7 +351,7 @@ internal class TableEventProcessor {
             val newTable = cellRange.table.makeClone(ref = ref)
             listenerRefEvent.version = ref.version
             listenerRefEvent.listenerEvent(newTable[cellRange].asSequence().map {
-                val oldColumn = BaseColumn(
+                val oldColumn = Column(
                     oldTable,
                     it.column.header,
                     ref.columns[it.column.header]?.columnOrder ?: it.column.order
@@ -399,7 +399,7 @@ internal class TableEventProcessor {
             listenerRefEvent.listenerEvent(newTable[cell].asSequence()
                 .filter { it !is UnitCell }
                 .map {
-                    val oldColumn = BaseColumn(
+                    val oldColumn = Column(
                         oldTable,
                         it.column.header,
                         ref.columns[it.column.header]?.columnOrder ?: it.column.order
@@ -477,7 +477,7 @@ internal class TableEventProcessor {
             val oldTable = cells.table.makeClone(ref = TableRef())
             val newTable = cells.table.makeClone(ref = ref)
             eventReceiver(cells.asSequence().map { newTable[it] }.map {
-                val oldColumn = BaseColumn(
+                val oldColumn = Column(
                     oldTable,
                     it.column.header,
                     ref.columns[it.column.header]?.columnOrder ?: it.column.order

@@ -16,21 +16,40 @@ import java.math.BigInteger
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 
-// TODO Should this be sealed rather than abstract? Or just a normal class with no BaseTable?
-abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> {
-    abstract val closed: Boolean
+class Table internal constructor(
+    val name: String?,
+    val source: Table?,
+    internal val tableRef: RefHolder<TableRef> = RefHolder(TableRef()),
+    internal val eventProcessor: TableEventProcessor = TableEventProcessor()
+) : Iterable<Cell<*>> {
+    val closed: Boolean get() = tableRef.closed
 
-    abstract val headers: Sequence<Header>
+    val headers: Sequence<Header>
+        get() = tableRef.get().headers.filter { !it.second.prenatal }.map { it.first }
 
-    abstract val columns: Sequence<Column>
+    val columns: Sequence<Column>
+        get() = tableRef.get().headers.filter { !it.second.prenatal }.map { Column(this, it.first, it.second.columnOrder) }
 
-    abstract val indexes: Sequence<Long>
+    val indexes: Sequence<Long>
+        get() = tableRef.get().indexes
 
-    internal abstract val tableRef: RefHolder<TableRef>
+    operator fun get(header: Header): Column {
+        if (header.labels.isEmpty()) throw InvalidColumnException("Empty header")
 
-    internal abstract val eventProcessor: TableEventProcessor
+        val columnMeta = tableRef.get().columns[header] ?: tableRef.updateAndGet {
+            if (it.columns.containsKey(header)) return@updateAndGet it
 
-    abstract operator fun get(header: Header): Column
+            val columnMeta = ColumnMeta(tableRef.get().columnCounter.getAndIncrement(), true)
+
+            it.copy(
+                columns = it.columns.put(header, columnMeta),
+                columnCells = it.columnCells.put(header, PTreeMap()),
+                version = it.version + 1L
+            )
+        }.columns[header] ?: throw InvalidColumnException("Unable to find column meta for header $header")
+
+        return Column(this, header, columnMeta.columnOrder)
+    }
 
     operator fun get(vararg header: String): Column = get(
         Header(
@@ -40,7 +59,7 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
 
     operator fun get(index: Long): Row = get(IndexRelation.AT, index)
 
-    operator fun get(indexRelation: IndexRelation, index: Long): Row = BaseRow(this, indexRelation, index)
+    operator fun get(indexRelation: IndexRelation, index: Long): Row = Row(this, indexRelation, index)
 
     operator fun get(header1: String, index: Long): Cell<*> = this[header1][index]
 
@@ -66,7 +85,7 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
 
     operator fun get(row: Row): Row = get(row.indexRelation, row.index)
 
-    operator fun get(indexRelation: IndexRelation, index: Int): Row = BaseRow(this, indexRelation, index.toLong())
+    operator fun get(indexRelation: IndexRelation, index: Int): Row = Row(this, indexRelation, index.toLong())
 
     operator fun get(header1: String, index: Int): Cell<*> = this[header1][index]
 
@@ -105,8 +124,8 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
     operator fun get(column: Column): Column = this[column.header]
 
     operator fun get(cellRange: CellRange): CellRange {
-        val startColumn = BaseColumn(this, cellRange.start.column.header)
-        val endInclusiveColumn = BaseColumn(this, cellRange.endInclusive.column.header)
+        val startColumn = Column(this, cellRange.start.column.header)
+        val endInclusiveColumn = Column(this, cellRange.endInclusive.column.header)
         return CellRange(startColumn[cellRange.start.index], endInclusiveColumn[cellRange.endInclusive.index], cellRange.order)
     }
 
@@ -983,7 +1002,7 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
 
     // -----
 
-    abstract operator fun contains(header: Header): Boolean
+    operator fun contains(header: Header): Boolean = tableRef.get().columns[header]?.prenatal == false
 
     operator fun contains(column: Column): Boolean = contains(column.header)
 
@@ -996,7 +1015,7 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
     override fun iterator(): Iterator<Cell<*>> = iterator(this, tableRef.get())
 
     internal fun iterator(table: Table, ref: TableRef): Iterator<Cell<*>> {
-        val columnIterator = ref.headers.map { BaseColumn(table, it.first, it.second.columnOrder) }.iterator()
+        val columnIterator = ref.headers.map { Column(table, it.first, it.second.columnOrder) }.iterator()
 
         return object : Iterator<Cell<*>> {
             private var cellIterator = nextCellIterator()
@@ -1026,7 +1045,7 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
         }
     }
 
-    internal abstract fun makeClone(name: String? = this.name, ref: TableRef = tableRef.get()): Table
+    internal fun makeClone(name: String? = this.name, ref: TableRef = tableRef.get()): Table = Table(name, this, RefHolder(ref))
 
     override fun toString() = "Table[$name]"
 
@@ -1042,8 +1061,8 @@ abstract class Table(val name: String?, val source: Table?) : Iterable<Cell<*>> 
 
     companion object {
         operator fun get(name: String?): Table {
-            return if (name == null) BaseTable(null, null) // This will not be on the registry
-            else get(name) { BaseTable(null, null) } // This will be on the registry
+            return if (name == null) Table(null, null) // This will not be on the registry
+            else get(name) { Table(null, null) } // This will be on the registry
         }
 
         operator fun get(name: String, init: (name: String) -> Table): Table = Registry.getTable(name, init)
@@ -1084,48 +1103,6 @@ internal data class TableRef(
             }
             .asSequence()
     }
-}
-
-class BaseTable internal constructor(
-    name: String?,
-    source: Table?,
-    override val tableRef: RefHolder<TableRef> = RefHolder(TableRef()),
-    override val eventProcessor: TableEventProcessor = TableEventProcessor()
-) : Table(name, source) {
-    override val closed: Boolean get() = tableRef.closed
-
-    override val headers: Sequence<Header>
-        get() = tableRef.get().headers.filter { !it.second.prenatal }.map { it.first }
-
-    override val columns: Sequence<Column>
-        get() = tableRef.get().headers.filter { !it.second.prenatal }.map { BaseColumn(this, it.first, it.second.columnOrder) }
-
-    override val indexes: Sequence<Long>
-        get() = tableRef.get().indexes
-
-    override fun get(header: Header): Column {
-        if (header.labels.isEmpty()) throw InvalidColumnException("Empty header")
-
-        val columnMeta = tableRef.get().columns[header] ?: tableRef.updateAndGet {
-            if (it.columns.containsKey(header)) return@updateAndGet it
-
-            val columnMeta = ColumnMeta(tableRef.get().columnCounter.getAndIncrement(), true)
-
-            it.copy(
-                columns = it.columns.put(header, columnMeta),
-                columnCells = it.columnCells.put(header, PTreeMap()),
-                version = it.version + 1L
-            )
-        }.columns[header] ?: throw InvalidColumnException("Unable to find column meta for header $header")
-
-        return BaseColumn(this, header, columnMeta.columnOrder)
-    }
-
-    override fun contains(header: Header): Boolean = tableRef.get().columns[header]?.prenatal == false
-
-    override fun makeClone(name: String?, ref: TableRef): Table = BaseTable(name, this, RefHolder(ref))
-
-    companion object
 }
 
 infix fun Table.by(columnRange: ColumnRange) = TableByColumnRangeAction(this, columnRange)

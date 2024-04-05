@@ -112,7 +112,7 @@ internal fun load1(
 
                     val columnLocation = headers.first().location ?: throw InvalidStorageException("Missing column location")
                     val header = Header(headers.map { it.section }.reversed())
-                    val column = BaseTable(null, table)[header]
+                    val column = Table(null, table)[header]
 
                     fillColumn(file, compressed, column, columnLocation)
                     column.filter()

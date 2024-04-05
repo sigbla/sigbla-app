@@ -81,7 +81,7 @@ class CellRange internal constructor(override val start: Cell<*>, override val e
             .let {
                 if (currentStart > currentEnd) it.toList().reversed().asSequence() else it
             }
-            .map { BaseColumn(table, it.first, it.second.columnOrder) }
+            .map { Column(table, it.first, it.second.columnOrder) }
             .toList()
 
         val rows = if (start.index <= endInclusive.index) {
@@ -396,7 +396,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
         // We want to throw this exception because ref should contain columnCells
         val values = ref.columnCells[this.column.header] ?: throw InvalidColumnException("Unable to find column cells for header ${this.column.header}")
         val cellValue = values[index] ?: return emptyList<Cell<*>>().iterator()
-        val column = BaseColumn(table, this.column.header, meta.columnOrder)
+        val column = Column(table, this.column.header, meta.columnOrder)
 
         return listOf(cellValue.toCell(column, index)).iterator()
     }

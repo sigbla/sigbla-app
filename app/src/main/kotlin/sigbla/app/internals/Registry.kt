@@ -2,10 +2,8 @@
  * See LICENSE file for licensing details. */
 package sigbla.app.internals
 
-import sigbla.app.BaseTable
 import sigbla.app.Table
 import sigbla.app.TableView
-import sigbla.app.exceptions.InvalidTableException
 import java.util.*
 import java.util.concurrent.ConcurrentSkipListMap
 
@@ -26,8 +24,6 @@ internal object Registry {
     val tableNames: SortedSet<String> get() = Collections.unmodifiableSortedSet(_tables.keys.toSortedSet())
 
     fun shutdownTable(table: Table, remove: Boolean) {
-        if (table !is BaseTable) throw InvalidTableException("Unsupported table type")
-
         synchronized(table.eventProcessor) {
             if (remove && table.name != null) _tables.remove(table.name, table)
             table.tableRef.closed = true

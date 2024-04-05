@@ -9,14 +9,7 @@ import java.math.BigInteger
 import kotlin.math.min
 import kotlin.math.max
 
-// TODO Should the be sealed rather than abstract? Or just a normal class with no BaseRow?
-abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
-    abstract val table: Table
-
-    abstract val indexRelation: IndexRelation
-
-    abstract val index: Long
-
+class Row internal constructor(val table: Table, val indexRelation: IndexRelation, val index: Long) : Comparable<Row>, Iterable<Cell<*>> {
     val headers: Sequence<Header>
         get() = table.headers
 
@@ -118,7 +111,7 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
                     IndexRelation.AT_OR_BEFORE -> at(columnHeader) ?: firstBefore(columnHeader)
                     IndexRelation.AT_OR_AFTER -> at(columnHeader) ?: firstAfter(columnHeader)
                 }.let {
-                    it?.toCell(BaseColumn(table, columnHeader, columnMeta.columnOrder), index)
+                    it?.toCell(Column(table, columnHeader, columnMeta.columnOrder), index)
                 }
             }
             .filterNotNull()
@@ -147,8 +140,6 @@ abstract class Row : Comparable<Row>, Iterable<Cell<*>> {
 
     override fun toString() = "Row[$indexRelation $index]"
 }
-
-class BaseRow internal constructor(override val table: Table, override val indexRelation: IndexRelation, override val index: Long) : Row()
 
 class RowRange internal constructor(override val start: Row, override val endInclusive: Row) : ClosedRange<Row>, Iterable<Row> {
     init {
