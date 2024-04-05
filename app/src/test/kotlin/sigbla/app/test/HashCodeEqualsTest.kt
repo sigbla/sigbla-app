@@ -485,7 +485,7 @@ class HashCodeEqualsTest {
     fun `values in cells`() {
         val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
-        table["Unit", 0] = null
+        table["Unit", 0] = Unit
         table["Boolean", 0] = true
         table["String", 0] = "string"
         table["Long", 0] = 100L

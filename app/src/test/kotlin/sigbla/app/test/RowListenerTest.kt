@@ -167,7 +167,7 @@ class RowListenerTest {
 
         off(ref1)
 
-        t["A", 0] = null
+        t["A", 0] = Unit
 
         val ref2 = on(t["A"]) {
             allowLoop = true
@@ -686,7 +686,7 @@ class RowListenerTest {
 
         assertEquals(2, eventCount1)
 
-        t1["B", 1] = null
+        t1["B", 1] = Unit
 
         assertEquals(3, eventCount1)
 

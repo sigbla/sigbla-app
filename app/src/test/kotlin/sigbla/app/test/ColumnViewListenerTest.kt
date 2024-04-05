@@ -1738,7 +1738,7 @@ class ColumnViewListenerTest {
         assertEquals(1, eventCount1)
         assertEquals(1, eventCount2)
 
-        tv1["A", 1][CellWidth] = null
+        tv1["A", 1][CellWidth] = Unit
 
         assertEquals(2, eventCount1)
         assertEquals(2, eventCount2)

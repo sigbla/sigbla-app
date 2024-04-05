@@ -5,6 +5,7 @@ package sigbla.app
 import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.IndexRelation.*
 import sigbla.app.exceptions.InvalidRowException
+import sigbla.app.exceptions.InvalidValueException
 import sigbla.app.pds.collection.TreeMap as PTreeMap
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -14,9 +15,9 @@ import kotlin.math.max
 import kotlin.math.min
 
 class Header internal constructor(vararg labels: String) : Comparable<Header> {
-    val labels: List<String> = Collections.unmodifiableList(labels.asList())
-
     internal constructor(labels: List<String>) : this(*labels.toTypedArray())
+
+    val labels: List<String> = Collections.unmodifiableList(labels.asList())
 
     init {
         labels.forEach {
@@ -241,19 +242,19 @@ class Column internal constructor(
 
     // ---
 
-    operator fun set(index: Long, value: Boolean) = set(index, value.toCell(this, index))
+    operator fun set(index: Long, value: Boolean?) = if (value == null) clear(index) else set(index, value.toCell(this, index))
 
-    operator fun set(index: Long, value: String) = set(index, value.toCell(this, index))
+    operator fun set(index: Long, value: String?) = if (value == null) clear(index) else set(index, value.toCell(this, index))
 
-    operator fun set(index: Long, value: Double) = set(index, value.toCell(this, index))
+    operator fun set(index: Long, value: Double?) = if (value == null) clear(index) else set(index, value.toCell(this, index))
 
-    operator fun set(index: Long, value: Long) = set(index, value.toCell(this, index))
+    operator fun set(index: Long, value: Long?) = if (value == null) clear(index) else set(index, value.toCell(this, index))
 
-    operator fun set(index: Long, value: BigInteger) = set(index, value.toCell(this, index))
+    operator fun set(index: Long, value: BigInteger?) = if (value == null) clear(index) else set(index, value.toCell(this, index))
 
-    operator fun set(index: Long, value: BigDecimal) = set(index, value.toCell(this, index))
+    operator fun set(index: Long, value: BigDecimal?) = if (value == null) clear(index) else set(index, value.toCell(this, index))
 
-    operator fun set(index: Long, value: Number) {
+    operator fun set(index: Long, value: Number?) {
         when (value) {
             is Int -> set(index, value.toLong())
             is Long -> set(index, value)
@@ -261,9 +262,12 @@ class Column internal constructor(
             is Double -> set(index, value)
             is BigInteger -> set(index, value)
             is BigDecimal -> set(index, value)
-            else -> set(index, value.toLong())
+            null -> clear(index)
+            else -> throw InvalidValueException("Unsupported type: ${value::class}")
         }
     }
+
+    operator fun set(index: Long, value: Unit?) = if (value == null) clear(index) else set(index, value.toCell(this, index))
 
     operator fun set(index: Long, init: Cell<*>.() -> Unit) = this[index].init()
 
@@ -271,19 +275,21 @@ class Column internal constructor(
 
     operator fun set(index: Int, cell: Cell<*>?) = set(index.toLong(), cell)
 
-    operator fun set(index: Int, value: Boolean) = set(index.toLong(), value)
+    operator fun set(index: Int, value: Boolean?) = set(index.toLong(), value)
 
-    operator fun set(index: Int, value: String) = set(index.toLong(), value)
+    operator fun set(index: Int, value: String?) = set(index.toLong(), value)
 
-    operator fun set(index: Int, value: Double) = set(index.toLong(), value)
+    operator fun set(index: Int, value: Double?) = set(index.toLong(), value)
 
-    operator fun set(index: Int, value: Long) = set(index.toLong(), value)
+    operator fun set(index: Int, value: Long?) = set(index.toLong(), value)
 
-    operator fun set(index: Int, value: BigInteger) = set(index.toLong(), value)
+    operator fun set(index: Int, value: BigInteger?) = set(index.toLong(), value)
 
-    operator fun set(index: Int, value: BigDecimal) = set(index.toLong(), value)
+    operator fun set(index: Int, value: BigDecimal?) = set(index.toLong(), value)
 
-    operator fun set(index: Int, value: Number) = set(index.toLong(), value)
+    operator fun set(index: Int, value: Number?) = set(index.toLong(), value)
+
+    operator fun set(index: Int, value: Unit?) = set(index.toLong(), value)
 
     operator fun set(index: Int, init: Cell<*>.() -> Unit) = this[index].init()
 
@@ -294,37 +300,42 @@ class Column internal constructor(
         set(row.index, cell)
     }
 
-    operator fun set(row: Row, value: Boolean) {
+    operator fun set(row: Row, value: Boolean?) {
         if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
         set(row.index, value)
     }
 
-    operator fun set(row: Row, value: String) {
+    operator fun set(row: Row, value: String?) {
         if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
         set(row.index, value)
     }
 
-    operator fun set(row: Row, value: Double) {
+    operator fun set(row: Row, value: Double?) {
         if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
         set(row.index, value)
     }
 
-    operator fun set(row: Row, value: Long) {
+    operator fun set(row: Row, value: Long?) {
         if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
         set(row.index, value)
     }
 
-    operator fun set(row: Row, value: BigInteger) {
+    operator fun set(row: Row, value: BigInteger?) {
         if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
         set(row.index, value)
     }
 
-    operator fun set(row: Row, value: BigDecimal) {
+    operator fun set(row: Row, value: BigDecimal?) {
         if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
         set(row.index, value)
     }
 
-    operator fun set(row: Row, value: Number) {
+    operator fun set(row: Row, value: Number?) {
+        if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        set(row.index, value)
+    }
+
+    operator fun set(row: Row, value: Unit?) {
         if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
         set(row.index, value)
     }

@@ -121,10 +121,10 @@ internal fun load1(
             SeekableByteChannelInputStream(sbc, defaultCellViewLength)
         }.use { inputStream ->
             val viewMeta = deserializeViewMeta(inputStream)
-            if (viewMeta.cellHeight == null) tableView[CellHeight] = null else tableView[CellHeight] = viewMeta.cellHeight
-            if (viewMeta.cellWidth == null) tableView[CellWidth] = null else tableView[CellWidth] = viewMeta.cellWidth
-            if (viewMeta.cellClasses == null) tableView[CellClasses] = null else tableView[CellClasses] = viewMeta.cellClasses
-            if (viewMeta.cellTopics == null) tableView[CellTopics] = null else tableView[CellTopics] = viewMeta.cellTopics
+            tableView[CellHeight] = viewMeta.cellHeight
+            tableView[CellWidth] = viewMeta.cellWidth
+            tableView[CellClasses] = viewMeta.cellClasses
+            tableView[CellTopics] = viewMeta.cellTopics
         }
 
         sbc.position(columnViewsPosition)
@@ -152,9 +152,9 @@ internal fun load1(
                     val header = Header(headers.map { it.section ?: throw InvalidStorageException("Missing column section") }.reversed())
 
                     val viewMeta = deserializeViewMeta(inputStream)
-                    if (viewMeta.cellWidth == null) tableView[header][CellWidth] = null else tableView[header][CellWidth] = viewMeta.cellWidth
-                    if (viewMeta.cellClasses == null) tableView[header][CellClasses] = null else tableView[header][CellClasses] = viewMeta.cellClasses
-                    if (viewMeta.cellTopics == null) tableView[header][CellTopics] = null else tableView[header][CellTopics] = viewMeta.cellTopics
+                    tableView[header][CellWidth] = viewMeta.cellWidth
+                    tableView[header][CellClasses] = viewMeta.cellClasses
+                    tableView[header][CellTopics] = viewMeta.cellTopics
                 }
             }
         }
@@ -191,9 +191,9 @@ internal fun load1(
                 prevRow = row
 
                 val viewMeta = deserializeViewMeta(inputStream)
-                if (viewMeta.cellHeight == null) tableView[row][CellHeight] = null else tableView[row][CellHeight] = viewMeta.cellHeight
-                if (viewMeta.cellClasses == null) tableView[row][CellClasses] = null else tableView[row][CellClasses] = viewMeta.cellClasses
-                if (viewMeta.cellTopics == null) tableView[row][CellTopics] = null else tableView[row][CellTopics] = viewMeta.cellTopics
+                tableView[row][CellHeight] = viewMeta.cellHeight
+                tableView[row][CellClasses] = viewMeta.cellClasses
+                tableView[row][CellTopics] = viewMeta.cellTopics
             }
         }
 
@@ -223,10 +223,10 @@ internal fun load1(
                     val row = viewSection.row ?: throw InvalidStorageException("Missing row section")
 
                     val viewMeta = deserializeViewMeta(inputStream)
-                    if (viewMeta.cellHeight == null) tableView[header, row][CellHeight] = null else tableView[header, row][CellHeight] = viewMeta.cellHeight
-                    if (viewMeta.cellWidth == null) tableView[header, row][CellWidth] = null else tableView[header, row][CellWidth] = viewMeta.cellWidth
-                    if (viewMeta.cellClasses == null) tableView[header, row][CellClasses] = null else tableView[header, row][CellClasses] = viewMeta.cellClasses
-                    if (viewMeta.cellTopics == null) tableView[header, row][CellTopics] = null else tableView[header, row][CellTopics] = viewMeta.cellTopics
+                    tableView[header, row][CellHeight] = viewMeta.cellHeight
+                    tableView[header, row][CellWidth] = viewMeta.cellWidth
+                    tableView[header, row][CellClasses] = viewMeta.cellClasses
+                    tableView[header, row][CellTopics] = viewMeta.cellTopics
                 }
             }
         }

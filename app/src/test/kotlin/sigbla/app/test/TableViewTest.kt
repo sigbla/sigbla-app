@@ -220,10 +220,10 @@ class TableViewTest {
         assertEquals(setOf("a"), tv1[CellClasses].toSet())
         assertEquals(setOf("b"), tv1[CellTopics].toSet())
 
-        tv1[CellHeight] = null
-        tv1[CellWidth] = null
-        tv1[CellClasses] = null
-        tv1[CellTopics] = null
+        tv1[CellHeight] = Unit
+        tv1[CellWidth] = Unit
+        tv1[CellClasses] = Unit
+        tv1[CellTopics] = Unit
 
         assertEquals(UnitCellHeight::class, tv1[CellHeight]::class)
         assertEquals(UnitCellWidth::class, tv1[CellWidth]::class)
@@ -306,9 +306,9 @@ class TableViewTest {
         assertEquals(setOf("a"), tv1["A"][CellClasses].toSet())
         assertEquals(setOf("b"), tv1["A"][CellTopics].toSet())
 
-        tv1["A"][CellWidth] = null
-        tv1["A"][CellClasses] = null
-        tv1["A"][CellTopics] = null
+        tv1["A"][CellWidth] = Unit
+        tv1["A"][CellClasses] = Unit
+        tv1["A"][CellTopics] = Unit
 
         assertEquals(UnitCellWidth::class, tv1["A"][CellWidth]::class)
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].toSet())
@@ -384,9 +384,9 @@ class TableViewTest {
         assertEquals(setOf("a"), tv1[1][CellClasses].toSet())
         assertEquals(setOf("b"), tv1[1][CellTopics].toSet())
 
-        tv1[1][CellHeight] = null
-        tv1[1][CellClasses] = null
-        tv1[1][CellTopics] = null
+        tv1[1][CellHeight] = Unit
+        tv1[1][CellClasses] = Unit
+        tv1[1][CellTopics] = Unit
 
         assertEquals(UnitCellHeight::class, tv1[1][CellHeight]::class)
         assertEquals(emptySet<String>(), tv1[1][CellClasses].toSet())
@@ -465,10 +465,10 @@ class TableViewTest {
         assertEquals(setOf("a"), tv1["A"][1][CellClasses].toSet())
         assertEquals(setOf("b"), tv1["A"][1][CellTopics].toSet())
 
-        tv1["A"][1][CellHeight] = null
-        tv1["A"][1][CellWidth] = null
-        tv1["A"][1][CellClasses] = null
-        tv1["A"][1][CellTopics] = null
+        tv1["A"][1][CellHeight] = Unit
+        tv1["A"][1][CellWidth] = Unit
+        tv1["A"][1][CellClasses] = Unit
+        tv1["A"][1][CellTopics] = Unit
 
         assertEquals(UnitCellHeight::class, tv1["A"][1][CellHeight]::class)
         assertEquals(UnitCellWidth::class, tv1["A"][1][CellWidth]::class)
@@ -627,7 +627,7 @@ class TableViewTest {
         assertEquals(emptySet<String>(), tv2["B", 2][CellClasses].toSet())
         assertEquals(emptySet<String>(), tv2["B", 2][CellTopics].toSet())
 
-        tv2[Table] = null
+        tv2[Table] = Unit
         assertTrue(tv2[Table].toList().isEmpty())
 
         tv2[TableView] = tv1
@@ -1834,7 +1834,7 @@ class TableViewTest {
         assertEquals("A0v2", tt8["A", 0].value)
         assertEquals("B0", tt8["B", 0].value)
 
-        tv[Table] = null
+        tv[Table] = Unit
 
         val tt9 = tv[Table]
         val tt10 = tv[Table]

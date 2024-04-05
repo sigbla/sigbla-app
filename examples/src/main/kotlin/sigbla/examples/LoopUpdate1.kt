@@ -26,7 +26,7 @@ fun main() {
         Thread.sleep(100)
         println("Update..")
         if (i++ % 10 == 0L)
-            table["A", ThreadLocalRandom.current().nextInt().absoluteValue % 10] = null
+            table["A", ThreadLocalRandom.current().nextInt().absoluteValue % 10] = Unit
         else
             table["A", ThreadLocalRandom.current().nextInt().absoluteValue % 10] = i
     }

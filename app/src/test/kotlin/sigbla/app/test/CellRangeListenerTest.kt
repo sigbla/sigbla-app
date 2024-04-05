@@ -176,7 +176,7 @@ class CellRangeListenerTest {
 
         off(ref1)
 
-        t["A", 0] = null
+        t["A", 0] = Unit
 
         val ref2 = on(t["A", 0]..t["A", 1]) {
             allowLoop = true
@@ -686,7 +686,7 @@ class CellRangeListenerTest {
 
         assertEquals(2, eventCount1)
 
-        t1["A", 2] = null
+        t1["A", 2] = Unit
 
         assertEquals(3, eventCount1)
 

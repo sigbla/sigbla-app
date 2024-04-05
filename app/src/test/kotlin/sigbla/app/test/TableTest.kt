@@ -1124,7 +1124,7 @@ class TableTest {
 
         assertNotEquals(t["A", 1L].value, t["A", 2L].value)
 
-        t["A"][1L] = null
+        t["A"][1L] = Unit
 
         assertEquals(t["A", 1L].value, t["A", 2L].value)
 
@@ -2849,7 +2849,7 @@ class TableTest {
 
         assertFalse(c in t)
 
-        c[1] = null
+        c[1] = Unit
 
         assertFalse(c in t)
 
@@ -2869,7 +2869,7 @@ class TableTest {
 
         assertFalse(c in t)
 
-        c[1] = null
+        c[1] = Unit
 
         assertEquals(2, eventCount)
     }
