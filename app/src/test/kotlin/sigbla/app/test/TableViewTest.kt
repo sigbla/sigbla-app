@@ -1171,6 +1171,7 @@ class TableViewTest {
         for (ir in IndexRelation.entries) {
             // TableView
             if (ir == IndexRelation.AT) {
+                tv1[t1[ir, 0]] = Unit
                 tv1[t1[ir, 0]] = tv1[t1[ir, 0]]
                 tv1[t1[ir, 0]] = { tv1[t1[ir, 0]] }
                 tv1[t1[ir, 0]](tv1[t1[ir, 0]])
@@ -1182,6 +1183,7 @@ class TableViewTest {
                 assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]] }
                 val validRow = t1[IndexRelation.AT, 0]
                 val rowView = tv1[validRow]
+                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]] = Unit }
                 assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]] = rowView }
                 assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]] = { this(rowView) } }
                 assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]](rowView) }
@@ -1191,6 +1193,7 @@ class TableViewTest {
 
             // ColumnView
             if (ir == IndexRelation.AT) {
+                tv1["A"][t1[ir, 0]] = Unit
                 tv1["A"][t1[ir, 0]] = tv1["A"][t1[ir, 0]]
                 tv1["A"][t1[ir, 0]] = { tv1["A"][t1[ir, 0]] }
                 tv1["A"][t1[ir, 0]](tv1["A"][t1[ir, 0]])
@@ -1199,6 +1202,7 @@ class TableViewTest {
                 assertFailsWith<InvalidRowException> { tv1["A"][t1[ir, 0]] }
                 val validRow = t1[IndexRelation.AT, 0]
                 val cellView = tv1["A"][validRow]
+                assertFailsWith<InvalidRowException> { tv1["A"][t1[ir, 0]] = Unit }
                 assertFailsWith<InvalidRowException> { tv1["A"][t1[ir, 0]] = cellView }
                 assertFailsWith<InvalidRowException> { tv1["A"][t1[ir, 0]] = { this(cellView) } }
                 assertFailsWith<InvalidRowException> { tv1["A"][t1[ir, 0]](cellView) }
@@ -1206,6 +1210,7 @@ class TableViewTest {
 
             // RowView
             if (ir == IndexRelation.AT) {
+                tv1[t1[ir, 0]]["A"] = Unit
                 tv1[t1[ir, 0]]["A"] = tv1[t1[ir, 0]]["A"]
                 tv1[t1[ir, 0]]["A"] = { tv1[t1[ir, 0]]["A"] }
                 assertEquals(CellView::class, tv1[t1[ir, 0]]["A"]::class)
@@ -1214,6 +1219,7 @@ class TableViewTest {
                 val validRow = t1[IndexRelation.AT, 0]
                 val cellView = tv1[validRow]["A"]
 
+                assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]]["A"] = Unit }
                 assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]]["A"] = cellView }
                 assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]]["A"] = { this(cellView) } }
                 assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]]["A"](cellView) }

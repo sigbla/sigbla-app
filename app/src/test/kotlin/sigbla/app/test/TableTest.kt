@@ -2265,7 +2265,7 @@ class TableTest {
 
         t["A", 0] = "Cell"
 
-        val values = listOf<Any>(t["A", 0], "String", 1.0, 2L, BigInteger.TEN, BigDecimal.valueOf(100), 1000 as Number, true)
+        val values = listOf<Any>(t["A", 0], "String", 1.0, 2L, BigInteger.TEN, BigDecimal.valueOf(100), 1000 as Number, Unit, true)
 
         fun assign(row: Row, v: Any) {
             when (v) {
@@ -2277,6 +2277,7 @@ class TableTest {
                 is BigDecimal -> t[row]["A"] = v
                 is Number -> t[row]["A"] = v
                 is Boolean -> t[row]["A"] = v
+                is Unit -> t[row]["A"] = v
                 else -> throw Exception()
             }
         }
@@ -2291,6 +2292,7 @@ class TableTest {
                 is BigDecimal -> t[row]["A"] = { this(v) }
                 is Number -> t[row]["A"] = { this(v) }
                 is Boolean -> t[row]["A"] = { this(v) }
+                is Unit -> t[row]["A"] = { this(v) }
                 else -> throw Exception()
             }
         }
