@@ -140,7 +140,7 @@ class TableView internal constructor(
                 if (cachedTable != null) return cachedTable
             }
 
-            val table = originalTable?.makeClone() ?: BaseTable(name = null, source = null)
+            val table = originalTable?.makeClone() ?: Table(name = null, source = null)
 
             ref.tableTransformer?.invoke(table)
 
@@ -1867,7 +1867,7 @@ class ColumnView internal constructor(
             }
 
         val values = tableRef.columnCells[header] ?: throw InvalidColumnException("Unable to find column cells for header $header")
-        val columnIterator = values.asSequence().map { it.component2().toCell(BaseColumn(table, header, columnMeta.columnOrder), it.component1()) }.iterator()
+        val columnIterator = values.asSequence().map { it.component2().toCell(Column(table, header, columnMeta.columnOrder), it.component1()) }.iterator()
 
         return object : Iterator<DerivedCellView> {
             override fun hasNext() = columnIterator.hasNext()

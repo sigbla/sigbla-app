@@ -67,21 +67,125 @@ class Header internal constructor(vararg labels: String) : Comparable<Header> {
     }
 }
 
-// TODO Should the be sealed rather than abstract? Or just a normal class with no BaseColumn?
-abstract class Column internal constructor(
+class Column internal constructor(
     val table: Table,
     val header: Header,
-    val order: Long
+    val order: Long = table.tableRef.get().columns[header]?.columnOrder ?: table.tableRef.get().columnCounter.getAndIncrement()
 ) : Comparable<Column>, Iterable<Cell<*>> {
     val indexes: Sequence<Long>
         get() = table.tableRef.get().columnCells[header]?.keys()?.sorted()?.asSequence()
             ?: throw InvalidColumnException("Unable to find column $header")
 
-    abstract operator fun get(indexRelation: IndexRelation, index: Long): Cell<*>
+    // TODO At an optimized version for get(index)?
+    operator fun get(indexRelation: IndexRelation, index: Long): Cell<*> {
+        return getCellRaw(table.tableRef.get(), header, index, indexRelation)?.let {
+            it.first.toCell(this, it.second)
+        } ?: UnitCell(this, index)
+    }
 
-    abstract operator fun set(index: Long, value: Cell<*>?)
+    operator fun set(index: Long, value: Cell<*>?) {
+        if (value is UnitCell || value == null) {
+            clear(index)
+            return
+        }
 
-    internal abstract fun iterator(table: Table, ref: TableRef): Iterator<Cell<*>>
+        val cellValue = value.toCellValue()
+
+        synchronized(table.eventProcessor) {
+            val (oldRef, newRef) = table.tableRef.refAction {
+                val columns = if (it.columns.containsKey(this.header)) it.columns
+                else it.columns.put(this.header, ColumnMeta(it.columnCounter.getAndIncrement(), true))
+
+                val columnCells = if (it.columnCells.containsKey(this.header)) it.columnCells
+                else it.columnCells.put(this.header, PTreeMap())
+
+                val meta = columns[this.header] ?: throw InvalidColumnException("Unable to find column meta for header ${this.header}")
+                val values = columnCells[this.header] ?: throw InvalidColumnException("Unable to find column cells for header ${this.header}")
+
+                it.copy(
+                    columns = if (meta.prenatal) it.columns.put(
+                        this.header,
+                        meta.copy(prenatal = false)
+                    ) else it.columns,
+                    columnCells = it.columnCells.put(this.header, values.put(index, cellValue)),
+                    version = it.version + 1L
+                )
+            }
+
+            if (!table.eventProcessor.haveListeners()) return
+
+            val oldTable = this.table.makeClone(ref = oldRef)
+            val newTable = this.table.makeClone(ref = newRef)
+
+            val oldColumn = Column(oldTable, this.header)
+            val newColumn = Column(newTable, this.header)
+
+            val old = oldColumn[index]
+            val new = newColumn[index]
+
+            table.eventProcessor.publish(
+                listOf(
+                    TableListenerEvent(
+                        old,
+                        new
+                    )
+                ) as List<TableListenerEvent<Any, Any>>
+            )
+        }
+    }
+
+    private fun clear(index: Long) {
+        synchronized(table.eventProcessor) {
+            val (oldRef, newRef) = table.tableRef.refAction {
+                // Return early if column no longer exists
+                val meta = it.columns[this.header] ?: return@refAction it
+                val values = it.columnCells[this.header] ?: throw InvalidColumnException("Unable to find column cells for header ${this.header}")
+
+                it.copy(
+                    columns = if (meta.prenatal) it.columns.put(
+                        this.header,
+                        meta.copy(prenatal = false)
+                    ) else it.columns,
+                    columnCells = it.columnCells.put(this.header, values.remove(index)),
+                    version = it.version + 1L
+                )
+            }
+
+            if (oldRef.version == newRef.version) return
+            if (!table.eventProcessor.haveListeners()) return
+
+            val oldTable = this.table.makeClone(ref = oldRef)
+            val newTable = this.table.makeClone(ref = newRef)
+
+            val oldColumn = Column(oldTable, this.header)
+            val newColumn = Column(newTable, this.header)
+
+            val old = oldColumn[index]
+            val new = newColumn[index] // This will be a unit cell, but with new table and column refs
+
+            table.eventProcessor.publish(
+                listOf(
+                    TableListenerEvent(
+                        old,
+                        new
+                    )
+                ) as List<TableListenerEvent<Any, Any>>
+            )
+        }
+    }
+
+    override fun iterator(): Iterator<Cell<*>> = iterator(table, table.tableRef.get())
+
+    internal fun iterator(table: Table, ref: TableRef): Iterator<Cell<*>> {
+        // Column might have been removed before we call iterator
+        val meta = ref.columns[this.header] ?: return emptyList<Cell<*>>().iterator()
+        if (meta.prenatal) return emptyList<Cell<*>>().iterator()
+
+        // We want to throw this exception because ref should contain columnCells
+        val values = ref.columnCells[this.header] ?: throw InvalidColumnException("Unable to find column cells for header ${this.header}")
+        val column = Column(table, this.header, meta.columnOrder)
+        return values.asSequence().map { it.component2().toCell(column, it.component1()) }.iterator()
+    }
 
     infix fun at(index: Long) = get(AT, index)
 
@@ -266,127 +370,6 @@ abstract class Column internal constructor(
     override fun toString() = "Column[${header.labels.joinToString(limit = 30)}]"
 }
 
-class BaseColumn internal constructor(
-    table: Table,
-    header: Header,
-    columnOrder: Long = table.tableRef.get().columns[header]?.columnOrder ?: table.tableRef.get().columnCounter.getAndIncrement()
-) : Column(
-    table,
-    header,
-    columnOrder
-) {
-    // TODO At an optimized version for get(index)
-    override fun get(indexRelation: IndexRelation, index: Long): Cell<*> {
-        return getCellRaw(table.tableRef.get(), header, index, indexRelation)?.let {
-            it.first.toCell(this, it.second)
-        } ?: UnitCell(this, index)
-    }
-
-    override fun set(index: Long, value: Cell<*>?) {
-        if (value is UnitCell || value == null) {
-            clear(index)
-            return
-        }
-
-        val cellValue = value.toCellValue()
-
-        synchronized(table.eventProcessor) {
-            val (oldRef, newRef) = table.tableRef.refAction {
-                val columns = if (it.columns.containsKey(this.header)) it.columns
-                    else it.columns.put(this.header, ColumnMeta(it.columnCounter.getAndIncrement(), true))
-
-                val columnCells = if (it.columnCells.containsKey(this.header)) it.columnCells
-                    else it.columnCells.put(this.header, PTreeMap())
-
-                val meta = columns[this.header] ?: throw InvalidColumnException("Unable to find column meta for header ${this.header}")
-                val values = columnCells[this.header] ?: throw InvalidColumnException("Unable to find column cells for header ${this.header}")
-
-                it.copy(
-                    columns = if (meta.prenatal) it.columns.put(
-                        this.header,
-                        meta.copy(prenatal = false)
-                    ) else it.columns,
-                    columnCells = it.columnCells.put(this.header, values.put(index, cellValue)),
-                    version = it.version + 1L
-                )
-            }
-
-            if (!table.eventProcessor.haveListeners()) return
-
-            val oldTable = this.table.makeClone(ref = oldRef)
-            val newTable = this.table.makeClone(ref = newRef)
-
-            val oldColumn = BaseColumn(oldTable, this.header)
-            val newColumn = BaseColumn(newTable, this.header)
-
-            val old = oldColumn[index]
-            val new = newColumn[index]
-
-            table.eventProcessor.publish(
-                listOf(
-                    TableListenerEvent(
-                        old,
-                        new
-                    )
-                ) as List<TableListenerEvent<Any, Any>>
-            )
-        }
-    }
-
-    private fun clear(index: Long) {
-        synchronized(table.eventProcessor) {
-            val (oldRef, newRef) = table.tableRef.refAction {
-                // Return early if column no longer exists
-                val meta = it.columns[this.header] ?: return@refAction it
-                val values = it.columnCells[this.header] ?: throw InvalidColumnException("Unable to find column cells for header ${this.header}")
-
-                it.copy(
-                    columns = if (meta.prenatal) it.columns.put(
-                        this.header,
-                        meta.copy(prenatal = false)
-                    ) else it.columns,
-                    columnCells = it.columnCells.put(this.header, values.remove(index)),
-                    version = it.version + 1L
-                )
-            }
-
-            if (oldRef.version == newRef.version) return
-            if (!table.eventProcessor.haveListeners()) return
-
-            val oldTable = this.table.makeClone(ref = oldRef)
-            val newTable = this.table.makeClone(ref = newRef)
-
-            val oldColumn = BaseColumn(oldTable, this.header)
-            val newColumn = BaseColumn(newTable, this.header)
-
-            val old = oldColumn[index]
-            val new = newColumn[index] // This will be a unit cell, but with new table and column refs
-
-            table.eventProcessor.publish(
-                listOf(
-                    TableListenerEvent(
-                        old,
-                        new
-                    )
-                ) as List<TableListenerEvent<Any, Any>>
-            )
-        }
-    }
-
-    override fun iterator(): Iterator<Cell<*>> = iterator(table, table.tableRef.get())
-
-    override fun iterator(table: Table, ref: TableRef): Iterator<Cell<*>> {
-        // Column might have been removed before we call iterator
-        val meta = ref.columns[this.header] ?: return emptyList<Cell<*>>().iterator()
-        if (meta.prenatal) return emptyList<Cell<*>>().iterator()
-
-        // We want to throw this exception because ref should contain columnCells
-        val values = ref.columnCells[this.header] ?: throw InvalidColumnException("Unable to find column cells for header ${this.header}")
-        val column = BaseColumn(table, this.header, meta.columnOrder)
-        return values.asSequence().map { it.component2().toCell(column, it.component1()) }.iterator()
-    }
-}
-
 internal fun getCellRaw(ref: TableRef, header: Header, index: Long, indexRelation: IndexRelation): Pair<CellValue<*>, Long>? {
     val values = ref.columnCells[header] ?: return null
 
@@ -440,7 +423,7 @@ class ColumnRange internal constructor(override val start: Column, override val 
             .let {
                 if (currentStart > currentEnd) it.toList().reversed().asSequence() else it
             }
-            .map { BaseColumn(table, it.first, it.second.columnOrder) }
+            .map { Column(table, it.first, it.second.columnOrder) }
             .iterator()
     }
 

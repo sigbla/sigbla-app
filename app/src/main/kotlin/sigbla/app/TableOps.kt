@@ -44,12 +44,12 @@ private fun publishColumnMoveEvents(
         val indexes = indexes1 union indexes2
 
         // Get columns anchored to old and new ref
-        val oldColumn = BaseColumn(
+        val oldColumn = Column(
             oldTable,
             column.header,
             oldRef.columns[column.header]?.columnOrder ?: column.order
         )
-        val newColumn = BaseColumn(
+        val newColumn = Column(
             newTable,
             column.header,
             newRef.columns[column.header]?.columnOrder ?: column.order
@@ -334,12 +334,12 @@ private fun publishTableMoveEvents(
         val indexes = indexes1 union indexes2
 
         // Get columns anchored to old and new ref
-        val oldColumn = BaseColumn(
+        val oldColumn = Column(
             oldTable,
             column.header,
             oldRef.columns[column.header]?.columnOrder ?: column.order
         )
-        val newColumn = BaseColumn(
+        val newColumn = Column(
             newTable,
             column.header,
             newRef.columns[column.header]?.columnOrder ?: column.order
@@ -446,12 +446,12 @@ private fun publishColumnCopyEvents(
         val indexes = indexes1 union indexes2
 
         // Get columns anchored to old and new ref
-        val oldColumn = BaseColumn(
+        val oldColumn = Column(
             oldTable,
             column.header,
             oldRef.columns[column.header]?.columnOrder ?: column.order
         )
-        val newColumn = BaseColumn(
+        val newColumn = Column(
             newTable,
             column.header,
             newRef.columns[column.header]?.columnOrder ?: column.order
@@ -704,12 +704,12 @@ private fun publishTableCopyEvents(
         val indexes = indexes1 union indexes2
 
         // Get columns anchored to old and new ref
-        val oldColumn = BaseColumn(
+        val oldColumn = Column(
             oldTable,
             column.header,
             oldRef.columns[column.header]?.columnOrder ?: column.order
         )
-        val newColumn = BaseColumn(
+        val newColumn = Column(
             newTable,
             column.header,
             newRef.columns[column.header]?.columnOrder ?: column.order
@@ -817,12 +817,12 @@ private fun publishRowMoveEvents(
 
         // Get columns anchored to old and new ref
         val columns = headers.map { (columnHeader, columnMeta) ->
-            val oldColumn = BaseColumn(
+            val oldColumn = Column(
                 oldTable,
                 columnHeader,
                 columnMeta.columnOrder
             )
-            val newColumn = BaseColumn(
+            val newColumn = Column(
                 newTable,
                 columnHeader,
                 columnMeta.columnOrder
@@ -860,12 +860,12 @@ private fun publishRowMoveEvents(
 
         // Get columns anchored to old and new ref
         val columns = headers.map { (columnHeader, columnMeta) ->
-            val oldColumn = BaseColumn(
+            val oldColumn = Column(
                 oldTable,
                 columnHeader,
                 columnMeta.columnOrder
             )
-            val newColumn = BaseColumn(
+            val newColumn = Column(
                 newTable,
                 columnHeader,
                 columnMeta.columnOrder
@@ -908,12 +908,12 @@ private fun publishRowMoveEvents(
 
         // Get columns anchored to old and new ref
         val columns = headers.map { (columnHeader, columnMeta) ->
-            val oldColumn = BaseColumn(
+            val oldColumn = Column(
                 oldTable,
                 columnHeader,
                 columnMeta.columnOrder
             )
-            val newColumn = BaseColumn(
+            val newColumn = Column(
                 newTable,
                 columnHeader,
                 columnMeta.columnOrder
@@ -1081,12 +1081,12 @@ private fun publishRowCopyEvents(
 
         // Get columns anchored to old and new ref
         val columns = headers.map { (columnHeader, columnMeta) ->
-            val oldColumn = BaseColumn(
+            val oldColumn = Column(
                 oldTable,
                 columnHeader,
                 columnMeta.columnOrder
             )
-            val newColumn = BaseColumn(
+            val newColumn = Column(
                 newTable,
                 columnHeader,
                 columnMeta.columnOrder
@@ -1124,12 +1124,12 @@ private fun publishRowCopyEvents(
 
         // Get columns anchored to old and new ref
         val columns = headers.map { (columnHeader, columnMeta) ->
-            val oldColumn = BaseColumn(
+            val oldColumn = Column(
                 oldTable,
                 columnHeader,
                 columnMeta.columnOrder
             )
-            val newColumn = BaseColumn(
+            val newColumn = Column(
                 newTable,
                 columnHeader,
                 columnMeta.columnOrder
@@ -1172,12 +1172,12 @@ private fun publishRowCopyEvents(
 
         // Get columns anchored to old and new ref
         val columns = headers.map { (columnHeader, columnMeta) ->
-            val oldColumn = BaseColumn(
+            val oldColumn = Column(
                 oldTable,
                 columnHeader,
                 columnMeta.columnOrder
             )
-            val newColumn = BaseColumn(
+            val newColumn = Column(
                 newTable,
                 columnHeader,
                 columnMeta.columnOrder
@@ -1359,7 +1359,7 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: Header) {
         synchronized(right.table.eventProcessor) {
             if (left.table === right.table) {
                 // Internal move
-                val newRight = BaseColumn(left.table, withName)
+                val newRight = Column(left.table, withName)
                 val (oldRef, newRef) = left.table.tableRef.refAction(
                     (::columnMove)(left.header, right.header, order, withName) {
                         copy(
@@ -1380,7 +1380,7 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: Header) {
                     )
                 }
 
-                val newRight = BaseColumn(right.table, withName)
+                val newRight = Column(right.table, withName)
                 val (oldRef2, newRef2) = right.table.tableRef.refAction(
                     (::columnMove)(newRight.header, right.header, order, withName) {
                         copy(
@@ -1448,7 +1448,7 @@ fun move(columnToTableAction: ColumnToTableAction, withName: Header) {
         synchronized(table.eventProcessor) {
             if (left.table === table) {
                 // Internal move
-                val newRight = BaseColumn(table, withName)
+                val newRight = Column(table, withName)
                 val (oldRef, newRef) = table.tableRef.refAction(
                     (::columnMove)(withName) {
                         copy(
@@ -1469,7 +1469,7 @@ fun move(columnToTableAction: ColumnToTableAction, withName: Header) {
                     )
                 }
 
-                val newRight = BaseColumn(table, withName)
+                val newRight = Column(table, withName)
                 val (oldRef2, newRef2) = table.tableRef.refAction(
                     (::columnMove)(withName) {
                         copy(
@@ -1559,7 +1559,7 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: Header) {
         synchronized(right.table.eventProcessor) {
             if (left.table === right.table) {
                 // Internal copy
-                val newRight = BaseColumn(left.table, withName)
+                val newRight = Column(left.table, withName)
                 val (oldRef, newRef) = left.table.tableRef.refAction(
                     (::columnCopy)(left.header, right.header, order, withName) {
                         copy(
@@ -1572,7 +1572,7 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: Header) {
                 publishColumnCopyEvents(left, right, newRight, order, oldRef, newRef)
             } else {
                 // Copy between tables
-                val newRight = BaseColumn(right.table, withName)
+                val newRight = Column(right.table, withName)
                 val (oldRef, newRef) = right.table.tableRef.refAction(
                     (::columnCopy)(newRight.header, right.header, order, withName) {
                         val leftRef = left.table.tableRef.get()
@@ -1640,7 +1640,7 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: Header) {
         synchronized(table.eventProcessor) {
             if (left.table === table) {
                 // Internal copy
-                val newRight = BaseColumn(table, withName)
+                val newRight = Column(table, withName)
                 val (oldRef, newRef) = table.tableRef.refAction(
                     (::columnCopy)(withName) {
                         copy(
@@ -1653,7 +1653,7 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: Header) {
                 publishTableCopyEvents(left, table, newRight, oldRef, newRef)
             } else {
                 // Copy between tables
-                val newRight = BaseColumn(table, withName)
+                val newRight = Column(table, withName)
                 val (oldRef, newRef) = table.tableRef.refAction(
                     (::columnCopy)(withName) {
                         val leftRef = left.table.tableRef.get()
@@ -1726,7 +1726,7 @@ fun move(rowToRowAction: RowToRowAction) {
                             .columns
                             .sortedBy { it.component2().columnOrder }
                             .fold(ref.columns) { acc, (c, cm) ->
-                                if (acc.containsKey(c)) acc else acc.put(c, ColumnMeta(BaseColumn(right.table, c).order, cm.prenatal))
+                                if (acc.containsKey(c)) acc else acc.put(c, ColumnMeta(Column(right.table, c).order, cm.prenatal))
                             }
 
                         val columnCellMap = oldRef1.columnCells.fold(ref.columnCells) { acc, ccm ->
@@ -1807,7 +1807,7 @@ fun move(rowToRowAction: RowToRowAction) {
                                 if (acc.containsKey(c)) {
                                     val existing = acc[c]!!
                                     acc.put(c, existing.copy(prenatal = existing.prenatal && cm.prenatal))
-                                } else acc.put(c, ColumnMeta(BaseColumn(right.table, c).order, cm.prenatal))
+                                } else acc.put(c, ColumnMeta(Column(right.table, c).order, cm.prenatal))
                             }
 
                         val columnCellMap = oldRef1.columnCells.fold(ref.columnCells) { acc, ccm ->
@@ -1889,7 +1889,7 @@ fun copy(rowToRowAction: RowToRowAction) {
                             .columns
                             .sortedBy { it.component2().columnOrder }
                             .fold(ref.columns) { acc, (c, cm) ->
-                                if (acc.containsKey(c)) acc else acc.put(c, ColumnMeta(BaseColumn(right.table, c).order, cm.prenatal))
+                                if (acc.containsKey(c)) acc else acc.put(c, ColumnMeta(Column(right.table, c).order, cm.prenatal))
                             }
 
                         val columnCellMap = leftRef.columnCells.fold(ref.columnCells) { acc, ccm ->
@@ -1956,7 +1956,7 @@ fun copy(rowToRowAction: RowToRowAction) {
                                 if (acc.containsKey(c)) {
                                     val existing = acc[c]!!
                                     acc.put(c, existing.copy(prenatal = existing.prenatal && cm.prenatal))
-                                } else acc.put(c, ColumnMeta(BaseColumn(right.table, c).order, cm.prenatal))
+                                } else acc.put(c, ColumnMeta(Column(right.table, c).order, cm.prenatal))
                             }
 
                         val columnCellMap = leftRef.columnCells.fold(ref.columnCells) { acc, ccm ->

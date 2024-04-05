@@ -12,7 +12,7 @@ fun valueOf(cell: Cell<*>, typeFilter: KClass<*>): Any? = if (typeFilter.isInsta
 inline fun <reified T> valueOf(noinline source: Cell<*>.() -> Unit): T? = valueOf(source, T::class) as T?
 
 fun valueOf(source: Cell<*>.() -> Unit, typeFilter: KClass<*>): Any? {
-    val table = BaseTable(null, null) as Table
+    val table = Table(null, null)
     table["valueOf", 0L].source()
     val value = valueOf(table["valueOf", 0L], typeFilter)
     Registry.shutdownTable(table, true) // Clean up
