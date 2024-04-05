@@ -1177,6 +1177,7 @@ class TableViewTest {
                 tv1[t1[ir, 0]](tv1[t1[ir, 0]])
                 assertEquals(RowView::class, tv1[t1[ir, 0]]::class)
 
+                tv1[Header["A"], t1[ir, 0]] = Unit
                 tv1[Header["A"], t1[ir, 0]] = tv1[Header["A"], t1[0]]
                 assertEquals(tv1[Header["A"], t1[0]], tv1[Header["A"], t1[ir, 0]])
             } else {
@@ -1188,6 +1189,7 @@ class TableViewTest {
                 assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]] = { this(rowView) } }
                 assertFailsWith<InvalidRowException> { tv1[t1[ir, 0]](rowView) }
                 assertFailsWith<InvalidRowException> { tv1[Header["A"], t1[ir, 0]] }
+                assertFailsWith<InvalidRowException> { tv1[Header["A"], t1[ir, 0]] = Unit }
                 assertFailsWith<InvalidRowException> { tv1[Header["A"], t1[ir, 0]] = tv1[Header["A"], t1[0]] }
             }
 
