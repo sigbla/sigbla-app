@@ -234,12 +234,16 @@ class TableViewTest {
         assertEquals(100L, tv1[CellHeight].height)
         tv1[CellHeight] = 200L as Number
         assertEquals(200L, tv1[CellHeight].height)
+        tv1[CellHeight] = null as Number?
+        assertEquals(Unit, tv1[CellHeight].height)
         assertFailsWith<InvalidCellHeightException> { tv1[CellHeight] = 300.0 }
 
         tv1[CellWidth] = 100 as Number
         assertEquals(100L, tv1[CellWidth].width)
         tv1[CellWidth] = 200L as Number
         assertEquals(200L, tv1[CellWidth].width)
+        tv1[CellWidth] = null as Number?
+        assertEquals(Unit, tv1[CellWidth].width)
         assertFailsWith<InvalidCellWidthException> { tv1[CellWidth] = 300.0 }
     }
 
@@ -318,6 +322,8 @@ class TableViewTest {
         assertEquals(100L, tv1["A"][CellWidth].width)
         tv1["A"][CellWidth] = 200L as Number
         assertEquals(200L, tv1["A"][CellWidth].width)
+        tv1["A"][CellWidth] = null as Number?
+        assertEquals(Unit, tv1["A"][CellWidth].width)
         assertFailsWith<InvalidCellWidthException> { tv1["A"][CellWidth] = 300.0 }
     }
 
@@ -396,6 +402,8 @@ class TableViewTest {
         assertEquals(100L, tv1[1][CellHeight].height)
         tv1[1][CellHeight] = 200L as Number
         assertEquals(200L, tv1[1][CellHeight].height)
+        tv1[1][CellHeight] = null as Number?
+        assertEquals(Unit, tv1[1][CellHeight].height)
         assertFailsWith<InvalidCellHeightException> { tv1[1][CellHeight] = 300.0 }
     }
 
@@ -479,12 +487,16 @@ class TableViewTest {
         assertEquals(100L, tv1["A"][1][CellHeight].height)
         tv1["A"][1][CellHeight] = 200L as Number
         assertEquals(200L, tv1["A"][1][CellHeight].height)
+        tv1["A"][1][CellHeight] = null as Number?
+        assertEquals(Unit, tv1["A"][1][CellHeight].height)
         assertFailsWith<InvalidCellHeightException> { tv1["A"][1][CellHeight] = 300.0 }
 
         tv1["A"][1][CellWidth] = 100 as Number
         assertEquals(100L, tv1["A"][1][CellWidth].width)
         tv1["A"][1][CellWidth] = 200L as Number
         assertEquals(200L, tv1["A"][1][CellWidth].width)
+        tv1["A"][1][CellWidth] = null as Number?
+        assertEquals(Unit, tv1["A"][1][CellWidth].width)
         assertFailsWith<InvalidCellWidthException> { tv1["A"][1][CellWidth] = 300.0 }
     }
 
