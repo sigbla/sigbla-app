@@ -928,6 +928,25 @@ class BasicTableTest {
         assertEquals("B 13", valueOf<Any>(t["B", IndexRelation.AFTER, 12]))
     }
 
+    @Test
+    fun `null and upscale number`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["A", 1] = 100L
+
+        assertEquals(100L, valueOf<Any>(t["A", 1]))
+
+        val num1: Number? = null
+        t["A", 1] = num1
+
+        assertEquals(Unit, valueOf<Any>(t["A", 1]))
+
+        val num2: Short = 10
+        t["A", 1] = num2
+
+        assertEquals(10L, valueOf<Any>(t["A", 1]))
+    }
+
     companion object {
         @JvmStatic
         @AfterClass

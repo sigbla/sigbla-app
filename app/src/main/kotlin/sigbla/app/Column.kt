@@ -263,7 +263,8 @@ class Column internal constructor(
             is BigInteger -> set(index, value)
             is BigDecimal -> set(index, value)
             null -> clear(index)
-            else -> throw InvalidValueException("Unsupported type: ${value::class}")
+            // Could be a byte or short, something that fits in a long
+            else -> set(index, value.toLong())
         }
     }
 
