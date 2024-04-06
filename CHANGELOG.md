@@ -4,6 +4,48 @@ All notable changes to this project will be documented in this file.
 
 This project is versioned following the [major release].[last 2 digits in release year].[minor release] format.
 
+## v1.24.3 - 2024-04-06 - Aged Moon
+
+The theme of this release is about stabilizing core APIs, cleaning them up, improving type safety and other related
+refactorings where needed. These changes make it clearer what types are accepted and removes some approaches that
+previously could be confusing to the API user, such as with contains(..) and invoke(..).
+
+As part of this change, Unit, rather than null, is encouraged when clearing values (be that in a table/view or in meta
+classes). Nulls are still supported most places to clear values, but must now have a specified type.
+
+The core APIs are unlikely to change drastically after this release, but new data types and new features are expected.
+
+### Added
+
+- Tighten equals checks with added support for contains across Table, Column, Row, Cell, and meta classes
+- Add source to tableView and make source on Table public
+- Cache transformed tables obtained via tableView[Table]
+- Various test case improvements, better coverage
+- Various related documentation improvements
+- Add asBoolean and asString on Cell
+
+### Fixed
+
+- Fix issue with BasicFunctions on cell clear + added tests
+- Tidy up some edge cases on Table related iterators
+- Avoid accidental column create when not wanted
+
+### Changed
+
+- Simplified registry interactions and how tables/views are initially created and then obtained again through Table[..]
+- Refactor transformer APIs and add support for TableTransformer, ColumnTransformer, and RowTransformer
+- Update column filter on load functions to match column transformer function
+- Change setters to accept nullable types, encourage use of Unit to reset
+- Simplify class structure by removing BaseTable, BaseColumn, and BaseRow
+- Change Cells constructor API to better match overall API with Cells[..]
+- Refactor invoke(..) for better type safety and a more intuitive API
+- Tighten acceptable types in contains(..) functions
+- Allow columns to recreate themselves if needed
+
+### Removed
+
+- Nothing
+
 ## v1.24.2 - 2024-02-20 - Odd Dust
 
 The general theme of this release is various minor API tidy-ups and improvements/fixes with increased test coverage,
