@@ -159,7 +159,7 @@ print(table)
 // Examples of how to remove the sum function on ["Sum", 0]
 // remove(table["Sum"])
 // clear(table["Sum"])
-table["Sum", 0] = null
+table["Sum", 0] = Unit
 
 table["A", 0] = 400
 
