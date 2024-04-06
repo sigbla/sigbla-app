@@ -349,7 +349,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     operator fun contains(that: Boolean): Boolean = compareTo(that) == 0
     operator fun contains(that: String): Boolean = compareTo(that) == 0
     operator fun contains(that: Unit): Boolean = compareTo(that) == 0
-    operator fun contains(that: Cell<*>?): Boolean = compareTo(that) == 0
+    operator fun contains(that: Cell<*>): Boolean = compareTo(that) == 0
 
     operator fun invoke(newValue: BigDecimal?): BigDecimal? {
         table[this] = newValue

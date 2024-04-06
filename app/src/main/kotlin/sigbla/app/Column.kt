@@ -359,7 +359,7 @@ class Column internal constructor(
     operator fun contains(that: Number): Boolean = any { that in it }
     operator fun contains(that: Boolean): Boolean = any { that in it }
     operator fun contains(that: String): Boolean = any { that in it }
-    operator fun contains(that: Cell<*>?): Boolean = any { that in it }
+    operator fun contains(that: Cell<*>): Boolean = any { that in it }
 
     override fun compareTo(other: Column): Int {
         return order.compareTo(other.order)

@@ -1099,7 +1099,7 @@ class Table internal constructor(
     operator fun contains(that: Number): Boolean = any { that in it }
     operator fun contains(that: Boolean): Boolean = any { that in it }
     operator fun contains(that: String): Boolean = any { that in it }
-    operator fun contains(that: Cell<*>?): Boolean = any { that in it }
+    operator fun contains(that: Cell<*>): Boolean = any { that in it }
 
     // -----
     override fun iterator(): Iterator<Cell<*>> = iterator(this, tableRef.get())
