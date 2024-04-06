@@ -530,15 +530,15 @@ class TableViewStorageTest {
 
             if (ThreadLocalRandom.current().nextBoolean()) {
                 if (ThreadLocalRandom.current().nextBoolean()) {
-                    if (ThreadLocalRandom.current().nextBoolean()) tableView1[CellHeight] = null
+                    if (ThreadLocalRandom.current().nextBoolean()) tableView1[CellHeight] = Unit
                     else tableView1[CellHeight] = ThreadLocalRandom.current().nextLong()
                 }
                 if (ThreadLocalRandom.current().nextBoolean()) {
-                    if (ThreadLocalRandom.current().nextBoolean()) tableView1[CellWidth] = null
+                    if (ThreadLocalRandom.current().nextBoolean()) tableView1[CellWidth] = Unit
                     else tableView1[CellWidth] = ThreadLocalRandom.current().nextLong()
                 }
                 if (ThreadLocalRandom.current().nextBoolean()) {
-                    if (ThreadLocalRandom.current().nextBoolean()) tableView1[CellClasses] = null
+                    if (ThreadLocalRandom.current().nextBoolean()) tableView1[CellClasses] = Unit
                     else tableView1[CellClasses] = ThreadLocalRandom.current().nextInt(0, 100).let {
                         val values = mutableSetOf<String>()
                         for (i in 0 until it) {
@@ -551,7 +551,7 @@ class TableViewStorageTest {
                     }
                 }
                 if (ThreadLocalRandom.current().nextBoolean()) {
-                    if (ThreadLocalRandom.current().nextBoolean()) tableView1[CellTopics] = null
+                    if (ThreadLocalRandom.current().nextBoolean()) tableView1[CellTopics] = Unit
                     else tableView1[CellTopics] = ThreadLocalRandom.current().nextInt(0, 100).let {
                         val values = mutableSetOf<String>()
                         for (i in 0 until it) {
@@ -580,11 +580,11 @@ class TableViewStorageTest {
 
                 if (ThreadLocalRandom.current().nextBoolean()) {
                     if (ThreadLocalRandom.current().nextBoolean()) {
-                        if (ThreadLocalRandom.current().nextBoolean()) tableView1[column][CellWidth] = null
+                        if (ThreadLocalRandom.current().nextBoolean()) tableView1[column][CellWidth] = Unit
                         else tableView1[column][CellWidth] = ThreadLocalRandom.current().nextLong()
                     }
                     if (ThreadLocalRandom.current().nextBoolean()) {
-                        if (ThreadLocalRandom.current().nextBoolean()) tableView1[column][CellClasses] = null
+                        if (ThreadLocalRandom.current().nextBoolean()) tableView1[column][CellClasses] = Unit
                         else tableView1[column][CellClasses] = ThreadLocalRandom.current().nextInt(0, 10).let {
                             val values = mutableSetOf<String>()
                             for (i in 0 until it) {
@@ -597,7 +597,7 @@ class TableViewStorageTest {
                         }
                     }
                     if (ThreadLocalRandom.current().nextBoolean()) {
-                        if (ThreadLocalRandom.current().nextBoolean()) tableView1[column][CellTopics] = null
+                        if (ThreadLocalRandom.current().nextBoolean()) tableView1[column][CellTopics] = Unit
                         else tableView1[column][CellTopics] = ThreadLocalRandom.current().nextInt(0, 10).let {
                             val values = mutableSetOf<String>()
                             for (i in 0 until it) {
@@ -632,11 +632,11 @@ class TableViewStorageTest {
                     for (r in range) {
                         if (ThreadLocalRandom.current().nextBoolean()) {
                             if (ThreadLocalRandom.current().nextBoolean()) {
-                                if (ThreadLocalRandom.current().nextBoolean()) tableView1[r][CellHeight] = null
+                                if (ThreadLocalRandom.current().nextBoolean()) tableView1[r][CellHeight] = Unit
                                 else tableView1[r][CellHeight] = ThreadLocalRandom.current().nextLong()
                             }
                             if (ThreadLocalRandom.current().nextBoolean()) {
-                                if (ThreadLocalRandom.current().nextBoolean()) tableView1[r][CellClasses] = null
+                                if (ThreadLocalRandom.current().nextBoolean()) tableView1[r][CellClasses] = Unit
                                 else tableView1[r][CellClasses] = ThreadLocalRandom.current().nextInt(0, 10).let {
                                     val values = mutableSetOf<String>()
                                     for (i in 0 until it) {
@@ -649,7 +649,7 @@ class TableViewStorageTest {
                                 }
                             }
                             if (ThreadLocalRandom.current().nextBoolean()) {
-                                if (ThreadLocalRandom.current().nextBoolean()) tableView1[r][CellTopics] = null
+                                if (ThreadLocalRandom.current().nextBoolean()) tableView1[r][CellTopics] = Unit
                                 else tableView1[r][CellTopics] = ThreadLocalRandom.current().nextInt(0, 10).let {
                                     val values = mutableSetOf<String>()
                                     for (i in 0 until it) {
@@ -665,15 +665,15 @@ class TableViewStorageTest {
 
                         if (ThreadLocalRandom.current().nextBoolean()) {
                             if (ThreadLocalRandom.current().nextBoolean()) {
-                                if (ThreadLocalRandom.current().nextBoolean()) tableView1[column, r][CellHeight] = null
+                                if (ThreadLocalRandom.current().nextBoolean()) tableView1[column, r][CellHeight] = Unit
                                 else tableView1[column, r][CellHeight] = ThreadLocalRandom.current().nextLong()
                             }
                             if (ThreadLocalRandom.current().nextBoolean()) {
-                                if (ThreadLocalRandom.current().nextBoolean()) tableView1[column, r][CellWidth] = null
+                                if (ThreadLocalRandom.current().nextBoolean()) tableView1[column, r][CellWidth] = Unit
                                 else tableView1[column, r][CellWidth] = ThreadLocalRandom.current().nextLong()
                             }
                             if (ThreadLocalRandom.current().nextBoolean()) {
-                                if (ThreadLocalRandom.current().nextBoolean()) tableView1[column, r][CellClasses] = null
+                                if (ThreadLocalRandom.current().nextBoolean()) tableView1[column, r][CellClasses] = Unit
                                 else tableView1[column, r][CellClasses] =
                                     ThreadLocalRandom.current().nextInt(0, 10).let {
                                         val values = mutableSetOf<String>()
@@ -687,7 +687,7 @@ class TableViewStorageTest {
                                     }
                             }
                             if (ThreadLocalRandom.current().nextBoolean()) {
-                                if (ThreadLocalRandom.current().nextBoolean()) tableView1[column, r][CellTopics] = null
+                                if (ThreadLocalRandom.current().nextBoolean()) tableView1[column, r][CellTopics] = Unit
                                 else tableView1[column, r][CellTopics] =
                                     ThreadLocalRandom.current().nextInt(0, 10).let {
                                         val values = mutableSetOf<String>()

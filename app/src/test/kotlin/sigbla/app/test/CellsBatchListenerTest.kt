@@ -355,7 +355,7 @@ class CellsBatchListenerTest {
 
             off(ref1)
 
-            t["A", 0] = null
+            t["A", 0] = Unit
 
             val ref2 = on(t["A", 1] or t["A", 0]) {
                 allowLoop = true
@@ -1251,7 +1251,7 @@ class CellsBatchListenerTest {
         assertEquals(2, eventCount1)
 
         batch(t1) {
-            t1["A", 2] = null
+            t1["A", 2] = Unit
             clear(t1["A"])
         }
 

@@ -98,7 +98,7 @@ fun main() {
 Most of these should be fairly self-explanatory, and we'll cover `WebContent` and `WebCell` in more detail later.
 Support for more types is on the roadmap, but the above is what's supported in the latest release.
 
-You can clear a cell by assigning a null to it, returning it to a `UnitCell`, for example `table["A", 1] = null`, or
+You can clear a cell by assigning a `Unit` to it, returning it to a `UnitCell`, for example `table["A", 1] = Unit`, or
 you may use the `clear(cell)` function if you prefer.
 
 ## Iterating over cells

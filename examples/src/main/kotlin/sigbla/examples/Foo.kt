@@ -329,7 +329,7 @@ fun main() {
         }
     }
 
-    table["A", 1] = null
+    table["A", 1] = Unit
 
     on(table) {
         name = "G"
@@ -371,7 +371,7 @@ fun main() {
     }
 
     table["A"][1] = "Hello subscription"
-    table["A"][1] = null
+    table["A"][1] = Unit
     table["A"][1] = 1000
 
     for (i in 10..10000) {

@@ -28,7 +28,7 @@ class BasicFunctionsTest {
 
         assertTrue(501 in t["Sum", 0])
 
-        t["Sum", 0] = null
+        t["Sum", 0] = Unit
 
         assertTrue(t["Sum", 0] is UnitCell)
 
@@ -56,7 +56,7 @@ class BasicFunctionsTest {
 
         assertTrue(500 in t["Sum", 0])
 
-        t["Sum", 0] = null
+        t["Sum", 0] = Unit
 
         assertTrue(t["Sum", 0] is UnitCell)
 
@@ -112,7 +112,7 @@ class BasicFunctionsTest {
 
         assertTrue(300 in t["Max", 0])
 
-        t["Max", 0] = null
+        t["Max", 0] = Unit
 
         assertTrue(t["Max", 0] is UnitCell)
 
@@ -140,7 +140,7 @@ class BasicFunctionsTest {
 
         assertTrue(200 in t["Max", 0])
 
-        t["Max", 0] = null
+        t["Max", 0] = Unit
 
         assertTrue(t["Max", 0] is UnitCell)
 
@@ -197,7 +197,7 @@ class BasicFunctionsTest {
 
         assertTrue(50 in t["Min", 0])
 
-        t["Min", 0] = null
+        t["Min", 0] = Unit
 
         assertTrue(t["Min", 0] is UnitCell)
 
@@ -225,7 +225,7 @@ class BasicFunctionsTest {
 
         assertTrue(150 in t["Min", 0])
 
-        t["Min", 0] = null
+        t["Min", 0] = Unit
 
         assertTrue(t["Min", 0] is UnitCell)
 
@@ -281,7 +281,7 @@ class BasicFunctionsTest {
 
         assertTrue(3 in t["Count", 0])
 
-        t["Count", 0] = null
+        t["Count", 0] = Unit
 
         assertTrue(t["Count", 0] is UnitCell)
 
@@ -309,7 +309,7 @@ class BasicFunctionsTest {
 
         assertTrue(2 in t["Count", 0])
 
-        t["Count", 0] = null
+        t["Count", 0] = Unit
 
         assertTrue(t["Count", 0] is UnitCell)
 

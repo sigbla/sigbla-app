@@ -18,6 +18,8 @@ import java.util.*
 import kotlin.math.min
 import kotlin.math.max
 
+internal fun Unit.toCell(column: Column, index: Long) =
+    UnitCell(column, index)
 internal fun Boolean.toCell(column: Column, index: Long) =
     BooleanCell(column, index, this)
 internal fun String.toCell(column: Column, index: Long) =
@@ -350,31 +352,31 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     operator fun contains(that: Cell<*>?): Boolean = compareTo(that) == 0
 
     operator fun invoke(newValue: BigDecimal?): BigDecimal? {
-        if (newValue == null) table[this] = null else table[this] = newValue
+        table[this] = newValue
         return newValue
     }
     operator fun invoke(newValue: BigInteger?): BigInteger? {
-        if (newValue == null) table[this] = null else table[this] = newValue
+        table[this] = newValue
         return newValue
     }
     operator fun invoke(newValue: Double?): Double? {
-        if (newValue == null) table[this] = null else table[this] = newValue
+        table[this] = newValue
         return newValue
     }
     operator fun invoke(newValue: Long?): Long? {
-        if (newValue == null) table[this] = null else table[this] = newValue
+        table[this] = newValue
         return newValue
     }
     operator fun invoke(newValue: Number?): Number? {
-        if (newValue == null) table[this] = null else table[this] = newValue
+        table[this] = newValue
         return newValue
     }
     operator fun invoke(newValue: String?): String? {
-        if (newValue == null) table[this] = null else table[this] = newValue
+        table[this] = newValue
         return newValue
     }
     operator fun invoke(newValue: Boolean?): Boolean? {
-        if (newValue == null) table[this] = null else table[this] = newValue
+        table[this] = newValue
         return newValue
     }
     operator fun invoke(newValue: Cell<*>?): Cell<*>? {
@@ -382,7 +384,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
         return newValue
     }
     operator fun invoke(newValue: Unit?): Unit? {
-        table[this] = null
+        table[this] = newValue
         return newValue
     }
 

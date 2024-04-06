@@ -1911,7 +1911,7 @@ class ColumnViewBatchListenerTest {
         assertEquals(1, eventCount2)
 
         batch(tv1) {
-            tv1["A", 1][CellWidth] = null
+            tv1["A", 1][CellWidth] = Unit
         }
 
         assertEquals(2, eventCount1)

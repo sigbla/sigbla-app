@@ -186,7 +186,7 @@ class ColumnBatchListenerTest {
 
             off(ref1)
 
-            t["A", 0] = null
+            t["A", 0] = Unit
 
             val ref2 = on(t["A"]) {
                 allowLoop = true
@@ -745,7 +745,7 @@ class ColumnBatchListenerTest {
         assertEquals(2, eventCount1)
 
         batch(t1) {
-            t1["A", 2] = null
+            t1["A", 2] = Unit
             clear(t1["A"])
         }
 

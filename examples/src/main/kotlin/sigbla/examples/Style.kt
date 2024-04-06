@@ -38,7 +38,7 @@ fun main() {
     tableView[CellClasses] = tableView[CellClasses] + setOf("d", "e")
     tableView[CellClasses] = tableView[CellClasses] - "e"
     tableView[CellClasses] = tableView[CellClasses] - setOf("a", "d")
-    tableView[CellClasses] = null
+    tableView[CellClasses] = Unit
     tableView["A"][CellWidth]
     tableView[1][CellHeight]
     tableView["A", 1][CellHeight]
@@ -209,7 +209,7 @@ fun main() {
 
     }
 
-    tableView[Header["A"], 1][CellHeight] = null
+    tableView[Header["A"], 1][CellHeight] = Unit
     tableView[Header["A"], 1][CellWidth] = 100
 
     // TODO?
@@ -225,7 +225,7 @@ fun main() {
     cv[CellHeight]
 
     tableView[CellHeight] = 100
-    tableView[CellHeight] = null
+    tableView[CellHeight] = Unit
     tableView[CellHeight] = 100L
     val height = tableView[CellHeight] + 100
     tableView[CellHeight] = height

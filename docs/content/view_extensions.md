@@ -274,7 +274,7 @@ tableView[2][CellClasses].apply { this(this - "cc1-2") }
 tableView["D", 2][CellClasses].apply { this(this - "cc1-d2") }
 ```
 
-Clear classes or topics by assigning a null, for example `tableView[2][CellClasses] = null`.
+Clear classes or topics by assigning a `Unit`, for example `tableView[2][CellClasses] = Unit`.
 
 We can make use of classes and CSS resources like shown in the next example:
 

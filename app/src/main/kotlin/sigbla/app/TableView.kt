@@ -168,6 +168,10 @@ class TableView internal constructor(
         }
     }
 
+    operator fun set(table: Table.Companion, newTable: Unit?) {
+        set(table, null as Table?)
+    }
+
     operator fun set(table: Table.Companion, newTable: Table?) {
         synchronized(eventProcessor) {
             val (oldRef, newRef) = tableViewRef.refAction {
@@ -192,6 +196,10 @@ class TableView internal constructor(
         val ref = tableViewRef.get()
         val function = ref.tableTransformer ?: return UnitTableTransformer(this)
         return FunctionTableTransformer(this, function)
+    }
+
+    operator fun set(table: TableTransformer.Companion, tableTransformer: Unit?) {
+        setTableTransformer(null)
     }
 
     operator fun set(table: TableTransformer.Companion, tableTransformer: TableTransformer<*>?) {
@@ -231,14 +239,19 @@ class TableView internal constructor(
         }
     }
 
-    operator fun set(cellHeight: CellHeight.Companion, height: Long) {
+    operator fun set(cellHeight: CellHeight.Companion, height: Unit?) {
+        setCellHeight(null)
+    }
+
+    operator fun set(cellHeight: CellHeight.Companion, height: Long?) {
         setCellHeight(height)
     }
 
-    operator fun set(cellHeight: CellHeight.Companion, height: Number) {
+    operator fun set(cellHeight: CellHeight.Companion, height: Number?) {
         when (height) {
             is Int -> setCellHeight(height.toLong())
             is Long -> setCellHeight(height)
+            null -> setCellHeight(null)
             else -> throw InvalidCellHeightException("Unsupported type: ${height::class}")
         }
     }
@@ -275,14 +288,19 @@ class TableView internal constructor(
         }
     }
 
-    operator fun set(cellWidth: CellWidth.Companion, width: Long) {
+    operator fun set(cellWidth: CellWidth.Companion, width: Unit?) {
+        setCellWidth(null)
+    }
+
+    operator fun set(cellWidth: CellWidth.Companion, width: Long?) {
         setCellWidth(width)
     }
 
-    operator fun set(cellWidth: CellWidth.Companion, width: Number) {
+    operator fun set(cellWidth: CellWidth.Companion, width: Number?) {
         when (width) {
             is Int -> setCellWidth(width.toLong())
             is Long -> setCellWidth(width)
+            null -> setCellWidth(null)
             else -> throw InvalidCellWidthException("Unsupported type: ${width::class}")
         }
     }
@@ -316,12 +334,16 @@ class TableView internal constructor(
         return CellClasses(this, ref.defaultCellView.cellClasses ?: immutableSetOf())
     }
 
-    operator fun set(cellClasses: CellClasses.Companion, classes: String) {
-        setCellClasses(immutableSetOf(classes))
+    operator fun set(cellClasses: CellClasses.Companion, classes: Unit?) {
+        setCellClasses(null)
     }
 
-    operator fun set(cellClasses: CellClasses.Companion, classes: Collection<String>) {
-        setCellClasses(classes.toImmutableSet())
+    operator fun set(cellClasses: CellClasses.Companion, classes: String?) {
+        if (classes == null) setCellClasses(null) else setCellClasses(immutableSetOf(classes))
+    }
+
+    operator fun set(cellClasses: CellClasses.Companion, classes: Collection<String>?) {
+        setCellClasses(classes?.toImmutableSet())
     }
 
     operator fun set(cellClasses: CellClasses.Companion, classes: CellClasses<*>?) {
@@ -353,12 +375,16 @@ class TableView internal constructor(
         return CellTopics(this, ref.defaultCellView.cellTopics ?: immutableSetOf())
     }
 
-    operator fun set(cellTopics: CellTopics.Companion, topics: String) {
-        setCellTopics(immutableSetOf(topics))
+    operator fun set(cellTopics: CellTopics.Companion, topics: Unit?) {
+        setCellTopics(null)
     }
 
-    operator fun set(cellTopics: CellTopics.Companion, topics: Collection<String>) {
-        setCellTopics(topics.toImmutableSet())
+    operator fun set(cellTopics: CellTopics.Companion, topics: String?) {
+        if (topics == null) setCellTopics(null) else setCellTopics(immutableSetOf(topics))
+    }
+
+    operator fun set(cellTopics: CellTopics.Companion, topics: Collection<String>?) {
+        setCellTopics(topics?.toImmutableSet())
     }
 
     operator fun set(cellTopics: CellTopics.Companion, topics: CellTopics<*>?) {
@@ -390,16 +416,29 @@ class TableView internal constructor(
         return Resources(this, ref.resources)
     }
 
-    operator fun set(resources: Resources.Companion, resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>) {
-        setResources(PHashMap<String, Pair<Long, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>().put(resource.first, Resources.RESOURCE_COUNTER.getAndIncrement() to resource.second))
+    operator fun set(resources: Resources.Companion, resource: Unit?) {
+        setResources(null)
     }
 
-    operator fun set(resources: Resources.Companion, newResources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>) {
-        setResources(newResources.fold(PHashMap()) { acc, r -> acc.put(r.first, Resources.RESOURCE_COUNTER.getAndIncrement() to r.second)})
+    operator fun set(resources: Resources.Companion, resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>?) {
+        if (resource == null)
+            setResources(null)
+        else
+            setResources(PHashMap<String, Pair<Long, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>().put(resource.first, Resources.RESOURCE_COUNTER.getAndIncrement() to resource.second))
     }
 
-    operator fun set(resources: Resources.Companion, newResources: Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>) {
-        setResources(newResources.entries.fold(PHashMap()) { acc, r -> acc.put(r.key, Resources.RESOURCE_COUNTER.getAndIncrement() to r.value)})
+    operator fun set(resources: Resources.Companion, newResources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>?) {
+        if (newResources == null)
+            setResources(null)
+        else
+            setResources(newResources.fold(PHashMap()) { acc, r -> acc.put(r.first, Resources.RESOURCE_COUNTER.getAndIncrement() to r.second)})
+    }
+
+    operator fun set(resources: Resources.Companion, newResources: Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>?) {
+        if (newResources == null)
+            setResources(null)
+        else
+            setResources(newResources.entries.fold(PHashMap()) { acc, r -> acc.put(r.key, Resources.RESOURCE_COUNTER.getAndIncrement() to r.value)})
     }
 
     operator fun set(resources: Resources.Companion, newResources: Resources?) {
@@ -546,6 +585,10 @@ class TableView internal constructor(
 
     // -----
 
+    operator fun set(cell: Cell<*>, view: Unit?) {
+        this[cell.column][cell.index] = view
+    }
+
     operator fun set(cell: Cell<*>, view: CellView?) {
         this[cell.column][cell.index] = view
     }
@@ -555,6 +598,10 @@ class TableView internal constructor(
     }
 
     // -----
+
+    operator fun set(cellView: CellView, view: Unit?) {
+        this[cellView.columnView][cellView.index] = view
+    }
 
     operator fun set(cellView: CellView, view: CellView?) {
         this[cellView.columnView][cellView.index] = view
@@ -602,6 +649,12 @@ class TableView internal constructor(
             ))
         }
     }
+
+    operator fun set(header: Header, view: Unit?) = set(header, null as ColumnView?)
+
+    operator fun set(column: Column, view: Unit?) = set(column.header, null as ColumnView?)
+
+    operator fun set(columnView: ColumnView, view: Unit?) = set(columnView.header, null as ColumnView?)
 
     operator fun set(column: Column, view: ColumnView?) = set(column.header, view)
 
@@ -681,6 +734,17 @@ class TableView internal constructor(
         }
     }
 
+    operator fun set(index: Long, view: Unit?) = set(index, null as RowView?)
+
+    operator fun set(index: Int, view: Unit?) = set(index.toLong(), null as RowView?)
+
+    operator fun set(rowView: RowView, view: Unit?) = set(rowView.index, null as RowView?)
+
+    operator fun set(row: Row, view: Unit?) {
+        if (row.indexRelation != IndexRelation.AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        set(row.index, view)
+    }
+
     operator fun set(index: Int, view: RowView?) = set(index.toLong(), view)
 
     operator fun set(rowView: RowView, view: RowView?) = set(rowView.index, view)
@@ -708,6 +772,22 @@ class TableView internal constructor(
 
     // -----
 
+    operator fun set(column: Column, index: Int, view: Unit?) {
+        this[column.header, index] = view
+    }
+
+    operator fun set(column: Column, row: Row, view: Unit?) {
+        this[column.header, row] = view
+    }
+
+    operator fun set(column: Column, rowView: RowView, view: Unit?) {
+        this[column.header, rowView] = view
+    }
+
+    operator fun set(column: Column, index: Long, view: Unit?) {
+        this[column.header, index] = view
+    }
+
     operator fun set(column: Column, index: Int, view: CellView?) {
         this[column.header, index] = view
     }
@@ -726,6 +806,22 @@ class TableView internal constructor(
 
     // -----
 
+    operator fun set(columnView: ColumnView, index: Int, view: Unit?) {
+        this[columnView.header, index] = view
+    }
+
+    operator fun set(columnView: ColumnView, row: Row, view: Unit?) {
+        this[columnView.header, row] = view
+    }
+
+    operator fun set(columnView: ColumnView, rowView: RowView, view: Unit?) {
+        this[columnView.header, rowView] = view
+    }
+
+    operator fun set(columnView: ColumnView, index: Long, view: Unit?) {
+        this[columnView.header, index] = view
+    }
+
     operator fun set(columnView: ColumnView, index: Int, view: CellView?) {
         this[columnView.header, index] = view
     }
@@ -743,6 +839,23 @@ class TableView internal constructor(
     }
 
     // -----
+
+    operator fun set(header: Header, index: Int, view: Unit?) {
+        this[header, index.toLong()] = null as CellView?
+    }
+
+    operator fun set(header: Header, row: Row, view: Unit?) {
+        if (row.indexRelation != IndexRelation.AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        this[header, row.index] = null as CellView?
+    }
+
+    operator fun set(header: Header, rowView: RowView, view: Unit?) {
+        this[header, rowView.index] = null as CellView?
+    }
+
+    operator fun set(header: Header, index: Long, view: Unit?) {
+        this[header, index] = null as CellView?
+    }
 
     operator fun set(header: Header, index: Int, view: CellView?) {
         this[header, index.toLong()] = view
@@ -857,11 +970,35 @@ class TableView internal constructor(
 
     // -----
 
+    operator fun set(vararg header: String, view: Unit?) {
+        this[Header(*header)] = view
+    }
+
     operator fun set(vararg header: String, view: ColumnView?) {
         this[Header(*header)] = view
     }
 
     // -----
+
+    operator fun set(header1: String, index: Long, view: Unit?) {
+        this[header1][index] = view
+    }
+
+    operator fun set(header1: String, header2: String, index: Long, view: Unit?) {
+        this[header1, header2][index] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Long, view: Unit?) {
+        this[header1, header2, header3][index] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, view: Unit?) {
+        this[header1, header2, header3, header4][index] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, view: Unit?) {
+        this[header1, header2, header3, header4, header5][index] = view
+    }
 
     operator fun set(header1: String, index: Long, view: CellView?) {
         this[header1][index] = view
@@ -885,6 +1022,26 @@ class TableView internal constructor(
 
     // -----
 
+    operator fun set(header1: String, row: Row, view: Unit?) {
+        this[header1][row] = view
+    }
+
+    operator fun set(header1: String, header2: String, row: Row, view: Unit?) {
+        this[header1, header2][row] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, row: Row, view: Unit?) {
+        this[header1, header2, header3][row] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, view: Unit?) {
+        this[header1, header2, header3, header4][row] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, view: Unit?) {
+        this[header1, header2, header3, header4, header5][row] = view
+    }
+
     operator fun set(header1: String, row: Row, view: CellView?) {
         this[header1][row] = view
     }
@@ -906,6 +1063,26 @@ class TableView internal constructor(
     }
 
     // -----
+
+    operator fun set(header1: String, rowView: RowView, view: Unit?) {
+        this[header1][rowView] = view
+    }
+
+    operator fun set(header1: String, header2: String, rowView: RowView, view: Unit?) {
+        this[header1, header2][rowView] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, rowView: RowView, view: Unit?) {
+        this[header1, header2, header3][rowView] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, rowView: RowView, view: Unit?) {
+        this[header1, header2, header3, header4][rowView] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, rowView: RowView, view: Unit?) {
+        this[header1, header2, header3, header4, header5][rowView] = view
+    }
 
     operator fun set(header1: String, rowView: RowView, view: CellView?) {
         this[header1][rowView] = view
@@ -1000,6 +1177,26 @@ class TableView internal constructor(
 
     // -----
 
+    operator fun set(header1: String, index: Int, view: Unit?) {
+        this[header1][index] = view
+    }
+
+    operator fun set(header1: String, header2: String, index: Int, view: Unit?) {
+        this[header1, header2][index] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Int, view: Unit?) {
+        this[header1, header2, header3][index] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, view: Unit?) {
+        this[header1, header2, header3, header4][index] = view
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, view: Unit?) {
+        this[header1, header2, header3, header4, header5][index] = view
+    }
+
     operator fun set(header1: String, index: Int, view: CellView?) {
         this[header1][index] = view
     }
@@ -1077,13 +1274,13 @@ class TableView internal constructor(
             }
         } else {
             batch(this) {
-                this[CellHeight] = null
-                this[CellWidth] = null
-                this[CellClasses] = null
-                this[CellTopics] = null
-                this[TableTransformer] = null
-                this[Resources] = null
-                this[Table] = null
+                this[CellHeight] = Unit
+                this[CellWidth] = Unit
+                this[CellClasses] = Unit
+                this[CellTopics] = Unit
+                this[TableTransformer] = Unit
+                this[Resources] = Unit
+                this[Table] = Unit
             }
         }
         return newValue
@@ -1230,20 +1427,25 @@ class CellView(
     }
 
     // TODO Ensure cell height and width is rendered (currently ignored)
-    operator fun set(cellHeight: CellHeight.Companion, height: Long) {
+    operator fun set(cellHeight: CellHeight.Companion, height: Long?) {
         setCellHeight(height)
     }
 
-    operator fun set(cellHeight: CellHeight.Companion, height: Number) {
+    operator fun set(cellHeight: CellHeight.Companion, height: Number?) {
         when (height) {
             is Int -> setCellHeight(height.toLong())
             is Long -> setCellHeight(height)
+            null -> setCellHeight(null)
             else -> throw InvalidCellHeightException("Unsupported type: ${height::class}")
         }
     }
 
     operator fun set(cellHeight: CellHeight.Companion, height: CellHeight<*, *>?) {
         setCellHeight(height?.asLong)
+    }
+
+    operator fun set(cellHeight: CellHeight.Companion, height: Unit?) {
+        setCellHeight(null)
     }
 
     private fun setCellHeight(height: Long?) {
@@ -1279,20 +1481,25 @@ class CellView(
         }
     }
 
-    operator fun set(cellWidth: CellWidth.Companion, width: Long) {
+    operator fun set(cellWidth: CellWidth.Companion, width: Long?) {
         setCellWidth(width)
     }
 
-    operator fun set(cellWidth: CellWidth.Companion, width: Number) {
+    operator fun set(cellWidth: CellWidth.Companion, width: Number?) {
         when (width) {
             is Int -> setCellWidth(width.toLong())
             is Long -> setCellWidth(width)
+            null -> setCellWidth(null)
             else -> throw InvalidCellWidthException("Unsupported type: ${width::class}")
         }
     }
 
     operator fun set(cellWidth: CellWidth.Companion, width: CellWidth<*, *>?) {
         setCellWidth(width?.asLong)
+    }
+
+    operator fun set(cellWidth: CellWidth.Companion, width: Unit?) {
+        setCellWidth(null)
     }
 
     private fun setCellWidth(width: Long?) {
@@ -1325,16 +1532,20 @@ class CellView(
         return CellClasses(this, ref.cellViews[Pair(columnView.header, index)]?.cellClasses ?: immutableSetOf())
     }
 
-    operator fun set(cellClasses: CellClasses.Companion, classes: String) {
-        setCellClasses(immutableSetOf(classes))
+    operator fun set(cellClasses: CellClasses.Companion, classes: String?) {
+        if (classes == null) setCellClasses(null) else setCellClasses(immutableSetOf(classes))
     }
 
-    operator fun set(cellClasses: CellClasses.Companion, classes: Collection<String>) {
-        setCellClasses(classes.toImmutableSet())
+    operator fun set(cellClasses: CellClasses.Companion, classes: Collection<String>?) {
+        setCellClasses(classes?.toImmutableSet())
     }
 
     operator fun set(cellClasses: CellClasses.Companion, classes: CellClasses<*>?) {
         setCellClasses(classes?._classes)
+    }
+
+    operator fun set(cellClasses: CellClasses.Companion, classes: Unit?) {
+        setCellClasses(null)
     }
 
     private fun setCellClasses(classes: PSet<String>?) {
@@ -1367,16 +1578,20 @@ class CellView(
         return CellTopics(this, ref.cellViews[Pair(columnView.header, index)]?.cellTopics ?: immutableSetOf())
     }
 
-    operator fun set(cellTopics: CellTopics.Companion, topics: String) {
-        setCellTopics(immutableSetOf(topics))
+    operator fun set(cellTopics: CellTopics.Companion, topics: String?) {
+        if (topics == null) setCellTopics(null) else setCellTopics(immutableSetOf(topics))
     }
 
-    operator fun set(cellTopics: CellTopics.Companion, topics: Collection<String>) {
-        setCellTopics(topics.toImmutableSet())
+    operator fun set(cellTopics: CellTopics.Companion, topics: Collection<String>?) {
+        setCellTopics(topics?.toImmutableSet())
     }
 
     operator fun set(cellTopics: CellTopics.Companion, topics: CellTopics<*>?) {
         setCellTopics(topics?._topics)
+    }
+
+    operator fun set(cellTopics: CellTopics.Companion, topics: Unit?) {
+        setCellTopics(null)
     }
 
     private fun setCellTopics(topics: PSet<String>?) {
@@ -1414,7 +1629,11 @@ class CellView(
         setCellTransformer(cellTransformer?.function as? (Cell<*>.() -> Unit)?)
     }
 
-    operator fun set(cell: CellTransformer.Companion, cellTransformer: Cell<*>.() -> Unit) {
+    operator fun set(cell: CellTransformer.Companion, cellTransformer: Unit?) {
+        setCellTransformer(null)
+    }
+
+    operator fun set(cell: CellTransformer.Companion, cellTransformer: (Cell<*>.() -> Unit)?) {
         setCellTransformer(cellTransformer)
     }
 
@@ -1472,7 +1691,7 @@ class CellView(
     }
 
     operator fun invoke(newValue: Unit?): Unit? {
-        tableView[this] = null
+        tableView[this] = newValue
         return newValue
     }
 
@@ -1614,11 +1833,15 @@ class ColumnView internal constructor(
         return FunctionColumnTransformer(this, function)
     }
 
+    operator fun set(column: ColumnTransformer.Companion, columnTransformer: Unit?) {
+        setColumnTransformer(null)
+    }
+
     operator fun set(column: ColumnTransformer.Companion, columnTransformer: ColumnTransformer<*>?) {
         setColumnTransformer(columnTransformer?.function as? (Column.() -> Unit)?)
     }
 
-    operator fun set(column: ColumnTransformer.Companion, columnTransformer: Column.() -> Unit) {
+    operator fun set(column: ColumnTransformer.Companion, columnTransformer: (Column.() -> Unit)?) {
         setColumnTransformer(columnTransformer)
     }
 
@@ -1651,14 +1874,19 @@ class ColumnView internal constructor(
         }
     }
 
-    operator fun set(cellWidth: CellWidth.Companion, width: Long) {
+    operator fun set(cellWidth: CellWidth.Companion, width: Unit?) {
+        setCellWidth(null)
+    }
+
+    operator fun set(cellWidth: CellWidth.Companion, width: Long?) {
         setCellWidth(width)
     }
 
-    operator fun set(cellWidth: CellWidth.Companion, width: Number) {
+    operator fun set(cellWidth: CellWidth.Companion, width: Number?) {
         when (width) {
             is Int -> setCellWidth(width.toLong())
             is Long -> setCellWidth(width)
+            null -> setCellWidth(null)
             else -> throw InvalidCellWidthException("Unsupported type: ${width::class}")
         }
     }
@@ -1696,12 +1924,16 @@ class ColumnView internal constructor(
         return CellClasses(this, ref.columnViews[header]?.cellClasses ?: immutableSetOf())
     }
 
-    operator fun set(cellClasses: CellClasses.Companion, classes: String) {
-        setCellClasses(immutableSetOf(classes))
+    operator fun set(cellClasses: CellClasses.Companion, classes: Unit?) {
+        setCellClasses(null)
     }
 
-    operator fun set(cellClasses: CellClasses.Companion, classes: Collection<String>) {
-        setCellClasses(classes.toImmutableSet())
+    operator fun set(cellClasses: CellClasses.Companion, classes: String?) {
+        if (classes == null) setCellClasses(null) else setCellClasses(immutableSetOf(classes))
+    }
+
+    operator fun set(cellClasses: CellClasses.Companion, classes: Collection<String>?) {
+        setCellClasses(classes?.toImmutableSet())
     }
 
     operator fun set(cellClasses: CellClasses.Companion, classes: CellClasses<*>?) {
@@ -1737,12 +1969,16 @@ class ColumnView internal constructor(
         return CellTopics(this, ref.columnViews[header]?.cellTopics ?: immutableSetOf())
     }
 
-    operator fun set(cellTopics: CellTopics.Companion, topics: String) {
-        setCellTopics(immutableSetOf(topics))
+    operator fun set(cellTopics: CellTopics.Companion, topics: Unit?) {
+        setCellTopics(null)
     }
 
-    operator fun set(cellTopics: CellTopics.Companion, topics: Collection<String>) {
-        setCellTopics(topics.toImmutableSet())
+    operator fun set(cellTopics: CellTopics.Companion, topics: String?) {
+        if (topics == null) setCellTopics(null) else setCellTopics(immutableSetOf(topics))
+    }
+
+    operator fun set(cellTopics: CellTopics.Companion, topics: Collection<String>?) {
+        setCellTopics(topics?.toImmutableSet())
     }
 
     operator fun set(cellTopics: CellTopics.Companion, topics: CellTopics<*>?) {
@@ -1799,7 +2035,7 @@ class ColumnView internal constructor(
     }
 
     operator fun invoke(newValue: Unit?): Unit? {
-        tableView[this] = null
+        tableView[this] = newValue
         return newValue
     }
 
@@ -1828,6 +2064,17 @@ class ColumnView internal constructor(
     }
 
     operator fun get(rowView: RowView) = get(rowView.index)
+
+    operator fun set(index: Long, view: Unit?) { tableView[header, index] = view }
+
+    operator fun set(index: Int, view: Unit?) { this[index.toLong()] = view }
+
+    operator fun set(row: Row, view: Unit?) {
+        if (row.indexRelation != IndexRelation.AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        this[row.index] = view
+    }
+
+    operator fun set(rowView: RowView, view: Unit?) { this[rowView.index] = view }
 
     operator fun set(index: Long, view: CellView?) { tableView[header, index] = view }
 
@@ -1962,11 +2209,15 @@ class RowView internal constructor(
         return FunctionRowTransformer(this, function)
     }
 
+    operator fun set(row: RowTransformer.Companion, rowTransformer: Unit?) {
+        setRowTransformer(null)
+    }
+
     operator fun set(row: RowTransformer.Companion, rowTransformer: RowTransformer<*>?) {
         setRowTransformer(rowTransformer?.function as? (Row.() -> Unit)?)
     }
 
-    operator fun set(row: RowTransformer.Companion, rowTransformer: Row.() -> Unit) {
+    operator fun set(row: RowTransformer.Companion, rowTransformer: (Row.() -> Unit)?) {
         setRowTransformer(rowTransformer)
     }
 
@@ -1999,14 +2250,19 @@ class RowView internal constructor(
         }
     }
 
-    operator fun set(cellHeight: CellHeight.Companion, height: Long) {
+    operator fun set(cellHeight: CellHeight.Companion, height: Unit?) {
+        setCellHeight(null)
+    }
+
+    operator fun set(cellHeight: CellHeight.Companion, height: Long?) {
         setCellHeight(height)
     }
 
-    operator fun set(cellHeight: CellHeight.Companion, height: Number) {
+    operator fun set(cellHeight: CellHeight.Companion, height: Number?) {
         when (height) {
             is Int -> setCellHeight(height.toLong())
             is Long -> setCellHeight(height)
+            null -> setCellHeight(null)
             else -> throw InvalidCellHeightException("Unsupported type: ${height::class}")
         }
     }
@@ -2044,12 +2300,16 @@ class RowView internal constructor(
         return CellClasses(this, ref.rowViews[index]?.cellClasses ?: immutableSetOf())
     }
 
-    operator fun set(cellClasses: CellClasses.Companion, classes: String) {
-        setCellClasses(immutableSetOf(classes))
+    operator fun set(cellClasses: CellClasses.Companion, classes: Unit?) {
+        setCellClasses(null)
     }
 
-    operator fun set(cellClasses: CellClasses.Companion, classes: Collection<String>) {
-        setCellClasses(classes.toImmutableSet())
+    operator fun set(cellClasses: CellClasses.Companion, classes: String?) {
+        if (classes == null) setCellClasses(null) else setCellClasses(immutableSetOf(classes))
+    }
+
+    operator fun set(cellClasses: CellClasses.Companion, classes: Collection<String>?) {
+        setCellClasses(classes?.toImmutableSet())
     }
 
     operator fun set(cellClasses: CellClasses.Companion, classes: CellClasses<*>?) {
@@ -2085,12 +2345,16 @@ class RowView internal constructor(
         return CellTopics(this, ref.rowViews[index]?.cellTopics ?: immutableSetOf())
     }
 
-    operator fun set(cellTopics: CellTopics.Companion, topics: String) {
-        setCellTopics(immutableSetOf(topics))
+    operator fun set(cellTopics: CellTopics.Companion, topics: Unit?) {
+        setCellTopics(null)
     }
 
-    operator fun set(cellTopics: CellTopics.Companion, topics: Collection<String>) {
-        setCellTopics(topics.toImmutableSet())
+    operator fun set(cellTopics: CellTopics.Companion, topics: String?) {
+        if (topics == null) setCellTopics(null) else setCellTopics(immutableSetOf(topics))
+    }
+
+    operator fun set(cellTopics: CellTopics.Companion, topics: Collection<String>?) {
+        setCellTopics(topics?.toImmutableSet())
     }
 
     operator fun set(cellTopics: CellTopics.Companion, topics: CellTopics<*>?) {
@@ -2147,7 +2411,7 @@ class RowView internal constructor(
     }
 
     operator fun invoke(newValue: Unit?): Unit? {
-        tableView[this] = null
+        tableView[this] = Unit
         return newValue
     }
 
@@ -2173,6 +2437,14 @@ class RowView internal constructor(
     operator fun get(columnView: ColumnView): CellView = tableView[columnView.header, index]
 
     operator fun get(column: Column): CellView = tableView[column.header, index]
+
+    operator fun set(vararg header: String, view: Unit?) { tableView[Header(*header), index] = view }
+
+    operator fun set(header: Header, view: Unit?) { tableView[header, index] = view }
+
+    operator fun set(columnView: ColumnView, view: Unit?) { tableView[columnView.header, index] = view }
+
+    operator fun set(column: Column, view: Unit?) { tableView[column.header, index] = view }
 
     operator fun set(vararg header: String, view: CellView?) { tableView[Header(*header), index] = view }
 
@@ -2382,9 +2654,9 @@ sealed class CellHeight<S, T> {
 
     operator fun invoke(newValue: CellHeight<*, *>?): CellHeight<*, *>? {
         when (val source = source) {
-            is TableView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
-            is RowView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
-            is CellView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
+            is TableView -> source[CellHeight] = newValue
+            is RowView -> source[CellHeight] = newValue
+            is CellView -> source[CellHeight] = newValue
         }
 
         return newValue
@@ -2392,9 +2664,9 @@ sealed class CellHeight<S, T> {
 
     operator fun invoke(newValue: Long?): Long? {
         when (val source = source) {
-            is TableView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
-            is RowView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
-            is CellView -> if (newValue == null) source[CellHeight] = null else source[CellHeight] = newValue
+            is TableView -> source[CellHeight] = newValue
+            is RowView -> source[CellHeight] = newValue
+            is CellView -> source[CellHeight] = newValue
         }
 
         return newValue
@@ -2402,9 +2674,9 @@ sealed class CellHeight<S, T> {
 
     operator fun invoke(newValue: Unit?): Unit? {
         when (val source = source) {
-            is TableView -> source[CellHeight] = null
-            is RowView -> source[CellHeight] = null
-            is CellView -> source[CellHeight] = null
+            is TableView -> source[CellHeight] = newValue
+            is RowView -> source[CellHeight] = newValue
+            is CellView -> source[CellHeight] = newValue
         }
 
         return newValue
@@ -2570,9 +2842,9 @@ sealed class CellWidth<S, T> {
 
     operator fun invoke(newValue: CellWidth<*, *>?): CellWidth<*, *>? {
         when (val source = source) {
-            is TableView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
-            is ColumnView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
-            is CellView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
+            is TableView -> source[CellWidth] = newValue
+            is ColumnView -> source[CellWidth] = newValue
+            is CellView -> source[CellWidth] = newValue
         }
 
         return newValue
@@ -2580,9 +2852,9 @@ sealed class CellWidth<S, T> {
 
     operator fun invoke(newValue: Long?): Long? {
         when (val source = source) {
-            is TableView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
-            is ColumnView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
-            is CellView -> if (newValue == null) source[CellWidth] = null else source[CellWidth] = newValue
+            is TableView -> source[CellWidth] = newValue
+            is ColumnView -> source[CellWidth] = newValue
+            is CellView -> source[CellWidth] = newValue
         }
 
         return newValue
@@ -2590,9 +2862,9 @@ sealed class CellWidth<S, T> {
 
     operator fun invoke(newValue: Unit?): Unit? {
         when (val source = source) {
-            is TableView -> source[CellWidth] = null
-            is ColumnView -> source[CellWidth] = null
-            is CellView -> source[CellWidth] = null
+            is TableView -> source[CellWidth] = newValue
+            is ColumnView -> source[CellWidth] = newValue
+            is CellView -> source[CellWidth] = newValue
         }
 
         return newValue
@@ -2675,10 +2947,10 @@ class CellClasses<S> internal constructor(
 
     operator fun invoke(newValue: Collection<String>?): Collection<String>? {
         when (source) {
-            is TableView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
-            is ColumnView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
-            is RowView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
-            is CellView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is TableView -> source[CellClasses] = newValue
+            is ColumnView -> source[CellClasses] = newValue
+            is RowView -> source[CellClasses] = newValue
+            is CellView -> source[CellClasses] = newValue
         }
 
         return newValue
@@ -2686,10 +2958,10 @@ class CellClasses<S> internal constructor(
 
     operator fun invoke(newValue: String?): String? {
         when (source) {
-            is TableView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
-            is ColumnView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
-            is RowView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
-            is CellView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is TableView -> source[CellClasses] = newValue
+            is ColumnView -> source[CellClasses] = newValue
+            is RowView -> source[CellClasses] = newValue
+            is CellView -> source[CellClasses] = newValue
         }
 
         return newValue
@@ -2697,10 +2969,10 @@ class CellClasses<S> internal constructor(
 
     operator fun invoke(newValue: CellClasses<*>?): CellClasses<*>? {
         when (source) {
-            is TableView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
-            is ColumnView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
-            is RowView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
-            is CellView -> if (newValue == null) source[CellClasses] = null else source[CellClasses] = newValue
+            is TableView -> source[CellClasses] = newValue
+            is ColumnView -> source[CellClasses] = newValue
+            is RowView -> source[CellClasses] = newValue
+            is CellView -> source[CellClasses] = newValue
         }
 
         return newValue
@@ -2708,10 +2980,10 @@ class CellClasses<S> internal constructor(
 
     operator fun invoke(newValue: Unit?): Unit? {
         when (source) {
-            is TableView -> source[CellClasses] = null
-            is ColumnView -> source[CellClasses] = null
-            is RowView -> source[CellClasses] = null
-            is CellView -> source[CellClasses] = null
+            is TableView -> source[CellClasses] = newValue
+            is ColumnView -> source[CellClasses] = newValue
+            is RowView -> source[CellClasses] = newValue
+            is CellView -> source[CellClasses] = newValue
         }
 
         return newValue
@@ -2756,10 +3028,10 @@ class CellTopics<S> internal constructor(
 
     operator fun invoke(newValue: Collection<String>?): Collection<String>? {
         when (source) {
-            is TableView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
-            is ColumnView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
-            is RowView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
-            is CellView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
+            is TableView -> source[CellTopics] = newValue
+            is ColumnView -> source[CellTopics] = newValue
+            is RowView -> source[CellTopics] = newValue
+            is CellView -> source[CellTopics] = newValue
         }
 
         return newValue
@@ -2767,10 +3039,10 @@ class CellTopics<S> internal constructor(
 
     operator fun invoke(newValue: String?): String? {
         when (source) {
-            is TableView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
-            is ColumnView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
-            is RowView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
-            is CellView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
+            is TableView -> source[CellTopics] = newValue
+            is ColumnView -> source[CellTopics] = newValue
+            is RowView -> source[CellTopics] = newValue
+            is CellView -> source[CellTopics] = newValue
         }
 
         return newValue
@@ -2778,10 +3050,10 @@ class CellTopics<S> internal constructor(
 
     operator fun invoke(newValue: CellTopics<*>?): CellTopics<*>? {
         when (source) {
-            is TableView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
-            is ColumnView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
-            is RowView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
-            is CellView -> if (newValue == null) source[CellTopics] = null else source[CellTopics] = newValue
+            is TableView -> source[CellTopics] = newValue
+            is ColumnView -> source[CellTopics] = newValue
+            is RowView -> source[CellTopics] = newValue
+            is CellView -> source[CellTopics] = newValue
         }
 
         return newValue
@@ -2789,10 +3061,10 @@ class CellTopics<S> internal constructor(
 
     operator fun invoke(newValue: Unit?): Unit? {
         when (source) {
-            is TableView -> source[CellTopics] = null
-            is ColumnView -> source[CellTopics] = null
-            is RowView -> source[CellTopics] = null
-            is CellView -> source[CellTopics] = null
+            is TableView -> source[CellTopics] = newValue
+            is ColumnView -> source[CellTopics] = newValue
+            is RowView -> source[CellTopics] = newValue
+            is CellView -> source[CellTopics] = newValue
         }
 
         return newValue
@@ -2830,12 +3102,12 @@ abstract class TableTransformer<T>(source: TableView, function: T): Transformer<
     }
 
     operator fun invoke(newValue: (Table.() -> Unit)?): (Table.() -> Unit)? {
-        if (newValue == null) source[TableTransformer] = null else source[TableTransformer] = newValue
+        if (newValue == null) source[TableTransformer] = Unit else source[TableTransformer] = newValue
         return newValue
     }
 
     operator fun invoke(newValue: Unit?): Unit? {
-        source[TableTransformer] = null
+        source[TableTransformer] = newValue
         return newValue
     }
 
@@ -2880,12 +3152,12 @@ abstract class ColumnTransformer<T>(source: ColumnView, function: T): Transforme
     }
 
     operator fun invoke(newValue: (Column.() -> Unit)?): (Column.() -> Unit)? {
-        if (newValue == null) source[ColumnTransformer] = null else source[ColumnTransformer] = newValue
+        source[ColumnTransformer] = newValue
         return newValue
     }
 
     operator fun invoke(newValue: Unit?): Unit? {
-        source[ColumnTransformer] = null
+        source[ColumnTransformer] = newValue
         return newValue
     }
 
@@ -2930,12 +3202,12 @@ abstract class RowTransformer<T>(source: RowView, function: T): Transformer<RowV
     }
 
     operator fun invoke(newValue: (Row.() -> Unit)?): (Row.() -> Unit)? {
-        if (newValue == null) source[RowTransformer] = null else source[RowTransformer] = newValue
+        source[RowTransformer] = newValue
         return newValue
     }
 
     operator fun invoke(newValue: Unit?): Unit? {
-        source[RowTransformer] = null
+        source[RowTransformer] = newValue
         return newValue
     }
 
@@ -2980,12 +3252,12 @@ abstract class CellTransformer<T>(source: CellView, function: T): Transformer<Ce
     }
 
     operator fun invoke(newValue: (Cell<*>.() -> Unit)?): (Cell<*>.() -> Unit)? {
-        if (newValue == null) source[CellTransformer] = null else source[CellTransformer] = newValue
+        source[CellTransformer] = newValue
         return newValue
     }
 
     operator fun invoke(newValue: Unit?): Unit? {
-        source[CellTransformer] = null
+        source[CellTransformer] = newValue
         return newValue
     }
 
@@ -3073,22 +3345,22 @@ class Resources internal constructor(
     }
 
     operator fun invoke(newValue: Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>?): Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>? {
-        if (newValue == null) source[Resources] = null else source[Resources] = newValue
+        source[Resources] = newValue
         return newValue
     }
 
     operator fun invoke(newValue: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>?): Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>? {
-        if (newValue == null) source[Resources] = null else source[Resources] = newValue
+        source[Resources] = newValue
         return newValue
     }
 
     operator fun invoke(newValue: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>?): Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>? {
-        if (newValue == null) source[Resources] = null else source[Resources] = newValue
+        source[Resources] = newValue
         return newValue
     }
 
     operator fun invoke(newValue: Unit?): Unit? {
-        source[Resources] = null
+        source[Resources] = newValue
         return newValue
     }
 

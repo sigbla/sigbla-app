@@ -21,7 +21,7 @@
 // table[index relation, int|long][header|column]
 
 // Values:
-// Cell, String, Int, Long, Float, Double, BigInteger, BigDecimal, Number
+// Cell, Unit, Boolean, String, Int, Long, Float, Double, BigInteger, BigDecimal, Number
 
 fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell") {
     println("@Test")
@@ -550,42 +550,57 @@ fun generateForCell() {
             it["A", 0]
         }
     """.trimIndent(), "cell.value")
+    generateForX("null cell", "val cell: Cell<*>? = null", "Unit")
 }
 
 fun generateForString() {
     generateForX("string", "val cell = \"string\"")
+    generateForX("null string", "val cell: String? = null", "Unit")
 }
 
 fun generateForInt() {
     generateForX("int", "val cell = Int.MAX_VALUE", "cell.toLong()")
+    generateForX("null int", "val cell: Int? = null", "Unit")
 }
 
 fun generateForLong() {
     generateForX("long", "val cell = Long.MAX_VALUE")
+    generateForX("null long", "val cell: Long? = null", "Unit")
 }
 
 fun generateForFloat() {
     generateForX("float", "val cell = Float.MAX_VALUE", "cell.toDouble()")
+    generateForX("null float", "val cell: Float? = null", "Unit")
 }
 
 fun generateForDouble() {
     generateForX("double", "val cell = Double.MAX_VALUE")
+    generateForX("null double", "val cell: Double? = null", "Unit")
 }
 
 fun generateForBigInteger() {
     generateForX("bigint", "val cell = BigInteger.TEN")
+    generateForX("null bigint", "val cell: BigInteger? = null", "Unit")
 }
 
 fun generateForBigDecimal() {
     generateForX("bigdecimal", "val cell = BigDecimal.TEN")
+    generateForX("null bigdecimal", "val cell: BigDecimal? = null", "Unit")
 }
 
 fun generateForNumber() {
     generateForX("number", "val cell = 123 as Number", "cell.toLong()")
+    generateForX("null number", "val cell: Number? = null", "Unit")
 }
 
 fun generateForBool() {
     generateForX("boolean", "val cell = true")
+    generateForX("null boolean", "val cell: Boolean? = null", "Unit")
+}
+
+fun generateForUnit() {
+    generateForX("unit", "val cell = Unit")
+    generateForX("null unit", "val cell: Unit? = null", "Unit")
 }
 
 generateForCell()
@@ -598,3 +613,4 @@ generateForBigInteger()
 generateForBigDecimal()
 generateForNumber()
 generateForBool()
+generateForUnit()

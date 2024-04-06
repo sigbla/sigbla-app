@@ -352,7 +352,7 @@ class TableStorageTest {
         load(tmpFile to table2) {
             assertEquals(table2, table.source)
             if (header[0] == "C") remove(this)
-            if (header[0] == "B") this[1] = null
+            if (header[0] == "B") this[1] = Unit
         }
 
         assertEquals(listOf(listOf("A"), listOf("B")), headersOf(table2).map { it.labels }.toList())
