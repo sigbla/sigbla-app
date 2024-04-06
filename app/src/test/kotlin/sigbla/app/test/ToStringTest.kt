@@ -151,28 +151,28 @@ class ToStringTest {
         assertEquals("CellTopics[A, B]", filledCellTopics.toString())
 
         val tableTransformerFunction: Table.() -> Unit = { }
-        val emptyTableTransformer = tableView[TableTransformer].also { it { tableTransformerFunction } }
+        val emptyTableTransformer = tableView[TableTransformer].also { it(tableTransformerFunction) }
         val filledTableTransformer = tableView[TableTransformer]
 
         assertEquals("UnitTableTransformer", emptyTableTransformer.toString())
         assertEquals("FunctionTableTransformer[sigbla.app.Table.() -> kotlin.Unit]", filledTableTransformer.toString())
 
         val columnTransformerFunction: Column.() -> Unit = { }
-        val emptyColumnTransformer = tableView["A"][ColumnTransformer].also { it { columnTransformerFunction } }
+        val emptyColumnTransformer = tableView["A"][ColumnTransformer].also { it(columnTransformerFunction) }
         val filledColumnTransformer = tableView["A"][ColumnTransformer]
 
         assertEquals("UnitColumnTransformer", emptyColumnTransformer.toString())
         assertEquals("FunctionColumnTransformer[sigbla.app.Column.() -> kotlin.Unit]", filledColumnTransformer.toString())
 
         val rowTransformerFunction: Row.() -> Unit = { }
-        val emptyRowTransformer = tableView[1][RowTransformer].also { it { rowTransformerFunction } }
+        val emptyRowTransformer = tableView[1][RowTransformer].also { it(rowTransformerFunction) }
         val filledRowTransformer = tableView[1][RowTransformer]
 
         assertEquals("UnitRowTransformer", emptyRowTransformer.toString())
         assertEquals("FunctionRowTransformer[sigbla.app.Row.() -> kotlin.Unit]", filledRowTransformer.toString())
 
         val cellTransformerFunction: Cell<*>.() -> Unit = { }
-        val emptyCellTransformer = tableView["A", 1][CellTransformer].also { it { cellTransformerFunction } }
+        val emptyCellTransformer = tableView["A", 1][CellTransformer].also { it(cellTransformerFunction) }
         val filledCellTransformer = tableView["A", 1][CellTransformer]
 
         assertEquals("UnitCellTransformer", emptyCellTransformer.toString())
