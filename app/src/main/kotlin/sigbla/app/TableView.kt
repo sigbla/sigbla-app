@@ -2685,7 +2685,7 @@ sealed class CellHeight<S, T> {
     operator fun contains(other: CellHeight<*, *>) = height == other.height
     operator fun contains(other: Int) = (height as? Long) == other.toLong()
     operator fun contains(other: Long) = (height as? Long) == other
-    operator fun contains(other: Unit?) = height is Unit
+    operator fun contains(other: Unit) = (height as? Unit) == other
 
     override fun hashCode() = Objects.hash(this.height)
 
@@ -2873,7 +2873,7 @@ sealed class CellWidth<S, T> {
     operator fun contains(other: CellWidth<*, *>) = width == other.width
     operator fun contains(other: Int) = (width as? Long) == other.toLong()
     operator fun contains(other: Long) = (width as? Long) == other
-    operator fun contains(other: Unit?) = width is Unit
+    operator fun contains(other: Unit) = (width as? Unit) == other
 
     override fun hashCode() = Objects.hash(this.width)
 
@@ -3113,7 +3113,7 @@ abstract class TableTransformer<T>(source: TableView, function: T): Transformer<
 
     operator fun contains(other: TableTransformer<*>) = function == other.function
     operator fun contains(other: Table.() -> Unit) = function == other
-    operator fun contains(other: Unit?) = function is Unit
+    operator fun contains(other: Unit) = function == other
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -3163,7 +3163,7 @@ abstract class ColumnTransformer<T>(source: ColumnView, function: T): Transforme
 
     operator fun contains(other: ColumnTransformer<*>) = function == other.function
     operator fun contains(other: Column.() -> Unit) = function == other
-    operator fun contains(other: Unit?) = function is Unit
+    operator fun contains(other: Unit) = function == other
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -3213,7 +3213,7 @@ abstract class RowTransformer<T>(source: RowView, function: T): Transformer<RowV
 
     operator fun contains(other: RowTransformer<*>) = function == other.function
     operator fun contains(other: Row.() -> Unit) = function == other
-    operator fun contains(other: Unit?) = function is Unit
+    operator fun contains(other: Unit) = function == other
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -3263,7 +3263,7 @@ abstract class CellTransformer<T>(source: CellView, function: T): Transformer<Ce
 
     operator fun contains(other: CellTransformer<*>) = function == other.function
     operator fun contains(other: Cell<*>.() -> Unit) = function == other
-    operator fun contains(other: Unit?) = function is Unit
+    operator fun contains(other: Unit) = function == other
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

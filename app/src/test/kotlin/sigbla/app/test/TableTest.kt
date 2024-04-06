@@ -2608,7 +2608,6 @@ class TableTest {
 
         assertTrue(t["A", 6] in t["A"])
         assertFalse(t["A", 3] in t["B"])
-        assertFalse(null in t["B"])
     }
 
     @Test
@@ -2666,7 +2665,6 @@ class TableTest {
 
         assertTrue(t["F", 1] in t[1])
         assertFalse(t["C", 1] in t[2])
-        assertFalse(null in t[2])
     }
 
     @Test

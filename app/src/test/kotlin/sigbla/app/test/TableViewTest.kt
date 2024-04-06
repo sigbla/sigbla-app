@@ -1921,9 +1921,7 @@ class TableViewTest {
         assertFalse(100 in unitCellHeight)
         assertFalse(100L in unitCellHeight)
         assertTrue(Unit in unitCellHeight)
-        assertTrue(null in unitCellHeight)
         assertFalse(Unit in filledCellHeight)
-        assertFalse(null in filledCellHeight)
     }
 
     @Test
@@ -1942,9 +1940,7 @@ class TableViewTest {
         assertFalse(100 in unitCellWidth)
         assertFalse(100L in unitCellWidth)
         assertTrue(Unit in unitCellWidth)
-        assertTrue(null in unitCellWidth)
         assertFalse(Unit in filledCellWidth)
-        assertFalse(null in filledCellWidth)
     }
 
     @Test
@@ -2001,13 +1997,11 @@ class TableViewTest {
 
         assertTrue(unitTableTransformer in unitTableTransformer)
         assertTrue(Unit in unitTableTransformer)
-        assertTrue(null in unitTableTransformer)
         assertFalse(tt in unitTableTransformer)
 
         assertTrue(filledTableTransformer in filledTableTransformer)
         assertTrue(tt in filledTableTransformer)
         assertFalse(Unit in filledTableTransformer)
-        assertFalse(null in filledTableTransformer)
     }
 
     @Test
@@ -2020,13 +2014,11 @@ class TableViewTest {
 
         assertTrue(unitColumnTransformer in unitColumnTransformer)
         assertTrue(Unit in unitColumnTransformer)
-        assertTrue(null in unitColumnTransformer)
         assertFalse(ct in unitColumnTransformer)
 
         assertTrue(filledColumnTransformer in filledColumnTransformer)
         assertTrue(ct in filledColumnTransformer)
         assertFalse(Unit in filledColumnTransformer)
-        assertFalse(null in filledColumnTransformer)
     }
 
     @Test
@@ -2039,13 +2031,11 @@ class TableViewTest {
 
         assertTrue(unitRowTransformer in unitRowTransformer)
         assertTrue(Unit in unitRowTransformer)
-        assertTrue(null in unitRowTransformer)
         assertFalse(rt in unitRowTransformer)
 
         assertTrue(filledRowTransformer in filledRowTransformer)
         assertTrue(rt in filledRowTransformer)
         assertFalse(Unit in filledRowTransformer)
-        assertFalse(null in filledRowTransformer)
     }
 
     @Test
@@ -2058,13 +2048,11 @@ class TableViewTest {
 
         assertTrue(unitCellTransformer in unitCellTransformer)
         assertTrue(Unit in unitCellTransformer)
-        assertTrue(null in unitCellTransformer)
         assertFalse(ct in unitCellTransformer)
 
         assertTrue(filledCellTransformer in filledCellTransformer)
         assertTrue(ct in filledCellTransformer)
         assertFalse(Unit in filledCellTransformer)
-        assertFalse(null in filledCellTransformer)
     }
 
     @Test

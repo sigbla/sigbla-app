@@ -265,7 +265,6 @@ class HashCodeEqualsTest {
         assertTrue(pixelCellHeight1 in pixelCellHeight2)
         assertTrue(pixelCellHeight2 in pixelCellHeight1)
 
-        assertTrue(null in unitCellHeight1)
         assertTrue(Unit in unitCellHeight1)
         assertTrue(100 in pixelCellHeight1)
         assertTrue(100L in pixelCellHeight2)
@@ -280,7 +279,6 @@ class HashCodeEqualsTest {
         assertTrue(pixelCellWidth1 in pixelCellWidth2)
         assertTrue(pixelCellWidth2 in pixelCellWidth1)
 
-        assertTrue(null in unitCellWidth1)
         assertTrue(Unit in unitCellWidth1)
         assertTrue(100 in pixelCellWidth1)
         assertTrue(100L in pixelCellWidth2)
@@ -332,7 +330,6 @@ class HashCodeEqualsTest {
         assertTrue(emptyTableTransformer1 in emptyTableTransformer2)
         assertTrue(emptyTableTransformer2 in emptyTableTransformer1)
         assertFalse(emptyTableTransformer1 in filledTableTransformer1)
-        assertTrue(null in emptyTableTransformer2)
         assertTrue(Unit in emptyTableTransformer2)
 
         assertNotEquals(filledTableTransformer1, filledTableTransformer2)
@@ -347,7 +344,6 @@ class HashCodeEqualsTest {
         assertTrue(emptyColumnTransformer1 in emptyColumnTransformer2)
         assertTrue(emptyColumnTransformer2 in emptyColumnTransformer1)
         assertFalse(emptyColumnTransformer1 in filledColumnTransformer1)
-        assertTrue(null in emptyColumnTransformer2)
         assertTrue(Unit in emptyColumnTransformer2)
 
         assertNotEquals(filledColumnTransformer1, filledColumnTransformer2)
@@ -362,7 +358,6 @@ class HashCodeEqualsTest {
         assertTrue(emptyRowTransformer1 in emptyRowTransformer2)
         assertTrue(emptyRowTransformer2 in emptyRowTransformer1)
         assertFalse(emptyRowTransformer1 in filledRowTransformer1)
-        assertTrue(null in emptyRowTransformer2)
         assertTrue(Unit in emptyRowTransformer2)
 
         assertNotEquals(filledRowTransformer1, filledRowTransformer2)
@@ -377,7 +372,6 @@ class HashCodeEqualsTest {
         assertTrue(emptyCellTransformer1 in emptyCellTransformer2)
         assertTrue(emptyCellTransformer2 in emptyCellTransformer1)
         assertFalse(emptyCellTransformer1 in filledCellTransformer1)
-        assertTrue(null in emptyCellTransformer2)
         assertTrue(Unit in emptyCellTransformer2)
 
         assertNotEquals(filledCellTransformer1, filledCellTransformer2)
@@ -503,13 +497,9 @@ class HashCodeEqualsTest {
 
         // Most of these are false because UnitCells aren't included in iterators
         assertFalse(unit in table)
-        assertFalse(null in table)
         assertFalse(unit in table[0])
-        assertFalse(null in table[0])
         assertFalse(unit in table["Unit"])
-        assertFalse(null in table["Unit"])
         assertTrue(unit in table["Unit", 0])
-        assertTrue(null in table["Unit", 0])
 
         assertTrue(boolean in table)
         assertTrue(true in table)
