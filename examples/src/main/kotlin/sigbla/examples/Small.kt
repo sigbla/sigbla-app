@@ -7,12 +7,14 @@ import sigbla.app.*
 import java.util.concurrent.ThreadLocalRandom
 
 fun main() {
+    TableView[Port] = 8080
+
     //val table = Table["Table A"]
     val table = Table["test"]
 
-    for (col in listOf("A", "B", "C", "D", "E", "F")) {
-        val withExtra = ThreadLocalRandom.current().nextBoolean()
-        for (row in 0..1000) {
+    for (col in listOf("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T")) {
+        val withExtra = col != "G" && ThreadLocalRandom.current().nextBoolean()
+        for (row in 0..100) {
             if (withExtra)
                 table[col, "E1", row] = "$col $row"
             else
@@ -59,7 +61,7 @@ fun main() {
     on(tableView) = listener
      */
 
-    val url = show(tableView)
+    val url = show(tableView, config = minimalViewConfig(title = "Small example"))
     println(url)
 
     println("END")

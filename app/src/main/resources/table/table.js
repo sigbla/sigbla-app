@@ -6,7 +6,11 @@ class Sigbla {
 
     #target;
     #corner;
+    #topBanner;
+    #leftBanner;
     #end;
+    #marker;
+    #markerCell;
     #overlay;
     #ovl;
     #ohl;
@@ -243,6 +247,327 @@ class Sigbla {
         return true;
     };
 
+    #manageMarkerCell = (newCell) => {
+        if (this.#markerCell === newCell) return;
+
+        if (this.#markerCell) {
+            // Send on blur
+            this.#markerCell.dispatchEvent(new FocusEvent("blur"));
+        }
+
+        this.#markerCell = newCell;
+
+        if (this.#markerCell) {
+            // Send on focus
+            this.#markerCell.dispatchEvent(new FocusEvent("focus"));
+        }
+    }
+
+    // Note: x and y are viewport x and y, not element left/top
+    #manageMarkerPosition = (x, y) => {
+        const findCell = (left, top) => {
+            if (isNaN(left) || isNaN(top)) return undefined;
+
+            const elements = document.elementsFromPoint(left - window.scrollX, top - window.scrollY);
+
+            for (const element of elements) {
+                if (element.classList.contains("co") && element.parentElement.classList.contains("c")) {
+                    return element.parentElement;
+                }
+            }
+            return undefined;
+        }
+
+        const findNextLeft = (scroll) => {
+            const tc = document.getElementById("tc");
+            const tcWidth = parseInt(tc.style.width);
+            const markerLeft = parseInt(this.#marker.style.left);
+            const markerTop = parseInt(this.#marker.style.top);
+            const markerHeight = parseInt(this.#marker.style.height);
+            const markerWidth = parseInt(this.#marker.style.width);
+
+            for (let left = markerLeft - 5; left > markerLeft - 1000; left -= 5) {
+                for (let top = markerTop + 5; top < markerTop + markerHeight; top += 5) {
+                    const cell = findCell(left, top);
+
+                    if (cell) {
+                        const cellLeft = cell.style.left;
+                        const cellTop = cell.style.top;
+
+                        if (cellLeft && cellTop) {
+                            if (parseInt(cellLeft) - tcWidth < window.scrollX + 10) {
+                                window.scroll({
+                                    left: parseInt(cellLeft) - tcWidth - 10,
+                                    behavior: "smooth"
+                                });
+                            }
+
+                            this.#marker.style.left = cellLeft;
+                            this.#marker.style.top = cellTop;
+                            this.#marker.style.height = cell.style.height;
+                            this.#marker.style.width = cell.style.width;
+
+                            this.#manageMarkerCell(cell);
+
+                            return;
+                        }
+                    } else if (scroll) {
+                        const length = markerWidth / 2 < window.innerWidth ? markerWidth / 2 : window.innerWidth;
+                        const cappedLength = length > window.innerWidth - tcWidth ? length - tcWidth : length
+
+                        window.scrollBy({
+                            left: cappedLength > 0 ? -cappedLength : -10,
+                            behavior: "smooth"
+                        });
+
+                        findNextLeft(false);
+
+                        return;
+                    }
+                }
+            }
+        }
+
+        const findNextRight = (scroll) => {
+            const tc = document.getElementById("tc");
+            const tcWidth = parseInt(tc.style.width);
+            const markerLeft = parseInt(this.#marker.style.left);
+            const markerTop = parseInt(this.#marker.style.top);
+            const markerHeight = parseInt(this.#marker.style.height);
+            const markerWidth = parseInt(this.#marker.style.width);
+
+            for (let left = markerLeft + markerWidth + 5; left < markerLeft + markerWidth + 1000; left += 5) {
+                for (let top = markerTop + 5; top < markerTop + markerHeight; top += 5) {
+                    const cell = findCell(left, top);
+
+                    if (cell) {
+                        const cellLeft = cell.style.left;
+                        const cellTop = cell.style.top;
+                        const cellWidth = cell.style.width;
+
+                        if (cellLeft && cellTop) {
+                            if (parseInt(cellLeft) + parseInt(cellWidth) + 10 > window.scrollX + window.innerWidth) {
+                                const length = markerWidth * 2 < window.innerWidth ? markerWidth * 2 : window.innerWidth;
+                                const cappedLength = length > window.innerWidth - tcWidth ? length - tcWidth : length
+
+                                window.scrollBy({
+                                    left: cappedLength > 0 ? cappedLength : 10,
+                                    behavior: "smooth"
+                                });
+                            }
+
+                            this.#marker.style.left = cellLeft;
+                            this.#marker.style.top = cellTop;
+                            this.#marker.style.height = cell.style.height;
+                            this.#marker.style.width = cellWidth;
+
+                            this.#manageMarkerCell(cell);
+
+                            return;
+                        }
+                    } else if (scroll) {
+                        const length = markerWidth / 2 < window.innerWidth ? markerWidth / 2 : window.innerWidth;
+                        const cappedLength = length > window.innerWidth - tcWidth - 10 ? length - tcWidth - 10 : length
+
+                        window.scrollBy({
+                            left: cappedLength > 0 ? cappedLength : 10,
+                            behavior: "smooth"
+                        });
+
+                        findNextRight(false);
+
+                        return;
+                    }
+                }
+            }
+        }
+
+        const findNextUp = (scroll) => {
+            const tc = document.getElementById("tc");
+            const tcHeight = parseInt(tc.style.height);
+            const markerLeft = parseInt(this.#marker.style.left);
+            const markerTop = parseInt(this.#marker.style.top);
+            const markerHeight = parseInt(this.#marker.style.height);
+            const markerWidth = parseInt(this.#marker.style.width);
+
+            for (let top = markerTop - 5; top > markerTop - 1000; top -= 5) {
+                for (let left = markerLeft + 5; left < markerLeft + markerWidth; left += 5) {
+                    const cell = findCell(left, top);
+
+                    if (cell) {
+                        const cellLeft = cell.style.left;
+                        const cellTop = cell.style.top;
+
+                        if (cellLeft && cellTop) {
+                            if (parseInt(cellTop) - tcHeight < window.scrollY + 10) {
+                                window.scroll({
+                                    top: parseInt(cellTop) - tcHeight - 10,
+                                    behavior: "smooth"
+                                });
+                            }
+
+                            this.#marker.style.left = cellLeft;
+                            this.#marker.style.top = cellTop;
+                            this.#marker.style.height = cell.style.height;
+                            this.#marker.style.width = cell.style.width;
+
+                            this.#manageMarkerCell(cell);
+
+                            return;
+                        }
+                    } else if (scroll) {
+                        const length = markerHeight / 2 < window.innerHeight ? markerHeight / 2 : window.innerHeight;
+                        const cappedLength = length > window.innerHeight - tcHeight ? length - tcHeight : length
+
+                        window.scrollBy({
+                            top: cappedLength > 0 ? -cappedLength : -10,
+                            behavior: "smooth"
+                        });
+
+                        findNextUp(false);
+
+                        return;
+                    }
+                }
+            }
+        }
+
+        const findNextDown = (scroll) => {
+            const tc = document.getElementById("tc");
+            const tcHeight = parseInt(tc.style.height);
+            const markerLeft = parseInt(this.#marker.style.left);
+            const markerTop = parseInt(this.#marker.style.top);
+            const markerHeight = parseInt(this.#marker.style.height);
+            const markerWidth = parseInt(this.#marker.style.width);
+
+            for (let top = markerTop + markerHeight + 5; top < markerTop + markerHeight + 1000; top += 5) {
+                for (let left = markerLeft + 5; left < markerLeft + markerWidth; left += 5) {
+                    const cell = findCell(left, top);
+
+                    if (cell) {
+                        const cellLeft = cell.style.left;
+                        const cellTop = cell.style.top;
+                        const cellHeight = cell.style.height;
+
+                        if (cellLeft && cellTop) {
+                            if (parseInt(cellTop) + parseInt(cellHeight) > window.scrollY + window.innerHeight - 10) {
+                                const length = markerHeight * 2 < window.innerHeight ? markerHeight * 2 : window.innerHeight;
+                                const cappedLength = length > window.innerHeight - tcHeight ? length - tcHeight : length
+
+                                window.scrollBy({
+                                    top: cappedLength > 0 ? cappedLength : 10,
+                                    behavior: "smooth"
+                                });
+                            }
+
+                            this.#marker.style.left = cellLeft;
+                            this.#marker.style.top = cellTop;
+                            this.#marker.style.height = cellHeight;
+                            this.#marker.style.width = cell.style.width;
+
+                            this.#manageMarkerCell(cell);
+
+                            return;
+                        }
+                    } else if (scroll) {
+                        const length = markerHeight / 2 < window.innerHeight ? markerHeight / 2 : window.innerHeight;
+                        const cappedLength = length > window.innerHeight - tcHeight ? length - tcHeight : length
+
+                        window.scrollBy({
+                            top: cappedLength > 0 ? cappedLength : 10,
+                            behavior: "smooth"
+                        });
+
+                        findNextDown(false);
+
+                        return;
+                    }
+                }
+            }
+        }
+
+        const marker = this.#marker || (() => {
+            const newMarker = document.createElement("div");
+            newMarker.id = "mkr";
+            newMarker.tabIndex = -1;
+            newMarker.style.top = "0";
+            newMarker.style.left = "0";
+            newMarker.style.height = "0px";
+            newMarker.style.width = "0px";
+
+            const innerMarker = document.createElement("div");
+            innerMarker.id = "mkrInner";
+            newMarker.appendChild(innerMarker);
+
+            this.#target.appendChild(newMarker);
+            this.#marker = newMarker;
+
+            newMarker.addEventListener("transitionend", (e) => {
+                newMarker.focus({
+                    preventScroll: true
+                });
+            });
+
+            const fireEvent = (e) => {
+                if (this.#markerCell) {
+                    const event = new KeyboardEvent("keydown", { key: e.key });
+                    this.#markerCell.dispatchEvent(event);
+                }
+            }
+
+            // TODO Add Enter for "accept input" and move down
+            // TODO Add Tab to create marker if not present, otherwise move right
+            // TODO Add page down / page up support
+            newMarker.addEventListener("keydown", (e) => {
+                switch (e.key) {
+                    case "Escape":
+                        e.preventDefault();
+                        fireEvent(e);
+                        newMarker.remove();
+                        this.#marker = null;
+                        this.#manageMarkerCell(null);
+                        break;
+                    case "ArrowLeft":
+                        e.preventDefault();
+                        findNextLeft(true);
+                        break;
+                    case "ArrowRight":
+                        e.preventDefault();
+                        findNextRight(true);
+                        break;
+                    case "ArrowUp":
+                        e.preventDefault();
+                        findNextUp(true);
+                        break;
+                    case "ArrowDown":
+                        e.preventDefault();
+                        findNextDown(true);
+                        break;
+                    default:
+                        e.preventDefault();
+                        fireEvent(e);
+                        break;
+                }
+            });
+
+            return newMarker;
+        })();
+
+        const elements = document.elementsFromPoint(x, y)
+        for (const element of elements) {
+            if (element.classList.contains("co") && element.parentElement.classList.contains("c")) {
+                marker.style.top = element.parentElement.style.top;
+                marker.style.left = element.parentElement.style.left;
+                marker.style.height = element.parentElement.style.height;
+                marker.style.width = element.parentElement.style.width;
+
+                this.#manageMarkerCell(element.parentElement);
+
+                return;
+            }
+        }
+    }
+
     #handleMessage = async (message) => {
         if (this.#pendingMessageBlockers > 0) {
             this.#pendingMessages.push(message);
@@ -259,7 +584,11 @@ class Sigbla {
 
                 this.#target = document.createElement("div");
                 this.#corner = null;
+                this.#topBanner = null;
+                this.#leftBanner = null;
                 this.#end = null;
+                this.#marker = null;
+                this.#manageMarkerCell(null);
 
                 this.#lastTile = [-1, -1, -1, -1];
                 this.#swapBuffer = true;
@@ -277,9 +606,10 @@ class Sigbla {
             case 2: { // add content
                 const div = document.createElement("div");
 
+                // TODO Change structure of this so id is attached to ch, rh, or c, never container
                 div.id = message.id;
 
-                if (message.classes.startsWith("ch") || message.classes.startsWith("rh")) {
+                if (message.classes === "ch" || message.classes === "rh" || message.classes.startsWith("ch ") || message.classes.startsWith("rh ")) {
                     const child = document.createElement("div");
                     child.className = message.classes;
                     div.className = "container";
@@ -291,10 +621,18 @@ class Sigbla {
                     if (message.y !== undefined) child.style.top = message.y + "px";
                     if (message.mt !== undefined) child.style.marginTop = message.mt + "px";
                     if (message.ml !== undefined) child.style.marginLeft = message.ml + "px";
-                    // TODO Maybe include a border width somewhere?
-                    child.style.height = (message.h - 0) + "px";
-                    child.style.width = (message.w - 0) + "px";
-                    child.innerText = message.content;
+                    // TODO Remove math
+                    child.style.height = (message.h + 0) + "px";
+                    child.style.width = (message.w + 0) + "px";
+
+                    const cc = document.createElement("div");
+                    cc.className = "cc";
+                    cc.innerText = message.content;
+
+                    const co = document.createElement("div");
+                    co.className = "co";
+
+                    div.appendChild(co);
 
                     const bb = document.createElement("div");
                     bb.className = "bb";
@@ -304,25 +642,41 @@ class Sigbla {
                     rb.className = "rb";
                     rb.onmousedown = this.#rbMousedown;
 
+                    child.appendChild(cc);
+                    child.appendChild(co);
                     child.appendChild(bb);
                     child.appendChild(rb);
 
                     div.appendChild(child);
                 } else {
-                    div.className = message.classes;
+                    const cc = document.createElement("div");
+                    cc.className = message.classes;
+                    div.className = "c";
 
                     //if (message.z !== undefined) div.style.zIndex = message.z
                     if (message.x !== undefined) div.style.left = message.x + "px";
                     if (message.y !== undefined) div.style.top = message.y + "px";
                     if (message.mt !== undefined) div.style.marginTop = message.mt + "px";
                     if (message.ml !== undefined) div.style.marginLeft = message.ml + "px";
-                    div.style.height = (message.h - 1) + "px";
-                    div.style.width = (message.w - 1) + "px";
+                    // TODO Remove math
+                    div.style.height = (message.h + 0) + "px";
+                    div.style.width = (message.w + 0) + "px";
 
                     if (message.classes.startsWith("hc "))
-                        div.innerHTML = message.content;
+                        cc.innerHTML = message.content;
                     else
-                        div.innerText = message.content;
+                        cc.innerText = message.content;
+
+                    div.appendChild(cc)
+
+                    const co = document.createElement("div");
+                    co.className = "co";
+
+                    div.appendChild(co);
+
+                    co.addEventListener("click", (e) => {
+                        this.#manageMarkerPosition(e.clientX, e.clientY);
+                    });
                 }
 
                 const old = document.getElementById(message.id);
@@ -443,24 +797,48 @@ class Sigbla {
             case 7: { // dims
                 const corner = this.#corner || (() => {
                     const newCorner = document.createElement("div");
-                    newCorner.className = "tc";
+                    newCorner.id = "tc";
                     this.#target.appendChild(newCorner);
                     this.#corner = newCorner;
                     return newCorner;
                 })();
+                const topBanner = this.#topBanner || (() => {
+                    const newBanner = document.createElement("div");
+                    newBanner.id = "tb";
+                    this.#target.appendChild(newBanner);
+                    this.#topBanner = newBanner;
+                    return newBanner;
+                })();
+                const leftBanner = this.#leftBanner || (() => {
+                    const newBanner = document.createElement("div");
+                    newBanner.id = "lb";
+                    this.#target.appendChild(newBanner);
+                    this.#leftBanner = newBanner;
+                    return newBanner;
+                })();
 
-                corner.style.height = (message.cornerY - 1) + "px";
-                corner.style.width = (message.cornerX - 1) + "px";
+                corner.style.height = message.cornerY + "px";
+                corner.style.width = message.cornerX + "px";
+
+                if (message.cornerRightMargin >= 0) {
+                    corner.style.borderRightWidth = message.cornerRightMargin + "px";
+                }
+                if (message.cornerBottomMargin >= 0) {
+                    corner.style.borderBottomWidth = message.cornerBottomMargin + "px";
+                }
+
+                topBanner.style.height = (message.cornerY + message.cornerBottomMargin) + "px";
+                topBanner.style.width = message.maxX + "px";
+
+                leftBanner.style.height = message.maxY + "px";
+                leftBanner.style.width = (message.cornerX + message.cornerRightMargin) + "px";
 
                 this.#target.style.height = message.maxY + "px";
                 this.#target.style.width = message.maxX + "px";
 
                 const end = this.#end || (() => {
                     const newEnd = document.createElement("div");
-                    newEnd.style.position = "absolute";
-                    newEnd.style.width = "1px";
-                    newEnd.style.height = "1px";
-                    newEnd.style.backgroundColor = "black";
+                    newEnd.id = "end";
                     this.#target.appendChild(newEnd);
                     this.#end = newEnd;
                     return newEnd;

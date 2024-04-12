@@ -39,7 +39,7 @@ internal object SigblaBackend {
 
     // TODO Add a ping event regularly on all listeners
     private val listeners: ConcurrentMap<WebSocketSession, SigblaClient> = ConcurrentHashMap()
-    private val viewRefs: ConcurrentMap<String, Triple<TableView, TableViewListenerReference, TableListenerReference?>> = ConcurrentHashMap()
+    private val viewRefs: ConcurrentMap<String, UIViewRef> = ConcurrentHashMap()
 
     init {
         val (engine, port) = start(10)
@@ -68,7 +68,7 @@ internal object SigblaBackend {
                                 return@handle
                             }
 
-                            val view = viewRefs[ref]?.first
+                            val view = viewRefs[ref]?.tableView
                             if (view == null) {
                                 call.respondText(status = HttpStatusCode.NotFound, text = "Not found")
                                 return@handle
@@ -86,19 +86,12 @@ internal object SigblaBackend {
                                 return@handle
                             }
 
-                            val view = viewRefs[ref]?.first
-                            if (view == null) {
+                            val viewRef = viewRefs[ref] ?: run {
                                 call.respondText(status = HttpStatusCode.NotFound, text = "Not found")
                                 return@handle
                             }
 
-                            call.respondText(
-                                ContentType.Text.Html,
-                                HttpStatusCode.OK
-                            ) {
-                                // TODO Replace title with table view name?
-                                this.javaClass.getResource("/table/table.html").readText().replace("\${title}", ref)
-                            }
+                            viewRef.config.tableHtml(this)
                         }
                     }
                     webSocket("/t/{ref}/socket") {
@@ -109,7 +102,7 @@ internal object SigblaBackend {
                             return@webSocket
                         }
 
-                        val view = viewRefs[ref]?.first
+                        val view = viewRefs[ref]?.tableView
                         if (view == null) {
                             close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No ref"))
                             // TODO return@webSocket ?
@@ -146,14 +139,18 @@ internal object SigblaBackend {
                                 return@handle
                             }
 
-                            val view = viewRefs[ref]?.first
-                            if (view == null) {
+                            val viewRef = viewRefs[ref] ?: run {
                                 call.respondText(status = HttpStatusCode.NotFound, text = "Not found")
                                 return@handle
                             }
 
-                            val resource = call.parameters.getAll("resource")?.joinToString("/")
-                            val handler = if (resource == null) null else view[Resources]._resources[resource]?.second
+                            val view = viewRef.tableView
+                            val handler = when (val resource = call.parameters.getAll("resource")?.joinToString("/")) {
+                                null -> null
+                                "table.js" -> viewRef.config.tableScript
+                                "table.css" -> viewRef.config.tableStyle
+                                else -> view[Resources]._resources[resource]?.second
+                            }
                             if (handler == null) {
                                 call.respondText(status = HttpStatusCode.NotFound, text = "Not found")
                                 return@handle
@@ -172,24 +169,35 @@ internal object SigblaBackend {
         }
     }
 
-    private fun areaContent(view: TableView, x: Long, y: Long, h: Long, w: Long, dims: Dimensions, dirtyCells: List<Cell<*>>? = null): List<PositionedContent> {
+    private fun areaContent(view: TableView, viewRef: UIViewRef, x: Long, y: Long, h: Long, w: Long, dims: Dimensions, dirtyCells: List<Cell<*>>? = null): List<PositionedContent> {
+        val marginTop = viewRef.config.marginTop
+        val marginBottom = viewRef.config.marginBottom
+        val marginLeft = viewRef.config.marginLeft
+        val marginRight = viewRef.config.marginRight
+        val paddingTop = viewRef.config.paddingTop
+        val paddingBottom = viewRef.config.paddingBottom
+        val paddingLeft = viewRef.config.paddingLeft
+        val paddingRight = viewRef.config.paddingRight
+
         val table = view[Table]
 
         val dirtyColumnHeaders = dirtyCells?.map { it.column.header }?.toSet()
         val dirtyRowIndices = dirtyCells?.map { it.index }?.toSet()
 
         val applicableColumns = mutableListOf<Pair<Column, Long>>()
-        var runningWidth = 0L
+        var runningWidth = marginRight + marginLeft // This is margin right for row header + margin left for first cell column
         var maxHeaderOffset = 0L
         var maxHeaderCells = 0
 
-        val headerWidth = view[emptyHeader].derived.cellWidth
+        val headerWidth = view[emptyHeader].derived.cellWidth + paddingLeft + paddingRight
 
         for (column in table.columns) {
             if (x <= runningWidth && runningWidth <= x + w) applicableColumns.add(Pair(column, runningWidth))
-            runningWidth += view[column].derived.cellWidth
+            runningWidth += view[column].derived.cellWidth + marginLeft + marginRight + paddingLeft + paddingRight
 
-            val yOffset = column.header.labels.mapIndexed { i, _ -> view[(-(column.header.labels.size) + i).toLong()].derived.cellHeight }.sum()
+            val yOffset = column.header.labels.mapIndexed { i, _ ->
+                view[(-(column.header.labels.size) + i).toLong()].derived.cellHeight + marginTop + marginBottom + paddingTop + paddingBottom
+            }.sum()
             if (yOffset > maxHeaderOffset) maxHeaderOffset = yOffset
             if (column.header.labels.size > maxHeaderCells) maxHeaderCells = column.header.labels.size
         }
@@ -205,14 +213,18 @@ internal object SigblaBackend {
 
             for (idx in 0 until maxHeaderCells) {
                 val headerText = applicableColumn.header[idx] ?: ""
-                val yOffset = applicableColumn.header.labels.mapIndexed { i, _ -> if (i < idx) view[(-maxHeaderCells + i).toLong()].derived.cellHeight else 0L }.sum()
+                val yOffset = applicableColumn.header.labels.mapIndexed { i, _ ->
+                    if (i < idx)
+                        view[(-maxHeaderCells + i).toLong()].derived.cellHeight + marginTop + marginBottom + paddingTop + paddingBottom
+                    else 0L
+                }.sum()
 
                 output.add(PositionedContent(
                     applicableColumn.header,
                     (-maxHeaderCells + idx).toLong(),
                     headerText,
-                    view[(-maxHeaderCells + idx).toLong()].derived.cellHeight,
-                    view[applicableColumn].derived.cellWidth,
+                    view[(-maxHeaderCells + idx).toLong()].derived.cellHeight + paddingTop + paddingBottom,
+                    view[applicableColumn].derived.cellWidth + paddingLeft + paddingRight,
                     colHeaderZ,
                     ml = applicableX + headerWidth,
                     cw = dims.maxX,
@@ -232,7 +244,7 @@ internal object SigblaBackend {
         for (row in 0..lastKey) {
             if (y <= runningHeight && runningHeight <= y + h) applicableRows.add(Pair(row, runningHeight))
 
-            runningHeight += view[row].derived.cellHeight
+            runningHeight += view[row].derived.cellHeight + marginTop + marginBottom + paddingTop + paddingBottom
 
             if (runningHeight > y + h || runningHeight < 0L) break
         }
@@ -245,7 +257,7 @@ internal object SigblaBackend {
                 emptyHeader,
                 applicableRow,
                 applicableRow.toString(),
-                view[applicableRow].derived.cellHeight,
+                view[applicableRow].derived.cellHeight + paddingTop + paddingBottom,
                 headerWidth,
                 rowHeaderZ,
                 mt = applicableY,
@@ -273,9 +285,9 @@ internal object SigblaBackend {
                     applicableColumn.header,
                     applicableRow,
                     if (cell is UnitCell) null else cell.toString(),
-                    view[applicableRow].derived.cellHeight,
-                    view[applicableColumn].derived.cellWidth,
-                    className = ((if (cell is WebCell) "hc c " else "c ") + view[applicableColumn, applicableRow].derived.cellClasses.joinToString(separator = " ")).trim(),
+                    view[applicableRow].derived.cellHeight + paddingTop + paddingBottom,
+                    view[applicableColumn].derived.cellWidth + paddingLeft + paddingRight,
+                    className = ((if (cell is WebCell) "hc cc " else "cc ") + view[applicableColumn, applicableRow].derived.cellClasses.joinToString(separator = " ")).trim(),
                     topics = view[applicableColumn, applicableRow].derived.cellTopics.toList(),
                     x = applicableX + headerWidth,
                     y = applicableY
@@ -286,30 +298,44 @@ internal object SigblaBackend {
         return output
     }
 
-    private fun dims(view: TableView): Dimensions {
+    private fun dims(view: TableView, viewRef: UIViewRef): Dimensions {
+        val marginTop = viewRef.config.marginTop
+        val marginBottom = viewRef.config.marginBottom
+        val marginLeft = viewRef.config.marginLeft
+        val marginRight = viewRef.config.marginRight
+        val paddingTop = viewRef.config.paddingTop
+        val paddingBottom = viewRef.config.paddingBottom
+        val paddingLeft = viewRef.config.paddingLeft
+        val paddingRight = viewRef.config.paddingRight
+
         val table = view[Table]
 
-        val headerHeight = view[-1].derived.cellHeight
-        val headerWidth = view[emptyHeader].derived.cellWidth
+        val headerHeight = view[-1].derived.cellHeight + paddingTop + paddingBottom
+        val headerWidth = view[emptyHeader].derived.cellWidth + paddingLeft + paddingRight
 
         var maxHeaderOffset = headerHeight
         var runningWidth = headerWidth
 
         for (column in table.columns) {
-            runningWidth += view[column].derived.cellWidth
+            runningWidth += view[column].derived.cellWidth + marginLeft + marginRight + paddingLeft + paddingRight
 
-            val yOffset = column.header.labels.mapIndexed { i, _ -> view[(-(column.header.labels.size) + i).toLong()].derived.cellHeight }.sum()
-            if (yOffset > maxHeaderOffset) maxHeaderOffset = yOffset
+            val yOffset = column.header.labels.mapIndexed { i, _ ->
+                view[(-(column.header.labels.size) + i).toLong()].derived.cellHeight + paddingTop + paddingBottom
+            }.sum()
+            val topMargins = (column.header.labels.size - 1) * marginTop
+            val bottomMargins = (column.header.labels.size - 1) * marginBottom
+            val combinedOffset = yOffset + topMargins + bottomMargins
+            if (combinedOffset > maxHeaderOffset) maxHeaderOffset = combinedOffset
         }
 
         var runningHeight = maxHeaderOffset
 
         val lastKey = table.tableRef.get().columnCells.values().map { it.last()?.component1() ?: -1 }.maxOrNull() ?: -1
         for (row in 0..lastKey) {
-            runningHeight += view[row].derived.cellHeight
+            runningHeight += view[row].derived.cellHeight + marginTop + marginBottom + paddingTop + paddingBottom
         }
 
-        return Dimensions(headerWidth, maxHeaderOffset, runningWidth, runningHeight)
+        return Dimensions(headerWidth, maxHeaderOffset, marginLeft + marginRight, marginTop + marginBottom, runningWidth, runningHeight)
     }
 
     private suspend fun handleEvent(socket: WebSocketSession, event: ClientEvent) {
@@ -332,10 +358,11 @@ internal object SigblaBackend {
 
             clientPackage.outgoing.add(jsonParser.toJsonString(ClientEvent(ClientEventType.CLEAR.type)))
 
-            val view = clone(viewRefs[client.ref]?.first ?: return)
+            val viewRef = viewRefs[client.ref] ?: return
+            val view = clone(viewRef.tableView)
 
-            val dims = dims(view)
-            val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.maxX, dims.maxY)
+            val dims = dims(view, viewRef)
+            val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.cornerRightMargin, dims.cornerBottomMargin, dims.maxX, dims.maxY)
 
             client.dims = dims
 
@@ -347,10 +374,11 @@ internal object SigblaBackend {
 
     private suspend fun handleDims(client: SigblaClient) {
         client.mutex.withLock {
-            val view = clone(viewRefs[client.ref]?.first ?: return)
+            val viewRef = viewRefs[client.ref] ?: return
+            val view = clone(viewRef.tableView)
 
-            val dims = dims(view)
-            val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.maxX, dims.maxY)
+            val dims = dims(view, viewRef)
+            val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.cornerRightMargin, dims.cornerBottomMargin, dims.maxX, dims.maxY)
 
             client.dims = dims
 
@@ -361,7 +389,9 @@ internal object SigblaBackend {
 
     private suspend fun handleTiles(client: SigblaClient, scroll: ClientEventScroll) {
         client.mutex.withLock {
-            val view = clone(viewRefs[client.ref]?.first ?: return)
+            val viewRef = viewRefs[client.ref] ?: return
+            val view = clone(viewRef.tableView)
+
             val currentRegion = client.contentState.updateTiles(scroll)
 
             val dims = client.dims
@@ -384,8 +414,9 @@ internal object SigblaBackend {
             val jsUrls = view[Resources]._resources.filter { jsHandlers.contains(it.component2().second) }.sortedBy { it.component2().first }.map { it.component1() }.toList()
             clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventLoadJavaScript(jsUrls)))
 
-            areaContent(view, x, y, h, w, dims).forEach { content ->
+            areaContent(view, viewRef, x, y, h, w, dims).forEach { content ->
                 val existingId = client.contentState.withIdFor(
+                    // TODO Use InvalidUIException?
                     content.x ?: content.ml ?: throw Exception(),
                     content.y ?: content.mt ?: throw Exception()
                 )
@@ -393,6 +424,7 @@ internal object SigblaBackend {
 
                 if (existingContent == null) {
                     val cellId = client.contentState.addIdFor(
+                        // TODO Use InvalidUIException?
                         content.x ?: content.ml ?: throw Exception(),
                         content.y ?: content.mt ?: throw Exception(),
                         content
@@ -460,8 +492,10 @@ internal object SigblaBackend {
 
     private suspend fun handleDirty(client: SigblaClient, dirtyCells: List<Cell<*>>, dirtyResources: List<Resources>) {
         client.mutex.withLock {
-            val view = clone(viewRefs[client.ref]?.first ?: return)
-            val currentDims = client.contentState.existingDims
+            val viewRef = viewRefs[client.ref] ?: return
+            val view = clone(viewRef.tableView)
+
+            val currentDims = client.contentState.existingRegion
 
             val clientPackage = ClientPackage(client.nextEventId())
 
@@ -480,7 +514,7 @@ internal object SigblaBackend {
             val jsUrls = dirtyResources.asSequence().map { it._resources }.flatten().filter { jsHandlers.contains(it.component2().second) }.sortedBy { it.component2().first }.map { it.component1() }.distinct().toList()
             clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventLoadJavaScript(jsUrls, dirty = true)))
 
-            areaContent(view, x, y, h, w, client.dims, dirtyCells).forEach { content ->
+            areaContent(view, viewRef, x, y, h, w, client.dims, dirtyCells).forEach { content ->
                 val existingId = client.contentState.withIdFor(content.x ?: content.ml ?: throw Exception(), content.y ?: content.mt ?: throw Exception())
                 val existingContent = if (existingId == null) null else client.contentState.withPCFor(existingId)
 
@@ -530,7 +564,7 @@ internal object SigblaBackend {
     private fun handleResize(client: SigblaClient, resize: ClientEventResize) {
         // No lock here as we're not sending data
         // No view clone here as we're manipulating the view below
-        val view = viewRefs[client.ref]?.first ?: return
+        val view = viewRefs[client.ref]?.tableView ?: return
         // Note that resize.target is the client side element id
         val targetId = resize.target.substring(1).toLong()
         val target = client.contentState.withPCFor(targetId) ?: return
@@ -553,7 +587,7 @@ internal object SigblaBackend {
     }
 
     @Synchronized
-    fun openView(view: TableView, ref: String, urlGenerator: (engine: ApplicationEngine, view: TableView, ref: String) -> URL): URL {
+    fun openView(view: TableView, ref: String, config: ViewConfig, urlGenerator: (engine: ApplicationEngine, view: TableView, ref: String) -> URL): URL {
         fun tableSubscription(table: Table?): TableListenerReference? {
             if (table == null) return null
 
@@ -598,9 +632,9 @@ internal object SigblaBackend {
                             is SourceTable -> {
                                 synchronized(SigblaBackend) {
                                     val viewRef = viewRefs[ref] ?: throw InvalidTableViewException("No view ref on $ref")
-                                    viewRef.third?.apply { off(this) }
+                                    viewRef.tableListener?.apply { off(this) }
                                     if (!viewRefs.replace(ref, viewRef, viewRef.copy(
-                                        third = tableSubscription(value.table)
+                                        tableListener = tableSubscription(value.table)
                                     ))) throw InvalidTableViewException("Unexpected view ref update")
                                 }
 
@@ -637,9 +671,9 @@ internal object SigblaBackend {
 
         val tableListener = tableSubscription(view.tableViewRef.get().table)
 
-        viewRefs.put(ref, Triple(view, viewListener, tableListener))?.apply {
-            off(this.second)
-            this.third?.apply { off(this) }
+        viewRefs.put(ref, UIViewRef(view, viewListener, tableListener, config))?.apply {
+            off(this.viewListener)
+            this.tableListener?.apply { off(this) }
 
             logger.debug("Forcing a clear on {}", ref)
             listeners.values.forEach { client ->
@@ -652,6 +686,7 @@ internal object SigblaBackend {
         }
 
         // TODO Clean up listeners if a tableview is removed
+        // TODO Look at shutting down ktor if all views are removed?
 
         return urlGenerator(engine, view, ref)
     }
@@ -670,6 +705,13 @@ internal object SigblaBackend {
     }
 }
 
+internal data class UIViewRef(
+    val tableView: TableView,
+    val viewListener: TableViewListenerReference,
+    val tableListener: TableListenerReference?,
+    val config: ViewConfig
+)
+
 internal data class ClientPackage(
     val id: Long,
     val outgoing: MutableList<String> = mutableListOf(),
@@ -681,7 +723,7 @@ internal data class SigblaClient(
     val ref: String,
     val contentState: ContentState = ContentState(),
     val mutex: Mutex = Mutex(),
-    @Volatile var dims: Dimensions = Dimensions(0, 0, 0, 0)
+    @Volatile var dims: Dimensions = Dimensions(0, 0, 0, 0, 0, 0)
 ) {
     private val outgoingPackages = mutableListOf<ClientPackage>()
 
@@ -710,7 +752,7 @@ internal data class SigblaClient(
 
             clearClientPackage.outgoing.add(jsonParser.toJsonString(ClientEvent(ClientEventType.CLEAR.type)))
 
-            val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.maxX, dims.maxY)
+            val clientEventDims = ClientEventDims(dims.cornerX, dims.cornerY, dims.cornerBottomMargin, dims.cornerRightMargin, dims.maxX, dims.maxY)
 
             clearClientPackage.outgoing.add(jsonParser.toJsonString(clientEventDims))
 
@@ -804,6 +846,8 @@ internal data class ClientEventPackageEnd(
 internal data class ClientEventDims(
     val cornerX: Long,
     val cornerY: Long,
+    val cornerRightMargin: Long,
+    val cornerBottomMargin: Long,
     val maxX: Long,
     val maxY: Long
 ): ClientEvent(ClientEventType.DIMS.type)
@@ -853,25 +897,26 @@ internal data class PositionedContent(
     val y: Long?
 )
 
-internal class Dimensions(val cornerX: Long, val cornerY: Long, val maxX: Long, val maxY: Long)
+internal class Region(val cornerX: Long, val cornerY: Long, val maxX: Long, val maxY: Long)
+internal class Dimensions(val cornerX: Long, val cornerY: Long, val cornerRightMargin: Long, val cornerBottomMargin: Long, val maxX: Long, val maxY: Long)
 
 internal class ContentState(val maxDistance: Int = 2000, val tileSize: Int = 1000) {
     @Volatile
-    var existingDims: Dimensions = Dimensions(0, 0, 0, 0)
+    var existingRegion: Region = Region(0, 0, 0, 0)
 
     private val contentIDGenerator = AtomicLong()
     private val coordinateIds: ConcurrentMap<Coordinate, Long> = ConcurrentHashMap()
     private val idsContent: ConcurrentMap<Long, PositionedContent> = ConcurrentHashMap()
 
-    fun updateTiles(scroll: ClientEventScroll): Dimensions {
+    fun updateTiles(scroll: ClientEventScroll): Region {
         val x1 = scroll.x - (scroll.x % tileSize)
         val y1 = scroll.y - (scroll.y % tileSize)
         val x2 = x1 + scroll.w - (scroll.w % tileSize) + tileSize
         val y2 = y1 + scroll.h - (scroll.h % tileSize) + tileSize
 
-        existingDims = Dimensions(x1 - maxDistance, y1 - maxDistance, x2 + maxDistance, y2 + maxDistance)
+        existingRegion = Region(x1 - maxDistance, y1 - maxDistance, x2 + maxDistance, y2 + maxDistance)
 
-        return existingDims
+        return existingRegion
     }
 
     fun addIdFor(x: Long, y: Long, pc: PositionedContent): Long {
@@ -893,7 +938,7 @@ internal class ContentState(val maxDistance: Int = 2000, val tileSize: Int = 100
     fun removeId(id: Long) = idsContent.remove(id)
 
     fun clear() {
-        existingDims = Dimensions(0, 0, 0, 0)
+        existingRegion = Region(0, 0, 0, 0)
         coordinateIds.clear()
         idsContent.clear()
     }
