@@ -12,7 +12,9 @@ import sigbla.app.pds.kollection.toImmutableSet
 import sigbla.app.pds.kollection.immutableSetOf
 import sigbla.app.pds.kollection.ImmutableSet as PSet
 import kotlin.collections.LinkedHashMap
+import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
 import java.lang.ref.WeakReference
 import java.util.*
@@ -30,6 +32,8 @@ import java.util.concurrent.ThreadLocalRandom
 //      This would allow for views with no clients to be cleaned up..
 //      Might want on<NO_CLIENT>(tableView) { .. } rather than INACTIVE?
 //      Allow for setting the time out value.. on<NO_CLIENT>(tableView) { timeout = .. }
+
+// TODO Add column/row hiding and locking
 
 internal val EMPTY_IMMUTABLE_STRING_SET = immutableSetOf<String>()
 
@@ -1585,6 +1589,63 @@ class SourceTable internal constructor(
 
     override fun toString() = "SourceTable[$source, ${table?.toString() ?: "null"}]"
 }
+
+// TODO Add support for disabling marker, hide column and row headers
+data class ViewConfig(
+    val marginTop: Long,
+    val marginBottom: Long,
+    val marginLeft: Long,
+    val marginRight: Long,
+
+    val paddingTop: Long,
+    val paddingBottom: Long,
+    val paddingLeft: Long,
+    val paddingRight: Long,
+
+    val tableHtml: suspend PipelineContext<*, ApplicationCall>.() -> Unit,
+    val tableScript: suspend PipelineContext<*, ApplicationCall>.() -> Unit,
+    val tableStyle: suspend PipelineContext<*, ApplicationCall>.() -> Unit
+)
+
+fun defaultViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
+    marginTop = 0,
+    marginBottom = 0,
+    marginLeft = 0,
+    marginRight = 0,
+
+    paddingTop = 0,
+    paddingBottom = 0,
+    paddingLeft = 0,
+    paddingRight = 0,
+
+    tableHtml = {
+        call.respondText(ContentType.Text.Html, HttpStatusCode.OK) {
+            this.javaClass.getResource("/table/table.html").readText().replace("\${title}", title)
+        }
+    },
+    tableScript = staticResource("/table/table.js"),
+    tableStyle = staticResource("/table/default.css")
+)
+
+fun minimalViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
+    marginTop = 1,
+    marginBottom = 1,
+    marginLeft = 1,
+    marginRight = 1,
+
+    paddingTop = 1,
+    paddingBottom = 1,
+    paddingLeft = 1,
+    paddingRight = 1,
+
+    tableHtml = {
+        call.respondText(ContentType.Text.Html, HttpStatusCode.OK) {
+            this.javaClass.getResource("/table/table.html").readText().replace("\${title}", title)
+        }
+    },
+    tableScript = staticResource("/table/table.js"),
+    tableStyle = staticResource("/table/minimal.css")
+)
 
 // TODO Consider an Index type which allows us to replace the index.html file served for a table,
 //      or let that happen straight on tableView[Resources] ?

@@ -1,0 +1,209 @@
+@font-face {
+    font-family: 'Roboto';
+    src: url('/_static/Roboto-Regular.ttf') format('truetype');
+}
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: none;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+    display: block;
+}
+body {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1;
+    user-select: none;
+}
+ol, ul {
+    list-style: none;
+}
+blockquote, q {
+    quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content: '';
+    content: none;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+#tc {
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-right-color: white;
+    border-right-style: solid;
+    border-bottom-color: white;
+    border-bottom-style: solid;
+    background-color: lightsteelblue;
+    z-index: 4000;
+}
+#tb {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: white;
+    z-index: 2000;
+}
+#lb {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: white;
+    z-index: 2000;
+}
+#end {
+    position: absolute;
+    height: 1px;
+    width: 1px;
+    background-color: black;
+}
+#mkr {
+    position: absolute;
+    z-index: 9000;
+    background-color: transparent;
+    transition: all 100ms linear;
+}
+#mkrInner {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    height: 100%;
+    width: 100%;
+    border: darkblue solid 5px;
+}
+
+.container {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.c {
+    white-space: nowrap;
+    overflow: hidden;
+    position: absolute;
+    z-index: 1000;
+}
+.c:hover {
+    background-color: lightsteelblue;
+}
+.co {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}
+.cc {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}
+.hc {}
+.ch {
+    white-space: nowrap;
+    overflow: hidden;
+    position: sticky;
+    z-index: 3000;
+}
+.rh {
+    white-space: nowrap;
+    overflow: hidden;
+    position: sticky;
+    z-index: 3000;
+}
+
+.ch > .co {
+    border: steelblue solid 1px;
+}
+
+.rh > .co {
+    border: steelblue solid 1px;
+}
+.ch > .cc {
+    background-color: lightsteelblue;
+    padding: 2px;
+}
+
+.rh > .cc {
+    background-color: lightsteelblue;
+    padding: 2px;
+}
+
+.c > .cc {
+    padding: 2px;
+}
+
+.c > .co {
+    border: lightsteelblue solid 1px;
+    width: calc(100% - 0px);
+    height: calc(100% - 0px);
+}
+
+.rb {
+    position: absolute;
+    display: inline-block;
+    right: 0;
+    width: 5px;
+    height: 100%;
+    background-color: transparent;
+    cursor: ew-resize;
+}
+.bb {
+    position: absolute;
+    display: inline-block;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 5px;
+    background-color: transparent;
+    cursor: ns-resize;
+}
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(255, 255, 255, 0.5);
+    z-index: 10000;
+}
+.ovl {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 1px;
+    border-right: lightsteelblue solid 1px;
+}
+.ohl {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    border-bottom: lightsteelblue solid 1px;
+}

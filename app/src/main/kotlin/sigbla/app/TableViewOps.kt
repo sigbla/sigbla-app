@@ -35,21 +35,26 @@ fun clone(tableView: TableView, withName: String): TableView = tableView.makeClo
 fun show(
     tableView: TableView,
     ref: String = tableView.name ?: throw InvalidTableViewException("No name on table view"),
+    config: ViewConfig = defaultViewConfig(title = ref),
     urlGenerator: (engine: ApplicationEngine, view: TableView, ref: String) -> URL = { engine, _, ref ->
         val type = engine.environment.connectors.first().type.name
         val host = engine.environment.connectors.first().host
         val port = engine.environment.connectors.first().port
         URL("$type://$host:$port/t/${ref}/")
     }
-): URL = SigblaBackend.openView(tableView, ref, urlGenerator)
+): URL = SigblaBackend.openView(tableView, ref, config, urlGenerator)
 
-fun show(table: Table): URL = show(TableView[table])
-fun show(table: Table, ref: String): URL = show(TableView[table], ref)
 fun show(
     table: Table,
-    ref: String,
-    urlGenerator: (engine: ApplicationEngine, view: TableView, ref: String) -> URL
-): URL = show(TableView[table], ref, urlGenerator)
+    ref: String = table.name ?: throw InvalidTableViewException("No name on table"),
+    config: ViewConfig = defaultViewConfig(title = ref),
+    urlGenerator: (engine: ApplicationEngine, view: TableView, ref: String) -> URL = { engine, _, ref ->
+        val type = engine.environment.connectors.first().type.name
+        val host = engine.environment.connectors.first().host
+        val port = engine.environment.connectors.first().port
+        URL("$type://$host:$port/t/${ref}/")
+    }
+): URL = show(TableView[table], ref, config, urlGenerator)
 
 // ---
 
