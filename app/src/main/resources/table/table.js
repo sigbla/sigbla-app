@@ -486,6 +486,118 @@ class Sigbla {
             }
         }
 
+        const findPageUp = (scroll) => {
+            const tc = document.getElementById("tc");
+            const tcHeight = parseInt(tc.style.height);
+            const markerLeft = parseInt(this.#marker.style.left);
+            const markerTop = parseInt(this.#marker.style.top) - window.innerHeight + tcHeight;
+            const markerHeight = parseInt(this.#marker.style.height);
+            const markerWidth = parseInt(this.#marker.style.width);
+
+            window.scrollBy({
+                top: -window.innerHeight + tcHeight,
+            });
+
+            for (let top = markerTop - 5; top > markerTop - 1000; top -= 5) {
+                for (let left = markerLeft + 5; left < markerLeft + markerWidth; left += 5) {
+                    const cell = findCell(left, top);
+
+                    if (cell) {
+                        const cellLeft = cell.style.left;
+                        const cellTop = cell.style.top;
+
+                        if (cellLeft && cellTop) {
+                            if (parseInt(cellTop) - tcHeight < window.scrollY + 10) {
+                                window.scroll({
+                                    top: parseInt(cellTop) - tcHeight - 10,
+                                    behavior: "smooth"
+                                });
+                            }
+
+                            this.#marker.style.left = cellLeft;
+                            this.#marker.style.top = cellTop;
+                            this.#marker.style.height = cell.style.height;
+                            this.#marker.style.width = cell.style.width;
+
+                            this.#manageMarkerCell(cell);
+
+                            return;
+                        }
+                    } else if (scroll) {
+                        const length = markerHeight / 2 < window.innerHeight ? markerHeight / 2 : window.innerHeight;
+                        const cappedLength = length > window.innerHeight - tcHeight ? length - tcHeight : length
+
+                        window.scrollBy({
+                            top: cappedLength > 0 ? -cappedLength : -10,
+                            behavior: "smooth"
+                        });
+
+                        findNextUp(false);
+
+                        return;
+                    }
+                }
+            }
+        }
+
+        const findPageDown = (scroll) => {
+            const tc = document.getElementById("tc");
+            const tcHeight = parseInt(tc.style.height);
+            const markerLeft = parseInt(this.#marker.style.left);
+            const markerTop = parseInt(this.#marker.style.top) + window.innerHeight - tcHeight;
+            const markerHeight = parseInt(this.#marker.style.height);
+            const markerWidth = parseInt(this.#marker.style.width);
+
+            window.scrollBy({
+                top: window.innerHeight - tcHeight,
+            });
+
+            for (let top = markerTop + 5; top < markerTop + 1000; top += 5) {
+                for (let left = markerLeft + 5; left < markerLeft + markerWidth; left += 5) {
+                    const cell = findCell(left, top);
+
+                    if (cell) {
+                        const cellLeft = cell.style.left;
+                        const cellTop = cell.style.top;
+                        const cellHeight = cell.style.height;
+
+                        if (cellLeft && cellTop) {
+                            if (parseInt(cellTop) + parseInt(cellHeight) > window.scrollY + window.innerHeight - 10) {
+                                const length = markerHeight * 2 < window.innerHeight ? markerHeight * 2 : window.innerHeight;
+                                const cappedLength = length > window.innerHeight - tcHeight ? length - tcHeight : length
+
+                                window.scrollBy({
+                                    top: cappedLength > 0 ? cappedLength : 10,
+                                    behavior: "smooth"
+                                });
+                            }
+
+                            this.#marker.style.left = cellLeft;
+                            this.#marker.style.top = cellTop;
+                            this.#marker.style.height = cellHeight;
+                            this.#marker.style.width = cell.style.width;
+
+                            this.#manageMarkerCell(cell);
+
+                            return;
+                        }
+                    } else if (scroll) {
+                        const length = markerHeight / 2 < window.innerHeight ? markerHeight / 2 : window.innerHeight;
+                        const cappedLength = length > window.innerHeight - tcHeight ? length - tcHeight : length
+
+                        window.scrollBy({
+                            top: cappedLength > 0 ? cappedLength : 10,
+                            behavior: "smooth"
+                        });
+
+                        findNextDown(false);
+
+                        return;
+                    }
+                }
+            }
+        }
+
         const marker = this.#marker || (() => {
             const newMarker = document.createElement("div");
             newMarker.id = "mkr";
@@ -515,37 +627,41 @@ class Sigbla {
                 }
             }
 
-            // TODO Add Enter for "accept input" and move down
-            // TODO Add Tab to create marker if not present, otherwise move right
-            // TODO Add page down / page up support
+            // TODO Add Tab to create marker if not present
+            // TODO Add home / end support
             newMarker.addEventListener("keydown", (e) => {
+                e.preventDefault();
+                fireEvent(e);
+
                 switch (e.key) {
                     case "Escape":
-                        e.preventDefault();
-                        fireEvent(e);
                         newMarker.remove();
                         this.#marker = null;
                         this.#manageMarkerCell(null);
                         break;
+                    case "Enter":
+                        findNextDown(true);
+                        break;
+                    case "Tab":
+                        findNextRight(true);
+                        break;
+                    case "PageUp":
+                        findPageUp(true);
+                        break;
+                    case "PageDown":
+                        findPageDown(true);
+                        break;
                     case "ArrowLeft":
-                        e.preventDefault();
                         findNextLeft(true);
                         break;
                     case "ArrowRight":
-                        e.preventDefault();
                         findNextRight(true);
                         break;
                     case "ArrowUp":
-                        e.preventDefault();
                         findNextUp(true);
                         break;
                     case "ArrowDown":
-                        e.preventDefault();
                         findNextDown(true);
-                        break;
-                    default:
-                        e.preventDefault();
-                        fireEvent(e);
                         break;
                 }
             });
