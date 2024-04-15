@@ -35,7 +35,7 @@ fun clone(tableView: TableView, withName: String): TableView = tableView.makeClo
 fun show(
     tableView: TableView,
     ref: String = tableView.name ?: throw InvalidTableViewException("No name on table view"),
-    config: ViewConfig = defaultViewConfig(title = ref),
+    config: ViewConfig = compactViewConfig(title = ref),
     urlGenerator: (engine: ApplicationEngine, view: TableView, ref: String) -> URL = { engine, _, ref ->
         val type = engine.environment.connectors.first().type.name
         val host = engine.environment.connectors.first().host
@@ -47,7 +47,7 @@ fun show(
 fun show(
     table: Table,
     ref: String = table.name ?: throw InvalidTableViewException("No name on table"),
-    config: ViewConfig = defaultViewConfig(title = ref),
+    config: ViewConfig = compactViewConfig(title = ref),
     urlGenerator: (engine: ApplicationEngine, view: TableView, ref: String) -> URL = { engine, _, ref ->
         val type = engine.environment.connectors.first().type.name
         val host = engine.environment.connectors.first().host
