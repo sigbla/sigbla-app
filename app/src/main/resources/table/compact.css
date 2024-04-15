@@ -88,6 +88,9 @@ table {
     background-color: transparent;
     transition: all 100ms linear;
 }
+#mkr.dblclicked {
+    pointer-events: none;
+}
 #mkrInner {
     position: absolute;
     top: -5px;
@@ -95,6 +98,10 @@ table {
     height: 100%;
     width: 100%;
     border: darkblue solid 5px;
+}
+#mkrInner.dblclicked {
+    border: darkblue dotted 5px;
+    pointer-events: none;
 }
 
 .container {

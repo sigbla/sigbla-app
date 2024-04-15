@@ -47,8 +47,8 @@ fun main() {
 
     move(table["A"] before table["B"])
 
-    val url = show(tableView, config = compactViewConfig())
-    //val url = show(tableView, config = spaciousViewConfig())
+    //val url = show(tableView, config = compactViewConfig())
+    val url = show(tableView, config = spaciousViewConfig())
     println(url)
 
     println("END")

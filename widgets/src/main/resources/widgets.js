@@ -88,6 +88,9 @@ window.sigbla.onTopic("sigbla-widgets-textfield", (data) => {
         let original = input.value
 
         data.target.onkeydown = async (e) => {
+            if (data.target.classList.contains("dblclicked")) return;
+
+            e.preventDefault();
             switch (e.key) {
                 case "Escape":
                     firstKey = true;

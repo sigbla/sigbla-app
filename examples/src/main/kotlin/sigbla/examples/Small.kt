@@ -61,7 +61,8 @@ fun main() {
     on(tableView) = listener
      */
 
-    val url = show(tableView, config = spaciousViewConfig(title = "Small example"))
+    //val url = show(tableView, config = spaciousViewConfig(title = "Small example"))
+    val url = show(tableView, config = compactViewConfig(title = "Small example"))
     println(url)
 
     println("END")

@@ -251,6 +251,22 @@ class Sigbla {
         if (this.#markerCell === newCell) return;
 
         if (this.#markerCell) {
+            const co = this.#markerCell.querySelector(".co");
+            if (co) {
+                co.style.visibility = "visible";
+            }
+            this.#markerCell.classList.remove("dblclicked");
+        }
+        const mkr = document.getElementById("mkr");
+        if (mkr) {
+            mkr.classList.remove("dblclicked");
+        }
+        const innerMkr = document.getElementById("mkrInner");
+        if (innerMkr) {
+            innerMkr.classList.remove("dblclicked");
+        }
+
+        if (this.#markerCell) {
             // Send on blur
             this.#markerCell.dispatchEvent(new FocusEvent("blur"));
         }
@@ -622,12 +638,12 @@ class Sigbla {
 
             const fireEvent = (e) => {
                 if (this.#markerCell) {
-                    const event = new KeyboardEvent("keydown", { key: e.key });
+                    const event = new KeyboardEvent("keydown", e);
                     this.#markerCell.dispatchEvent(event);
                 }
             }
 
-            // TODO Add Tab to create marker if not present
+            // TODO Add Tab to create marker if not present (put marker on previous location if available)
             // TODO Add home / end support
             newMarker.addEventListener("keydown", (e) => {
                 e.preventDefault();
@@ -666,7 +682,20 @@ class Sigbla {
                 }
             });
 
-            // TODO Add support for double click on marker to expose cc div (should also send a dblclick to c)
+            newMarker.addEventListener("dblclick", (e) => {
+                if (this.#markerCell) {
+                    const co = this.#markerCell.querySelector(".co");
+                    if (co) {
+                        co.style.visibility = "hidden";
+                    }
+                    this.#markerCell.classList.add("dblclicked");
+                    newMarker.classList.add("dblclicked");
+                    innerMarker.classList.add("dblclicked");
+
+                    // Send dblclick to c
+                    this.#markerCell.dispatchEvent(new MouseEvent("dblclick", e));
+                }
+            });
 
             return newMarker;
         })();
