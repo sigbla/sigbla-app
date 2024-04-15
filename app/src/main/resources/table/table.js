@@ -666,6 +666,8 @@ class Sigbla {
                 }
             });
 
+            // TODO Add support for double click on marker to expose cc div (should also send a dblclick to c)
+
             return newMarker;
         })();
 
@@ -907,6 +909,10 @@ class Sigbla {
                 }
 
                 this.#pendingUpdate = havePendingResize || havePendingScroll;
+
+                if (this.#markerCell && document.getElementById(this.#markerCell.id)) {
+                    this.#manageMarkerCell(document.getElementById(this.#markerCell.id));
+                }
 
                 break;
             }

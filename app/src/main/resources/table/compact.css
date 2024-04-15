@@ -207,3 +207,56 @@ table {
     height: 1px;
     border-bottom: lightsteelblue solid 1px;
 }
+
+.cc input[type="button"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: calc(100% - 4px);
+    width: calc(100% - 4px);
+    padding: 0;
+    border: steelblue solid 1px;
+    background-color: aliceblue;
+}
+
+.cc input[type="checkbox"] {
+    appearance: none;
+    border: steelblue solid 1px;
+    background-color: aliceblue;
+    height: 15px;
+    width: 15px;
+    margin: 0 2px 0 0;
+}
+.cc input[type="checkbox"]:checked {
+    background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xml:space="preserve" viewBox="0 0 9 9"><rect x="0" y="4.3" transform="matrix(-0.707 -0.7072 0.7072 -0.707 0.5891 10.4702)" width="4.3" height="1.6" /><rect x="2.2" y="2.9" transform="matrix(-0.7071 0.7071 -0.7071 -0.7071 12.1877 2.9833)" width="6.1" height="1.7" /></svg>');
+}
+.cc input[type="checkbox"] + label {
+    vertical-align: top;
+}
+
+.cc input[type="radio"] {
+    appearance: none;
+    border: steelblue solid 1px;
+    border-radius: 7px;
+    background-color: aliceblue;
+    height: 15px;
+    width: 15px;
+    margin: 0 2px 0 0;
+}
+.cc input[type="radio"]:checked {
+    background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xml:space="preserve" viewBox="0 0 100 100"><circle r="40" cx="50" cy="50" stroke="transparent" stroke-width="0" fill="black" /></svg>');
+}
+.cc input[type="radio"] + label {
+    vertical-align: top;
+}
+
+.cc input[type="text"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 0;
+    padding: 1px;
+    background-color: aliceblue;
+    width: 100%;
+    border-bottom: aliceblue solid 1000px;
+}

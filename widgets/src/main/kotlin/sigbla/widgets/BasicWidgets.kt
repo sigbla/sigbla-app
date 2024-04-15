@@ -11,6 +11,7 @@ import io.ktor.util.pipeline.*
 import kotlinx.html.InputType
 import kotlinx.html.input
 import kotlinx.html.label
+import kotlinx.html.tabIndex
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.absoluteValue
@@ -79,6 +80,7 @@ internal fun button(
         input {
             type = InputType.button
             value = text
+            tabIndex = "-1"
             attributes["id"] = id
             attributes["callback"] = callback
         }
@@ -169,6 +171,7 @@ internal fun checkBox(
     val transformer = div("sigbla-widgets") {
         input {
             type = InputType.checkBox
+            tabIndex = "-1"
             attributes["id"] = id
             attributes["callback"] = callback
             if (checked) attributes["checked"] = "checked"
@@ -264,6 +267,7 @@ internal fun radio(
     val transformer = div("sigbla-widgets") {
         input {
             type = InputType.radio
+            tabIndex = "-1"
             attributes["id"] = id
             attributes["callback"] = callback
             if (selected) attributes["checked"] = "checked"
@@ -351,6 +355,7 @@ internal fun textField(
     val transformer = div("sigbla-widgets") {
         input {
             type = InputType.text
+            tabIndex = "-1"
             value = text
             attributes["id"] = id
             attributes["callback"] = callback

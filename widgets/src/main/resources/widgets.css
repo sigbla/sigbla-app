@@ -3,12 +3,6 @@
     height: 100%;
 }
 
-.sigbla-widgets input[type="button"] {
-    width: 100%;
-    height: 100%;
-}
-
-.sigbla-widgets input[type="text"] {
-    width: 100%;
-    height: 100%;
+.sigbla-widgets input {
+    font-family: 'Roboto', sans-serif;
 }
