@@ -1607,7 +1607,7 @@ data class ViewConfig(
     val tableStyle: suspend PipelineContext<*, ApplicationCall>.() -> Unit
 )
 
-fun defaultViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
+fun compactViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
     marginTop = 0,
     marginBottom = 0,
     marginLeft = 0,
@@ -1624,10 +1624,10 @@ fun defaultViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
         }
     },
     tableScript = staticResource("/table/table.js"),
-    tableStyle = staticResource("/table/default.css")
+    tableStyle = staticResource("/table/compact.css")
 )
 
-fun minimalViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
+fun spaciousViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
     marginTop = 1,
     marginBottom = 1,
     marginLeft = 1,
@@ -1644,7 +1644,7 @@ fun minimalViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
         }
     },
     tableScript = staticResource("/table/table.js"),
-    tableStyle = staticResource("/table/minimal.css")
+    tableStyle = staticResource("/table/spacious.css")
 )
 
 // TODO Consider an Index type which allows us to replace the index.html file served for a table,
