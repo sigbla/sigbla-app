@@ -39,16 +39,16 @@ class TableEventReceiver<S, O, N>(
     lateinit var reference: TableListenerReference
         internal set
 
-    private var process: (Sequence<TableListenerEvent<O, N>>.() -> Unit) = {}
+    private var processor: (Sequence<TableListenerEvent<O, N>>.() -> Unit) = {}
 
-    fun events(process: Sequence<TableListenerEvent<out O, out N>>.() -> Unit) {
-        this.process = process
+    fun events(processor: Sequence<TableListenerEvent<out O, out N>>.() -> Unit) {
+        this.processor = processor
     }
 
     // TODO Shouldn't events be Sequence<TableListenerEvent<out Any, out Any>> ?
     internal operator fun invoke(events: Sequence<TableListenerEvent<Any, Any>>) {
         val seq = (events.typeFilter() as Sequence<TableListenerEvent<O, N>>)
-        if (seq.any()) seq.process()
+        if (seq.any()) seq.processor()
     }
 }
 

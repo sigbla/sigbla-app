@@ -2040,7 +2040,7 @@ fun clone(table: Table, withName: String): Table = table.makeClone(withName).als
 //      This will trigger in addition to the cell events, so that someone can subscribe to the operations
 
 interface OnTable<O, N> {
-    infix fun events(process: Sequence<TableListenerEvent<out O, out N>>.() -> Unit): TableListenerReference
+    infix fun events(processor: Sequence<TableListenerEvent<out O, out N>>.() -> Unit): TableListenerReference
 }
 
 inline fun <reified O : Any, reified N : Any> on(
@@ -2052,7 +2052,7 @@ inline fun <reified O : Any, reified N : Any> on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTable<O, N> {
-    override fun events(process: Sequence<TableListenerEvent<out O, out N>>.() -> Unit): TableListenerReference {
+    override fun events(processor: Sequence<TableListenerEvent<out O, out N>>.() -> Unit): TableListenerReference {
         return on(
             table,
             old,
@@ -2061,7 +2061,7 @@ inline fun <reified O : Any, reified N : Any> on(
             order,
             allowLoop,
             skipHistory
-        ) events process as Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit
+        ) events processor as Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit
     }
 }
 
@@ -2075,7 +2075,7 @@ fun on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTable<Any, Any> {
-    override fun events(process: Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit): TableListenerReference {
+    override fun events(processor: Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit): TableListenerReference {
         return on(
             table,
             old,
@@ -2086,7 +2086,7 @@ fun on(
             skipHistory
         ) {
             events {
-                process(this)
+                processor(this)
             }
         }
     }
@@ -2098,7 +2098,7 @@ inline fun <reified O, reified N> on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    noinline init: TableEventReceiver<Table, O, N>.() -> Unit
+    noinline receiver: TableEventReceiver<Table, O, N>.() -> Unit
 ): TableListenerReference {
     return on(
         table,
@@ -2108,7 +2108,7 @@ inline fun <reified O, reified N> on(
         order,
         allowLoop,
         skipHistory,
-        init as TableEventReceiver<Table, Any, Any>.() -> Unit
+        receiver as TableEventReceiver<Table, Any, Any>.() -> Unit
     )
 }
 
@@ -2120,7 +2120,7 @@ fun on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    init: TableEventReceiver<Table, Any, Any>.() -> Unit
+    receiver: TableEventReceiver<Table, Any, Any>.() -> Unit
 ): TableListenerReference {
     val eventReceiver = when {
         old == Any::class && new == Any::class -> TableEventReceiver<Table, Any, Any>(
@@ -2174,7 +2174,7 @@ fun on(
             }
         }
     }
-    return table.eventProcessor.subscribe(table, eventReceiver, init)
+    return table.eventProcessor.subscribe(table, eventReceiver, receiver)
 }
 
 // ---
@@ -2188,7 +2188,7 @@ inline fun <reified O : Any, reified N : Any> on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTable<O, N> {
-    override fun events(process: Sequence<TableListenerEvent<out O, out N>>.() -> Unit): TableListenerReference {
+    override fun events(processor: Sequence<TableListenerEvent<out O, out N>>.() -> Unit): TableListenerReference {
         return on(
             column,
             old,
@@ -2197,7 +2197,7 @@ inline fun <reified O : Any, reified N : Any> on(
             order,
             allowLoop,
             skipHistory
-        ) events process as Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit
+        ) events processor as Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit
     }
 }
 
@@ -2211,7 +2211,7 @@ fun on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTable<Any, Any> {
-    override fun events(process: Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit): TableListenerReference {
+    override fun events(processor: Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit): TableListenerReference {
         return on(
             column,
             old,
@@ -2222,7 +2222,7 @@ fun on(
             skipHistory
         ) {
             events {
-                process(this)
+                processor(this)
             }
         }
     }
@@ -2234,7 +2234,7 @@ inline fun <reified O, reified N> on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    noinline init: TableEventReceiver<Column, O, N>.() -> Unit
+    noinline receiver: TableEventReceiver<Column, O, N>.() -> Unit
 ): TableListenerReference {
     return on(
         column,
@@ -2244,7 +2244,7 @@ inline fun <reified O, reified N> on(
         order,
         allowLoop,
         skipHistory,
-        init as TableEventReceiver<Column, Any, Any>.() -> Unit
+        receiver as TableEventReceiver<Column, Any, Any>.() -> Unit
     )
 }
 
@@ -2256,7 +2256,7 @@ fun on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    init: TableEventReceiver<Column, Any, Any>.() -> Unit
+    receiver: TableEventReceiver<Column, Any, Any>.() -> Unit
 ): TableListenerReference {
     val eventReceiver = when {
         old == Any::class && new == Any::class -> TableEventReceiver<Column, Any, Any>(
@@ -2310,7 +2310,7 @@ fun on(
             }
         }
     }
-    return column.table.eventProcessor.subscribe(column, eventReceiver, init)
+    return column.table.eventProcessor.subscribe(column, eventReceiver, receiver)
 }
 
 // ---
@@ -2324,7 +2324,7 @@ inline fun <reified O : Any, reified N : Any> on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTable<O, N> {
-    override fun events(process: Sequence<TableListenerEvent<out O, out N>>.() -> Unit): TableListenerReference {
+    override fun events(processor: Sequence<TableListenerEvent<out O, out N>>.() -> Unit): TableListenerReference {
         return on(
             row,
             old,
@@ -2333,7 +2333,7 @@ inline fun <reified O : Any, reified N : Any> on(
             order,
             allowLoop,
             skipHistory
-        ) events process as Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit
+        ) events processor as Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit
     }
 }
 
@@ -2347,7 +2347,7 @@ fun on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTable<Any, Any> {
-    override fun events(process: Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit): TableListenerReference {
+    override fun events(processor: Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit): TableListenerReference {
         return on(
             row,
             old,
@@ -2358,7 +2358,7 @@ fun on(
             skipHistory
         ) {
             events {
-                process(this)
+                processor(this)
             }
         }
     }
@@ -2370,7 +2370,7 @@ inline fun <reified O, reified N> on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    noinline init: TableEventReceiver<Row, O, N>.() -> Unit
+    noinline receiver: TableEventReceiver<Row, O, N>.() -> Unit
 ): TableListenerReference {
     return on(
         row,
@@ -2380,7 +2380,7 @@ inline fun <reified O, reified N> on(
         order,
         allowLoop,
         skipHistory,
-        init as TableEventReceiver<Row, Any, Any>.() -> Unit
+        receiver as TableEventReceiver<Row, Any, Any>.() -> Unit
     )
 }
 
@@ -2392,7 +2392,7 @@ fun on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    init: TableEventReceiver<Row, Any, Any>.() -> Unit
+    receiver: TableEventReceiver<Row, Any, Any>.() -> Unit
 ): TableListenerReference {
     val eventReceiver = when {
         old == Any::class && new == Any::class -> TableEventReceiver<Row, Any, Any>(
@@ -2446,7 +2446,7 @@ fun on(
             }
         }
     }
-    return row.table.eventProcessor.subscribe(row, eventReceiver, init)
+    return row.table.eventProcessor.subscribe(row, eventReceiver, receiver)
 }
 
 // ---
@@ -2460,7 +2460,7 @@ inline fun <reified O : Any, reified N : Any> on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTable<O, N> {
-    override fun events(process: Sequence<TableListenerEvent<out O, out N>>.() -> Unit): TableListenerReference {
+    override fun events(processor: Sequence<TableListenerEvent<out O, out N>>.() -> Unit): TableListenerReference {
         return on(
             cellRange,
             old,
@@ -2469,7 +2469,7 @@ inline fun <reified O : Any, reified N : Any> on(
             order,
             allowLoop,
             skipHistory
-        ) events process as Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit
+        ) events processor as Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit
     }
 }
 
@@ -2483,7 +2483,7 @@ fun on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTable<Any, Any> {
-    override fun events(process: Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit): TableListenerReference {
+    override fun events(processor: Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit): TableListenerReference {
         return on(
             cellRange,
             old,
@@ -2494,7 +2494,7 @@ fun on(
             skipHistory
         ) {
             events {
-                process(this)
+                processor(this)
             }
         }
     }
@@ -2506,7 +2506,7 @@ inline fun <reified O, reified N> on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    noinline init: TableEventReceiver<CellRange, O, N>.() -> Unit
+    noinline receiver: TableEventReceiver<CellRange, O, N>.() -> Unit
 ): TableListenerReference {
     return on(
         cellRange,
@@ -2516,7 +2516,7 @@ inline fun <reified O, reified N> on(
         order,
         allowLoop,
         skipHistory,
-        init as TableEventReceiver<CellRange, Any, Any>.() -> Unit
+        receiver as TableEventReceiver<CellRange, Any, Any>.() -> Unit
     )
 }
 
@@ -2528,7 +2528,7 @@ fun on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    init: TableEventReceiver<CellRange, Any, Any>.() -> Unit
+    receiver: TableEventReceiver<CellRange, Any, Any>.() -> Unit
 ): TableListenerReference {
     val eventReceiver = when {
         old == Any::class && new == Any::class -> TableEventReceiver<CellRange, Any, Any>(
@@ -2582,7 +2582,7 @@ fun on(
             }
         }
     }
-    return cellRange.start.column.table.eventProcessor.subscribe(cellRange, eventReceiver, init)
+    return cellRange.start.column.table.eventProcessor.subscribe(cellRange, eventReceiver, receiver)
 }
 
 // ---
@@ -2596,7 +2596,7 @@ inline fun <reified O : Any, reified N : Any> on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTable<O, N> {
-    override fun events(process: Sequence<TableListenerEvent<out O, out N>>.() -> Unit): TableListenerReference {
+    override fun events(processor: Sequence<TableListenerEvent<out O, out N>>.() -> Unit): TableListenerReference {
         return on(
             cell,
             old,
@@ -2605,7 +2605,7 @@ inline fun <reified O : Any, reified N : Any> on(
             order,
             allowLoop,
             skipHistory
-        ) events process as Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit
+        ) events processor as Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit
     }
 }
 
@@ -2619,7 +2619,7 @@ fun on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTable<Any, Any> {
-    override fun events(process: Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit): TableListenerReference {
+    override fun events(processor: Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit): TableListenerReference {
         return on(
             cell,
             old,
@@ -2630,7 +2630,7 @@ fun on(
             skipHistory
         ) {
             events {
-                process(this)
+                processor(this)
             }
         }
     }
@@ -2642,7 +2642,7 @@ inline fun <reified O, reified N> on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    noinline init: TableEventReceiver<Cell<*>, O, N>.() -> Unit
+    noinline receiver: TableEventReceiver<Cell<*>, O, N>.() -> Unit
 ): TableListenerReference {
     return on(
         cell,
@@ -2652,7 +2652,7 @@ inline fun <reified O, reified N> on(
         order,
         allowLoop,
         skipHistory,
-        init as TableEventReceiver<Cell<*>, Any, Any>.() -> Unit
+        receiver as TableEventReceiver<Cell<*>, Any, Any>.() -> Unit
     )
 }
 
@@ -2664,7 +2664,7 @@ fun on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    init: TableEventReceiver<Cell<*>, Any, Any>.() -> Unit
+    receiver: TableEventReceiver<Cell<*>, Any, Any>.() -> Unit
 ): TableListenerReference {
     val eventReceiver = when {
         old == Any::class && new == Any::class -> TableEventReceiver<Cell<*>, Any, Any>(
@@ -2718,7 +2718,7 @@ fun on(
             }
         }
     }
-    return cell.column.table.eventProcessor.subscribe(cell, eventReceiver, init)
+    return cell.column.table.eventProcessor.subscribe(cell, eventReceiver, receiver)
 }
 
 // ---
@@ -2732,7 +2732,7 @@ inline fun <reified O : Any, reified N : Any> on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTable<O, N> {
-    override fun events(process: Sequence<TableListenerEvent<out O, out N>>.() -> Unit): TableListenerReference {
+    override fun events(processor: Sequence<TableListenerEvent<out O, out N>>.() -> Unit): TableListenerReference {
         return on(
             cells,
             old,
@@ -2741,7 +2741,7 @@ inline fun <reified O : Any, reified N : Any> on(
             order,
             allowLoop,
             skipHistory
-        ) events process as Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit
+        ) events processor as Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit
     }
 }
 
@@ -2755,7 +2755,7 @@ fun on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTable<Any, Any> {
-    override fun events(process: Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit): TableListenerReference {
+    override fun events(processor: Sequence<TableListenerEvent<out Any, out Any>>.() -> Unit): TableListenerReference {
         return on(
             cells,
             old,
@@ -2766,7 +2766,7 @@ fun on(
             skipHistory
         ) {
             events {
-                process(this)
+                processor(this)
             }
         }
     }
@@ -2778,7 +2778,7 @@ inline fun <reified O, reified N> on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    noinline init: TableEventReceiver<Cells, O, N>.() -> Unit
+    noinline receiver: TableEventReceiver<Cells, O, N>.() -> Unit
 ): TableListenerReference {
     return on(
         cells,
@@ -2788,7 +2788,7 @@ inline fun <reified O, reified N> on(
         order,
         allowLoop,
         skipHistory,
-        init as TableEventReceiver<Cells, Any, Any>.() -> Unit
+        receiver as TableEventReceiver<Cells, Any, Any>.() -> Unit
     )
 }
 
@@ -2800,7 +2800,7 @@ fun on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    init: TableEventReceiver<Cells, Any, Any>.() -> Unit
+    receiver: TableEventReceiver<Cells, Any, Any>.() -> Unit
 ): TableListenerReference {
     val eventReceiver = when {
         old == Any::class && new == Any::class -> TableEventReceiver<Cells, Any, Any>(
@@ -2854,7 +2854,7 @@ fun on(
             }
         }
     }
-    return cells.table.eventProcessor.subscribe(cells, eventReceiver, init)
+    return cells.table.eventProcessor.subscribe(cells, eventReceiver, receiver)
 }
 
 // ---
