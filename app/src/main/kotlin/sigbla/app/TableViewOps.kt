@@ -59,7 +59,7 @@ fun show(
 // ---
 
 interface OnTableView<T> {
-    infix fun events(process: Sequence<TableViewListenerEvent<out T>>.() -> Unit): TableViewListenerReference
+    infix fun events(processor: Sequence<TableViewListenerEvent<out T>>.() -> Unit): TableViewListenerReference
 }
 
 inline fun <reified T : Any> on(
@@ -70,7 +70,7 @@ inline fun <reified T : Any> on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTableView<T> {
-    override fun events(process: Sequence<TableViewListenerEvent<out T>>.() -> Unit): TableViewListenerReference {
+    override fun events(processor: Sequence<TableViewListenerEvent<out T>>.() -> Unit): TableViewListenerReference {
         return on(
             tableView,
             type,
@@ -78,7 +78,7 @@ inline fun <reified T : Any> on(
             order,
             allowLoop,
             skipHistory
-        ) events process as Sequence<TableViewListenerEvent<out Any>>.() -> Unit
+        ) events processor as Sequence<TableViewListenerEvent<out Any>>.() -> Unit
     }
 }
 
@@ -91,7 +91,7 @@ fun on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTableView<Any> {
-    override fun events(process: Sequence<TableViewListenerEvent<out Any>>.() -> Unit): TableViewListenerReference {
+    override fun events(processor: Sequence<TableViewListenerEvent<out Any>>.() -> Unit): TableViewListenerReference {
         return on(
             tableView,
             type,
@@ -101,7 +101,7 @@ fun on(
             skipHistory
         ) {
             events {
-                process(this)
+                processor(this)
             }
         }
     }
@@ -113,7 +113,7 @@ inline fun <reified T> on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    noinline init: TableViewEventReceiver<TableView, T>.() -> Unit
+    noinline receiver: TableViewEventReceiver<TableView, T>.() -> Unit
 ): TableViewListenerReference {
     return on(
         tableView,
@@ -122,7 +122,7 @@ inline fun <reified T> on(
         order,
         allowLoop,
         skipHistory,
-        init as TableViewEventReceiver<TableView, Any>.() -> Unit
+        receiver as TableViewEventReceiver<TableView, Any>.() -> Unit
     )
 }
 
@@ -133,7 +133,7 @@ fun on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    init: TableViewEventReceiver<TableView, Any>.() -> Unit
+    receiver: TableViewEventReceiver<TableView, Any>.() -> Unit
 ): TableViewListenerReference {
     val eventReceiver = when {
         type == Any::class -> TableViewEventReceiver<TableView, Any>(
@@ -163,7 +163,7 @@ fun on(
             }
         }
     }
-    return tableView.eventProcessor.subscribe(tableView, eventReceiver, init)
+    return tableView.eventProcessor.subscribe(tableView, eventReceiver, receiver)
 }
 
 // ---
@@ -176,7 +176,7 @@ inline fun <reified T : Any> on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTableView<T> {
-    override fun events(process: Sequence<TableViewListenerEvent<out T>>.() -> Unit): TableViewListenerReference {
+    override fun events(processor: Sequence<TableViewListenerEvent<out T>>.() -> Unit): TableViewListenerReference {
         return on(
             columnView,
             type,
@@ -184,7 +184,7 @@ inline fun <reified T : Any> on(
             order,
             allowLoop,
             skipHistory
-        ) events process as Sequence<TableViewListenerEvent<out Any>>.() -> Unit
+        ) events processor as Sequence<TableViewListenerEvent<out Any>>.() -> Unit
     }
 }
 
@@ -197,7 +197,7 @@ fun on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTableView<Any> {
-    override fun events(process: Sequence<TableViewListenerEvent<out Any>>.() -> Unit): TableViewListenerReference {
+    override fun events(processor: Sequence<TableViewListenerEvent<out Any>>.() -> Unit): TableViewListenerReference {
         return on(
             columnView,
             type,
@@ -207,7 +207,7 @@ fun on(
             skipHistory
         ) {
             events {
-                process(this)
+                processor(this)
             }
         }
     }
@@ -219,7 +219,7 @@ inline fun <reified T> on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    noinline init: TableViewEventReceiver<ColumnView, T>.() -> Unit
+    noinline receiver: TableViewEventReceiver<ColumnView, T>.() -> Unit
 ): TableViewListenerReference {
     return on(
         columnView,
@@ -228,7 +228,7 @@ inline fun <reified T> on(
         order,
         allowLoop,
         skipHistory,
-        init as TableViewEventReceiver<ColumnView, Any>.() -> Unit
+        receiver as TableViewEventReceiver<ColumnView, Any>.() -> Unit
     )
 }
 
@@ -239,7 +239,7 @@ fun on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    init: TableViewEventReceiver<ColumnView, Any>.() -> Unit
+    receiver: TableViewEventReceiver<ColumnView, Any>.() -> Unit
 ): TableViewListenerReference {
     val eventReceiver = when {
         type == Any::class -> TableViewEventReceiver<ColumnView, Any>(
@@ -269,7 +269,7 @@ fun on(
             }
         }
     }
-    return columnView.tableView.eventProcessor.subscribe(columnView, eventReceiver, init)
+    return columnView.tableView.eventProcessor.subscribe(columnView, eventReceiver, receiver)
 }
 
 // ---
@@ -282,7 +282,7 @@ inline fun <reified T : Any> on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTableView<T> {
-    override fun events(process: Sequence<TableViewListenerEvent<out T>>.() -> Unit): TableViewListenerReference {
+    override fun events(processor: Sequence<TableViewListenerEvent<out T>>.() -> Unit): TableViewListenerReference {
         return on(
             rowView,
             type,
@@ -290,7 +290,7 @@ inline fun <reified T : Any> on(
             order,
             allowLoop,
             skipHistory
-        ) events process as Sequence<TableViewListenerEvent<out Any>>.() -> Unit
+        ) events processor as Sequence<TableViewListenerEvent<out Any>>.() -> Unit
     }
 }
 
@@ -303,7 +303,7 @@ fun on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTableView<Any> {
-    override fun events(process: Sequence<TableViewListenerEvent<out Any>>.() -> Unit): TableViewListenerReference {
+    override fun events(processor: Sequence<TableViewListenerEvent<out Any>>.() -> Unit): TableViewListenerReference {
         return on(
             rowView,
             type,
@@ -313,7 +313,7 @@ fun on(
             skipHistory
         ) {
             events {
-                process(this)
+                processor(this)
             }
         }
     }
@@ -325,7 +325,7 @@ inline fun <reified T> on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    noinline init: TableViewEventReceiver<RowView, T>.() -> Unit
+    noinline receiver: TableViewEventReceiver<RowView, T>.() -> Unit
 ): TableViewListenerReference {
     return on(
         rowView,
@@ -334,7 +334,7 @@ inline fun <reified T> on(
         order,
         allowLoop,
         skipHistory,
-        init as TableViewEventReceiver<RowView, Any>.() -> Unit
+        receiver as TableViewEventReceiver<RowView, Any>.() -> Unit
     )
 }
 
@@ -345,7 +345,7 @@ fun on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    init: TableViewEventReceiver<RowView, Any>.() -> Unit
+    receiver: TableViewEventReceiver<RowView, Any>.() -> Unit
 ): TableViewListenerReference {
     val eventReceiver = when {
         type == Any::class -> TableViewEventReceiver<RowView, Any>(
@@ -375,7 +375,7 @@ fun on(
             }
         }
     }
-    return rowView.tableView.eventProcessor.subscribe(rowView, eventReceiver, init)
+    return rowView.tableView.eventProcessor.subscribe(rowView, eventReceiver, receiver)
 }
 
 // ---
@@ -392,7 +392,7 @@ inline fun <reified T : Any> on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTableView<T> {
-    override fun events(process: Sequence<TableViewListenerEvent<out T>>.() -> Unit): TableViewListenerReference {
+    override fun events(processor: Sequence<TableViewListenerEvent<out T>>.() -> Unit): TableViewListenerReference {
         return on(
             cellView,
             type,
@@ -400,7 +400,7 @@ inline fun <reified T : Any> on(
             order,
             allowLoop,
             skipHistory
-        ) events process as Sequence<TableViewListenerEvent<out Any>>.() -> Unit
+        ) events processor as Sequence<TableViewListenerEvent<out Any>>.() -> Unit
     }
 }
 
@@ -413,7 +413,7 @@ fun on(
     allowLoop: Boolean = false,
     skipHistory: Boolean = false
 ) = object : OnTableView<Any> {
-    override fun events(process: Sequence<TableViewListenerEvent<out Any>>.() -> Unit): TableViewListenerReference {
+    override fun events(processor: Sequence<TableViewListenerEvent<out Any>>.() -> Unit): TableViewListenerReference {
         return on(
             cellView,
             type,
@@ -423,7 +423,7 @@ fun on(
             skipHistory
         ) {
             events {
-                process(this)
+                processor(this)
             }
         }
     }
@@ -435,7 +435,7 @@ inline fun <reified T> on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    noinline init: TableViewEventReceiver<CellView, T>.() -> Unit
+    noinline receiver: TableViewEventReceiver<CellView, T>.() -> Unit
 ): TableViewListenerReference {
     return on(
         cellView,
@@ -444,7 +444,7 @@ inline fun <reified T> on(
         order,
         allowLoop,
         skipHistory,
-        init as TableViewEventReceiver<CellView, Any>.() -> Unit
+        receiver as TableViewEventReceiver<CellView, Any>.() -> Unit
     )
 }
 
@@ -455,7 +455,7 @@ fun on(
     order: Long = 0,
     allowLoop: Boolean = false,
     skipHistory: Boolean = false,
-    init: TableViewEventReceiver<CellView, Any>.() -> Unit
+    receiver: TableViewEventReceiver<CellView, Any>.() -> Unit
 ): TableViewListenerReference {
     val eventReceiver = when {
         type == Any::class -> TableViewEventReceiver<CellView, Any>(
@@ -485,7 +485,7 @@ fun on(
             }
         }
     }
-    return cellView.tableView.eventProcessor.subscribe(cellView, eventReceiver, init)
+    return cellView.tableView.eventProcessor.subscribe(cellView, eventReceiver, receiver)
 }
 
 // ---

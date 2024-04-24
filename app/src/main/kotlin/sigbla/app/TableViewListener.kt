@@ -37,15 +37,15 @@ class TableViewEventReceiver<S, T>(
     lateinit var reference: TableViewListenerReference
         internal set
 
-    private var process: (Sequence<TableViewListenerEvent<T>>.() -> Unit) = {}
+    private var processor: (Sequence<TableViewListenerEvent<T>>.() -> Unit) = {}
 
-    fun events(process: Sequence<TableViewListenerEvent<out T>>.() -> Unit) {
-        this.process = process
+    fun events(processor: Sequence<TableViewListenerEvent<out T>>.() -> Unit) {
+        this.processor = processor
     }
 
     internal operator fun invoke(events: Sequence<TableViewListenerEvent<Any>>) {
         val seq = events.typeFilter()
-        if (seq.any()) seq.process()
+        if (seq.any()) seq.processor()
     }
 }
 
