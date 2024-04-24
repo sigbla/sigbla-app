@@ -49,7 +49,7 @@ class Sigbla {
 
     #rbMousedown = (e) => {
         if (e.buttons === 1) {
-            this.#resizeTarget = e.target.parentElement.parentElement.id;
+            this.#resizeTarget = e.target.parentElement.id;
 
             this.#enableVerticalOverlay = true;
             this.#enableHorizontalOverlay = false;
@@ -66,7 +66,7 @@ class Sigbla {
 
     #bbMousedown = (e) => {
         if (e.buttons === 1) {
-            this.#resizeTarget = e.target.parentElement.parentElement.id;
+            this.#resizeTarget = e.target.parentElement.id;
 
             this.#enableVerticalOverlay = false;
             this.#enableHorizontalOverlay = true;
@@ -753,11 +753,9 @@ class Sigbla {
             case 2: { // add content
                 const div = document.createElement("div");
 
-                // TODO Change structure of this so id is attached to ch, rh, or c, never container
-                div.id = message.id;
-
                 if (message.classes === "ch" || message.classes === "rh" || message.classes.startsWith("ch ") || message.classes.startsWith("rh ")) {
                     const child = document.createElement("div");
+                    child.id = message.id;
                     child.className = message.classes;
                     div.className = "container";
                     div.style.height = message.ch + "px";
@@ -796,9 +794,11 @@ class Sigbla {
 
                     div.appendChild(child);
                 } else {
+                    div.id = message.id;
+                    div.className = "c";
+
                     const cc = document.createElement("div");
                     cc.className = message.classes;
-                    div.className = "c";
 
                     //if (message.z !== undefined) div.style.zIndex = message.z
                     if (message.x !== undefined) div.style.left = message.x + "px";
@@ -835,7 +835,11 @@ class Sigbla {
                         target: old,
                         message: message
                     }));
-                    old.remove();
+                    if (old.parentElement.classList.contains("container")) {
+                        old.parentElement.remove();
+                    } else {
+                        old.remove();
+                    }
                     (message.topics || []).forEach(topic => this.#dispatchTopic({
                         topic: topic,
                         action: "removed",
@@ -891,7 +895,11 @@ class Sigbla {
                         target: item,
                         message: message
                     }));
-                    item.remove();
+                    if (item.parentElement.classList.contains("container")) {
+                        item.parentElement.remove();
+                    } else {
+                        item.remove();
+                    }
                     (message.topics || []).forEach(topic => this.#dispatchTopic({
                         topic: topic,
                         action: "removed",
