@@ -766,9 +766,8 @@ class Sigbla {
                     if (message.y !== undefined) child.style.top = message.y + "px";
                     if (message.mt !== undefined) child.style.marginTop = message.mt + "px";
                     if (message.ml !== undefined) child.style.marginLeft = message.ml + "px";
-                    // TODO Remove math
-                    child.style.height = (message.h + 0) + "px";
-                    child.style.width = (message.w + 0) + "px";
+                    child.style.height = message.h + "px";
+                    child.style.width = message.w + "px";
 
                     const cc = document.createElement("div");
                     cc.className = "cc";
@@ -805,9 +804,8 @@ class Sigbla {
                     if (message.y !== undefined) div.style.top = message.y + "px";
                     if (message.mt !== undefined) div.style.marginTop = message.mt + "px";
                     if (message.ml !== undefined) div.style.marginLeft = message.ml + "px";
-                    // TODO Remove math
-                    div.style.height = (message.h + 0) + "px";
-                    div.style.width = (message.w + 0) + "px";
+                    div.style.height = message.h + "px";
+                    div.style.width = message.w + "px";
 
                     if (message.classes.startsWith("hc "))
                         cc.innerHTML = message.content;
