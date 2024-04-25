@@ -5,7 +5,6 @@ package sigbla.app
 import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.IndexRelation.*
 import sigbla.app.exceptions.InvalidRowException
-import sigbla.app.exceptions.InvalidValueException
 import sigbla.app.pds.collection.TreeMap as PTreeMap
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -536,4 +535,4 @@ class ColumnToColumnAction internal constructor(val left: Column, val right: Col
 
 enum class ColumnActionOrder { BEFORE, AFTER, TO }
 
-internal val emptyHeader = Header()
+val EMPTY_HEADER = Header()

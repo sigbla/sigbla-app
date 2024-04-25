@@ -17,8 +17,7 @@ class ColumnView internal constructor(
     init {
         // Best efforts to help columns appear in the order they are referenced,
         // but ultimately this is controlled by the underlying table.
-        // TODO Do != instead of !== to allow row header style control?
-        if (header !== emptyHeader) tableView.tableViewRef.get().table?.get(header)
+        if (header != EMPTY_HEADER) tableView.tableViewRef.get().table?.get(header)
     }
 
     operator fun get(column: ColumnTransformer.Companion): ColumnTransformer<*> {
