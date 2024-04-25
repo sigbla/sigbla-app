@@ -189,7 +189,7 @@ internal object SigblaBackend {
         var maxHeaderOffset = 0L
         var maxHeaderCells = 0
 
-        val headerWidth = view[emptyHeader].derived.cellWidth + paddingLeft + paddingRight
+        val headerWidth = view[EMPTY_HEADER].derived.cellWidth + paddingLeft + paddingRight
 
         for (column in table.columns) {
             if (x <= runningWidth && runningWidth <= x + w) applicableColumns.add(Pair(column, runningWidth))
@@ -219,18 +219,21 @@ internal object SigblaBackend {
                     else 0L
                 }.sum()
 
+                val cellView = view[applicableColumn, (-maxHeaderCells + idx).toLong()]
+                val derivedCellView = cellView.derived
+
                 output.add(PositionedContent(
                     applicableColumn.header,
                     (-maxHeaderCells + idx).toLong(),
                     headerText,
-                    view[(-maxHeaderCells + idx).toLong()].derived.cellHeight + paddingTop + paddingBottom,
-                    view[applicableColumn].derived.cellWidth + paddingLeft + paddingRight,
+                    derivedCellView.cellHeight + paddingTop + paddingBottom,
+                    derivedCellView.cellWidth + paddingLeft + paddingRight,
                     colHeaderZ,
                     ml = applicableX + headerWidth,
                     cw = dims.maxX,
                     ch = dims.maxY,
-                    className = ("ch " + view[applicableColumn].derived.cellClasses.joinToString(separator = " ")).trim(),
-                    topics = view[applicableColumn].derived.cellTopics.toList(),
+                    className = ("ch " + derivedCellView.cellClasses.joinToString(separator = " ")).trim(),
+                    topics = derivedCellView.cellTopics.toList(),
                     x = null,
                     y = yOffset
                 ))
@@ -253,18 +256,21 @@ internal object SigblaBackend {
         for ((applicableRow, applicableY) in applicableRows) {
             if (dirtyRowIndices != null && !dirtyRowIndices.contains(applicableRow)) continue
 
+            val cellView = view[EMPTY_HEADER, applicableRow]
+            val derivedCellView = cellView.derived
+
             output.add(PositionedContent(
-                emptyHeader,
+                EMPTY_HEADER,
                 applicableRow,
                 applicableRow.toString(),
-                view[applicableRow].derived.cellHeight + paddingTop + paddingBottom,
-                headerWidth,
+                derivedCellView.cellHeight + paddingTop + paddingBottom,
+                derivedCellView.cellWidth + paddingLeft + paddingRight,
                 rowHeaderZ,
                 mt = applicableY,
                 cw = dims.maxX,
                 ch = dims.maxY,
-                className = ("rh " + view[applicableRow].derived.cellClasses.joinToString(separator = " ")).trim(),
-                topics = view[applicableRow].derived.cellTopics.toList(),
+                className = ("rh " + derivedCellView.cellClasses.joinToString(separator = " ")).trim(),
+                topics = derivedCellView.cellTopics.toList(),
                 x = 0,
                 y = null
             ))
@@ -277,6 +283,8 @@ internal object SigblaBackend {
                 if (dirtyRowIndices != null && !dirtyRowIndices.contains(applicableRow)) continue
 
                 val cell = applicableColumn[applicableRow]
+                val cellView = view[cell]
+                val derivedCellView = cellView.derived
 
                 // TODO Consider option to skip empty cells here..
                 //if (cell is UnitCell) continue
@@ -285,10 +293,10 @@ internal object SigblaBackend {
                     applicableColumn.header,
                     applicableRow,
                     if (cell is UnitCell) null else cell.toString(),
-                    view[applicableRow].derived.cellHeight + paddingTop + paddingBottom,
-                    view[applicableColumn].derived.cellWidth + paddingLeft + paddingRight,
-                    className = ((if (cell is WebCell) "hc cc " else "cc ") + view[applicableColumn, applicableRow].derived.cellClasses.joinToString(separator = " ")).trim(),
-                    topics = view[applicableColumn, applicableRow].derived.cellTopics.toList(),
+                    derivedCellView.cellHeight + paddingTop + paddingBottom,
+                    derivedCellView.cellWidth + paddingLeft + paddingRight,
+                    className = ((if (cell is WebCell) "hc cc " else "cc ") + derivedCellView.cellClasses.joinToString(separator = " ")).trim(),
+                    topics = derivedCellView.cellTopics.toList(),
                     x = applicableX + headerWidth,
                     y = applicableY
                 ))
@@ -311,7 +319,7 @@ internal object SigblaBackend {
         val table = view[Table]
 
         val headerHeight = view[-1].derived.cellHeight + paddingTop + paddingBottom
-        val headerWidth = view[emptyHeader].derived.cellWidth + paddingLeft + paddingRight
+        val headerWidth = view[EMPTY_HEADER].derived.cellWidth + paddingLeft + paddingRight
 
         var maxHeaderOffset = headerHeight
         var runningWidth = headerWidth

@@ -2,6 +2,7 @@
  * See LICENSE file for licensing details. */
 package sigbla.app
 
+import sigbla.app.exceptions.InvalidCellException
 import sigbla.app.exceptions.InvalidCellHeightException
 import sigbla.app.exceptions.InvalidCellWidthException
 import sigbla.app.pds.kollection.ImmutableSet as PSet
@@ -21,7 +22,6 @@ class CellView(
         }
     }
 
-    // TODO Ensure cell height and width is rendered (currently ignored)
     operator fun set(cellHeight: CellHeight.Companion, height: Long?) {
         setCellHeight(height)
     }
@@ -427,7 +427,12 @@ class DerivedCellView internal constructor(
         get() = columnView[index]
 
     // Note: This is assigned on init to preserve the derived nature of the class
-    val cell: Cell<*> = tableView[Table].let { it[columnView.header][index] }
+    // TODO Should assign null on negative index?
+    private val _cell: Cell<*>? = if (columnView.header.labels.isEmpty()) null
+        else tableView[Table].let { it[columnView.header][index] }
+
+    val cell: Cell<*>
+        get() = _cell ?: throw InvalidCellException("Cell not available")
 
     val cellClasses: CellClasses<DerivedCellView> by lazy {
         CellClasses(this, classes)
