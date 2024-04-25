@@ -126,7 +126,7 @@ internal object SigblaBackend {
                                 }
                             }
                         } catch (ex: Exception) {
-                            logger.info("Closing listener on $ref due to: ${ex.message}")
+                            logger.error("Closing listener on $ref due to: ${ex.message}", ex)
                             removeListener(this)
                         }
                     }
