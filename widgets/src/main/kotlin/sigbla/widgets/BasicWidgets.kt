@@ -49,54 +49,54 @@ internal fun button(
     text: String,
     action: Button.() -> Unit = {}
 ): CellView.() -> Unit = {
-    // Remove all existing properties on cellview
     val cellView = this
-    clear(cellView)
 
-    val callback = "sigbla/widgets/$id-${widgetCounter.getAndIncrement()}"
+    batch(cellView.tableView) {
+        val callback = "sigbla/widgets/$id-${widgetCounter.getAndIncrement()}"
 
-    val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
-        if (call.request.httpMethod == HttpMethod.Post) {
-            val b = Button(cellView, text)
-            b.action()
-            if (b.modified) {
-                cellView.(button(id, b.text, action))()
-                call.respondText { "false" }
-            } else {
-                call.respondText { "true" }
+        val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
+            if (call.request.httpMethod == HttpMethod.Post) {
+                val b = Button(cellView, text)
+                b.action()
+                if (b.modified) {
+                    cellView.(button(id, b.text, action))()
+                    call.respondText { "false" }
+                } else {
+                    call.respondText { "true" }
+                }
             }
         }
-    }
 
-    this.tableView[Resources].apply {
-        this(this + listOf(
-            (callback to handler),
-            ("sigbla/widgets.css" to cssResource("/widgets.css")),
-            ("sigbla/widgets.js" to jsResource("/widgets.js"))
-        ))
-    }
-
-    val transformer = div("sigbla-widgets") {
-        input {
-            type = InputType.button
-            value = text
-            tabIndex = "-1"
-            attributes["id"] = id
-            attributes["callback"] = callback
+        cellView.tableView[Resources].apply {
+            this(this + listOf(
+                (callback to handler),
+                ("sigbla/widgets.css" to cssResource("/widgets.css")),
+                ("sigbla/widgets.js" to jsResource("/widgets.js"))
+            ))
         }
-    }
-    this[CellTransformer] = transformer
 
-    this[CellTopics] = "sigbla-widgets-button"
+        val transformer = div("sigbla-widgets") {
+            input {
+                type = InputType.button
+                value = text
+                tabIndex = "-1"
+                attributes["id"] = id
+                attributes["callback"] = callback
+            }
+        }
+        cellView[CellTransformer] = transformer
 
-    on(this) {
-        val unsubscribe = { off(this) }
-        skipHistory = true
-        events {
-            if (any() && source.tableView[source][CellTransformer].function != transformer) {
-                // clean up
-                unsubscribe()
-                source.tableView[Resources] = source.tableView[Resources] - callback
+        cellView[CellTopics] = "sigbla-widgets-button"
+
+        on(cellView) {
+            val unsubscribe = { off(this) }
+            skipHistory = true
+            events {
+                if (any() && source.tableView[source][CellTransformer].function != transformer) {
+                    // clean up
+                    unsubscribe()
+                    source.tableView[Resources] = source.tableView[Resources] - callback
+                }
             }
         }
     }
@@ -140,59 +140,59 @@ internal fun checkBox(
     checked: Boolean = false,
     action: CheckBox.() -> Unit
 ): CellView.() -> Unit = {
-    // Remove all existing properties on cellview
     val cellView = this
-    clear(cellView)
 
-    val callback = "sigbla/widgets/$id-${widgetCounter.getAndIncrement()}"
+    batch(cellView.tableView) {
+        val callback = "sigbla/widgets/$id-${widgetCounter.getAndIncrement()}"
 
-    val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
-        if (call.request.httpMethod == HttpMethod.Post) {
-            val newChecked = call.receiveText() == "true"
-            val cb = CheckBox(cellView, text, newChecked)
-            cb.action()
-            if (cb.modified || newChecked != checked) {
-                cellView.(checkBox(id, cb.text, cb.checked, action))()
-                call.respondText { "false" }
-            } else {
-                call.respondText { "true" }
+        val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
+            if (call.request.httpMethod == HttpMethod.Post) {
+                val newChecked = call.receiveText() == "true"
+                val cb = CheckBox(cellView, text, newChecked)
+                cb.action()
+                if (cb.modified || newChecked != checked) {
+                    cellView.(checkBox(id, cb.text, cb.checked, action))()
+                    call.respondText { "false" }
+                } else {
+                    call.respondText { "true" }
+                }
             }
         }
-    }
 
-    this.tableView[Resources].apply {
-        this(this + listOf(
-            (callback to handler),
-            ("sigbla/widgets.css" to cssResource("/widgets.css")),
-            ("sigbla/widgets.js" to jsResource("/widgets.js"))
-        ))
-    }
-
-    val transformer = div("sigbla-widgets") {
-        input {
-            type = InputType.checkBox
-            tabIndex = "-1"
-            attributes["id"] = id
-            attributes["callback"] = callback
-            if (checked) attributes["checked"] = "checked"
+        cellView.tableView[Resources].apply {
+            this(this + listOf(
+                (callback to handler),
+                ("sigbla/widgets.css" to cssResource("/widgets.css")),
+                ("sigbla/widgets.js" to jsResource("/widgets.js"))
+            ))
         }
-        label {
-            attributes["for"] = id
-            +text
+
+        val transformer = div("sigbla-widgets") {
+            input {
+                type = InputType.checkBox
+                tabIndex = "-1"
+                attributes["id"] = id
+                attributes["callback"] = callback
+                if (checked) attributes["checked"] = "checked"
+            }
+            label {
+                attributes["for"] = id
+                +text
+            }
         }
-    }
-    this[CellTransformer] = transformer
+        cellView[CellTransformer] = transformer
 
-    this[CellTopics] = "sigbla-widgets-checkbox"
+        cellView[CellTopics] = "sigbla-widgets-checkbox"
 
-    on(this) {
-        val unsubscribe = { off(this) }
-        skipHistory = true
-        events {
-            if (any() && source.tableView[source][CellTransformer].function != transformer) {
-                // clean up
-                unsubscribe()
-                source.tableView[Resources] = source.tableView[Resources] - callback
+        on(cellView) {
+            val unsubscribe = { off(this) }
+            skipHistory = true
+            events {
+                if (any() && source.tableView[source][CellTransformer].function != transformer) {
+                    // clean up
+                    unsubscribe()
+                    source.tableView[Resources] = source.tableView[Resources] - callback
+                }
             }
         }
     }
@@ -236,59 +236,59 @@ internal fun radio(
     selected: Boolean = false,
     action: Radio.() -> Unit
 ): CellView.() -> Unit = {
-    // Remove all existing properties on cellview
     val cellView = this
-    clear(cellView)
 
-    val callback = "sigbla/widgets/$id-${widgetCounter.getAndIncrement()}"
+    batch(cellView.tableView) {
+        val callback = "sigbla/widgets/$id-${widgetCounter.getAndIncrement()}"
 
-    val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
-        if (call.request.httpMethod == HttpMethod.Post) {
-            val newSelected = call.receiveText() == "true"
-            val r = Radio(cellView, text, newSelected)
-            r.action()
-            if (r.modified || newSelected != selected) {
-                cellView.(radio(id, r.text, r.selected, action))()
-                call.respondText { "false" }
-            } else {
-                call.respondText { "true" }
+        val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
+            if (call.request.httpMethod == HttpMethod.Post) {
+                val newSelected = call.receiveText() == "true"
+                val r = Radio(cellView, text, newSelected)
+                r.action()
+                if (r.modified || newSelected != selected) {
+                    cellView.(radio(id, r.text, r.selected, action))()
+                    call.respondText { "false" }
+                } else {
+                    call.respondText { "true" }
+                }
             }
         }
-    }
 
-    this.tableView[Resources].apply {
-        this(this + listOf(
-            (callback to handler),
-            ("sigbla/widgets.css" to cssResource("/widgets.css")),
-            ("sigbla/widgets.js" to jsResource("/widgets.js"))
-        ))
-    }
-
-    val transformer = div("sigbla-widgets") {
-        input {
-            type = InputType.radio
-            tabIndex = "-1"
-            attributes["id"] = id
-            attributes["callback"] = callback
-            if (selected) attributes["checked"] = "checked"
+        cellView.tableView[Resources].apply {
+            this(this + listOf(
+                (callback to handler),
+                ("sigbla/widgets.css" to cssResource("/widgets.css")),
+                ("sigbla/widgets.js" to jsResource("/widgets.js"))
+            ))
         }
-        label {
-            attributes["for"] = id
-            +text
+
+        val transformer = div("sigbla-widgets") {
+            input {
+                type = InputType.radio
+                tabIndex = "-1"
+                attributes["id"] = id
+                attributes["callback"] = callback
+                if (selected) attributes["checked"] = "checked"
+            }
+            label {
+                attributes["for"] = id
+                +text
+            }
         }
-    }
-    this[CellTransformer] = transformer
+        cellView[CellTransformer] = transformer
 
-    this[CellTopics] = "sigbla-widgets-radio"
+        cellView[CellTopics] = "sigbla-widgets-radio"
 
-    on(this) {
-        val unsubscribe = { off(this) }
-        skipHistory = true
-        events {
-            if (any() && source.tableView[source][CellTransformer].function != transformer) {
-                // clean up
-                unsubscribe()
-                source.tableView[Resources] = source.tableView[Resources] - callback
+        on(cellView) {
+            val unsubscribe = { off(this) }
+            skipHistory = true
+            events {
+                if (any() && source.tableView[source][CellTransformer].function != transformer) {
+                    // clean up
+                    unsubscribe()
+                    source.tableView[Resources] = source.tableView[Resources] - callback
+                }
             }
         }
     }
@@ -324,55 +324,56 @@ internal fun textField(
     text: String,
     action: TextField.() -> Unit = {}
 ): CellView.() -> Unit = {
-    // Remove all existing properties on cellview
     val cellView = this
-    clear(cellView)
 
-    val callback = "sigbla/widgets/$id-${widgetCounter.getAndIncrement()}"
+    batch(this.tableView) {
+        val callback = "sigbla/widgets/$id-${widgetCounter.getAndIncrement()}"
 
-    val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
-        if (call.request.httpMethod == HttpMethod.Post) {
-            val newText = call.receiveText()
-            val tf = TextField(cellView, newText)
-            tf.action()
-            if (tf.modified || newText != text) {
-                cellView.(textField(id, tf.text, action))()
-                call.respondText { "false" }
-            } else {
-                call.respondText { "true" }
+        val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
+            if (call.request.httpMethod == HttpMethod.Post) {
+                val newText = call.receiveText()
+                val tf = TextField(cellView, newText)
+                tf.action()
+                if (tf.modified || newText != text) {
+                    cellView.(textField(id, tf.text, action))()
+                    call.respondText { "false" }
+                } else {
+                    call.respondText { "true" }
+                }
             }
         }
-    }
 
-    this.tableView[Resources].apply {
-        this(this + listOf(
-            (callback to handler),
-            ("sigbla/widgets.css" to cssResource("/widgets.css")),
-            ("sigbla/widgets.js" to jsResource("/widgets.js"))
-        ))
-    }
-
-    val transformer = div("sigbla-widgets") {
-        input {
-            type = InputType.text
-            tabIndex = "-1"
-            value = text
-            attributes["id"] = id
-            attributes["callback"] = callback
+        cellView.tableView[Resources].apply {
+            this(this + listOf(
+                (callback to handler),
+                ("sigbla/widgets.css" to cssResource("/widgets.css")),
+                ("sigbla/widgets.js" to jsResource("/widgets.js"))
+            ))
         }
-    }
-    this[CellTransformer] = transformer
 
-    this[CellTopics] = "sigbla-widgets-textfield"
+        val transformer = div("sigbla-widgets") {
+            input {
+                type = InputType.text
+                tabIndex = "-1"
+                value = text
+                attributes["id"] = id
+                attributes["callback"] = callback
+            }
+        }
 
-    on(this) {
-        val unsubscribe = { off(this) }
-        skipHistory = true
-        events {
-            if (any() && source.tableView[source][CellTransformer].function != transformer) {
-                // clean up
-                unsubscribe()
-                source.tableView[Resources] = source.tableView[Resources] - callback
+        cellView[CellTransformer] = transformer
+
+        cellView[CellTopics] = "sigbla-widgets-textfield"
+
+        on(cellView) {
+            val unsubscribe = { off(this) }
+            skipHistory = true
+            events {
+                if (any() && source.tableView[source][CellTransformer].function != transformer) {
+                    // clean up
+                    unsubscribe()
+                    source.tableView[Resources] = source.tableView[Resources] - callback
+                }
             }
         }
     }

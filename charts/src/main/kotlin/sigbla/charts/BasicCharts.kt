@@ -120,63 +120,65 @@ fun line(
     labels: List<String>,
     vararg datasets: Pair<String, List<Double>>
 ): CellView.() -> Unit = {
-    val chartConfig = ChartConfig(
-        type = "line",
-        options = ChartConfig.Options(
-            plugins = ChartConfig.Options.Plugins(
-                title = ChartConfig.Options.Plugins.Title(
-                    display = !title.isNullOrBlank(),
-                    text = title ?: ""
+    val cellView = this
+
+    batch (cellView.tableView) {
+        val chartConfig = ChartConfig(
+            type = "line",
+            options = ChartConfig.Options(
+                plugins = ChartConfig.Options.Plugins(
+                    title = ChartConfig.Options.Plugins.Title(
+                        display = !title.isNullOrBlank(),
+                        text = title ?: ""
+                    )
                 )
+            ),
+            data = ChartConfig.Data(
+                labels = labels,
+                datasets = datasets.map {
+                    ChartConfig.Data.Dataset(
+                        label = it.first,
+                        data = it.second
+                    )
+                }
             )
-        ),
-        data = ChartConfig.Data(
-            labels = labels,
-            datasets = datasets.map {
-                ChartConfig.Data.Dataset(
-                    label = it.first,
-                    data = it.second
-                )
-            }
         )
-    )
 
-    clear(this)
+        val callback = "sigbla/charts/${chartCounter.getAndIncrement()}"
 
-    val callback = "sigbla/charts/${chartCounter.getAndIncrement()}"
-
-    val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
-        if (call.request.httpMethod == HttpMethod.Get) {
-            call.respondText { Klaxon().toJsonString(chartConfig) }
+        val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
+            if (call.request.httpMethod == HttpMethod.Get) {
+                call.respondText { Klaxon().toJsonString(chartConfig) }
+            }
         }
-    }
 
-    this.tableView[Resources].apply {
-        this(this + listOf(
-            (callback to handler),
-            ("chartjs/charts.js" to jsResource("/chartjs/chart.js")),
-            ("sigbla/charts.css" to cssResource("/sigbla/charts.css")),
-            ("sigbla/charts.js" to jsResource("/sigbla/charts.js"))
-        ))
-    }
+        cellView.tableView[Resources].apply {
+            this(this + listOf(
+                (callback to handler),
+                ("chartjs/charts.js" to jsResource("/chartjs/chart.js")),
+                ("sigbla/charts.css" to cssResource("/sigbla/charts.css")),
+                ("sigbla/charts.js" to jsResource("/sigbla/charts.js"))
+            ))
+        }
 
-    val transformer = div("sigbla-charts") {
-        attributes["callback"] = callback
-        canvas {}
-    }
+        val transformer = div("sigbla-charts") {
+            attributes["callback"] = callback
+            canvas {}
+        }
 
-    this[CellTransformer] = transformer
+        cellView[CellTransformer] = transformer
 
-    this[CellTopics] = "sigbla-charts"
+        cellView[CellTopics] = "sigbla-charts"
 
-    on(this) {
-        val unsubscribe = { off(this) }
-        skipHistory = true
-        events {
-            if (any() && source.tableView[source][CellTransformer].function != transformer) {
-                // clean up
-                unsubscribe()
-                source.tableView[Resources] = source.tableView[Resources] - callback
+        on(cellView) {
+            val unsubscribe = { off(this) }
+            skipHistory = true
+            events {
+                if (any() && source.tableView[source][CellTransformer].function != transformer) {
+                    // clean up
+                    unsubscribe()
+                    source.tableView[Resources] = source.tableView[Resources] - callback
+                }
             }
         }
     }
@@ -242,63 +244,65 @@ fun bar(
     labels: List<String>,
     vararg datasets: Pair<String, List<Double>>
 ): CellView.() -> Unit = {
-    val chartConfig = ChartConfig(
-        type = "bar",
-        options = ChartConfig.Options(
-            plugins = ChartConfig.Options.Plugins(
-                title = ChartConfig.Options.Plugins.Title(
-                    display = !title.isNullOrBlank(),
-                    text = title ?: ""
+    val cellView = this
+
+    batch(cellView.tableView) {
+        val chartConfig = ChartConfig(
+            type = "bar",
+            options = ChartConfig.Options(
+                plugins = ChartConfig.Options.Plugins(
+                    title = ChartConfig.Options.Plugins.Title(
+                        display = !title.isNullOrBlank(),
+                        text = title ?: ""
+                    )
                 )
+            ),
+            data = ChartConfig.Data(
+                labels = labels,
+                datasets = datasets.map {
+                    ChartConfig.Data.Dataset(
+                        label = it.first,
+                        data = it.second
+                    )
+                }
             )
-        ),
-        data = ChartConfig.Data(
-            labels = labels,
-            datasets = datasets.map {
-                ChartConfig.Data.Dataset(
-                    label = it.first,
-                    data = it.second
-                )
-            }
         )
-    )
 
-    clear(this)
+        val callback = "sigbla/charts/${chartCounter.getAndIncrement()}"
 
-    val callback = "sigbla/charts/${chartCounter.getAndIncrement()}"
-
-    val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
-        if (call.request.httpMethod == HttpMethod.Get) {
-            call.respondText { Klaxon().toJsonString(chartConfig) }
+        val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
+            if (call.request.httpMethod == HttpMethod.Get) {
+                call.respondText { Klaxon().toJsonString(chartConfig) }
+            }
         }
-    }
 
-    this.tableView[Resources].apply {
-        this(this + listOf(
-            (callback to handler),
-            ("chartjs/charts.js" to jsResource("/chartjs/chart.js")),
-            ("sigbla/charts.css" to cssResource("/sigbla/charts.css")),
-            ("sigbla/charts.js" to jsResource("/sigbla/charts.js"))
-        ))
-    }
+        cellView.tableView[Resources].apply {
+            this(this + listOf(
+                (callback to handler),
+                ("chartjs/charts.js" to jsResource("/chartjs/chart.js")),
+                ("sigbla/charts.css" to cssResource("/sigbla/charts.css")),
+                ("sigbla/charts.js" to jsResource("/sigbla/charts.js"))
+            ))
+        }
 
-    val transformer = div("sigbla-charts") {
-        attributes["callback"] = callback
-        canvas {}
-    }
+        val transformer = div("sigbla-charts") {
+            attributes["callback"] = callback
+            canvas {}
+        }
 
-    this[CellTransformer] = transformer
+        cellView[CellTransformer] = transformer
 
-    this[CellTopics] = "sigbla-charts"
+        cellView[CellTopics] = "sigbla-charts"
 
-    on(this) {
-        val unsubscribe = { off(this) }
-        skipHistory = true
-        events {
-            if (any() && source.tableView[source][CellTransformer].function != transformer) {
-                // clean up
-                unsubscribe()
-                source.tableView[Resources] = source.tableView[Resources] - callback
+        on(cellView) {
+            val unsubscribe = { off(this) }
+            skipHistory = true
+            events {
+                if (any() && source.tableView[source][CellTransformer].function != transformer) {
+                    // clean up
+                    unsubscribe()
+                    source.tableView[Resources] = source.tableView[Resources] - callback
+                }
             }
         }
     }
