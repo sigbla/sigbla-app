@@ -86,7 +86,7 @@ internal fun button(
         }
         cellView[CellTransformer] = transformer
 
-        cellView[CellTopics] = "sigbla-widgets-button"
+        cellView[CellTopics].apply { this(this + "sigbla-widgets-button") }
 
         on(cellView) {
             val unsubscribe = { off(this) }
@@ -182,7 +182,7 @@ internal fun checkBox(
         }
         cellView[CellTransformer] = transformer
 
-        cellView[CellTopics] = "sigbla-widgets-checkbox"
+        cellView[CellTopics].apply { this(this + "sigbla-widgets-checkbox") }
 
         on(cellView) {
             val unsubscribe = { off(this) }
@@ -278,7 +278,7 @@ internal fun radio(
         }
         cellView[CellTransformer] = transformer
 
-        cellView[CellTopics] = "sigbla-widgets-radio"
+        cellView[CellTopics].apply { this(this + "sigbla-widgets-radio") }
 
         on(cellView) {
             val unsubscribe = { off(this) }
@@ -363,7 +363,7 @@ internal fun textField(
 
         cellView[CellTransformer] = transformer
 
-        cellView[CellTopics] = "sigbla-widgets-textfield"
+        cellView[CellTopics].apply { this(this + "sigbla-widgets-textfield") }
 
         on(cellView) {
             val unsubscribe = { off(this) }
