@@ -168,7 +168,7 @@ fun line(
 
         cellView[CellTransformer] = transformer
 
-        cellView[CellTopics] = "sigbla-charts"
+        cellView[CellTopics].apply { this(this + "sigbla-charts") }
 
         on(cellView) {
             val unsubscribe = { off(this) }
@@ -292,7 +292,7 @@ fun bar(
 
         cellView[CellTransformer] = transformer
 
-        cellView[CellTopics] = "sigbla-charts"
+        cellView[CellTopics].apply { this(this + "sigbla-charts") }
 
         on(cellView) {
             val unsubscribe = { off(this) }
