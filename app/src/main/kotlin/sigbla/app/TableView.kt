@@ -60,6 +60,9 @@ internal data class TableViewRef(
     val rowTransformers: PMap<Long, Row.() -> Unit> = PHashMap(),
     val cellTransformers: PMap<Pair<Header, Long>, Cell<*>.() -> Unit> = PHashMap(),
 
+    val columnPositions: PMap<Header, Position.PositionValue> = PHashMap(),
+    val rowPositions: PMap<Long, Position.PositionValue> = PHashMap(),
+
     val table: Table? = null,
 
     val version: Long = Long.MIN_VALUE
@@ -1471,6 +1474,18 @@ class FunctionTableTransformer internal constructor(
 }
 
 // TODO Should introduce a generic type S like else where..?
+// TODO Refactor this to Resource and allow for:
+//      tableView[Resource["foo/bar"]] = handler, etc
+//  which also allows for global resources with
+//      Resource["foo/bar"] = handler
+//  and
+//      tableView.resources and Resource.resources for getting all
+//  and
+//      tableView[Resource["foo/bar"]] = Unit and Resource["foo/bar"] = Unit
+//  to clear (or via invoke). Allow for clear(resource) and clear(resources) too..
+//  Each Resource instance, obtained from tableView[Resource["foo/bar"]] or Resource["foo/bar"]
+//  contain a path and a handler field + source (tableView or self based on type S)
+//  While path must be defined, handler might not, so we need UnitResource and HandlerResource?
 class Resources internal constructor(
     val source: TableView,
     internal val _resources: PMap<String, Pair<Long, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>
@@ -1565,6 +1580,7 @@ class Resources internal constructor(
 }
 
 // TODO Should introduce a generic type S like else where..
+// TODO Instead of table being nullable, have UnitSource and TableSource?
 class SourceTable internal constructor(
     val source: TableView,
     val table: Table?
@@ -1590,6 +1606,36 @@ class SourceTable internal constructor(
     override fun toString() = "SourceTable[$source, ${table?.toString() ?: "null"}]"
 }
 
+
+sealed class Position<S>(
+    val source: S
+) {
+    internal enum class PositionValue { LEFT, RIGHT, TOP, BOTTOM }
+
+    internal abstract val positionValue: PositionValue?
+
+    open class Horizontal internal constructor(source: ColumnView, override val positionValue: PositionValue?) : Position<ColumnView>(source)
+    open class Vertical internal constructor(source: RowView, override val positionValue: PositionValue?) : Position<RowView>(source)
+
+    class Left internal constructor(source: ColumnView) : Horizontal(source, PositionValue.LEFT) {
+        companion object
+    }
+
+    class Right internal constructor(source: ColumnView) : Horizontal(source, PositionValue.RIGHT) {
+        companion object
+    }
+
+    class Top internal constructor(source: RowView) : Vertical(source, PositionValue.TOP) {
+        companion object
+    }
+
+    class Bottom internal constructor(source: RowView) : Vertical(source, PositionValue.BOTTOM) {
+        companion object
+    }
+
+    companion object
+}
+
 // TODO Add support for disabling marker, hide column and row headers
 data class ViewConfig(
     val marginTop: Long,
@@ -1601,6 +1647,9 @@ data class ViewConfig(
     val paddingBottom: Long,
     val paddingLeft: Long,
     val paddingRight: Long,
+
+    val leftSeparatorWidth: Long,
+    val rightSeparatorWidth: Long,
 
     val tableHtml: suspend PipelineContext<*, ApplicationCall>.() -> Unit,
     val tableScript: suspend PipelineContext<*, ApplicationCall>.() -> Unit,
@@ -1617,6 +1666,9 @@ fun compactViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
     paddingBottom = 0,
     paddingLeft = 0,
     paddingRight = 0,
+
+    leftSeparatorWidth = 2,
+    rightSeparatorWidth = 2,
 
     tableHtml = {
         call.respondText(ContentType.Text.Html, HttpStatusCode.OK) {
@@ -1637,6 +1689,9 @@ fun spaciousViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
     paddingBottom = 1,
     paddingLeft = 1,
     paddingRight = 1,
+
+    leftSeparatorWidth = 3,
+    rightSeparatorWidth = 3,
 
     tableHtml = {
         call.respondText(ContentType.Text.Html, HttpStatusCode.OK) {

@@ -3,6 +3,7 @@
 package sigbla.app
 
 import sigbla.app.exceptions.InvalidCellHeightException
+import sigbla.app.exceptions.InvalidRowException
 import sigbla.app.pds.kollection.ImmutableSet as PSet
 import sigbla.app.pds.kollection.immutableSetOf
 import sigbla.app.pds.kollection.toImmutableSet
@@ -218,6 +219,58 @@ class RowView internal constructor(
         }
     }
 
+    operator fun get(position: Position.Companion): Position.Vertical {
+        val ref = tableView.tableViewRef.get()
+        return when (ref.rowPositions[index]) {
+            null -> Position.Vertical(this, null)
+            Position.PositionValue.TOP -> Position.Top(this)
+            Position.PositionValue.BOTTOM -> Position.Bottom(this)
+            else -> throw InvalidRowException("Unsupported position type")
+        }
+    }
+
+    operator fun set(position: Position.Companion, newPosition: Unit?) {
+        setRowPosition(null)
+    }
+
+    operator fun set(position: Position.Companion, newPosition: Position.Vertical?) {
+        setRowPosition(newPosition?.positionValue)
+    }
+
+    operator fun set(position: Position.Companion, newPosition: Position.Top.Companion?) {
+        if (newPosition == null) setRowPosition(null) else setRowPosition(Position.PositionValue.TOP)
+    }
+
+    operator fun set(position: Position.Companion, newPosition: Position.Bottom.Companion?) {
+        if (newPosition == null) setRowPosition(null) else setRowPosition(Position.PositionValue.BOTTOM)
+    }
+
+    private fun setRowPosition(position: Position.PositionValue?) {
+        synchronized(tableView.eventProcessor) {
+            val (oldRef, newRef) = tableView.tableViewRef.refAction {
+                it.copy(
+                    rowPositions = if (position == null) it.rowPositions.remove(index) else it.rowPositions.put(index, position),
+                    version = it.version + 1L
+                )
+            }
+
+            if (!tableView.eventProcessor.haveListeners()) return
+
+            val oldView = tableView.makeClone(ref = oldRef)
+            val newView = tableView.makeClone(ref = newRef)
+
+            val old = oldView[index][Position]
+            val new = newView[index][Position]
+
+            tableView.eventProcessor.publish(listOf(
+                TableViewListenerEvent<Position.Vertical>(
+                    old,
+                    new
+                )
+            ) as List<TableViewListenerEvent<Any>>)
+        }
+    }
+
     operator fun invoke(newValue: RowView?): RowView? {
         tableView[this] = newValue
         return newValue
@@ -242,6 +295,13 @@ class RowView internal constructor(
         tableView[this][RowTransformer] = newValue
         return newValue
     }
+
+    operator fun invoke(newValue: Position.Vertical?): Position.Vertical? {
+        tableView[this][Position] = newValue
+        return newValue
+    }
+
+    // TODO Other invoke for position?
 
     operator fun invoke(newValue: Unit?): Unit? {
         tableView[this] = Unit

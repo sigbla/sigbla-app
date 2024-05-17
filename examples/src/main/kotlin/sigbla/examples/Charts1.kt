@@ -9,12 +9,6 @@ fun main() {
     val table = Table["Charts"]
     val tableView = TableView[table]
 
-    // TODO
-    tableView["A", 0][CellHeight] = 250
-    tableView["A", 0][CellWidth] = 350
-    tableView["B", 0][CellHeight] = 250
-    tableView["B", 0][CellWidth] = 350
-
     tableView[0][CellHeight] = 250
     tableView["A"][CellWidth] = 350
     tableView["B"][CellWidth] = 350

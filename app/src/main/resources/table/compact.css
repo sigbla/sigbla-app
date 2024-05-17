@@ -60,7 +60,7 @@ table {
     border-bottom-color: white;
     border-bottom-style: solid;
     background-color: lightsteelblue;
-    z-index: 4000;
+    z-index: 6000;
 }
 #tb {
     position: fixed;
@@ -69,6 +69,24 @@ table {
     background-color: white;
     z-index: 2000;
 }
+#tbl {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 4000;
+    background: white;
+    box-sizing: border-box;
+    border-right: steelblue 2px solid;
+}
+#tbr {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 4000;
+    background: white;
+    box-sizing: border-box;
+    border-left: steelblue 2px solid;
+}
 #lb {
     position: fixed;
     top: 0;
@@ -76,31 +94,58 @@ table {
     background-color: white;
     z-index: 2000;
 }
+#cbl {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2000;
+    background: white;
+    box-sizing: border-box;
+    border-right: steelblue 2px solid;
+}
+#cbr {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2000;
+    background: white;
+    box-sizing: border-box;
+    border-left: steelblue 2px solid;
+}
 #end {
     position: absolute;
     height: 1px;
     width: 1px;
-    background-color: black;
+    background-color: transparent;
+}
+#mkrContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 #mkr {
     position: absolute;
-    z-index: 9000;
+    z-index: 1500;
     background-color: transparent;
-    transition: all 100ms linear;
+    /* transition: all 100ms linear; */
+}
+#mkr.ml {
+    z-index: 3500;
+}
+#mkr.mr {
+    z-index: 3500;
 }
 #mkr.dblclicked {
     pointer-events: none;
 }
 #mkrInner {
     position: absolute;
-    top: -5px;
-    left: -5px;
     height: 100%;
     width: 100%;
-    border: darkblue solid 5px;
+    outline: darkblue solid 5px;
 }
 #mkrInner.dblclicked {
-    border: darkblue dotted 5px;
+    outline: darkblue dotted 5px;
     pointer-events: none;
 }
 
@@ -110,10 +155,19 @@ table {
     left: 0;
 }
 .c {
+    background-color: white;
     white-space: nowrap;
     overflow: hidden;
     position: absolute;
     z-index: 1000;
+}
+.cl {
+    position: sticky;
+    z-index: 3000;
+}
+.cr {
+    position: sticky;
+    z-index: 3000;
 }
 .c:hover {
     background-color: lightsteelblue;
@@ -130,12 +184,20 @@ table {
 }
 .hc {}
 .ch {
+    background-color: lightsteelblue;
     white-space: nowrap;
     overflow: hidden;
     position: sticky;
     z-index: 3000;
 }
+.chl {
+    z-index: 5000;
+}
+.chr {
+    z-index: 5000;
+}
 .rh {
+    background-color: lightsteelblue;
     white-space: nowrap;
     overflow: hidden;
     position: sticky;
@@ -143,19 +205,19 @@ table {
 }
 
 .ch > .co {
+    /* TODO Keep? */
     border: steelblue solid 1px;
 }
 
 .rh > .co {
+    /* TODO Keep? */
     border: steelblue solid 1px;
 }
 .ch > .cc {
-    background-color: lightsteelblue;
     padding: 2px;
 }
 
 .rh > .cc {
-    background-color: lightsteelblue;
     padding: 2px;
 }
 

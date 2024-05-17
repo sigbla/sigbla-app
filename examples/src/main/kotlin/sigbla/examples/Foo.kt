@@ -19,6 +19,11 @@ fun main() {
     table["Column A"][1] = 1000
     table["Column A", 1] = 1000
 
+    val tv = TableView[table]
+    tv["A"][Position] = Position.Right
+    tv[1][Position] = Position.Top
+    tv["A"][Position] = null as Position.Left?
+
     on(table["C"][1]..table["D"][10]) {
         name = "A"
 
