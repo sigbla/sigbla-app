@@ -90,6 +90,20 @@ table {
     background-color: white;
     z-index: 2000;
 }
+#lbt {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 4000;
+    background: linear-gradient(0deg, rgba(255,255,255,0), rgba(176,196,222,128) 5px, rgba(255,255,255,255) 5px);
+}
+#lbb {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 4000;
+    background: linear-gradient(180deg, rgba(255,255,255,0), rgba(176,196,222,128) 5px, rgba(255,255,255,255) 5px);
+}
 #cbl {
     position: fixed;
     top: 0;
@@ -103,6 +117,20 @@ table {
     left: 0;
     z-index: 2000;
     background: linear-gradient(90deg, rgba(255,255,255,0), rgba(176,196,222,128) 5px, rgba(255,255,255,255) 5px);
+}
+#cbt {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2000;
+    background: linear-gradient(0deg, rgba(255,255,255,0), rgba(176,196,222,128) 5px, rgba(255,255,255,255) 5px);
+}
+#cbb {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2000;
+    background: linear-gradient(180deg, rgba(255,255,255,0), rgba(176,196,222,128) 5px, rgba(255,255,255,255) 5px);
 }
 #end {
     position: absolute;
@@ -125,6 +153,12 @@ table {
     z-index: 3500;
 }
 #mkr.mr {
+    z-index: 3500;
+}
+#mkr.mt {
+    z-index: 3500;
+}
+#mkr.mb {
     z-index: 3500;
 }
 #mkr.dblclicked {
@@ -161,6 +195,14 @@ table {
     position: sticky;
     z-index: 3000;
 }
+.ct {
+    position: sticky;
+    z-index: 3000;
+}
+.cb {
+    position: sticky;
+    z-index: 3000;
+}
 .co {
     position: absolute;
     height: 100%;
@@ -191,6 +233,12 @@ table {
     overflow: hidden;
     position: sticky;
     z-index: 3000;
+}
+.rht {
+    z-index: 5000;
+}
+.rhb {
+    z-index: 5000;
 }
 
 .ch > .cc {

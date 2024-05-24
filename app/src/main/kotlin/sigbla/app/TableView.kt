@@ -1648,6 +1648,8 @@ data class ViewConfig(
     val paddingLeft: Long,
     val paddingRight: Long,
 
+    val topSeparatorHeight: Long,
+    val bottomSeparatorHeight: Long,
     val leftSeparatorWidth: Long,
     val rightSeparatorWidth: Long,
 
@@ -1667,6 +1669,8 @@ fun compactViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
     paddingLeft = 0,
     paddingRight = 0,
 
+    topSeparatorHeight = 2,
+    bottomSeparatorHeight = 2,
     leftSeparatorWidth = 2,
     rightSeparatorWidth = 2,
 
@@ -1690,6 +1694,8 @@ fun spaciousViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
     paddingLeft = 1,
     paddingRight = 1,
 
+    topSeparatorHeight = 3,
+    bottomSeparatorHeight = 3,
     leftSeparatorWidth = 3,
     rightSeparatorWidth = 3,
 

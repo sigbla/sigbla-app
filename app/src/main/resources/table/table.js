@@ -10,8 +10,12 @@ class Sigbla {
     #topBannerLeft;
     #topBannerRight;
     #leftBanner;
+    #leftBannerTop;
+    #leftBannerBottom;
     #cellBannerLeft;
     #cellBannerRight;
+    #cellBannerTop;
+    #cellBannerBottom;
     #end;
     #marker;
     #markerCell;
@@ -281,7 +285,11 @@ class Sigbla {
             mkr.style.width = newCell.style.width;
             mkr.style.marginTop = newCell.style.marginTop;
             mkr.style.marginLeft = newCell.style.marginLeft;
-            if (newCell.classList.contains("cl") || newCell.classList.contains("cr")) {
+            if (newCell.classList.contains("cl")
+                || newCell.classList.contains("cr")
+                || newCell.classList.contains("ct")
+                || newCell.classList.contains("cb")
+            ) {
                 mkr.style.position = "sticky";
             } else {
                 mkr.style.position = "absolute";
@@ -295,6 +303,16 @@ class Sigbla {
                 mkr.classList.add("mr");
             } else {
                 mkr.classList.remove("mr");
+            }
+            if (newCell.classList.contains("ct")) {
+                mkr.classList.add("mt");
+            } else {
+                mkr.classList.remove("mt");
+            }
+            if (newCell.classList.contains("cb")) {
+                mkr.classList.add("mb");
+            } else {
+                mkr.classList.remove("mb");
             }
 
             mkr.focus();
@@ -328,6 +346,8 @@ class Sigbla {
             const preferLocked = this.#markerCell && (
                 this.#markerCell.classList.contains("cl")
                 || this.#markerCell.classList.contains("cr")
+                || this.#markerCell.classList.contains("ct")
+                || this.#markerCell.classList.contains("cb")
             )
 
             const elements = document.elementsFromPoint(x, y);
@@ -340,6 +360,8 @@ class Sigbla {
                         && (
                             element.parentElement.classList.contains("cl")
                             || element.parentElement.classList.contains("cr")
+                            || element.parentElement.classList.contains("ct")
+                            || element.parentElement.classList.contains("cb")
                         )
                     ) {
                         return element.parentElement;
@@ -353,6 +375,8 @@ class Sigbla {
                         && !(
                             element.parentElement.classList.contains("cl")
                             || element.parentElement.classList.contains("cr")
+                            || element.parentElement.classList.contains("ct")
+                            || element.parentElement.classList.contains("cb")
                         )
                     ) {
                         return element.parentElement;
@@ -366,6 +390,8 @@ class Sigbla {
                         && !(
                             element.parentElement.classList.contains("cl")
                             || element.parentElement.classList.contains("cr")
+                            || element.parentElement.classList.contains("ct")
+                            || element.parentElement.classList.contains("cb")
                         )
                     ) {
                         return element.parentElement;
@@ -379,6 +405,8 @@ class Sigbla {
                         && (
                             element.parentElement.classList.contains("cl")
                             || element.parentElement.classList.contains("cr")
+                            || element.parentElement.classList.contains("ct")
+                            || element.parentElement.classList.contains("cb")
                         )
                     ) {
                         return element.parentElement;
@@ -505,12 +533,10 @@ class Sigbla {
             const markerHeight = parseInt(this.#marker.style.height);
             const markerWidth = parseInt(this.#marker.style.width);
 
-            /*
             const horizontalLockedCell = this.#markerCell && (
                 this.#markerCell.classList.contains("cl")
                 || this.#markerCell.classList.contains("cr")
             )
-             */
 
             for (let x = markerX + markerWidth + 5; x < markerX + markerWidth + 1000; x += 5) {
                 for (let y = markerY + 5; y < markerY + markerHeight; y += 5) {
@@ -536,7 +562,7 @@ class Sigbla {
                 }
             }
 
-            if (retry > 0) {
+            if (!horizontalLockedCell && retry > 0) {
                 // No cell found, scroll a bit
                 window.scrollBy({
                     left: 100,
@@ -549,21 +575,21 @@ class Sigbla {
 
         const findNextUp = () => {
             const tb = document.getElementById("tb");
+            const cbt = document.getElementById("cbt");
             const tbHeight = parseInt(tb.style.height);
-            const topOffset = tbHeight;
+            const cbtHeight = parseInt(cbt.style.height);
+            const topOffset = tbHeight > cbtHeight ? tbHeight : cbtHeight;
             const markerX = this.#marker.getBoundingClientRect().x;
             const markerY = this.#marker.getBoundingClientRect().y;
             const markerWidth = parseInt(this.#marker.style.width);
 
-            /*
-            const horizontalLockedCell = this.#markerCell && (
-                this.#markerCell.classList.contains("cl")
-                || this.#markerCell.classList.contains("cr")
+            const verticalLockedCell = this.#markerCell && (
+                this.#markerCell.classList.contains("ct")
+                || this.#markerCell.classList.contains("cb")
             )
-             */
 
             // Bring current marker more in view if needed
-            if (markerY < topOffset) {
+            if (!verticalLockedCell && markerY < topOffset) {
                 window.scrollBy({
                     top: -25,
                     behavior: "smooth"
@@ -579,11 +605,11 @@ class Sigbla {
                     if (cell) {
                         this.#manageMarkerCell(cell);
 
-                        //const horizontalLockedCell = cell.classList.contains("cl") || cell.classList.contains("cr");
+                        const verticalLockedCell = cell.classList.contains("ct") || cell.classList.contains("cb");
 
                         // Bring current marker more in view if needed
                         const markerY = this.#marker.getBoundingClientRect().y;
-                        if (markerY < topOffset) {
+                        if (!verticalLockedCell && markerY < topOffset) {
                             window.scrollBy({
                                 top: -25,
                                 behavior: "smooth"
@@ -603,21 +629,20 @@ class Sigbla {
         }
 
         const findNextDown = () => {
-            const bottomOffset = window.innerHeight;
+            const cbb = document.getElementById("cbb");
+            const bottomOffset = cbb.getBoundingClientRect().y;
             const markerX = this.#marker.getBoundingClientRect().x;
             const markerY = this.#marker.getBoundingClientRect().y;
             const markerHeight = parseInt(this.#marker.style.height);
             const markerWidth = parseInt(this.#marker.style.width);
 
-            /*
-            const horizontalLockedCell = this.#markerCell && (
-                this.#markerCell.classList.contains("cl")
-                || this.#markerCell.classList.contains("cr")
+            const verticalLockedCell = this.#markerCell && (
+                this.#markerCell.classList.contains("ct")
+                || this.#markerCell.classList.contains("cb")
             )
-             */
 
             // Bring current marker more in view if needed
-            if (markerY > bottomOffset) {
+            if (!verticalLockedCell && markerY + markerHeight > bottomOffset) {
                 window.scrollBy({
                     top: 25,
                     behavior: "smooth"
@@ -633,11 +658,11 @@ class Sigbla {
                     if (cell) {
                         this.#manageMarkerCell(cell);
 
-                        //const horizontalLockedCell = cell.classList.contains("cl") || cell.classList.contains("cr");
+                        const verticalLockedCell = cell.classList.contains("ct") || cell.classList.contains("cb");
 
                         // Bring current marker more in view if needed
                         const markerY = this.#marker.getBoundingClientRect().y;
-                        if (markerY > bottomOffset) {
+                        if (!verticalLockedCell && markerY > bottomOffset) {
                             window.scrollBy({
                                 top: 25,
                                 behavior: "smooth"
@@ -657,18 +682,17 @@ class Sigbla {
         }
 
         const findNextEnter = (retry) => {
-            const bottomOffset = window.innerHeight;
+            const cbb = document.getElementById("cbb");
+            const bottomOffset = cbb.getBoundingClientRect().y;
             const markerX = this.#marker.getBoundingClientRect().x;
             const markerY = this.#marker.getBoundingClientRect().y;
             const markerHeight = parseInt(this.#marker.style.height);
             const markerWidth = parseInt(this.#marker.style.width);
 
-            /*
-            const horizontalLockedCell = this.#markerCell && (
-                this.#markerCell.classList.contains("cl")
-                || this.#markerCell.classList.contains("cr")
+            const verticalLockedCell = this.#markerCell && (
+                this.#markerCell.classList.contains("ct")
+                || this.#markerCell.classList.contains("cb")
             )
-             */
 
             for (let y = markerY + markerHeight + 5; y < markerY + markerHeight + 1000; y += 5) {
                 for (let x = markerX + 5; x < markerX + markerWidth; x += 5) {
@@ -677,12 +701,12 @@ class Sigbla {
                     if (cell) {
                         this.#manageMarkerCell(cell);
 
-                        //const horizontalLockedCell = cell.classList.contains("cl") || cell.classList.contains("cr");
+                        const verticalLockedCell = cell.classList.contains("ct") || cell.classList.contains("cb");
 
                         // Bring current marker more in view if needed
                         const markerY = this.#marker.getBoundingClientRect().y;
                         const markerHeight = parseInt(this.#marker.style.height);
-                        if (markerY + markerHeight > bottomOffset) {
+                        if (!verticalLockedCell && markerY + markerHeight > bottomOffset) {
                             window.scrollBy({
                                 top: markerY + markerHeight - bottomOffset,
                                 behavior: "instant"
@@ -694,7 +718,7 @@ class Sigbla {
                 }
             }
 
-            if (retry > 0) {
+            if (!verticalLockedCell && retry > 0) {
                 // No cell found, scroll a bit and try again
                 window.scrollBy({
                     top: 25,
@@ -715,13 +739,6 @@ class Sigbla {
             const markerHeight = parseInt(this.#marker.style.height);
             const markerWidth = parseInt(this.#marker.style.width);
 
-            /*
-            const horizontalLockedCell = this.#markerCell && (
-                this.#markerCell.classList.contains("cl")
-                || this.#markerCell.classList.contains("cr")
-            )
-             */
-
             window.scrollBy({
                 top: -bottomOffset,
                 behavior: "instant"
@@ -734,8 +751,6 @@ class Sigbla {
 
                     if (cell) {
                         this.#manageMarkerCell(cell);
-
-                        //const horizontalLockedCell = cell.classList.contains("cl") || cell.classList.contains("cr");
 
                         // Bring current marker more in view if needed
                         const markerY = this.#marker.getBoundingClientRect().y;
@@ -767,13 +782,6 @@ class Sigbla {
             const markerHeight = parseInt(this.#marker.style.height);
             const markerWidth = parseInt(this.#marker.style.width);
 
-            /*
-            const horizontalLockedCell = this.#markerCell && (
-                this.#markerCell.classList.contains("cl")
-                || this.#markerCell.classList.contains("cr")
-            )
-             */
-
             window.scrollBy({
                 top: window.innerHeight - topOffset,
                 behavior: "instant"
@@ -785,8 +793,6 @@ class Sigbla {
 
                     if (cell) {
                         this.#manageMarkerCell(cell);
-
-                        //const horizontalLockedCell = cell.classList.contains("cl") || cell.classList.contains("cr");
 
                         // Bring current marker more in view if needed
                         const markerY = this.#marker.getBoundingClientRect().y;
@@ -931,8 +937,12 @@ class Sigbla {
                 this.#topBannerLeft = null;
                 this.#topBannerRight = null;
                 this.#leftBanner = null;
+                this.#leftBannerTop = null;
+                this.#leftBannerBottom = null;
                 this.#cellBannerLeft = null;
                 this.#cellBannerRight = null;
+                this.#cellBannerTop = null;
+                this.#cellBannerBottom = null;
                 this.#end = null;
                 this.#marker = null;
                 this.#manageMarkerCell(null);
@@ -954,6 +964,8 @@ class Sigbla {
             case 2: { // add content
                 const container = document.createElement("div");
                 container.className = "container";
+                container.style.height = message.ch + "px";
+                container.style.width = message.cw + "px";
 
                 const div = document.createElement("div");
 
@@ -966,48 +978,40 @@ class Sigbla {
                 cc.className = message.contentClasses;
 
                 if (div.classList.contains("chl")) {
-                    container.style.height = message.ch + "px";
-                    container.style.width = message.cw + "px";
-
                     div.style.left = message.left + "px";
                     div.style.top = message.top + "px";
                 } else if (div.classList.contains("chr")) {
-                    container.style.height = message.ch + "px";
-                    container.style.width = message.cw + "px";
-
                     div.style.left = "calc(min(100%, " + message.cw + "px) - " + message.right + "px)";
-                    //div.style.left = "calc(min(" + window.innerWidth + "px, " + message.cw + "px) - " + message.right + "px)";
                     div.style.top = message.top + "px";
                 } else if (div.classList.contains("ch")) {
-                    container.style.height = message.ch + "px";
-                    container.style.width = message.cw + "px";
-
                     div.style.marginLeft = message.left + "px";
                     div.style.top = message.top + "px";
+                } else if (div.classList.contains("rht")) {
+                    div.style.left = message.left + "px";
+                    div.style.top = message.top + "px";
+                } else if (div.classList.contains("rhb")) {
+                    div.style.left = message.left + "px";
+                    div.style.top = "calc(min(100%, " + message.ch + "px) - " + message.bottom + "px)";
+                } else if (div.classList.contains("rh")) {
+                    div.style.left = message.left + "px";
+                    div.style.marginTop = message.top + "px";
                 } else if (div.classList.contains("cl")) {
-                    container.style.height = message.ch + "px";
-                    container.style.width = message.cw + "px";
-
                     div.style.left = message.left + "px";
                     div.style.marginTop = message.top + "px";
                 } else if (div.classList.contains("cr")) {
-                    container.style.height = message.ch + "px";
-                    container.style.width = message.cw + "px";
-
                     div.style.left = "calc(min(100%, " + message.cw + "px) - " + message.right + "px)";
-                    //div.style.left = "calc(min(" + window.innerWidth + "px, " + message.cw + "px) - " + message.right + "px)";
                     div.style.marginTop = message.top + "px";
+                } else if (div.classList.contains("ct")) {
+                    div.style.marginLeft = message.left + "px";
+                    div.style.top = message.top + "px";
+                } else if (div.classList.contains("cb")) {
+                    div.style.marginLeft = message.left + "px";
+                    div.style.top = "calc(min(100%, " + message.ch + "px) - " + message.bottom + "px)";
                 } else if (div.classList.contains("c")) {
-                    container.style.height = message.ch + "px";
-                    container.style.width = message.cw + "px";
-
                     div.style.left = message.left + "px";
                     div.style.top = message.top + "px";
                 } else {
                     // TODO Probably don't need this else?
-                    container.style.height = message.ch + "px";
-                    container.style.width = message.cw + "px";
-
                     if (message.left !== undefined) div.style.left = message.left + "px";
                     if (message.right !== undefined) div.style.right = message.right + "px";
                     if (message.top !== undefined) div.style.top = message.top + "px";
@@ -1223,6 +1227,20 @@ class Sigbla {
                     this.#leftBanner = newBanner;
                     return newBanner;
                 })();
+                const leftBannerTop = this.#leftBannerTop || (() => {
+                    const newBanner = document.createElement("div");
+                    newBanner.id = "lbt";
+                    this.#target.appendChild(newBanner);
+                    this.#leftBannerTop = newBanner;
+                    return newBanner;
+                })();
+                const leftBannerBottom = this.#leftBannerBottom || (() => {
+                    const newBanner = document.createElement("div");
+                    newBanner.id = "lbb";
+                    this.#target.appendChild(newBanner);
+                    this.#leftBannerBottom = newBanner;
+                    return newBanner;
+                })();
                 const cellBannerLeft = this.#cellBannerLeft || (() => {
                     const newBanner = document.createElement("div");
                     newBanner.id = "cbl";
@@ -1235,6 +1253,20 @@ class Sigbla {
                     newBanner.id = "cbr";
                     this.#target.appendChild(newBanner);
                     this.#cellBannerRight = newBanner;
+                    return newBanner;
+                })();
+                const cellBannerTop = this.#cellBannerTop || (() => {
+                    const newBanner = document.createElement("div");
+                    newBanner.id = "cbt";
+                    this.#target.appendChild(newBanner);
+                    this.#cellBannerTop = newBanner;
+                    return newBanner;
+                })();
+                const cellBannerBottom = this.#cellBannerBottom || (() => {
+                    const newBanner = document.createElement("div");
+                    newBanner.id = "cbb";
+                    this.#target.appendChild(newBanner);
+                    this.#cellBannerBottom = newBanner;
                     return newBanner;
                 })();
                 const end = this.#end || (() => {
@@ -1269,7 +1301,6 @@ class Sigbla {
                 topBannerRight.style.height = (message.cornerY + message.cornerBottomMargin) + "px";
                 topBannerRight.style.width = message.topBannerRight + "px";
                 topBannerRight.style.left = "calc(min(100%, " + message.maxX + "px) - " + message.topBannerRight + "px)";
-                //topBannerRight.style.left = "calc(min(" + window.innerWidth + "px, " + message.maxX + "px) - " + message.topBannerRight + "px)";
                 if (message.topBannerRight === 0) {
                     topBannerRight.style.visibility = "hidden";
                 } else {
@@ -1278,6 +1309,23 @@ class Sigbla {
 
                 leftBanner.style.height = message.maxY + "px";
                 leftBanner.style.width = (message.cornerX + message.cornerRightMargin) + "px";
+
+                leftBannerTop.style.height = message.leftBannerTop + "px";
+                leftBannerTop.style.width = (message.cornerX + message.cornerRightMargin) + "px";
+                if (message.leftBannerTop === 0) {
+                    leftBannerTop.style.visibility = "hidden";
+                } else {
+                    leftBannerTop.style.visibility = "visible";
+                }
+
+                leftBannerBottom.style.height = message.leftBannerBottom + "px";
+                leftBannerBottom.style.width = (message.cornerX + message.cornerRightMargin) + "px";
+                leftBannerBottom.style.top = "calc(min(100%, " + message.maxY + "px) - " + message.leftBannerBottom + "px)";
+                if (message.leftBannerBottom === 0) {
+                    leftBannerBottom.style.visibility = "hidden";
+                } else {
+                    leftBannerBottom.style.visibility = "visible";
+                }
 
                 cellBannerLeft.style.top = (message.cornerY + message.cornerBottomMargin) + "px";
                 cellBannerLeft.style.height = (message.maxY - message.cornerY - message.cornerBottomMargin) + "px";
@@ -1292,11 +1340,29 @@ class Sigbla {
                 cellBannerRight.style.height = (message.maxY - message.cornerY - message.cornerBottomMargin) + "px";
                 cellBannerRight.style.width = message.topBannerRight + "px";
                 cellBannerRight.style.left = "calc(min(100%, " + message.maxX + "px) - " + message.topBannerRight + "px)";
-                //cellBannerRight.style.left = "calc(min(" + window.innerWidth + "px, " + message.maxX + "px) - " + message.topBannerRight + "px)";
                 if (message.topBannerRight === 0) {
                     cellBannerRight.style.visibility = "hidden";
                 } else {
                     cellBannerRight.style.visibility = "visible";
+                }
+
+                cellBannerTop.style.left = (message.cornerX + message.cornerRightMargin) + "px";
+                cellBannerTop.style.height = message.leftBannerTop + "px";
+                cellBannerTop.style.width = (message.maxX - message.cornerX - message.cornerRightMargin) + "px";
+                if (message.leftBannerTop === 0) {
+                    cellBannerTop.style.visibility = "hidden";
+                } else {
+                    cellBannerTop.style.visibility = "visible";
+                }
+
+                cellBannerBottom.style.left = (message.cornerX + message.cornerRightMargin) + "px";
+                cellBannerBottom.style.height = message.leftBannerBottom + "px";
+                cellBannerBottom.style.width = (message.maxX - message.cornerX - message.cornerRightMargin) + "px";
+                cellBannerBottom.style.top = "calc(min(100%, " + message.maxY + "px) - " + message.leftBannerBottom + "px)";
+                if (message.leftBannerBottom === 0) {
+                    cellBannerBottom.style.visibility = "hidden";
+                } else {
+                    cellBannerBottom.style.visibility = "visible";
                 }
 
                 end.style.top = (message.maxY - 1) + "px";

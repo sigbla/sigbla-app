@@ -179,6 +179,8 @@ internal object SigblaBackend {
         val paddingBottom = viewRef.config.paddingBottom
         val paddingLeft = viewRef.config.paddingLeft
         val paddingRight = viewRef.config.paddingRight
+        val topSeparatorHeight = viewRef.config.topSeparatorHeight
+        val bottomSeparatorHeight = viewRef.config.bottomSeparatorHeight
         val leftSeparatorWidth = viewRef.config.leftSeparatorWidth
         val rightSeparatorWidth = viewRef.config.rightSeparatorWidth
 
@@ -283,24 +285,56 @@ internal object SigblaBackend {
             }
         }
 
-        val applicableRows = mutableListOf<Pair<Long, Long>>()
+        val applicableRows = mutableListOf<Pair<Long, Pair<Long, Long>>>()
         var runningHeight = maxHeaderOffset
+        var topHeight = 0L
+        var runningBottom = 0L
 
         val lastKey = table.tableRef.get().columnCells.values().map { it.last()?.component1() ?: -1 }.maxOrNull() ?: -1
-        for (row in 0..lastKey) {
-            if (y <= runningHeight && runningHeight <= y + h) applicableRows.add(Pair(row, runningHeight))
+
+        for (row in ref.rowPositions.filter { it.component2() == Position.PositionValue.TOP }.map { it.component1() }.sorted()) {
+            if (!table.indexes.contains(row)) continue
+
+            applicableRows.add(Pair(row, Pair(runningHeight, 0)))
 
             runningHeight += view[row].derived.cellHeight + marginTop + marginBottom + paddingTop + paddingBottom
+            topHeight += view[row].derived.cellHeight + marginTop + marginBottom + paddingTop + paddingBottom
+        }
 
-            if (runningHeight > y + h || runningHeight < 0L) break
+        if (topHeight > 0)
+            runningHeight += topSeparatorHeight
+
+        for (row in 0..lastKey) {
+            if (ref.rowPositions[row] == Position.PositionValue.TOP) continue
+            if (ref.rowPositions[row] == Position.PositionValue.BOTTOM) continue
+
+            if (y <= runningHeight && runningHeight <= y + h) applicableRows.add(Pair(row, Pair(runningHeight, 0)))
+
+            runningHeight += view[row].derived.cellHeight + marginTop + marginBottom + paddingTop + paddingBottom
+        }
+
+        for (row in ref.rowPositions.filter { it.component2() == Position.PositionValue.BOTTOM }.map { it.component1() }.sortedDescending()) {
+            if (!table.indexes.contains(row)) continue
+
+            if (runningBottom == 0L) {
+                runningHeight += bottomSeparatorHeight
+            }
+
+            applicableRows.add(Pair(row, Pair(runningHeight, runningBottom)))
+
+            runningHeight += view[row].derived.cellHeight + marginTop + marginBottom + paddingTop + paddingBottom
+            runningBottom += view[row].derived.cellHeight + marginTop + marginBottom + paddingTop + paddingBottom
         }
 
         // This is for the row headers
-        for ((applicableRow, applicableY) in applicableRows) {
+        for ((applicableRow, applicableTopBottom) in applicableRows) {
             if (dirtyRowIndices != null && !dirtyRowIndices.contains(applicableRow)) continue
 
             val cellView = view[EMPTY_HEADER, applicableRow]
             val derivedCellView = cellView.derived
+
+            val stickyTop = ref.rowPositions[applicableRow] == Position.PositionValue.TOP
+            val stickyBottom = ref.rowPositions[applicableRow] == Position.PositionValue.BOTTOM
 
             output.add(PositionedContent(
                 contentHeader = EMPTY_HEADER,
@@ -310,13 +344,18 @@ internal object SigblaBackend {
                 text = applicableRow.toString(),
                 h = derivedCellView.cellHeight + paddingTop + paddingBottom,
                 w = derivedCellView.cellWidth + paddingLeft + paddingRight,
-                mt = applicableY,
                 ch = dims.maxY,
                 cw = dims.maxX,
-                cellClasses = if (false) "rh rhs" else "rh",
+                cellClasses = listOfNotNull(
+                    "rh",
+                    if (stickyTop) "rht" else null,
+                    if (stickyBottom) "rhb" else null
+                ).joinToString(separator = " "),
                 contentClasses = ("cc " + derivedCellView.cellClasses.joinToString(separator = " ")).trim(),
                 topics = derivedCellView.cellTopics.toList(),
-                left = 0
+                left = 0,
+                top = applicableTopBottom.first,
+                bottom = applicableTopBottom.second + derivedCellView.cellHeight + paddingTop + paddingBottom
             ))
         }
 
@@ -327,8 +366,11 @@ internal object SigblaBackend {
             val stickyLeft = ref.columnPositions[applicableColumn.header] == Position.PositionValue.LEFT
             val stickyRight = ref.columnPositions[applicableColumn.header] == Position.PositionValue.RIGHT
 
-            for ((applicableRow, applicableY) in applicableRows) {
+            for ((applicableRow, applicableTopBottom) in applicableRows) {
                 if (dirtyRowIndices != null && !dirtyRowIndices.contains(applicableRow)) continue
+
+                val stickyTop = ref.rowPositions[applicableRow] == Position.PositionValue.TOP
+                val stickyBottom = ref.rowPositions[applicableRow] == Position.PositionValue.BOTTOM
 
                 val cell = applicableColumn[applicableRow]
                 val cellView = view[cell]
@@ -353,13 +395,16 @@ internal object SigblaBackend {
                     cellClasses = listOfNotNull(
                         "c",
                         if (stickyLeft) "cl" else null,
-                        if (stickyRight) "cr" else null
+                        if (stickyRight) "cr" else null,
+                        if (stickyTop) "ct" else null,
+                        if (stickyBottom) "cb" else null
                     ).joinToString(separator = " "),
                     contentClasses = ("cc " + derivedCellView.cellClasses.joinToString(separator = " ")).trim(),
                     topics = derivedCellView.cellTopics.toList(),
                     left = applicableLeftRight.first + headerWidth,
                     right = applicableLeftRight.second + derivedCellView.cellWidth + paddingLeft + paddingRight,
-                    top = applicableY
+                    top = applicableTopBottom.first,
+                    bottom = applicableTopBottom.second + derivedCellView.cellHeight + paddingTop + paddingBottom
                 ))
             }
         }
@@ -377,6 +422,8 @@ internal object SigblaBackend {
         val paddingBottom = viewRef.config.paddingBottom
         val paddingLeft = viewRef.config.paddingLeft
         val paddingRight = viewRef.config.paddingRight
+        val topSeparatorHeight = viewRef.config.topSeparatorHeight
+        val bottomSeparatorHeight = viewRef.config.bottomSeparatorHeight
         val leftSeparatorWidth = viewRef.config.leftSeparatorWidth
         val rightSeparatorWidth = viewRef.config.rightSeparatorWidth
 
@@ -386,7 +433,7 @@ internal object SigblaBackend {
         val headerWidth = view[EMPTY_HEADER].derived.cellWidth + paddingLeft + paddingRight
 
         var maxHeaderOffset = headerHeight
-        var runningLeft = headerWidth + leftSeparatorWidth + rightSeparatorWidth
+        var runningLeft = headerWidth
         var fixedLeft = 0L
         var runningRight = 0L
 
@@ -408,11 +455,33 @@ internal object SigblaBackend {
             if (combinedOffset > maxHeaderOffset) maxHeaderOffset = combinedOffset
         }
 
+        if (fixedLeft > 0) {
+            runningLeft += leftSeparatorWidth
+        }
+        if (runningRight > 0) {
+            runningLeft += rightSeparatorWidth
+        }
+
+        var fixedTop = 0L
         var runningHeight = maxHeaderOffset
+        var runningBottom = 0L
 
         val lastKey = table.tableRef.get().columnCells.values().map { it.last()?.component1() ?: -1 }.maxOrNull() ?: -1
         for (row in 0..lastKey) {
+            if (ref.rowPositions[row] == Position.PositionValue.TOP) {
+                fixedTop += view[row].derived.cellHeight + marginTop + marginBottom + paddingTop + paddingBottom
+            }
+            if (ref.rowPositions[row] == Position.PositionValue.BOTTOM) {
+                runningBottom += view[row].derived.cellHeight + marginTop + marginBottom + paddingTop + paddingBottom
+            }
             runningHeight += view[row].derived.cellHeight + marginTop + marginBottom + paddingTop + paddingBottom
+        }
+
+        if (fixedTop > 0) {
+            runningHeight += topSeparatorHeight
+        }
+        if (runningBottom > 0) {
+            runningHeight += bottomSeparatorHeight
         }
 
         return Dimensions(
@@ -423,7 +492,9 @@ internal object SigblaBackend {
             runningLeft,
             runningHeight,
             if (fixedLeft == 0L) 0 else headerWidth + marginLeft + marginRight + fixedLeft + leftSeparatorWidth,
-            if (runningRight == 0L) 0 else runningRight + rightSeparatorWidth
+            if (runningRight == 0L) 0 else runningRight + rightSeparatorWidth,
+            if (fixedTop == 0L) 0 else fixedTop + maxHeaderOffset + marginTop + marginBottom + topSeparatorHeight,
+            if (runningBottom == 0L) 0 else runningBottom + bottomSeparatorHeight
         )
     }
 
@@ -459,7 +530,9 @@ internal object SigblaBackend {
                 dims.maxX,
                 dims.maxY,
                 dims.topBannerLeft,
-                dims.topBannerRight
+                dims.topBannerRight,
+                dims.leftBannerTop,
+                dims.leftBannerBottom
             )
 
             client.dims = dims
@@ -484,7 +557,9 @@ internal object SigblaBackend {
                 dims.maxX,
                 dims.maxY,
                 dims.topBannerLeft,
-                dims.topBannerRight
+                dims.topBannerRight,
+                dims.leftBannerTop,
+                dims.leftBannerBottom
             )
 
             client.dims = dims
@@ -844,7 +919,7 @@ internal data class SigblaClient(
     val ref: String,
     val contentState: ContentState = ContentState(),
     val mutex: Mutex = Mutex(),
-    @Volatile var dims: Dimensions = Dimensions(0, 0, 0, 0, 0, 0, 0, 0)
+    @Volatile var dims: Dimensions = Dimensions(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 ) {
     private val outgoingPackages = mutableListOf<ClientPackage>()
 
@@ -881,7 +956,9 @@ internal data class SigblaClient(
                 dims.maxX,
                 dims.maxY,
                 dims.topBannerLeft,
-                dims.topBannerRight
+                dims.topBannerRight,
+                dims.leftBannerTop,
+                dims.leftBannerBottom,
             )
 
             clearClientPackage.outgoing.add(jsonParser.toJsonString(clientEventDims))
@@ -986,7 +1063,9 @@ internal data class ClientEventDims(
     val maxX: Long,
     val maxY: Long,
     val topBannerLeft: Long,
-    val topBannerRight: Long
+    val topBannerRight: Long,
+    val leftBannerTop: Long,
+    val leftBannerBottom: Long
 ): ClientEvent(ClientEventType.DIMS.type)
 
 internal data class ClientEventResize(
@@ -1049,7 +1128,9 @@ internal class Dimensions(
     val maxX: Long,
     val maxY: Long,
     val topBannerLeft: Long,
-    val topBannerRight: Long
+    val topBannerRight: Long,
+    val leftBannerTop: Long,
+    val leftBannerBottom: Long
 )
 
 internal class ContentState(val maxDistance: Int = 2000, val tileSize: Int = 1000) {

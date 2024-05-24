@@ -94,6 +94,24 @@ table {
     background-color: white;
     z-index: 2000;
 }
+#lbt {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 4000;
+    background: white;
+    box-sizing: border-box;
+    border-bottom: steelblue 2px solid;
+}
+#lbb {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 4000;
+    background: white;
+    box-sizing: border-box;
+    border-top: steelblue 2px solid;
+}
 #cbl {
     position: fixed;
     top: 0;
@@ -111,6 +129,24 @@ table {
     background: white;
     box-sizing: border-box;
     border-left: steelblue 2px solid;
+}
+#cbt {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2000;
+    background: white;
+    box-sizing: border-box;
+    border-bottom: steelblue 2px solid;
+}
+#cbb {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2000;
+    background: white;
+    box-sizing: border-box;
+    border-top: steelblue 2px solid;
 }
 #end {
     position: absolute;
@@ -133,6 +169,12 @@ table {
     z-index: 3500;
 }
 #mkr.mr {
+    z-index: 3500;
+}
+#mkr.mt {
+    z-index: 3500;
+}
+#mkr.mb {
     z-index: 3500;
 }
 #mkr.dblclicked {
@@ -169,6 +211,14 @@ table {
     position: sticky;
     z-index: 3000;
 }
+.ct {
+    position: sticky;
+    z-index: 3000;
+}
+.cb {
+    position: sticky;
+    z-index: 3000;
+}
 .c:hover {
     background-color: lightsteelblue;
 }
@@ -202,6 +252,12 @@ table {
     overflow: hidden;
     position: sticky;
     z-index: 3000;
+}
+.rht {
+    z-index: 5000;
+}
+.rhb {
+    z-index: 5000;
 }
 
 .ch > .co {
