@@ -14,13 +14,11 @@ fun main() {
         }
     }
 
-    /*
     tableView["D"][Position] = Position.Left
     tableView["G"][Position] = Position.Left
 
     tableView["E"][Position] = Position.Right
     tableView["B"][Position] = Position.Right
-     */
 
     tableView[10][Position] = Position.Top
     tableView[200][Position] = Position.Top

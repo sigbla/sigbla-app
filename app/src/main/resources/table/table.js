@@ -16,6 +16,10 @@ class Sigbla {
     #cellBannerRight;
     #cellBannerTop;
     #cellBannerBottom;
+    #cellBannerTopLeft;
+    #cellBannerTopRight;
+    #cellBannerBottomLeft;
+    #cellBannerBottomRight;
     #end;
     #marker;
     #markerCell;
@@ -943,6 +947,10 @@ class Sigbla {
                 this.#cellBannerRight = null;
                 this.#cellBannerTop = null;
                 this.#cellBannerBottom = null;
+                this.#cellBannerTopLeft = null;
+                this.#cellBannerTopRight = null;
+                this.#cellBannerBottomLeft = null;
+                this.#cellBannerBottomRight = null;
                 this.#end = null;
                 this.#marker = null;
                 this.#manageMarkerCell(null);
@@ -995,6 +1003,18 @@ class Sigbla {
                 } else if (div.classList.contains("rh")) {
                     div.style.left = message.left + "px";
                     div.style.marginTop = message.top + "px";
+                } else if (div.classList.contains("cl") && div.classList.contains("ct")) {
+                    div.style.left = message.left + "px";
+                    div.style.top = message.top + "px";
+                } else if (div.classList.contains("cr") && div.classList.contains("ct")) {
+                    div.style.left = "calc(min(100%, " + message.cw + "px) - " + message.right + "px)";
+                    div.style.top = message.top + "px";
+                } else if (div.classList.contains("cl") && div.classList.contains("cb")) {
+                    div.style.left = message.left + "px";
+                    div.style.top = "calc(min(100%, " + message.ch + "px) - " + message.bottom + "px)";
+                } else if (div.classList.contains("cr") && div.classList.contains("cb")) {
+                    div.style.left = "calc(min(100%, " + message.cw + "px) - " + message.right + "px)";
+                    div.style.top = "calc(min(100%, " + message.ch + "px) - " + message.bottom + "px)";
                 } else if (div.classList.contains("cl")) {
                     div.style.left = message.left + "px";
                     div.style.marginTop = message.top + "px";
@@ -1269,6 +1289,34 @@ class Sigbla {
                     this.#cellBannerBottom = newBanner;
                     return newBanner;
                 })();
+                const cellBannerTopLeft = this.#cellBannerTopLeft || (() => {
+                    const newBanner = document.createElement("div");
+                    newBanner.id = "cbtl";
+                    this.#target.appendChild(newBanner);
+                    this.#cellBannerTopLeft = newBanner;
+                    return newBanner;
+                })();
+                const cellBannerTopRight = this.#cellBannerTopRight || (() => {
+                    const newBanner = document.createElement("div");
+                    newBanner.id = "cbtr";
+                    this.#target.appendChild(newBanner);
+                    this.#cellBannerTopRight = newBanner;
+                    return newBanner;
+                })();
+                const cellBannerBottomLeft = this.#cellBannerBottomLeft || (() => {
+                    const newBanner = document.createElement("div");
+                    newBanner.id = "cbbl";
+                    this.#target.appendChild(newBanner);
+                    this.#cellBannerBottomLeft = newBanner;
+                    return newBanner;
+                })();
+                const cellBannerBottomRight = this.#cellBannerBottomRight || (() => {
+                    const newBanner = document.createElement("div");
+                    newBanner.id = "cbbr";
+                    this.#target.appendChild(newBanner);
+                    this.#cellBannerBottomRight = newBanner;
+                    return newBanner;
+                })();
                 const end = this.#end || (() => {
                     const newEnd = document.createElement("div");
                     newEnd.id = "end";
@@ -1363,6 +1411,46 @@ class Sigbla {
                     cellBannerBottom.style.visibility = "hidden";
                 } else {
                     cellBannerBottom.style.visibility = "visible";
+                }
+
+                cellBannerTopLeft.style.top = (message.cornerY + message.cornerBottomMargin) + "px";
+                cellBannerTopLeft.style.left = (message.cornerX + message.cornerRightMargin) + "px";
+                cellBannerTopLeft.style.height = (message.leftBannerTop - message.cornerY - message.cornerBottomMargin) + "px";
+                cellBannerTopLeft.style.width = (message.topBannerLeft - message.cornerX - message.cornerRightMargin) + "px";
+                if (message.topBannerLeft === 0 || message.leftBannerTop === 0) {
+                    cellBannerTopLeft.style.visibility = "hidden";
+                } else {
+                    cellBannerTopLeft.style.visibility = "visible";
+                }
+
+                cellBannerTopRight.style.top = (message.cornerY + message.cornerBottomMargin) + "px";
+                cellBannerTopRight.style.left = "calc(min(100%, " + message.maxX + "px) - " + message.topBannerRight + "px)";
+                cellBannerTopRight.style.height = (message.leftBannerTop - message.cornerY - message.cornerBottomMargin) + "px";
+                cellBannerTopRight.style.width = message.topBannerRight + "px";
+                if (message.topBannerRight === 0 || message.leftBannerTop === 0) {
+                    cellBannerTopRight.style.visibility = "hidden";
+                } else {
+                    cellBannerTopRight.style.visibility = "visible";
+                }
+
+                cellBannerBottomLeft.style.top = "calc(min(100%, " + message.maxY + "px) - " + message.leftBannerBottom + "px)";
+                cellBannerBottomLeft.style.left = (message.cornerX + message.cornerRightMargin) + "px";
+                cellBannerBottomLeft.style.height = message.leftBannerBottom + "px";
+                cellBannerBottomLeft.style.width = (message.topBannerLeft - message.cornerX - message.cornerRightMargin) + "px";
+                if (message.leftBannerBottom === 0 || message.topBannerLeft === 0) {
+                    cellBannerBottomLeft.style.visibility = "hidden";
+                } else {
+                    cellBannerBottomLeft.style.visibility = "visible";
+                }
+
+                cellBannerBottomRight.style.top = "calc(min(100%, " + message.maxY + "px) - " + message.leftBannerBottom + "px)";
+                cellBannerBottomRight.style.left = "calc(min(100%, " + message.maxX + "px) - " + message.topBannerRight + "px)";
+                cellBannerBottomRight.style.height = message.leftBannerBottom + "px";
+                cellBannerBottomRight.style.width = message.topBannerRight + "px";
+                if (message.leftBannerBottom === 0 || message.topBannerRight === 0) {
+                    cellBannerBottomRight.style.visibility = "hidden";
+                } else {
+                    cellBannerBottomRight.style.visibility = "visible";
                 }
 
                 end.style.top = (message.maxY - 1) + "px";

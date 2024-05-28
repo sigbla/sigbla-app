@@ -132,6 +132,38 @@ table {
     z-index: 2000;
     background: linear-gradient(180deg, rgba(255,255,255,0), rgba(176,196,222,128) 5px, rgba(255,255,255,255) 5px);
 }
+#cbtl {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 4000;
+    background: linear-gradient(0deg, rgba(255,255,255,0), rgba(176,196,222,128) 5px, rgba(255,255,255,0) 5px),
+                linear-gradient(-90deg, rgba(255,255,255,0), rgba(176,196,222,128) 5px, rgba(255,255,255,255) 5px);
+}
+#cbtr {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 4000;
+    background: linear-gradient(0deg, rgba(255,255,255,0), rgba(176,196,222,128) 5px, rgba(255,255,255,0) 5px),
+                linear-gradient(90deg, rgba(255,255,255,0), rgba(176,196,222,128) 5px, rgba(255,255,255,255) 5px);
+}
+#cbbl {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 4000;
+    background: linear-gradient(180deg, rgba(255,255,255,0), rgba(176,196,222,128) 5px, rgba(255,255,255,0) 5px),
+                linear-gradient(-90deg, rgba(255,255,255,0), rgba(176,196,222,128) 5px, rgba(255,255,255,255) 5px);
+}
+#cbbr {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 4000;
+    background: linear-gradient(180deg, rgba(255,255,255,0), rgba(176,196,222,128) 5px, rgba(255,255,255,0) 5px),
+                linear-gradient(90deg, rgba(255,255,255,0), rgba(176,196,222,128) 5px, rgba(255,255,255,255) 5px);
+}
 #end {
     position: absolute;
     height: 1px;
@@ -160,6 +192,18 @@ table {
 }
 #mkr.mb {
     z-index: 3500;
+}
+#mkr.mt.ml {
+    z-index: 5500;
+}
+#mkr.mt.mr {
+    z-index: 5500;
+}
+#mkr.mb.ml {
+    z-index: 5500;
+}
+#mkr.mb.mr {
+    z-index: 5500;
 }
 #mkr.dblclicked {
     pointer-events: none;
@@ -202,6 +246,18 @@ table {
 .cb {
     position: sticky;
     z-index: 3000;
+}
+.ct.cl {
+    z-index: 5000;
+}
+.ct.cr {
+    z-index: 5000;
+}
+.cb.cl {
+    z-index: 5000;
+}
+.cb.cr {
+    z-index: 5000;
 }
 .co {
     position: absolute;
