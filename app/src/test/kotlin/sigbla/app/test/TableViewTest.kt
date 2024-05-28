@@ -2617,6 +2617,22 @@ class TableViewTest {
         assertTrue(h7 !is Position.Right)
         assertEquals(tv1["A"], h7.source)
         assertNull(h7.positionValue)
+
+        tv1["A"][Position] = Position.Left
+        tv1["A"][Position] = null as Position.Left.Companion?
+        val h8 = tv1["A"][Position]
+        assertTrue(h8 !is Position.Left)
+        assertTrue(h8 !is Position.Right)
+        assertEquals(tv1["A"], h8.source)
+        assertNull(h8.positionValue)
+
+        tv1["A"][Position] = Position.Right
+        tv1["A"][Position] = null as Position.Right.Companion?
+        val h9 = tv1["A"][Position]
+        assertTrue(h9 !is Position.Left)
+        assertTrue(h9 !is Position.Right)
+        assertEquals(tv1["A"], h9.source)
+        assertNull(h9.positionValue)
     }
 
     @Test
@@ -2672,6 +2688,22 @@ class TableViewTest {
         assertTrue(h7 !is Position.Bottom)
         assertEquals(tv1[1], h7.source)
         assertNull(h7.positionValue)
+
+        tv1[1][Position] = Position.Top
+        tv1[1][Position] = null as Position.Top.Companion?
+        val h8 = tv1[1][Position]
+        assertTrue(h8 !is Position.Top)
+        assertTrue(h8 !is Position.Bottom)
+        assertEquals(tv1[1], h8.source)
+        assertNull(h8.positionValue)
+
+        tv1[1][Position] = Position.Bottom
+        tv1[1][Position] = null as Position.Bottom.Companion?
+        val h9 = tv1[1][Position]
+        assertTrue(h9 !is Position.Top)
+        assertTrue(h9 !is Position.Bottom)
+        assertEquals(tv1[1], h9.source)
+        assertNull(h9.positionValue)
     }
 
     companion object {
