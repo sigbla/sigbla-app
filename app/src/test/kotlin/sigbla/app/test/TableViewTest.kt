@@ -2564,6 +2564,116 @@ class TableViewTest {
         assertEquals(emptyMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(), tv1[Resources].resources)
     }
 
+    @Test
+    fun `horizontal position`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val h1 = tv1["A"][Position]
+        assertTrue(h1 !is Position.Left)
+        assertTrue(h1 !is Position.Right)
+        assertEquals(tv1["A"], h1.source)
+        assertNull(h1.positionValue)
+
+        tv1["A"][Position] = Position.Left
+        val h2 = tv1["A"][Position]
+        assertTrue(h2 is Position.Left)
+        assertTrue(h2 !is Position.Right)
+        assertEquals(tv1["A"], h2.source)
+        assertEquals(Position.PositionValue.LEFT, h2.positionValue)
+
+        tv1["A"][Position] = Position.Right
+        val h3 = tv1["A"][Position]
+        assertTrue(h3 !is Position.Left)
+        assertTrue(h3 is Position.Right)
+        assertEquals(tv1["A"], h3.source)
+        assertEquals(Position.PositionValue.RIGHT, h3.positionValue)
+
+        tv1["A"][Position] = null as Position.Horizontal?
+        val h4 = tv1["A"][Position]
+        assertTrue(h4 !is Position.Left)
+        assertTrue(h4 !is Position.Right)
+        assertEquals(tv1["A"], h4.source)
+        assertNull(h4.positionValue)
+
+        tv1["B"][Position] = Position.Right
+        tv1["A"][Position] = tv1["B"][Position]
+        val h5 = tv1["A"][Position]
+        assertTrue(h5 !is Position.Left)
+        assertTrue(h5 is Position.Right)
+        assertEquals(tv1["A"], h5.source)
+        assertEquals(Position.PositionValue.RIGHT, h5.positionValue)
+
+        tv1["A"][Position] = Unit
+        val h6 = tv1["A"][Position]
+        assertTrue(h6 !is Position.Left)
+        assertTrue(h6 !is Position.Right)
+        assertEquals(tv1["A"], h6.source)
+        assertNull(h6.positionValue)
+
+        tv1["A"][Position] = Position.Left
+        tv1["A"][Position] = null as Unit?
+        val h7 = tv1["A"][Position]
+        assertTrue(h7 !is Position.Left)
+        assertTrue(h7 !is Position.Right)
+        assertEquals(tv1["A"], h7.source)
+        assertNull(h7.positionValue)
+    }
+
+    @Test
+    fun `vertical position`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val h1 = tv1[1][Position]
+        assertTrue(h1 !is Position.Top)
+        assertTrue(h1 !is Position.Bottom)
+        assertEquals(tv1[1], h1.source)
+        assertNull(h1.positionValue)
+
+        tv1[1][Position] = Position.Top
+        val h2 = tv1[1][Position]
+        assertTrue(h2 is Position.Top)
+        assertTrue(h2 !is Position.Bottom)
+        assertEquals(tv1[1], h2.source)
+        assertEquals(Position.PositionValue.TOP, h2.positionValue)
+
+        tv1[1][Position] = Position.Bottom
+        val h3 = tv1[1][Position]
+        assertTrue(h3 !is Position.Top)
+        assertTrue(h3 is Position.Bottom)
+        assertEquals(tv1[1], h3.source)
+        assertEquals(Position.PositionValue.BOTTOM, h3.positionValue)
+
+        tv1[1][Position] = null as Position.Vertical?
+        val h4 = tv1[1][Position]
+        assertTrue(h4 !is Position.Top)
+        assertTrue(h4 !is Position.Bottom)
+        assertEquals(tv1[1], h4.source)
+        assertNull(h4.positionValue)
+
+        tv1[2][Position] = Position.Bottom
+        tv1[1][Position] = tv1[2][Position]
+        val h5 = tv1[1][Position]
+        assertTrue(h5 !is Position.Top)
+        assertTrue(h5 is Position.Bottom)
+        assertEquals(tv1[1], h5.source)
+        assertEquals(Position.PositionValue.BOTTOM, h5.positionValue)
+
+        tv1[1][Position] = Unit
+        val h6 = tv1[1][Position]
+        assertTrue(h6 !is Position.Top)
+        assertTrue(h6 !is Position.Bottom)
+        assertEquals(tv1[1], h6.source)
+        assertNull(h6.positionValue)
+
+        tv1[1][Position] = Position.Top
+        tv1[1][Position] = null as Unit?
+        val h7 = tv1[1][Position]
+        assertTrue(h7 !is Position.Top)
+        assertTrue(h7 !is Position.Bottom)
+        assertEquals(tv1[1], h7.source)
+        assertNull(h7.positionValue)
+    }
+
     companion object {
         @JvmStatic
         @AfterClass
