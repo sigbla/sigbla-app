@@ -232,7 +232,7 @@ class ColumnView internal constructor(
             null -> Position.Horizontal(this, null)
             Position.PositionValue.LEFT -> Position.Left(this)
             Position.PositionValue.RIGHT -> Position.Right(this)
-            else -> throw InvalidRowException("Unsupported position type")
+            else -> throw InvalidColumnException("Unsupported position type")
         }
     }
 

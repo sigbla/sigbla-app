@@ -2633,6 +2633,14 @@ class TableViewTest {
         assertTrue(h9 !is Position.Right)
         assertEquals(tv1["A"], h9.source)
         assertNull(h9.positionValue)
+
+        tv1["B"][Position] = Position.Right
+        tv1["A"](tv1["B"][Position])
+        val h10 = tv1["A"][Position]
+        assertTrue(h10 !is Position.Left)
+        assertTrue(h10 is Position.Right)
+        assertEquals(tv1["A"], h10.source)
+        assertEquals(Position.PositionValue.RIGHT, h10.positionValue)
     }
 
     @Test
@@ -2704,6 +2712,14 @@ class TableViewTest {
         assertTrue(h9 !is Position.Bottom)
         assertEquals(tv1[1], h9.source)
         assertNull(h9.positionValue)
+
+        tv1[2][Position] = Position.Bottom
+        tv1[1](tv1[2][Position])
+        val h10 = tv1[1][Position]
+        assertTrue(h10 !is Position.Top)
+        assertTrue(h10 is Position.Bottom)
+        assertEquals(tv1[1], h10.source)
+        assertEquals(Position.PositionValue.BOTTOM, h10.positionValue)
     }
 
     companion object {
