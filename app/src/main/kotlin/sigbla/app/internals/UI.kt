@@ -598,19 +598,15 @@ internal object SigblaBackend {
 
             areaContent(view, viewRef, x, y, h, w, dims).forEach { content ->
                 val existingId = client.contentState.withIdFor(
-                    // TODO Use InvalidUIException?
-                    // TODO No need for ml/mt?
-                    content.left ?: content.ml ?: throw Exception(),
-                    content.top ?: content.mt ?: throw Exception()
+                    content.left,
+                    content.top
                 )
                 val existingContent = if (existingId == null) null else client.contentState.withPCFor(existingId)
 
                 if (existingContent == null) {
                     val cellId = client.contentState.addIdFor(
-                        // TODO Use InvalidUIException?
-                        // TODO No need for ml/mt?
-                        content.left ?: content.ml ?: throw Exception(),
-                        content.top ?: content.mt ?: throw Exception(),
+                        content.left,
+                        content.top,
                         content
                     )
 
@@ -627,8 +623,6 @@ internal object SigblaBackend {
                         content.bottom,
                         content.h,
                         content.w,
-                        content.mt,
-                        content.ml,
                         content.ch,
                         content.cw,
                         content.text,
@@ -704,15 +698,13 @@ internal object SigblaBackend {
             clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventLoadJavaScript(jsUrls, dirty = true)))
 
             areaContent(view, viewRef, x, y, h, w, client.dims, dirtyCells).forEach { content ->
-                val existingId = client.contentState.withIdFor(content.left ?: content.ml ?: throw Exception(), content.top ?: content.mt ?: throw Exception())
+                val existingId = client.contentState.withIdFor(content.left, content.top)
                 val existingContent = if (existingId == null) null else client.contentState.withPCFor(existingId)
 
                 if (existingContent != content) {
                     val cellId = client.contentState.addIdFor(
-                        // TODO Change exception type?
-                        // TODO No need for ml/mt?
-                        content.left ?: content.ml ?: throw Exception(),
-                        content.top ?: content.mt ?: throw Exception(),
+                        content.left,
+                        content.top,
                         content
                     )
                     val addContent = ClientEventAddContent(
@@ -728,8 +720,6 @@ internal object SigblaBackend {
                         content.bottom,
                         content.h,
                         content.w,
-                        content.mt,
-                        content.ml,
                         content.ch,
                         content.cw,
                         content.text,
@@ -1025,16 +1015,14 @@ internal data class ClientEventAddContent(
     val topics: List<String>?,
     val marker: Boolean,
     val resize: Boolean,
-    val left: Long?,
+    val left: Long,
     val right: Long?,
-    val top: Long?,
+    val top: Long,
     val bottom: Long?,
     val h: Long,
     val w: Long,
-    val mt: Long?,
-    val ml: Long?,
-    val ch: Long?,
-    val cw: Long?,
+    val ch: Long,
+    val cw: Long,
     val text: String?,
     val html: String?
 ): ClientEvent(ClientEventType.ADD_CONTENT.type)
@@ -1105,16 +1093,14 @@ internal data class PositionedContent(
     val html: String? = null,
     val h: Long,
     val w: Long,
-    val mt: Long? = null, // Margin top
-    val ml: Long? = null, // Margin left
-    val ch: Long? = null, // Container height
-    val cw: Long? = null, // Container width
+    val ch: Long, // Container height
+    val cw: Long, // Container width
     val cellClasses: String?,
     val contentClasses: String?,
     val topics: List<String>?,
-    val left: Long? = null,
+    val left: Long,
     val right: Long? = null,
-    val top: Long? = null,
+    val top: Long,
     val bottom: Long? = null
 )
 

@@ -1031,13 +1031,8 @@ class Sigbla {
                     div.style.left = message.left + "px";
                     div.style.top = message.top + "px";
                 } else {
-                    // TODO Probably don't need this else?
-                    if (message.left !== undefined) div.style.left = message.left + "px";
-                    if (message.right !== undefined) div.style.right = message.right + "px";
-                    if (message.top !== undefined) div.style.top = message.top + "px";
-                    if (message.bottom !== undefined) div.style.bottom = message.bottom + "px";
-                    if (message.mt !== undefined) div.style.marginTop = message.mt + "px";
-                    if (message.ml !== undefined) div.style.marginLeft = message.ml + "px";
+                    console.error("Unknown content type", message);
+                    break;
                 }
 
                 if (message.html)
