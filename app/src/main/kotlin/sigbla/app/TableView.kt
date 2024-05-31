@@ -44,7 +44,8 @@ internal data class ViewMeta(
     val cellHeight: Long? = null,
     val cellWidth: Long? = null,
     val cellClasses: PSet<String>? = null,
-    val cellTopics: PSet<String>? = null
+    val cellTopics: PSet<String>? = null,
+    val positionValue: Position.PositionValue? = null
 )
 
 internal data class TableViewRef(
@@ -59,9 +60,6 @@ internal data class TableViewRef(
     val columnTransformers: PMap<Header, Column.() -> Unit> = PHashMap(),
     val rowTransformers: PMap<Long, Row.() -> Unit> = PHashMap(),
     val cellTransformers: PMap<Pair<Header, Long>, Cell<*>.() -> Unit> = PHashMap(),
-
-    val columnPositions: PMap<Header, Position.PositionValue> = PHashMap(),
-    val rowPositions: PMap<Long, Position.PositionValue> = PHashMap(),
 
     val table: Table? = null,
 
@@ -652,6 +650,7 @@ class TableView internal constructor(
                 TableViewListenerEvent(oldColumnView[CellClasses], newColumnView[CellClasses]),
                 TableViewListenerEvent(oldColumnView[CellTopics], newColumnView[CellTopics]),
                 TableViewListenerEvent(oldColumnView[CellWidth], newColumnView[CellWidth]),
+                TableViewListenerEvent(oldColumnView[Position], newColumnView[Position]),
                 TableViewListenerEvent(oldColumnView[ColumnTransformer], newColumnView[ColumnTransformer])
             ))
         }
@@ -736,6 +735,7 @@ class TableView internal constructor(
                 TableViewListenerEvent(oldRowView[CellClasses], newRowView[CellClasses]),
                 TableViewListenerEvent(oldRowView[CellHeight], newRowView[CellHeight]),
                 TableViewListenerEvent(oldRowView[CellTopics], newRowView[CellTopics]),
+                TableViewListenerEvent(oldRowView[Position], newRowView[Position]),
                 TableViewListenerEvent(oldRowView[RowTransformer], newRowView[RowTransformer])
             ))
         }
@@ -1612,8 +1612,10 @@ sealed class Position<S>(
 ) {
     internal enum class PositionValue { LEFT, RIGHT, TOP, BOTTOM }
 
+    // TODO Consider making this public? And not nullable, use Unit instead or null?
     internal abstract val positionValue: PositionValue?
 
+    // TODO Need invoke(..) on Horizontal and Vertical
     open class Horizontal internal constructor(source: ColumnView, override val positionValue: PositionValue?) : Position<ColumnView>(source)
     open class Vertical internal constructor(source: RowView, override val positionValue: PositionValue?) : Position<RowView>(source)
 

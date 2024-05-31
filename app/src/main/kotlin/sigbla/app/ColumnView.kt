@@ -228,11 +228,11 @@ class ColumnView internal constructor(
 
     operator fun get(position: Position.Companion): Position.Horizontal {
         val ref = tableView.tableViewRef.get()
-        return when (ref.columnPositions[header]) {
+        return when (ref.columnViews[header]?.positionValue) {
             null -> Position.Horizontal(this, null)
             Position.PositionValue.LEFT -> Position.Left(this)
             Position.PositionValue.RIGHT -> Position.Right(this)
-            else -> throw InvalidColumnException("Unsupported position type")
+            else -> throw InvalidColumnException("Unsupported position type: ${ref.columnViews[header]?.positionValue}")
         }
     }
 
@@ -255,8 +255,11 @@ class ColumnView internal constructor(
     private fun setColumnPosition(position: Position.PositionValue?) {
         synchronized(tableView.eventProcessor) {
             val (oldRef, newRef) = tableView.tableViewRef.refAction {
+                val oldMeta = it.columnViews[header]
+                val viewMeta = oldMeta?.copy(positionValue = position) ?: ViewMeta(positionValue = position)
+
                 it.copy(
-                    columnPositions = if (position == null) it.columnPositions.remove(header) else it.columnPositions.put(header, position),
+                    columnViews = it.columnViews.put(header, viewMeta),
                     version = it.version + 1L
                 )
             }

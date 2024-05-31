@@ -1319,6 +1319,7 @@ class TableViewTest {
         tv1["A"][CellClasses] = "cc-1"
         tv1["A"][CellTopics] = "ct-1"
         tv1["A"][CellWidth] = 1000
+        tv1["A"][Position] = Position.Left
         tv1["A"][ColumnTransformer] = ct
 
         var count = 0
@@ -1329,11 +1330,13 @@ class TableViewTest {
             assertEquals(setOf("cc-1"), oldView["A"][CellClasses].classes)
             assertEquals(setOf("ct-1"), oldView["A"][CellTopics].topics)
             assertEquals(1000L, oldView["A"][CellWidth].width)
+            assertEquals(Position.PositionValue.LEFT, oldView["A"][Position].positionValue)
             assertEquals(ct, oldView["A"][ColumnTransformer].function)
 
             assertEquals(emptySet<String>(), newView["A"][CellClasses].classes)
             assertEquals(emptySet<String>(), newView["A"][CellTopics].topics)
             assertEquals(Unit, newView["A"][CellWidth].width)
+            assertNull(newView["A"][Position].positionValue)
             assertEquals(Unit, newView["A"][ColumnTransformer].function)
         }
 
@@ -1342,6 +1345,7 @@ class TableViewTest {
         assertEquals(setOf("cc-1"), tv1["A"][CellClasses].classes)
         assertEquals(setOf("ct-1"), tv1["A"][CellTopics].topics)
         assertEquals(1000L, tv1["A"][CellWidth].width)
+        assertEquals(Position.PositionValue.LEFT, tv1["A"][Position].positionValue)
         assertEquals(ct, tv1["A"][ColumnTransformer].function)
 
         clear(tv1["A"])
@@ -1349,9 +1353,10 @@ class TableViewTest {
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
         assertEquals(Unit, tv1["A"][CellWidth].width)
+        assertNull(tv1["A"][Position].positionValue)
         assertEquals(Unit, tv1["A"][ColumnTransformer].function)
 
-        assertEquals(4, count)
+        assertEquals(5, count)
     }
 
     @Test
@@ -1362,6 +1367,7 @@ class TableViewTest {
         tv1[1][CellClasses] = "cc-1"
         tv1[1][CellTopics] = "ct-1"
         tv1[1][CellHeight] = 1000
+        tv1[1][Position] = Position.Top
         tv1[1][RowTransformer] = rt
 
         var count = 0
@@ -1372,11 +1378,13 @@ class TableViewTest {
             assertEquals(setOf("cc-1"), oldView[1][CellClasses].classes)
             assertEquals(setOf("ct-1"), oldView[1][CellTopics].topics)
             assertEquals(1000L, oldView[1][CellHeight].height)
+            assertEquals(Position.PositionValue.TOP, oldView[1][Position].positionValue)
             assertEquals(rt, oldView[1][RowTransformer].function)
 
             assertEquals(emptySet<String>(), newView[1][CellClasses].classes)
             assertEquals(emptySet<String>(), newView[1][CellTopics].topics)
             assertEquals(Unit, newView[1][CellHeight].height)
+            assertNull(newView[1][Position].positionValue)
             assertEquals(Unit, newView[1][RowTransformer].function)
         }
 
@@ -1385,6 +1393,7 @@ class TableViewTest {
         assertEquals(setOf("cc-1"), tv1[1][CellClasses].classes)
         assertEquals(setOf("ct-1"), tv1[1][CellTopics].topics)
         assertEquals(1000L, tv1[1][CellHeight].height)
+        assertEquals(Position.PositionValue.TOP, tv1[1][Position].positionValue)
         assertEquals(rt, tv1[1][RowTransformer].function)
 
         clear(tv1[1])
@@ -1392,9 +1401,10 @@ class TableViewTest {
         assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
         assertEquals(Unit, tv1[1][CellHeight].height)
+        assertNull(tv1[1][Position].positionValue)
         assertEquals(Unit, tv1[1][RowTransformer].function)
 
-        assertEquals(4, count)
+        assertEquals(5, count)
     }
 
     @Test

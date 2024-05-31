@@ -221,11 +221,11 @@ class RowView internal constructor(
 
     operator fun get(position: Position.Companion): Position.Vertical {
         val ref = tableView.tableViewRef.get()
-        return when (ref.rowPositions[index]) {
+        return when (ref.rowViews[index]?.positionValue) {
             null -> Position.Vertical(this, null)
             Position.PositionValue.TOP -> Position.Top(this)
             Position.PositionValue.BOTTOM -> Position.Bottom(this)
-            else -> throw InvalidRowException("Unsupported position type")
+            else -> throw InvalidRowException("Unsupported position type: ${ref.rowViews[index]?.positionValue}")
         }
     }
 
@@ -248,8 +248,11 @@ class RowView internal constructor(
     private fun setRowPosition(position: Position.PositionValue?) {
         synchronized(tableView.eventProcessor) {
             val (oldRef, newRef) = tableView.tableViewRef.refAction {
+                val oldMeta = it.rowViews[index]
+                val viewMeta = oldMeta?.copy(positionValue = position) ?: ViewMeta(positionValue = position)
+
                 it.copy(
-                    rowPositions = if (position == null) it.rowPositions.remove(index) else it.rowPositions.put(index, position),
+                    rowViews = it.rowViews.put(index, viewMeta),
                     version = it.version + 1L
                 )
             }

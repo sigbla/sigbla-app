@@ -197,7 +197,7 @@ internal object SigblaBackend {
 
         val headerWidth = view[EMPTY_HEADER].derived.cellWidth + paddingLeft + paddingRight
 
-        val leftRest = table.columns.partition { ref.columnPositions[it.header] == Position.PositionValue.LEFT }
+        val leftRest = table.columns.partition { ref.columnViews[it.header]?.positionValue == Position.PositionValue.LEFT }
 
         for (column in leftRest.first) {
             applicableColumns.add(Pair(column, Pair(runningLeft, 0)))
@@ -213,7 +213,7 @@ internal object SigblaBackend {
         if (leftRest.first.isNotEmpty())
             runningLeft += leftSeparatorWidth
 
-        val rightRest = leftRest.second.partition { ref.columnPositions[it.header] == Position.PositionValue.RIGHT }
+        val rightRest = leftRest.second.partition { ref.columnViews[it.header]?.positionValue == Position.PositionValue.RIGHT }
 
         for (column in rightRest.second) {
             if (x <= runningLeft && runningLeft <= x + w) applicableColumns.add(Pair(column, Pair(runningLeft, 0)))
@@ -258,8 +258,8 @@ internal object SigblaBackend {
                 val cellView = view[applicableColumn, (-maxHeaderCells + idx).toLong()]
                 val derivedCellView = cellView.derived
 
-                val stickyLeft = ref.columnPositions[applicableColumn.header] == Position.PositionValue.LEFT
-                val stickyRight = ref.columnPositions[applicableColumn.header] == Position.PositionValue.RIGHT
+                val stickyLeft = ref.columnViews[applicableColumn.header]?.positionValue == Position.PositionValue.LEFT
+                val stickyRight = ref.columnViews[applicableColumn.header]?.positionValue == Position.PositionValue.RIGHT
 
                 output.add(PositionedContent(
                     contentHeader = applicableColumn.header,
@@ -292,7 +292,7 @@ internal object SigblaBackend {
 
         val lastKey = table.tableRef.get().columnCells.values().map { it.last()?.component1() ?: -1 }.maxOrNull() ?: -1
 
-        for (row in ref.rowPositions.filter { it.component2() == Position.PositionValue.TOP }.map { it.component1() }.sorted()) {
+        for (row in ref.rowViews.filter { it.component2().positionValue == Position.PositionValue.TOP }.map { it.component1() }.sorted()) {
             if (!table.indexes.contains(row)) continue
 
             applicableRows.add(Pair(row, Pair(runningHeight, 0)))
@@ -305,15 +305,15 @@ internal object SigblaBackend {
             runningHeight += topSeparatorHeight
 
         for (row in 0..lastKey) {
-            if (ref.rowPositions[row] == Position.PositionValue.TOP) continue
-            if (ref.rowPositions[row] == Position.PositionValue.BOTTOM) continue
+            if (ref.rowViews[row]?.positionValue == Position.PositionValue.TOP) continue
+            if (ref.rowViews[row]?.positionValue == Position.PositionValue.BOTTOM) continue
 
             if (y <= runningHeight && runningHeight <= y + h) applicableRows.add(Pair(row, Pair(runningHeight, 0)))
 
             runningHeight += view[row].derived.cellHeight + marginTop + marginBottom + paddingTop + paddingBottom
         }
 
-        for (row in ref.rowPositions.filter { it.component2() == Position.PositionValue.BOTTOM }.map { it.component1() }.sortedDescending()) {
+        for (row in ref.rowViews.filter { it.component2().positionValue == Position.PositionValue.BOTTOM }.map { it.component1() }.sortedDescending()) {
             if (!table.indexes.contains(row)) continue
 
             if (runningBottom == 0L) {
@@ -333,8 +333,8 @@ internal object SigblaBackend {
             val cellView = view[EMPTY_HEADER, applicableRow]
             val derivedCellView = cellView.derived
 
-            val stickyTop = ref.rowPositions[applicableRow] == Position.PositionValue.TOP
-            val stickyBottom = ref.rowPositions[applicableRow] == Position.PositionValue.BOTTOM
+            val stickyTop = ref.rowViews[applicableRow]?.positionValue == Position.PositionValue.TOP
+            val stickyBottom = ref.rowViews[applicableRow]?.positionValue == Position.PositionValue.BOTTOM
 
             output.add(PositionedContent(
                 contentHeader = EMPTY_HEADER,
@@ -363,14 +363,14 @@ internal object SigblaBackend {
         for ((applicableColumn, applicableLeftRight) in applicableColumns) {
             if (dirtyColumnHeaders != null && !dirtyColumnHeaders.contains(applicableColumn.header)) continue
 
-            val stickyLeft = ref.columnPositions[applicableColumn.header] == Position.PositionValue.LEFT
-            val stickyRight = ref.columnPositions[applicableColumn.header] == Position.PositionValue.RIGHT
+            val stickyLeft = ref.columnViews[applicableColumn.header]?.positionValue == Position.PositionValue.LEFT
+            val stickyRight = ref.columnViews[applicableColumn.header]?.positionValue == Position.PositionValue.RIGHT
 
             for ((applicableRow, applicableTopBottom) in applicableRows) {
                 if (dirtyRowIndices != null && !dirtyRowIndices.contains(applicableRow)) continue
 
-                val stickyTop = ref.rowPositions[applicableRow] == Position.PositionValue.TOP
-                val stickyBottom = ref.rowPositions[applicableRow] == Position.PositionValue.BOTTOM
+                val stickyTop = ref.rowViews[applicableRow]?.positionValue == Position.PositionValue.TOP
+                val stickyBottom = ref.rowViews[applicableRow]?.positionValue == Position.PositionValue.BOTTOM
 
                 val cell = applicableColumn[applicableRow]
                 val cellView = view[cell]
@@ -439,10 +439,10 @@ internal object SigblaBackend {
 
         for (column in table.columns) {
             runningLeft += view[column].derived.cellWidth + marginLeft + marginRight + paddingLeft + paddingRight
-            if (ref.columnPositions[column.header] == Position.PositionValue.LEFT) {
+            if (ref.columnViews[column.header]?.positionValue == Position.PositionValue.LEFT) {
                 fixedLeft += view[column].derived.cellWidth + marginLeft + marginRight + paddingLeft + paddingRight
             }
-            if (ref.columnPositions[column.header] == Position.PositionValue.RIGHT) {
+            if (ref.columnViews[column.header]?.positionValue == Position.PositionValue.RIGHT) {
                 runningRight += view[column].derived.cellWidth + marginLeft + marginRight + paddingLeft + paddingRight
             }
 
@@ -468,10 +468,10 @@ internal object SigblaBackend {
 
         val lastKey = table.tableRef.get().columnCells.values().map { it.last()?.component1() ?: -1 }.maxOrNull() ?: -1
         for (row in 0..lastKey) {
-            if (ref.rowPositions[row] == Position.PositionValue.TOP) {
+            if (ref.rowViews[row]?.positionValue == Position.PositionValue.TOP) {
                 fixedTop += view[row].derived.cellHeight + marginTop + marginBottom + paddingTop + paddingBottom
             }
-            if (ref.rowPositions[row] == Position.PositionValue.BOTTOM) {
+            if (ref.rowViews[row]?.positionValue == Position.PositionValue.BOTTOM) {
                 runningBottom += view[row].derived.cellHeight + marginTop + marginBottom + paddingTop + paddingBottom
             }
             runningHeight += view[row].derived.cellHeight + marginTop + marginBottom + paddingTop + paddingBottom

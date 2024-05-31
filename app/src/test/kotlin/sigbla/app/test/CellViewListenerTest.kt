@@ -16,6 +16,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.test.assertFalse
 
 class CellViewListenerTest {
     @Test
@@ -97,6 +98,7 @@ class CellViewListenerTest {
         tv1["A"][CellWidth] = 25
         tv1["A"][CellClasses] = "cell-classes-1"
         tv1["A"][CellTopics] = "cell-topics-1"
+        tv1["A"][Position] = Position.Left
         //tv1["A"][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -105,6 +107,7 @@ class CellViewListenerTest {
         tv1["A"][CellWidth] = 50
         tv1["A"][CellClasses] = "cell-classes-2"
         tv1["A"][CellTopics] = "cell-topics-2"
+        tv1["A"][Position] = Position.Right
         //tv1["A"][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -113,12 +116,14 @@ class CellViewListenerTest {
         tv1["A"][CellWidth] = 100
         tv1["A"][CellClasses] = "cell-classes-3"
         tv1["A"][CellTopics] = "cell-topics-3"
+        tv1["A"][Position] = Unit
         //tv1["A"][CellTransformer] = {}
 
         //tv1["B"][CellHeight] = 125
         tv1["B"][CellWidth] = 125
         tv1["B"][CellClasses] = "cell-classes-4"
         tv1["B"][CellTopics] = "cell-topics-4"
+        tv1["B"][Position] = Position.Right
         //tv1["B"][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -129,12 +134,14 @@ class CellViewListenerTest {
         tv1["B"][CellWidth] = 150
         tv1["B"][CellClasses] = "cell-classes-5"
         tv1["B"][CellTopics] = "cell-topics-5"
+        tv1["B"][Position] = Unit
         //tv1["B"][CellTransformer] = {}
 
         //tv1["C"][CellHeight] = 175
         tv1["A"][CellWidth] = 175
         tv1["A"][CellClasses] = "cell-classes-6"
         tv1["A"][CellTopics] = "cell-topics-6"
+        tv1["C"][Position] = Position.Left
         //tv1["C"][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -158,6 +165,7 @@ class CellViewListenerTest {
         //tv1[1][CellWidth] = 25
         tv1[1][CellClasses] = "cell-classes-1"
         tv1[1][CellTopics] = "cell-topics-1"
+        tv1[1][Position] = Position.Top
         //tv1[1][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -166,6 +174,7 @@ class CellViewListenerTest {
         //tv1[1][CellWidth] = 50
         tv1[1][CellClasses] = "cell-classes-2"
         tv1[1][CellTopics] = "cell-topics-2"
+        tv1[1][Position] = Position.Bottom
         //tv1[1][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -174,12 +183,14 @@ class CellViewListenerTest {
         //tv1[2][CellWidth] = 100
         tv1[2][CellClasses] = "cell-classes-3"
         tv1[2][CellTopics] = "cell-topics-3"
+        tv1[2][Position] = Unit
         //tv1[2][CellTransformer] = {}
 
         tv1[3][CellHeight] = 125
         //tv1[3][CellWidth] = 125
         tv1[3][CellClasses] = "cell-classes-4"
         tv1[3][CellTopics] = "cell-topics-4"
+        tv1[3][Position] = Position.Top
         //tv1[3][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -190,12 +201,14 @@ class CellViewListenerTest {
         //tv1[3][CellWidth] = 150
         tv1[3][CellClasses] = "cell-classes-5"
         tv1[3][CellTopics] = "cell-topics-5"
+        tv1[3][Position] = Unit
         //tv1[3][CellTransformer] = {}
 
         tv1[1][CellHeight] = 175
         //tv1[1][CellWidth] = 175
         tv1[1][CellClasses] = "cell-classes-6"
         tv1[1][CellTopics] = "cell-topics-6"
+        tv1[1][Position] = Position.Top
         //tv1[1][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -317,6 +330,7 @@ class CellViewListenerTest {
         tv1["A"][CellWidth] = 25
         tv1["A"][CellClasses] = "cell-classes-1"
         tv1["A"][CellTopics] = "cell-topics-1"
+        tv1["A"][Position] = Position.Left
         //tv1["A"][CellTransformer] = {}
 
         val ref = on(tv1["A", 1]) {
@@ -331,6 +345,7 @@ class CellViewListenerTest {
         tv1["A"][CellWidth] = 50
         tv1["A"][CellClasses] = "cell-classes-2"
         tv1["A"][CellTopics] = "cell-topics-2"
+        tv1["A"][Position] = Position.Right
         //tv1["A"][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -339,12 +354,14 @@ class CellViewListenerTest {
         tv1["A"][CellWidth] = 75
         tv1["A"][CellClasses] = "cell-classes-3"
         tv1["A"][CellTopics] = "cell-topics-3"
+        tv1["A"][Position] = Unit
         //tv1["A"][CellTransformer] = {}
 
         //tv1["B"][CellHeight] = 100
         tv1["B"][CellWidth] = 100
         tv1["B"][CellClasses] = "cell-classes-4"
         tv1["B"][CellTopics] = "cell-topics-4"
+        tv1["B"][Position] = Position.Left
         //tv1["B"][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -355,12 +372,14 @@ class CellViewListenerTest {
         tv1["B"][CellWidth] = 125
         tv1["B"][CellClasses] = "cell-classes-5"
         tv1["B"][CellTopics] = "cell-topics-5"
+        tv1["B"][Position] = Unit
         //tv1["B"][CellTransformer] = {}
 
         //tv1["A"][CellHeight] = 150
         tv1["A"][CellWidth] = 150
         tv1["A"][CellClasses] = "cell-classes-6"
         tv1["A"][CellTopics] = "cell-topics-6"
+        tv1["A"][Position] = Position.Left
         //tv1["A"][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -376,6 +395,7 @@ class CellViewListenerTest {
         //tv1[1][CellWidth] = 25
         tv1[1][CellClasses] = "cell-classes-1"
         tv1[1][CellTopics] = "cell-topics-1"
+        tv1[1][Position] = Position.Top
         //tv1[1][CellTransformer] = {}
 
         val ref = on(tv1["A", 1]) {
@@ -390,6 +410,7 @@ class CellViewListenerTest {
         //tv1[1][CellWidth] = 50
         tv1[1][CellClasses] = "cell-classes-2"
         tv1[1][CellTopics] = "cell-topics-2"
+        tv1[1][Position] = Position.Bottom
         //tv1[1][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -398,12 +419,14 @@ class CellViewListenerTest {
         //tv1[2][CellWidth] = 75
         tv1[2][CellClasses] = "cell-classes-3"
         tv1[2][CellTopics] = "cell-topics-3"
+        tv1[2][Position] = Position.Top
         //tv1[2][CellTransformer] = {}
 
         tv1[3][CellHeight] = 100
         //tv1[3][CellWidth] = 100
         tv1[3][CellClasses] = "cell-classes-4"
         tv1[3][CellTopics] = "cell-topics-4"
+        tv1[3][Position] = Position.Top
         //tv1[3][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -414,12 +437,14 @@ class CellViewListenerTest {
         //tv1[3][CellWidth] = 125
         tv1[3][CellClasses] = "cell-classes-5"
         tv1[3][CellTopics] = "cell-topics-5"
+        tv1[3][Position] = Unit
         //tv1[3][CellTransformer] = {}
 
         tv1[1][CellHeight] = 150
         //tv1[1][CellWidth] = 150
         tv1[1][CellClasses] = "cell-classes-6"
         tv1[1][CellTopics] = "cell-topics-6"
+        tv1[1][Position] = Position.Top
         //tv1[1][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -515,6 +540,7 @@ class CellViewListenerTest {
         tv1["A"][CellWidth] = 25
         tv1["A"][CellClasses] = "cell-classes-1"
         tv1["A"][CellTopics] = "cell-topics-1"
+        tv1["A"][Position] = Position.Left
         //tv1["A"][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -540,6 +566,7 @@ class CellViewListenerTest {
         //tv1[1][CellWidth] = 25
         tv1[1][CellClasses] = "cell-classes-1"
         tv1[1][CellTopics] = "cell-topics-1"
+        tv1[1][Position] = Position.Top
         //tv1[1][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -613,6 +640,7 @@ class CellViewListenerTest {
         tv1["A"][CellWidth] = 25
         tv1["A"][CellClasses] = "cell-classes-1"
         tv1["A"][CellTopics] = "cell-topics-1"
+        tv1["A"][Position] = Position.Left
         //tv1["A"][CellTransformer] = {}
 
         on(tv1["A", 1]) {
@@ -629,6 +657,7 @@ class CellViewListenerTest {
         tv1["A"][CellWidth] = 50
         tv1["A"][CellClasses] = "cell-classes-2"
         tv1["A"][CellTopics] = "cell-topics-2"
+        tv1["A"][Position] = Position.Right
         //tv1["A"][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -644,6 +673,7 @@ class CellViewListenerTest {
         //tv1[1][CellWidth] = 25
         tv1[1][CellClasses] = "cell-classes-1"
         tv1[1][CellTopics] = "cell-topics-1"
+        tv1[1][Position] = Position.Top
         //tv1[1][CellTransformer] = {}
 
         on(tv1["A", 1]) {
@@ -660,6 +690,7 @@ class CellViewListenerTest {
         //tv1[1][CellWidth] = 50
         tv1[1][CellClasses] = "cell-classes-2"
         tv1[1][CellTopics] = "cell-topics-2"
+        tv1[1][Position] = Position.Bottom
         //tv1[1][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -1247,6 +1278,7 @@ class CellViewListenerTest {
         tv1["A"][CellWidth] = 30
         tv1["A"][CellClasses] = "cell-classes-1"
         tv1["A"][CellTopics] = "cell-topics-1"
+        tv1["A"][Position] = Position.Left
         tv1["A"][ColumnTransformer] = ct1
 
         var init = true
@@ -1278,6 +1310,18 @@ class CellViewListenerTest {
                             assertEquals(oldView["A"], (it.oldValue as CellTopics<*>).source)
                             assertEquals(newView["A"], (it.newValue as CellTopics<*>).source)
                         }
+
+                        is Position<*> -> {
+                            assertTrue(it.oldValue is Position.Horizontal)
+                            assertFalse(it.oldValue is Position.Left)
+                            assertFalse(it.oldValue is Position.Right)
+                            assertNull((it.oldValue as Position<*>).positionValue)
+                            assertTrue(it.newValue is Position.Left)
+                            assertEquals(Position.PositionValue.LEFT, (it.newValue as Position<*>).positionValue)
+                            assertEquals(oldView["A"], (it.oldValue as Position<*>).source)
+                            assertEquals(newView["A"], (it.newValue as Position<*>).source)
+                        }
+
                         is ColumnTransformer<*> -> {
                             assertEquals(Unit, (it.oldValue as ColumnTransformer<*>).function)
                             assertEquals(ct1, (it.newValue as ColumnTransformer<*>).function)
@@ -1310,6 +1354,16 @@ class CellViewListenerTest {
                             assertEquals(oldView["A"], (it.oldValue as CellTopics<*>).source)
                             assertEquals(newView["A"], (it.newValue as CellTopics<*>).source)
                         }
+
+                        is Position<*> -> {
+                            assertTrue(it.oldValue is Position.Left)
+                            assertTrue(it.newValue is Position.Right)
+                            assertEquals(Position.PositionValue.LEFT, (it.oldValue as Position<*>).positionValue)
+                            assertEquals(Position.PositionValue.RIGHT, (it.newValue as Position<*>).positionValue)
+                            assertEquals(oldView["A"], (it.oldValue as Position<*>).source)
+                            assertEquals(newView["A"], (it.newValue as Position<*>).source)
+                        }
+
                         is ColumnTransformer<*> -> {
                             assertEquals(ct1, (it.oldValue as ColumnTransformer<*>).function)
                             assertEquals(ct2, (it.newValue as ColumnTransformer<*>).function)
@@ -1328,6 +1382,7 @@ class CellViewListenerTest {
         tv1["A"][CellWidth] = 60
         tv1["A"][CellClasses] = "cell-classes-2"
         tv1["A"][CellTopics] = "cell-topics-2"
+        tv1["A"][Position] = Position.Right
         tv1["A"][ColumnTransformer] = ct2
 
         assertEquals(0, count)
@@ -1344,6 +1399,7 @@ class CellViewListenerTest {
         //tv1[1][CellWidth] = 30
         tv1[1][CellClasses] = "cell-classes-1"
         tv1[1][CellTopics] = "cell-topics-1"
+        tv1[1][Position] = Position.Top
         tv1[1][RowTransformer] = rt1
 
         var init = true
@@ -1375,6 +1431,18 @@ class CellViewListenerTest {
                             assertEquals(oldView[1], (it.oldValue as CellTopics<*>).source)
                             assertEquals(newView[1], (it.newValue as CellTopics<*>).source)
                         }
+
+                        is Position<*> -> {
+                            assertTrue(it.oldValue is Position.Vertical)
+                            assertFalse(it.oldValue is Position.Top)
+                            assertFalse(it.oldValue is Position.Bottom)
+                            assertNull((it.oldValue as Position<*>).positionValue)
+                            assertTrue(it.newValue is Position.Top)
+                            assertEquals(Position.PositionValue.TOP, (it.newValue as Position<*>).positionValue)
+                            assertEquals(oldView[1], (it.oldValue as Position<*>).source)
+                            assertEquals(newView[1], (it.newValue as Position<*>).source)
+                        }
+
                         is RowTransformer<*> -> {
                             assertEquals(Unit, (it.oldValue as RowTransformer<*>).function)
                             assertEquals(rt1, (it.newValue as RowTransformer<*>).function)
@@ -1407,6 +1475,16 @@ class CellViewListenerTest {
                             assertEquals(oldView[1], (it.oldValue as CellTopics<*>).source)
                             assertEquals(newView[1], (it.newValue as CellTopics<*>).source)
                         }
+
+                        is Position<*> -> {
+                            assertTrue(it.oldValue is Position.Top)
+                            assertTrue(it.newValue is Position.Bottom)
+                            assertEquals(Position.PositionValue.TOP, (it.oldValue as Position<*>).positionValue)
+                            assertEquals(Position.PositionValue.BOTTOM, (it.newValue as Position<*>).positionValue)
+                            assertEquals(oldView[1], (it.oldValue as Position<*>).source)
+                            assertEquals(newView[1], (it.newValue as Position<*>).source)
+                        }
+
                         is RowTransformer<*> -> {
                             assertEquals(rt1, (it.oldValue as RowTransformer<*>).function)
                             assertEquals(rt2, (it.newValue as RowTransformer<*>).function)
@@ -1425,6 +1503,7 @@ class CellViewListenerTest {
         //tv1[1][CellWidth] = 60
         tv1[1][CellClasses] = "cell-classes-2"
         tv1[1][CellTopics] = "cell-topics-2"
+        tv1[1][Position] = Position.Bottom
         tv1[1][RowTransformer] = rt2
 
         assertEquals(0, count)
@@ -1607,6 +1686,7 @@ class CellViewListenerTest {
         var eventCount5 = 0
         var eventCount6 = 0
         var eventCount7 = 0
+        var eventCount8 = 0
 
         on<CellHeight<*, *>>(tv1["A", 0]) events {
             eventCount1 += count()
@@ -1636,6 +1716,10 @@ class CellViewListenerTest {
             eventCount7 += count()
         }
 
+        on<Position<*>>(tv1["A", 0]) events {
+            eventCount8 += count()
+        }
+
         assertEquals(1, eventCount1)
         assertEquals(1, eventCount2)
         assertEquals(1, eventCount3)
@@ -1643,6 +1727,7 @@ class CellViewListenerTest {
         assertEquals(1, eventCount5)
         assertEquals(0, eventCount6)
         assertEquals(0, eventCount7)
+        assertEquals(0, eventCount8)
 
         tv1["A", 0][CellHeight] = 45
 
@@ -1653,6 +1738,7 @@ class CellViewListenerTest {
         assertEquals(1, eventCount5)
         assertEquals(0, eventCount6)
         assertEquals(0, eventCount7)
+        assertEquals(0, eventCount8)
 
         tv1["A", 0][CellWidth] = 60
 
@@ -1663,6 +1749,7 @@ class CellViewListenerTest {
         assertEquals(1, eventCount5)
         assertEquals(0, eventCount6)
         assertEquals(0, eventCount7)
+        assertEquals(0, eventCount8)
 
         tv1["A", 0][CellClasses] = "cell-classes-2"
 
@@ -1673,6 +1760,7 @@ class CellViewListenerTest {
         assertEquals(1, eventCount5)
         assertEquals(0, eventCount6)
         assertEquals(0, eventCount7)
+        assertEquals(0, eventCount8)
 
         tv1["A", 0][CellTopics] = "cell-topics-2"
 
@@ -1683,6 +1771,7 @@ class CellViewListenerTest {
         assertEquals(1, eventCount5)
         assertEquals(0, eventCount6)
         assertEquals(0, eventCount7)
+        assertEquals(0, eventCount8)
 
         tv1["A", 0][CellTransformer] = ct2
 
@@ -1693,6 +1782,7 @@ class CellViewListenerTest {
         assertEquals(2, eventCount5)
         assertEquals(0, eventCount6)
         assertEquals(0, eventCount7)
+        assertEquals(0, eventCount8)
 
         tv1[Resources] = r2
 
@@ -1703,6 +1793,7 @@ class CellViewListenerTest {
         assertEquals(2, eventCount5)
         assertEquals(0, eventCount6)
         assertEquals(0, eventCount7)
+        assertEquals(0, eventCount8)
 
         tv1[Table] = t2
 
@@ -1713,6 +1804,7 @@ class CellViewListenerTest {
         assertEquals(2, eventCount5)
         assertEquals(0, eventCount6)
         assertEquals(0, eventCount7)
+        assertEquals(0, eventCount8)
     }
 
     @Test
