@@ -2114,6 +2114,56 @@ class TableViewTest {
     }
 
     @Test
+    fun `position contains`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val horizontalUnitPosition = tv1["A"][Position]
+        val verticalUnitPosition = tv1[1][Position]
+
+        tv1["A"][Position] = Position.Right
+        tv1[1][Position] = Position.Bottom
+
+        val horizontalFilledPosition = tv1["A"][Position]
+        val verticalFilledPosition = tv1[1][Position]
+
+        assertTrue(horizontalUnitPosition in horizontalUnitPosition)
+        assertTrue(verticalUnitPosition in verticalUnitPosition)
+
+        assertTrue(horizontalFilledPosition in horizontalFilledPosition)
+        assertTrue(verticalFilledPosition in verticalFilledPosition)
+
+        assertFalse(horizontalUnitPosition in horizontalFilledPosition)
+        assertFalse(verticalUnitPosition in verticalFilledPosition)
+
+        assertFalse(horizontalFilledPosition in horizontalUnitPosition)
+        assertFalse(verticalFilledPosition in verticalUnitPosition)
+
+        assertTrue(Unit in horizontalUnitPosition)
+        assertTrue(Unit in verticalUnitPosition)
+
+        assertFalse(Unit in horizontalFilledPosition)
+        assertFalse(Unit in verticalFilledPosition)
+
+        assertTrue(Position.Right in horizontalFilledPosition)
+        assertTrue(Position.Bottom in verticalFilledPosition)
+
+        assertFalse(Position.Right in horizontalUnitPosition)
+        assertFalse(Position.Bottom in verticalUnitPosition)
+
+        assertFalse(Position.Left in horizontalFilledPosition)
+        assertFalse(Position.Top in verticalFilledPosition)
+
+        assertTrue(Position.Value.RIGHT in horizontalFilledPosition)
+        assertTrue(Position.Value.BOTTOM in verticalFilledPosition)
+
+        assertFalse(Position.Value.RIGHT in horizontalUnitPosition)
+        assertFalse(Position.Value.BOTTOM in verticalUnitPosition)
+
+        assertFalse(Position.Value.LEFT in horizontalFilledPosition)
+        assertFalse(Position.Value.TOP in verticalFilledPosition)
+    }
+
+    @Test
     fun `cell classes invoke`() {
         val cc1 = TableView[null][CellClasses].let { it(listOf("D", "E")); it.source[CellClasses] }
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]

@@ -1616,10 +1616,19 @@ sealed class Position<S, T>(
     open val asValue: Value? = null
 
     // TODO Need invoke(..) on Horizontal and Vertical
-    // TODO Need contains(..)
 
-    open class Horizontal<T> internal constructor(source: ColumnView, position: T) : Position<ColumnView, T>(source, position)
-    open class Vertical<T> internal constructor(source: RowView, position: T) : Position<RowView, T>(source, position)
+    operator fun contains(other: Value) = position == other
+    operator fun contains(other: Unit) = position == other
+
+    open class Horizontal<T> internal constructor(source: ColumnView, position: T) : Position<ColumnView, T>(source, position) {
+        operator fun contains(other: Horizontal<*>) = position == other.position
+        operator fun contains(other: HorizontalCompanion) = position == other.asValue
+    }
+
+    open class Vertical<T> internal constructor(source: RowView, position: T) : Position<RowView, T>(source, position) {
+        operator fun contains(other: Vertical<*>) = position == other.position
+        operator fun contains(other: VerticalCompanion) = position == other.asValue
+    }
 
     interface HorizontalCompanion {
         val asValue: Value
