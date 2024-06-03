@@ -1308,15 +1308,15 @@ class ColumnViewListenerTest {
                             assertEquals(newView["A"], (it.newValue as CellTopics<*>).source)
                         }
 
-                        is Position<*> -> {
-                            assertTrue(it.oldValue is Position.Horizontal)
+                        is Position<*, *> -> {
+                            assertTrue(it.oldValue is Position.Horizontal<*>)
                             assertFalse(it.oldValue is Position.Left)
                             assertFalse(it.oldValue is Position.Right)
-                            assertNull((it.oldValue as Position<*>).positionValue)
+                            assertEquals(Unit, (it.oldValue as Position<*, *>).position)
                             assertTrue(it.newValue is Position.Left)
-                            assertEquals(Position.PositionValue.LEFT, (it.newValue as Position<*>).positionValue)
-                            assertEquals(oldView["A"], (it.oldValue as Position<*>).source)
-                            assertEquals(newView["A"], (it.newValue as Position<*>).source)
+                            assertEquals(Position.Value.LEFT, (it.newValue as Position<*, *>).position)
+                            assertEquals(oldView["A"], (it.oldValue as Position<*, *>).source)
+                            assertEquals(newView["A"], (it.newValue as Position<*, *>).source)
                         }
 
                         is ColumnTransformer<*> -> {
@@ -1352,13 +1352,13 @@ class ColumnViewListenerTest {
                             assertEquals(newView["A"], (it.newValue as CellTopics<*>).source)
                         }
 
-                        is Position<*> -> {
+                        is Position<*, *> -> {
                             assertTrue(it.oldValue is Position.Left)
                             assertTrue(it.newValue is Position.Right)
-                            assertEquals(Position.PositionValue.LEFT, (it.oldValue as Position<*>).positionValue)
-                            assertEquals(Position.PositionValue.RIGHT, (it.newValue as Position<*>).positionValue)
-                            assertEquals(oldView["A"], (it.oldValue as Position<*>).source)
-                            assertEquals(newView["A"], (it.newValue as Position<*>).source)
+                            assertEquals(Position.Value.LEFT, (it.oldValue as Position<*, *>).position)
+                            assertEquals(Position.Value.RIGHT, (it.newValue as Position<*, *>).position)
+                            assertEquals(oldView["A"], (it.oldValue as Position<*, *>).source)
+                            assertEquals(newView["A"], (it.newValue as Position<*, *>).source)
                         }
 
                         is ColumnTransformer<*> -> {
@@ -1427,15 +1427,15 @@ class ColumnViewListenerTest {
                             assertEquals(newView[1], (it.newValue as CellTopics<*>).source)
                         }
 
-                        is Position<*> -> {
-                            assertTrue(it.oldValue is Position.Vertical)
+                        is Position<*, *> -> {
+                            assertTrue(it.oldValue is Position.Vertical<*>)
                             assertFalse(it.oldValue is Position.Top)
                             assertFalse(it.oldValue is Position.Bottom)
-                            assertNull((it.oldValue as Position<*>).positionValue)
+                            assertEquals(Unit, (it.oldValue as Position<*, *>).position)
                             assertTrue(it.newValue is Position.Top)
-                            assertEquals(Position.PositionValue.TOP, (it.newValue as Position<*>).positionValue)
-                            assertEquals(oldView[1], (it.oldValue as Position<*>).source)
-                            assertEquals(newView[1], (it.newValue as Position<*>).source)
+                            assertEquals(Position.Value.TOP, (it.newValue as Position<*, *>).position)
+                            assertEquals(oldView[1], (it.oldValue as Position<*, *>).source)
+                            assertEquals(newView[1], (it.newValue as Position<*, *>).source)
                         }
 
                         is RowTransformer<*> -> {
@@ -1471,13 +1471,13 @@ class ColumnViewListenerTest {
                             assertEquals(newView[1], (it.newValue as CellTopics<*>).source)
                         }
 
-                        is Position<*> -> {
+                        is Position<*, *> -> {
                             assertTrue(it.oldValue is Position.Top)
                             assertTrue(it.newValue is Position.Bottom)
-                            assertEquals(Position.PositionValue.TOP, (it.oldValue as Position<*>).positionValue)
-                            assertEquals(Position.PositionValue.BOTTOM, (it.newValue as Position<*>).positionValue)
-                            assertEquals(oldView[1], (it.oldValue as Position<*>).source)
-                            assertEquals(newView[1], (it.newValue as Position<*>).source)
+                            assertEquals(Position.Value.TOP, (it.oldValue as Position<*, *>).position)
+                            assertEquals(Position.Value.BOTTOM, (it.newValue as Position<*, *>).position)
+                            assertEquals(oldView[1], (it.oldValue as Position<*, *>).source)
+                            assertEquals(newView[1], (it.newValue as Position<*, *>).source)
                         }
 
                         is RowTransformer<*> -> {
@@ -1712,7 +1712,7 @@ class ColumnViewListenerTest {
             eventCount7 += count()
         }
 
-        on<Position<*>>(tv1["A"]) events {
+        on<Position<*, *>>(tv1["A"]) events {
             eventCount8 += count()
         }
 

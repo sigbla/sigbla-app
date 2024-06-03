@@ -219,12 +219,12 @@ class RowView internal constructor(
         }
     }
 
-    operator fun get(position: Position.Companion): Position.Vertical {
+    operator fun get(position: Position.Companion): Position.Vertical<*> {
         val ref = tableView.tableViewRef.get()
         return when (ref.rowViews[index]?.positionValue) {
-            null -> Position.Vertical(this, null)
-            Position.PositionValue.TOP -> Position.Top(this)
-            Position.PositionValue.BOTTOM -> Position.Bottom(this)
+            null -> Position.Vertical(this, Unit)
+            Position.Value.TOP -> Position.Top(this)
+            Position.Value.BOTTOM -> Position.Bottom(this)
             else -> throw InvalidRowException("Unsupported position type: ${ref.rowViews[index]?.positionValue}")
         }
     }
@@ -233,19 +233,19 @@ class RowView internal constructor(
         setRowPosition(null)
     }
 
-    operator fun set(position: Position.Companion, newPosition: Position.Vertical?) {
-        setRowPosition(newPosition?.positionValue)
+    operator fun set(position: Position.Companion, newPosition: Position.Vertical<*>?) {
+        setRowPosition(newPosition?.asValue)
     }
 
     operator fun set(position: Position.Companion, newPosition: Position.Top.Companion?) {
-        if (newPosition == null) setRowPosition(null) else setRowPosition(Position.PositionValue.TOP)
+        if (newPosition == null) setRowPosition(null) else setRowPosition(Position.Value.TOP)
     }
 
     operator fun set(position: Position.Companion, newPosition: Position.Bottom.Companion?) {
-        if (newPosition == null) setRowPosition(null) else setRowPosition(Position.PositionValue.BOTTOM)
+        if (newPosition == null) setRowPosition(null) else setRowPosition(Position.Value.BOTTOM)
     }
 
-    private fun setRowPosition(position: Position.PositionValue?) {
+    private fun setRowPosition(position: Position.Value?) {
         synchronized(tableView.eventProcessor) {
             val (oldRef, newRef) = tableView.tableViewRef.refAction {
                 val oldMeta = it.rowViews[index]
@@ -266,7 +266,7 @@ class RowView internal constructor(
             val new = newView[index][Position]
 
             tableView.eventProcessor.publish(listOf(
-                TableViewListenerEvent<Position.Vertical>(
+                TableViewListenerEvent<Position.Vertical<*>>(
                     old,
                     new
                 )
@@ -299,7 +299,7 @@ class RowView internal constructor(
         return newValue
     }
 
-    operator fun invoke(newValue: Position.Vertical?): Position.Vertical? {
+    operator fun invoke(newValue: Position.Vertical<*>?): Position.Vertical<*>? {
         tableView[this][Position] = newValue
         return newValue
     }

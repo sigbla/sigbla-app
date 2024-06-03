@@ -45,7 +45,7 @@ internal data class ViewMeta(
     val cellWidth: Long? = null,
     val cellClasses: PSet<String>? = null,
     val cellTopics: PSet<String>? = null,
-    val positionValue: Position.PositionValue? = null
+    val positionValue: Position.Value? = null
 )
 
 internal data class TableViewRef(
@@ -1606,32 +1606,46 @@ class SourceTable internal constructor(
     override fun toString() = "SourceTable[$source, ${table?.toString() ?: "null"}]"
 }
 
-
-sealed class Position<S>(
-    val source: S
+sealed class Position<S, T>(
+    val source: S,
+    val position: T
 ) {
-    internal enum class PositionValue { LEFT, RIGHT, TOP, BOTTOM }
+    enum class Value { LEFT, RIGHT, TOP, BOTTOM }
 
-    // TODO Consider making this public? And not nullable, use Unit instead or null?
-    internal abstract val positionValue: PositionValue?
+    open val isValue: Boolean = false
+    open val asValue: Value? = null
 
     // TODO Need invoke(..) on Horizontal and Vertical
-    open class Horizontal internal constructor(source: ColumnView, override val positionValue: PositionValue?) : Position<ColumnView>(source)
-    open class Vertical internal constructor(source: RowView, override val positionValue: PositionValue?) : Position<RowView>(source)
+    // TODO Need contains(..)
 
-    class Left internal constructor(source: ColumnView) : Horizontal(source, PositionValue.LEFT) {
+    open class Horizontal<T> internal constructor(source: ColumnView, position: T) : Position<ColumnView, T>(source, position)
+    open class Vertical<T> internal constructor(source: RowView, position: T) : Position<RowView, T>(source, position)
+
+    class Left internal constructor(source: ColumnView) : Horizontal<Value>(source, Value.LEFT) {
+        override val isValue: Boolean = true
+        override val asValue: Value = position
+
         companion object
     }
 
-    class Right internal constructor(source: ColumnView) : Horizontal(source, PositionValue.RIGHT) {
+    class Right internal constructor(source: ColumnView) : Horizontal<Value>(source, Value.RIGHT) {
+        override val isValue: Boolean = true
+        override val asValue: Value = position
+
         companion object
     }
 
-    class Top internal constructor(source: RowView) : Vertical(source, PositionValue.TOP) {
+    class Top internal constructor(source: RowView) : Vertical<Value>(source, Value.TOP) {
+        override val isValue: Boolean = true
+        override val asValue: Value = position
+
         companion object
     }
 
-    class Bottom internal constructor(source: RowView) : Vertical(source, PositionValue.BOTTOM) {
+    class Bottom internal constructor(source: RowView) : Vertical<Value>(source, Value.BOTTOM) {
+        override val isValue: Boolean = true
+        override val asValue: Value = position
+
         companion object
     }
 

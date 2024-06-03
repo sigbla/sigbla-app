@@ -255,6 +255,7 @@ class TableViewTest {
         assertEquals(UnitCellWidth::class, tv1["A"][CellWidth]::class)
         assertEquals(CellClasses::class, tv1["A"][CellClasses]::class)
         assertEquals(CellTopics::class, tv1["A"][CellTopics]::class)
+        assertEquals(Position.Horizontal::class, tv1["A"][Position]::class)
 
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].toSet())
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].toSet())
@@ -262,10 +263,12 @@ class TableViewTest {
         tv1["A"][CellWidth] = DEFAULT_CELL_WIDTH * 2
         tv1["A"][CellClasses] = "a"
         tv1["A"][CellTopics] = "b"
+        tv1["A"][Position] = Position.Left
 
         assertEquals(DEFAULT_CELL_WIDTH * 2, tv1["A"][CellWidth].width)
         assertEquals(setOf("a"), tv1["A"][CellClasses].toSet())
         assertEquals(setOf("b"), tv1["A"][CellTopics].toSet())
+        assertEquals(Position.Left::class, tv1["A"][Position]::class)
 
         tv1["A"][CellClasses] = tv1["A"][CellClasses] + setOf("c", "d")
         tv1["A"][CellTopics] = tv1["A"][CellTopics] + setOf("e", "f")
@@ -313,10 +316,12 @@ class TableViewTest {
         tv1["A"][CellWidth] = Unit
         tv1["A"][CellClasses] = Unit
         tv1["A"][CellTopics] = Unit
+        tv1["A"][Position] = Unit
 
         assertEquals(UnitCellWidth::class, tv1["A"][CellWidth]::class)
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].toSet())
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].toSet())
+        assertEquals(Position.Horizontal::class, tv1["A"][Position]::class)
 
         tv1["A"][CellWidth] = 100 as Number
         assertEquals(100L, tv1["A"][CellWidth].width)
@@ -335,6 +340,7 @@ class TableViewTest {
         assertEquals(UnitCellHeight::class, tv1[1][CellHeight]::class)
         assertEquals(CellClasses::class, tv1[1][CellClasses]::class)
         assertEquals(CellTopics::class, tv1[1][CellTopics]::class)
+        assertEquals(Position.Vertical::class, tv1[1][Position]::class)
 
         assertEquals(emptySet<String>(), tv1[1][CellClasses].toSet())
         assertEquals(emptySet<String>(), tv1[1][CellTopics].toSet())
@@ -342,10 +348,12 @@ class TableViewTest {
         tv1[1][CellHeight] = DEFAULT_CELL_HEIGHT * 2
         tv1[1][CellClasses] = "a"
         tv1[1][CellTopics] = "b"
+        tv1[1][Position] = Position.Top
 
         assertEquals(DEFAULT_CELL_HEIGHT * 2, tv1[1][CellHeight].height)
         assertEquals(setOf("a"), tv1[1][CellClasses].toSet())
         assertEquals(setOf("b"), tv1[1][CellTopics].toSet())
+        assertEquals(Position.Top::class, tv1[1][Position]::class)
 
         tv1[1][CellClasses] = tv1[1][CellClasses] + setOf("c", "d")
         tv1[1][CellTopics] = tv1[1][CellTopics] + setOf("e", "f")
@@ -393,10 +401,12 @@ class TableViewTest {
         tv1[1][CellHeight] = Unit
         tv1[1][CellClasses] = Unit
         tv1[1][CellTopics] = Unit
+        tv1[1][Position] = Unit
 
         assertEquals(UnitCellHeight::class, tv1[1][CellHeight]::class)
         assertEquals(emptySet<String>(), tv1[1][CellClasses].toSet())
         assertEquals(emptySet<String>(), tv1[1][CellTopics].toSet())
+        assertEquals(Position.Vertical::class, tv1[1][Position]::class)
 
         tv1[1][CellHeight] = 100 as Number
         assertEquals(100L, tv1[1][CellHeight].height)
@@ -1330,13 +1340,13 @@ class TableViewTest {
             assertEquals(setOf("cc-1"), oldView["A"][CellClasses].classes)
             assertEquals(setOf("ct-1"), oldView["A"][CellTopics].topics)
             assertEquals(1000L, oldView["A"][CellWidth].width)
-            assertEquals(Position.PositionValue.LEFT, oldView["A"][Position].positionValue)
+            assertEquals(Position.Value.LEFT, oldView["A"][Position].position)
             assertEquals(ct, oldView["A"][ColumnTransformer].function)
 
             assertEquals(emptySet<String>(), newView["A"][CellClasses].classes)
             assertEquals(emptySet<String>(), newView["A"][CellTopics].topics)
             assertEquals(Unit, newView["A"][CellWidth].width)
-            assertNull(newView["A"][Position].positionValue)
+            assertEquals(Unit, newView["A"][Position].position)
             assertEquals(Unit, newView["A"][ColumnTransformer].function)
         }
 
@@ -1345,7 +1355,7 @@ class TableViewTest {
         assertEquals(setOf("cc-1"), tv1["A"][CellClasses].classes)
         assertEquals(setOf("ct-1"), tv1["A"][CellTopics].topics)
         assertEquals(1000L, tv1["A"][CellWidth].width)
-        assertEquals(Position.PositionValue.LEFT, tv1["A"][Position].positionValue)
+        assertEquals(Position.Value.LEFT, tv1["A"][Position].position)
         assertEquals(ct, tv1["A"][ColumnTransformer].function)
 
         clear(tv1["A"])
@@ -1353,7 +1363,7 @@ class TableViewTest {
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
         assertEquals(Unit, tv1["A"][CellWidth].width)
-        assertNull(tv1["A"][Position].positionValue)
+        assertEquals(Unit, tv1["A"][Position].position)
         assertEquals(Unit, tv1["A"][ColumnTransformer].function)
 
         assertEquals(5, count)
@@ -1378,13 +1388,13 @@ class TableViewTest {
             assertEquals(setOf("cc-1"), oldView[1][CellClasses].classes)
             assertEquals(setOf("ct-1"), oldView[1][CellTopics].topics)
             assertEquals(1000L, oldView[1][CellHeight].height)
-            assertEquals(Position.PositionValue.TOP, oldView[1][Position].positionValue)
+            assertEquals(Position.Value.TOP, oldView[1][Position].position)
             assertEquals(rt, oldView[1][RowTransformer].function)
 
             assertEquals(emptySet<String>(), newView[1][CellClasses].classes)
             assertEquals(emptySet<String>(), newView[1][CellTopics].topics)
             assertEquals(Unit, newView[1][CellHeight].height)
-            assertNull(newView[1][Position].positionValue)
+            assertEquals(Unit, newView[1][Position].position)
             assertEquals(Unit, newView[1][RowTransformer].function)
         }
 
@@ -1393,7 +1403,7 @@ class TableViewTest {
         assertEquals(setOf("cc-1"), tv1[1][CellClasses].classes)
         assertEquals(setOf("ct-1"), tv1[1][CellTopics].topics)
         assertEquals(1000L, tv1[1][CellHeight].height)
-        assertEquals(Position.PositionValue.TOP, tv1[1][Position].positionValue)
+        assertEquals(Position.Value.TOP, tv1[1][Position].position)
         assertEquals(rt, tv1[1][RowTransformer].function)
 
         clear(tv1[1])
@@ -1401,7 +1411,7 @@ class TableViewTest {
         assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
         assertEquals(Unit, tv1[1][CellHeight].height)
-        assertNull(tv1[1][Position].positionValue)
+        assertEquals(Unit, tv1[1][Position].position)
         assertEquals(Unit, tv1[1][RowTransformer].function)
 
         assertEquals(5, count)
@@ -2582,28 +2592,36 @@ class TableViewTest {
         assertTrue(h1 !is Position.Left)
         assertTrue(h1 !is Position.Right)
         assertEquals(tv1["A"], h1.source)
-        assertNull(h1.positionValue)
+        assertEquals(Unit, h1.position)
+        assertFalse(h1.isValue)
+        assertNull(h1.asValue)
 
         tv1["A"][Position] = Position.Left
         val h2 = tv1["A"][Position]
         assertTrue(h2 is Position.Left)
         assertTrue(h2 !is Position.Right)
         assertEquals(tv1["A"], h2.source)
-        assertEquals(Position.PositionValue.LEFT, h2.positionValue)
+        assertEquals(Position.Value.LEFT, h2.position)
+        assertTrue(h2.isValue)
+        assertEquals(Position.Value.LEFT, h2.asValue)
 
         tv1["A"][Position] = Position.Right
         val h3 = tv1["A"][Position]
         assertTrue(h3 !is Position.Left)
         assertTrue(h3 is Position.Right)
         assertEquals(tv1["A"], h3.source)
-        assertEquals(Position.PositionValue.RIGHT, h3.positionValue)
+        assertEquals(Position.Value.RIGHT, h3.position)
+        assertTrue(h3.isValue)
+        assertEquals(Position.Value.RIGHT, h3.asValue)
 
-        tv1["A"][Position] = null as Position.Horizontal?
+        tv1["A"][Position] = null as Position.Horizontal<*>?
         val h4 = tv1["A"][Position]
         assertTrue(h4 !is Position.Left)
         assertTrue(h4 !is Position.Right)
         assertEquals(tv1["A"], h4.source)
-        assertNull(h4.positionValue)
+        assertEquals(Unit, h4.position)
+        assertFalse(h4.isValue)
+        assertNull(h4.asValue)
 
         tv1["B"][Position] = Position.Right
         tv1["A"][Position] = tv1["B"][Position]
@@ -2611,14 +2629,18 @@ class TableViewTest {
         assertTrue(h5 !is Position.Left)
         assertTrue(h5 is Position.Right)
         assertEquals(tv1["A"], h5.source)
-        assertEquals(Position.PositionValue.RIGHT, h5.positionValue)
+        assertEquals(Position.Value.RIGHT, h5.position)
+        assertTrue(h5.isValue)
+        assertEquals(Position.Value.RIGHT, h5.asValue)
 
         tv1["A"][Position] = Unit
         val h6 = tv1["A"][Position]
         assertTrue(h6 !is Position.Left)
         assertTrue(h6 !is Position.Right)
         assertEquals(tv1["A"], h6.source)
-        assertNull(h6.positionValue)
+        assertEquals(Unit, h6.position)
+        assertFalse(h6.isValue)
+        assertNull(h6.asValue)
 
         tv1["A"][Position] = Position.Left
         tv1["A"][Position] = null as Unit?
@@ -2626,7 +2648,9 @@ class TableViewTest {
         assertTrue(h7 !is Position.Left)
         assertTrue(h7 !is Position.Right)
         assertEquals(tv1["A"], h7.source)
-        assertNull(h7.positionValue)
+        assertEquals(Unit, h7.position)
+        assertFalse(h7.isValue)
+        assertNull(h7.asValue)
 
         tv1["A"][Position] = Position.Left
         tv1["A"][Position] = null as Position.Left.Companion?
@@ -2634,7 +2658,9 @@ class TableViewTest {
         assertTrue(h8 !is Position.Left)
         assertTrue(h8 !is Position.Right)
         assertEquals(tv1["A"], h8.source)
-        assertNull(h8.positionValue)
+        assertEquals(Unit, h8.position)
+        assertFalse(h8.isValue)
+        assertNull(h8.asValue)
 
         tv1["A"][Position] = Position.Right
         tv1["A"][Position] = null as Position.Right.Companion?
@@ -2642,7 +2668,9 @@ class TableViewTest {
         assertTrue(h9 !is Position.Left)
         assertTrue(h9 !is Position.Right)
         assertEquals(tv1["A"], h9.source)
-        assertNull(h9.positionValue)
+        assertEquals(Unit, h9.position)
+        assertFalse(h9.isValue)
+        assertNull(h9.asValue)
 
         tv1["B"][Position] = Position.Right
         tv1["A"](tv1["B"][Position])
@@ -2650,7 +2678,9 @@ class TableViewTest {
         assertTrue(h10 !is Position.Left)
         assertTrue(h10 is Position.Right)
         assertEquals(tv1["A"], h10.source)
-        assertEquals(Position.PositionValue.RIGHT, h10.positionValue)
+        assertEquals(Position.Value.RIGHT, h10.position)
+        assertTrue(h10.isValue)
+        assertEquals(Position.Value.RIGHT, h10.asValue)
     }
 
     @Test
@@ -2661,28 +2691,36 @@ class TableViewTest {
         assertTrue(h1 !is Position.Top)
         assertTrue(h1 !is Position.Bottom)
         assertEquals(tv1[1], h1.source)
-        assertNull(h1.positionValue)
+        assertEquals(Unit, h1.position)
+        assertFalse(h1.isValue)
+        assertNull(h1.asValue)
 
         tv1[1][Position] = Position.Top
         val h2 = tv1[1][Position]
         assertTrue(h2 is Position.Top)
         assertTrue(h2 !is Position.Bottom)
         assertEquals(tv1[1], h2.source)
-        assertEquals(Position.PositionValue.TOP, h2.positionValue)
+        assertEquals(Position.Value.TOP, h2.position)
+        assertTrue(h2.isValue)
+        assertEquals(Position.Value.TOP, h2.asValue)
 
         tv1[1][Position] = Position.Bottom
         val h3 = tv1[1][Position]
         assertTrue(h3 !is Position.Top)
         assertTrue(h3 is Position.Bottom)
         assertEquals(tv1[1], h3.source)
-        assertEquals(Position.PositionValue.BOTTOM, h3.positionValue)
+        assertEquals(Position.Value.BOTTOM, h3.position)
+        assertTrue(h3.isValue)
+        assertEquals(Position.Value.BOTTOM, h3.asValue)
 
-        tv1[1][Position] = null as Position.Vertical?
+        tv1[1][Position] = null as Position.Vertical<*>?
         val h4 = tv1[1][Position]
         assertTrue(h4 !is Position.Top)
         assertTrue(h4 !is Position.Bottom)
         assertEquals(tv1[1], h4.source)
-        assertNull(h4.positionValue)
+        assertEquals(Unit, h4.position)
+        assertFalse(h4.isValue)
+        assertNull(h4.asValue)
 
         tv1[2][Position] = Position.Bottom
         tv1[1][Position] = tv1[2][Position]
@@ -2690,14 +2728,18 @@ class TableViewTest {
         assertTrue(h5 !is Position.Top)
         assertTrue(h5 is Position.Bottom)
         assertEquals(tv1[1], h5.source)
-        assertEquals(Position.PositionValue.BOTTOM, h5.positionValue)
+        assertEquals(Position.Value.BOTTOM, h5.position)
+        assertTrue(h5.isValue)
+        assertEquals(Position.Value.BOTTOM, h5.asValue)
 
         tv1[1][Position] = Unit
         val h6 = tv1[1][Position]
         assertTrue(h6 !is Position.Top)
         assertTrue(h6 !is Position.Bottom)
         assertEquals(tv1[1], h6.source)
-        assertNull(h6.positionValue)
+        assertEquals(Unit, h6.position)
+        assertFalse(h6.isValue)
+        assertNull(h6.asValue)
 
         tv1[1][Position] = Position.Top
         tv1[1][Position] = null as Unit?
@@ -2705,7 +2747,9 @@ class TableViewTest {
         assertTrue(h7 !is Position.Top)
         assertTrue(h7 !is Position.Bottom)
         assertEquals(tv1[1], h7.source)
-        assertNull(h7.positionValue)
+        assertEquals(Unit, h7.position)
+        assertFalse(h7.isValue)
+        assertNull(h7.asValue)
 
         tv1[1][Position] = Position.Top
         tv1[1][Position] = null as Position.Top.Companion?
@@ -2713,7 +2757,9 @@ class TableViewTest {
         assertTrue(h8 !is Position.Top)
         assertTrue(h8 !is Position.Bottom)
         assertEquals(tv1[1], h8.source)
-        assertNull(h8.positionValue)
+        assertEquals(Unit, h8.position)
+        assertFalse(h8.isValue)
+        assertNull(h8.asValue)
 
         tv1[1][Position] = Position.Bottom
         tv1[1][Position] = null as Position.Bottom.Companion?
@@ -2721,7 +2767,9 @@ class TableViewTest {
         assertTrue(h9 !is Position.Top)
         assertTrue(h9 !is Position.Bottom)
         assertEquals(tv1[1], h9.source)
-        assertNull(h9.positionValue)
+        assertEquals(Unit, h9.position)
+        assertFalse(h9.isValue)
+        assertNull(h9.asValue)
 
         tv1[2][Position] = Position.Bottom
         tv1[1](tv1[2][Position])
@@ -2729,7 +2777,9 @@ class TableViewTest {
         assertTrue(h10 !is Position.Top)
         assertTrue(h10 is Position.Bottom)
         assertEquals(tv1[1], h10.source)
-        assertEquals(Position.PositionValue.BOTTOM, h10.positionValue)
+        assertEquals(Position.Value.BOTTOM, h10.position)
+        assertTrue(h10.isValue)
+        assertEquals(Position.Value.BOTTOM, h10.asValue)
     }
 
     companion object {

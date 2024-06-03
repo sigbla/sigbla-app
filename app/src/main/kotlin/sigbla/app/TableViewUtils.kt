@@ -74,7 +74,7 @@ fun tableViewFromViewRelated(value: Any?): TableView = when (value) {
     is RowView -> value.tableView
     is CellView -> value.tableView
     is DerivedCellView -> value.tableView
-    is Position<*> -> tableViewFromViewRelated(value.source)
+    is Position<*, *> -> tableViewFromViewRelated(value.source)
     is CellHeight<*, *> -> tableViewFromViewRelated(value.source)
     is CellWidth<*, *> -> tableViewFromViewRelated(value.source)
     is CellClasses<*> -> tableViewFromViewRelated(value.source)
@@ -94,7 +94,7 @@ fun columnViewFromViewRelated(value: Any?): ColumnView? = when (value) {
     is RowView -> null
     is CellView -> value.columnView
     is DerivedCellView -> value.columnView
-    is Position<*> -> columnViewFromViewRelated(value.source)
+    is Position<*, *> -> columnViewFromViewRelated(value.source)
     is CellHeight<*, *> -> columnViewFromViewRelated(value.source)
     is CellWidth<*, *> -> columnViewFromViewRelated(value.source)
     is CellClasses<*> -> columnViewFromViewRelated(value.source)
@@ -114,7 +114,7 @@ fun indexFromViewRelated(value: Any?): Long? = when (value) {
     is RowView -> value.index
     is CellView -> value.index
     is DerivedCellView -> value.index
-    is Position<*> -> indexFromViewRelated(value.source)
+    is Position<*, *> -> indexFromViewRelated(value.source)
     is CellHeight<*, *> -> indexFromViewRelated(value.source)
     is CellWidth<*, *> -> indexFromViewRelated(value.source)
     is CellClasses<*> -> indexFromViewRelated(value.source)
@@ -133,7 +133,7 @@ fun sourceFromViewEventRelated(value: Any?): Any = when (value) {
     is CellWidth<*, *> -> value.source!!
     is CellClasses<*> -> value.source!!
     is CellTopics<*> -> value.source!!
-    is Position<*> -> value.source!!
+    is Position<*, *> -> value.source!!
     is CellTransformer<*> -> value.source
     is ColumnTransformer<*> -> value.source
     is RowTransformer<*> -> value.source
@@ -149,7 +149,7 @@ internal fun relatedFromViewRelated(tableView: TableView, value: Any?): Any = wh
     is RowView -> tableView[value]
     is CellView -> tableView[value]
     is DerivedCellView -> tableView[value]
-    is Position<*> -> when (val source = value.source) {
+    is Position<*, *> -> when (val source = value.source) {
         is ColumnView -> tableView[source][Position]
         is RowView -> tableView[source][Position]
         else -> throw InvalidValueException("Unsupported source: ${source?.javaClass}")
@@ -195,7 +195,7 @@ internal fun refVersionFromViewRelated(value: Any?): Long = when (value) {
     is RowView -> value.tableView.tableViewRef.get().version
     is CellView -> value.tableView.tableViewRef.get().version
     is DerivedCellView -> value.tableView.tableViewRef.get().version
-    is Position<*> -> refVersionFromViewRelated(value.source)
+    is Position<*, *> -> refVersionFromViewRelated(value.source)
     is CellHeight<*, *> -> refVersionFromViewRelated(value.source)
     is CellWidth<*, *> -> refVersionFromViewRelated(value.source)
     is CellClasses<*> -> refVersionFromViewRelated(value.source)
@@ -211,7 +211,7 @@ internal fun refVersionFromViewRelated(value: Any?): Long = when (value) {
 
 internal fun cellOrResourceOrSourceTableOrFalseFromViewRelated(value: Any?): Any? = when (value) {
     is CellView -> value.cell
-    is Position<*> -> cellOrResourceOrSourceTableOrFalseFromViewRelated(value.source)
+    is Position<*, *> -> cellOrResourceOrSourceTableOrFalseFromViewRelated(value.source)
     is CellHeight<*, *> -> cellOrResourceOrSourceTableOrFalseFromViewRelated(value.source)
     is CellWidth<*, *> -> cellOrResourceOrSourceTableOrFalseFromViewRelated(value.source)
     is CellClasses<*> -> cellOrResourceOrSourceTableOrFalseFromViewRelated(value.source)

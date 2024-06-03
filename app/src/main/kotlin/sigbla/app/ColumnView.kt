@@ -226,12 +226,12 @@ class ColumnView internal constructor(
         }
     }
 
-    operator fun get(position: Position.Companion): Position.Horizontal {
+    operator fun get(position: Position.Companion): Position.Horizontal<*> {
         val ref = tableView.tableViewRef.get()
         return when (ref.columnViews[header]?.positionValue) {
-            null -> Position.Horizontal(this, null)
-            Position.PositionValue.LEFT -> Position.Left(this)
-            Position.PositionValue.RIGHT -> Position.Right(this)
+            null -> Position.Horizontal(this, Unit)
+            Position.Value.LEFT -> Position.Left(this)
+            Position.Value.RIGHT -> Position.Right(this)
             else -> throw InvalidColumnException("Unsupported position type: ${ref.columnViews[header]?.positionValue}")
         }
     }
@@ -240,19 +240,19 @@ class ColumnView internal constructor(
         setColumnPosition(null)
     }
 
-    operator fun set(position: Position.Companion, newPosition: Position.Horizontal?) {
-        setColumnPosition(newPosition?.positionValue)
+    operator fun set(position: Position.Companion, newPosition: Position.Horizontal<*>?) {
+        setColumnPosition(newPosition?.asValue)
     }
 
     operator fun set(position: Position.Companion, newPosition: Position.Left.Companion?) {
-        if (newPosition == null) setColumnPosition(null) else setColumnPosition(Position.PositionValue.LEFT)
+        if (newPosition == null) setColumnPosition(null) else setColumnPosition(Position.Value.LEFT)
     }
 
     operator fun set(position: Position.Companion, newPosition: Position.Right.Companion?) {
-        if (newPosition == null) setColumnPosition(null) else setColumnPosition(Position.PositionValue.RIGHT)
+        if (newPosition == null) setColumnPosition(null) else setColumnPosition(Position.Value.RIGHT)
     }
 
-    private fun setColumnPosition(position: Position.PositionValue?) {
+    private fun setColumnPosition(position: Position.Value?) {
         synchronized(tableView.eventProcessor) {
             val (oldRef, newRef) = tableView.tableViewRef.refAction {
                 val oldMeta = it.columnViews[header]
@@ -273,7 +273,7 @@ class ColumnView internal constructor(
             val new = newView[header][Position]
 
             tableView.eventProcessor.publish(listOf(
-                TableViewListenerEvent<Position.Horizontal>(
+                TableViewListenerEvent<Position.Horizontal<*>>(
                     old,
                     new
                 )
@@ -306,7 +306,7 @@ class ColumnView internal constructor(
         return newValue
     }
 
-    operator fun invoke(newValue: Position.Horizontal?): Position.Horizontal? {
+    operator fun invoke(newValue: Position.Horizontal<*>?): Position.Horizontal<*>? {
         tableView[this][Position] = newValue
         return newValue
     }
