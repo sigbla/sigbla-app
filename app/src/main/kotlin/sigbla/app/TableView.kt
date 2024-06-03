@@ -1621,32 +1621,48 @@ sealed class Position<S, T>(
     open class Horizontal<T> internal constructor(source: ColumnView, position: T) : Position<ColumnView, T>(source, position)
     open class Vertical<T> internal constructor(source: RowView, position: T) : Position<RowView, T>(source, position)
 
+    interface HorizontalCompanion {
+        val asValue: Value
+    }
+
+    interface VerticalCompanion {
+        val asValue: Value
+    }
+
     class Left internal constructor(source: ColumnView) : Horizontal<Value>(source, Value.LEFT) {
         override val isValue: Boolean = true
         override val asValue: Value = position
 
-        companion object
+        companion object : HorizontalCompanion {
+            override val asValue = Value.LEFT
+        }
     }
 
     class Right internal constructor(source: ColumnView) : Horizontal<Value>(source, Value.RIGHT) {
         override val isValue: Boolean = true
         override val asValue: Value = position
 
-        companion object
+        companion object : HorizontalCompanion {
+            override val asValue = Value.RIGHT
+        }
     }
 
     class Top internal constructor(source: RowView) : Vertical<Value>(source, Value.TOP) {
         override val isValue: Boolean = true
         override val asValue: Value = position
 
-        companion object
+        companion object : VerticalCompanion {
+            override val asValue = Value.TOP
+        }
     }
 
     class Bottom internal constructor(source: RowView) : Vertical<Value>(source, Value.BOTTOM) {
         override val isValue: Boolean = true
         override val asValue: Value = position
 
-        companion object
+        companion object : VerticalCompanion {
+            override val asValue = Value.BOTTOM
+        }
     }
 
     companion object

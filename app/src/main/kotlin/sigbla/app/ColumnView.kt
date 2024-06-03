@@ -244,12 +244,8 @@ class ColumnView internal constructor(
         setColumnPosition(newPosition?.asValue)
     }
 
-    operator fun set(position: Position.Companion, newPosition: Position.Left.Companion?) {
-        if (newPosition == null) setColumnPosition(null) else setColumnPosition(Position.Value.LEFT)
-    }
-
-    operator fun set(position: Position.Companion, newPosition: Position.Right.Companion?) {
-        if (newPosition == null) setColumnPosition(null) else setColumnPosition(Position.Value.RIGHT)
+    operator fun set(position: Position.Companion, newPosition: Position.HorizontalCompanion?) {
+        setColumnPosition(newPosition?.asValue)
     }
 
     private fun setColumnPosition(position: Position.Value?) {

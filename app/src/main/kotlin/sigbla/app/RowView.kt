@@ -237,12 +237,8 @@ class RowView internal constructor(
         setRowPosition(newPosition?.asValue)
     }
 
-    operator fun set(position: Position.Companion, newPosition: Position.Top.Companion?) {
-        if (newPosition == null) setRowPosition(null) else setRowPosition(Position.Value.TOP)
-    }
-
-    operator fun set(position: Position.Companion, newPosition: Position.Bottom.Companion?) {
-        if (newPosition == null) setRowPosition(null) else setRowPosition(Position.Value.BOTTOM)
+    operator fun set(position: Position.Companion, newPosition: Position.VerticalCompanion?) {
+        setRowPosition(newPosition?.asValue)
     }
 
     private fun setRowPosition(position: Position.Value?) {
