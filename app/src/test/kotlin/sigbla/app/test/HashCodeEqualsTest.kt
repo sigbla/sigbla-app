@@ -226,6 +226,14 @@ class HashCodeEqualsTest {
         val emptyResources1 = tableView1[Resources].also { it(listOf("B" to handler1, "A" to handler2)) }
         val filledResources1 = tableView1[Resources]
 
+        val unitHorizontal1 = tableView1["A"][Position].also { it(Position.Left) }
+        val leftHorizontal1 = tableView1["A"][Position].also { it(Position.Right) }
+        val rightHorizontal1 = tableView1["A"][Position]
+
+        val unitVertical1 = tableView1[1][Position].also { it(Position.Top) }
+        val topVertical1 = tableView1[1][Position].also { it(Position.Bottom) }
+        val bottomVertical1 = tableView1[1][Position]
+
         val tableView2 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         val unitCellHeight2 = tableView2[CellHeight].also { it(100) }
@@ -254,6 +262,14 @@ class HashCodeEqualsTest {
 
         val emptyResources2 = tableView2[Resources].also { it(listOf("B" to handler1, "A" to handler2)) }
         val filledResources2 = tableView2[Resources]
+
+        val unitHorizontal2 = tableView2["A"][Position].also { it(Position.Left) }
+        val leftHorizontal2 = tableView2["A"][Position].also { it(Position.Right) }
+        val rightHorizontal2 = tableView2["A"][Position]
+
+        val unitVertical2 = tableView2[1][Position].also { it(Position.Top) }
+        val topVertical2 = tableView2[1][Position].also { it(Position.Bottom) }
+        val bottomVertical2 = tableView2[1][Position]
 
         assertNotEquals(unitCellHeight1, unitCellHeight2)
         assertEquals(unitCellHeight1.height, unitCellHeight2.height)
@@ -401,6 +417,27 @@ class HashCodeEqualsTest {
         assertTrue(mapOf("B" to handler1) in filledResources2)
         assertFalse(mapOf("B" to handler1) in emptyResources2)
 
+        assertNotEquals(unitHorizontal1, unitHorizontal2)
+        assertEquals(unitHorizontal1.position, unitHorizontal2.position)
+        assertTrue(unitHorizontal1 in unitHorizontal2)
+        assertTrue(unitHorizontal2 in unitHorizontal1)
+
+        assertNotEquals(leftHorizontal1, leftHorizontal2)
+        assertEquals(leftHorizontal1.position, leftHorizontal2.position)
+        assertTrue(leftHorizontal1 in leftHorizontal2)
+        assertTrue(leftHorizontal2 in leftHorizontal1)
+
+        assertNotEquals(topVertical1, topVertical2)
+        assertEquals(topVertical1.position, topVertical2.position)
+        assertTrue(topVertical1 in topVertical2)
+        assertTrue(topVertical2 in topVertical1)
+
+        assertTrue(Unit in unitHorizontal1)
+        assertTrue(Position.Value.LEFT in leftHorizontal1)
+        assertTrue(Position.Left in leftHorizontal2)
+        assertTrue(Position.Value.TOP in topVertical1)
+        assertTrue(Position.Top in topVertical2)
+
         assertEquals(unitCellHeight1.hashCode(), unitCellHeight2.hashCode())
         assertEquals(pixelCellHeight1.hashCode(), pixelCellHeight2.hashCode())
         assertEquals(unitCellWidth1.hashCode(), unitCellWidth2.hashCode())
@@ -419,6 +456,13 @@ class HashCodeEqualsTest {
         assertEquals(filledCellTransformer1.hashCode(), filledCellTransformer2.hashCode())
         assertEquals(emptyResources1.hashCode(), emptyResources2.hashCode())
         assertEquals(filledResources1.hashCode(), filledResources2.hashCode())
+        assertEquals(unitHorizontal1.hashCode(), unitHorizontal2.hashCode())
+        assertEquals(unitVertical1.hashCode(), unitVertical2.hashCode())
+        assertEquals(unitVertical1.hashCode(), unitHorizontal1.hashCode())
+        assertEquals(leftHorizontal1.hashCode(), leftHorizontal2.hashCode())
+        assertEquals(rightHorizontal1.hashCode(), rightHorizontal2.hashCode())
+        assertEquals(topVertical1.hashCode(), topVertical2.hashCode())
+        assertEquals(bottomVertical1.hashCode(), bottomVertical2.hashCode())
     }
 
     @Test

@@ -1615,10 +1615,22 @@ sealed class Position<S, T>(
     open val isValue: Boolean = false
     open val asValue: Value? = null
 
-    // TODO Hashcode, eq, toString..
-
     operator fun contains(other: Value) = position == other
     operator fun contains(other: Unit) = position == other
+
+    override fun hashCode() = Objects.hashCode(this.position)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Position<*, *>
+
+        if (source != other.source) return false
+        if (position != other.position) return false
+
+        return true
+    }
 
     open class Horizontal<T> internal constructor(source: ColumnView, position: T) : Position<ColumnView, T>(source, position) {
         operator fun contains(other: Horizontal<*>) = position == other.position
@@ -1638,6 +1650,8 @@ sealed class Position<S, T>(
             source[Position] = newValue
             return newValue
         }
+
+        override fun toString() = "Horizontal"
     }
 
     open class Vertical<T> internal constructor(source: RowView, position: T) : Position<RowView, T>(source, position) {
@@ -1658,6 +1672,8 @@ sealed class Position<S, T>(
             source[Position] = newValue
             return newValue
         }
+
+        override fun toString() = "Vertical"
     }
 
     interface HorizontalCompanion {
@@ -1672,6 +1688,8 @@ sealed class Position<S, T>(
         override val isValue: Boolean = true
         override val asValue: Value = position
 
+        override fun toString() = "Left"
+
         companion object : HorizontalCompanion {
             override val asValue = Value.LEFT
         }
@@ -1680,6 +1698,8 @@ sealed class Position<S, T>(
     class Right internal constructor(source: ColumnView) : Horizontal<Value>(source, Value.RIGHT) {
         override val isValue: Boolean = true
         override val asValue: Value = position
+
+        override fun toString() = "Right"
 
         companion object : HorizontalCompanion {
             override val asValue = Value.RIGHT
@@ -1690,6 +1710,8 @@ sealed class Position<S, T>(
         override val isValue: Boolean = true
         override val asValue: Value = position
 
+        override fun toString() = "Top"
+
         companion object : VerticalCompanion {
             override val asValue = Value.TOP
         }
@@ -1698,6 +1720,8 @@ sealed class Position<S, T>(
     class Bottom internal constructor(source: RowView) : Vertical<Value>(source, Value.BOTTOM) {
         override val isValue: Boolean = true
         override val asValue: Value = position
+
+        override fun toString() = "Bottom"
 
         companion object : VerticalCompanion {
             override val asValue = Value.BOTTOM
