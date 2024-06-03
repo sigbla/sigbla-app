@@ -1615,7 +1615,7 @@ sealed class Position<S, T>(
     open val isValue: Boolean = false
     open val asValue: Value? = null
 
-    // TODO Need invoke(..) on Horizontal and Vertical
+    // TODO Hashcode, eq, toString..
 
     operator fun contains(other: Value) = position == other
     operator fun contains(other: Unit) = position == other
@@ -1623,11 +1623,41 @@ sealed class Position<S, T>(
     open class Horizontal<T> internal constructor(source: ColumnView, position: T) : Position<ColumnView, T>(source, position) {
         operator fun contains(other: Horizontal<*>) = position == other.position
         operator fun contains(other: HorizontalCompanion) = position == other.asValue
+
+        operator fun invoke(newValue: Unit?): Unit? {
+            source[Position] = newValue
+            return newValue
+        }
+
+        operator fun invoke(newValue: Horizontal<*>?): Horizontal<*>? {
+            source[Position] = newValue
+            return newValue
+        }
+
+        operator fun invoke(newValue: HorizontalCompanion?): HorizontalCompanion? {
+            source[Position] = newValue
+            return newValue
+        }
     }
 
     open class Vertical<T> internal constructor(source: RowView, position: T) : Position<RowView, T>(source, position) {
         operator fun contains(other: Vertical<*>) = position == other.position
         operator fun contains(other: VerticalCompanion) = position == other.asValue
+
+        operator fun invoke(newValue: Unit?): Unit? {
+            source[Position] = newValue
+            return newValue
+        }
+
+        operator fun invoke(newValue: Vertical<*>?): Vertical<*>? {
+            source[Position] = newValue
+            return newValue
+        }
+
+        operator fun invoke(newValue: VerticalCompanion?): VerticalCompanion? {
+            source[Position] = newValue
+            return newValue
+        }
     }
 
     interface HorizontalCompanion {

@@ -842,29 +842,37 @@ class TableViewTest {
         tv1["A"][CellClasses]("300")
         tv1["A"][CellTopics]("400")
         tv1["A"][ColumnTransformer](ct)
+        tv1["A"][Position](Position.Left)
 
         assertEquals(200L, tv1["A"][CellWidth].width)
         assertEquals(setOf("300"), tv1["A"][CellClasses].classes)
         assertEquals(setOf("400"), tv1["A"][CellTopics].topics)
         assertEquals(ct, tv1["A"][ColumnTransformer].function)
+        assertEquals(Position.Value.LEFT, tv1["A"][Position].position)
 
         tv1["A"][CellClasses](setOf("500", "600"))
         tv1["A"][CellTopics](setOf("700", "800"))
+
+        tv1["B"](Position.Right)
+        tv1["A"][Position](tv1["B"][Position])
 
         assertEquals(200L, tv1["A"][CellWidth].width)
         assertEquals(setOf("500", "600"), tv1["A"][CellClasses].classes)
         assertEquals(setOf("700", "800"), tv1["A"][CellTopics].topics)
         assertEquals(ct, tv1["A"][ColumnTransformer].function)
+        assertEquals(Position.Value.RIGHT, tv1["A"][Position].position)
 
         tv1["A"][CellWidth](null as Unit?)
         tv1["A"][CellClasses](null as Unit?)
         tv1["A"][CellTopics](null as Unit?)
         tv1["A"][ColumnTransformer](null as Unit?)
+        tv1["A"][Position](null as Unit?)
 
         assertEquals(Unit, tv1["A"][CellWidth].width)
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
         assertEquals(Unit, tv1["A"][ColumnTransformer].function)
+        assertEquals(Unit, tv1["A"][Position].position)
     }
 
     @Test
@@ -876,26 +884,31 @@ class TableViewTest {
         tv1["A"](tv1["B"][CellClasses])
         tv1["A"](tv1["B"][CellTopics])
         tv1["A"](tv1["B"][ColumnTransformer])
+        tv1["A"](tv1["B"][Position])
 
         assertEquals(Unit, tv1["A"][CellWidth].width)
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
         assertEquals(Unit, tv1["A"][ColumnTransformer].function)
+        assertEquals(Unit, tv1["A"][Position].position)
 
         tv1["B"][CellWidth](200)
         tv1["B"][CellClasses]("300")
         tv1["B"][CellTopics]("400")
         tv1["B"][ColumnTransformer](ct)
+        tv1["B"][Position](Position.Left)
 
         tv1["A"](tv1["B"][CellWidth])
         tv1["A"](tv1["B"][CellClasses])
         tv1["A"](tv1["B"][CellTopics])
         tv1["A"](tv1["B"][ColumnTransformer])
+        tv1["A"](tv1["B"][Position])
 
         assertEquals(200L, tv1["A"][CellWidth].width)
         assertEquals(setOf("300"), tv1["A"][CellClasses].classes)
         assertEquals(setOf("400"), tv1["A"][CellTopics].topics)
         assertEquals(ct, tv1["A"][ColumnTransformer].function)
+        assertEquals(Position.Value.LEFT, tv1["A"][Position].position)
 
         tv1["A"](null as Unit?)
 
@@ -903,6 +916,7 @@ class TableViewTest {
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
         assertEquals(Unit, tv1["A"][ColumnTransformer].function)
+        assertEquals(Unit, tv1["A"][Position].position)
 
         tv1["A"](tv1["B"])
 
@@ -910,6 +924,7 @@ class TableViewTest {
         assertEquals(setOf("300"), tv1["A"][CellClasses].classes)
         assertEquals(setOf("400"), tv1["A"][CellTopics].topics)
         assertEquals(ct, tv1["A"][ColumnTransformer].function)
+        assertEquals(Position.Value.LEFT, tv1["A"][Position].position)
     }
 
     @Test
@@ -921,29 +936,37 @@ class TableViewTest {
         tv1[1][CellClasses]("300")
         tv1[1][CellTopics]("400")
         tv1[1][RowTransformer](rt)
+        tv1[1][Position](Position.Top)
 
         assertEquals(200L, tv1[1][CellHeight].height)
         assertEquals(setOf("300"), tv1[1][CellClasses].classes)
         assertEquals(setOf("400"), tv1[1][CellTopics].topics)
         assertEquals(rt, tv1[1][RowTransformer].function)
+        assertEquals(Position.Value.TOP, tv1[1][Position].position)
 
         tv1[1][CellClasses](setOf("500", "600"))
         tv1[1][CellTopics](setOf("700", "800"))
+
+        tv1[2](Position.Bottom)
+        tv1[1][Position](tv1[2][Position])
 
         assertEquals(200L, tv1[1][CellHeight].height)
         assertEquals(setOf("500", "600"), tv1[1][CellClasses].classes)
         assertEquals(setOf("700", "800"), tv1[1][CellTopics].topics)
         assertEquals(rt, tv1[1][RowTransformer].function)
+        assertEquals(Position.Value.BOTTOM, tv1[1][Position].position)
 
         tv1[1][CellHeight](null as Unit?)
         tv1[1][CellClasses](null as Unit?)
         tv1[1][CellTopics](null as Unit?)
         tv1[1][RowTransformer](null as Unit?)
+        tv1[1][Position](null as Unit?)
 
         assertEquals(Unit, tv1[1][CellHeight].height)
         assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
         assertEquals(Unit, tv1[1][RowTransformer].function)
+        assertEquals(Unit, tv1[1][Position].position)
     }
 
     @Test
@@ -955,26 +978,31 @@ class TableViewTest {
         tv1[1](tv1[2][CellClasses])
         tv1[1](tv1[2][CellTopics])
         tv1[1](tv1[2][RowTransformer])
+        tv1[1](tv1[2][Position])
 
         assertEquals(Unit, tv1[1][CellHeight].height)
         assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
         assertEquals(Unit, tv1[1][RowTransformer].function)
+        assertEquals(Unit, tv1[1][Position].position)
 
         tv1[2][CellHeight](200)
         tv1[2][CellClasses]("300")
         tv1[2][CellTopics]("400")
         tv1[2][RowTransformer](rt)
+        tv1[2][Position](Position.Top)
 
         tv1[1](tv1[2][CellHeight])
         tv1[1](tv1[2][CellClasses])
         tv1[1](tv1[2][CellTopics])
         tv1[1](tv1[2][RowTransformer])
+        tv1[1](tv1[2][Position])
 
         assertEquals(200L, tv1[1][CellHeight].height)
         assertEquals(setOf("300"), tv1[1][CellClasses].classes)
         assertEquals(setOf("400"), tv1[1][CellTopics].topics)
         assertEquals(rt, tv1[1][RowTransformer].function)
+        assertEquals(Position.Value.TOP, tv1[1][Position].position)
 
         tv1[1](null as Unit?)
 
@@ -982,6 +1010,7 @@ class TableViewTest {
         assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
         assertEquals(Unit, tv1[1][RowTransformer].function)
+        assertEquals(Unit, tv1[1][Position].position)
 
         tv1[1](tv1[2])
 
@@ -989,6 +1018,7 @@ class TableViewTest {
         assertEquals(setOf("300"), tv1[1][CellClasses].classes)
         assertEquals(setOf("400"), tv1[1][CellTopics].topics)
         assertEquals(rt, tv1[1][RowTransformer].function)
+        assertEquals(Position.Value.TOP, tv1[1][Position].position)
     }
 
     @Test

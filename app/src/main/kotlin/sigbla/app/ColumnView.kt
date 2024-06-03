@@ -307,7 +307,10 @@ class ColumnView internal constructor(
         return newValue
     }
 
-    // TODO Other invoke for position?
+    operator fun invoke(newValue: Position.HorizontalCompanion?): Position.HorizontalCompanion? {
+        tableView[this][Position] = newValue
+        return newValue
+    }
 
     operator fun invoke(newValue: Unit?): Unit? {
         tableView[this] = newValue
