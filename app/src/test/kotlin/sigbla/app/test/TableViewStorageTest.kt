@@ -135,10 +135,12 @@ class TableViewStorageTest {
         tableView1["A"][CellWidth] = 200
         tableView1["A"][CellClasses] = listOf("A", "AB", "ABC")
         tableView1["A"][CellTopics] = listOf("B", "BB", "BBB")
+        tableView1["A"][Position] = Position.Left
 
         tableView1[1][CellHeight] = 100
         tableView1[1][CellClasses] = listOf("A", "AB", "ABC")
         tableView1[1][CellTopics] = listOf("B", "BB", "BBB")
+        tableView1[1][Position] = Position.Top
 
         tableView1["A", 1][CellHeight] = 100
         tableView1["A", 1][CellWidth] = 200
@@ -166,6 +168,7 @@ class TableViewStorageTest {
             assertEquals(v1[CellWidth].width, v2[CellWidth].width)
             assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
             assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
+            assertEquals(v1[Position].position, v2[Position].position)
         }
 
         assertFalse(it1.hasNext())
@@ -181,6 +184,7 @@ class TableViewStorageTest {
             assertEquals(v1[CellHeight].height, v2[CellHeight].height)
             assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
             assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
+            assertEquals(v1[Position].position, v2[Position].position)
         }
 
         assertFalse(it3.hasNext())
@@ -222,10 +226,12 @@ class TableViewStorageTest {
         tableView1["A"][CellWidth] = 200
         tableView1["A"][CellClasses] = listOf("A", "AB", "ABC")
         tableView1["A"][CellTopics] = listOf("B", "BB", "BBB")
+        tableView1["A"][Position] = Position.Right
 
         tableView1[1][CellHeight] = 100
         tableView1[1][CellClasses] = listOf("A", "AB", "ABC")
         tableView1[1][CellTopics] = listOf("B", "BB", "BBB")
+        tableView1[1][Position] = Position.Bottom
 
         tableView1["A", 1][CellHeight] = 100
         tableView1["A", 1][CellWidth] = 200
@@ -253,6 +259,7 @@ class TableViewStorageTest {
             assertEquals(v1[CellWidth].width, v2[CellWidth].width)
             assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
             assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
+            assertEquals(v1[Position].position, v2[Position].position)
         }
 
         assertFalse(it1.hasNext())
@@ -268,6 +275,7 @@ class TableViewStorageTest {
             assertEquals(v1[CellHeight].height, v2[CellHeight].height)
             assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
             assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
+            assertEquals(v1[Position].position, v2[Position].position)
         }
 
         assertFalse(it3.hasNext())
@@ -609,6 +617,11 @@ class TableViewStorageTest {
                             values.toList()
                         }
                     }
+                    if (ThreadLocalRandom.current().nextBoolean()) {
+                        if (ThreadLocalRandom.current().nextBoolean()) tableView1[column][Position] = Unit
+                        else tableView1[column][Position] = if (ThreadLocalRandom.current().nextBoolean())
+                            Position.Left else Position.Right
+                    }
                 }
 
                 if (ThreadLocalRandom.current().nextBoolean()) {
@@ -660,6 +673,11 @@ class TableViewStorageTest {
                                     }
                                     values.toList()
                                 }
+                            }
+                            if (ThreadLocalRandom.current().nextBoolean()) {
+                                if (ThreadLocalRandom.current().nextBoolean()) tableView1[r][Position] = Unit
+                                else tableView1[r][Position] = if (ThreadLocalRandom.current().nextBoolean())
+                                    Position.Top else Position.Bottom
                             }
                         }
 
@@ -736,6 +754,7 @@ class TableViewStorageTest {
                 assertEquals(v1[CellWidth].width, v2[CellWidth].width)
                 assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
                 assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
+                assertEquals(v1[Position].position, v2[Position].position)
             }
 
             assertFalse(it1.hasNext())
@@ -752,6 +771,7 @@ class TableViewStorageTest {
                 assertEquals(v1[CellHeight].height, v2[CellHeight].height)
                 assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
                 assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
+                assertEquals(v1[Position].position, v2[Position].position)
             }
 
             assertFalse(it3.hasNext())
