@@ -3,6 +3,7 @@
 package sigbla.app
 
 import sigbla.app.exceptions.InvalidCellHeightException
+import sigbla.app.exceptions.InvalidRowException
 import sigbla.app.pds.kollection.ImmutableSet as PSet
 import sigbla.app.pds.kollection.immutableSetOf
 import sigbla.app.pds.kollection.toImmutableSet
@@ -218,6 +219,57 @@ class RowView internal constructor(
         }
     }
 
+    operator fun get(position: Position.Companion): Position.Vertical<*> {
+        val ref = tableView.tableViewRef.get()
+        return when (ref.rowViews[index]?.positionValue) {
+            null -> Position.Vertical(this, Unit)
+            Position.Value.TOP -> Position.Top(this)
+            Position.Value.BOTTOM -> Position.Bottom(this)
+            else -> throw InvalidRowException("Unsupported position type: ${ref.rowViews[index]?.positionValue}")
+        }
+    }
+
+    operator fun set(position: Position.Companion, newPosition: Unit?) {
+        setRowPosition(null)
+    }
+
+    operator fun set(position: Position.Companion, newPosition: Position.Vertical<*>?) {
+        setRowPosition(newPosition?.asValue)
+    }
+
+    operator fun set(position: Position.Companion, newPosition: Position.VerticalCompanion?) {
+        setRowPosition(newPosition?.asValue)
+    }
+
+    private fun setRowPosition(position: Position.Value?) {
+        synchronized(tableView.eventProcessor) {
+            val (oldRef, newRef) = tableView.tableViewRef.refAction {
+                val oldMeta = it.rowViews[index]
+                val viewMeta = oldMeta?.copy(positionValue = position) ?: ViewMeta(positionValue = position)
+
+                it.copy(
+                    rowViews = it.rowViews.put(index, viewMeta),
+                    version = it.version + 1L
+                )
+            }
+
+            if (!tableView.eventProcessor.haveListeners()) return
+
+            val oldView = tableView.makeClone(ref = oldRef)
+            val newView = tableView.makeClone(ref = newRef)
+
+            val old = oldView[index][Position]
+            val new = newView[index][Position]
+
+            tableView.eventProcessor.publish(listOf(
+                TableViewListenerEvent<Position.Vertical<*>>(
+                    old,
+                    new
+                )
+            ) as List<TableViewListenerEvent<Any>>)
+        }
+    }
+
     operator fun invoke(newValue: RowView?): RowView? {
         tableView[this] = newValue
         return newValue
@@ -240,6 +292,16 @@ class RowView internal constructor(
 
     operator fun invoke(newValue: RowTransformer<*>?): RowTransformer<*>? {
         tableView[this][RowTransformer] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Position.Vertical<*>?): Position.Vertical<*>? {
+        tableView[this][Position] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Position.VerticalCompanion?): Position.VerticalCompanion? {
+        tableView[this][Position] = newValue
         return newValue
     }
 

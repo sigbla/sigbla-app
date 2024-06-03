@@ -226,6 +226,57 @@ class ColumnView internal constructor(
         }
     }
 
+    operator fun get(position: Position.Companion): Position.Horizontal<*> {
+        val ref = tableView.tableViewRef.get()
+        return when (ref.columnViews[header]?.positionValue) {
+            null -> Position.Horizontal(this, Unit)
+            Position.Value.LEFT -> Position.Left(this)
+            Position.Value.RIGHT -> Position.Right(this)
+            else -> throw InvalidColumnException("Unsupported position type: ${ref.columnViews[header]?.positionValue}")
+        }
+    }
+
+    operator fun set(position: Position.Companion, newPosition: Unit?) {
+        setColumnPosition(null)
+    }
+
+    operator fun set(position: Position.Companion, newPosition: Position.Horizontal<*>?) {
+        setColumnPosition(newPosition?.asValue)
+    }
+
+    operator fun set(position: Position.Companion, newPosition: Position.HorizontalCompanion?) {
+        setColumnPosition(newPosition?.asValue)
+    }
+
+    private fun setColumnPosition(position: Position.Value?) {
+        synchronized(tableView.eventProcessor) {
+            val (oldRef, newRef) = tableView.tableViewRef.refAction {
+                val oldMeta = it.columnViews[header]
+                val viewMeta = oldMeta?.copy(positionValue = position) ?: ViewMeta(positionValue = position)
+
+                it.copy(
+                    columnViews = it.columnViews.put(header, viewMeta),
+                    version = it.version + 1L
+                )
+            }
+
+            if (!tableView.eventProcessor.haveListeners()) return
+
+            val oldView = tableView.makeClone(ref = oldRef)
+            val newView = tableView.makeClone(ref = newRef)
+
+            val old = oldView[header][Position]
+            val new = newView[header][Position]
+
+            tableView.eventProcessor.publish(listOf(
+                TableViewListenerEvent<Position.Horizontal<*>>(
+                    old,
+                    new
+                )
+            ) as List<TableViewListenerEvent<Any>>)
+        }
+    }
+
     operator fun invoke(newValue: ColumnView?): ColumnView? {
         tableView[this] = newValue
         return newValue
@@ -248,6 +299,16 @@ class ColumnView internal constructor(
 
     operator fun invoke(newValue: ColumnTransformer<*>?): ColumnTransformer<*>? {
         tableView[this][ColumnTransformer] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Position.Horizontal<*>?): Position.Horizontal<*>? {
+        tableView[this][Position] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Position.HorizontalCompanion?): Position.HorizontalCompanion? {
+        tableView[this][Position] = newValue
         return newValue
     }
 

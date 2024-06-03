@@ -1297,6 +1297,7 @@ fun generateForColumnView() {
         tableView["A"][CellTopics] = "ct-1"
         val ct: Column.() -> Unit = {}
         tableView["A"][ColumnTransformer] = ct
+        tableView["A"][Position] = Position.Left
 
         val sourceColumnView = tableView["A"]
 
@@ -1305,11 +1306,13 @@ fun generateForColumnView() {
             assertEquals(setOf("cc-1"), sourceColumnView[CellClasses].classes)
             assertEquals(setOf("ct-1"), sourceColumnView[CellTopics].topics)
             assertEquals(ct, sourceColumnView[ColumnTransformer].function)
+            assertEquals(Position.Value.LEFT, sourceColumnView[Position].position)
 
             assertEquals(sourceColumnView[CellWidth].width, columnView[CellWidth].width)
             assertEquals(sourceColumnView[CellClasses].classes, columnView[CellClasses].classes)
             assertEquals(sourceColumnView[CellTopics].topics, columnView[CellTopics].topics)
             assertEquals(sourceColumnView[ColumnTransformer].function, columnView[ColumnTransformer].function)
+            assertEquals(sourceColumnView[Position].position, columnView[Position].position)
         }
 
         fun unitCompare(columnView: ColumnView) {
@@ -1317,6 +1320,7 @@ fun generateForColumnView() {
             assertEquals(setOf<String>(), columnView[CellClasses].classes)
             assertEquals(setOf<String>(), columnView[CellTopics].topics)
             assertEquals(Unit, columnView[ColumnTransformer].function)
+            assertEquals(Unit, columnView[Position].position)
         }
     """.trimIndent())
 
@@ -1446,6 +1450,7 @@ fun generateForRowView() {
         tableView[1][CellTopics] = "ct-1"
         val ct: Row.() -> Unit = {}
         tableView[1][RowTransformer] = ct
+        tableView[1][Position] = Position.Top
 
         val sourceRowView = tableView[1]
 
@@ -1454,11 +1459,13 @@ fun generateForRowView() {
             assertEquals(setOf("cc-1"), sourceRowView[CellClasses].classes)
             assertEquals(setOf("ct-1"), sourceRowView[CellTopics].topics)
             assertEquals(ct, sourceRowView[RowTransformer].function)
+            assertEquals(Position.Value.TOP, sourceRowView[Position].position)
 
             assertEquals(sourceRowView[CellHeight].height, rowView[CellHeight].height)
             assertEquals(sourceRowView[CellClasses].classes, rowView[CellClasses].classes)
             assertEquals(sourceRowView[CellTopics].topics, rowView[CellTopics].topics)
             assertEquals(sourceRowView[RowTransformer].function, rowView[RowTransformer].function)
+            assertEquals(sourceRowView[Position].position, rowView[Position].position)
         }
 
         fun unitCompare(rowView: RowView) {
@@ -1466,6 +1473,7 @@ fun generateForRowView() {
             assertEquals(setOf<String>(), rowView[CellClasses].classes)
             assertEquals(setOf<String>(), rowView[CellTopics].topics)
             assertEquals(Unit, rowView[RowTransformer].function)
+            assertEquals(Unit, rowView[Position].position)
         }
     """.trimIndent())
 

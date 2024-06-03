@@ -226,6 +226,14 @@ class HashCodeEqualsTest {
         val emptyResources1 = tableView1[Resources].also { it(listOf("B" to handler1, "A" to handler2)) }
         val filledResources1 = tableView1[Resources]
 
+        val unitHorizontal1 = tableView1["A"][Position].also { it(Position.Left) }
+        val leftHorizontal1 = tableView1["A"][Position].also { it(Position.Right) }
+        val rightHorizontal1 = tableView1["A"][Position]
+
+        val unitVertical1 = tableView1[1][Position].also { it(Position.Top) }
+        val topVertical1 = tableView1[1][Position].also { it(Position.Bottom) }
+        val bottomVertical1 = tableView1[1][Position]
+
         val tableView2 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         val unitCellHeight2 = tableView2[CellHeight].also { it(100) }
@@ -255,6 +263,15 @@ class HashCodeEqualsTest {
         val emptyResources2 = tableView2[Resources].also { it(listOf("B" to handler1, "A" to handler2)) }
         val filledResources2 = tableView2[Resources]
 
+        val unitHorizontal2 = tableView2["A"][Position].also { it(Position.Left) }
+        val leftHorizontal2 = tableView2["A"][Position].also { it(Position.Right) }
+        val rightHorizontal2 = tableView2["A"][Position]
+
+        val unitVertical2 = tableView2[1][Position].also { it(Position.Top) }
+        val topVertical2 = tableView2[1][Position].also { it(Position.Bottom) }
+        val bottomVertical2 = tableView2[1][Position]
+
+        assertEquals(tableView1[CellHeight], tableView1[CellHeight])
         assertNotEquals(unitCellHeight1, unitCellHeight2)
         assertEquals(unitCellHeight1.height, unitCellHeight2.height)
         assertTrue(unitCellHeight1 in unitCellHeight2)
@@ -269,6 +286,7 @@ class HashCodeEqualsTest {
         assertTrue(100 in pixelCellHeight1)
         assertTrue(100L in pixelCellHeight2)
 
+        assertEquals(tableView1[CellWidth], tableView1[CellWidth])
         assertNotEquals(unitCellWidth1, unitCellWidth2)
         assertEquals(unitCellWidth1.width, unitCellWidth2.width)
         assertTrue(unitCellWidth1 in unitCellWidth2)
@@ -283,6 +301,7 @@ class HashCodeEqualsTest {
         assertTrue(100 in pixelCellWidth1)
         assertTrue(100L in pixelCellWidth2)
 
+        assertEquals(tableView1[CellClasses], tableView1[CellClasses])
         assertNotEquals(emptyCellClasses1, emptyCellClasses2)
         assertEquals(emptyCellClasses1.classes, emptyCellClasses2.classes)
         assertTrue(emptyCellClasses1 in emptyCellClasses2)
@@ -304,6 +323,7 @@ class HashCodeEqualsTest {
         assertFalse(setOf("A", "B", "C") in filledCellClasses1)
         assertFalse(listOf("A", "B", "C") in filledCellClasses1)
 
+        assertEquals(tableView1[CellTopics], tableView1[CellTopics])
         assertNotEquals(emptyCellTopics1, emptyCellTopics2)
         assertEquals(emptyCellTopics1.topics, emptyCellTopics2.topics)
         assertTrue(emptyCellTopics1 in emptyCellTopics2)
@@ -325,6 +345,7 @@ class HashCodeEqualsTest {
         assertFalse(setOf("A", "B", "C") in filledCellTopics1)
         assertFalse(listOf("A", "B", "C") in filledCellTopics1)
 
+        assertEquals(tableView1[TableTransformer], tableView1[TableTransformer])
         assertNotEquals(emptyTableTransformer1, emptyTableTransformer2)
         assertEquals(emptyTableTransformer1.function, emptyTableTransformer2.function)
         assertTrue(emptyTableTransformer1 in emptyTableTransformer2)
@@ -339,6 +360,7 @@ class HashCodeEqualsTest {
         assertTrue(tableTransformerFunction in filledTableTransformer1)
         assertTrue((filledTableTransformer1.function as? Table.() -> Unit)!! in filledTableTransformer2)
 
+        assertEquals(tableView1["A"][ColumnTransformer], tableView1["A"][ColumnTransformer])
         assertNotEquals(emptyColumnTransformer1, emptyColumnTransformer2)
         assertEquals(emptyColumnTransformer1.function, emptyColumnTransformer2.function)
         assertTrue(emptyColumnTransformer1 in emptyColumnTransformer2)
@@ -353,6 +375,7 @@ class HashCodeEqualsTest {
         assertTrue(columnTransformerFunction in filledColumnTransformer1)
         assertTrue((filledColumnTransformer1.function as? Column.() -> Unit)!! in filledColumnTransformer2)
 
+        assertEquals(tableView1[1][RowTransformer], tableView1[1][RowTransformer])
         assertNotEquals(emptyRowTransformer1, emptyRowTransformer2)
         assertEquals(emptyRowTransformer1.function, emptyRowTransformer2.function)
         assertTrue(emptyRowTransformer1 in emptyRowTransformer2)
@@ -367,6 +390,7 @@ class HashCodeEqualsTest {
         assertTrue(rowTransformerFunction in filledRowTransformer1)
         assertTrue((filledRowTransformer1.function as? Row.() -> Unit)!! in filledRowTransformer2)
 
+        assertEquals(tableView1["A", 1][CellTransformer], tableView1["A", 1][CellTransformer])
         assertNotEquals(emptyCellTransformer1, emptyCellTransformer2)
         assertEquals(emptyCellTransformer1.function, emptyCellTransformer2.function)
         assertTrue(emptyCellTransformer1 in emptyCellTransformer2)
@@ -381,6 +405,7 @@ class HashCodeEqualsTest {
         assertTrue(cellTransformerFunction in filledCellTransformer1)
         assertTrue((filledCellTransformer1.function as? Cell<*>.() -> Unit)!! in filledCellTransformer2)
 
+        assertEquals(tableView1[Resources], tableView1[Resources])
         assertNotEquals(emptyResources1, emptyResources2)
         assertEquals(emptyResources1.resources, emptyResources2.resources)
         assertTrue(emptyResources1 in emptyResources2)
@@ -401,6 +426,29 @@ class HashCodeEqualsTest {
         assertTrue(mapOf("B" to handler1) in filledResources2)
         assertFalse(mapOf("B" to handler1) in emptyResources2)
 
+        assertEquals(tableView1["A"][Position], tableView1["A"][Position])
+        assertNotEquals(unitHorizontal1, unitHorizontal2)
+        assertEquals(unitHorizontal1.position, unitHorizontal2.position)
+        assertTrue(unitHorizontal1 in unitHorizontal2)
+        assertTrue(unitHorizontal2 in unitHorizontal1)
+
+        assertNotEquals(leftHorizontal1, leftHorizontal2)
+        assertEquals(leftHorizontal1.position, leftHorizontal2.position)
+        assertTrue(leftHorizontal1 in leftHorizontal2)
+        assertTrue(leftHorizontal2 in leftHorizontal1)
+
+        assertEquals(tableView1[1][Position], tableView1[1][Position])
+        assertNotEquals(topVertical1, topVertical2)
+        assertEquals(topVertical1.position, topVertical2.position)
+        assertTrue(topVertical1 in topVertical2)
+        assertTrue(topVertical2 in topVertical1)
+
+        assertTrue(Unit in unitHorizontal1)
+        assertTrue(Position.Value.LEFT in leftHorizontal1)
+        assertTrue(Position.Left in leftHorizontal2)
+        assertTrue(Position.Value.TOP in topVertical1)
+        assertTrue(Position.Top in topVertical2)
+
         assertEquals(unitCellHeight1.hashCode(), unitCellHeight2.hashCode())
         assertEquals(pixelCellHeight1.hashCode(), pixelCellHeight2.hashCode())
         assertEquals(unitCellWidth1.hashCode(), unitCellWidth2.hashCode())
@@ -419,6 +467,13 @@ class HashCodeEqualsTest {
         assertEquals(filledCellTransformer1.hashCode(), filledCellTransformer2.hashCode())
         assertEquals(emptyResources1.hashCode(), emptyResources2.hashCode())
         assertEquals(filledResources1.hashCode(), filledResources2.hashCode())
+        assertEquals(unitHorizontal1.hashCode(), unitHorizontal2.hashCode())
+        assertEquals(unitVertical1.hashCode(), unitVertical2.hashCode())
+        assertEquals(unitVertical1.hashCode(), unitHorizontal1.hashCode())
+        assertEquals(leftHorizontal1.hashCode(), leftHorizontal2.hashCode())
+        assertEquals(rightHorizontal1.hashCode(), rightHorizontal2.hashCode())
+        assertEquals(topVertical1.hashCode(), topVertical2.hashCode())
+        assertEquals(bottomVertical1.hashCode(), bottomVertical2.hashCode())
     }
 
     @Test

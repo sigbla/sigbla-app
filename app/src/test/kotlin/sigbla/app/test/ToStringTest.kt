@@ -191,6 +191,22 @@ class ToStringTest {
         // These are in order they are added
         assertEquals("Resources[B, A]", filledResources.toString())
 
+        val unitHorizontal = tableView["A"][Position].also { it(Position.Left) }
+        val leftHorizontal = tableView["A"][Position].also { it(Position.Right) }
+        val rightHorizontal = tableView["A"][Position]
+
+        assertEquals("Horizontal", unitHorizontal.toString())
+        assertEquals("Left", leftHorizontal.toString())
+        assertEquals("Right", rightHorizontal.toString())
+
+        val unitVertical = tableView[1][Position].also { it(Position.Top) }
+        val topVertical = tableView[1][Position].also { it(Position.Bottom) }
+        val bottomVertical = tableView[1][Position]
+
+        assertEquals("Vertical", unitVertical.toString())
+        assertEquals("Top", topVertical.toString())
+        assertEquals("Bottom", bottomVertical.toString())
+
         val labels = mutableListOf<String>()
 
         for (i in 1..40) {

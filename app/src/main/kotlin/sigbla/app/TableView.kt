@@ -44,7 +44,8 @@ internal data class ViewMeta(
     val cellHeight: Long? = null,
     val cellWidth: Long? = null,
     val cellClasses: PSet<String>? = null,
-    val cellTopics: PSet<String>? = null
+    val cellTopics: PSet<String>? = null,
+    val positionValue: Position.Value? = null
 )
 
 internal data class TableViewRef(
@@ -649,6 +650,7 @@ class TableView internal constructor(
                 TableViewListenerEvent(oldColumnView[CellClasses], newColumnView[CellClasses]),
                 TableViewListenerEvent(oldColumnView[CellTopics], newColumnView[CellTopics]),
                 TableViewListenerEvent(oldColumnView[CellWidth], newColumnView[CellWidth]),
+                TableViewListenerEvent(oldColumnView[Position], newColumnView[Position]),
                 TableViewListenerEvent(oldColumnView[ColumnTransformer], newColumnView[ColumnTransformer])
             ))
         }
@@ -733,6 +735,7 @@ class TableView internal constructor(
                 TableViewListenerEvent(oldRowView[CellClasses], newRowView[CellClasses]),
                 TableViewListenerEvent(oldRowView[CellHeight], newRowView[CellHeight]),
                 TableViewListenerEvent(oldRowView[CellTopics], newRowView[CellTopics]),
+                TableViewListenerEvent(oldRowView[Position], newRowView[Position]),
                 TableViewListenerEvent(oldRowView[RowTransformer], newRowView[RowTransformer])
             ))
         }
@@ -1471,6 +1474,18 @@ class FunctionTableTransformer internal constructor(
 }
 
 // TODO Should introduce a generic type S like else where..?
+// TODO Refactor this to Resource and allow for:
+//      tableView[Resource["foo/bar"]] = handler, etc
+//  which also allows for global resources with
+//      Resource["foo/bar"] = handler
+//  and
+//      tableView.resources and Resource.resources for getting all
+//  and
+//      tableView[Resource["foo/bar"]] = Unit and Resource["foo/bar"] = Unit
+//  to clear (or via invoke). Allow for clear(resource) and clear(resources) too..
+//  Each Resource instance, obtained from tableView[Resource["foo/bar"]] or Resource["foo/bar"]
+//  contain a path and a handler field + source (tableView or self based on type S)
+//  While path must be defined, handler might not, so we need UnitResource and HandlerResource?
 class Resources internal constructor(
     val source: TableView,
     internal val _resources: PMap<String, Pair<Long, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>
@@ -1565,6 +1580,7 @@ class Resources internal constructor(
 }
 
 // TODO Should introduce a generic type S like else where..
+// TODO Instead of table being nullable, have UnitSource and TableSource?
 class SourceTable internal constructor(
     val source: TableView,
     val table: Table?
@@ -1590,6 +1606,131 @@ class SourceTable internal constructor(
     override fun toString() = "SourceTable[$source, ${table?.toString() ?: "null"}]"
 }
 
+sealed class Position<S, T>(
+    val source: S,
+    val position: T
+) {
+    enum class Value { LEFT, RIGHT, TOP, BOTTOM }
+
+    open val isValue: Boolean = false
+    open val asValue: Value? = null
+
+    operator fun contains(other: Value) = position == other
+    operator fun contains(other: Unit) = position == other
+
+    override fun hashCode() = Objects.hashCode(this.position)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Position<*, *>
+
+        if (source != other.source) return false
+        if (position != other.position) return false
+
+        return true
+    }
+
+    open class Horizontal<T> internal constructor(source: ColumnView, position: T) : Position<ColumnView, T>(source, position) {
+        operator fun contains(other: Horizontal<*>) = position == other.position
+        operator fun contains(other: HorizontalCompanion) = position == other.asValue
+
+        operator fun invoke(newValue: Unit?): Unit? {
+            source[Position] = newValue
+            return newValue
+        }
+
+        operator fun invoke(newValue: Horizontal<*>?): Horizontal<*>? {
+            source[Position] = newValue
+            return newValue
+        }
+
+        operator fun invoke(newValue: HorizontalCompanion?): HorizontalCompanion? {
+            source[Position] = newValue
+            return newValue
+        }
+
+        override fun toString() = "Horizontal"
+    }
+
+    open class Vertical<T> internal constructor(source: RowView, position: T) : Position<RowView, T>(source, position) {
+        operator fun contains(other: Vertical<*>) = position == other.position
+        operator fun contains(other: VerticalCompanion) = position == other.asValue
+
+        operator fun invoke(newValue: Unit?): Unit? {
+            source[Position] = newValue
+            return newValue
+        }
+
+        operator fun invoke(newValue: Vertical<*>?): Vertical<*>? {
+            source[Position] = newValue
+            return newValue
+        }
+
+        operator fun invoke(newValue: VerticalCompanion?): VerticalCompanion? {
+            source[Position] = newValue
+            return newValue
+        }
+
+        override fun toString() = "Vertical"
+    }
+
+    interface HorizontalCompanion {
+        val asValue: Value
+    }
+
+    interface VerticalCompanion {
+        val asValue: Value
+    }
+
+    class Left internal constructor(source: ColumnView) : Horizontal<Value>(source, Value.LEFT) {
+        override val isValue: Boolean = true
+        override val asValue: Value = position
+
+        override fun toString() = "Left"
+
+        companion object : HorizontalCompanion {
+            override val asValue = Value.LEFT
+        }
+    }
+
+    class Right internal constructor(source: ColumnView) : Horizontal<Value>(source, Value.RIGHT) {
+        override val isValue: Boolean = true
+        override val asValue: Value = position
+
+        override fun toString() = "Right"
+
+        companion object : HorizontalCompanion {
+            override val asValue = Value.RIGHT
+        }
+    }
+
+    class Top internal constructor(source: RowView) : Vertical<Value>(source, Value.TOP) {
+        override val isValue: Boolean = true
+        override val asValue: Value = position
+
+        override fun toString() = "Top"
+
+        companion object : VerticalCompanion {
+            override val asValue = Value.TOP
+        }
+    }
+
+    class Bottom internal constructor(source: RowView) : Vertical<Value>(source, Value.BOTTOM) {
+        override val isValue: Boolean = true
+        override val asValue: Value = position
+
+        override fun toString() = "Bottom"
+
+        companion object : VerticalCompanion {
+            override val asValue = Value.BOTTOM
+        }
+    }
+
+    companion object
+}
+
 // TODO Add support for disabling marker, hide column and row headers
 data class ViewConfig(
     val marginTop: Long,
@@ -1601,6 +1742,11 @@ data class ViewConfig(
     val paddingBottom: Long,
     val paddingLeft: Long,
     val paddingRight: Long,
+
+    val topSeparatorHeight: Long,
+    val bottomSeparatorHeight: Long,
+    val leftSeparatorWidth: Long,
+    val rightSeparatorWidth: Long,
 
     val tableHtml: suspend PipelineContext<*, ApplicationCall>.() -> Unit,
     val tableScript: suspend PipelineContext<*, ApplicationCall>.() -> Unit,
@@ -1617,6 +1763,11 @@ fun compactViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
     paddingBottom = 0,
     paddingLeft = 0,
     paddingRight = 0,
+
+    topSeparatorHeight = 2,
+    bottomSeparatorHeight = 2,
+    leftSeparatorWidth = 2,
+    rightSeparatorWidth = 2,
 
     tableHtml = {
         call.respondText(ContentType.Text.Html, HttpStatusCode.OK) {
@@ -1637,6 +1788,11 @@ fun spaciousViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
     paddingBottom = 1,
     paddingLeft = 1,
     paddingRight = 1,
+
+    topSeparatorHeight = 3,
+    bottomSeparatorHeight = 3,
+    leftSeparatorWidth = 3,
+    rightSeparatorWidth = 3,
 
     tableHtml = {
         call.respondText(ContentType.Text.Html, HttpStatusCode.OK) {

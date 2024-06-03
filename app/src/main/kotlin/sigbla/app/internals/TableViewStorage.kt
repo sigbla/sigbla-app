@@ -155,6 +155,11 @@ internal fun load1(
                     tableView[header][CellWidth] = viewMeta.cellWidth
                     tableView[header][CellClasses] = viewMeta.cellClasses
                     tableView[header][CellTopics] = viewMeta.cellTopics
+                    when (viewMeta.positionValue) {
+                        Position.Value.LEFT -> tableView[header][Position] = Position.Left
+                        Position.Value.RIGHT -> tableView[header][Position] = Position.Right
+                        else -> tableView[header][Position] = Unit
+                    }
                 }
             }
         }
@@ -194,6 +199,11 @@ internal fun load1(
                 tableView[row][CellHeight] = viewMeta.cellHeight
                 tableView[row][CellClasses] = viewMeta.cellClasses
                 tableView[row][CellTopics] = viewMeta.cellTopics
+                when (viewMeta.positionValue) {
+                    Position.Value.TOP -> tableView[row][Position] = Position.Top
+                    Position.Value.BOTTOM -> tableView[row][Position] = Position.Bottom
+                    else -> tableView[row][Position] = Unit
+                }
             }
         }
 
@@ -508,12 +518,13 @@ private fun deserializeViewSection(inputStream: InputStream): ViewSection? {
 
 private fun serializeViewMeta(viewMeta: ViewMeta): ByteArray {
     ByteArrayOutputStream().use { baos ->
-        val haveHeight = if (viewMeta.cellHeight == null) 0 else   0b10000000
-        val haveWidth = if (viewMeta.cellWidth == null) 0 else     0b01000000
-        val haveClasses = if (viewMeta.cellClasses == null) 0 else 0b00100000
-        val haveTopics = if (viewMeta.cellTopics == null) 0 else   0b00010000
+        val haveHeight = if (viewMeta.cellHeight == null) 0 else      0b10000000
+        val haveWidth = if (viewMeta.cellWidth == null) 0 else        0b01000000
+        val haveClasses = if (viewMeta.cellClasses == null) 0 else    0b00100000
+        val haveTopics = if (viewMeta.cellTopics == null) 0 else      0b00010000
+        val havePosition = if (viewMeta.positionValue == null) 0 else 0b00001000
 
-        val options = haveHeight or haveWidth or haveClasses or haveTopics
+        val options = haveHeight or haveWidth or haveClasses or haveTopics or havePosition
 
         baos.write(SerializationUtils.fromInt(options))
 
@@ -537,16 +548,25 @@ private fun serializeViewMeta(viewMeta: ViewMeta): ByteArray {
                 }
             }
         }
+        if (viewMeta.positionValue != null) {
+            when (viewMeta.positionValue) {
+                Position.Value.BOTTOM -> baos.write(SerializationUtils.fromInt(0))
+                Position.Value.LEFT -> baos.write(SerializationUtils.fromInt(1))
+                Position.Value.RIGHT -> baos.write(SerializationUtils.fromInt(2))
+                Position.Value.TOP -> baos.write(SerializationUtils.fromInt(3))
+            }
+        }
 
         return baos.toByteArray()
     }
 }
 
 private fun deserializeViewMeta(inputStream: InputStream): ViewMeta {
-    val haveHeight =  0b10000000
-    val haveWidth =   0b01000000
-    val haveClasses = 0b00100000
-    val haveTopics =  0b00010000
+    val haveHeight =   0b10000000
+    val haveWidth =    0b01000000
+    val haveClasses =  0b00100000
+    val haveTopics =   0b00010000
+    val havePosition = 0b00001000
 
     val options = ByteArray(Int.SIZE_BYTES).let {
         if (inputStream.readNBytes(it, 0, it.size) != it.size) throw InvalidStorageException("Unable to read view meta options")
@@ -588,13 +608,13 @@ private fun deserializeViewMeta(inputStream: InputStream): ViewMeta {
 
     val cellTopics: PSet<String>? = if ((options and haveTopics) == haveTopics) {
         val topicsLength = ByteArray(Int.SIZE_BYTES).let {
-            if (inputStream.readNBytes(it, 0, it.size) != it.size) throw InvalidStorageException("Unable to read view meta classes length")
+            if (inputStream.readNBytes(it, 0, it.size) != it.size) throw InvalidStorageException("Unable to read view meta topics length")
             SerializationUtils.toInt(it)
         }
         val topics = mutableSetOf<String>()
         for (i in 0 until topicsLength) {
             val topicLength = ByteArray(Int.SIZE_BYTES).let {
-                if (inputStream.readNBytes(it, 0, it.size) != it.size) throw InvalidStorageException("Unable to read view meta classes length")
+                if (inputStream.readNBytes(it, 0, it.size) != it.size) throw InvalidStorageException("Unable to read view meta topics length")
                 SerializationUtils.toInt(it)
             }
             topics += ByteArray(topicLength).let {
@@ -605,5 +625,18 @@ private fun deserializeViewMeta(inputStream: InputStream): ViewMeta {
         topics.toImmutableSet()
     } else null
 
-    return ViewMeta(cellHeight, cellWidth, cellClasses, cellTopics)
+    val positionValue: Position.Value? = if ((options and havePosition) == havePosition) {
+        ByteArray(Int.SIZE_BYTES).let {
+            if (inputStream.readNBytes(it, 0, it.size) != it.size) throw InvalidStorageException("Unable to read view meta position value")
+            when (SerializationUtils.toInt(it)) {
+                0 -> Position.Value.BOTTOM
+                1 -> Position.Value.LEFT
+                2 -> Position.Value.RIGHT
+                3 -> Position.Value.TOP
+                else -> throw InvalidStorageException("Unsupported view meta position value")
+            }
+        }
+    } else null
+
+    return ViewMeta(cellHeight, cellWidth, cellClasses, cellTopics, positionValue)
 }
