@@ -45,7 +45,8 @@ internal data class ViewMeta(
     val cellWidth: Long? = null,
     val cellClasses: PSet<String>? = null,
     val cellTopics: PSet<String>? = null,
-    val positionValue: Position.Value? = null
+    val positionValue: Position.Value? = null,
+    val visibilityValue: Visibility.Value? = null
 )
 
 internal data class TableViewRef(
@@ -1725,6 +1726,97 @@ sealed class Position<S, T>(
 
         companion object : VerticalCompanion {
             override val asValue = Value.BOTTOM
+        }
+    }
+
+    companion object
+}
+
+sealed class Visibility<S, T>(
+    val source: S,
+    val visibility: T
+) {
+    enum class Value { SHOW, HIDE }
+
+    open val isValue: Boolean = false
+    open val asValue: Value? = null
+
+    operator fun contains(other: Visibility<*, *>) = visibility == other.visibility
+    operator fun contains(other: VisibilityCompanion) = visibility == other.asValue
+    operator fun contains(other: Value) = visibility == other
+    operator fun contains(other: Unit) = visibility == other
+
+    operator fun invoke(newValue: Unit?): Unit? {
+        when (val source = source) {
+            is ColumnView -> source[Visibility] = newValue
+            is RowView -> source[Visibility] = newValue
+        }
+
+        return newValue
+    }
+
+    operator fun invoke(newValue: Visibility<*, *>?): Visibility<*, *>? {
+        when (val source = source) {
+            is ColumnView -> source[Visibility] = newValue
+            is RowView -> source[Visibility] = newValue
+        }
+
+        return newValue
+    }
+
+    operator fun invoke(newValue: VisibilityCompanion?): VisibilityCompanion? {
+        when (val source = source) {
+            is ColumnView -> source[Visibility] = newValue
+            is RowView -> source[Visibility] = newValue
+        }
+
+        return newValue
+    }
+
+    override fun hashCode() = Objects.hashCode(this.visibility)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Visibility<*, *>
+
+        if (source != other.source) return false
+        if (visibility != other.visibility) return false
+
+        return true
+    }
+
+    interface VisibilityCompanion {
+        val asValue: Value
+    }
+
+    class Undefined<S> internal constructor(source: S) : Visibility<S, Unit>(source, Unit) {
+        override val isValue: Boolean = false
+        override val asValue: Value? = null
+
+        override fun toString() = "Undefined"
+    }
+
+    class Show<S> internal constructor(source: S) : Visibility<S, Value>(source, Value.SHOW) {
+        override val isValue: Boolean = true
+        override val asValue: Value = visibility
+
+        override fun toString() = "Show"
+
+        companion object : VisibilityCompanion {
+            override val asValue = Value.SHOW
+        }
+    }
+
+    class Hide<S> internal constructor(source: S) : Visibility<S, Value>(source, Value.HIDE) {
+        override val isValue: Boolean = true
+        override val asValue: Value = visibility
+
+        override fun toString() = "Hide"
+
+        companion object : VisibilityCompanion {
+            override val asValue = Value.HIDE
         }
     }
 
