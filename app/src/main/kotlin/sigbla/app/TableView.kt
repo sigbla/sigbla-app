@@ -652,6 +652,7 @@ class TableView internal constructor(
                 TableViewListenerEvent(oldColumnView[CellTopics], newColumnView[CellTopics]),
                 TableViewListenerEvent(oldColumnView[CellWidth], newColumnView[CellWidth]),
                 TableViewListenerEvent(oldColumnView[Position], newColumnView[Position]),
+                TableViewListenerEvent(oldColumnView[Visibility], newColumnView[Visibility]),
                 TableViewListenerEvent(oldColumnView[ColumnTransformer], newColumnView[ColumnTransformer])
             ))
         }
@@ -737,6 +738,7 @@ class TableView internal constructor(
                 TableViewListenerEvent(oldRowView[CellHeight], newRowView[CellHeight]),
                 TableViewListenerEvent(oldRowView[CellTopics], newRowView[CellTopics]),
                 TableViewListenerEvent(oldRowView[Position], newRowView[Position]),
+                TableViewListenerEvent(oldRowView[Visibility], newRowView[Visibility]),
                 TableViewListenerEvent(oldRowView[RowTransformer], newRowView[RowTransformer])
             ))
         }
@@ -1823,7 +1825,7 @@ sealed class Visibility<S, T>(
     companion object
 }
 
-// TODO Add support for disabling marker, hide column and row headers
+// TODO Add support for disabling marker, hide column and row headers, visibility behavior (show/hide undefined)
 data class ViewConfig(
     val marginTop: Long,
     val marginBottom: Long,
