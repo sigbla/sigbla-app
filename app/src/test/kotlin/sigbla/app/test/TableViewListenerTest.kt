@@ -99,24 +99,27 @@ class TableViewListenerTest {
         tv1["A"][CellClasses] = "cell-classes-1"
         tv1["A"][CellTopics] = "cell-topics-1"
         tv1["A"][Position] = Position.Left
+        tv1["A"][Visibility] = Visibility.Show
         //tv1["A"][CellTransformer] = {}
 
-        assertEquals(4, eventCount)
+        assertEquals(5, eventCount)
 
         //tv1["A"][CellHeight] = 50
         tv1["A"][CellWidth] = 50
         tv1["A"][CellClasses] = "cell-classes-2"
         tv1["A"][CellTopics] = "cell-topics-2"
         tv1["A"][Position] = Position.Right
+        tv1["A"][Visibility] = Visibility.Hide
         //tv1["A"][CellTransformer] = {}
 
-        assertEquals(8, eventCount)
+        assertEquals(10, eventCount)
 
         //tv1["A"][CellHeight] = 100
         tv1["A"][CellWidth] = 100
         tv1["A"][CellClasses] = "cell-classes-3"
         tv1["A"][CellTopics] = "cell-topics-3"
         tv1["A"][Position] = Unit
+        tv1["A"][Visibility] = Unit
         //tv1["A"][CellTransformer] = {}
 
         //tv1["B"][CellHeight] = 125
@@ -124,9 +127,10 @@ class TableViewListenerTest {
         tv1["B"][CellClasses] = "cell-classes-4"
         tv1["B"][CellTopics] = "cell-topics-4"
         tv1["B"][Position] = Position.Right
+        tv1["B"][Visibility] = Visibility.Show
         //tv1["B"][CellTransformer] = {}
 
-        assertEquals(16, eventCount)
+        assertEquals(20, eventCount)
 
         off(ref)
 
@@ -135,6 +139,7 @@ class TableViewListenerTest {
         tv1["B"][CellClasses] = "cell-classes-5"
         tv1["B"][CellTopics] = "cell-topics-5"
         tv1["B"][Position] = Unit
+        tv1["B"][Visibility] = Unit
         //tv1["B"][CellTransformer] = {}
 
         //tv1["C"][CellHeight] = 175
@@ -142,9 +147,10 @@ class TableViewListenerTest {
         tv1["C"][CellClasses] = "cell-classes-6"
         tv1["C"][CellTopics] = "cell-topics-6"
         tv1["C"][Position] = Position.Left
+        tv1["C"][Visibility] = Visibility.Show
         //tv1["C"][CellTransformer] = {}
 
-        assertEquals(16, eventCount)
+        assertEquals(20, eventCount)
     }
 
     @Test
@@ -166,24 +172,27 @@ class TableViewListenerTest {
         tv1[1][CellClasses] = "cell-classes-1"
         tv1[1][CellTopics] = "cell-topics-1"
         tv1[1][Position] = Position.Top
+        tv1[1][Visibility] = Visibility.Show
         //tv1[1][CellTransformer] = {}
 
-        assertEquals(4, eventCount)
+        assertEquals(5, eventCount)
 
         tv1[1][CellHeight] = 50
         //tv1[1][CellWidth] = 50
         tv1[1][CellClasses] = "cell-classes-2"
         tv1[1][CellTopics] = "cell-topics-2"
         tv1[1][Position] = Position.Bottom
+        tv1[1][Visibility] = Visibility.Hide
         //tv1[1][CellTransformer] = {}
 
-        assertEquals(8, eventCount)
+        assertEquals(10, eventCount)
 
         tv1[2][CellHeight] = 100
         //tv1[2][CellWidth] = 100
         tv1[2][CellClasses] = "cell-classes-3"
         tv1[2][CellTopics] = "cell-topics-3"
         tv1[2][Position] = Unit
+        tv1[2][Visibility] = Unit
         //tv1[2][CellTransformer] = {}
 
         tv1[3][CellHeight] = 125
@@ -191,9 +200,10 @@ class TableViewListenerTest {
         tv1[3][CellClasses] = "cell-classes-4"
         tv1[3][CellTopics] = "cell-topics-4"
         tv1[3][Position] = Position.Top
+        tv1[3][Visibility] = Visibility.Show
         //tv1[3][CellTransformer] = {}
 
-        assertEquals(16, eventCount)
+        assertEquals(20, eventCount)
 
         off(ref)
 
@@ -202,6 +212,7 @@ class TableViewListenerTest {
         tv1[3][CellClasses] = "cell-classes-5"
         tv1[3][CellTopics] = "cell-topics-5"
         tv1[3][Position] = Unit
+        tv1[3][Visibility] = Unit
         //tv1[3][CellTransformer] = {}
 
         tv1[4][CellHeight] = 175
@@ -209,9 +220,10 @@ class TableViewListenerTest {
         tv1[4][CellClasses] = "cell-classes-6"
         tv1[4][CellTopics] = "cell-topics-6"
         tv1[4][Position] = Position.Top
+        tv1[4][Visibility] = Visibility.Show
         //tv1[4][CellTransformer] = {}
 
-        assertEquals(16, eventCount)
+        assertEquals(20, eventCount)
     }
 
     @Test
@@ -331,6 +343,7 @@ class TableViewListenerTest {
         tv1["A"][CellClasses] = "cell-classes-1"
         tv1["A"][CellTopics] = "cell-topics-1"
         tv1["A"][Position] = Position.Left
+        tv1["A"][Visibility] = Visibility.Show
         //tv1["A"][CellTransformer] = {}
 
         val ref = on(tv1) {
@@ -339,22 +352,24 @@ class TableViewListenerTest {
             }
         }
 
-        assertEquals(4, eventCount)
+        assertEquals(5, eventCount)
 
         //tv1["A"][CellHeight] = 50
         tv1["A"][CellWidth] = 50
         tv1["A"][CellClasses] = "cell-classes-2"
         tv1["A"][CellTopics] = "cell-topics-2"
         tv1["A"][Position] = Position.Right
+        tv1["A"][Visibility] = Visibility.Hide
         //tv1["A"][CellTransformer] = {}
 
-        assertEquals(8, eventCount)
+        assertEquals(10, eventCount)
 
         //tv1["A"][CellHeight] = 75
         tv1["A"][CellWidth] = 75
         tv1["A"][CellClasses] = "cell-classes-3"
         tv1["A"][CellTopics] = "cell-topics-3"
         tv1["A"][Position] = Unit
+        tv1["A"][Visibility] = Unit
         //tv1["A"][CellTransformer] = {}
 
         //tv1["B"][CellHeight] = 100
@@ -362,9 +377,10 @@ class TableViewListenerTest {
         tv1["B"][CellClasses] = "cell-classes-4"
         tv1["B"][CellTopics] = "cell-topics-4"
         tv1["B"][Position] = Position.Left
+        tv1["B"][Visibility] = Visibility.Show
         //tv1["B"][CellTransformer] = {}
 
-        assertEquals(16, eventCount)
+        assertEquals(20, eventCount)
 
         off(ref)
 
@@ -373,6 +389,7 @@ class TableViewListenerTest {
         tv1["B"][CellClasses] = "cell-classes-5"
         tv1["B"][CellTopics] = "cell-topics-5"
         tv1["B"][Position] = Unit
+        tv1["B"][Visibility] = Unit
         //tv1["B"][CellTransformer] = {}
 
         //tv1["C"][CellHeight] = 150
@@ -380,9 +397,10 @@ class TableViewListenerTest {
         tv1["C"][CellClasses] = "cell-classes-6"
         tv1["C"][CellTopics] = "cell-topics-6"
         tv1["C"][Position] = Position.Left
+        tv1["C"][Visibility] = Visibility.Show
         //tv1["C"][CellTransformer] = {}
 
-        assertEquals(16, eventCount)
+        assertEquals(20, eventCount)
     }
 
     @Test
@@ -396,6 +414,7 @@ class TableViewListenerTest {
         tv1[1][CellClasses] = "cell-classes-1"
         tv1[1][CellTopics] = "cell-topics-1"
         tv1[1][Position] = Position.Top
+        tv1[1][Visibility] = Visibility.Show
         //tv1[1][CellTransformer] = {}
 
         val ref = on(tv1) {
@@ -404,22 +423,24 @@ class TableViewListenerTest {
             }
         }
 
-        assertEquals(4, eventCount)
+        assertEquals(5, eventCount)
 
         tv1[1][CellHeight] = 50
         //tv1[1][CellWidth] = 50
         tv1[1][CellClasses] = "cell-classes-2"
         tv1[1][CellTopics] = "cell-topics-2"
         tv1[1][Position] = Position.Bottom
+        tv1[1][Visibility] = Visibility.Hide
         //tv1[1][CellTransformer] = {}
 
-        assertEquals(8, eventCount)
+        assertEquals(10, eventCount)
 
         tv1[2][CellHeight] = 75
         //tv1[2][CellWidth] = 75
         tv1[2][CellClasses] = "cell-classes-3"
         tv1[2][CellTopics] = "cell-topics-3"
         tv1[2][Position] = Position.Top
+        tv1[2][Visibility] = Visibility.Show
         //tv1[2][CellTransformer] = {}
 
         tv1[3][CellHeight] = 100
@@ -427,9 +448,10 @@ class TableViewListenerTest {
         tv1[3][CellClasses] = "cell-classes-4"
         tv1[3][CellTopics] = "cell-topics-4"
         tv1[3][Position] = Position.Top
+        tv1[3][Visibility] = Visibility.Show
         //tv1[3][CellTransformer] = {}
 
-        assertEquals(16, eventCount)
+        assertEquals(20, eventCount)
 
         off(ref)
 
@@ -438,6 +460,7 @@ class TableViewListenerTest {
         tv1[3][CellClasses] = "cell-classes-5"
         tv1[3][CellTopics] = "cell-topics-5"
         tv1[3][Position] = Unit
+        tv1[3][Visibility] = Unit
         //tv1[3][CellTransformer] = {}
 
         tv1[4][CellHeight] = 150
@@ -445,9 +468,10 @@ class TableViewListenerTest {
         tv1[4][CellClasses] = "cell-classes-6"
         tv1[4][CellTopics] = "cell-topics-6"
         tv1[4][Position] = Position.Top
+        tv1[4][Visibility] = Visibility.Show
         //tv1[4][CellTransformer] = {}
 
-        assertEquals(16, eventCount)
+        assertEquals(20, eventCount)
     }
 
     @Test
@@ -541,6 +565,7 @@ class TableViewListenerTest {
         tv1["A"][CellClasses] = "cell-classes-1"
         tv1["A"][CellTopics] = "cell-topics-1"
         tv1["A"][Position] = Position.Left
+        tv1["A"][Visibility] = Visibility.Show
         //tv1["A"][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -567,6 +592,7 @@ class TableViewListenerTest {
         tv1[1][CellClasses] = "cell-classes-1"
         tv1[1][CellTopics] = "cell-topics-1"
         tv1[1][Position] = Position.Top
+        tv1[1][Visibility] = Visibility.Show
         //tv1[1][CellTransformer] = {}
 
         assertEquals(0, eventCount)
@@ -641,6 +667,7 @@ class TableViewListenerTest {
         tv1["A"][CellClasses] = "cell-classes-1"
         tv1["A"][CellTopics] = "cell-topics-1"
         tv1["A"][Position] = Position.Left
+        tv1["A"][Visibility] = Visibility.Show
         //tv1["A"][CellTransformer] = {}
 
         on(tv1) {
@@ -651,16 +678,17 @@ class TableViewListenerTest {
             }
         }
 
-        assertEquals(4, eventCount)
+        assertEquals(5, eventCount)
 
         //tv1["A"][CellHeight] = 50
         tv1["A"][CellWidth] = 50
         tv1["A"][CellClasses] = "cell-classes-2"
         tv1["A"][CellTopics] = "cell-topics-2"
         tv1["A"][Position] = Position.Right
+        tv1["A"][Visibility] = Visibility.Hide
         //tv1["A"][CellTransformer] = {}
 
-        assertEquals(4, eventCount)
+        assertEquals(5, eventCount)
     }
 
     @Test
@@ -674,6 +702,7 @@ class TableViewListenerTest {
         tv1[1][CellClasses] = "cell-classes-1"
         tv1[1][CellTopics] = "cell-topics-1"
         tv1[1][Position] = Position.Top
+        tv1[1][Visibility] = Visibility.Show
         //tv1[1][CellTransformer] = {}
 
         on(tv1) {
@@ -684,16 +713,17 @@ class TableViewListenerTest {
             }
         }
 
-        assertEquals(4, eventCount)
+        assertEquals(5, eventCount)
 
         tv1[1][CellHeight] = 50
         //tv1[1][CellWidth] = 50
         tv1[1][CellClasses] = "cell-classes-2"
         tv1[1][CellTopics] = "cell-topics-2"
         tv1[1][Position] = Position.Bottom
+        tv1[1][Visibility] = Visibility.Hide
         //tv1[1][CellTransformer] = {}
 
-        assertEquals(4, eventCount)
+        assertEquals(5, eventCount)
     }
 
     @Test
@@ -1279,6 +1309,7 @@ class TableViewListenerTest {
         tv1["A"][CellClasses] = "cell-classes-1"
         tv1["A"][CellTopics] = "cell-topics-1"
         tv1["A"][Position] = Position.Left
+        tv1["A"][Visibility] = Visibility.Show
         tv1["A"][ColumnTransformer] = ct1
 
         var init = true
@@ -1317,6 +1348,17 @@ class TableViewListenerTest {
                             assertEquals(Position.Value.LEFT, (it.newValue as Position<*, *>).position)
                             assertEquals(oldView["A"], (it.oldValue as Position<*, *>).source)
                             assertEquals(newView["A"], (it.newValue as Position<*, *>).source)
+                        }
+
+                        is Visibility<*, *> -> {
+                            assertTrue(it.oldValue is Visibility.Undefined<*>)
+                            assertFalse(it.oldValue is Visibility.Show<*>)
+                            assertFalse(it.oldValue is Visibility.Hide<*>)
+                            assertEquals(Unit, (it.oldValue as Visibility<*, *>).visibility)
+                            assertTrue(it.newValue is Visibility.Show<*>)
+                            assertEquals(Visibility.Value.SHOW, (it.newValue as Visibility<*, *>).visibility)
+                            assertEquals(oldView["A"], (it.oldValue as Visibility<*, *>).source)
+                            assertEquals(newView["A"], (it.newValue as Visibility<*, *>).source)
                         }
 
                         is ColumnTransformer<*> -> {
@@ -1361,6 +1403,15 @@ class TableViewListenerTest {
                             assertEquals(newView["A"], (it.newValue as Position<*, *>).source)
                         }
 
+                        is Visibility<*, *> -> {
+                            assertTrue(it.oldValue is Visibility.Show<*>)
+                            assertTrue(it.newValue is Visibility.Hide<*>)
+                            assertEquals(Visibility.Value.SHOW, (it.oldValue as Visibility<*, *>).visibility)
+                            assertEquals(Visibility.Value.HIDE, (it.newValue as Visibility<*, *>).visibility)
+                            assertEquals(oldView["A"], (it.oldValue as Visibility<*, *>).source)
+                            assertEquals(newView["A"], (it.newValue as Visibility<*, *>).source)
+                        }
+
                         is ColumnTransformer<*> -> {
                             assertEquals(ct1, (it.oldValue as ColumnTransformer<*>).function)
                             assertEquals(ct2, (it.newValue as ColumnTransformer<*>).function)
@@ -1380,6 +1431,7 @@ class TableViewListenerTest {
         tv1["A"][CellClasses] = "cell-classes-2"
         tv1["A"][CellTopics] = "cell-topics-2"
         tv1["A"][Position] = Position.Right
+        tv1["A"][Visibility] = Visibility.Hide
         tv1["A"][ColumnTransformer] = ct2
     }
 
@@ -1395,6 +1447,7 @@ class TableViewListenerTest {
         tv1[1][CellClasses] = "cell-classes-1"
         tv1[1][CellTopics] = "cell-topics-1"
         tv1[1][Position] = Position.Top
+        tv1[1][Visibility] = Visibility.Show
         tv1[1][RowTransformer] = rt1
 
         var init = true
@@ -1433,6 +1486,17 @@ class TableViewListenerTest {
                             assertEquals(Position.Value.TOP, (it.newValue as Position<*, *>).position)
                             assertEquals(oldView[1], (it.oldValue as Position<*, *>).source)
                             assertEquals(newView[1], (it.newValue as Position<*, *>).source)
+                        }
+
+                        is Visibility<*, *> -> {
+                            assertTrue(it.oldValue is Visibility.Undefined<*>)
+                            assertFalse(it.oldValue is Visibility.Show<*>)
+                            assertFalse(it.oldValue is Visibility.Hide<*>)
+                            assertEquals(Unit, (it.oldValue as Visibility<*, *>).visibility)
+                            assertTrue(it.newValue is Visibility.Show<*>)
+                            assertEquals(Visibility.Value.SHOW, (it.newValue as Visibility<*, *>).visibility)
+                            assertEquals(oldView[1], (it.oldValue as Visibility<*, *>).source)
+                            assertEquals(newView[1], (it.newValue as Visibility<*, *>).source)
                         }
 
                         is RowTransformer<*> -> {
@@ -1477,6 +1541,15 @@ class TableViewListenerTest {
                             assertEquals(newView[1], (it.newValue as Position<*, *>).source)
                         }
 
+                        is Visibility<*, *> -> {
+                            assertTrue(it.oldValue is Visibility.Show<*>)
+                            assertTrue(it.newValue is Visibility.Hide<*>)
+                            assertEquals(Visibility.Value.SHOW, (it.oldValue as Visibility<*, *>).visibility)
+                            assertEquals(Visibility.Value.HIDE, (it.newValue as Visibility<*, *>).visibility)
+                            assertEquals(oldView[1], (it.oldValue as Visibility<*, *>).source)
+                            assertEquals(newView[1], (it.newValue as Visibility<*, *>).source)
+                        }
+
                         is RowTransformer<*> -> {
                             assertEquals(rt1, (it.oldValue as RowTransformer<*>).function)
                             assertEquals(rt2, (it.newValue as RowTransformer<*>).function)
@@ -1496,6 +1569,7 @@ class TableViewListenerTest {
         tv1[1][CellClasses] = "cell-classes-2"
         tv1[1][CellTopics] = "cell-topics-2"
         tv1[1][Position] = Position.Bottom
+        tv1[1][Visibility] = Visibility.Hide
         tv1[1][RowTransformer] = rt2
     }
 
@@ -1672,6 +1746,7 @@ class TableViewListenerTest {
         var eventCount6 = 0
         var eventCount7 = 0
         var eventCount8 = 0
+        var eventCount9 = 0
 
         on<CellHeight<*, *>>(tv1) events {
             eventCount1 += count()
@@ -1705,6 +1780,10 @@ class TableViewListenerTest {
             eventCount8 += count()
         }
 
+        on<Visibility<*, *>>(tv1) events {
+            eventCount8 += count()
+        }
+
         assertEquals(1, eventCount1)
         assertEquals(1, eventCount2)
         assertEquals(1, eventCount3)
@@ -1713,6 +1792,7 @@ class TableViewListenerTest {
         assertEquals(1, eventCount6)
         assertEquals(1, eventCount7)
         assertEquals(0, eventCount8)
+        assertEquals(0, eventCount9)
 
         tv1[CellHeight] = 45
 
@@ -1724,6 +1804,7 @@ class TableViewListenerTest {
         assertEquals(1, eventCount6)
         assertEquals(1, eventCount7)
         assertEquals(0, eventCount8)
+        assertEquals(0, eventCount9)
 
         tv1[CellWidth] = 60
 
@@ -1735,6 +1816,7 @@ class TableViewListenerTest {
         assertEquals(1, eventCount6)
         assertEquals(1, eventCount7)
         assertEquals(0, eventCount8)
+        assertEquals(0, eventCount9)
 
         tv1[CellClasses] = "cell-classes-2"
 
@@ -1746,6 +1828,7 @@ class TableViewListenerTest {
         assertEquals(1, eventCount6)
         assertEquals(1, eventCount7)
         assertEquals(0, eventCount8)
+        assertEquals(0, eventCount9)
 
         tv1[CellTopics] = "cell-topics-2"
 
@@ -1757,6 +1840,7 @@ class TableViewListenerTest {
         assertEquals(1, eventCount6)
         assertEquals(1, eventCount7)
         assertEquals(0, eventCount8)
+        assertEquals(0, eventCount9)
 
         tv1[Resources] = r2
 
@@ -1768,6 +1852,7 @@ class TableViewListenerTest {
         assertEquals(1, eventCount6)
         assertEquals(1, eventCount7)
         assertEquals(0, eventCount8)
+        assertEquals(0, eventCount9)
 
         tv1[Table] = t2
 
@@ -1779,6 +1864,7 @@ class TableViewListenerTest {
         assertEquals(2, eventCount6)
         assertEquals(1, eventCount7)
         assertEquals(0, eventCount8)
+        assertEquals(0, eventCount9)
 
         tv1[TableTransformer] = tt2
 
@@ -1790,6 +1876,7 @@ class TableViewListenerTest {
         assertEquals(2, eventCount6)
         assertEquals(2, eventCount7)
         assertEquals(0, eventCount8)
+        assertEquals(0, eventCount9)
     }
 
     @Test
@@ -1872,6 +1959,16 @@ class TableViewListenerTest {
                         assertEquals(oldView["B"], (it.oldValue as Position<*, *>).source)
                         assertEquals(newView["B"], (it.newValue as Position<*, *>).source)
                     }
+                    is Visibility<*, *> -> {
+                        assertTrue(it.oldValue is Visibility.Undefined<*>)
+                        assertFalse(it.oldValue is Visibility.Show<*>)
+                        assertFalse(it.oldValue is Visibility.Hide<*>)
+                        assertEquals(Unit, (it.oldValue as Visibility<*, *>).visibility)
+                        assertTrue(it.newValue is Visibility.Show<*>)
+                        assertEquals(Visibility.Value.SHOW, (it.newValue as Visibility<*, *>).visibility)
+                        assertEquals(oldView["B"], (it.oldValue as Visibility<*, *>).source)
+                        assertEquals(newView["B"], (it.newValue as Visibility<*, *>).source)
+                    }
                     else -> assertTrue(false)
                 }
             }
@@ -1882,10 +1979,11 @@ class TableViewListenerTest {
         tv1["A"][ColumnTransformer] = ct
         tv1["A"][CellWidth] = 1000
         tv1["A"][Position] = Position.Left
+        tv1["A"][Visibility] = Visibility.Show
 
         assertEquals(0, count)
         tv1["B"] = tv1["A"]
-        assertEquals(5, count)
+        assertEquals(6, count)
     }
 
     @Test
@@ -1934,6 +2032,16 @@ class TableViewListenerTest {
                         assertEquals(oldView[2], (it.oldValue as Position<*, *>).source)
                         assertEquals(newView[2], (it.newValue as Position<*, *>).source)
                     }
+                    is Visibility<*, *> -> {
+                        assertTrue(it.oldValue is Visibility.Undefined<*>)
+                        assertFalse(it.oldValue is Visibility.Show<*>)
+                        assertFalse(it.oldValue is Visibility.Hide<*>)
+                        assertEquals(Unit, (it.oldValue as Visibility<*, *>).visibility)
+                        assertTrue(it.newValue is Visibility.Show<*>)
+                        assertEquals(Visibility.Value.SHOW, (it.newValue as Visibility<*, *>).visibility)
+                        assertEquals(oldView[2], (it.oldValue as Visibility<*, *>).source)
+                        assertEquals(newView[2], (it.newValue as Visibility<*, *>).source)
+                    }
                     else -> assertTrue(false)
                 }
             }
@@ -1944,10 +2052,11 @@ class TableViewListenerTest {
         tv1[1][RowTransformer] = rt
         tv1[1][CellHeight] = 1000
         tv1[1][Position] = Position.Top
+        tv1[1][Visibility] = Visibility.Show
 
         assertEquals(0, count)
         tv1[2] = tv1[1]
-        assertEquals(5, count)
+        assertEquals(6, count)
     }
 
     @Test
