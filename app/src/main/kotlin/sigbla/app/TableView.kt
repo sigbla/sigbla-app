@@ -1842,12 +1842,19 @@ data class ViewConfig(
     val leftSeparatorWidth: Long,
     val rightSeparatorWidth: Long,
 
+    val columnVisibilityBehavior: Visibility.VisibilityCompanion,
+    val rowVisibilityBehavior: Visibility.VisibilityCompanion,
+
     val tableHtml: suspend PipelineContext<*, ApplicationCall>.() -> Unit,
     val tableScript: suspend PipelineContext<*, ApplicationCall>.() -> Unit,
     val tableStyle: suspend PipelineContext<*, ApplicationCall>.() -> Unit
 )
 
-fun compactViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
+fun compactViewConfig(
+    title: String = "Table",
+    columnVisibilityBehavior: Visibility.VisibilityCompanion = Visibility.Hide,
+    rowVisibilityBehavior: Visibility.VisibilityCompanion = Visibility.Hide
+): ViewConfig = ViewConfig(
     marginTop = 0,
     marginBottom = 0,
     marginLeft = 0,
@@ -1863,6 +1870,9 @@ fun compactViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
     leftSeparatorWidth = 2,
     rightSeparatorWidth = 2,
 
+    columnVisibilityBehavior = columnVisibilityBehavior,
+    rowVisibilityBehavior = rowVisibilityBehavior,
+
     tableHtml = {
         call.respondText(ContentType.Text.Html, HttpStatusCode.OK) {
             this.javaClass.getResource("/table/table.html").readText().replace("\${title}", title)
@@ -1872,7 +1882,11 @@ fun compactViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
     tableStyle = staticResource("/table/compact.css")
 )
 
-fun spaciousViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
+fun spaciousViewConfig(
+    title: String = "Table",
+    columnVisibilityBehavior: Visibility.VisibilityCompanion = Visibility.Hide,
+    rowVisibilityBehavior: Visibility.VisibilityCompanion = Visibility.Hide
+): ViewConfig = ViewConfig(
     marginTop = 1,
     marginBottom = 1,
     marginLeft = 1,
@@ -1887,6 +1901,9 @@ fun spaciousViewConfig(title: String = "Table"): ViewConfig = ViewConfig(
     bottomSeparatorHeight = 3,
     leftSeparatorWidth = 3,
     rightSeparatorWidth = 3,
+
+    columnVisibilityBehavior = columnVisibilityBehavior,
+    rowVisibilityBehavior = rowVisibilityBehavior,
 
     tableHtml = {
         call.respondText(ContentType.Text.Html, HttpStatusCode.OK) {
