@@ -160,6 +160,11 @@ internal fun load1(
                         Position.Value.RIGHT -> tableView[header][Position] = Position.Right
                         else -> tableView[header][Position] = Unit
                     }
+                    when (viewMeta.visibilityValue) {
+                        Visibility.Value.HIDE -> tableView[header][Visibility] = Visibility.Hide
+                        Visibility.Value.SHOW -> tableView[header][Visibility] = Visibility.Show
+                        else -> tableView[header][Visibility] = Unit
+                    }
                 }
             }
         }
@@ -203,6 +208,11 @@ internal fun load1(
                     Position.Value.TOP -> tableView[row][Position] = Position.Top
                     Position.Value.BOTTOM -> tableView[row][Position] = Position.Bottom
                     else -> tableView[row][Position] = Unit
+                }
+                when (viewMeta.visibilityValue) {
+                    Visibility.Value.HIDE -> tableView[row][Visibility] = Visibility.Hide
+                    Visibility.Value.SHOW -> tableView[row][Visibility] = Visibility.Show
+                    else -> tableView[row][Visibility] = Unit
                 }
             }
         }
@@ -518,13 +528,14 @@ private fun deserializeViewSection(inputStream: InputStream): ViewSection? {
 
 private fun serializeViewMeta(viewMeta: ViewMeta): ByteArray {
     ByteArrayOutputStream().use { baos ->
-        val haveHeight = if (viewMeta.cellHeight == null) 0 else      0b10000000
-        val haveWidth = if (viewMeta.cellWidth == null) 0 else        0b01000000
-        val haveClasses = if (viewMeta.cellClasses == null) 0 else    0b00100000
-        val haveTopics = if (viewMeta.cellTopics == null) 0 else      0b00010000
-        val havePosition = if (viewMeta.positionValue == null) 0 else 0b00001000
+        val haveHeight = if (viewMeta.cellHeight == null) 0 else          0b10000000
+        val haveWidth = if (viewMeta.cellWidth == null) 0 else            0b01000000
+        val haveClasses = if (viewMeta.cellClasses == null) 0 else        0b00100000
+        val haveTopics = if (viewMeta.cellTopics == null) 0 else          0b00010000
+        val havePosition = if (viewMeta.positionValue == null) 0 else     0b00001000
+        val haveVisibility = if (viewMeta.visibilityValue == null) 0 else 0b00000100
 
-        val options = haveHeight or haveWidth or haveClasses or haveTopics or havePosition
+        val options = haveHeight or haveWidth or haveClasses or haveTopics or havePosition or haveVisibility
 
         baos.write(SerializationUtils.fromInt(options))
 
@@ -556,17 +567,24 @@ private fun serializeViewMeta(viewMeta: ViewMeta): ByteArray {
                 Position.Value.TOP -> baos.write(SerializationUtils.fromInt(3))
             }
         }
+        if (viewMeta.visibilityValue != null) {
+            when (viewMeta.visibilityValue) {
+                Visibility.Value.HIDE -> baos.write(SerializationUtils.fromInt(0))
+                Visibility.Value.SHOW -> baos.write(SerializationUtils.fromInt(1))
+            }
+        }
 
         return baos.toByteArray()
     }
 }
 
 private fun deserializeViewMeta(inputStream: InputStream): ViewMeta {
-    val haveHeight =   0b10000000
-    val haveWidth =    0b01000000
-    val haveClasses =  0b00100000
-    val haveTopics =   0b00010000
-    val havePosition = 0b00001000
+    val haveHeight =     0b10000000
+    val haveWidth =      0b01000000
+    val haveClasses =    0b00100000
+    val haveTopics =     0b00010000
+    val havePosition =   0b00001000
+    val haveVisibility = 0b00000100
 
     val options = ByteArray(Int.SIZE_BYTES).let {
         if (inputStream.readNBytes(it, 0, it.size) != it.size) throw InvalidStorageException("Unable to read view meta options")
@@ -638,5 +656,16 @@ private fun deserializeViewMeta(inputStream: InputStream): ViewMeta {
         }
     } else null
 
-    return ViewMeta(cellHeight, cellWidth, cellClasses, cellTopics, positionValue)
+    val visibilityValue: Visibility.Value? = if ((options and haveVisibility) == haveVisibility) {
+        ByteArray(Int.SIZE_BYTES).let {
+            if (inputStream.readNBytes(it, 0, it.size) != it.size) throw InvalidStorageException("Unable to read view meta visibility value")
+            when (SerializationUtils.toInt(it)) {
+                0 -> Visibility.Value.HIDE
+                1 -> Visibility.Value.SHOW
+                else -> throw InvalidStorageException("Unsupported view meta visibility value")
+            }
+        }
+    } else null
+
+    return ViewMeta(cellHeight, cellWidth, cellClasses, cellTopics, positionValue, visibilityValue)
 }

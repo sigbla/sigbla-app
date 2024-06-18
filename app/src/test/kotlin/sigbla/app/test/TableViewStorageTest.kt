@@ -136,11 +136,13 @@ class TableViewStorageTest {
         tableView1["A"][CellClasses] = listOf("A", "AB", "ABC")
         tableView1["A"][CellTopics] = listOf("B", "BB", "BBB")
         tableView1["A"][Position] = Position.Left
+        tableView1["A"][Visibility] = Visibility.Show
 
         tableView1[1][CellHeight] = 100
         tableView1[1][CellClasses] = listOf("A", "AB", "ABC")
         tableView1[1][CellTopics] = listOf("B", "BB", "BBB")
         tableView1[1][Position] = Position.Top
+        tableView1[1][Visibility] = Visibility.Hide
 
         tableView1["A", 1][CellHeight] = 100
         tableView1["A", 1][CellWidth] = 200
@@ -169,6 +171,7 @@ class TableViewStorageTest {
             assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
             assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
             assertEquals(v1[Position].position, v2[Position].position)
+            assertEquals(v1[Visibility].visibility, v2[Visibility].visibility)
         }
 
         assertFalse(it1.hasNext())
@@ -185,6 +188,7 @@ class TableViewStorageTest {
             assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
             assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
             assertEquals(v1[Position].position, v2[Position].position)
+            assertEquals(v1[Visibility].visibility, v2[Visibility].visibility)
         }
 
         assertFalse(it3.hasNext())
@@ -227,11 +231,13 @@ class TableViewStorageTest {
         tableView1["A"][CellClasses] = listOf("A", "AB", "ABC")
         tableView1["A"][CellTopics] = listOf("B", "BB", "BBB")
         tableView1["A"][Position] = Position.Right
+        tableView1["A"][Visibility] = Visibility.Show
 
         tableView1[1][CellHeight] = 100
         tableView1[1][CellClasses] = listOf("A", "AB", "ABC")
         tableView1[1][CellTopics] = listOf("B", "BB", "BBB")
         tableView1[1][Position] = Position.Bottom
+        tableView1[1][Visibility] = Visibility.Hide
 
         tableView1["A", 1][CellHeight] = 100
         tableView1["A", 1][CellWidth] = 200
@@ -260,6 +266,7 @@ class TableViewStorageTest {
             assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
             assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
             assertEquals(v1[Position].position, v2[Position].position)
+            assertEquals(v1[Visibility].visibility, v2[Visibility].visibility)
         }
 
         assertFalse(it1.hasNext())
@@ -276,6 +283,7 @@ class TableViewStorageTest {
             assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
             assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
             assertEquals(v1[Position].position, v2[Position].position)
+            assertEquals(v1[Visibility].visibility, v2[Visibility].visibility)
         }
 
         assertFalse(it3.hasNext())
@@ -622,6 +630,11 @@ class TableViewStorageTest {
                         else tableView1[column][Position] = if (ThreadLocalRandom.current().nextBoolean())
                             Position.Left else Position.Right
                     }
+                    if (ThreadLocalRandom.current().nextBoolean()) {
+                        if (ThreadLocalRandom.current().nextBoolean()) tableView1[column][Visibility] = Unit
+                        else tableView1[column][Visibility] = if (ThreadLocalRandom.current().nextBoolean())
+                            Visibility.Show else Visibility.Hide
+                    }
                 }
 
                 if (ThreadLocalRandom.current().nextBoolean()) {
@@ -678,6 +691,11 @@ class TableViewStorageTest {
                                 if (ThreadLocalRandom.current().nextBoolean()) tableView1[r][Position] = Unit
                                 else tableView1[r][Position] = if (ThreadLocalRandom.current().nextBoolean())
                                     Position.Top else Position.Bottom
+                            }
+                            if (ThreadLocalRandom.current().nextBoolean()) {
+                                if (ThreadLocalRandom.current().nextBoolean()) tableView1[r][Visibility] = Unit
+                                else tableView1[r][Visibility] = if (ThreadLocalRandom.current().nextBoolean())
+                                    Visibility.Show else Visibility.Hide
                             }
                         }
 
@@ -755,6 +773,7 @@ class TableViewStorageTest {
                 assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
                 assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
                 assertEquals(v1[Position].position, v2[Position].position)
+                assertEquals(v1[Visibility].visibility, v2[Visibility].visibility)
             }
 
             assertFalse(it1.hasNext())
@@ -772,6 +791,7 @@ class TableViewStorageTest {
                 assertEquals(v1[CellClasses].classes, v2[CellClasses].classes)
                 assertEquals(v1[CellTopics].topics, v2[CellTopics].topics)
                 assertEquals(v1[Position].position, v2[Position].position)
+                assertEquals(v1[Visibility].visibility, v2[Visibility].visibility)
             }
 
             assertFalse(it3.hasNext())
