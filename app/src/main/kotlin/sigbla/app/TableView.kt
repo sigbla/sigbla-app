@@ -1740,8 +1740,8 @@ sealed class Visibility<S, T>(
 ) {
     enum class Value { SHOW, HIDE }
 
-    open val isValue: Boolean = false
-    open val asValue: Value? = null
+    abstract val isValue: Boolean
+    abstract val asValue: Value?
 
     operator fun contains(other: Visibility<*, *>) = visibility == other.visibility
     operator fun contains(other: VisibilityCompanion) = visibility == other.asValue

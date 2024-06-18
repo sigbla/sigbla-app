@@ -234,6 +234,10 @@ class HashCodeEqualsTest {
         val topVertical1 = tableView1[1][Position].also { it(Position.Bottom) }
         val bottomVertical1 = tableView1[1][Position]
 
+        val unitVisibility1 = tableView1[1][Visibility].also { it(Visibility.Show) }
+        val showVisibility1 = tableView1[1][Visibility].also { it(Visibility.Hide) }
+        val hideVisibility1 = tableView1[1][Visibility]
+
         val tableView2 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}" + " 2"]
 
         val unitCellHeight2 = tableView2[CellHeight].also { it(100) }
@@ -270,6 +274,10 @@ class HashCodeEqualsTest {
         val unitVertical2 = tableView2[1][Position].also { it(Position.Top) }
         val topVertical2 = tableView2[1][Position].also { it(Position.Bottom) }
         val bottomVertical2 = tableView2[1][Position]
+
+        val unitVisibility2 = tableView2[1][Visibility].also { it(Visibility.Show) }
+        val showVisibility2 = tableView2[1][Visibility].also { it(Visibility.Hide) }
+        val hideVisibility2 = tableView2[1][Visibility]
 
         assertEquals(tableView1[CellHeight], tableView1[CellHeight])
         assertNotEquals(unitCellHeight1, unitCellHeight2)
@@ -449,6 +457,26 @@ class HashCodeEqualsTest {
         assertTrue(Position.Value.TOP in topVertical1)
         assertTrue(Position.Top in topVertical2)
 
+        assertEquals(tableView1[1][Visibility], tableView1[1][Visibility])
+        assertNotEquals(unitVisibility1, unitVisibility2)
+        assertEquals(unitVisibility1.visibility, unitVisibility2.visibility)
+        assertTrue(unitVisibility1 in unitVisibility2)
+        assertTrue(unitVisibility2 in unitVisibility1)
+
+        assertNotEquals(showVisibility1, showVisibility2)
+        assertEquals(showVisibility1.visibility, showVisibility2.visibility)
+        assertTrue(showVisibility1 in showVisibility2)
+        assertTrue(showVisibility2 in showVisibility1)
+
+        assertNotEquals(hideVisibility1, hideVisibility2)
+        assertEquals(hideVisibility1.visibility, hideVisibility2.visibility)
+        assertTrue(hideVisibility1 in hideVisibility2)
+        assertTrue(hideVisibility2 in hideVisibility1)
+
+        assertTrue(Unit in unitVertical1)
+        assertTrue(Visibility.Value.SHOW in showVisibility1)
+        assertTrue(Visibility.Value.HIDE in hideVisibility1)
+
         assertEquals(unitCellHeight1.hashCode(), unitCellHeight2.hashCode())
         assertEquals(pixelCellHeight1.hashCode(), pixelCellHeight2.hashCode())
         assertEquals(unitCellWidth1.hashCode(), unitCellWidth2.hashCode())
@@ -474,6 +502,9 @@ class HashCodeEqualsTest {
         assertEquals(rightHorizontal1.hashCode(), rightHorizontal2.hashCode())
         assertEquals(topVertical1.hashCode(), topVertical2.hashCode())
         assertEquals(bottomVertical1.hashCode(), bottomVertical2.hashCode())
+        assertEquals(unitVisibility1.hashCode(), unitVisibility2.hashCode())
+        assertEquals(showVisibility1.hashCode(), showVisibility2.hashCode())
+        assertEquals(hideVisibility1.hashCode(), hideVisibility2.hashCode())
     }
 
     @Test
