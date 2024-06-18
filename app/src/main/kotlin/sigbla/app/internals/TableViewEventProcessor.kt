@@ -173,7 +173,8 @@ internal class TableViewEventProcessor {
                     if (viewMeta.cellClasses?.isEmpty() != false) null else TableViewListenerEvent(oldColumnView[CellClasses], newColumnView[CellClasses]),
                     if (viewMeta.cellTopics?.isEmpty() != false) null else TableViewListenerEvent(oldColumnView[CellTopics], newColumnView[CellTopics]),
                     if (viewMeta.cellWidth == null) null else TableViewListenerEvent(oldColumnView[CellWidth], newColumnView[CellWidth]),
-                    if (viewMeta.positionValue == null) null else TableViewListenerEvent(oldColumnView[Position], newColumnView[Position])
+                    if (viewMeta.positionValue == null) null else TableViewListenerEvent(oldColumnView[Position], newColumnView[Position]),
+                    if (viewMeta.visibilityValue == null) null else TableViewListenerEvent(oldColumnView[Visibility], newColumnView[Visibility])
                 )
             }.flatten()
 
@@ -188,7 +189,8 @@ internal class TableViewEventProcessor {
                     if (viewMeta.cellClasses?.isEmpty() != false) null else TableViewListenerEvent(oldRowView[CellClasses], newRowView[CellClasses]),
                     if (viewMeta.cellHeight == null) null else TableViewListenerEvent(oldRowView[CellHeight], newRowView[CellHeight]),
                     if (viewMeta.cellTopics?.isEmpty() != false) null else TableViewListenerEvent(oldRowView[CellTopics], newRowView[CellTopics]),
-                    if (viewMeta.positionValue == null) null else TableViewListenerEvent(oldRowView[Position], newRowView[Position])
+                    if (viewMeta.positionValue == null) null else TableViewListenerEvent(oldRowView[Position], newRowView[Position]),
+                    if (viewMeta.visibilityValue == null) null else TableViewListenerEvent(oldRowView[Visibility], newRowView[Visibility])
                 )
             }.flatten()
 
@@ -287,7 +289,8 @@ internal class TableViewEventProcessor {
                     if (viewMeta.cellClasses?.isEmpty() != false) null else TableViewListenerEvent(oldColumnView[CellClasses], newColumnView[CellClasses]),
                     if (viewMeta.cellTopics?.isEmpty() != false) null else TableViewListenerEvent(oldColumnView[CellTopics], newColumnView[CellTopics]),
                     if (viewMeta.cellWidth == null) null else TableViewListenerEvent(oldColumnView[CellWidth], newColumnView[CellWidth]),
-                    if (viewMeta.positionValue == null) null else TableViewListenerEvent(oldColumnView[Position], newColumnView[Position])
+                    if (viewMeta.positionValue == null) null else TableViewListenerEvent(oldColumnView[Position], newColumnView[Position]),
+                    if (viewMeta.visibilityValue == null) null else TableViewListenerEvent(oldColumnView[Visibility], newColumnView[Visibility])
                 ).asSequence()
             } ?: emptySequence()
 
@@ -375,7 +378,8 @@ internal class TableViewEventProcessor {
                     if (viewMeta.cellClasses?.isEmpty() != false) null else TableViewListenerEvent(oldRowView[CellClasses], newRowView[CellClasses]),
                     if (viewMeta.cellHeight == null) null else TableViewListenerEvent(oldRowView[CellHeight], newRowView[CellHeight]),
                     if (viewMeta.cellTopics?.isEmpty() != false) null else TableViewListenerEvent(oldRowView[CellTopics], newRowView[CellTopics]),
-                    if (viewMeta.positionValue == null) null else TableViewListenerEvent(oldRowView[Position], newRowView[Position])
+                    if (viewMeta.positionValue == null) null else TableViewListenerEvent(oldRowView[Position], newRowView[Position]),
+                    if (viewMeta.visibilityValue == null) null else TableViewListenerEvent(oldRowView[Visibility], newRowView[Visibility])
                 ).asSequence()
             } ?: emptySequence()
 

@@ -2189,6 +2189,7 @@ class TableViewAccessorsTest {
         val ct: Column.() -> Unit = {}
         tableView["A"][ColumnTransformer] = ct
         tableView["A"][Position] = Position.Left
+        tableView["A"][Visibility] = Visibility.Show
 
         val sourceColumnView = tableView["A"]
 
@@ -2198,12 +2199,14 @@ class TableViewAccessorsTest {
             assertEquals(setOf("ct-1"), sourceColumnView[CellTopics].topics)
             assertEquals(ct, sourceColumnView[ColumnTransformer].function)
             assertEquals(Position.Value.LEFT, sourceColumnView[Position].position)
+            assertEquals(Visibility.Value.SHOW, sourceColumnView[Visibility].visibility)
 
             assertEquals(sourceColumnView[CellWidth].width, columnView[CellWidth].width)
             assertEquals(sourceColumnView[CellClasses].classes, columnView[CellClasses].classes)
             assertEquals(sourceColumnView[CellTopics].topics, columnView[CellTopics].topics)
             assertEquals(sourceColumnView[ColumnTransformer].function, columnView[ColumnTransformer].function)
             assertEquals(sourceColumnView[Position].position, columnView[Position].position)
+            assertEquals(sourceColumnView[Visibility].visibility, columnView[Visibility].visibility)
         }
 
         fun unitCompare(columnView: ColumnView) {
@@ -2212,6 +2215,7 @@ class TableViewAccessorsTest {
             assertEquals(setOf<String>(), columnView[CellTopics].topics)
             assertEquals(Unit, columnView[ColumnTransformer].function)
             assertEquals(Unit, columnView[Position].position)
+            assertEquals(Unit, columnView[Visibility].visibility)
         }
 
         tableView["L1"] = sourceColumnView
@@ -2392,6 +2396,7 @@ class TableViewAccessorsTest {
         val ct: Row.() -> Unit = {}
         tableView[1][RowTransformer] = ct
         tableView[1][Position] = Position.Top
+        tableView[1][Visibility] = Visibility.Show
 
         val sourceRowView = tableView[1]
 
@@ -2401,12 +2406,14 @@ class TableViewAccessorsTest {
             assertEquals(setOf("ct-1"), sourceRowView[CellTopics].topics)
             assertEquals(ct, sourceRowView[RowTransformer].function)
             assertEquals(Position.Value.TOP, sourceRowView[Position].position)
+            assertEquals(Visibility.Value.SHOW, sourceRowView[Visibility].visibility)
 
             assertEquals(sourceRowView[CellHeight].height, rowView[CellHeight].height)
             assertEquals(sourceRowView[CellClasses].classes, rowView[CellClasses].classes)
             assertEquals(sourceRowView[CellTopics].topics, rowView[CellTopics].topics)
             assertEquals(sourceRowView[RowTransformer].function, rowView[RowTransformer].function)
             assertEquals(sourceRowView[Position].position, rowView[Position].position)
+            assertEquals(sourceRowView[Visibility].visibility, rowView[Visibility].visibility)
         }
 
         fun unitCompare(rowView: RowView) {
@@ -2415,6 +2422,7 @@ class TableViewAccessorsTest {
             assertEquals(setOf<String>(), rowView[CellTopics].topics)
             assertEquals(Unit, rowView[RowTransformer].function)
             assertEquals(Unit, rowView[Position].position)
+            assertEquals(Unit, rowView[Visibility].visibility)
         }
 
         tableView[Int.MAX_VALUE] = sourceRowView

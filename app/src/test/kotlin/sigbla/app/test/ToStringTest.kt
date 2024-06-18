@@ -207,6 +207,14 @@ class ToStringTest {
         assertEquals("Top", topVertical.toString())
         assertEquals("Bottom", bottomVertical.toString())
 
+        val unitVisibility = tableView[1][Visibility].also { it(Visibility.Show) }
+        val showVisibility = tableView[1][Visibility].also { it(Visibility.Hide) }
+        val hideVisibility = tableView[1][Visibility]
+
+        assertEquals("Undefined", unitVisibility.toString())
+        assertEquals("Show", showVisibility.toString())
+        assertEquals("Hide", hideVisibility.toString())
+
         val labels = mutableListOf<String>()
 
         for (i in 1..40) {

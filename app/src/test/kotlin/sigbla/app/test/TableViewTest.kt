@@ -256,6 +256,7 @@ class TableViewTest {
         assertEquals(CellClasses::class, tv1["A"][CellClasses]::class)
         assertEquals(CellTopics::class, tv1["A"][CellTopics]::class)
         assertEquals(Position.Horizontal::class, tv1["A"][Position]::class)
+        assertEquals(Visibility.Undefined::class, tv1["A"][Visibility]::class)
 
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].toSet())
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].toSet())
@@ -264,11 +265,13 @@ class TableViewTest {
         tv1["A"][CellClasses] = "a"
         tv1["A"][CellTopics] = "b"
         tv1["A"][Position] = Position.Left
+        tv1["A"][Visibility] = Visibility.Show
 
         assertEquals(DEFAULT_CELL_WIDTH * 2, tv1["A"][CellWidth].width)
         assertEquals(setOf("a"), tv1["A"][CellClasses].toSet())
         assertEquals(setOf("b"), tv1["A"][CellTopics].toSet())
         assertEquals(Position.Left::class, tv1["A"][Position]::class)
+        assertEquals(Visibility.Show::class, tv1["A"][Visibility]::class)
 
         tv1["A"][CellClasses] = tv1["A"][CellClasses] + setOf("c", "d")
         tv1["A"][CellTopics] = tv1["A"][CellTopics] + setOf("e", "f")
@@ -317,11 +320,13 @@ class TableViewTest {
         tv1["A"][CellClasses] = Unit
         tv1["A"][CellTopics] = Unit
         tv1["A"][Position] = Unit
+        tv1["A"][Visibility] = Unit
 
         assertEquals(UnitCellWidth::class, tv1["A"][CellWidth]::class)
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].toSet())
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].toSet())
         assertEquals(Position.Horizontal::class, tv1["A"][Position]::class)
+        assertEquals(Visibility.Undefined::class, tv1["A"][Visibility]::class)
 
         tv1["A"][CellWidth] = 100 as Number
         assertEquals(100L, tv1["A"][CellWidth].width)
@@ -341,6 +346,7 @@ class TableViewTest {
         assertEquals(CellClasses::class, tv1[1][CellClasses]::class)
         assertEquals(CellTopics::class, tv1[1][CellTopics]::class)
         assertEquals(Position.Vertical::class, tv1[1][Position]::class)
+        assertEquals(Visibility.Undefined::class, tv1[1][Visibility]::class)
 
         assertEquals(emptySet<String>(), tv1[1][CellClasses].toSet())
         assertEquals(emptySet<String>(), tv1[1][CellTopics].toSet())
@@ -349,11 +355,13 @@ class TableViewTest {
         tv1[1][CellClasses] = "a"
         tv1[1][CellTopics] = "b"
         tv1[1][Position] = Position.Top
+        tv1[1][Visibility] = Visibility.Show
 
         assertEquals(DEFAULT_CELL_HEIGHT * 2, tv1[1][CellHeight].height)
         assertEquals(setOf("a"), tv1[1][CellClasses].toSet())
         assertEquals(setOf("b"), tv1[1][CellTopics].toSet())
         assertEquals(Position.Top::class, tv1[1][Position]::class)
+        assertEquals(Visibility.Show::class, tv1[1][Visibility]::class)
 
         tv1[1][CellClasses] = tv1[1][CellClasses] + setOf("c", "d")
         tv1[1][CellTopics] = tv1[1][CellTopics] + setOf("e", "f")
@@ -402,11 +410,13 @@ class TableViewTest {
         tv1[1][CellClasses] = Unit
         tv1[1][CellTopics] = Unit
         tv1[1][Position] = Unit
+        tv1[1][Visibility] = Unit
 
         assertEquals(UnitCellHeight::class, tv1[1][CellHeight]::class)
         assertEquals(emptySet<String>(), tv1[1][CellClasses].toSet())
         assertEquals(emptySet<String>(), tv1[1][CellTopics].toSet())
         assertEquals(Position.Vertical::class, tv1[1][Position]::class)
+        assertEquals(Visibility.Undefined::class, tv1[1][Visibility]::class)
 
         tv1[1][CellHeight] = 100 as Number
         assertEquals(100L, tv1[1][CellHeight].height)
@@ -843,12 +853,14 @@ class TableViewTest {
         tv1["A"][CellTopics]("400")
         tv1["A"][ColumnTransformer](ct)
         tv1["A"][Position](Position.Left)
+        tv1["A"][Visibility](Visibility.Show)
 
         assertEquals(200L, tv1["A"][CellWidth].width)
         assertEquals(setOf("300"), tv1["A"][CellClasses].classes)
         assertEquals(setOf("400"), tv1["A"][CellTopics].topics)
         assertEquals(ct, tv1["A"][ColumnTransformer].function)
         assertEquals(Position.Value.LEFT, tv1["A"][Position].position)
+        assertEquals(Visibility.Value.SHOW, tv1["A"][Visibility].visibility)
 
         tv1["A"][CellClasses](setOf("500", "600"))
         tv1["A"][CellTopics](setOf("700", "800"))
@@ -856,23 +868,29 @@ class TableViewTest {
         tv1["B"](Position.Right)
         tv1["A"][Position](tv1["B"][Position])
 
+        tv1["B"](Visibility.Hide)
+        tv1["A"][Visibility](tv1["B"][Visibility])
+
         assertEquals(200L, tv1["A"][CellWidth].width)
         assertEquals(setOf("500", "600"), tv1["A"][CellClasses].classes)
         assertEquals(setOf("700", "800"), tv1["A"][CellTopics].topics)
         assertEquals(ct, tv1["A"][ColumnTransformer].function)
         assertEquals(Position.Value.RIGHT, tv1["A"][Position].position)
+        assertEquals(Visibility.Value.HIDE, tv1["A"][Visibility].visibility)
 
         tv1["A"][CellWidth](null as Unit?)
         tv1["A"][CellClasses](null as Unit?)
         tv1["A"][CellTopics](null as Unit?)
         tv1["A"][ColumnTransformer](null as Unit?)
         tv1["A"][Position](null as Unit?)
+        tv1["A"][Visibility](null as Unit?)
 
         assertEquals(Unit, tv1["A"][CellWidth].width)
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
         assertEquals(Unit, tv1["A"][ColumnTransformer].function)
         assertEquals(Unit, tv1["A"][Position].position)
+        assertEquals(Unit, tv1["A"][Visibility].visibility)
     }
 
     @Test
@@ -885,30 +903,35 @@ class TableViewTest {
         tv1["A"](tv1["B"][CellTopics])
         tv1["A"](tv1["B"][ColumnTransformer])
         tv1["A"](tv1["B"][Position])
+        tv1["A"](tv1["B"][Visibility])
 
         assertEquals(Unit, tv1["A"][CellWidth].width)
         assertEquals(emptySet<String>(), tv1["A"][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
         assertEquals(Unit, tv1["A"][ColumnTransformer].function)
         assertEquals(Unit, tv1["A"][Position].position)
+        assertEquals(Unit, tv1["A"][Visibility].visibility)
 
         tv1["B"][CellWidth](200)
         tv1["B"][CellClasses]("300")
         tv1["B"][CellTopics]("400")
         tv1["B"][ColumnTransformer](ct)
         tv1["B"][Position](Position.Left)
+        tv1["B"][Visibility](Visibility.Show)
 
         tv1["A"](tv1["B"][CellWidth])
         tv1["A"](tv1["B"][CellClasses])
         tv1["A"](tv1["B"][CellTopics])
         tv1["A"](tv1["B"][ColumnTransformer])
         tv1["A"](tv1["B"][Position])
+        tv1["A"](tv1["B"][Visibility])
 
         assertEquals(200L, tv1["A"][CellWidth].width)
         assertEquals(setOf("300"), tv1["A"][CellClasses].classes)
         assertEquals(setOf("400"), tv1["A"][CellTopics].topics)
         assertEquals(ct, tv1["A"][ColumnTransformer].function)
         assertEquals(Position.Value.LEFT, tv1["A"][Position].position)
+        assertEquals(Visibility.Value.SHOW, tv1["A"][Visibility].visibility)
 
         tv1["A"](null as Unit?)
 
@@ -917,6 +940,7 @@ class TableViewTest {
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
         assertEquals(Unit, tv1["A"][ColumnTransformer].function)
         assertEquals(Unit, tv1["A"][Position].position)
+        assertEquals(Unit, tv1["A"][Visibility].visibility)
 
         tv1["A"](tv1["B"])
 
@@ -925,6 +949,7 @@ class TableViewTest {
         assertEquals(setOf("400"), tv1["A"][CellTopics].topics)
         assertEquals(ct, tv1["A"][ColumnTransformer].function)
         assertEquals(Position.Value.LEFT, tv1["A"][Position].position)
+        assertEquals(Visibility.Value.SHOW, tv1["A"][Visibility].visibility)
     }
 
     @Test
@@ -937,12 +962,14 @@ class TableViewTest {
         tv1[1][CellTopics]("400")
         tv1[1][RowTransformer](rt)
         tv1[1][Position](Position.Top)
+        tv1[1][Visibility](Visibility.Show)
 
         assertEquals(200L, tv1[1][CellHeight].height)
         assertEquals(setOf("300"), tv1[1][CellClasses].classes)
         assertEquals(setOf("400"), tv1[1][CellTopics].topics)
         assertEquals(rt, tv1[1][RowTransformer].function)
         assertEquals(Position.Value.TOP, tv1[1][Position].position)
+        assertEquals(Visibility.Value.SHOW, tv1[1][Visibility].visibility)
 
         tv1[1][CellClasses](setOf("500", "600"))
         tv1[1][CellTopics](setOf("700", "800"))
@@ -950,23 +977,29 @@ class TableViewTest {
         tv1[2](Position.Bottom)
         tv1[1][Position](tv1[2][Position])
 
+        tv1[2](Visibility.Hide)
+        tv1[1][Visibility](tv1[2][Visibility])
+
         assertEquals(200L, tv1[1][CellHeight].height)
         assertEquals(setOf("500", "600"), tv1[1][CellClasses].classes)
         assertEquals(setOf("700", "800"), tv1[1][CellTopics].topics)
         assertEquals(rt, tv1[1][RowTransformer].function)
         assertEquals(Position.Value.BOTTOM, tv1[1][Position].position)
+        assertEquals(Visibility.Value.HIDE, tv1[1][Visibility].visibility)
 
         tv1[1][CellHeight](null as Unit?)
         tv1[1][CellClasses](null as Unit?)
         tv1[1][CellTopics](null as Unit?)
         tv1[1][RowTransformer](null as Unit?)
         tv1[1][Position](null as Unit?)
+        tv1[1][Visibility](null as Unit?)
 
         assertEquals(Unit, tv1[1][CellHeight].height)
         assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
         assertEquals(Unit, tv1[1][RowTransformer].function)
         assertEquals(Unit, tv1[1][Position].position)
+        assertEquals(Unit, tv1[1][Visibility].visibility)
     }
 
     @Test
@@ -979,30 +1012,35 @@ class TableViewTest {
         tv1[1](tv1[2][CellTopics])
         tv1[1](tv1[2][RowTransformer])
         tv1[1](tv1[2][Position])
+        tv1[1](tv1[2][Visibility])
 
         assertEquals(Unit, tv1[1][CellHeight].height)
         assertEquals(emptySet<String>(), tv1[1][CellClasses].classes)
         assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
         assertEquals(Unit, tv1[1][RowTransformer].function)
         assertEquals(Unit, tv1[1][Position].position)
+        assertEquals(Unit, tv1[1][Visibility].visibility)
 
         tv1[2][CellHeight](200)
         tv1[2][CellClasses]("300")
         tv1[2][CellTopics]("400")
         tv1[2][RowTransformer](rt)
         tv1[2][Position](Position.Top)
+        tv1[2][Visibility](Visibility.Show)
 
         tv1[1](tv1[2][CellHeight])
         tv1[1](tv1[2][CellClasses])
         tv1[1](tv1[2][CellTopics])
         tv1[1](tv1[2][RowTransformer])
         tv1[1](tv1[2][Position])
+        tv1[1](tv1[2][Visibility])
 
         assertEquals(200L, tv1[1][CellHeight].height)
         assertEquals(setOf("300"), tv1[1][CellClasses].classes)
         assertEquals(setOf("400"), tv1[1][CellTopics].topics)
         assertEquals(rt, tv1[1][RowTransformer].function)
         assertEquals(Position.Value.TOP, tv1[1][Position].position)
+        assertEquals(Visibility.Value.SHOW, tv1[1][Visibility].visibility)
 
         tv1[1](null as Unit?)
 
@@ -1011,6 +1049,7 @@ class TableViewTest {
         assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
         assertEquals(Unit, tv1[1][RowTransformer].function)
         assertEquals(Unit, tv1[1][Position].position)
+        assertEquals(Unit, tv1[1][Visibility].visibility)
 
         tv1[1](tv1[2])
 
@@ -1019,6 +1058,7 @@ class TableViewTest {
         assertEquals(setOf("400"), tv1[1][CellTopics].topics)
         assertEquals(rt, tv1[1][RowTransformer].function)
         assertEquals(Position.Value.TOP, tv1[1][Position].position)
+        assertEquals(Visibility.Value.SHOW, tv1[1][Visibility].visibility)
     }
 
     @Test
@@ -1360,6 +1400,7 @@ class TableViewTest {
         tv1["A"][CellTopics] = "ct-1"
         tv1["A"][CellWidth] = 1000
         tv1["A"][Position] = Position.Left
+        tv1["A"][Visibility] = Visibility.Show
         tv1["A"][ColumnTransformer] = ct
 
         var count = 0
@@ -1371,12 +1412,14 @@ class TableViewTest {
             assertEquals(setOf("ct-1"), oldView["A"][CellTopics].topics)
             assertEquals(1000L, oldView["A"][CellWidth].width)
             assertEquals(Position.Value.LEFT, oldView["A"][Position].position)
+            assertEquals(Visibility.Value.SHOW, oldView["A"][Visibility].visibility)
             assertEquals(ct, oldView["A"][ColumnTransformer].function)
 
             assertEquals(emptySet<String>(), newView["A"][CellClasses].classes)
             assertEquals(emptySet<String>(), newView["A"][CellTopics].topics)
             assertEquals(Unit, newView["A"][CellWidth].width)
             assertEquals(Unit, newView["A"][Position].position)
+            assertEquals(Unit, newView["A"][Visibility].visibility)
             assertEquals(Unit, newView["A"][ColumnTransformer].function)
         }
 
@@ -1386,6 +1429,7 @@ class TableViewTest {
         assertEquals(setOf("ct-1"), tv1["A"][CellTopics].topics)
         assertEquals(1000L, tv1["A"][CellWidth].width)
         assertEquals(Position.Value.LEFT, tv1["A"][Position].position)
+        assertEquals(Visibility.Value.SHOW, tv1["A"][Visibility].visibility)
         assertEquals(ct, tv1["A"][ColumnTransformer].function)
 
         clear(tv1["A"])
@@ -1394,9 +1438,10 @@ class TableViewTest {
         assertEquals(emptySet<String>(), tv1["A"][CellTopics].topics)
         assertEquals(Unit, tv1["A"][CellWidth].width)
         assertEquals(Unit, tv1["A"][Position].position)
+        assertEquals(Unit, tv1["A"][Visibility].visibility)
         assertEquals(Unit, tv1["A"][ColumnTransformer].function)
 
-        assertEquals(5, count)
+        assertEquals(6, count)
     }
 
     @Test
@@ -1408,6 +1453,7 @@ class TableViewTest {
         tv1[1][CellTopics] = "ct-1"
         tv1[1][CellHeight] = 1000
         tv1[1][Position] = Position.Top
+        tv1[1][Visibility] = Visibility.Show
         tv1[1][RowTransformer] = rt
 
         var count = 0
@@ -1419,12 +1465,14 @@ class TableViewTest {
             assertEquals(setOf("ct-1"), oldView[1][CellTopics].topics)
             assertEquals(1000L, oldView[1][CellHeight].height)
             assertEquals(Position.Value.TOP, oldView[1][Position].position)
+            assertEquals(Visibility.Value.SHOW, oldView[1][Visibility].visibility)
             assertEquals(rt, oldView[1][RowTransformer].function)
 
             assertEquals(emptySet<String>(), newView[1][CellClasses].classes)
             assertEquals(emptySet<String>(), newView[1][CellTopics].topics)
             assertEquals(Unit, newView[1][CellHeight].height)
             assertEquals(Unit, newView[1][Position].position)
+            assertEquals(Unit, newView[1][Visibility].visibility)
             assertEquals(Unit, newView[1][RowTransformer].function)
         }
 
@@ -1434,6 +1482,7 @@ class TableViewTest {
         assertEquals(setOf("ct-1"), tv1[1][CellTopics].topics)
         assertEquals(1000L, tv1[1][CellHeight].height)
         assertEquals(Position.Value.TOP, tv1[1][Position].position)
+        assertEquals(Visibility.Value.SHOW, tv1[1][Visibility].visibility)
         assertEquals(rt, tv1[1][RowTransformer].function)
 
         clear(tv1[1])
@@ -1442,9 +1491,10 @@ class TableViewTest {
         assertEquals(emptySet<String>(), tv1[1][CellTopics].topics)
         assertEquals(Unit, tv1[1][CellHeight].height)
         assertEquals(Unit, tv1[1][Position].position)
+        assertEquals(Unit, tv1[1][Visibility].visibility)
         assertEquals(Unit, tv1[1][RowTransformer].function)
 
-        assertEquals(5, count)
+        assertEquals(6, count)
     }
 
     @Test
@@ -2194,6 +2244,50 @@ class TableViewTest {
     }
 
     @Test
+    fun `visibility contains`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val horizontalUnitVisibility = tv1["A"][Visibility]
+        val verticalUnitVisibility = tv1[1][Visibility]
+
+        tv1["A"][Visibility] = Visibility.Show
+        tv1[1][Visibility] = Visibility.Hide
+
+        val horizontalFilledVisibility = tv1["A"][Visibility]
+        val verticalFilledVisibility = tv1[1][Visibility]
+
+        assertTrue(horizontalUnitVisibility in horizontalUnitVisibility)
+        assertTrue(verticalUnitVisibility in verticalUnitVisibility)
+
+        assertTrue(horizontalFilledVisibility in horizontalFilledVisibility)
+        assertTrue(verticalFilledVisibility in verticalFilledVisibility)
+
+        assertFalse(horizontalUnitVisibility in horizontalFilledVisibility)
+        assertFalse(verticalUnitVisibility in verticalFilledVisibility)
+
+        assertFalse(horizontalFilledVisibility in horizontalUnitVisibility)
+        assertFalse(verticalFilledVisibility in verticalUnitVisibility)
+
+        assertTrue(Unit in horizontalUnitVisibility)
+        assertTrue(Unit in verticalUnitVisibility)
+
+        assertFalse(Unit in horizontalFilledVisibility)
+        assertFalse(Unit in verticalFilledVisibility)
+
+        assertTrue(Visibility.Show in horizontalFilledVisibility)
+        assertTrue(Visibility.Hide in verticalFilledVisibility)
+
+        assertFalse(Visibility.Hide in horizontalUnitVisibility)
+        assertFalse(Visibility.Show in verticalUnitVisibility)
+
+        assertTrue(Visibility.Value.SHOW in horizontalFilledVisibility)
+        assertTrue(Visibility.Value.HIDE in verticalFilledVisibility)
+
+        assertFalse(Visibility.Value.HIDE in horizontalUnitVisibility)
+        assertFalse(Visibility.Value.SHOW in verticalUnitVisibility)
+    }
+
+    @Test
     fun `cell classes invoke`() {
         val cc1 = TableView[null][CellClasses].let { it(listOf("D", "E")); it.source[CellClasses] }
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
@@ -2860,6 +2954,222 @@ class TableViewTest {
         assertEquals(Position.Value.BOTTOM, h10.position)
         assertTrue(h10.isValue)
         assertEquals(Position.Value.BOTTOM, h10.asValue)
+    }
+
+    @Test
+    fun `horizontal visibility`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val h1 = tv1["A"][Visibility]
+        assertTrue(h1 is Visibility.Undefined)
+        assertTrue(h1 !is Visibility.Hide)
+        assertTrue(h1 !is Visibility.Show)
+        assertEquals(tv1["A"], h1.source)
+        assertEquals(Unit, h1.visibility)
+        assertFalse(h1.isValue)
+        assertNull(h1.asValue)
+
+        tv1["A"][Visibility] = Visibility.Hide
+        val h2 = tv1["A"][Visibility]
+        assertTrue(h2 !is Visibility.Undefined)
+        assertTrue(h2 is Visibility.Hide)
+        assertTrue(h2 !is Visibility.Show)
+        assertEquals(tv1["A"], h2.source)
+        assertEquals(Visibility.Value.HIDE, h2.visibility)
+        assertTrue(h2.isValue)
+        assertEquals(Visibility.Value.HIDE, h2.asValue)
+
+        tv1["A"][Visibility] = Visibility.Show
+        val h3 = tv1["A"][Visibility]
+        assertTrue(h3 !is Visibility.Undefined)
+        assertTrue(h3 !is Visibility.Hide)
+        assertTrue(h3 is Visibility.Show)
+        assertEquals(tv1["A"], h3.source)
+        assertEquals(Visibility.Value.SHOW, h3.visibility)
+        assertTrue(h2.isValue)
+        assertEquals(Visibility.Value.SHOW, h3.asValue)
+
+        tv1["A"][Visibility] = null as Visibility<*, *>?
+        val h4 = tv1["A"][Visibility]
+        assertTrue(h4 is Visibility.Undefined)
+        assertTrue(h4 !is Visibility.Hide)
+        assertTrue(h4 !is Visibility.Show)
+        assertEquals(tv1["A"], h4.source)
+        assertEquals(Unit, h4.visibility)
+        assertFalse(h4.isValue)
+        assertNull(h4.asValue)
+
+        tv1["B"][Visibility] = Visibility.Show
+        tv1["A"][Visibility] = tv1["B"][Visibility]
+        val h5 = tv1["A"][Visibility]
+        assertTrue(h5 !is Visibility.Undefined)
+        assertTrue(h5 !is Visibility.Hide)
+        assertTrue(h5 is Visibility.Show)
+        assertEquals(tv1["A"], h5.source)
+        assertEquals(Visibility.Value.SHOW, h5.visibility)
+        assertTrue(h5.isValue)
+        assertEquals(Visibility.Value.SHOW, h5.asValue)
+
+        tv1["A"][Visibility] = Unit
+        val h6 = tv1["A"][Visibility]
+        assertTrue(h6 is Visibility.Undefined)
+        assertTrue(h6 !is Visibility.Hide)
+        assertTrue(h6 !is Visibility.Show)
+        assertEquals(tv1["A"], h6.source)
+        assertEquals(Unit, h6.visibility)
+        assertFalse(h6.isValue)
+        assertNull(h6.asValue)
+
+        tv1["A"][Visibility] = Visibility.Hide
+        tv1["A"][Visibility] = null as Unit?
+        val h7 = tv1["A"][Visibility]
+        assertTrue(h7 is Visibility.Undefined)
+        assertTrue(h7 !is Visibility.Hide)
+        assertTrue(h7 !is Visibility.Show)
+        assertEquals(tv1["A"], h7.source)
+        assertEquals(Unit, h7.visibility)
+        assertFalse(h7.isValue)
+        assertNull(h7.asValue)
+
+        tv1["A"][Visibility] = Visibility.Show
+        tv1["A"][Visibility] = null as Visibility.Show.Companion?
+        val h8 = tv1["A"][Visibility]
+        assertTrue(h8 is Visibility.Undefined)
+        assertTrue(h8 !is Visibility.Hide)
+        assertTrue(h8 !is Visibility.Show)
+        assertEquals(tv1["A"], h8.source)
+        assertEquals(Unit, h8.visibility)
+        assertFalse(h8.isValue)
+        assertNull(h8.asValue)
+
+        tv1["A"][Visibility] = Visibility.Hide
+        tv1["A"][Visibility] = null as Visibility.Hide.Companion?
+        val h9 = tv1["A"][Visibility]
+        assertTrue(h9 is Visibility.Undefined)
+        assertTrue(h9 !is Visibility.Hide)
+        assertTrue(h9 !is Visibility.Show)
+        assertEquals(tv1["A"], h9.source)
+        assertEquals(Unit, h9.visibility)
+        assertFalse(h9.isValue)
+        assertNull(h9.asValue)
+
+        tv1["B"][Visibility] = Visibility.Show
+        tv1["A"](tv1["B"][Visibility])
+        val h10 = tv1["A"][Visibility]
+        assertTrue(h10 !is Visibility.Hide)
+        assertTrue(h10 is Visibility.Show)
+        assertEquals(tv1["A"], h10.source)
+        assertEquals(Visibility.Value.SHOW, h10.visibility)
+        assertTrue(h10.isValue)
+        assertEquals(Visibility.Value.SHOW, h10.asValue)
+    }
+
+    @Test
+    fun `vertical visibility`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val h1 = tv1[1][Visibility]
+        assertTrue(h1 is Visibility.Undefined)
+        assertTrue(h1 !is Visibility.Hide)
+        assertTrue(h1 !is Visibility.Show)
+        assertEquals(tv1[1], h1.source)
+        assertEquals(Unit, h1.visibility)
+        assertFalse(h1.isValue)
+        assertNull(h1.asValue)
+
+        tv1[1][Visibility] = Visibility.Hide
+        val h2 = tv1[1][Visibility]
+        assertTrue(h2 !is Visibility.Undefined)
+        assertTrue(h2 is Visibility.Hide)
+        assertTrue(h2 !is Visibility.Show)
+        assertEquals(tv1[1], h2.source)
+        assertEquals(Visibility.Value.HIDE, h2.visibility)
+        assertTrue(h2.isValue)
+        assertEquals(Visibility.Value.HIDE, h2.asValue)
+
+        tv1[1][Visibility] = Visibility.Show
+        val h3 = tv1[1][Visibility]
+        assertTrue(h3 !is Visibility.Undefined)
+        assertTrue(h3 !is Visibility.Hide)
+        assertTrue(h3 is Visibility.Show)
+        assertEquals(tv1[1], h3.source)
+        assertEquals(Visibility.Value.SHOW, h3.visibility)
+        assertTrue(h2.isValue)
+        assertEquals(Visibility.Value.SHOW, h3.asValue)
+
+        tv1[1][Visibility] = null as Visibility<*, *>?
+        val h4 = tv1[1][Visibility]
+        assertTrue(h4 is Visibility.Undefined)
+        assertTrue(h4 !is Visibility.Hide)
+        assertTrue(h4 !is Visibility.Show)
+        assertEquals(tv1[1], h4.source)
+        assertEquals(Unit, h4.visibility)
+        assertFalse(h4.isValue)
+        assertNull(h4.asValue)
+
+        tv1[2][Visibility] = Visibility.Show
+        tv1[1][Visibility] = tv1[2][Visibility]
+        val h5 = tv1[1][Visibility]
+        assertTrue(h5 !is Visibility.Undefined)
+        assertTrue(h5 !is Visibility.Hide)
+        assertTrue(h5 is Visibility.Show)
+        assertEquals(tv1[1], h5.source)
+        assertEquals(Visibility.Value.SHOW, h5.visibility)
+        assertTrue(h5.isValue)
+        assertEquals(Visibility.Value.SHOW, h5.asValue)
+
+        tv1[1][Visibility] = Unit
+        val h6 = tv1[1][Visibility]
+        assertTrue(h6 is Visibility.Undefined)
+        assertTrue(h6 !is Visibility.Hide)
+        assertTrue(h6 !is Visibility.Show)
+        assertEquals(tv1[1], h6.source)
+        assertEquals(Unit, h6.visibility)
+        assertFalse(h6.isValue)
+        assertNull(h6.asValue)
+
+        tv1[1][Visibility] = Visibility.Hide
+        tv1[1][Visibility] = null as Unit?
+        val h7 = tv1[1][Visibility]
+        assertTrue(h7 is Visibility.Undefined)
+        assertTrue(h7 !is Visibility.Hide)
+        assertTrue(h7 !is Visibility.Show)
+        assertEquals(tv1[1], h7.source)
+        assertEquals(Unit, h7.visibility)
+        assertFalse(h7.isValue)
+        assertNull(h7.asValue)
+
+        tv1[1][Visibility] = Visibility.Show
+        tv1[1][Visibility] = null as Visibility.Show.Companion?
+        val h8 = tv1[1][Visibility]
+        assertTrue(h8 is Visibility.Undefined)
+        assertTrue(h8 !is Visibility.Hide)
+        assertTrue(h8 !is Visibility.Show)
+        assertEquals(tv1[1], h8.source)
+        assertEquals(Unit, h8.visibility)
+        assertFalse(h8.isValue)
+        assertNull(h8.asValue)
+
+        tv1[1][Visibility] = Visibility.Hide
+        tv1[1][Visibility] = null as Visibility.Hide.Companion?
+        val h9 = tv1[1][Visibility]
+        assertTrue(h9 is Visibility.Undefined)
+        assertTrue(h9 !is Visibility.Hide)
+        assertTrue(h9 !is Visibility.Show)
+        assertEquals(tv1[1], h9.source)
+        assertEquals(Unit, h9.visibility)
+        assertFalse(h9.isValue)
+        assertNull(h9.asValue)
+
+        tv1[2][Visibility] = Visibility.Show
+        tv1[1](tv1[2][Visibility])
+        val h10 = tv1[1][Visibility]
+        assertTrue(h10 !is Visibility.Hide)
+        assertTrue(h10 is Visibility.Show)
+        assertEquals(tv1[1], h10.source)
+        assertEquals(Visibility.Value.SHOW, h10.visibility)
+        assertTrue(h10.isValue)
+        assertEquals(Visibility.Value.SHOW, h10.asValue)
     }
 
     companion object {

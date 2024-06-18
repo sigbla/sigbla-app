@@ -197,7 +197,12 @@ internal object SigblaBackend {
 
         val headerWidth = view[EMPTY_HEADER].derived.cellWidth + paddingLeft + paddingRight
 
-        val leftRest = table.columns.partition { ref.columnViews[it.header]?.positionValue == Position.Value.LEFT }
+        val leftRest = table.columns
+            .filter {
+                viewRef.config.columnVisibilityBehavior == Visibility.Hide && ref.columnViews[it.header]?.visibilityValue != Visibility.Value.HIDE
+                        || viewRef.config.columnVisibilityBehavior == Visibility.Show && ref.columnViews[it.header]?.visibilityValue == Visibility.Value.SHOW
+            }
+            .partition { ref.columnViews[it.header]?.positionValue == Position.Value.LEFT }
 
         for (column in leftRest.first) {
             applicableColumns.add(Pair(column, Pair(runningLeft, 0)))
@@ -294,6 +299,7 @@ internal object SigblaBackend {
 
         for (row in ref.rowViews.filter { it.component2().positionValue == Position.Value.TOP }.map { it.component1() }.sorted()) {
             if (!table.indexes.contains(row)) continue
+            if (ref.rowViews[row]?.visibilityValue == Visibility.Value.HIDE) continue
 
             applicableRows.add(Pair(row, Pair(runningHeight, 0)))
 
@@ -307,6 +313,8 @@ internal object SigblaBackend {
         for (row in 0..lastKey) {
             if (ref.rowViews[row]?.positionValue == Position.Value.TOP) continue
             if (ref.rowViews[row]?.positionValue == Position.Value.BOTTOM) continue
+            if (viewRef.config.rowVisibilityBehavior == Visibility.Hide && ref.rowViews[row]?.visibilityValue == Visibility.Value.HIDE) continue
+            else if (viewRef.config.rowVisibilityBehavior == Visibility.Show && ref.rowViews[row]?.visibilityValue != Visibility.Value.SHOW) continue
 
             if (y <= runningHeight && runningHeight <= y + h) applicableRows.add(Pair(row, Pair(runningHeight, 0)))
 
@@ -315,6 +323,8 @@ internal object SigblaBackend {
 
         for (row in ref.rowViews.filter { it.component2().positionValue == Position.Value.BOTTOM }.map { it.component1() }.sortedDescending()) {
             if (!table.indexes.contains(row)) continue
+            if (viewRef.config.rowVisibilityBehavior == Visibility.Hide && ref.rowViews[row]?.visibilityValue == Visibility.Value.HIDE) continue
+            else if (viewRef.config.rowVisibilityBehavior == Visibility.Show && ref.rowViews[row]?.visibilityValue != Visibility.Value.SHOW) continue
 
             if (runningBottom == 0L) {
                 runningHeight += bottomSeparatorHeight
@@ -437,7 +447,10 @@ internal object SigblaBackend {
         var fixedLeft = 0L
         var runningRight = 0L
 
-        for (column in table.columns) {
+        for (column in table.columns.filter {
+            viewRef.config.columnVisibilityBehavior == Visibility.Hide && ref.columnViews[it.header]?.visibilityValue != Visibility.Value.HIDE
+                    || viewRef.config.columnVisibilityBehavior == Visibility.Show && ref.columnViews[it.header]?.visibilityValue == Visibility.Value.SHOW
+        }) {
             runningLeft += view[column].derived.cellWidth + marginLeft + marginRight + paddingLeft + paddingRight
             if (ref.columnViews[column.header]?.positionValue == Position.Value.LEFT) {
                 fixedLeft += view[column].derived.cellWidth + marginLeft + marginRight + paddingLeft + paddingRight
@@ -468,6 +481,9 @@ internal object SigblaBackend {
 
         val lastKey = table.tableRef.get().columnCells.values().map { it.last()?.component1() ?: -1 }.maxOrNull() ?: -1
         for (row in 0..lastKey) {
+            if (viewRef.config.rowVisibilityBehavior == Visibility.Hide && ref.rowViews[row]?.visibilityValue == Visibility.Value.HIDE) continue
+            else if (viewRef.config.rowVisibilityBehavior == Visibility.Show && ref.rowViews[row]?.visibilityValue != Visibility.Value.SHOW) continue
+
             if (ref.rowViews[row]?.positionValue == Position.Value.TOP) {
                 fixedTop += view[row].derived.cellHeight + marginTop + marginBottom + paddingTop + paddingBottom
             }

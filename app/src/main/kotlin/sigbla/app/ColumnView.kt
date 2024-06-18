@@ -277,6 +277,56 @@ class ColumnView internal constructor(
         }
     }
 
+    operator fun get(visibility: Visibility.Companion): Visibility<ColumnView, *> {
+        val ref = tableView.tableViewRef.get()
+        return when (ref.columnViews[header]?.visibilityValue) {
+            null -> Visibility.Undefined(this)
+            Visibility.Value.SHOW -> Visibility.Show(this)
+            Visibility.Value.HIDE -> Visibility.Hide(this)
+        }
+    }
+
+    operator fun set(visibility: Visibility.Companion, newVisibility: Unit?) {
+        setColumnVisibility(null)
+    }
+
+    operator fun set(visibility: Visibility.Companion, newVisibility: Visibility<*, *>?) {
+        setColumnVisibility(newVisibility?.asValue)
+    }
+
+    operator fun set(visibility: Visibility.Companion, newVisibility: Visibility.VisibilityCompanion?) {
+        setColumnVisibility(newVisibility?.asValue)
+    }
+
+    private fun setColumnVisibility(visibility: Visibility.Value?) {
+        synchronized(tableView.eventProcessor) {
+            val (oldRef, newRef) = tableView.tableViewRef.refAction {
+                val oldMeta = it.columnViews[header]
+                val viewMeta = oldMeta?.copy(visibilityValue = visibility) ?: ViewMeta(visibilityValue = visibility)
+
+                it.copy(
+                    columnViews = it.columnViews.put(header, viewMeta),
+                    version = it.version + 1L
+                )
+            }
+
+            if (!tableView.eventProcessor.haveListeners()) return
+
+            val oldView = tableView.makeClone(ref = oldRef)
+            val newView = tableView.makeClone(ref = newRef)
+
+            val old = oldView[header][Visibility]
+            val new = newView[header][Visibility]
+
+            tableView.eventProcessor.publish(listOf(
+                TableViewListenerEvent<Visibility<*, *>>(
+                    old,
+                    new
+                )
+            ) as List<TableViewListenerEvent<Any>>)
+        }
+    }
+
     operator fun invoke(newValue: ColumnView?): ColumnView? {
         tableView[this] = newValue
         return newValue
@@ -309,6 +359,16 @@ class ColumnView internal constructor(
 
     operator fun invoke(newValue: Position.HorizontalCompanion?): Position.HorizontalCompanion? {
         tableView[this][Position] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Visibility<*, *>?): Visibility<*, *>? {
+        tableView[this][Visibility] = newValue
+        return newValue
+    }
+
+    operator fun invoke(newValue: Visibility.VisibilityCompanion?): Visibility.VisibilityCompanion? {
+        tableView[this][Visibility] = newValue
         return newValue
     }
 
