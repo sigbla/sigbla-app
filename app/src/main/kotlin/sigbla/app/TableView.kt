@@ -1842,8 +1842,8 @@ data class ViewConfig(
     val leftSeparatorWidth: Long,
     val rightSeparatorWidth: Long,
 
-    val columnVisibilityBehavior: Visibility.VisibilityCompanion,
-    val rowVisibilityBehavior: Visibility.VisibilityCompanion,
+    val defaultColumnVisibility: Visibility.VisibilityCompanion,
+    val defaultRowVisibility: Visibility.VisibilityCompanion,
 
     val tableHtml: suspend PipelineContext<*, ApplicationCall>.() -> Unit,
     val tableScript: suspend PipelineContext<*, ApplicationCall>.() -> Unit,
@@ -1852,8 +1852,8 @@ data class ViewConfig(
 
 fun compactViewConfig(
     title: String = "Table",
-    columnVisibilityBehavior: Visibility.VisibilityCompanion = Visibility.Hide,
-    rowVisibilityBehavior: Visibility.VisibilityCompanion = Visibility.Hide
+    defaultColumnVisibility: Visibility.VisibilityCompanion = Visibility.Show,
+    defaultRowVisibility: Visibility.VisibilityCompanion = Visibility.Show
 ): ViewConfig = ViewConfig(
     marginTop = 0,
     marginBottom = 0,
@@ -1870,8 +1870,8 @@ fun compactViewConfig(
     leftSeparatorWidth = 2,
     rightSeparatorWidth = 2,
 
-    columnVisibilityBehavior = columnVisibilityBehavior,
-    rowVisibilityBehavior = rowVisibilityBehavior,
+    defaultColumnVisibility = defaultColumnVisibility,
+    defaultRowVisibility = defaultRowVisibility,
 
     tableHtml = {
         call.respondText(ContentType.Text.Html, HttpStatusCode.OK) {
@@ -1884,8 +1884,8 @@ fun compactViewConfig(
 
 fun spaciousViewConfig(
     title: String = "Table",
-    columnVisibilityBehavior: Visibility.VisibilityCompanion = Visibility.Hide,
-    rowVisibilityBehavior: Visibility.VisibilityCompanion = Visibility.Hide
+    defaultColumnVisibility: Visibility.VisibilityCompanion = Visibility.Show,
+    defaultRowVisibility: Visibility.VisibilityCompanion = Visibility.Show
 ): ViewConfig = ViewConfig(
     marginTop = 1,
     marginBottom = 1,
@@ -1902,8 +1902,8 @@ fun spaciousViewConfig(
     leftSeparatorWidth = 3,
     rightSeparatorWidth = 3,
 
-    columnVisibilityBehavior = columnVisibilityBehavior,
-    rowVisibilityBehavior = rowVisibilityBehavior,
+    defaultColumnVisibility = defaultColumnVisibility,
+    defaultRowVisibility = defaultRowVisibility,
 
     tableHtml = {
         call.respondText(ContentType.Text.Html, HttpStatusCode.OK) {
