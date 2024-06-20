@@ -21,6 +21,6 @@ fun main() {
     tableView[3][Visibility] = Visibility.Show
 
     // Reverse default visibility behavior by setting columnVisibilityBehavior and rowVisibilityBehavior to Show
-    //println(show(tableView, ref = "column-row-show", config = compactViewConfig(columnVisibilityBehavior = Visibility.Show, rowVisibilityBehavior = Visibility.Show)))
-    println(show(tableView, ref = "column-row-show", config = spaciousViewConfig(columnVisibilityBehavior = Visibility.Show, rowVisibilityBehavior = Visibility.Show)))
+    //println(show(tableView, ref = "column-row-show", config = compactViewConfig(defaultColumnVisibility = Visibility.Hide, defaultRowVisibility = Visibility.Hide)))
+    println(show(tableView, ref = "column-row-show", config = spaciousViewConfig(defaultColumnVisibility = Visibility.Hide, defaultRowVisibility = Visibility.Hide)))
 }
