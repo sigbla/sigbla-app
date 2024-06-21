@@ -59,7 +59,7 @@ window.sigbla.onTopic("sigbla-widgets-radio", (data) => {
         if (callback === null || callback === undefined || callback.trim() === "") return;
 
         data.target.onkeydown = async (e) => {
-            if (e.key === " ") {
+            if (e.key === " " && !input.checked) {
                 await fetch(callback, {
                     method: "POST",
                     body: input.checked ? "false" : "true" // Note: swapped to toggle
