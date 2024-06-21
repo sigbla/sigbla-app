@@ -1734,6 +1734,7 @@ sealed class Position<S, T>(
     companion object
 }
 
+// TODO Support tableView[-1][Visibility] and related to hide/show headers?
 sealed class Visibility<S, T>(
     val source: S,
     val visibility: T
@@ -1825,8 +1826,10 @@ sealed class Visibility<S, T>(
     companion object
 }
 
-// TODO Add support for disabling marker, hide column and row headers, visibility behavior (show/hide undefined)
+// TODO Add support for disabling marker, hide column and row headers (but hiding columns can be done with empty header/negative index)
 data class ViewConfig(
+    val title: String,
+
     val marginTop: Long,
     val marginBottom: Long,
     val marginLeft: Long,
@@ -1855,6 +1858,8 @@ fun compactViewConfig(
     defaultColumnVisibility: Visibility.VisibilityCompanion = Visibility.Show,
     defaultRowVisibility: Visibility.VisibilityCompanion = Visibility.Show
 ): ViewConfig = ViewConfig(
+    title = title,
+
     marginTop = 0,
     marginBottom = 0,
     marginLeft = 0,
@@ -1887,6 +1892,8 @@ fun spaciousViewConfig(
     defaultColumnVisibility: Visibility.VisibilityCompanion = Visibility.Show,
     defaultRowVisibility: Visibility.VisibilityCompanion = Visibility.Show
 ): ViewConfig = ViewConfig(
+    title = title,
+
     marginTop = 1,
     marginBottom = 1,
     marginLeft = 1,
