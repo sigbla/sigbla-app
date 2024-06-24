@@ -1,4 +1,4 @@
-# Introduction to Sigbla
+# Sigbla: Developer-friendly spreadsheets
 
 [![Build](https://github.com/sigbla/sigbla-app/actions/workflows/build.yml/badge.svg)](https://github.com/sigbla/sigbla-app/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/sigbla/sigbla-app/graph/badge.svg?token=EU00X66Y7N)](https://codecov.io/gh/sigbla/sigbla-app)
@@ -19,7 +19,7 @@ These issues make them difficult to maintain and understand, and limits how much
 
 Sigbla fixes this by:
 
-* Providing an easy to use table structure for data
+* Providing an easy-to-use table structure for data
 * With programming residing in source code files
 * And letting you view the data through views
 

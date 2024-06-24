@@ -1,4 +1,4 @@
-# Introduction to Sigbla
+# Sigbla: Developer-friendly spreadsheets
 
 Sigbla is a framework for working with data in tables, using the Kotlin programming language.
 It supports [various data types](cells.md), [reactive programming and events](table_subscriptions.md),
@@ -15,7 +15,7 @@ These issues make them difficult to maintain and understand, and limits how much
 
 Sigbla fixes this by:
 
-* Providing an easy to use table structure for data
+* Providing an easy-to-use table structure for data
 * With programming residing in source code files
 * And letting you view the data through views
 

@@ -6,7 +6,7 @@ site_url: https://sigbla.app/docs/
 repo_url: https://github.com/sigbla/sigbla-app
 
 nav:
-  - 'index.md'
+  - 'Introduction': 'index.md'
   - 'tables.md'
   - 'columns.md'
   - 'rows.md'
