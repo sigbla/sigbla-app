@@ -208,17 +208,17 @@ table["A", 0] = 100
 table["A", 1] = 200
 
 tableView[Resources] = tableView[Resources] + ("my.css" to css {
-    """
-        .tc, .ch, .ch:hover, .bb, .rb, .rh, .rh:hover {
-            background-color: lightgreen;
-        }
-        .c {
-            background-color: lightgray;
-        }
-        .c:hover {
-            background-color: gray;
-        }
-    """
+"""
+    #tc, .ch, .rh {
+        background-color: lightgreen;
+    }
+    .c {
+        background-color: lightgray;
+    }
+    .c:hover {
+        background-color: gray;
+    }
+"""
 })
 
 val url = show(tableView)

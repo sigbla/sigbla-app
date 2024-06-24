@@ -52,7 +52,7 @@ fun main() {
                     console.log("Data", data);
 
                     if (data.action === "preparing") {
-                        const cell = data.target;
+                        const cell = data.target.querySelector(".cc");
                         console.log("Target", cell);
                         if (cell == null) return;
 
@@ -64,6 +64,17 @@ fun main() {
                         }
 
                         cell.onclick = onclick;
+
+                        const onkeydown = async (e) => {
+                            if (e.key === " ") {
+                                console.log("Marker input!");
+                                const response = await fetch("click-service", {
+                                    method: "POST"
+                                });
+                            }
+                        }
+
+                        data.target.onkeydown = onkeydown;
                     }
                 });
             """
@@ -85,7 +96,7 @@ window.sigbla.onTopic("click-cell", (data) => {
     console.log("Data", data);
 
     if (data.action === "preparing") {
-        const cell = data.target;
+        const cell = data.target.querySelector(".cc");
         console.log("Target", cell);
         if (cell == null) return;
 
@@ -97,6 +108,17 @@ window.sigbla.onTopic("click-cell", (data) => {
         }
 
         cell.onclick = onclick;
+
+        const onkeydown = async (e) => {
+            if (e.key === " ") {
+                console.log("Marker input!");
+                const response = await fetch("click-service", {
+                    method: "POST"
+                });
+            }
+        }
+
+        data.target.onkeydown = onkeydown;
     }
 });
 ```
@@ -111,10 +133,22 @@ processed. Cells in a table view can belong to many different topics, something 
 placed on a cell view, a column view, a row view, or a table view itself.
 
 Within the function we execute we're receiving a parameter we've named `data`. This JavaScript object contains various
-properties, such as `target`, which points to the cell itself. We then attach an `onclick` listener to this which in
-turn calls our resource at a relative URL simply named "click-service".
+properties, such as `target`, which points to the cell itself. We then attach an `onclick` listener to a child of this
+which in turn calls our resource at a relative URL simply named "click-service".
 
-Looking at the "click-service" resource, we find:
+To understand the child structure, and also the second `onkeydown` event listener, we need to understand the structure
+of a cell. A cell, in the frontend, is a div with a class `c`. This div is what we get in the `data.target` field.
+Within the `c` cell div we find two other divs, one with class `cc`, the other `co`. The div with the `cc` class
+contains the cell content, hence where our value is placed. The `co` div is a cell overlay, which normally sits on top
+of the `cc` div. Whenever a cell is double clicked, the `co` div will no longer be visible, exposing the content of `cc`.
+
+This is why we place the `onclick` listener on `cc`. If you double click the cell, the following clicks will trigger
+this `onclick` listener.
+
+In addition, we place an `onkeydown` listener directly on `data.target`. Key down events are fired if the marker is on
+the cell. Hence, if the marker is on the cell, and we press the space bar, we also want the counter to increase.
+
+Going back to the Kotlin code, looking at the "click-service" resource, we find:
 
 ``` kotlin
 "click-service" to {
@@ -296,14 +330,14 @@ tableView["D"][CellClasses] = "specialColumn"
 tableView[2][CellClasses] = "specialRow"
 
 tableView[Resources] = "my.css" to css {
-    """
-        .specialColumn {
-            border-right: 3px solid darkred;
-        }
-        .specialRow {
-            border-bottom: 3px solid darkred;
-        }
-    """
+"""
+    .specialColumn {
+        background-color: lightblue;
+    }
+    .specialRow {
+        background-color: lightblue;
+    }
+"""
 }
 
 val url = show(tableView)
@@ -405,7 +439,7 @@ fun clickableCellCounter(sourceCell: Cell<*>): CellView.() -> Unit = {
                 """
                 window.sigbla.onTopic("click-cell", (data) => {
                     if (data.action === "preparing") {
-                        const cell = data.target.querySelector("div");
+                        const cell = data.target.querySelector(".click-cell");
                         if (cell == null) return;
 
                         const callback = cell.attributes.getNamedItem("callback").value;
@@ -416,6 +450,14 @@ fun clickableCellCounter(sourceCell: Cell<*>): CellView.() -> Unit = {
                         }
 
                         cell.onclick = onclick;
+
+                        const onkeydown = async (e) => {
+                            if (e.key === " ") {
+                                await fetch(callback, { method: "POST" });
+                            }
+                        }
+                
+                        data.target.onkeydown = onkeydown;
                     }
                 });
                 """

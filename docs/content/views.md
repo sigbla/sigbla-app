@@ -290,6 +290,142 @@ iterator2.forEach {
 // DerivedCellView(columnView=[B], index=2, cellHeight=20, cellWidth=100, tableView=TableView[null], cellView=[B]:2, cell=200, cellClasses=[], cellTopics=[])
 ```
 
+## Hiding columns and rows
+
+You might want to hide some columns or rows. The next example shows how we can hide the first row and column from the table view:
+
+``` kotlin
+val t = Table["Hide"]
+
+t["A", 0] = "A0"
+t["A", 1] = "A1"
+t["B", 0] = "B0"
+t["B", 1] = "B1"
+t["C", 0] = "C0"
+t["C", 1] = "C1"
+
+val tableView = TableView[t]
+
+tableView["A"][Visibility] = Visibility.Hide
+tableView[0][Visibility] = Visibility.Hide
+
+val url = show(tableView)
+println(url)
+```
+
+![Hide column and row](img/views_hide_column_row.png)
+
+As can be seen, while column A and row 0 contains data, it is not shown in the view because they were hidden.
+
+It's also possible to assign a `Visibility.Show` value, but the default behavior is to show any column and row that has
+not been hidden with `Visibility.Hide`. If you wanted to change this default behavior to only show those columns or rows
+that have explicitly been set to be visible you'd need to provide a customized view configuration to the show function.
+
+We'll dive into the view configuration in more details later, but here's a quick preview:
+
+``` kotlin
+val t = Table["Show"]
+
+t["A", 0] = "A0"
+t["A", 1] = "A1"
+t["B", 0] = "B0"
+t["B", 1] = "B1"
+t["C", 0] = "C0"
+t["C", 1] = "C1"
+
+val tableView = TableView[t]
+
+tableView["A"][Visibility] = Visibility.Show
+tableView[0][Visibility] = Visibility.Show
+
+val url = show(tableView, config = compactViewConfig(
+    defaultColumnVisibility = Visibility.Hide,
+    defaultRowVisibility = Visibility.Hide
+))
+
+println(url)
+```
+
+![Show column and row](img/views_show_column_row.png)
+
+You'll notice we're able to define the visibility behavior on either the column or row separately allowing for different
+default behavior between them.
+
+## Locking columns and rows
+
+It is often helpful to lock certain columns or rows so that they are always in view, even if we scroll within a table
+that otherwise contains more information that what can be shown at once. You'd do that with `Position` and we'll start
+with an example that locks the first column to the left side of the view:
+
+``` kotlin
+val table = Table["Lock"]
+val tableView = TableView[table]
+
+for (label in listOf("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T")) {
+    for (index in 0..1000) {
+        table[label, index] = "$label $index"
+    }
+}
+
+// Lock column A to left position
+tableView["A"][Position] = Position.Left
+
+val url = show(tableView)
+println(url)
+```
+
+![Lock column to left position](img/views_position_left.png)
+
+In a similar fashion you can lock the column to the right position with:
+
+``` kotlin
+tableView["A"][Position] = Position.Right
+```
+
+And rows can be locked to the top or bottom position with:
+
+``` kotlin
+tableView[1][Position] = Position.Top
+tableView[2][Position] = Position.Bottom
+```
+
+When multiple columns are locked to the same position, they are ordered according to their table order, for example:
+
+``` kotlin
+tableView["A"][Position] = Position.Left
+tableView["B"][Position] = Position.Left
+
+tableView["C"][Position] = Position.Right
+tableView["D"][Position] = Position.Right
+```
+
+![Lock multiple columns to left and right](img/views_multiple_column_positions.png)
+
+And for rows it would look like this:
+
+``` kotlin
+tableView[1][Position] = Position.Top
+tableView[2][Position] = Position.Top
+
+tableView[3][Position] = Position.Bottom
+tableView[4][Position] = Position.Bottom
+```
+
+![Lock multiple rows to top and bottom](img/views_multiple_row_positions.png)
+
+If we lock both columns and rows at the same time, we would lock the intersecting cells in both the horizontal and
+vertical position, meaning those cells would never scroll out of view:
+
+``` kotlin
+tableView["A"][Position] = Position.Left
+tableView["B"][Position] = Position.Left
+
+tableView[1][Position] = Position.Top
+tableView[2][Position] = Position.Top
+```
+
+![Lock multiple columns and rows together](img/views_multiple_column_and_row_positions.png)
+
 ## Transformations
 
 A table view allows us to define something called transformers. A transformer allows us to change how a view is presented.
@@ -309,6 +445,9 @@ content for the purpose of elevating or changing how data is viewed, again witho
 Here's an example that changes the text color to red if the number is negative, otherwise green:
 
 ``` kotlin
+import sigbla.app.*
+import kotlinx.html.*
+
 fun main() {
     val table = Table["Transformers"]
     val tableView = TableView[table]
@@ -328,12 +467,12 @@ val cellTransformer: Cell<*>.() -> Unit = {
     if (isNumeric) {
         table[this] = if (this > 0) div {
             p {
-                attributes += "style" to "color: green; text-align: right"
+                style = "color: green; text-align: right; padding-right: 5px"
                 +value.toString()
             }
         } else div {
             p {
-                attributes += "style" to "color: red; text-align: right"
+                style = "color: red; text-align: right; padding-right: 5px"
                 +value.toString()
             }
         }
@@ -384,12 +523,12 @@ val cellTransformer: Cell<*>.() -> Unit = {
     if (isNumeric) {
         table[this] = if (this > 0) div {
             p {
-                attributes += "style" to "color: green; text-align: right"
+                style = "color: green; text-align: right; padding-right: 5px"
                 +value.toString()
             }
         } else div {
             p {
-                attributes += "style" to "color: red; text-align: right"
+                style = "color: red; text-align: right; padding-right: 5px"
                 +value.toString()
             }
         }
@@ -462,7 +601,7 @@ function.
 When saving a table, it will use the file extension `sigt`, while views will use `sigv` as their default extension.
 
 The table view can also be cloned using the `clone` function. As we'll cover later, you can have listeners on a table
-view, and these listeners are, as with the table, not cloned when cloning a view. The use of cell transformers on the
+view, and these listeners are, as with the table, not cloned when cloning a view. The use of transformers on the
 other hand is included in the cloned view, sharing the same instance references.
 
 Also, much like on tables, table views also have a registry. The behaviour is comparable to that of tables.
@@ -505,4 +644,93 @@ Specifically, you are able to adjust the height and width as shown below.
 
 This updates the metadata just as if you did it from the code, interacting with the particular column or row being
 adjusted. Hence, any such activity will trigger events, and if you don't want the user to be able to adjust any row or
-column of your choice, you can simply override the action from a listener, setting it to whatever value you pick.
+column of your choice, you can simply override the action from a listener, setting it to whatever value you pick. The
+listener and event topics will be covered in later chapters.
+
+## The cell marker
+
+If you click on a cell it will become marked. When the marker is present, you may move it around with your allow keys,
+and also use tab to move right or enter to move down. Whatever cell is marked will receive user keyboard input,
+something that will be explored in more detail in the [view extensions](view_extensions.md) chapter.
+
+Double clicking a cell will select the cell, and expose the cell content. An exposed cell will be able to receive all
+input, including mouse events.
+
+The below video shows us clicking on a cell to expose the marker, using arrow keys to move it right and finally double
+clicking it to expose the underlying content.
+
+![Interacting with the cell marker](img/views_cell_marker.png)
+
+## View configuration and related properties
+
+You might have noticed in the above example that the URL is localhost:8080/t/Table/. While we've covered how to set the
+host and port, the Table in the URL is taken from the name of the table when it was created with `Table["Table"]`.
+Also, the title of the HTML page is set to the same.
+
+You might not want this, and might want to separate the URL from the HTML title, and even keep them different from the
+name of the table in your code. Let's start with the URL.
+
+You can define the last part of the URL by defining what's known as a `ref` as shown next:
+
+``` kotlin
+TableView[Host] = "localhost"
+TableView[Port] = 8080
+
+val table = Table["Table"]
+val tableView = TableView[table]
+
+val url = show(tableView, ref = "my-own-ref")
+println(url)
+```
+
+Running this and the URL will now be localhost:8080/t/my-own-ref/ which is what we wanted. But if you open it you'll
+also see that the title has been set to "my-own-ref". If you also wanted to define a title you will need to define
+the view config. Here's an example of this:
+
+``` kotlin
+TableView[Host] = "localhost"
+TableView[Port] = 8080
+
+val table = Table["Table"]
+val tableView = TableView[table]
+
+val url = show(tableView, ref = "my-own-ref",
+                config = compactViewConfig(title = "My own title"))
+println(url)
+```
+
+You'll notice that in `show(tableView, ref = "my-own-ref", config = compactViewConfig(title = "My own title"))` we use
+something called `compactViewConfig(..)` to generate an instance of `ViewConfig` on which we set the title. Within
+`ViewConfig` there are many parameters we can define, and we'll dive into that in more details in later chapters when
+looking at extending views.
+
+However, for now, be aware that there's two default view configs provided, as defined by `compactViewConfig(..)` and
+`spaciousViewConfig(..)` providing two different styles for viewing a table. Here's an example of that:
+
+``` kotlin
+TableView[Host] = "localhost"
+TableView[Port] = 8080
+
+val table = Table["Table"]
+val tableView = TableView[table]
+
+table["A", 0] = "A 0"
+table["A", 1] = "A 1"
+table["B", 0] = "B 0"
+table["B", 1] = "B 1"
+
+val url1 = show(tableView, ref = "compact", config = compactViewConfig())
+val url2 = show(tableView, ref = "spacious", config = spaciousViewConfig())
+
+println(url1)
+println(url2)
+```
+
+While the table and table view is shared between them, the way they look in the browser is different.
+
+Here's the compact variant next to the spacious variant:
+
+![Compact vs spacious view configs](img/views_viewconfig_compact_vs_spacious.png)
+
+Being able to pass in a `ViewConfig` gives you the ability to fully customize what HTML, CSS and JavaScript is used
+by the frontend, enabling you to build whatever works for your needs.
