@@ -278,32 +278,30 @@ without needing to know exactly what row it's located at.
 Say we want to append a cell to the bottom of a column:
 
 ``` kotlin
-fun addValue(column: Column, value: Any?) {
+fun addValue(column: Column, value: String) {
     when (val cell = column before Long.MAX_VALUE) {
-        is UnitCell -> column[0] { value }
-        else -> column[cell.index + 1] { value }
+        is UnitCell -> column[0] = value
+        else -> column[cell.index + 1] = value
     }
 }
 
 val table = Table["MyTable"]
 
 addValue(table["A"], "First value")
-addValue(table["B"], 1000)
 addValue(table["A"], "Second value")
-addValue(table["B"], 2000)
 
 print(table)
 
 // Output:
-//              |A            |B            
-// 0            |First value  |1000         
-// 1            |Second value |2000         
+//              |A            
+// 0            |First value  
+// 1            |Second value 
 ```
 
-The two lines within the `when` statement, including `UnitCell` and how the value is assigned to the cell hasn't been
-covered yet, but will be in the next chapter. Be aware that if you try to get a cell on a column where the relation
-can't be fulfilled, as shown in the below example, the returned unit cell will be at the index provided, irrespective
-of the index relation used.
+The `UnitCell` in the first line within the `when` statement hasn't been covered yet, but will be in the next chapter.
+
+Be aware that if you try to get a cell on a column where the relation can't be fulfilled, as shown in the below example,
+the returned unit cell will be at the index provided, irrespective of the index relation used.
 
 ``` kotlin
 val table = Table[null]

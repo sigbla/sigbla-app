@@ -6,6 +6,10 @@ of widgets currently supporting buttons, check boxes, radio buttons, and text fi
 Like for charts, widgets are placed under a separate `sigbla.widgets` package, so do an `import sigbla.widgets.*` in
 addition to the usual `import sigbla.app.*` to make use of them.
 
+Unless you double click a selected cell, you'll not have direct access to the widget with a mouse pointer. But a
+selected cell with a widget in it will receive keyboard inputs. The space bar can therefore be used to "click" the
+button, check box, or ratio button.
+
 ## Button
 
 Below is an example of how we'd create two buttons, where their actions increments or decrements a cell value.
@@ -17,20 +21,33 @@ import sigbla.widgets.*
 fun main() {
     TableView[Port] = 8080
 
-    val table = Table["widgets"]
+    val table = Table[null]
     val tableView = TableView[table]
 
-    tableView["Increment", 0] = button("+") {
-        table["Value", 0] = table["Value", 0] + 1
+    // Create a spacer to give the buttons some breathing room on the UI
+    // Also assign a Unit to it to avoid the column being prenatal and hidden
+    val spacer = table[" ", 0].also { it(Unit) }
+    tableView[spacer.column][CellWidth] = 20
+
+    // Create reference to relevant cells and init their layout order
+    val incButton = table["Increment", 1]
+    val value = table["Value", 1]
+    val decButton = table["Decrement", 1]
+
+    // Init the starting value
+    table[value] = 0
+
+    // Set up increment button and its action
+    tableView[incButton] = button("+") {
+        table[value] = table[value] + 1
     }
 
-    table["Value", 0] = 0
-
-    tableView["Decrement", 0] = button("-") {
-        table["Value", 0] = table["Value", 0] - 1
+    // Set up decrement button and its action
+    tableView[decButton] = button("-") {
+        table[value] = table[value] - 1
     }
 
-    val url = show(tableView)
+    val url = show(tableView, ref = "buttons", config = spaciousViewConfig(title = "Buttons"))
     println(url)
 }
 ```
@@ -62,7 +79,7 @@ fun main() {
 
 ## Radio button
 
-Radio buttons can be checked, but not unchecked unless we check another related radio button. In the next example
+Radio buttons can be checked, and should uncheck any other related radio button in the process. In the next example
 we're creating two radio buttons, and linking them so that one unchecks the other.
 
 ``` kotlin
@@ -72,21 +89,30 @@ import sigbla.widgets.*
 fun main() {
     TableView[Port] = 8080
 
-    val table = Table["widgets"]
+    val table = Table[null]
     val tableView = TableView[table]
 
+    // Create a spacer to give the buttons some breathing room on the UI
+    // Also assign a Unit to it to avoid the column being prenatal and hidden
+    val spacer = table[" ", 0].also { it(Unit) }
+    tableView[spacer.column][CellWidth] = 20
+
+    // Create reference to relevant cells and init their layout order
+    val radio1 = tableView["Radio 1", 1]
+    val radio2 = tableView["Radio 2", 1]
+
     fun initButtons(selected: Int = 0) {
-        tableView["Radio 1", 0] = radio("Button 1", selected = selected == 1) {
+        tableView[radio1] = radio("Button 1", selected = selected == 1) {
             initButtons(1)
         }
-        tableView["Radio 2", 0] = radio("Button 2", selected = selected == 2) {
+        tableView[radio2] = radio("Button 2", selected = selected == 2) {
             initButtons(2)
         }
     }
 
     initButtons()
 
-    val url = show(tableView)
+    val url = show(tableView, ref = "radio", config = spaciousViewConfig(title = "Radio buttons"))
     println(url)
 }
 ```

@@ -14,18 +14,25 @@ metadata types currently supported on a view.
 
 | Type              | Subtypes                                         | Assignable on                            |
 |-------------------|--------------------------------------------------|------------------------------------------|
-| CellClasses       | N/A                                              | TableView, ColumnView, RowView, CellView |
 | CellHeight        | UnitCellHeight, PixelCellHeight                  | TableView, RowView, CellView             |
+| CellWidth         | UnitCellWidth, PixelCellWidth                    | TableView, ColumnView, CellView          |
+| CellClasses       | N/A                                              | TableView, ColumnView, RowView, CellView |
 | CellTopics        | N/A                                              | TableView, ColumnView, RowView, CellView |
+| Visibility        | Undefined, Show, Hide                            | ColumnView, RowView                      |
+| Position          | Top, Bottom, Left, Right <sup>*</sup>            | ColumnView, RowView                      |
 | TableTransformer  | UnitTableTransformer, FunctionTableTransformer   | TableView                                |
 | ColumnTransformer | UnitColumnTransformer, FunctionColumnTransformer | ColumnView                               |
 | RowTransformer    | UnitRowTransformer, FunctionRowTransformer       | RowView                                  |
 | CellTransformer   | UnitCellTransformer, FunctionCellTransformer     | CellView                                 |
-| CellWidth         | UnitCellWidth, PixelCellWidth                    | TableView, ColumnView, CellView          |
 | Resources         | N/A                                              | TableView                                |
-| Table             | SourceTable <sup>*</sup>                         | TableView                                |
+| Table             | SourceTable <sup>**</sup>                        | TableView                                |
 
-<sup>*</sup> SourceTable is not a subtype of Table, but instead a container of the table for event purposes.
+<sup>*</sup> `Top` and `Bottom` belong to a type `Vertical` and `Left` and `Right` to a type `Horizontal`. `ColumnView`
+will only accept subtypes of `Horizontal` and `RowView` will only accept subtypes of `Vertical`. Put differently, we
+can't assign a `Left` on a `RowView`, as rows only lock to the top or to the bottom, and similarly for `ColumnView`.
+`Horizontal` and `Vertical` is a subtype of `Position`.
+
+<sup>**</sup> `SourceTable` is not a subtype of `Table`, but instead a container of the table for event purposes.
 
 With the above table in mind, if you have a table view, and you do `on(tableView) { .. }` and thereafter assign a
 `CellHeight` to a `CellView`, this event will bubble up and trigger your listener. If instead you had a cell view and

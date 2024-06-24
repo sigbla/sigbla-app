@@ -314,17 +314,13 @@ val table = Table[null]
 
 val emptyCell = table["A", 0]
 
-println(null in emptyCell)
 println(Unit in emptyCell)
 println(emptyCell is UnitCell)
 
 // Output:
 // true
 // true
-// true
 ```
-
-You'll notice that both `Unit` and `null` can be used with `in` against the empty `UnitCell`.
 
 ## Immutability
 
@@ -460,13 +456,13 @@ val value: BigDecimal? = table["A", 1].asBigDecimal(MathContext.DECIMAL32)
 
 Because `TableView` allows you to view a table in a web browser, embedding HTML into a cell is handy for all sorts of
 reasons. Examples can include formatting text, adding colors, and more advanced UI logic like we'll see in the chapter
-on charts later.
+on [charts](charts.md) and [widgets](widgets.md) later.
 
 We said in the introduction that the combination of data and UI into the same sheet in traditional spreadsheets is an
 issue. So to be fair, if we embed HTML directly in a cell we are sort of putting ourselves into the same situation,
 mixing data with how we present that data.
 
-That's true, but we'll see in the chapter on views how we can avoid this mixing. However, before getting to views in
+That's true, but we'll see in the chapter on [views](views.md) how we can avoid this mixing. However, before getting to views in
 later chapters, let's explain `WebCell` and `WebContent` in more detail.
 
 `WebCells` are created when you assign to a table using the `div` function: `table["A", 1] = div { .. }`. What we put
