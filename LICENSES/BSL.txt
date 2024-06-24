@@ -14,7 +14,7 @@ Licensed Work:        Sigbla App
 
 Additional Use Grant: None
 
-Change Date:          2028-04-06
+Change Date:          2028-06-24
 
 Change License:       AGPL-3.0-or-later
 

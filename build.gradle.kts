@@ -7,7 +7,7 @@ plugins {
 
 allprojects {
     group = "sigbla.app"
-    version = "1.24.4-SNAPSHOT"
+    version = "1.24.4"
 
     ext {
         set("klaxonVersion", "5.6")
