@@ -11,13 +11,14 @@ import sigbla.app.pds.collection.HashMap as PHashMap
 import sigbla.app.pds.kollection.toImmutableSet
 import sigbla.app.pds.kollection.immutableSetOf
 import sigbla.app.pds.kollection.ImmutableSet as PSet
-import kotlin.collections.LinkedHashMap
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
 import java.lang.ref.WeakReference
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.ThreadLocalRandom
 
@@ -104,6 +105,12 @@ class TableView internal constructor(
             .map {
                 CellView(ColumnView(this, it.first), it.second)
             }
+
+    val resources: Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>
+        get() = tableViewRef.get()
+            .resources
+            .sortedBy { it.component2().first }
+            .associate { it.component1() to it.component2().second }
 
     // TODO Consider if get(tableView: TableView) and set(..: TableView, ..) should be included for symmetry?
 
@@ -417,45 +424,30 @@ class TableView internal constructor(
         }
     }
 
-    operator fun get(resources: Resources.Companion): Resources {
+    operator fun get(resource: Resource<*, *>): Resource<TableView, *> {
         val ref = tableViewRef.get()
-        return Resources(this, ref.resources)
+        return when (val handler = ref.resources[resource.path]?.second) {
+            null -> UnitResource(this, resource.path)
+            else -> HandlerResource(this, resource.path, handler)
+        }
     }
 
-    operator fun set(resources: Resources.Companion, resource: Unit?) {
-        setResources(null)
+    operator fun set(resource: Resource<*, *>, handler: Unit?) {
+        setResources(resource.path, null)
     }
 
-    operator fun set(resources: Resources.Companion, resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>?) {
-        if (resource == null)
-            setResources(null)
-        else
-            setResources(PHashMap<String, Pair<Long, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>().put(resource.first, Resources.RESOURCE_COUNTER.getAndIncrement() to resource.second))
+    operator fun set(resource: Resource<*, *>, handler: (suspend PipelineContext<*, ApplicationCall>.() -> Unit)?) {
+        setResources(resource.path, handler)
     }
 
-    operator fun set(resources: Resources.Companion, newResources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>?) {
-        if (newResources == null)
-            setResources(null)
-        else
-            setResources(newResources.fold(PHashMap()) { acc, r -> acc.put(r.first, Resources.RESOURCE_COUNTER.getAndIncrement() to r.second)})
-    }
+    private fun setResources(path: String, handler: (suspend PipelineContext<*, ApplicationCall>.() -> Unit)?) {
+        if (path.isEmpty()) throw InvalidValueException("TableView resource path cannot be empty")
 
-    operator fun set(resources: Resources.Companion, newResources: Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>?) {
-        if (newResources == null)
-            setResources(null)
-        else
-            setResources(newResources.entries.fold(PHashMap()) { acc, r -> acc.put(r.key, Resources.RESOURCE_COUNTER.getAndIncrement() to r.value)})
-    }
-
-    operator fun set(resources: Resources.Companion, newResources: Resources?) {
-        setResources(newResources?._resources)
-    }
-
-    private fun setResources(resources: PMap<String, Pair<Long, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>?) {
         synchronized(eventProcessor) {
             val (oldRef, newRef) = tableViewRef.refAction {
                 it.copy(
-                    resources = resources ?: PHashMap(),
+                    resources = if (handler == null) it.resources.remove(path)
+                                else it.resources.put(path, Resource.RESOURCE_COUNTER.getAndIncrement() to handler),
                     version = it.version + 1L
                 )
             }
@@ -465,7 +457,7 @@ class TableView internal constructor(
             val old = makeClone(ref = oldRef)
             val new = makeClone(ref = newRef)
 
-            eventProcessor.publish(listOf(TableViewListenerEvent<Resources>(old[Resources], new[Resources])) as List<TableViewListenerEvent<Any>>)
+            eventProcessor.publish(listOf(TableViewListenerEvent<Resource<*, *>>(old[Resource[path]], new[Resource[path]])) as List<TableViewListenerEvent<Any>>)
         }
     }
 
@@ -1273,13 +1265,18 @@ class TableView internal constructor(
 
     operator fun invoke(newValue: TableView?): TableView? {
         if (newValue != null) {
+            // TODO Snapshot newValue
             batch(this) {
                 this[CellHeight] = newValue[CellHeight]
                 this[CellWidth] = newValue[CellWidth]
                 this[CellClasses] = newValue[CellClasses]
                 this[CellTopics] = newValue[CellTopics]
                 this[TableTransformer] = newValue[TableTransformer]
-                this[Resources] = newValue[Resources]
+
+                val resources = newValue.resources
+                this.resources.keys.filter { !resources.containsKey(it) }.forEach { this[Resource[it]] = Unit }
+                resources.forEach { this[Resource[it.component1()]] = it.component2() }
+
                 this[Table] = newValue[Table]
             }
         } else {
@@ -1289,7 +1286,7 @@ class TableView internal constructor(
                 this[CellClasses] = Unit
                 this[CellTopics] = Unit
                 this[TableTransformer] = Unit
-                this[Resources] = Unit
+                this.resources.keys.forEach { this[Resource[it]] = Unit }
                 this[Table] = Unit
             }
         }
@@ -1321,8 +1318,11 @@ class TableView internal constructor(
         return newValue
     }
 
-    operator fun invoke(newValue: Resources?): Resources? {
-        this[Resources] = newValue
+    operator fun invoke(newValue: Resource<*, *>?): Resource<*, *>? {
+        when (newValue) {
+            is UnitResource<*> -> this[newValue] = Unit
+            is HandlerResource<*> -> this[newValue] = newValue.handler
+        }
         return newValue
     }
 
@@ -1476,110 +1476,86 @@ class FunctionTableTransformer internal constructor(
     override fun toString() = "FunctionTableTransformer[$function]"
 }
 
-// TODO Should introduce a generic type S like else where..?
-// TODO Refactor this to Resource and allow for:
-//      tableView[Resource["foo/bar"]] = handler, etc
-//  which also allows for global resources with
-//      Resource["foo/bar"] = handler
-//  and
-//      tableView.resources and Resource.resources for getting all
-//  and
-//      tableView[Resource["foo/bar"]] = Unit and Resource["foo/bar"] = Unit
-//  to clear (or via invoke). Allow for clear(resource) and clear(resources) too..
-//  Each Resource instance, obtained from tableView[Resource["foo/bar"]] or Resource["foo/bar"]
-//  contain a path and a handler field + source (tableView or self based on type S)
-//  While path must be defined, handler might not, so we need UnitResource and HandlerResource?
-class Resources internal constructor(
-    val source: TableView,
-    internal val _resources: PMap<String, Pair<Long, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>
-): Iterable<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>> {
-    val resources: Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> by lazy {
-        _resources.sortedBy { it.component2().first }.associateTo(LinkedHashMap()) { it.component1() to it.component2().second }
-    }
+abstract class Resource<S, T> internal constructor(
+    val source: S,
+    path: String,
+    val handler: T
+) {
+    val path: String = path.trim().replace("^/+".toRegex(), "")
 
-    operator fun plus(resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>): Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> =
-        _resources
-            .put(resource.first, RESOURCE_COUNTER.getAndIncrement() to resource.second)
-            .sortedBy { it.component2().first }
-            .associateTo(LinkedHashMap()) { it.component1() to it.component2().second }
-
-    operator fun plus(resources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>): Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> =
-        resources
-            .fold(_resources) { acc, resource ->
-                acc.put(
-                    resource.first,
-                    RESOURCE_COUNTER.getAndIncrement() to resource.second
-                )
-            }
-            .sortedBy { it.component2().first }
-            .associateTo(LinkedHashMap()) { it.component1() to it.component2().second }
-
-    operator fun minus(resource: String): Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> =
-        _resources
-            .remove(resource)
-            .sortedBy { it.component2().first }
-            .associateTo(LinkedHashMap()) { it.component1() to it.component2().second }
-
-    operator fun minus(resource: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>): Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> =
-        (if (_resources[resource.first]?.second == resource.second) _resources.remove(resource.first) else _resources)
-            .sortedBy { it.component2().first }
-            .associateTo(LinkedHashMap()) { it.component1() to it.component2().second }
-
-    operator fun minus(resources: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>): Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> =
-        resources.fold(_resources) {acc, resource -> if (acc[resource.first]?.second == resource.second) acc.remove(resource.first) else acc}
-            .sortedBy { it.component2().first }
-            .associateTo(LinkedHashMap()) { it.component1() to it.component2().second }
-
-    override fun iterator(): Iterator<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>> = resources.map { Pair(it.key, it.value) }.iterator()
-
-    operator fun invoke(newValue: Resources?): Resources? {
-        source[Resources] = newValue
-        return newValue
-    }
-
-    operator fun invoke(newValue: Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>?): Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>? {
-        source[Resources] = newValue
-        return newValue
-    }
-
-    operator fun invoke(newValue: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>?): Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>? {
-        source[Resources] = newValue
-        return newValue
-    }
-
-    operator fun invoke(newValue: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>?): Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>? {
-        source[Resources] = newValue
+    operator fun invoke(newValue: (suspend PipelineContext<*, ApplicationCall>.() -> Unit)?): (suspend PipelineContext<*, ApplicationCall>.() -> Unit)? {
+        when (source) {
+            is TableView -> source[Resource[path]] = newValue
+            is Companion -> Resource[path] = newValue
+        }
         return newValue
     }
 
     operator fun invoke(newValue: Unit?): Unit? {
-        source[Resources] = newValue
+        when (source) {
+            is TableView -> source[Resource[path]] = newValue
+            is Companion -> Resource[path] = newValue
+        }
         return newValue
     }
 
-    operator fun contains(other: Resources) = other._resources.all { _resources[it.component1()]?.second == it.component2().second }
-    operator fun contains(other: Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>) = other.entries.all { _resources[it.key]?.second == it.value }
-    operator fun contains(other: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>) = _resources[other.first]?.second == other.second
-    operator fun contains(other: Collection<Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>>) = other.all { _resources[it.first]?.second == it.second }
+    operator fun contains(other: String) = other == path
+    operator fun contains(other: Unit) = other == handler
+    operator fun contains(other: suspend PipelineContext<*, ApplicationCall>.() -> Unit) = other == handler
+    operator fun contains(other: Resource<*, *>) = other.path == path && other.handler == handler
+    operator fun contains(other: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>) = other.first == path && other.second == handler
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Resources
+        other as Resource<*, *>
 
         if (source != other.source) return false
-        if (_resources != other._resources) return false
+        if (path != other.path) return false
+        if (handler != other.handler) return false
 
         return true
     }
 
-    override fun hashCode() = Objects.hash(this.resources)
+    override fun hashCode() = Objects.hash(this.path)
 
-    override fun toString() = "Resources[${resources.keys.joinToString(limit = 30)}]"
     companion object {
-        internal val RESOURCE_COUNTER = AtomicLong()
+        internal val RESOURCE_COUNTER = AtomicLong(Long.MIN_VALUE)
+
+        private val _resources: ConcurrentMap<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = ConcurrentHashMap()
+
+        val resources: Map<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit>
+            get() = _resources.entries.associate { it.component1() to it.component2() }
+
+        operator fun get(path: String): Resource<Companion, *> {
+            val cleanPath = path.trim().replace("^/+".toRegex(), "")
+            return when (val handler = _resources[cleanPath]) {
+                null -> UnitResource(this, cleanPath)
+                else -> HandlerResource(this, cleanPath, handler)
+            }
+        }
+
+        operator fun set(path: String, handler: (suspend PipelineContext<*, ApplicationCall>.() -> Unit)?) {
+            val cleanPath = path.trim().replace("^/+".toRegex(), "")
+            if (handler == null) _resources.remove(cleanPath)
+            else _resources[cleanPath] = handler
+        }
+
+        operator fun set(path: String, handler: Unit?) {
+            val cleanPath = path.trim().replace("^/+".toRegex(), "")
+            _resources.remove(cleanPath)
+        }
     }
+}
+
+class UnitResource<S> internal constructor(source: S, path: String): Resource<S, Unit>(source, path, Unit) {
+    override fun toString() = "UnitResource[$path]"
+}
+class HandlerResource<S> internal constructor(
+    source: S, path: String, handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit
+): Resource<S, suspend PipelineContext<*, ApplicationCall>.() -> Unit>(source, path, handler) {
+    override fun toString() = "HandlerResource[$path]"
 }
 
 // TODO Should introduce a generic type S like else where..

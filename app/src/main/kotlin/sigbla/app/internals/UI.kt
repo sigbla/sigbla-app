@@ -13,6 +13,7 @@ import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
+import io.ktor.util.pipeline.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -149,7 +150,23 @@ internal object SigblaBackend {
                                 null -> null
                                 "table.js" -> viewRef.config.tableScript
                                 "table.css" -> viewRef.config.tableStyle
-                                else -> view[Resources]._resources[resource]?.second
+                                else -> view[Resource[resource]].handler as? (suspend PipelineContext<*, ApplicationCall>.() -> Unit)
+                            }
+                            if (handler == null) {
+                                call.respondText(status = HttpStatusCode.NotFound, text = "Not found")
+                                return@handle
+                            }
+
+                            handler()
+                        }
+                    }
+
+                    // Root routing
+                    route("/{resource...}") {
+                        handle {
+                            val handler = when (val resource = call.parameters.getAll("resource")?.joinToString("/")) {
+                                null -> null
+                                else -> Resource[resource].handler as? (suspend PipelineContext<*, ApplicationCall>.() -> Unit)
                             }
                             if (handler == null) {
                                 call.respondText(status = HttpStatusCode.NotFound, text = "Not found")
@@ -584,6 +601,7 @@ internal object SigblaBackend {
         client.mutex.withLock {
             val viewRef = viewRefs[client.ref] ?: return
             val view = clone(viewRef.tableView)
+            val tableViewRef = view.tableViewRef.get()
 
             val currentRegion = client.contentState.updateTiles(scroll)
 
@@ -601,10 +619,22 @@ internal object SigblaBackend {
 
             val jsonParser = Klaxon()
 
-            val cssUrls = view[Resources]._resources.filter { cssHandlers.contains(it.component2().second) }.sortedBy { it.component2().first }.map { it.component1() }.toList()
+            val cssUrls = tableViewRef.resources.asSequence()
+                .map { it.component1() to it.component2() }
+                .filter { cssHandlers.contains(it.second!!.second) }
+                .sortedBy { it.second!!.first }
+                .map { it.first }
+                .toList()
+
             clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventLoadCSS(cssUrls)))
 
-            val jsUrls = view[Resources]._resources.filter { jsHandlers.contains(it.component2().second) }.sortedBy { it.component2().first }.map { it.component1() }.toList()
+            val jsUrls = tableViewRef.resources.asSequence()
+                .map { it.component1() to it.component2() }
+                .filter { jsHandlers.contains(it.second!!.second) }
+                .sortedBy { it.second!!.first }
+                .map { it.first }
+                .toList()
+
             clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventLoadJavaScript(jsUrls)))
 
             areaContent(view, viewRef, x, y, h, w, dims).forEach { content ->
@@ -684,10 +714,11 @@ internal object SigblaBackend {
         }
     }
 
-    private suspend fun handleDirty(client: SigblaClient, dirtyCells: List<Cell<*>>, dirtyResources: List<Resources>) {
+    private suspend fun handleDirty(client: SigblaClient, dirtyCells: List<Cell<*>>, dirtyResources: List<Resource<*, *>>) {
         client.mutex.withLock {
             val viewRef = viewRefs[client.ref] ?: return
             val view = clone(viewRef.tableView)
+            val tableViewRef = view.tableViewRef.get()
 
             val currentDims = client.contentState.existingRegion
 
@@ -702,10 +733,26 @@ internal object SigblaBackend {
 
             val jsonParser = Klaxon()
 
-            val cssUrls = dirtyResources.asSequence().map { it._resources }.flatten().filter { cssHandlers.contains(it.component2().second) }.sortedBy { it.component2().first }.map { it.component1() }.distinct().toList()
+            val cssUrls = dirtyResources.asSequence()
+                .map { it.path to tableViewRef.resources[it.path] }
+                .filter { it.second != null }
+                .filter { cssHandlers.contains(it.second!!.second) }
+                .sortedBy { it.second!!.first }
+                .map { it.first }
+                .distinct()
+                .toList()
+
             clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventLoadCSS(cssUrls, dirty = true)))
 
-            val jsUrls = dirtyResources.asSequence().map { it._resources }.flatten().filter { jsHandlers.contains(it.component2().second) }.sortedBy { it.component2().first }.map { it.component1() }.distinct().toList()
+            val jsUrls = dirtyResources.asSequence()
+                .map { it.path to tableViewRef.resources[it.path] }
+                .filter { it.second != null }
+                .filter { jsHandlers.contains(it.second!!.second) }
+                .sortedBy { it.second!!.first }
+                .map { it.first }
+                .distinct()
+                .toList()
+
             clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventLoadJavaScript(jsUrls, dirty = true)))
 
             areaContent(view, viewRef, x, y, h, w, client.dims, dirtyCells).forEach { content ->
@@ -819,7 +866,7 @@ internal object SigblaBackend {
                     // TODO: Might be able to just do as below for table events and not clear if we just extract cells?
                     var clear = false
                     val dirtyCells = mutableListOf<Cell<*>>()
-                    val dirtyResources = mutableListOf<Resources>()
+                    val dirtyResources = mutableListOf<Resource<*, *>>()
                     for (event in this) {
                         when (val value = cellOrResourceOrSourceTableOrFalseFromViewRelated(event.newValue)) {
                             false -> {
@@ -839,7 +886,7 @@ internal object SigblaBackend {
                                 break
                             }
                             is Cell<*> -> dirtyCells.add(value)
-                            is Resources -> dirtyResources.add(value)
+                            is Resource<*, *> -> dirtyResources.add(value)
                         }
                     }
 

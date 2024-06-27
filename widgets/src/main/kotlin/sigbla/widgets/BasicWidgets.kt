@@ -67,13 +67,9 @@ internal fun button(
             }
         }
 
-        cellView.tableView[Resources].apply {
-            this(this + listOf(
-                (callback to handler),
-                ("sigbla/widgets.css" to cssResource("/widgets.css")),
-                ("sigbla/widgets.js" to jsResource("/widgets.js"))
-            ))
-        }
+        cellView.tableView[Resource[callback]] = handler
+        cellView.tableView[Resource["sigbla/widgets.css"]] = cssResource("/widgets.css")
+        cellView.tableView[Resource["sigbla/widgets.js"]] = jsResource("/widgets.js")
 
         val transformer = div("sigbla-widgets") {
             input {
@@ -95,7 +91,7 @@ internal fun button(
                 if (any() && source.tableView[source][CellTransformer].function != transformer) {
                     // clean up
                     unsubscribe()
-                    source.tableView[Resources] = source.tableView[Resources] - callback
+                    source.tableView[Resource[callback]] = Unit
                 }
             }
         }
@@ -159,13 +155,9 @@ internal fun checkBox(
             }
         }
 
-        cellView.tableView[Resources].apply {
-            this(this + listOf(
-                (callback to handler),
-                ("sigbla/widgets.css" to cssResource("/widgets.css")),
-                ("sigbla/widgets.js" to jsResource("/widgets.js"))
-            ))
-        }
+        cellView.tableView[Resource[callback]] = handler
+        cellView.tableView[Resource["sigbla/widgets.css"]] = cssResource("/widgets.css")
+        cellView.tableView[Resource["sigbla/widgets.js"]] = jsResource("/widgets.js")
 
         val transformer = div("sigbla-widgets") {
             input {
@@ -191,7 +183,7 @@ internal fun checkBox(
                 if (any() && source.tableView[source][CellTransformer].function != transformer) {
                     // clean up
                     unsubscribe()
-                    source.tableView[Resources] = source.tableView[Resources] - callback
+                    source.tableView[Resource[callback]] = Unit
                 }
             }
         }
@@ -255,13 +247,9 @@ internal fun radio(
             }
         }
 
-        cellView.tableView[Resources].apply {
-            this(this + listOf(
-                (callback to handler),
-                ("sigbla/widgets.css" to cssResource("/widgets.css")),
-                ("sigbla/widgets.js" to jsResource("/widgets.js"))
-            ))
-        }
+        cellView.tableView[Resource[callback]] = handler
+        cellView.tableView[Resource["sigbla/widgets.css"]] = cssResource("/widgets.css")
+        cellView.tableView[Resource["sigbla/widgets.js"]] = jsResource("/widgets.js")
 
         val transformer = div("sigbla-widgets") {
             input {
@@ -287,7 +275,7 @@ internal fun radio(
                 if (any() && source.tableView[source][CellTransformer].function != transformer) {
                     // clean up
                     unsubscribe()
-                    source.tableView[Resources] = source.tableView[Resources] - callback
+                    source.tableView[Resource[callback]] = Unit
                 }
             }
         }
@@ -343,13 +331,9 @@ internal fun textField(
             }
         }
 
-        cellView.tableView[Resources].apply {
-            this(this + listOf(
-                (callback to handler),
-                ("sigbla/widgets.css" to cssResource("/widgets.css")),
-                ("sigbla/widgets.js" to jsResource("/widgets.js"))
-            ))
-        }
+        cellView.tableView[Resource[callback]] = handler
+        cellView.tableView[Resource["sigbla/widgets.css"]] = cssResource("/widgets.css")
+        cellView.tableView[Resource["sigbla/widgets.js"]] = jsResource("/widgets.js")
 
         val transformer = div("sigbla-widgets") {
             input {
@@ -372,7 +356,7 @@ internal fun textField(
                 if (any() && source.tableView[source][CellTransformer].function != transformer) {
                     // clean up
                     unsubscribe()
-                    source.tableView[Resources] = source.tableView[Resources] - callback
+                    source.tableView[Resource[callback]] = Unit
                 }
             }
         }
