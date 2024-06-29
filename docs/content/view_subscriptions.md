@@ -24,7 +24,7 @@ metadata types currently supported on a view.
 | ColumnTransformer | UnitColumnTransformer, FunctionColumnTransformer | ColumnView                               |
 | RowTransformer    | UnitRowTransformer, FunctionRowTransformer       | RowView                                  |
 | CellTransformer   | UnitCellTransformer, FunctionCellTransformer     | CellView                                 |
-| Resources         | N/A                                              | TableView                                |
+| Resource          | UnitResource, HandlerResource                    | TableView                                |
 | Table             | SourceTable <sup>**</sup>                        | TableView                                |
 
 <sup>*</sup> `Top` and `Bottom` belong to a type `Vertical` and `Left` and `Right` to a type `Horizontal`. `ColumnView`

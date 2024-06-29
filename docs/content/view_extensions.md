@@ -35,51 +35,49 @@ fun main() {
 
     tableView["A", 0][CellTopics] = "click-cell"
 
-    tableView[Resources] = listOf(
-        "click-service" to {
-            if (call.request.httpMethod == HttpMethod.Post) {
-                println("Received a click!")
-                table["A", 0] = table["A", 0] + 1
-                call.respondText(text = "Click processed")
-            }
-        },
+    tableView[Resource["click-service"]] = {
+        if (call.request.httpMethod == HttpMethod.Post) {
+            println("Received a click!")
+            table["A", 0] = table["A", 0] + 1
+            call.respondText(text = "Click processed")
+        }
+    }
 
-        "my.js" to js {
-            """
-                console.log("my.js init");
+    tableView[Resource["my.js"]] = js {
+        """
+            console.log("my.js init");
 
-                window.sigbla.onTopic("click-cell", (data) => {
-                    console.log("Data", data);
+            window.sigbla.onTopic("click-cell", (data) => {
+                console.log("Data", data);
 
-                    if (data.action === "preparing") {
-                        const cell = data.target.querySelector(".cc");
-                        console.log("Target", cell);
-                        if (cell == null) return;
+                if (data.action === "preparing") {
+                    const cell = data.target.querySelector(".cc");
+                    console.log("Target", cell);
+                    if (cell == null) return;
 
-                        const onclick = async (e) => {
-                            console.log("Cell click!");
+                    const onclick = async (e) => {
+                        console.log("Cell click!");
+                        const response = await fetch("click-service", {
+                            method: "POST"
+                        });
+                    }
+
+                    cell.onclick = onclick;
+
+                    const onkeydown = async (e) => {
+                        if (e.key === " ") {
+                            console.log("Marker input!");
                             const response = await fetch("click-service", {
                                 method: "POST"
                             });
                         }
-
-                        cell.onclick = onclick;
-
-                        const onkeydown = async (e) => {
-                            if (e.key === " ") {
-                                console.log("Marker input!");
-                                const response = await fetch("click-service", {
-                                    method: "POST"
-                                });
-                            }
-                        }
-
-                        data.target.onkeydown = onkeydown;
                     }
-                });
-            """
-        }
-    )
+
+                    data.target.onkeydown = onkeydown;
+                }
+            });
+        """
+    }
 
     val url = show(tableView)
     println(url)
@@ -151,7 +149,7 @@ the cell. Hence, if the marker is on the cell, and we press the space bar, we al
 Going back to the Kotlin code, looking at the "click-service" resource, we find:
 
 ``` kotlin
-"click-service" to {
+tableView[Resource["click-service"]] = {
     if (call.request.httpMethod == HttpMethod.Post) {
         println("Received a click!")
         table["A", 0] = table["A", 0] + 1
@@ -329,15 +327,15 @@ for (r in 0..3) {
 tableView["D"][CellClasses] = "specialColumn"
 tableView[2][CellClasses] = "specialRow"
 
-tableView[Resources] = "my.css" to css {
-"""
-    .specialColumn {
-        background-color: lightblue;
-    }
-    .specialRow {
-        background-color: lightblue;
-    }
-"""
+tableView[Resource["my.css"]] = css {
+    """
+        .specialColumn {
+            background-color: lightblue;
+        }
+        .specialRow {
+            background-color: lightblue;
+        }
+    """
 }
 
 val url = show(tableView)
@@ -361,7 +359,7 @@ tableView["A", 0][CellTopics] = setOf("topic1", "topic2")
 
 table["A", 0] = "A0"
 
-tableView[Resources] = "my.js" to js {
+tableView[Resource["my.js"]] = js {
     """
         window.sigbla.onTopic("topic1", (data) => {
             console.log("topic1 callback", data);
@@ -429,48 +427,40 @@ fun clickableCellCounter(sourceCell: Cell<*>): CellView.() -> Unit = {
     this[CellTopics] = "click-cell"
     this[CellTransformer] = transformer
 
-    tableView[Resources].apply {
-        this(this + listOf(
-            callback to handler,
+    tableView[Resource[callback]] = handler
 
-            // If an existing click-service.js resource has been defined,
-            // we can simply replace this with a similar new service:
-            "click-service.js" to js {
-                """
-                window.sigbla.onTopic("click-cell", (data) => {
-                    if (data.action === "preparing") {
-                        const cell = data.target.querySelector(".click-cell");
-                        if (cell == null) return;
+    // If an existing click-service.js resource has been defined,
+    // we can simply replace this with a similar new service:
+    tableView[Resource["click-service.js"]] = js {
+        """
+            window.sigbla.onTopic("click-cell", (data) => {
+                if (data.action === "preparing") {
+                    const cell = data.target.querySelector(".click-cell");
+                    if (cell == null) return;
 
-                        const callback = cell.attributes.getNamedItem("callback").value;
-                        if (callback === null || callback === undefined || callback.trim() === "") return;
+                    const callback = cell.attributes.getNamedItem("callback").value;
+                    if (callback === null || callback === undefined || callback.trim() === "") return;
 
-                        const onclick = async (e) => {
+                    const onclick = async (e) => {
+                        await fetch(callback, { method: "POST" });
+                    }
+
+                    cell.onclick = onclick;
+
+                    const onkeydown = async (e) => {
+                        if (e.key === " ") {
                             await fetch(callback, { method: "POST" });
                         }
-
-                        cell.onclick = onclick;
-
-                        const onkeydown = async (e) => {
-                            if (e.key === " ") {
-                                await fetch(callback, { method: "POST" });
-                            }
-                        }
-                
-                        data.target.onkeydown = onkeydown;
                     }
-                });
-                """
-            },
-
-            // Just need some CSS to ensure we can click anywhere in the cell
-            "click-service.css" to css {
-                """
-                    .click-cell { height: 100%; }
-                """
-            }
-        ))
+            
+                    data.target.onkeydown = onkeydown;
+                }
+            });
+        """
     }
+
+    // Just need some CSS to ensure we can click anywhere in the cell
+    tableView[Resource["click-service.css"]] = css { ".click-cell { height: 100%; }" }
 
     // If a new transformation is assigned on the cell view, assume this
     // means we should remove the existing clickableCellCounter.
@@ -482,7 +472,7 @@ fun clickableCellCounter(sourceCell: Cell<*>): CellView.() -> Unit = {
             if (source.tableView[source][CellTransformer].function != transformer) {
                 // clean up
                 unsubscribe()
-                source.tableView[Resources] = source.tableView[Resources] - callback
+                source.tableView[Resource[callback]] = Unit
             }
         }
     }
