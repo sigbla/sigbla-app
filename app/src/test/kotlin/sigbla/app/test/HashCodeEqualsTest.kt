@@ -417,6 +417,11 @@ class HashCodeEqualsTest {
         assertEquals(emptyResources1.path, emptyResources2.path)
         assertEquals(emptyResources1.handler, emptyResources2.handler)
         assertTrue(emptyResources1 in emptyResources2)
+        assertEquals(Resource["/test"], Resource["/test"])
+        assertNotEquals<Resource<*, *>>(TableView[null][Resource["/test"]], Resource["/test"]) // Different source
+        assertNotEquals<Resource<*, *>>(Resource["/test"].also { it(handler1) }, Resource["/test"]) // Different resource
+        assertNotEquals<Resource<*, *>>(Resource["/test-2"], Resource["/test-3"]) // Different path
+        assertNotEquals<Resource<*, *>>(Resource["/test-3"].also { it(handler2) }, Resource["/test-3"]) // Different handler
 
         assertNotEquals(filledResources1, filledResources2)
         assertEquals(filledResources1.path, filledResources2.path)
