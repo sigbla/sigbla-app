@@ -20,6 +20,8 @@ fun staticResource(resource: String): suspend PipelineContext<*, ApplicationCall
     }
 }
 
+fun staticText(text: String): suspend PipelineContext<*, ApplicationCall>.() -> Unit = staticText(ContentType.Text.Plain, text)
+
 fun staticText(contentType: ContentType, text: String): suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
     call.respondText(contentType = contentType, text = text)
 }
