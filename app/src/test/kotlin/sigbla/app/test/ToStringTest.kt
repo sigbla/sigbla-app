@@ -184,12 +184,12 @@ class ToStringTest {
             }
         }
 
-        val emptyResources = tableView[Resources].also { it(listOf("B" to getHandler(), "A" to getHandler())) }
-        val filledResources = tableView[Resources]
+        val emptyResource = tableView[Resource["//A/B"]].also { it(getHandler()) }
+        val filledResource = tableView[Resource["/A/B"]]
 
-        assertEquals("Resources[]", emptyResources.toString())
-        // These are in order they are added
-        assertEquals("Resources[B, A]", filledResources.toString())
+        // Notice how leading slashes are removed
+        assertEquals("UnitResource[A/B]", emptyResource.toString())
+        assertEquals("HandlerResource[A/B]", filledResource.toString())
 
         val unitHorizontal = tableView["A"][Position].also { it(Position.Left) }
         val leftHorizontal = tableView["A"][Position].also { it(Position.Right) }
@@ -222,11 +222,9 @@ class ToStringTest {
 
             tableView[CellClasses] = labels
             tableView[CellTopics] = labels
-            tableView[Resources] = labels.map { it to getHandler() }
 
             assertEquals("CellClasses[${labels.sorted().joinToString(limit = 30)}]", tableView[CellClasses].toString())
             assertEquals("CellTopics[${labels.sorted().joinToString(limit = 30)}]", tableView[CellTopics].toString())
-            assertEquals("Resources[${labels.joinToString(limit = 30)}]", tableView[Resources].toString())
         }
     }
 

@@ -26,6 +26,8 @@ fun clear(rowView: RowView): Unit { rowView(Unit) }
 
 fun clear(cellView: CellView): Unit { cellView(Unit) }
 
+// TODO Add clear(resource) and other?
+
 // ---
 
 fun clone(tableView: TableView): TableView = tableView.makeClone()

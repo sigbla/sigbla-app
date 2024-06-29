@@ -184,6 +184,11 @@ class HashCodeEqualsTest {
 
     @Test
     fun `meta classes`() {
+        // Clean up any other Resources
+        Resource.resources.forEach {
+            Resource[it.key] = Unit
+        }
+
         fun getHandler(): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
             return {
                 call.respondText(text = "Response 1")
@@ -223,8 +228,8 @@ class HashCodeEqualsTest {
         val emptyCellTransformer1 = tableView1["A", 1][CellTransformer].also { it(cellTransformerFunction) }
         val filledCellTransformer1 = tableView1["A", 1][CellTransformer]
 
-        val emptyResources1 = tableView1[Resources].also { it(listOf("B" to handler1, "A" to handler2)) }
-        val filledResources1 = tableView1[Resources]
+        val emptyResources1 = tableView1[Resource["/A"]].also { it(handler1) }
+        val filledResources1 = tableView1[Resource["/A"]]
 
         val unitHorizontal1 = tableView1["A"][Position].also { it(Position.Left) }
         val leftHorizontal1 = tableView1["A"][Position].also { it(Position.Right) }
@@ -264,8 +269,8 @@ class HashCodeEqualsTest {
         val emptyCellTransformer2 = tableView2["A", 1][CellTransformer].also { it(cellTransformerFunction) }
         val filledCellTransformer2 = tableView2["A", 1][CellTransformer]
 
-        val emptyResources2 = tableView2[Resources].also { it(listOf("B" to handler1, "A" to handler2)) }
-        val filledResources2 = tableView2[Resources]
+        val emptyResources2 = tableView2[Resource["A"]].also { it(handler1) }
+        val filledResources2 = tableView2[Resource["A"]]
 
         val unitHorizontal2 = tableView2["A"][Position].also { it(Position.Left) }
         val leftHorizontal2 = tableView2["A"][Position].also { it(Position.Right) }
@@ -413,26 +418,32 @@ class HashCodeEqualsTest {
         assertTrue(cellTransformerFunction in filledCellTransformer1)
         assertTrue((filledCellTransformer1.function as? Cell<*>.() -> Unit)!! in filledCellTransformer2)
 
-        assertEquals(tableView1[Resources], tableView1[Resources])
         assertNotEquals(emptyResources1, emptyResources2)
-        assertEquals(emptyResources1.resources, emptyResources2.resources)
+        assertEquals(emptyResources1.path, emptyResources2.path)
+        assertEquals(emptyResources1.handler, emptyResources2.handler)
         assertTrue(emptyResources1 in emptyResources2)
+        assertEquals(Resource["/test"], Resource["/test"])
+        assertNotEquals<Resource<*, *>>(TableView[null][Resource["/test"]], Resource["/test"]) // Different source
+        assertNotEquals<Resource<*, *>>(Resource["/test"].also { it(handler1) }, Resource["/test"]) // Different resource
+        assertNotEquals<Resource<*, *>>(Resource["/test-2"], Resource["/test-3"]) // Different path
+        assertNotEquals<Resource<*, *>>(Resource["/test-3"].also { it(handler2) }, Resource["/test-3"]) // Different handler
 
         assertNotEquals(filledResources1, filledResources2)
-        assertEquals(filledResources1.resources, filledResources2.resources)
+        assertEquals(filledResources1.path, filledResources2.path)
+        assertEquals(filledResources1.handler, filledResources2.handler)
 
-        assertTrue(emptyResources1 in filledResources1)
+        assertFalse(emptyResources1 in filledResources1)
         assertTrue(filledCellClasses1 !in emptyCellClasses1)
+        assertTrue(filledCellClasses1 in filledCellClasses2)
 
-        assertFalse("B" to handler1 in emptyResources1)
-        assertTrue("B" to handler1 in filledResources1)
-        assertTrue(listOf("B" to handler1, "A" to handler2) in filledResources2)
-        assertFalse(listOf("B" to handler1, "A" to handler2) in emptyResources2)
-        assertTrue(setOf("B" to handler1) in filledResources2)
-        assertFalse(listOf("A" to handler1, "B" to handler1) in filledResources2)
-        assertTrue(mapOf("B" to handler1, "A" to handler2) in filledResources2)
-        assertTrue(mapOf("B" to handler1) in filledResources2)
-        assertFalse(mapOf("B" to handler1) in emptyResources2)
+        assertFalse("A" to handler1 in emptyResources1)
+        assertTrue("A" in emptyResources1)
+        assertTrue("A" to handler1 in filledResources1)
+        assertTrue(handler1 in filledResources1)
+        assertFalse(handler2 in filledResources1)
+        assertFalse("A" to handler2 in filledResources2)
+        assertFalse("A" to handler2 in emptyResources2)
+        assertEquals(mapOf("A" to handler1), tableView2.resources)
 
         assertEquals(tableView1["A"][Position], tableView1["A"][Position])
         assertNotEquals(unitHorizontal1, unitHorizontal2)

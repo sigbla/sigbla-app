@@ -154,13 +154,17 @@ internal class TableViewEventProcessor {
             listenerRefEvent.version = ref.version
 
             val tableEvents = listOfNotNull(
-                if (ref.table == null) null else TableViewListenerEvent(SourceTable(oldTableView, null), SourceTable(newTableView, ref.table)),
-                if (ref.resources.isEmpty) null else TableViewListenerEvent(oldTableView[Resources], newTableView[Resources]),
-                if (ref.defaultCellView.cellClasses?.isEmpty() != false) null else TableViewListenerEvent(oldTableView[CellClasses], newTableView[CellClasses]),
-                if (ref.defaultCellView.cellHeight == null) null else TableViewListenerEvent(oldTableView[CellHeight], newTableView[CellHeight]),
-                if (ref.defaultCellView.cellTopics?.isEmpty() != false) null else TableViewListenerEvent(oldTableView[CellTopics], newTableView[CellTopics]),
-                if (ref.defaultCellView.cellWidth == null) null else TableViewListenerEvent(oldTableView[CellWidth], newTableView[CellWidth])
-            ).asSequence()
+                if (ref.table == null) null else listOf(TableViewListenerEvent(SourceTable(oldTableView, null), SourceTable(newTableView, ref.table))),
+                if (ref.resources.isEmpty) null else ref.resources.asSequence()
+                    .map { it.component1() to it.component2() }
+                    .sortedBy { it.second.first }
+                    .map { TableViewListenerEvent(oldTableView[Resource[it.first]], newTableView[Resource[it.first]]) }
+                    .toList(),
+                if (ref.defaultCellView.cellClasses?.isEmpty() != false) null else listOf(TableViewListenerEvent(oldTableView[CellClasses], newTableView[CellClasses])),
+                if (ref.defaultCellView.cellHeight == null) null else listOf(TableViewListenerEvent(oldTableView[CellHeight], newTableView[CellHeight])),
+                if (ref.defaultCellView.cellTopics?.isEmpty() != false) null else listOf(TableViewListenerEvent(oldTableView[CellTopics], newTableView[CellTopics])),
+                if (ref.defaultCellView.cellWidth == null) null else listOf(TableViewListenerEvent(oldTableView[CellWidth], newTableView[CellWidth]))
+            ).flatten().asSequence()
 
             val columnEvents = ref.columnViews.asSequence().map {
                 val columnHeader = it.component1()

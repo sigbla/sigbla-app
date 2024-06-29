@@ -20,6 +20,8 @@ fun staticResource(resource: String): suspend PipelineContext<*, ApplicationCall
     }
 }
 
+fun staticText(text: String): suspend PipelineContext<*, ApplicationCall>.() -> Unit = staticText(ContentType.Text.Plain, text)
+
 fun staticText(contentType: ContentType, text: String): suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
     call.respondText(contentType = contentType, text = text)
 }
@@ -84,7 +86,7 @@ fun tableViewFromViewRelated(value: Any?): TableView = when (value) {
     is ColumnTransformer<*> -> tableViewFromViewRelated(value.source)
     is RowTransformer<*> -> tableViewFromViewRelated(value.source)
     is TableTransformer<*> -> tableViewFromViewRelated(value.source)
-    is Resources -> tableViewFromViewRelated(value.source)
+    is Resource<*, *> -> tableViewFromViewRelated(value.source)
     is SourceTable -> value.source
     else -> throw InvalidValueException("Unknown type: ${value?.javaClass}")
 }
@@ -105,7 +107,7 @@ fun columnViewFromViewRelated(value: Any?): ColumnView? = when (value) {
     is ColumnTransformer<*> -> columnViewFromViewRelated(value.source)
     is RowTransformer<*> -> columnViewFromViewRelated(value.source)
     is TableTransformer<*> -> columnViewFromViewRelated(value.source)
-    is Resources -> columnViewFromViewRelated(value.source)
+    is Resource<*, *> -> columnViewFromViewRelated(value.source)
     is SourceTable -> null
     else -> throw InvalidValueException("Unsupported type: ${value?.javaClass}")
 }
@@ -126,7 +128,7 @@ fun indexFromViewRelated(value: Any?): Long? = when (value) {
     is ColumnTransformer<*> -> indexFromViewRelated(value.source)
     is RowTransformer<*> -> indexFromViewRelated(value.source)
     is TableTransformer<*> -> indexFromViewRelated(value.source)
-    is Resources -> indexFromViewRelated(value.source)
+    is Resource<*, *> -> indexFromViewRelated(value.source)
     is SourceTable -> null
     else -> throw InvalidValueException("Unsupported type: ${value?.javaClass}")
 }
@@ -142,7 +144,7 @@ fun sourceFromViewEventRelated(value: Any?): Any = when (value) {
     is ColumnTransformer<*> -> value.source
     is RowTransformer<*> -> value.source
     is TableTransformer<*> -> value.source
-    is Resources -> value.source
+    is Resource<*, *> -> value.source!!
     is SourceTable -> value.source
     else -> throw InvalidValueException("Unsupported type: ${value?.javaClass}")
 }
@@ -193,7 +195,7 @@ internal fun relatedFromViewRelated(tableView: TableView, value: Any?): Any = wh
     is ColumnTransformer<*> -> tableView[value.source][ColumnTransformer]
     is RowTransformer<*> -> tableView[value.source][RowTransformer]
     is TableTransformer<*> -> tableView[TableTransformer]
-    is Resources -> tableView[Resources]
+    is Resource<*, *> -> tableView[value]
     is SourceTable -> SourceTable(tableView, tableView.tableViewRef.get().table)
     else -> throw InvalidValueException("Unknown type: ${value?.javaClass}")
 }
@@ -214,7 +216,7 @@ internal fun refVersionFromViewRelated(value: Any?): Long = when (value) {
     is ColumnTransformer<*> -> refVersionFromViewRelated(value.source)
     is RowTransformer<*> -> refVersionFromViewRelated(value.source)
     is TableTransformer<*> -> refVersionFromViewRelated(value.source)
-    is Resources -> refVersionFromViewRelated(value.source)
+    is Resource<*, *> -> refVersionFromViewRelated(value.source)
     is SourceTable -> refVersionFromViewRelated(value.source)
     else -> throw InvalidValueException("Unsupported type: ${value?.javaClass}")
 }
@@ -232,6 +234,6 @@ internal fun cellOrResourceOrSourceTableOrFalseFromViewRelated(value: Any?): Any
     is RowTransformer<*> -> cellOrResourceOrSourceTableOrFalseFromViewRelated(value.source)
     is TableTransformer<*> -> cellOrResourceOrSourceTableOrFalseFromViewRelated(value.source)
     is SourceTable -> value
-    is Resources -> value
+    is Resource<*, *> -> value
     else -> false
 }

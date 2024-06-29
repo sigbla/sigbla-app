@@ -30,7 +30,7 @@ fun main() {
     val table = Table["MyTable"]
     val tableView = TableView[table]
 
-    tableView[Resources] = "my-resources/service-1" to {
+    tableView[Resource["my-resources/service-1"]] = {
         call.respondText(text = "Hello from my resources")
     }
 
@@ -43,7 +43,9 @@ If you run this, you can open your browser to http://127.0.0.1:8080/t/MyTable/my
 
 ![Example showing output from a table view resource](img/resources_get_endpoint_example.png)
 
-You'll notice that when we specify the resource we provide a relative URL, which is relative to the table view.
+You'll notice that when we specify the resource we provide a relative URL, which is relative to the table view. If you
+were to specify it as `Resource["/my-resources/service-1"]`, the leading slash would be automatically removed. An empty
+path is not allowed when adding resources to a table view.
 
 Next is an example of how you'd allow for a basic POST request:
 
@@ -59,7 +61,7 @@ fun main() {
     val table = Table["MyTable"]
     val tableView = TableView[table]
 
-    tableView[Resources] = "my-resources/service-2" to {
+    tableView[Resource["my-resources/service-2"]] = {
         val name = call.receiveText()
         call.respondText(text = "Hello $name")
     }
@@ -76,81 +78,16 @@ $ curl --data "World" http://127.0.0.1:8080/t/MyTable/my-resources/service-2
 Hello World
 ```
 
-If you wanted to define more than one resource and do this as done in the next example it wouldn't work. That's because
-you reassign the resources provided with the second assignment, much like you set any other type of value on a table
-or a table view.
-
-``` kotlin
-import sigbla.app.*
-import io.ktor.server.response.*
-import io.ktor.server.application.*
-import io.ktor.server.request.*
-
-fun main() {
-    TableView[Port] = 8080
-
-    val table = Table["MyTable"]
-    val tableView = TableView[table]
-
-    tableView[Resources] = "my-resources/service-1" to {
-        call.respondText(text = "Hello from my resources")
-    }
-    
-    // NOTE: This will replace the previous service, removing it
-    tableView[Resources] = "my-resources/service-2" to {
-        val name = call.receiveText()
-        call.respondText(text = "Hello $name")
-    }
-
-    val url = show(tableView)
-    println(url)
-}
-```
-
-Instead, if you actually don't want to remove the first resource, you need to add to it like so:
-
-``` kotlin
-tableView[Resources] = "my-resources/service-1" to {
-    call.respondText(text = "Hello from my resources")
-}
-
-tableView[Resources] = tableView[Resources] + ("my-resources/service-2" to {
-    val name = call.receiveText()
-    call.respondText(text = "Hello $name")
-})
-```
-
-The resources on a table view represent an immutable set of services, so you'd need to take the old and add to it.
-There are neater ways of adding multiple services:
-
-``` kotlin
-tableView[Resources] = tableView[Resources] + listOf(
-    "my-resources/service-1" to {
-        call.respondText(text = "Hello from my resources")
-    },
-
-    "my-resources/service-2" to {
-        val name = call.receiveText()
-        call.respondText(text = "Hello $name")
-    }
-)
-```
-
-You can also clean up and remove services you don't want anymore like so, by providing the URL:
-
-``` kotlin
-tableView[Resources] = tableView[Resources] - "my-resources/service-1"
-```
+You can add as many resources as you need, and replace existing resources by reassigning them. Assigning a `Unit` to
+any resource will remove it, as we're used to from other assignments.
 
 ## Making available static resources
 
 Often you just need to include some static content, and there are a few options for that:
 
 ``` kotlin
-tableView[Resources] = tableView[Resources] + listOf(
-    "my-resources/file-1.jpg" to staticResource("/some-folder/file.jpg"),
-    "my-resources/file-2.jpg" to staticFile(File("/file-path/file.jpg"))
-)
+tableView[Resource["my-resources/file-1.jpg"]] = staticResource("/some-folder/file.jpg")
+tableView[Resource["my-resources/file-2.jpg"]] = staticFile(File("/file-path/file.jpg"))
 ```
 
 For the first resource, we use `staticResource` to pass the path to a file within our resources. Resources are usually
@@ -171,11 +108,9 @@ fun main() {
     val table = Table["MyTable"]
     val tableView = TableView[table]
 
-    tableView[Resources] = tableView[Resources] + listOf(
-        "my-resources/service-1" to staticText(
-            contentType = ContentType.Text.Plain,
-            text = "Hello from my resources"
-        )
+    tableView[Resource["my-resources/service-1"]] = staticText(
+        contentType = ContentType.Text.Plain,
+        text = "Hello from my resources"
     )
 
     val url = show(tableView)
@@ -207,19 +142,19 @@ val tableView = TableView[table]
 table["A", 0] = 100
 table["A", 1] = 200
 
-tableView[Resources] = tableView[Resources] + ("my.css" to css {
-"""
-    #tc, .ch, .rh {
-        background-color: lightgreen;
-    }
-    .c {
-        background-color: lightgray;
-    }
-    .c:hover {
-        background-color: gray;
-    }
-"""
-})
+tableView[Resource["my.css"]] = css {
+    """
+        #tc, .ch, .rh {
+            background-color: lightgreen;
+        }
+        .c {
+            background-color: lightgray;
+        }
+        .c:hover {
+            background-color: gray;
+        }
+    """
+}
 
 val url = show(tableView)
 println(url)
@@ -228,3 +163,31 @@ println(url)
 This produces a lovely looking table with our custom color scheme:
 
 ![Table with custom CSS](img/resources_css_example.png)
+
+## Root resources
+
+So far, whenever we've done `tableView[Resource["some-path"]]` we've defined resources that are placed under the URL
+of the table view. If the table reference was `my-table`, the `some-path` resource would be accessible from
+`http://host:post/t/my-table/some-path`.
+
+It's also possible to define resources outside the table view, known as root resources. This is how you'd do that:
+
+``` kotlin
+TableView[Port] = 8080
+
+Resource["root-resource"] = staticText("Root resource")
+
+// We need to show something to start the web server
+show(Table["dummy"])
+```
+
+Running this and you can then access `http://127.0.0.1:8080/root-resource`. Root resources are good for shared
+resources used across several tables. It also allows you to create a new root index page at `http://127.0.0.1:8080/`:
+
+`Resource["/"] = staticText("Root resource")`
+
+Note that leading slashes are automatically removed, so the above is the same as:
+
+`Resource[""] = staticText("Root resource")`
+
+But it might be more indicative to use a `/` for the root if you prefer.

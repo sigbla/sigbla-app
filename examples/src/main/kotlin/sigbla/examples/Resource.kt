@@ -27,33 +27,28 @@ fun main() {
         }
     }
 
-    tableView[Resources] = "test-resource/1" to getHandler()
-    tableView[Resources] = tableView[Resources] + ("test-resource/1" to getHandler())
-    tableView[Resources] = tableView[Resources] + ("" to {
-        call.respondText(text = "Works!")
-    })
+    Resource["/"] = {
+        call.respondText(text = "Root routing works!")
+    }
+    Resource["/more-root"] = {
+        call.respondText(text = "More stuff at root..")
+    }
 
-    tableView[Resources].apply {
+    tableView[Resource["test-resource/1"]] = getHandler()
+
+    tableView[Resource["static-file/sigbla.txt"]].apply {
         val tmpFile = File.createTempFile("sigbla", "txt")
         tmpFile.deleteOnExit()
         tmpFile.writeText("sigbla data app file resource")
-        this(this + ("static-file/sigbla.txt" to staticFile(tmpFile)))
+        this(staticFile(tmpFile))
     }
 
     val url = show(tableView)
     println(url)
 
-    tableView[Resources].apply {
-        this(this + ("static-resource/magpie.jpg" to staticResource("/test-folder/magpie.jpg")))
-    }
-
-    tableView[Resources].apply {
-        this(this + ("js/test.js" to jsResource("/test-folder/test.js")))
-    }
-
-    tableView[Resources].apply {
-        this(this + ("css/test.css" to cssResource("/test-folder/test.css")))
-    }
+    tableView[Resource["static-resource/magpie.jpg"]] = staticResource("/test-folder/magpie.jpg")
+    tableView[Resource["js/test.js"]] = jsResource("/test-folder/test.js")
+    tableView[Resource["css/test.css"]] = cssResource("/test-folder/test.css")
 
     tableView["A", 0][CellTopics] = "resourceTopic1"
 

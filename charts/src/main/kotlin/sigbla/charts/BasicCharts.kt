@@ -152,14 +152,10 @@ fun line(
             }
         }
 
-        cellView.tableView[Resources].apply {
-            this(this + listOf(
-                (callback to handler),
-                ("chartjs/charts.js" to jsResource("/chartjs/chart.js")),
-                ("sigbla/charts.css" to cssResource("/sigbla/charts.css")),
-                ("sigbla/charts.js" to jsResource("/sigbla/charts.js"))
-            ))
-        }
+        cellView.tableView[Resource[callback]] = handler
+        cellView.tableView[Resource["chartjs/charts.js"]] = jsResource("/chartjs/chart.js")
+        cellView.tableView[Resource["sigbla/charts.css"]] = cssResource("/sigbla/charts.css")
+        cellView.tableView[Resource["sigbla/charts.js"]] = jsResource("/sigbla/charts.js")
 
         val transformer = div("sigbla-charts") {
             attributes["callback"] = callback
@@ -177,7 +173,7 @@ fun line(
                 if (any() && source.tableView[source][CellTransformer].function != transformer) {
                     // clean up
                     unsubscribe()
-                    source.tableView[Resources] = source.tableView[Resources] - callback
+                    source.tableView[Resource[callback]] = Unit
                 }
             }
         }
@@ -276,14 +272,10 @@ fun bar(
             }
         }
 
-        cellView.tableView[Resources].apply {
-            this(this + listOf(
-                (callback to handler),
-                ("chartjs/charts.js" to jsResource("/chartjs/chart.js")),
-                ("sigbla/charts.css" to cssResource("/sigbla/charts.css")),
-                ("sigbla/charts.js" to jsResource("/sigbla/charts.js"))
-            ))
-        }
+        cellView.tableView[Resource[callback]] = handler
+        cellView.tableView[Resource["chartjs/charts.js"]] = jsResource("/chartjs/chart.js")
+        cellView.tableView[Resource["sigbla/charts.css"]] = cssResource("/sigbla/charts.css")
+        cellView.tableView[Resource["sigbla/charts.js"]] = jsResource("/sigbla/charts.js")
 
         val transformer = div("sigbla-charts") {
             attributes["callback"] = callback
@@ -301,7 +293,7 @@ fun bar(
                 if (any() && source.tableView[source][CellTransformer].function != transformer) {
                     // clean up
                     unsubscribe()
-                    source.tableView[Resources] = source.tableView[Resources] - callback
+                    source.tableView[Resource[callback]] = Unit
                 }
             }
         }

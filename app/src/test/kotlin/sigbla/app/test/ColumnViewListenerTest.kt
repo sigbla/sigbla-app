@@ -245,7 +245,7 @@ class ColumnViewListenerTest {
         tv1[CellClasses] = "cell-classes-1"
         tv1[CellTopics] = "cell-topics-1"
         //tv1[CellTransformer] = {}
-        tv1[Resources] = ("a" to {})
+        tv1[Resource["a"]] = {}
         tv1[Table] = Table[null]
 
         assertEquals(0, eventCount)
@@ -255,7 +255,7 @@ class ColumnViewListenerTest {
         tv1[CellClasses] = "cell-classes-2"
         tv1[CellTopics] = "cell-topics-2"
         //tv1[CellTransformer] = {}
-        tv1[Resources] = ("b" to {})
+        tv1[Resource["b"]] = {}
         tv1[Table] = Table[null]
 
         assertEquals(0, eventCount)
@@ -267,7 +267,7 @@ class ColumnViewListenerTest {
         tv1[CellClasses] = "cell-classes-3"
         tv1[CellTopics] = "cell-topics-3"
         //tv1[CellTransformer] = {}
-        tv1[Resources] = ("c" to {})
+        tv1[Resource["c"]] = {}
         tv1[Table] = Table[null]
 
         assertEquals(0, eventCount)
@@ -485,7 +485,7 @@ class ColumnViewListenerTest {
         tv1[CellClasses] = "cell-classes-1"
         tv1[CellTopics] = "cell-topics-1"
         //tv1[CellTransformer] = {}
-        tv1[Resources] = ("a" to {})
+        tv1[Resource["a"]] = {}
         tv1[Table] = Table[null]
 
         val ref = on(tv1["A"]) {
@@ -501,7 +501,7 @@ class ColumnViewListenerTest {
         tv1[CellClasses] = "cell-classes-2"
         tv1[CellTopics] = "cell-topics-2"
         //tv1[CellTransformer] = {}
-        tv1[Resources] = ("b" to {})
+        tv1[Resource["b"]] = {}
         tv1[Table] = Table[null]
 
         assertEquals(0, eventCount)
@@ -513,7 +513,7 @@ class ColumnViewListenerTest {
         tv1[CellClasses] = "cell-classes-5"
         tv1[CellTopics] = "cell-topics-5"
         //tv1[CellTransformer] = {}
-        tv1[Resources] = ("c" to {})
+        tv1[Resource["c"]] = {}
         tv1[Table] = Table[null]
 
         assertEquals(0, eventCount)
@@ -619,7 +619,7 @@ class ColumnViewListenerTest {
         tv1[CellClasses] = "cell-classes-1"
         tv1[CellTopics] = "cell-topics-1"
         //tv1[CellTransformer] = {}
-        tv1[Resources] = ("a" to {})
+        tv1[Resource["a"]] = {}
         tv1[Table] = Table[null]
 
         assertEquals(0, eventCount)
@@ -737,7 +737,7 @@ class ColumnViewListenerTest {
         tv1[CellClasses] = "cell-classes-1"
         tv1[CellTopics] = "cell-topics-1"
         //tv1[CellTransformer] = {}
-        tv1[Resources] = ("a" to {})
+        tv1[Resource["a"]] = {}
         tv1[Table] = Table[null]
 
         on(tv1["A"]) {
@@ -755,7 +755,7 @@ class ColumnViewListenerTest {
         tv1[CellClasses] = "cell-classes-2"
         tv1[CellTopics] = "cell-topics-2"
         //tv1[CellTransformer] = {}
-        tv1[Resources] = ("b" to {})
+        tv1[Resource["b"]] = {}
         tv1[Table] = Table[null]
 
         assertEquals(0, eventCount)
@@ -1589,14 +1589,14 @@ class ColumnViewListenerTest {
         val tt2: Table.() -> Unit = {}
 
         val r1: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "a" to {}
-        val r2: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "b" to {}
+        val r2: Pair<String, suspend PipelineContext<*, ApplicationCall>.() -> Unit> = "a" to {}
 
         tv1[CellHeight] = 25
         tv1[CellWidth] = 30
         tv1[CellClasses] = "cell-classes-1"
         tv1[CellTopics] = "cell-topics-1"
         tv1[TableTransformer] = tt1
-        tv1[Resources] = r1
+        tv1[Resource[r1.first]] = r1.second
         tv1[Table] = t1
 
         var init = true
@@ -1641,11 +1641,15 @@ class ColumnViewListenerTest {
                             assertEquals(oldView, (it.oldValue as TableTransformer<*>).source)
                             assertEquals(newView, (it.newValue as TableTransformer<*>).source)
                         }
-                        is Resources -> {
-                            assertEquals(emptyMap(), (it.oldValue as Resources).resources)
-                            assertEquals(mapOf(r1), (it.newValue as Resources).resources)
-                            assertEquals(oldView, (it.oldValue as Resources).source)
-                            assertEquals(newView, (it.newValue as Resources).source)
+                        is Resource<*, *> -> {
+                            assertTrue(it.oldValue is UnitResource<*>)
+                            assertTrue(it.newValue is HandlerResource<*>)
+                            assertEquals(oldView, (it.oldValue as Resource<*, *>).source)
+                            assertEquals(newView, (it.newValue as Resource<*, *>).source)
+                            assertEquals("a", (it.oldValue as Resource<*, *>).path)
+                            assertEquals(r1.first, (it.newValue as Resource<*, *>).path)
+                            assertEquals(Unit, (it.oldValue as Resource<*, *>).handler)
+                            assertEquals(r1.second, (it.newValue as Resource<*, *>).handler)
                         }
 
                         is SourceTable -> {
@@ -1694,11 +1698,15 @@ class ColumnViewListenerTest {
                             assertEquals(oldView, (it.oldValue as TableTransformer<*>).source)
                             assertEquals(newView, (it.newValue as TableTransformer<*>).source)
                         }
-                        is Resources -> {
-                            assertEquals(mapOf(r1), (it.oldValue as Resources).resources)
-                            assertEquals(mapOf(r2), (it.newValue as Resources).resources)
-                            assertEquals(oldView, (it.oldValue as Resources).source)
-                            assertEquals(newView, (it.newValue as Resources).source)
+                        is Resource<*, *> -> {
+                            assertTrue(it.oldValue is HandlerResource<*>)
+                            assertTrue(it.newValue is HandlerResource<*>)
+                            assertEquals(oldView, (it.oldValue as Resource<*, *>).source)
+                            assertEquals(newView, (it.newValue as Resource<*, *>).source)
+                            assertEquals(r1.first, (it.oldValue as Resource<*, *>).path)
+                            assertEquals(r2.first, (it.newValue as Resource<*, *>).path)
+                            assertEquals(r1.second, (it.oldValue as Resource<*, *>).handler)
+                            assertEquals(r2.second, (it.newValue as Resource<*, *>).handler)
                         }
 
                         is SourceTable -> {
@@ -1721,7 +1729,7 @@ class ColumnViewListenerTest {
         tv1[CellClasses] = "cell-classes-2"
         tv1[CellTopics] = "cell-topics-2"
         tv1[TableTransformer] = tt2
-        tv1[Resources] = r2
+        tv1[Resource[r2.first]] = r2.second
         tv1[Table] = t2
 
         assertEquals(0, count)
@@ -1747,7 +1755,7 @@ class ColumnViewListenerTest {
         tv1["A"][Position] = Position.Left
         tv1["A"][Visibility] = Visibility.Show
         tv1["A"][ColumnTransformer] = ct1
-        tv1[Resources] = r1
+        tv1[Resource[r1.first]] = r1.second
         tv1[Table] = t1
 
         var eventCount1 = 0
@@ -1776,7 +1784,7 @@ class ColumnViewListenerTest {
             eventCount4 += count()
         }
 
-        on<Resources>(tv1["A"]) events {
+        on<Resource<*, *>>(tv1["A"]) events {
             eventCount5 += count()
         }
 
@@ -1854,7 +1862,7 @@ class ColumnViewListenerTest {
         assertEquals(1, eventCount8)
         assertEquals(1, eventCount9)
 
-        tv1[Resources] = r2
+        tv1[Resource[r2.first]] = r2.second
 
         assertEquals(0, eventCount1)
         assertEquals(2, eventCount2)

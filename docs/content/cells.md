@@ -502,7 +502,7 @@ fun main() {
     val table = Table["WebCells"]
     val tableView = TableView[table]
 
-    tableView[Resources] = "my.css" to css {
+    tableView[Resource["my.css"]] = css {
         """
             .red { background-color: red; height: 100%;}
             .yellow { background-color: yellow; height: 100%; }
@@ -529,9 +529,9 @@ fun main() {
 
 ![WebCells with CSS](img/cells_webcell_example_1.png)
 
-We haven't yet covered views in any detail, but for now, what we're doing is adding some custom CSS using the resources
-feature of `TableView`. This CSS is loaded into the view, allowing us to use the three classes `red`, `yellow`, and
-`green`.
+We haven't yet covered views in any detail, but for now, what we're doing is adding some custom CSS using the
+[resources](view_resources.md) feature of `TableView`. This CSS is loaded into the view, allowing us to use the three
+classes `red`, `yellow`, and `green`.
 
 We make use of these classes on the `WebContent` divs by passing a string as shown, for example
 `table["A", 0] = div("red") { .. }`.
