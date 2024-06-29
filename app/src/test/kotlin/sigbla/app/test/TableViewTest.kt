@@ -1160,6 +1160,11 @@ class TableViewTest {
 
     @Test
     fun `tableview resources`() {
+        // Clean up any other Resources
+        Resource.resources.forEach {
+            Resource[it.key] = Unit
+        }
+
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
         fun getHandler1(): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
@@ -1206,6 +1211,11 @@ class TableViewTest {
 
     @Test
     fun `root resources`() {
+        // Clean up any other Resources
+        Resource.resources.forEach {
+            Resource[it.key] = Unit
+        }
+
         fun getHandler1(): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
             return {
                 call.respondText(text = "Response 1")

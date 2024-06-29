@@ -184,6 +184,11 @@ class HashCodeEqualsTest {
 
     @Test
     fun `meta classes`() {
+        // Clean up any other Resources
+        Resource.resources.forEach {
+            Resource[it.key] = Unit
+        }
+
         fun getHandler(): suspend PipelineContext<*, ApplicationCall>.() -> Unit {
             return {
                 call.respondText(text = "Response 1")
