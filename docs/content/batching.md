@@ -2,7 +2,8 @@
 
 Sometimes you need to make multiple updates to a table, and only have other threads or event listeners see all those
 changes in one go. You might have dependencies between multiple values, so you don't want anything to process those
-values until you've had a chance to update all of them.
+values until you've had a chance to update all of them. There's also a performance benefit to updating multiple values
+in one go if each update would trigger recalculations.
 
 In the previous chapter on concurrency we saw how you could synchronize on the table so that no one could read from it
 before you finished the update. This didn't cover listeners, so wouldn't work for all situations, something batching
