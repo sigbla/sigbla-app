@@ -201,6 +201,7 @@ fun bar(
             val labelStrings = labels.table[labels].map(Cell<*>::toString)
 
             val datasetValues = datasets.map {
+                // TODO Should support and convert any number to double
                 it.first to it.second.table[it.second].mapNotNull(Cell<*>::asDouble)
             }
 

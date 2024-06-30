@@ -34,6 +34,8 @@ fun clone(tableView: TableView): TableView = tableView.makeClone()
 
 fun clone(tableView: TableView, withName: String): TableView = tableView.makeClone(withName).also { Registry.setView(withName, it) }
 
+// TODO Allow show() as a way to just start the webserver
+
 fun show(
     tableView: TableView,
     ref: String = tableView.name ?: throw InvalidTableViewException("No name on table view"),

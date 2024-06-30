@@ -34,8 +34,6 @@ import java.util.concurrent.ThreadLocalRandom
 //      Might want on<NO_CLIENT>(tableView) { .. } rather than INACTIVE?
 //      Allow for setting the time out value.. on<NO_CLIENT>(tableView) { timeout = .. }
 
-// TODO Add column/row hiding and locking
-
 internal val EMPTY_IMMUTABLE_STRING_SET = immutableSetOf<String>()
 
 const val DEFAULT_CELL_HEIGHT = 20L
@@ -1366,8 +1364,6 @@ class TableView internal constructor(
 
         val views: Set<TableView> get() = Registry.views
 
-        // TODO Consider a operator get/set(resources: Resources, ..) on this level as well to allow for global resources
-
         operator fun get(host: Host): String = Host.host
 
         operator fun set(_host: Host, host: String) {
@@ -1896,7 +1892,3 @@ fun spaciousViewConfig(
     tableScript = staticResource("/table/table.js"),
     tableStyle = staticResource("/table/spacious.css")
 )
-
-// TODO Consider an Index type which allows us to replace the index.html file served for a table,
-//      or let that happen straight on tableView[Resources] ?
-// TODO Add plusAssign and minusAssign to the companion object on Resources to allow for root resources ?

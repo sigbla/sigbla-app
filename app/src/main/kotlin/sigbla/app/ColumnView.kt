@@ -536,6 +536,7 @@ class FunctionColumnTransformer internal constructor(
     override fun toString() = "FunctionColumnTransformer[$function]"
 }
 
+// TODO Add position and visibility to DerivedColumnView (and DerivedRowView)
 class DerivedColumnView internal constructor(
     val columnView: ColumnView,
     val cellWidth: Long,
