@@ -1295,6 +1295,8 @@ private fun publishRowCopyEvents(
     }
 }
 
+// TODO Add move and copy for cells, allowing us to operate within just 1 column or row
+
 fun move(columnToColumnAction: ColumnToColumnAction, withName: Header) {
     fun columnMove(left: Header, right: Header, order: ColumnActionOrder, withName: Header, refUpdate: TableRef.() -> TableRef): (ref: TableRef) -> TableRef = { inRef ->
         val ref = inRef.refUpdate()

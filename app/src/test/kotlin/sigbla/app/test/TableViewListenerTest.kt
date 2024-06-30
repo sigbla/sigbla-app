@@ -100,6 +100,7 @@ class TableViewListenerTest {
         tv1["A"][CellTopics] = "cell-topics-1"
         tv1["A"][Position] = Position.Left
         tv1["A"][Visibility] = Visibility.Show
+        // TODO Transformers here and rest of file..
         //tv1["A"][CellTransformer] = {}
 
         assertEquals(5, eventCount)

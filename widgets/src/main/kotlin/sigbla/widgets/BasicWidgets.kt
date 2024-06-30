@@ -60,6 +60,7 @@ internal fun button(
                 b.action()
                 if (b.modified) {
                     cellView.(button(id, b.text, action))()
+                    // TODO Look at return values
                     call.respondText { "false" }
                 } else {
                     call.respondText { "true" }
