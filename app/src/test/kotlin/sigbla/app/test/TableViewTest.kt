@@ -839,8 +839,15 @@ class TableViewTest {
         assertEquals(setOf("400"), tv1[CellTopics].topics)
         assertEquals(mapOf("a" to handler), tv1.resources)
         assertEquals(tt, tv1[TableTransformer].function)
+        assertEquals(t1, tv1[Table].source)
 
-        assertEquals(t2, tv1[Table].source)
+        assertEquals(tv2[CellHeight].height, tv1[CellHeight].height)
+        assertEquals(tv2[CellWidth].width, tv1[CellWidth].width)
+        assertEquals(tv2[CellClasses].classes, tv1[CellClasses].classes)
+        assertEquals(tv2[CellTopics].topics, tv1[CellTopics].topics)
+        assertEquals(tv2.resources, tv1.resources)
+        assertEquals(tv2[TableTransformer].function, tv1[TableTransformer].function)
+        assertEquals(tv2[Table].source, tv1[Table].source)
     }
 
     @Test

@@ -1262,33 +1262,45 @@ class TableView internal constructor(
     }
 
     operator fun invoke(newValue: TableView?): TableView? {
-        if (newValue != null) {
-            // TODO Snapshot newValue
-            batch(this) {
-                this[CellHeight] = newValue[CellHeight]
-                this[CellWidth] = newValue[CellWidth]
-                this[CellClasses] = newValue[CellClasses]
-                this[CellTopics] = newValue[CellTopics]
-                this[TableTransformer] = newValue[TableTransformer]
+        synchronized(eventProcessor) {
+            val (oldRef, newRef) = tableViewRef.refAction {
+                val otherRef = newValue?.tableViewRef?.get()
 
-                val resources = newValue.resources
-                this.resources.keys.filter { !resources.containsKey(it) }.forEach { this[Resource[it]] = Unit }
-                resources.forEach { this[Resource[it.component1()]] = it.component2() }
+                it.copy(
+                    defaultCellView = otherRef?.defaultCellView ?: ViewMeta(),
+                    table = otherRef?.table,
+                    tableTransformer = otherRef?.tableTransformer,
+                    resources = otherRef?.resources ?: PHashMap()
+                )
+            }
 
-                this[Table] = newValue[Table]
-            }
-        } else {
-            batch(this) {
-                this[CellHeight] = Unit
-                this[CellWidth] = Unit
-                this[CellClasses] = Unit
-                this[CellTopics] = Unit
-                this[TableTransformer] = Unit
-                this.resources.keys.forEach { this[Resource[it]] = Unit }
-                this[Table] = Unit
-            }
+            if (!eventProcessor.haveListeners()) return newValue
+
+            val oldTableView = makeClone(ref = oldRef)
+            val newTableView = makeClone(ref = newRef)
+
+            val tableEvents = listOf(
+                listOf(TableViewListenerEvent(SourceTable(oldTableView, oldRef.table), SourceTable(newTableView, newRef.table))),
+                oldRef.resources
+                    .sortedBy { it.component2().first }
+                    .filter { !newRef.resources.containsKey(it.component1()) }
+                    .map { TableViewListenerEvent(oldTableView[Resource[it.component1()]], newTableView[Resource[it.component1()]]) }
+                    .toList(),
+                newRef.resources
+                    .sortedBy { it.component2().first }
+                    .map { TableViewListenerEvent(oldTableView[Resource[it.component1()]], newTableView[Resource[it.component1()]]) }
+                    .toList(),
+                listOf(TableViewListenerEvent(oldTableView[CellClasses], newTableView[CellClasses])),
+                listOf(TableViewListenerEvent(oldTableView[CellHeight], newTableView[CellHeight])),
+                listOf(TableViewListenerEvent(oldTableView[CellTopics], newTableView[CellTopics])),
+                listOf(TableViewListenerEvent(oldTableView[CellWidth], newTableView[CellWidth])),
+                listOf(TableViewListenerEvent(oldTableView[TableTransformer], newTableView[TableTransformer]))
+            ).flatten()
+
+            eventProcessor.publish(tableEvents as List<TableViewListenerEvent<Any>>)
+
+            return newValue
         }
-        return newValue
     }
 
     operator fun invoke(newValue: CellHeight<*, *>?): CellHeight<*, *>? {
