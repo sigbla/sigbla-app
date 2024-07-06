@@ -24,6 +24,7 @@ import sigbla.app.*
 import sigbla.app.exceptions.InvalidTableViewException
 import sigbla.app.exceptions.InvalidUIException
 import java.net.URL
+import java.util.LinkedList
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.atomic.AtomicLong
@@ -597,6 +598,17 @@ internal object SigblaBackend {
         }
     }
 
+    private fun produceJson(batch: List<EventJson>): StringBuffer {
+        val buffer = StringBuffer(10240)
+        buffer.append("[")
+        batch.forEachIndexed { i, c ->
+            if (i > 0) buffer.append(",")
+            c.addJson(buffer)
+        }
+        buffer.append("]")
+        return buffer
+    }
+
     private suspend fun handleTiles(client: SigblaClient, scroll: ClientEventScroll) {
         client.mutex.withLock {
             val viewRef = viewRefs[client.ref] ?: return
@@ -637,7 +649,8 @@ internal object SigblaBackend {
 
             clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventLoadJavaScript(jsUrls)))
 
-            areaContent(view, viewRef, x, y, h, w, dims).forEach { content ->
+            val ac = areaContent(view, viewRef, x, y, h, w, dims)
+            ac.forEach { content ->
                 val existingId = client.contentState.withIdFor(
                     content.left,
                     content.top
@@ -673,7 +686,7 @@ internal object SigblaBackend {
                     addBatch.add(addContent)
 
                     if (addBatch.size > 25) {
-                        clientPackage.outgoing.add(jsonParser.toJsonString(addBatch))
+                        clientPackage.outgoing.add(produceJson(addBatch).toString())
                         addBatch.clear()
                     }
 
@@ -683,7 +696,9 @@ internal object SigblaBackend {
                 }
             }
 
-            if (addBatch.isNotEmpty()) clientPackage.outgoing.add(jsonParser.toJsonString(addBatch))
+            if (addBatch.isNotEmpty()) {
+                clientPackage.outgoing.add(produceJson(addBatch).toString())
+            }
 
             if (clientPackage.outgoing.isNotEmpty()) {
                 clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventAddCommit(client.nextEventId().toString())))
@@ -696,14 +711,14 @@ internal object SigblaBackend {
                 removeBatch.add(removeContent)
 
                 if (removeBatch.size > 25) {
-                    clientPackage.outgoing.add(jsonParser.toJsonString(removeBatch))
+                    clientPackage.outgoing.add(produceJson(removeBatch).toString())
                     removeBatch.clear()
                 }
 
                 client.contentState.removeId(contentId)
             }
 
-            if (removeBatch.isNotEmpty()) clientPackage.outgoing.add(jsonParser.toJsonString(removeBatch))
+            if (removeBatch.isNotEmpty()) clientPackage.outgoing.add(produceJson(removeBatch).toString())
 
             // TODO Consider if there are some edge cases where we still want to send this on empty outgoing?
             if (clientPackage.outgoing.isNotEmpty()) {
@@ -755,7 +770,8 @@ internal object SigblaBackend {
 
             clientPackage.outgoing.add(jsonParser.toJsonString(ClientEventLoadJavaScript(jsUrls, dirty = true)))
 
-            areaContent(view, viewRef, x, y, h, w, client.dims, dirtyCells).forEach { content ->
+            val ac = areaContent(view, viewRef, x, y, h, w, client.dims, dirtyCells)
+            ac.forEach { content ->
                 val existingId = client.contentState.withIdFor(content.left, content.top)
                 val existingContent = if (existingId == null) null else client.contentState.withPCFor(existingId)
 
@@ -786,13 +802,13 @@ internal object SigblaBackend {
                     batch.add(addContent)
 
                     if (batch.size > 25) {
-                        clientPackage.outgoing.add(jsonParser.toJsonString(batch))
+                        clientPackage.outgoing.add(produceJson(batch).toString())
                         batch.clear()
                     }
                 }
             }
 
-            if (batch.isNotEmpty()) clientPackage.outgoing.add(jsonParser.toJsonString(batch))
+            if (batch.isNotEmpty()) clientPackage.outgoing.add(produceJson(batch).toString())
 
             // TODO Consider if there are some edge cases where we still want to send this on empty outgoing?
             if (clientPackage.outgoing.isNotEmpty()) {
@@ -958,7 +974,7 @@ internal data class UIViewRef(
 
 internal data class ClientPackage(
     val id: Long,
-    val outgoing: MutableList<String> = mutableListOf(),
+    val outgoing: MutableList<String> = LinkedList(),
     var published: Boolean = false
 )
 
@@ -1054,6 +1070,10 @@ internal enum class ClientEventType(val type: Int) {
     LOAD_JS(10)
 }
 
+internal interface EventJson {
+    fun addJson(buffer: StringBuffer)
+}
+
 @TypeFor(field = "type", adapter = ClientEventAdapter::class)
 internal open class ClientEvent(
     val type: Int
@@ -1083,7 +1103,33 @@ internal data class ClientEventAddContent(
     val cw: Long,
     val text: String?,
     val html: String?
-): ClientEvent(ClientEventType.ADD_CONTENT.type)
+) : ClientEvent(ClientEventType.ADD_CONTENT.type), EventJson {
+    override fun addJson(buffer: StringBuffer) {
+        fun escape(s: String?) = if (s == null) "null" else "\"" + s.replace("\"", "\\\"") + "\""
+        fun escape(s: List<String>?) = if (s == null) "null" else "[" + s.joinToString(separator = ",") { escape(it) } + "]"
+
+        buffer
+            .append("{")
+            .append("\"type\":$type,")
+            .append("\"id\":${escape(id)},")
+            .append("\"cellClasses\":${escape(cellClasses)},")
+            .append("\"contentClasses\":${escape(contentClasses)},")
+            .append("\"topics\":${escape(topics)},")
+            .append("\"marker\":$marker,")
+            .append("\"resize\":$resize,")
+            .append("\"left\":$left,")
+            .append("\"right\":$right,")
+            .append("\"top\":$top,")
+            .append("\"bottom\":$bottom,")
+            .append("\"h\":$h,")
+            .append("\"w\":$w,")
+            .append("\"ch\":$ch,")
+            .append("\"cw\":$cw,")
+            .append("\"text\":${escape(text)},")
+            .append("\"html\":${escape(html)}")
+            .append("}")
+    }
+}
 
 internal data class ClientEventAddCommit(
     val id: String
@@ -1091,7 +1137,17 @@ internal data class ClientEventAddCommit(
 
 internal data class ClientEventRemoveContent(
     val id: String
-): ClientEvent(ClientEventType.REMOVE_CONTENT.type)
+): ClientEvent(ClientEventType.REMOVE_CONTENT.type), EventJson {
+    override fun addJson(buffer: StringBuffer) {
+        fun escape(s: String) = "\"" + s.replace("\"", "\\\"") + "\""
+
+        buffer
+            .append("{")
+            .append("\"type\":$type,")
+            .append("\"id\":${escape(id)}")
+            .append("}")
+    }
+}
 
 internal data class ClientEventUpdateEnd(
     val id: String
