@@ -3,6 +3,7 @@
 package sigbla.app.internals
 
 import com.beust.klaxon.Klaxon
+import com.beust.klaxon.Render
 import com.beust.klaxon.TypeAdapter
 import com.beust.klaxon.TypeFor
 import io.ktor.http.*
@@ -1105,7 +1106,7 @@ internal data class ClientEventAddContent(
     val html: String?
 ) : ClientEvent(ClientEventType.ADD_CONTENT.type), EventJson {
     override fun addJson(buffer: StringBuffer) {
-        fun escape(s: String?) = if (s == null) "null" else "\"" + s.replace("\"", "\\\"") + "\""
+        fun escape(s: String?) = if (s == null) "null" else "\"" + Render.escapeString(s) + "\""
         fun escape(s: List<String>?) = if (s == null) "null" else "[" + s.joinToString(separator = ",") { escape(it) } + "]"
 
         buffer
@@ -1139,7 +1140,7 @@ internal data class ClientEventRemoveContent(
     val id: String
 ): ClientEvent(ClientEventType.REMOVE_CONTENT.type), EventJson {
     override fun addJson(buffer: StringBuffer) {
-        fun escape(s: String) = "\"" + s.replace("\"", "\\\"") + "\""
+        fun escape(s: String) = "\"" + Render.escapeString(s) + "\""
 
         buffer
             .append("{")
