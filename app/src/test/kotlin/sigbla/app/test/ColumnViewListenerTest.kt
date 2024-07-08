@@ -1340,11 +1340,11 @@ class ColumnViewListenerTest {
                         }
 
                         is Position<*, *> -> {
-                            assertTrue(it.oldValue is Position.Horizontal<*>)
-                            assertFalse(it.oldValue is Position.Left)
-                            assertFalse(it.oldValue is Position.Right)
+                            assertTrue(it.oldValue is Position.Horizontal<*, *>)
+                            assertFalse(it.oldValue is Position.Left<*>)
+                            assertFalse(it.oldValue is Position.Right<*>)
                             assertEquals(Unit, (it.oldValue as Position<*, *>).position)
-                            assertTrue(it.newValue is Position.Left)
+                            assertTrue(it.newValue is Position.Left<*>)
                             assertEquals(Position.Value.LEFT, (it.newValue as Position<*, *>).position)
                             assertEquals(oldView["A"], (it.oldValue as Position<*, *>).source)
                             assertEquals(newView["A"], (it.newValue as Position<*, *>).source)
@@ -1395,8 +1395,8 @@ class ColumnViewListenerTest {
                         }
 
                         is Position<*, *> -> {
-                            assertTrue(it.oldValue is Position.Left)
-                            assertTrue(it.newValue is Position.Right)
+                            assertTrue(it.oldValue is Position.Left<*>)
+                            assertTrue(it.newValue is Position.Right<*>)
                             assertEquals(Position.Value.LEFT, (it.oldValue as Position<*, *>).position)
                             assertEquals(Position.Value.RIGHT, (it.newValue as Position<*, *>).position)
                             assertEquals(oldView["A"], (it.oldValue as Position<*, *>).source)
@@ -1481,11 +1481,11 @@ class ColumnViewListenerTest {
                         }
 
                         is Position<*, *> -> {
-                            assertTrue(it.oldValue is Position.Vertical<*>)
-                            assertFalse(it.oldValue is Position.Top)
-                            assertFalse(it.oldValue is Position.Bottom)
+                            assertTrue(it.oldValue is Position.Vertical<*, *>)
+                            assertFalse(it.oldValue is Position.Top<*>)
+                            assertFalse(it.oldValue is Position.Bottom<*>)
                             assertEquals(Unit, (it.oldValue as Position<*, *>).position)
-                            assertTrue(it.newValue is Position.Top)
+                            assertTrue(it.newValue is Position.Top<*>)
                             assertEquals(Position.Value.TOP, (it.newValue as Position<*, *>).position)
                             assertEquals(oldView[1], (it.oldValue as Position<*, *>).source)
                             assertEquals(newView[1], (it.newValue as Position<*, *>).source)
@@ -1536,8 +1536,8 @@ class ColumnViewListenerTest {
                         }
 
                         is Position<*, *> -> {
-                            assertTrue(it.oldValue is Position.Top)
-                            assertTrue(it.newValue is Position.Bottom)
+                            assertTrue(it.oldValue is Position.Top<*>)
+                            assertTrue(it.newValue is Position.Bottom<*>)
                             assertEquals(Position.Value.TOP, (it.oldValue as Position<*, *>).position)
                             assertEquals(Position.Value.BOTTOM, (it.newValue as Position<*, *>).position)
                             assertEquals(oldView[1], (it.oldValue as Position<*, *>).source)

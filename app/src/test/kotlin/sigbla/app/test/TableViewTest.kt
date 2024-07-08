@@ -2806,7 +2806,7 @@ class TableViewTest {
         assertTrue(h3.isValue)
         assertEquals(Position.Value.RIGHT, h3.asValue)
 
-        tv1["A"][Position] = null as Position.Horizontal<*>?
+        tv1["A"][Position] = null as Position.Horizontal<*, *>?
         val h4 = tv1["A"][Position]
         assertTrue(h4 !is Position.Left)
         assertTrue(h4 !is Position.Right)
@@ -2905,7 +2905,7 @@ class TableViewTest {
         assertTrue(h3.isValue)
         assertEquals(Position.Value.BOTTOM, h3.asValue)
 
-        tv1[1][Position] = null as Position.Vertical<*>?
+        tv1[1][Position] = null as Position.Vertical<*, *>?
         val h4 = tv1[1][Position]
         assertTrue(h4 !is Position.Top)
         assertTrue(h4 !is Position.Bottom)
