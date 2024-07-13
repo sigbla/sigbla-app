@@ -14,6 +14,11 @@ import sigbla.app.exceptions.InvalidValueException
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.MathContext
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZonedDateTime
+import java.time.temporal.Temporal
 import java.util.*
 import kotlin.math.min
 import kotlin.math.max
@@ -32,6 +37,14 @@ internal fun BigInteger.toCell(column: Column, index: Long): BigIntegerCell =
     BigIntegerCell(column, index, this)
 internal fun BigDecimal.toCell(column: Column, index: Long): BigDecimalCell =
     BigDecimalCell(column, index, this)
+internal fun LocalDate.toCell(column: Column, index: Long): LocalDateCell =
+    LocalDateCell(column, index, this)
+internal fun LocalTime.toCell(column: Column, index: Long): LocalTimeCell =
+    LocalTimeCell(column, index, this)
+internal fun LocalDateTime.toCell(column: Column, index: Long): LocalDateTimeCell =
+    LocalDateTimeCell(column, index, this)
+internal fun ZonedDateTime.toCell(column: Column, index: Long): ZonedDateTimeCell =
+    ZonedDateTimeCell(column, index, this)
 internal fun WebContent.toCell(column: Column, index: Long): WebCell =
     WebCell(column, index, this)
 
@@ -44,6 +57,10 @@ internal class CellValue<T>(val value: T) {
             is Double -> value.toCell(column, index)
             is BigInteger -> value.toCell(column, index)
             is BigDecimal -> value.toCell(column, index)
+            is LocalDate -> value.toCell(column, index)
+            is LocalTime -> value.toCell(column, index)
+            is LocalDateTime -> value.toCell(column, index)
+            is ZonedDateTime -> value.toCell(column, index)
             is WebContent -> value.toCell(column, index)
             else -> throw UnsupportedOperationException("Unable to convert to cell: $value")
         }
@@ -118,6 +135,7 @@ class CellRange internal constructor(override val start: Cell<*>, override val e
     }
 
     operator fun contains(that: Number): Boolean = any { that in it }
+    operator fun contains(that: Temporal): Boolean = any { that in it }
     operator fun contains(that: Boolean): Boolean = any { that in it }
     operator fun contains(that: String): Boolean = any { that in it }
 
@@ -150,6 +168,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
 
     open val isNumeric: Boolean = false
     open val isText: Boolean = false
+    open val isTemporal: Boolean = false
 
     open val asLong: Long? = null
     open val asDouble: Double? = null
@@ -159,6 +178,10 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     open val asNumber: Number? = null
     open val asString: String? = null
     open val asBoolean: Boolean? = null
+    open val asLocalDate: LocalDate? = null
+    open val asLocalTime: LocalTime? = null
+    open val asLocalDateTime: LocalDateTime? = null
+    open val asZonedDateTime: ZonedDateTime? = null
 
     operator fun plus(that: Cell<*>): Number {
         return when (val v = that.value) {
@@ -346,6 +369,7 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     }
 
     operator fun contains(that: Number): Boolean = compareTo(that) == 0
+    operator fun contains(that: Temporal): Boolean = compareTo(that) == 0
     operator fun contains(that: Boolean): Boolean = compareTo(that) == 0
     operator fun contains(that: String): Boolean = compareTo(that) == 0
     operator fun contains(that: Unit): Boolean = compareTo(that) == 0
@@ -376,6 +400,22 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
         return newValue
     }
     operator fun invoke(newValue: Boolean?): Boolean? {
+        table[this] = newValue
+        return newValue
+    }
+    operator fun invoke(newValue: LocalDate?): LocalDate? {
+        table[this] = newValue
+        return newValue
+    }
+    operator fun invoke(newValue: LocalTime?): LocalTime? {
+        table[this] = newValue
+        return newValue
+    }
+    operator fun invoke(newValue: LocalDateTime?): LocalDateTime? {
+        table[this] = newValue
+        return newValue
+    }
+    operator fun invoke(newValue: ZonedDateTime?): ZonedDateTime? {
         table[this] = newValue
         return newValue
     }
@@ -732,6 +772,26 @@ class BigDecimalCell internal constructor(column: Column, index: Long, override 
     override fun rem(that: BigDecimal) = this.value.remainder(that)!!
 }
 
+class LocalDateCell internal constructor(column: Column, index: Long, override val value: LocalDate) : Cell<LocalDate>(column, index) {
+    override val isTemporal = true
+    override val asLocalDate: LocalDate = value
+}
+
+class LocalTimeCell internal constructor(column: Column, index: Long, override val value: LocalTime) : Cell<LocalTime>(column, index) {
+    override val isTemporal = true
+    override val asLocalTime: LocalTime = value
+}
+
+class LocalDateTimeCell internal constructor(column: Column, index: Long, override val value: LocalDateTime) : Cell<LocalDateTime>(column, index) {
+    override val isTemporal = true
+    override val asLocalDateTime: LocalDateTime = value
+}
+
+class ZonedDateTimeCell internal constructor(column: Column, index: Long, override val value: ZonedDateTime) : Cell<ZonedDateTime>(column, index) {
+    override val isTemporal = true
+    override val asZonedDateTime: ZonedDateTime = value
+}
+
 class WebContent internal constructor(val content: String) {
     override fun toString() = content
 
@@ -752,9 +812,6 @@ class WebContent internal constructor(val content: String) {
 internal fun String.toWebContent() = WebContent(this)
 
 class WebCell internal constructor(column: Column, index: Long, override val value: WebContent) : Cell<WebContent>(column, index)
-
-// TODO Other types of cells:
-//      Time/Date cell
 
 fun div(
     classes : String? = null, block : DIV.() -> Unit = {}
