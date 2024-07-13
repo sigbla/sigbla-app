@@ -2808,6 +2808,14 @@ class TableTest {
         assertNull(t["Val1", 0].asNumber)
         assertNull(t["Val1", 0].asBoolean)
         assertNull(t["Val1", 0].asString)
+        assertNull(t["Val1", 0].asLocalDate)
+        assertNull(t["Val1", 0].asLocalTime)
+        assertNull(t["Val1", 0].asLocalDateTime)
+        assertNull(t["Val1", 0].asZonedDateTime)
+
+        assertFalse(t["Val1", 0].isNumeric)
+        assertFalse(t["Val1", 0].isText)
+        assertFalse(t["Val1", 0].isTemporal)
     }
 
     @Test
@@ -2824,6 +2832,14 @@ class TableTest {
         assertNull(t["Val1", 0].asNumber)
         assertEquals(true, t["Val1", 0].asBoolean)
         assertNull(t["Val1", 0].asString)
+        assertNull(t["Val1", 0].asLocalDate)
+        assertNull(t["Val1", 0].asLocalTime)
+        assertNull(t["Val1", 0].asLocalDateTime)
+        assertNull(t["Val1", 0].asZonedDateTime)
+
+        assertFalse(t["Val1", 0].isNumeric)
+        assertFalse(t["Val1", 0].isText)
+        assertFalse(t["Val1", 0].isTemporal)
     }
 
     @Test
@@ -2840,6 +2856,114 @@ class TableTest {
         assertNull(t["Val1", 0].asNumber)
         assertNull(t["Val1", 0].asBoolean)
         assertEquals("string A", t["Val1", 0].asString)
+        assertNull(t["Val1", 0].asLocalDate)
+        assertNull(t["Val1", 0].asLocalTime)
+        assertNull(t["Val1", 0].asLocalDateTime)
+        assertNull(t["Val1", 0].asZonedDateTime)
+
+        assertFalse(t["Val1", 0].isNumeric)
+        assertTrue(t["Val1", 0].isText)
+        assertFalse(t["Val1", 0].isTemporal)
+    }
+
+    @Test
+    fun `localdate cell as`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val temporal = LocalDate.now()
+        t["Val1", 0] = temporal
+
+        assertNull(t["Val1", 0].asLong)
+        assertNull(t["Val1", 0].asDouble)
+        assertNull(t["Val1", 0].asBigInteger)
+        assertNull(t["Val1", 0].asBigDecimal)
+        assertNull(t["Val1", 0].asBigDecimal(MathContext.DECIMAL32))
+        assertNull(t["Val1", 0].asNumber)
+        assertNull(t["Val1", 0].asBoolean)
+        assertNull(t["Val1", 0].asString)
+        assertEquals(temporal, t["Val1", 0].asLocalDate)
+        assertNull(t["Val1", 0].asLocalTime)
+        assertNull(t["Val1", 0].asLocalDateTime)
+        assertNull(t["Val1", 0].asZonedDateTime)
+
+        assertFalse(t["Val1", 0].isNumeric)
+        assertFalse(t["Val1", 0].isText)
+        assertTrue(t["Val1", 0].isTemporal)
+    }
+
+    @Test
+    fun `localtime cell as`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val temporal = LocalTime.now()
+        t["Val1", 0] = temporal
+
+        assertNull(t["Val1", 0].asLong)
+        assertNull(t["Val1", 0].asDouble)
+        assertNull(t["Val1", 0].asBigInteger)
+        assertNull(t["Val1", 0].asBigDecimal)
+        assertNull(t["Val1", 0].asBigDecimal(MathContext.DECIMAL32))
+        assertNull(t["Val1", 0].asNumber)
+        assertNull(t["Val1", 0].asBoolean)
+        assertNull(t["Val1", 0].asString)
+        assertNull(t["Val1", 0].asLocalDate)
+        assertEquals(temporal, t["Val1", 0].asLocalTime)
+        assertNull(t["Val1", 0].asLocalDateTime)
+        assertNull(t["Val1", 0].asZonedDateTime)
+
+        assertFalse(t["Val1", 0].isNumeric)
+        assertFalse(t["Val1", 0].isText)
+        assertTrue(t["Val1", 0].isTemporal)
+    }
+
+    @Test
+    fun `localdatetime cell as`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val temporal = LocalDateTime.now()
+        t["Val1", 0] = temporal
+
+        assertNull(t["Val1", 0].asLong)
+        assertNull(t["Val1", 0].asDouble)
+        assertNull(t["Val1", 0].asBigInteger)
+        assertNull(t["Val1", 0].asBigDecimal)
+        assertNull(t["Val1", 0].asBigDecimal(MathContext.DECIMAL32))
+        assertNull(t["Val1", 0].asNumber)
+        assertNull(t["Val1", 0].asBoolean)
+        assertNull(t["Val1", 0].asString)
+        assertNull(t["Val1", 0].asLocalDate)
+        assertNull(t["Val1", 0].asLocalTime)
+        assertEquals(temporal, t["Val1", 0].asLocalDateTime)
+        assertNull(t["Val1", 0].asZonedDateTime)
+
+        assertFalse(t["Val1", 0].isNumeric)
+        assertFalse(t["Val1", 0].isText)
+        assertTrue(t["Val1", 0].isTemporal)
+    }
+
+    @Test
+    fun `zoneddatetime cell as`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val temporal = ZonedDateTime.now()
+        t["Val1", 0] = temporal
+
+        assertNull(t["Val1", 0].asLong)
+        assertNull(t["Val1", 0].asDouble)
+        assertNull(t["Val1", 0].asBigInteger)
+        assertNull(t["Val1", 0].asBigDecimal)
+        assertNull(t["Val1", 0].asBigDecimal(MathContext.DECIMAL32))
+        assertNull(t["Val1", 0].asNumber)
+        assertNull(t["Val1", 0].asBoolean)
+        assertNull(t["Val1", 0].asString)
+        assertNull(t["Val1", 0].asLocalDate)
+        assertNull(t["Val1", 0].asLocalTime)
+        assertNull(t["Val1", 0].asLocalDateTime)
+        assertEquals(temporal, t["Val1", 0].asZonedDateTime)
+
+        assertFalse(t["Val1", 0].isNumeric)
+        assertFalse(t["Val1", 0].isText)
+        assertTrue(t["Val1", 0].isTemporal)
     }
 
     @Test
