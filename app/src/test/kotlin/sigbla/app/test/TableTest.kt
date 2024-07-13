@@ -10,6 +10,10 @@ import sigbla.app.exceptions.*
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.MathContext
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZonedDateTime
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
 import kotlin.test.assertFailsWith
@@ -2521,12 +2525,15 @@ class TableTest {
     fun `cell contains`() {
         val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
+        val ld = LocalDate.now()
+
         t["A", 1] = 100
         t["A", 2] = true
         t["A", 3] = false
         t["A", 4] = "String A"
         t["A", 5] = "String B"
         t["A", 6] = "String B"
+        t["A", 7] = ld
 
         assertTrue(100 in t["A", 1])
         assertTrue(100L in t["A", 1])
@@ -2543,8 +2550,11 @@ class TableTest {
         assertFalse("String A" in t["A", 5])
         assertFalse("String B" in t["A", 4])
 
-        assertTrue(Unit in t["A", 7])
-        assertFalse(Unit in t["A", 6])
+        assertTrue(ld in t["A", 7])
+        assertFalse(ld.plusDays(1) in t["A", 7])
+
+        assertTrue(Unit in t["A", 8])
+        assertFalse(Unit in t["A", 7])
 
         assertTrue(t["A", 6] in t["A", 5])
         assertFalse(t["A", 3] in t["A", 5])
@@ -2554,12 +2564,15 @@ class TableTest {
     fun `cell range contains`() {
         val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
+        val lt = LocalTime.now()
+
         t["A", 1] = 100
         t["A", 2] = true
         t["A", 3] = false
         t["A", 4] = "String A"
         t["A", 5] = "String B"
         t["A", 6] = "String B"
+        t["A", 7] = lt
 
         assertTrue(100 in t["A", 1]..t["A", 2])
         assertTrue(100L in t["A", 1]..t["A", 2])
@@ -2570,6 +2583,9 @@ class TableTest {
         assertTrue(false in t["A", 3]..t["A", 2])
         assertFalse(true in t["A", 4]..t["A", 5])
         assertFalse(false in t["A", 5]..t["A", 4])
+
+        assertTrue(lt in t["A", 3]..t["A", 8])
+        assertFalse(lt.plusHours(1) in t["A", 7]..t["A", 5])
 
         assertTrue("String A" in t["A", 4]..t["A", 5])
         assertTrue("String B" in t["A", 5]..t["A", 4])
@@ -2584,12 +2600,15 @@ class TableTest {
     fun `column contains`() {
         val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
+        val ldt = LocalDateTime.now()
+
         t["A", 1] = 100
         t["A", 2] = true
         t["A", 3] = false
         t["A", 4] = "String A"
         t["A", 5] = "String B"
         t["A", 6] = "String B"
+        t["A", 7] = ldt
 
         assertTrue(100 in t["A"])
         assertTrue(100L in t["A"])
@@ -2600,6 +2619,9 @@ class TableTest {
         assertTrue(false in t["A"])
         assertFalse(true in t["B"])
         assertFalse(false in t["B"])
+
+        assertTrue(ldt in t["A"])
+        assertFalse(ldt in t["B"])
 
         assertTrue("String A" in t["A"])
         assertTrue("String B" in t["A"])
@@ -2614,12 +2636,15 @@ class TableTest {
     fun `column range contains`() {
         val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
+        val zdt = ZonedDateTime.now()
+
         t["A", 1] = 100
         t["A", 2] = true
         t["A", 3] = false
         t["A", 4] = "String A"
         t["A", 5] = "String B"
         t["A", 6] = "String B"
+        t["A", 7] = zdt
 
         assertTrue(100 in t["A"]..t["A"])
         assertTrue(100L in t["A"]..t["A"])
@@ -2631,6 +2656,9 @@ class TableTest {
         assertFalse(true in t["C"]..t["B"])
         assertFalse(false in t["C"]..t["B"])
 
+        assertTrue(zdt in t["A"]..t["A"])
+        assertFalse(zdt in t["C"]..t["B"])
+
         assertTrue("String A" in t["A"]..t["A"])
         assertTrue("String B" in t["A"]..t["A"])
         assertFalse("String A" in t["C"]..t["B"])
@@ -2641,12 +2669,15 @@ class TableTest {
     fun `row contains`() {
         val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
+        val ld = LocalDate.now()
+
         t["A", 1] = 100
         t["B", 1] = true
         t["C", 1] = false
         t["D", 1] = "String A"
         t["E", 1] = "String B"
         t["F", 1] = "String B"
+        t["G", 1] = ld
 
         assertTrue(100 in t[1])
         assertTrue(100L in t[1])
@@ -2657,6 +2688,9 @@ class TableTest {
         assertTrue(false in t[1])
         assertFalse(true in t[2])
         assertFalse(false in t[2])
+
+        assertTrue(ld in t[1])
+        assertFalse(ld in t[2])
 
         assertTrue("String A" in t[1])
         assertTrue("String B" in t[1])
@@ -2671,12 +2705,15 @@ class TableTest {
     fun `row range contains`() {
         val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
+        val lt = LocalTime.now()
+
         t["A", 1] = 100
         t["B", 1] = true
         t["C", 1] = false
         t["D", 1] = "String A"
         t["E", 1] = "String B"
         t["F", 1] = "String B"
+        t["G", 1] = lt
 
         assertTrue(100 in t[1]..t[1])
         assertTrue(100L in t[1]..t[1])
@@ -2688,6 +2725,9 @@ class TableTest {
         assertFalse(true in t[3]..t[2])
         assertFalse(false in t[3]..t[2])
 
+        assertTrue(lt in t[1]..t[1])
+        assertFalse(lt in t[3]..t[2])
+
         assertTrue("String A" in t[0]..t[1])
         assertTrue("String B" in t[1]..t[0])
         assertFalse("String A" in t[3]..t[2])
@@ -2698,12 +2738,15 @@ class TableTest {
     fun `table contains`() {
         val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
+        val ldt = LocalDateTime.now()
+
         t["A", 1] = 100
         t["B", 2] = true
         t["C", 3] = false
         t["D", 4] = "String A"
         t["E", 5] = "String B"
         t["F", 6] = "String B"
+        t["G", 7] = ldt
 
         assertTrue(100 in t)
         assertTrue(100L in t)
@@ -2712,6 +2755,9 @@ class TableTest {
 
         assertTrue(true in t)
         assertTrue(false in t)
+
+        assertTrue(ldt in t)
+        assertFalse(ldt.plusDays(1) in t)
 
         assertTrue("String A" in t)
         assertTrue("String B" in t)
