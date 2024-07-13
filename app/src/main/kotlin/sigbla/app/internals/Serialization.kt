@@ -10,6 +10,10 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.security.MessageDigest
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZonedDateTime
 
 internal enum class SerializationType(val type: Int) {
     NULL(0),
@@ -24,7 +28,15 @@ internal enum class SerializationType(val type: Int) {
     STRING(9),
     BIGINTEGER(10),
     BIGDECIMAL(11),
-    WEBCONTENT(12)
+    LOCALDATE(12),
+    LOCALTIME(13),
+    LOCALDATETIME(14),
+    ZONEDDATETIME(15),
+    // 16
+    // 17
+    // 18
+    // 19
+    WEBCONTENT(20)
 }
 
 internal object SerializationUtils {
@@ -125,6 +137,34 @@ internal object SerializationUtils {
                     baos.write(fromInt(bytes.size))
                     baos.writeBytes(bytes)
                     baos.writeBytes(scale)
+                }
+
+                is LocalDate -> {
+                    baos.write(SerializationType.LOCALDATE.type)
+                    val bytes = value.toString().toByteArray(Charsets.UTF_8)
+                    baos.write(fromInt(bytes.size))
+                    baos.writeBytes(bytes)
+                }
+
+                is LocalTime -> {
+                    baos.write(SerializationType.LOCALTIME.type)
+                    val bytes = value.toString().toByteArray(Charsets.UTF_8)
+                    baos.write(fromInt(bytes.size))
+                    baos.writeBytes(bytes)
+                }
+
+                is LocalDateTime -> {
+                    baos.write(SerializationType.LOCALDATETIME.type)
+                    val bytes = value.toString().toByteArray(Charsets.UTF_8)
+                    baos.write(fromInt(bytes.size))
+                    baos.writeBytes(bytes)
+                }
+
+                is ZonedDateTime -> {
+                    baos.write(SerializationType.ZONEDDATETIME.type)
+                    val bytes = value.toString().toByteArray(Charsets.UTF_8)
+                    baos.write(fromInt(bytes.size))
+                    baos.writeBytes(bytes)
                 }
 
                 is WebContent -> {
@@ -230,6 +270,54 @@ internal object SerializationUtils {
                 }
                 val scale = buffer2.getInt()
                 return BigDecimal(BigInteger(bigdecimal), scale)
+            }
+            SerializationType.LOCALDATE.type -> {
+                val buffer = ByteArray(Int.SIZE_BYTES).let {
+                    if (inputStream.readNBytes(it, 0, it.size) != it.size) throw IllegalArgumentException()
+                    ByteBuffer.wrap(it)
+                }
+                val length = buffer.getInt()
+                val temporal = ByteArray(length).let {
+                    if (inputStream.readNBytes(it, 0, it.size) != it.size) throw IllegalArgumentException()
+                    it
+                }
+                return LocalDate.parse(String(temporal, Charsets.UTF_8))
+            }
+            SerializationType.LOCALTIME.type -> {
+                val buffer = ByteArray(Int.SIZE_BYTES).let {
+                    if (inputStream.readNBytes(it, 0, it.size) != it.size) throw IllegalArgumentException()
+                    ByteBuffer.wrap(it)
+                }
+                val length = buffer.getInt()
+                val temporal = ByteArray(length).let {
+                    if (inputStream.readNBytes(it, 0, it.size) != it.size) throw IllegalArgumentException()
+                    it
+                }
+                return LocalTime.parse(String(temporal, Charsets.UTF_8))
+            }
+            SerializationType.LOCALDATETIME.type -> {
+                val buffer = ByteArray(Int.SIZE_BYTES).let {
+                    if (inputStream.readNBytes(it, 0, it.size) != it.size) throw IllegalArgumentException()
+                    ByteBuffer.wrap(it)
+                }
+                val length = buffer.getInt()
+                val temporal = ByteArray(length).let {
+                    if (inputStream.readNBytes(it, 0, it.size) != it.size) throw IllegalArgumentException()
+                    it
+                }
+                return LocalDateTime.parse(String(temporal, Charsets.UTF_8))
+            }
+            SerializationType.ZONEDDATETIME.type -> {
+                val buffer = ByteArray(Int.SIZE_BYTES).let {
+                    if (inputStream.readNBytes(it, 0, it.size) != it.size) throw IllegalArgumentException()
+                    ByteBuffer.wrap(it)
+                }
+                val length = buffer.getInt()
+                val temporal = ByteArray(length).let {
+                    if (inputStream.readNBytes(it, 0, it.size) != it.size) throw IllegalArgumentException()
+                    it
+                }
+                return ZonedDateTime.parse(String(temporal, Charsets.UTF_8))
             }
             SerializationType.WEBCONTENT.type -> {
                 val buffer = ByteArray(Int.SIZE_BYTES).let {
