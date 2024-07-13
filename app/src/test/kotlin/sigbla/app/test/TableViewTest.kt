@@ -538,10 +538,14 @@ class TableViewTest {
         tv1["A"][CellWidth] = 30
         tv1["A"][CellClasses] = "tv_a cc"
         tv1["A"][CellTopics] = "tv_a ct"
+        tv1["A"][Position] = Position.Left
+        tv1["A"][Visibility] = Visibility.Hide
 
         tv1[1][CellHeight] = 40
         tv1[1][CellClasses] = "tv_1 cc"
         tv1[1][CellTopics] = "tv_1 ct"
+        tv1[1][Position] = Position.Top
+        tv1[1][Visibility] = Visibility.Hide
 
         assertEquals(30L, tv1["A"].derived.cellWidth)
         assertEquals(20L, tv1["B"].derived.cellWidth)
@@ -552,6 +556,12 @@ class TableViewTest {
         assertEquals(setOf("tv ct", "tv_a ct"), tv1["A"].derived.cellTopics.toSet())
         assertEquals(setOf("tv ct"), tv1["B"].derived.cellTopics.toSet())
 
+        assertEquals(Position.Value.LEFT, tv1["A"].derived.position.position)
+        assertEquals(Unit, tv1["B"].derived.position.position)
+
+        assertEquals(Visibility.Value.HIDE, tv1["A"].derived.visibility.visibility)
+        assertEquals(Unit, tv1["B"].derived.visibility.visibility)
+
         assertEquals(40L, tv1[1].derived.cellHeight)
         assertEquals(10L, tv1[2].derived.cellHeight)
 
@@ -560,6 +570,12 @@ class TableViewTest {
 
         assertEquals(setOf("tv ct", "tv_1 ct"), tv1[1].derived.cellTopics.toSet())
         assertEquals(setOf("tv ct"), tv1[2].derived.cellTopics.toSet())
+
+        assertEquals(Position.Value.TOP, tv1[1].derived.position.position)
+        assertEquals(Unit, tv1[2].derived.position.position)
+
+        assertEquals(Visibility.Value.HIDE, tv1[1].derived.visibility.visibility)
+        assertEquals(Unit, tv1[2].derived.visibility.visibility)
 
         assertEquals(40L, tv1["A", 1].derived.cellHeight)
         assertEquals(30L, tv1["A", 1].derived.cellWidth)
