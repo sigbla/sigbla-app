@@ -10,6 +10,10 @@ import org.junit.Test
 import sigbla.app.*
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZonedDateTime
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.test.assertEquals
@@ -583,6 +587,10 @@ class HashCodeEqualsTest {
         table["Double", 0] = 200.0
         table["BigInteger", 0] = BigInteger.TEN
         table["BigDecimal", 0] = BigDecimal.ONE
+        table["LocalDate", 0] = LocalDate.now()
+        table["LocalTime", 0] = LocalTime.now()
+        table["LocalDateTime", 0] = LocalDateTime.now()
+        table["ZonedDateTime", 0] = ZonedDateTime.now()
 
         val unit = table["Unit", 0]
         val boolean = table["Boolean", 0]
@@ -591,6 +599,10 @@ class HashCodeEqualsTest {
         val double = table["Double", 0]
         val bigint = table["BigInteger", 0]
         val bigdec = table["BigDecimal", 0]
+        val localdate = table["LocalDate", 0]
+        val localtime = table["LocalTime", 0]
+        val localdatetime = table["LocalDateTime", 0]
+        val zoneddatetime = table["ZonedDateTime", 0]
 
         // Most of these are false because UnitCells aren't included in iterators
         assertFalse(unit in table)
@@ -671,6 +683,42 @@ class HashCodeEqualsTest {
         assertTrue(1 in table[0])
         assertTrue(1 in table["BigDecimal"])
         assertTrue(1 in table["BigDecimal", 0])
+
+        assertTrue(localdate in table)
+        assertTrue(localdate.value as LocalDate in table)
+        assertTrue(localdate in table[0])
+        assertTrue(localdate.value as LocalDate in table[0])
+        assertTrue(localdate in table["LocalDate"])
+        assertTrue(localdate.value as LocalDate in table["LocalDate"])
+        assertTrue(localdate in table["LocalDate", 0])
+        assertTrue(localdate.value as LocalDate in table["LocalDate", 0])
+
+        assertTrue(localtime in table)
+        assertTrue(localtime.value as LocalTime in table)
+        assertTrue(localtime in table[0])
+        assertTrue(localtime.value as LocalTime in table[0])
+        assertTrue(localtime in table["LocalTime"])
+        assertTrue(localtime.value as LocalTime in table["LocalTime"])
+        assertTrue(localtime in table["LocalTime", 0])
+        assertTrue(localtime.value as LocalTime in table["LocalTime", 0])
+
+        assertTrue(localdatetime in table)
+        assertTrue(localdatetime.value as LocalDateTime in table)
+        assertTrue(localdatetime in table[0])
+        assertTrue(localdatetime.value as LocalDateTime in table[0])
+        assertTrue(localdatetime in table["LocalDateTime"])
+        assertTrue(localdatetime.value as LocalDateTime in table["LocalDateTime"])
+        assertTrue(localdatetime in table["LocalDateTime", 0])
+        assertTrue(localdatetime.value as LocalDateTime in table["LocalDateTime", 0])
+
+        assertTrue(zoneddatetime in table)
+        assertTrue(zoneddatetime.value as ZonedDateTime in table)
+        assertTrue(zoneddatetime in table[0])
+        assertTrue(zoneddatetime.value as ZonedDateTime in table[0])
+        assertTrue(zoneddatetime in table["ZonedDateTime"])
+        assertTrue(zoneddatetime.value as ZonedDateTime in table["ZonedDateTime"])
+        assertTrue(zoneddatetime in table["ZonedDateTime", 0])
+        assertTrue(zoneddatetime.value as ZonedDateTime in table["ZonedDateTime", 0])
     }
 
     companion object {
