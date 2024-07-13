@@ -1619,44 +1619,63 @@ sealed class Position<S, T>(
         return true
     }
 
-    open class Horizontal<T> internal constructor(source: ColumnView, position: T) : Position<ColumnView, T>(source, position) {
-        operator fun contains(other: Horizontal<*>) = position == other.position
+    open class Horizontal<S, T> internal constructor(source: S, position: T) : Position<S, T>(source, position) {
+        operator fun contains(other: Horizontal<*, *>) = position == other.position
         operator fun contains(other: HorizontalCompanion) = position == other.asValue
 
         operator fun invoke(newValue: Unit?): Unit? {
-            source[Position] = newValue
+            when (val source = source) {
+                is ColumnView -> source[Position] = newValue
+                // TODO Create a InvalidSourceException and throw that (including on other meta classes invoke)
+            }
+
             return newValue
         }
 
-        operator fun invoke(newValue: Horizontal<*>?): Horizontal<*>? {
-            source[Position] = newValue
+        operator fun invoke(newValue: Horizontal<*, *>?): Horizontal<*, *>? {
+            when (val source = source) {
+                is ColumnView -> source[Position] = newValue
+            }
+
             return newValue
         }
 
         operator fun invoke(newValue: HorizontalCompanion?): HorizontalCompanion? {
-            source[Position] = newValue
+            when (val source = source) {
+                is ColumnView -> source[Position] = newValue
+            }
+
             return newValue
         }
 
         override fun toString() = "Horizontal"
     }
 
-    open class Vertical<T> internal constructor(source: RowView, position: T) : Position<RowView, T>(source, position) {
-        operator fun contains(other: Vertical<*>) = position == other.position
+    open class Vertical<S, T> internal constructor(source: S, position: T) : Position<S, T>(source, position) {
+        operator fun contains(other: Vertical<*,*>) = position == other.position
         operator fun contains(other: VerticalCompanion) = position == other.asValue
 
         operator fun invoke(newValue: Unit?): Unit? {
-            source[Position] = newValue
+            when (val source = source) {
+                is RowView -> source[Position] = newValue
+            }
+
             return newValue
         }
 
-        operator fun invoke(newValue: Vertical<*>?): Vertical<*>? {
-            source[Position] = newValue
+        operator fun invoke(newValue: Vertical<*, *>?): Vertical<*, *>? {
+            when (val source = source) {
+                is RowView -> source[Position] = newValue
+            }
+
             return newValue
         }
 
         operator fun invoke(newValue: VerticalCompanion?): VerticalCompanion? {
-            source[Position] = newValue
+            when (val source = source) {
+                is RowView -> source[Position] = newValue
+            }
+
             return newValue
         }
 
@@ -1671,7 +1690,7 @@ sealed class Position<S, T>(
         val asValue: Value
     }
 
-    class Left internal constructor(source: ColumnView) : Horizontal<Value>(source, Value.LEFT) {
+    class Left<S> internal constructor(source: S) : Horizontal<S, Value>(source, Value.LEFT) {
         override val isValue: Boolean = true
         override val asValue: Value = position
 
@@ -1682,7 +1701,7 @@ sealed class Position<S, T>(
         }
     }
 
-    class Right internal constructor(source: ColumnView) : Horizontal<Value>(source, Value.RIGHT) {
+    class Right<S> internal constructor(source: S) : Horizontal<S, Value>(source, Value.RIGHT) {
         override val isValue: Boolean = true
         override val asValue: Value = position
 
@@ -1693,7 +1712,7 @@ sealed class Position<S, T>(
         }
     }
 
-    class Top internal constructor(source: RowView) : Vertical<Value>(source, Value.TOP) {
+    class Top<S> internal constructor(source: S) : Vertical<S, Value>(source, Value.TOP) {
         override val isValue: Boolean = true
         override val asValue: Value = position
 
@@ -1704,7 +1723,7 @@ sealed class Position<S, T>(
         }
     }
 
-    class Bottom internal constructor(source: RowView) : Vertical<Value>(source, Value.BOTTOM) {
+    class Bottom<S> internal constructor(source: S) : Vertical<S, Value>(source, Value.BOTTOM) {
         override val isValue: Boolean = true
         override val asValue: Value = position
 

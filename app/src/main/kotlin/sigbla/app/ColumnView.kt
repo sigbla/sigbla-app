@@ -226,7 +226,7 @@ class ColumnView internal constructor(
         }
     }
 
-    operator fun get(position: Position.Companion): Position.Horizontal<*> {
+    operator fun get(position: Position.Companion): Position.Horizontal<ColumnView, *> {
         val ref = tableView.tableViewRef.get()
         return when (ref.columnViews[header]?.positionValue) {
             null -> Position.Horizontal(this, Unit)
@@ -240,7 +240,7 @@ class ColumnView internal constructor(
         setColumnPosition(null)
     }
 
-    operator fun set(position: Position.Companion, newPosition: Position.Horizontal<*>?) {
+    operator fun set(position: Position.Companion, newPosition: Position.Horizontal<*, *>?) {
         setColumnPosition(newPosition?.asValue)
     }
 
@@ -269,7 +269,7 @@ class ColumnView internal constructor(
             val new = newView[header][Position]
 
             tableView.eventProcessor.publish(listOf(
-                TableViewListenerEvent<Position.Horizontal<*>>(
+                TableViewListenerEvent<Position.Horizontal<*, *>>(
                     old,
                     new
                 )
@@ -352,7 +352,7 @@ class ColumnView internal constructor(
         return newValue
     }
 
-    operator fun invoke(newValue: Position.Horizontal<*>?): Position.Horizontal<*>? {
+    operator fun invoke(newValue: Position.Horizontal<*, *>?): Position.Horizontal<*, *>? {
         tableView[this][Position] = newValue
         return newValue
     }
@@ -536,12 +536,13 @@ class FunctionColumnTransformer internal constructor(
     override fun toString() = "FunctionColumnTransformer[$function]"
 }
 
-// TODO Add position and visibility to DerivedColumnView (and DerivedRowView)
 class DerivedColumnView internal constructor(
     val columnView: ColumnView,
     val cellWidth: Long,
     classes: PSet<String>,
-    topics: PSet<String>
+    topics: PSet<String>,
+    positionValue: Position.Value?,
+    visibilityValue: Visibility.Value?
 ) : Iterable<DerivedCellView> {
     val tableView: TableView
         get() = columnView.tableView
@@ -555,6 +556,23 @@ class DerivedColumnView internal constructor(
 
     val cellTopics: CellTopics<DerivedColumnView> by lazy {
         CellTopics(this, topics)
+    }
+
+    val position: Position<DerivedColumnView, *> by lazy {
+        when (positionValue) {
+            null -> Position.Horizontal(this, Unit)
+            Position.Value.LEFT -> Position.Left(this)
+            Position.Value.RIGHT -> Position.Right(this)
+            else -> throw InvalidColumnException("Unsupported position type: $positionValue")
+        }
+    }
+
+    val visibility: Visibility<DerivedColumnView, *> by lazy {
+        when (visibilityValue) {
+            null -> Visibility.Undefined(this)
+            Visibility.Value.SHOW -> Visibility.Show(this)
+            Visibility.Value.HIDE -> Visibility.Hide(this)
+        }
     }
 
     override fun iterator() = columnView.iterator()
@@ -590,5 +608,8 @@ internal fun createDerivedColumnView(columnView: ColumnView): DerivedColumnView 
     val topics = (columnViewMeta?.cellTopics ?: EMPTY_IMMUTABLE_STRING_SET) +
             (defaultCellViewMeta.cellTopics ?: EMPTY_IMMUTABLE_STRING_SET)
 
-    return DerivedColumnView(columnView, width, classes, topics)
+    val positionValue = columnViewMeta?.positionValue
+    val visibilityValue = columnViewMeta?.visibilityValue
+
+    return DerivedColumnView(columnView, width, classes, topics, positionValue, visibilityValue)
 }

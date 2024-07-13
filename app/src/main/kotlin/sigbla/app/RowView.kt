@@ -219,7 +219,7 @@ class RowView internal constructor(
         }
     }
 
-    operator fun get(position: Position.Companion): Position.Vertical<*> {
+    operator fun get(position: Position.Companion): Position.Vertical<RowView, *> {
         val ref = tableView.tableViewRef.get()
         return when (ref.rowViews[index]?.positionValue) {
             null -> Position.Vertical(this, Unit)
@@ -233,7 +233,7 @@ class RowView internal constructor(
         setRowPosition(null)
     }
 
-    operator fun set(position: Position.Companion, newPosition: Position.Vertical<*>?) {
+    operator fun set(position: Position.Companion, newPosition: Position.Vertical<*, *>?) {
         setRowPosition(newPosition?.asValue)
     }
 
@@ -262,7 +262,7 @@ class RowView internal constructor(
             val new = newView[index][Position]
 
             tableView.eventProcessor.publish(listOf(
-                TableViewListenerEvent<Position.Vertical<*>>(
+                TableViewListenerEvent<Position.Vertical<*, *>>(
                     old,
                     new
                 )
@@ -345,7 +345,7 @@ class RowView internal constructor(
         return newValue
     }
 
-    operator fun invoke(newValue: Position.Vertical<*>?): Position.Vertical<*>? {
+    operator fun invoke(newValue: Position.Vertical<*, *>?): Position.Vertical<*, *>? {
         tableView[this][Position] = newValue
         return newValue
     }
@@ -508,7 +508,9 @@ class DerivedRowView internal constructor(
     val rowView: RowView,
     val cellHeight: Long,
     classes: PSet<String>,
-    topics: PSet<String>
+    topics: PSet<String>,
+    positionValue: Position.Value?,
+    visibilityValue: Visibility.Value?
 ) : Iterable<DerivedCellView> {
     val tableView: TableView
         get() = rowView.tableView
@@ -522,6 +524,23 @@ class DerivedRowView internal constructor(
 
     val cellTopics: CellTopics<DerivedRowView> by lazy {
         CellTopics(this, topics)
+    }
+
+    val position: Position<DerivedRowView, *> by lazy {
+        when (positionValue) {
+            null -> Position.Horizontal(this, Unit)
+            Position.Value.TOP -> Position.Top(this)
+            Position.Value.BOTTOM -> Position.Bottom(this)
+            else -> throw InvalidRowException("Unsupported position type: $positionValue")
+        }
+    }
+
+    val visibility: Visibility<DerivedRowView, *> by lazy {
+        when (visibilityValue) {
+            null -> Visibility.Undefined(this)
+            Visibility.Value.SHOW -> Visibility.Show(this)
+            Visibility.Value.HIDE -> Visibility.Hide(this)
+        }
     }
 
     override fun iterator() = rowView.iterator()
@@ -557,5 +576,8 @@ internal fun createDerivedRowView(rowView: RowView): DerivedRowView {
     val topics = (rowViewMeta?.cellTopics ?: EMPTY_IMMUTABLE_STRING_SET) +
             (defaultCellViewMeta.cellTopics ?: EMPTY_IMMUTABLE_STRING_SET)
 
-    return DerivedRowView(rowView, height, classes, topics)
+    val positionValue = rowViewMeta?.positionValue
+    val visibilityValue = rowViewMeta?.visibilityValue
+
+    return DerivedRowView(rowView, height, classes, topics, positionValue, visibilityValue)
 }
