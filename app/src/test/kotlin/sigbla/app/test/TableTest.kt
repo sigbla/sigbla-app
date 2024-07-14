@@ -2841,6 +2841,102 @@ class TableTest {
     }
 
     @Test
+    fun `long cell as`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["Val1", 0] = 100L
+
+        assertEquals(100L, t["Val1", 0].asLong)
+        assertEquals(100.0, t["Val1", 0].asDouble)
+        assertEquals(BigInteger.valueOf(100), t["Val1", 0].asBigInteger)
+        assertEquals(BigDecimal.valueOf(100), t["Val1", 0].asBigDecimal)
+        assertEquals(BigDecimal.valueOf(100), t["Val1", 0].asBigDecimal(MathContext.DECIMAL32))
+        assertEquals(100L as Number, t["Val1", 0].asNumber)
+        assertNull(t["Val1", 0].asBoolean)
+        assertNull(t["Val1", 0].asString)
+        assertNull(t["Val1", 0].asLocalDate)
+        assertNull(t["Val1", 0].asLocalTime)
+        assertNull(t["Val1", 0].asLocalDateTime)
+        assertNull(t["Val1", 0].asZonedDateTime)
+
+        assertTrue(t["Val1", 0].isNumeric)
+        assertFalse(t["Val1", 0].isText)
+        assertFalse(t["Val1", 0].isTemporal)
+    }
+
+    @Test
+    fun `double cell as`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["Val1", 0] = 100.0
+
+        assertEquals(100L, t["Val1", 0].asLong)
+        assertEquals(100.0, t["Val1", 0].asDouble)
+        assertEquals(BigInteger.valueOf(100), t["Val1", 0].asBigInteger)
+        assertEquals(BigDecimal("100.0"), t["Val1", 0].asBigDecimal)
+        assertEquals(BigDecimal("100.0"), t["Val1", 0].asBigDecimal(MathContext.DECIMAL32))
+        assertEquals(100.0 as Number, t["Val1", 0].asNumber)
+        assertNull(t["Val1", 0].asBoolean)
+        assertNull(t["Val1", 0].asString)
+        assertNull(t["Val1", 0].asLocalDate)
+        assertNull(t["Val1", 0].asLocalTime)
+        assertNull(t["Val1", 0].asLocalDateTime)
+        assertNull(t["Val1", 0].asZonedDateTime)
+
+        assertTrue(t["Val1", 0].isNumeric)
+        assertFalse(t["Val1", 0].isText)
+        assertFalse(t["Val1", 0].isTemporal)
+    }
+
+    @Test
+    fun `biginteger cell as`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["Val1", 0] = BigInteger.valueOf(100)
+
+        assertEquals(100L, t["Val1", 0].asLong)
+        assertEquals(100.0, t["Val1", 0].asDouble)
+        assertEquals(BigInteger.valueOf(100), t["Val1", 0].asBigInteger)
+        assertEquals(BigDecimal("100"), t["Val1", 0].asBigDecimal)
+        assertEquals(BigDecimal("100"), t["Val1", 0].asBigDecimal(MathContext.DECIMAL32))
+        assertEquals(BigInteger.valueOf(100) as Number, t["Val1", 0].asNumber)
+        assertNull(t["Val1", 0].asBoolean)
+        assertNull(t["Val1", 0].asString)
+        assertNull(t["Val1", 0].asLocalDate)
+        assertNull(t["Val1", 0].asLocalTime)
+        assertNull(t["Val1", 0].asLocalDateTime)
+        assertNull(t["Val1", 0].asZonedDateTime)
+
+        assertTrue(t["Val1", 0].isNumeric)
+        assertFalse(t["Val1", 0].isText)
+        assertFalse(t["Val1", 0].isTemporal)
+    }
+
+    @Test
+    fun `bigdecimal cell as`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["Val1", 0] = BigDecimal("100.0")
+
+        assertEquals(100L, t["Val1", 0].asLong)
+        assertEquals(100.0, t["Val1", 0].asDouble)
+        assertEquals(BigInteger.valueOf(100), t["Val1", 0].asBigInteger)
+        assertEquals(BigDecimal("100.0"), t["Val1", 0].asBigDecimal)
+        assertEquals(BigDecimal("100.0"), t["Val1", 0].asBigDecimal(MathContext.DECIMAL32))
+        assertEquals(BigDecimal("100.0") as Number, t["Val1", 0].asNumber)
+        assertNull(t["Val1", 0].asBoolean)
+        assertNull(t["Val1", 0].asString)
+        assertNull(t["Val1", 0].asLocalDate)
+        assertNull(t["Val1", 0].asLocalTime)
+        assertNull(t["Val1", 0].asLocalDateTime)
+        assertNull(t["Val1", 0].asZonedDateTime)
+
+        assertTrue(t["Val1", 0].isNumeric)
+        assertFalse(t["Val1", 0].isText)
+        assertFalse(t["Val1", 0].isTemporal)
+    }
+
+    @Test
     fun `boolean cell as`() {
         val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
@@ -2953,8 +3049,8 @@ class TableTest {
         assertNull(t["Val1", 0].asNumber)
         assertNull(t["Val1", 0].asBoolean)
         assertNull(t["Val1", 0].asString)
-        assertNull(t["Val1", 0].asLocalDate)
-        assertNull(t["Val1", 0].asLocalTime)
+        assertEquals(temporal.toLocalDate(), t["Val1", 0].asLocalDate)
+        assertEquals(temporal.toLocalTime(), t["Val1", 0].asLocalTime)
         assertEquals(temporal, t["Val1", 0].asLocalDateTime)
         assertNull(t["Val1", 0].asZonedDateTime)
 
@@ -2978,9 +3074,9 @@ class TableTest {
         assertNull(t["Val1", 0].asNumber)
         assertNull(t["Val1", 0].asBoolean)
         assertNull(t["Val1", 0].asString)
-        assertNull(t["Val1", 0].asLocalDate)
-        assertNull(t["Val1", 0].asLocalTime)
-        assertNull(t["Val1", 0].asLocalDateTime)
+        assertEquals(temporal.toLocalDate(), t["Val1", 0].asLocalDate)
+        assertEquals(temporal.toLocalTime(), t["Val1", 0].asLocalTime)
+        assertEquals(temporal.toLocalDateTime(), t["Val1", 0].asLocalDateTime)
         assertEquals(temporal, t["Val1", 0].asZonedDateTime)
 
         assertFalse(t["Val1", 0].isNumeric)

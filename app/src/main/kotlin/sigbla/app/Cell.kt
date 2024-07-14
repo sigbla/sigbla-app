@@ -785,11 +785,16 @@ class LocalTimeCell internal constructor(column: Column, index: Long, override v
 class LocalDateTimeCell internal constructor(column: Column, index: Long, override val value: LocalDateTime) : Cell<LocalDateTime>(column, index) {
     override val isTemporal = true
     override val asLocalDateTime: LocalDateTime = value
+    override val asLocalDate: LocalDate by lazy { value.toLocalDate() }
+    override val asLocalTime: LocalTime by lazy { value.toLocalTime() }
 }
 
 class ZonedDateTimeCell internal constructor(column: Column, index: Long, override val value: ZonedDateTime) : Cell<ZonedDateTime>(column, index) {
     override val isTemporal = true
     override val asZonedDateTime: ZonedDateTime = value
+    override val asLocalDateTime: LocalDateTime by lazy { value.toLocalDateTime() }
+    override val asLocalDate: LocalDate by lazy { value.toLocalDate() }
+    override val asLocalTime: LocalTime by lazy { value.toLocalTime() }
 }
 
 class WebContent internal constructor(val content: String) {
