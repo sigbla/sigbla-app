@@ -22,6 +22,7 @@ println("Index: ${cellA1.index}")
 println("Value: ${cellA1.value}")
 println("Numeric: ${cellA1.isNumeric}")
 println("Text: ${cellA1.isText}")
+println("Temporal: ${cellA1.isTemporal}")
 
 // Output:
 // Table: Table[MyTable]
@@ -30,12 +31,13 @@ println("Text: ${cellA1.isText}")
 // Value: kotlin.Unit
 // Numeric: false
 // Text: false
+// Temporal: false
 ```
 
 There are other properties and functions on a cell beyond these, but this is a good starting point.
 
 As we can tell, it's linked to our table, column and index. We can also tell that it contains a `value`, in this case
-a `Unit`, which is the case for all empty cells, which are neither numeric nor text.
+a `Unit`, which is the case for all empty cells, which are neither numeric, text, nor temporal.
 
 The fact that `value` is Unit also dictates the specific type of the cell. Let's look at the type of this cell:
 
@@ -55,9 +57,9 @@ all next:
 
 ``` kotlin
 import sigbla.app.*
-import kotlinx.html.p
-import java.math.BigDecimal
-import java.math.BigInteger
+import kotlinx.html.*
+import java.math.*
+import java.time.*
 
 fun main() {
     val table = Table[null]
@@ -68,35 +70,46 @@ fun main() {
     table["Types", 4] = Double.MAX_VALUE
     table["Types", 5] = BigInteger.ZERO
     table["Types", 6] = BigDecimal.TEN
-    table["Types", 7] = div { p { +"HTML content" } }
+    table["Types", 7] = LocalDate.of(2024, 1, 1)
+    table["Types", 8] = LocalTime.of(14, 34, 12)
+    table["Types", 9] = LocalDateTime.of(2024, 1, 1, 14, 34, 12)
+    table["Types", 10] = ZonedDateTime.of(LocalDateTime.of(2024, 1, 1, 14, 34, 12), ZoneOffset.UTC)
+    table["Types", 11] = div { p { +"HTML content" } }
 
     print(table)
 
     // Output:
-    //                                |Types                          
-    // 1                              |Some text                      
-    // 2                              |true                           
-    // 3                              |9223372036854775807            
-    // 4                              |1.7976931348623157E308         
-    // 5                              |0                              
-    // 6                              |10                             
-    // 7                              |<div><p>HTML content</p></div> 
+    //                                |Types
+    // 1                              |Some text
+    // 2                              |true
+    // 3                              |9223372036854775807
+    // 4                              |1.7976931348623157E308
+    // 5                              |0
+    // 6                              |10
+    // 7                              |2024-01-01
+    // 8                              |14:34:12
+    // 9                              |2024-01-01T14:34:12
+    // 10                             |2024-01-01T14:34:12Z
+    // 11                             |<div><p>HTML content</p></div>
 }
 ```
 
-| Value type | Cell type      | Is numeric | Is text |
-|------------|----------------|------------|---------|
-| Unit       | UnitCell       | false      | false   |
-| Boolean    | BooleanCell    | false      | false   |
-| String     | StringCell     | false      | true    |
-| Long       | LongCell       | true       | false   |
-| Double     | DoubleCell     | true       | false   |
-| BigInteger | BigIntegerCell | true       | false   |
-| BigDecimal | BigDecimalCell | true       | false   |
-| WebContent | WebCell        | false      | false   |
+| Value type    | Cell type         | Is numeric | Is text | Is temporal |
+|---------------|-------------------|------------|---------|-------------|
+| Unit          | UnitCell          | false      | false   | false       |
+| Boolean       | BooleanCell       | false      | false   | false       |
+| String        | StringCell        | false      | true    | false       |
+| Long          | LongCell          | true       | false   | false       |
+| Double        | DoubleCell        | true       | false   | false       |
+| BigInteger    | BigIntegerCell    | true       | false   | false       |
+| BigDecimal    | BigDecimalCell    | true       | false   | false       |
+| LocalDate     | LocalDateCell     | false      | false   | true        |
+| LocalTime     | LocalTimeCell     | false      | false   | true        |
+| LocalDateTime | LocalDateTimeCell | false      | false   | true        |
+| ZonedDateTime | ZonedDateTimeCell | false      | false   | true        |
+| WebContent    | WebCell           | false      | false   | false       |
 
 Most of these should be fairly self-explanatory, and we'll cover `WebContent` and `WebCell` in more detail later.
-Support for more types is on the roadmap, but the above is what's supported in the latest release.
 
 You can clear a cell by assigning a `Unit` to it, returning it to a `UnitCell`, for example `table["A", 1] = Unit`, or
 you may use the `clear(cell)` function if you prefer.
@@ -200,7 +213,11 @@ table["Types", 3] = Long.MAX_VALUE
 table["Types", 4] = Double.MAX_VALUE
 table["Types", 5] = BigInteger.ZERO
 table["Types", 6] = BigDecimal.TEN
-table["Types", 7] = div { +"HTML content" }
+table["Types", 7] = LocalDate.of(2024, 1, 1)
+table["Types", 8] = LocalTime.of(14, 34, 12)
+table["Types", 9] = LocalDateTime.of(2024, 1, 1, 14, 34, 12)
+table["Types", 10] = ZonedDateTime.of(LocalDateTime.of(2024, 1, 1, 14, 34, 12), ZoneOffset.UTC)
+table["Types", 11] = div { p { +"HTML content" } }
 
 val unitCell = table["Types", 0]
 val stringCell = table["Types", 1]
@@ -209,12 +226,17 @@ val longCell = table["Types", 3]
 val doubleCell = table["Types", 4]
 val bigIntegerCell = table["Types", 5]
 val bigDecimalCell = table["Types", 6]
-val webCell = table["Types", 7]
+val localDateCell = table["Types", 7]
+val localTimeCell = table["Types", 8]
+val localDateTimeCell = table["Types", 9]
+val zonedDateTimeCell = table["Types", 10]
+val webCell = table["Types", 11]
 
 listOf(
     unitCell, stringCell, booleanCell, longCell,
     doubleCell, bigIntegerCell, bigDecimalCell,
-    webCell
+    localDateCell, localTimeCell, localDateTimeCell,
+    zonedDateTimeCell, webCell
 ).sorted().forEach {
     println("$it [${it::class}]")
 }
@@ -225,13 +247,17 @@ listOf(
 // 10 [class sigbla.app.BigDecimalCell]
 // 9223372036854775807 [class sigbla.app.LongCell]
 // 1.7976931348623157E308 [class sigbla.app.DoubleCell]
-// <div>HTML content</div> [class sigbla.app.WebCell]
+// 14:34:12 [class sigbla.app.LocalTimeCell]
+// 2024-01-01 [class sigbla.app.LocalDateCell]
+// 2024-01-01T14:34:12 [class sigbla.app.LocalDateTimeCell]
+// 2024-01-01T14:34:12Z [class sigbla.app.ZonedDateTimeCell]
+// <div><p>HTML content</p></div> [class sigbla.app.WebCell]
 // Some text [class sigbla.app.StringCell]
 // true [class sigbla.app.BooleanCell]
 ```
 
-It's not immediately obvious what's going on, other than obtaining a list of cells that have been sorted according to
-some rules, so let's lay out the rules:
+It might not be immediately obvious what's going on, other than obtaining a list of cells that have been sorted
+according to some rules, so let's lay out the rules:
 
 **Rule 1:** A unit cell is always the lowest ranking cell. Hence, it would come first when sorted.
 
@@ -365,9 +391,9 @@ It's worth noting that we could do `table["A", 1]("Second value")` above instead
 
 ## Utility functions and properties
 
-We covered some utility properties already, specifically `isNumber` and `isText`, and also how you can compare cells to
-other cells or values. These are helpful when for example iterating or running some conditional logic on them.
-We've seen examples in earlier chapters using `isNumeric` for this.
+We covered some utility properties already, specifically `isNumber`, `isText`, and `isTemporal`, and also how you can
+compare cells to other cells or values. These are helpful when for example iterating or running some conditional logic
+on them. We've seen examples in earlier chapters using `isNumeric` for this.
 
 But there are others as well, such as `asLong`, `asDouble`, and similar:
 
@@ -383,6 +409,10 @@ val d: BigDecimal? = table["A", 1].asBigDecimal
 val e: Number? = table["A", 1].asNumber
 val f: Boolean? = table["A", 1].asBoolean
 val g: String? = table["A", 1].asString
+val h: LocalDate? = table["A", 1].asLocalDate
+val i: LocalTime? = table["A", 1].asLocalTime
+val j: LocalDateTime? = table["A", 1].asLocalDateTime
+val k: ZonedDateTime? = table["A", 1].asZonedDateTime
 
 println("$a ${a?.let {it::class} ?: ""}")
 println("$b ${b?.let {it::class} ?: ""}")
@@ -391,6 +421,10 @@ println("$d ${d?.let {it::class} ?: ""}")
 println("$e ${e?.let {it::class} ?: ""}")
 println("$f ${f?.let {it::class} ?: ""}")
 println("$g ${g?.let {it::class} ?: ""}")
+println("$h ${h?.let {it::class} ?: ""}")
+println("$i ${i?.let {it::class} ?: ""}")
+println("$j ${j?.let {it::class} ?: ""}")
+println("$k ${k?.let {it::class} ?: ""}")
 
 // Output:
 // 100 class kotlin.Long
@@ -398,6 +432,10 @@ println("$g ${g?.let {it::class} ?: ""}")
 // 100 class java.math.BigInteger
 // 100 class java.math.BigDecimal
 // 100 class kotlin.Long
+// null 
+// null 
+// null 
+// null 
 // null 
 // null 
 ```
@@ -418,6 +456,10 @@ val d: BigDecimal? = table["A", 1].asBigDecimal
 val e: Number? = table["A", 1].asNumber
 val f: Boolean? = table["A", 1].asBoolean
 val g: String? = table["A", 1].asString
+val h: LocalDate? = table["A", 1].asLocalDate
+val i: LocalTime? = table["A", 1].asLocalTime
+val j: LocalDateTime? = table["A", 1].asLocalDateTime
+val k: ZonedDateTime? = table["A", 1].asZonedDateTime
 
 println("$a ${a?.let {it::class} ?: ""}")
 println("$b ${b?.let {it::class} ?: ""}")
@@ -426,6 +468,10 @@ println("$d ${d?.let {it::class} ?: ""}")
 println("$e ${e?.let {it::class} ?: ""}")
 println("$f ${f?.let {it::class} ?: ""}")
 println("$g ${g?.let {it::class} ?: ""}")
+println("$h ${h?.let {it::class} ?: ""}")
+println("$i ${i?.let {it::class} ?: ""}")
+println("$j ${j?.let {it::class} ?: ""}")
+println("$k ${k?.let {it::class} ?: ""}")
 
 // Output:
 // null 
@@ -435,6 +481,10 @@ println("$g ${g?.let {it::class} ?: ""}")
 // null 
 // null 
 // not a number class kotlin.String
+// null 
+// null 
+// null 
+// null 
 ```
 
 Note that these don't try to convert a string to numbers. Even if we assigned "100", doing `asLong` would still return
@@ -450,6 +500,51 @@ val table = Table[null]
 table["A", 1] = 1000
 
 val value: BigDecimal? = table["A", 1].asBigDecimal(MathContext.DECIMAL32)
+```
+
+Finally, a temporal example:
+
+``` kotlin
+val table = Table[null]
+
+table["A", 1] = ZonedDateTime.of(LocalDateTime.of(2024, 1, 1, 14, 34, 12), ZoneOffset.UTC)
+
+val a: Long? = table["A", 1].asLong
+val b: Double? = table["A", 1].asDouble
+val c: BigInteger? = table["A", 1].asBigInteger
+val d: BigDecimal? = table["A", 1].asBigDecimal
+val e: Number? = table["A", 1].asNumber
+val f: Boolean? = table["A", 1].asBoolean
+val g: String? = table["A", 1].asString
+val h: LocalDate? = table["A", 1].asLocalDate
+val i: LocalTime? = table["A", 1].asLocalTime
+val j: LocalDateTime? = table["A", 1].asLocalDateTime
+val k: ZonedDateTime? = table["A", 1].asZonedDateTime
+
+println("$a ${a?.let {it::class} ?: ""}")
+println("$b ${b?.let {it::class} ?: ""}")
+println("$c ${c?.let {it::class} ?: ""}")
+println("$d ${d?.let {it::class} ?: ""}")
+println("$e ${e?.let {it::class} ?: ""}")
+println("$f ${f?.let {it::class} ?: ""}")
+println("$g ${g?.let {it::class} ?: ""}")
+println("$h ${h?.let {it::class} ?: ""}")
+println("$i ${i?.let {it::class} ?: ""}")
+println("$j ${j?.let {it::class} ?: ""}")
+println("$k ${k?.let {it::class} ?: ""}")
+
+// Output:
+// null 
+// null 
+// null 
+// null 
+// null 
+// null 
+// null 
+// 2024-01-01 class java.time.LocalDate
+// 14:34:12 class java.time.LocalTime
+// 2024-01-01T14:34:12 class java.time.LocalDateTime
+// 2024-01-01T14:34:12Z class java.time.ZonedDateTime
 ```
 
 ## Web content
