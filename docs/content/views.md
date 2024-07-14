@@ -238,6 +238,35 @@ as the `CellClasses` apply to the cell container itself, not its content.
 
 We'll also get back to the generics used on `CellClasses` and `CellTopics` in the chapter on view subscriptions.
 
+Finally, it's worth noting that `DerivedColumnView` and `DerivedRowView` also exist, serving a comparable role but for
+columns and rows:
+
+``` kotlin
+val derivedColumnView = TableView[null]["A"].derived
+
+val cellWidth: Long = derivedColumnView.cellWidth
+val columnView: ColumnView = derivedColumnView.columnView
+val header: Header = derivedColumnView.header
+val tableView: TableView = derivedColumnView.tableView
+val cellClasses: CellClasses<DerivedColumnView> = derivedColumnView.cellClasses
+val cellTopics: CellTopics<DerivedColumnView> = derivedColumnView.cellTopics
+val position: Position<DerivedColumnView, *> = derivedColumnView.position
+val visibility: Visibility<DerivedColumnView, *> = derivedColumnView.visibility
+```
+
+``` kotlin
+val derivedRowView = TableView[null][1].derived
+
+val cellHeight: Long = derivedRowView.cellHeight
+val index: Long = derivedRowView.index
+val tableView: TableView = derivedRowView.tableView
+val rowView: RowView = derivedRowView.rowView
+val cellClasses: CellClasses<DerivedRowView> = derivedRowView.cellClasses
+val cellTopics: CellTopics<DerivedRowView> = derivedRowView.cellTopics
+val position: Position<DerivedRowView, *> = derivedRowView.position
+val visibility: Visibility<DerivedRowView, *> = derivedRowView.visibility
+```
+
 ## Iterating over derived cell views
 
 On `TableView`, `ColumnView`, `RowView`, `CellView` and so on, you're able to create iterators that give you all the derived cell
