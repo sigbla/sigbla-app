@@ -8,6 +8,11 @@ import sigbla.app.exceptions.InvalidRowException
 import sigbla.app.pds.collection.TreeMap as PTreeMap
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZonedDateTime
+import java.time.temporal.Temporal
 import java.util.*
 import kotlin.math.absoluteValue
 import kotlin.math.max
@@ -267,6 +272,14 @@ class Column internal constructor(
         }
     }
 
+    operator fun set(index: Long, value: LocalDate?) = if (value == null) clear(index) else set(index, value.toCell(this, index))
+
+    operator fun set(index: Long, value: LocalTime?) = if (value == null) clear(index) else set(index, value.toCell(this, index))
+
+    operator fun set(index: Long, value: LocalDateTime?) = if (value == null) clear(index) else set(index, value.toCell(this, index))
+
+    operator fun set(index: Long, value: ZonedDateTime?) = if (value == null) clear(index) else set(index, value.toCell(this, index))
+
     operator fun set(index: Long, value: Unit?) = if (value == null) clear(index) else set(index, value.toCell(this, index))
 
     operator fun set(index: Long, init: Cell<*>.() -> Unit) = this[index].init()
@@ -288,6 +301,14 @@ class Column internal constructor(
     operator fun set(index: Int, value: BigDecimal?) = set(index.toLong(), value)
 
     operator fun set(index: Int, value: Number?) = set(index.toLong(), value)
+
+    operator fun set(index: Int, value: LocalDate?) = set(index.toLong(), value)
+
+    operator fun set(index: Int, value: LocalTime?) = set(index.toLong(), value)
+
+    operator fun set(index: Int, value: LocalDateTime?) = set(index.toLong(), value)
+
+    operator fun set(index: Int, value: ZonedDateTime?) = set(index.toLong(), value)
 
     operator fun set(index: Int, value: Unit?) = set(index.toLong(), value)
 
@@ -335,6 +356,26 @@ class Column internal constructor(
         set(row.index, value)
     }
 
+    operator fun set(row: Row, value: LocalDate?) {
+        if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        set(row.index, value)
+    }
+
+    operator fun set(row: Row, value: LocalTime?) {
+        if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        set(row.index, value)
+    }
+
+    operator fun set(row: Row, value: LocalDateTime?) {
+        if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        set(row.index, value)
+    }
+
+    operator fun set(row: Row, value: ZonedDateTime?) {
+        if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        set(row.index, value)
+    }
+
     operator fun set(row: Row, value: Unit?) {
         if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
         set(row.index, value)
@@ -356,6 +397,7 @@ class Column internal constructor(
     }
 
     operator fun contains(that: Number): Boolean = any { that in it }
+    operator fun contains(that: Temporal): Boolean = any { that in it }
     operator fun contains(that: Boolean): Boolean = any { that in it }
     operator fun contains(that: String): Boolean = any { that in it }
     operator fun contains(that: Cell<*>): Boolean = any { that in it }
@@ -439,6 +481,7 @@ class ColumnRange internal constructor(override val start: Column, override val 
     }
 
     operator fun contains(that: Number): Boolean = any { that in it }
+    operator fun contains(that: Temporal): Boolean = any { that in it }
     operator fun contains(that: Boolean): Boolean = any { that in it }
     operator fun contains(that: String): Boolean = any { that in it }
 

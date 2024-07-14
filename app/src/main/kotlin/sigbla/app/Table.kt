@@ -13,6 +13,11 @@ import sigbla.app.pds.collection.SortedMap as PSortedMap
 import sigbla.app.pds.collection.TreeMap as PTreeMap
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZonedDateTime
+import java.time.temporal.Temporal
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 
@@ -192,6 +197,22 @@ class Table internal constructor(
         this[column][index] = value
     }
 
+    operator fun set(column: Column, index: Long, value: LocalDate?) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Long, value: LocalTime?) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Long, value: LocalDateTime?) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Long, value: ZonedDateTime?) {
+        this[column][index] = value
+    }
+
     operator fun set(column: Column, index: Long, value: Unit?) {
         this[column][index] = value
     }
@@ -229,6 +250,22 @@ class Table internal constructor(
     }
 
     operator fun set(column: Column, index: Int, value: Number?) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Int, value: LocalDate?) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Int, value: LocalTime?) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Int, value: LocalDateTime?) {
+        this[column][index] = value
+    }
+
+    operator fun set(column: Column, index: Int, value: ZonedDateTime?) {
         this[column][index] = value
     }
 
@@ -272,6 +309,22 @@ class Table internal constructor(
         this[header][index] = value
     }
 
+    operator fun set(header: Header, index: Long, value: LocalDate?) {
+        this[header][index] = value
+    }
+
+    operator fun set(header: Header, index: Long, value: LocalTime?) {
+        this[header][index] = value
+    }
+
+    operator fun set(header: Header, index: Long, value: LocalDateTime?) {
+        this[header][index] = value
+    }
+
+    operator fun set(header: Header, index: Long, value: ZonedDateTime?) {
+        this[header][index] = value
+    }
+
     operator fun set(header: Header, index: Long, value: Unit?) {
         this[header][index] = value
     }
@@ -309,6 +362,22 @@ class Table internal constructor(
     }
 
     operator fun set(header: Header, index: Int, value: Number?) {
+        this[header][index] = value
+    }
+
+    operator fun set(header: Header, index: Int, value: LocalDate?) {
+        this[header][index] = value
+    }
+
+    operator fun set(header: Header, index: Int, value: LocalTime?) {
+        this[header][index] = value
+    }
+
+    operator fun set(header: Header, index: Int, value: LocalDateTime?) {
+        this[header][index] = value
+    }
+
+    operator fun set(header: Header, index: Int, value: ZonedDateTime?) {
         this[header][index] = value
     }
 
@@ -352,6 +421,22 @@ class Table internal constructor(
         this[column][row] = value
     }
 
+    operator fun set(column: Column, row: Row, value: LocalDate?) {
+        this[column][row] = value
+    }
+
+    operator fun set(column: Column, row: Row, value: LocalTime?) {
+        this[column][row] = value
+    }
+
+    operator fun set(column: Column, row: Row, value: LocalDateTime?) {
+        this[column][row] = value
+    }
+
+    operator fun set(column: Column, row: Row, value: ZonedDateTime?) {
+        this[column][row] = value
+    }
+
     operator fun set(column: Column, row: Row, value: Unit?) {
         this[column][row] = value
     }
@@ -392,6 +477,22 @@ class Table internal constructor(
         this[header][row] = value
     }
 
+    operator fun set(header: Header, row: Row, value: LocalDate?) {
+        this[header][row] = value
+    }
+
+    operator fun set(header: Header, row: Row, value: LocalTime?) {
+        this[header][row] = value
+    }
+
+    operator fun set(header: Header, row: Row, value: LocalDateTime?) {
+        this[header][row] = value
+    }
+
+    operator fun set(header: Header, row: Row, value: ZonedDateTime?) {
+        this[header][row] = value
+    }
+
     operator fun set(header: Header, row: Row, value: Unit?) {
         this[header][row] = value
     }
@@ -429,6 +530,22 @@ class Table internal constructor(
     }
 
     operator fun set(cell: Cell<*>, value: Number?) {
+        this[cell.column][cell.index] = value
+    }
+
+    operator fun set(cell: Cell<*>, value: LocalDate?) {
+        this[cell.column][cell.index] = value
+    }
+
+    operator fun set(cell: Cell<*>, value: LocalTime?) {
+        this[cell.column][cell.index] = value
+    }
+
+    operator fun set(cell: Cell<*>, value: LocalDateTime?) {
+        this[cell.column][cell.index] = value
+    }
+
+    operator fun set(cell: Cell<*>, value: ZonedDateTime?) {
         this[cell.column][cell.index] = value
     }
 
@@ -652,6 +769,94 @@ class Table internal constructor(
 
     // -----
 
+    operator fun set(header1: String, index: Long, value: LocalDate?) {
+        this[header1][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, index: Long, value: LocalDate?) {
+        this[header1, header2][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Long, value: LocalDate?) {
+        this[header1, header2, header3][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, value: LocalDate?) {
+        this[header1, header2, header3, header4][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, value: LocalDate?) {
+        this[header1, header2, header3, header4, header5][index] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, index: Long, value: LocalTime?) {
+        this[header1][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, index: Long, value: LocalTime?) {
+        this[header1, header2][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Long, value: LocalTime?) {
+        this[header1, header2, header3][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, value: LocalTime?) {
+        this[header1, header2, header3, header4][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, value: LocalTime?) {
+        this[header1, header2, header3, header4, header5][index] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, index: Long, value: LocalDateTime?) {
+        this[header1][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, index: Long, value: LocalDateTime?) {
+        this[header1, header2][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Long, value: LocalDateTime?) {
+        this[header1, header2, header3][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, value: LocalDateTime?) {
+        this[header1, header2, header3, header4][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, value: LocalDateTime?) {
+        this[header1, header2, header3, header4, header5][index] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, index: Long, value: ZonedDateTime?) {
+        this[header1][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, index: Long, value: ZonedDateTime?) {
+        this[header1, header2][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Long, value: ZonedDateTime?) {
+        this[header1, header2, header3][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Long, value: ZonedDateTime?) {
+        this[header1, header2, header3, header4][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Long, value: ZonedDateTime?) {
+        this[header1, header2, header3, header4, header5][index] = value
+    }
+
+    // -----
+
     operator fun set(header1: String, index: Long, value: Unit?) {
         this[header1][index] = value
     }
@@ -845,6 +1050,94 @@ class Table internal constructor(
     }
 
     operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, value: Number?) {
+        this[header1, header2, header3, header4, header5][index] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, index: Int, value: LocalDate?) {
+        this[header1][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, index: Int, value: LocalDate?) {
+        this[header1, header2][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Int, value: LocalDate?) {
+        this[header1, header2, header3][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, value: LocalDate?) {
+        this[header1, header2, header3, header4][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, value: LocalDate?) {
+        this[header1, header2, header3, header4, header5][index] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, index: Int, value: LocalTime?) {
+        this[header1][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, index: Int, value: LocalTime?) {
+        this[header1, header2][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Int, value: LocalTime?) {
+        this[header1, header2, header3][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, value: LocalTime?) {
+        this[header1, header2, header3, header4][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, value: LocalTime?) {
+        this[header1, header2, header3, header4, header5][index] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, index: Int, value: LocalDateTime?) {
+        this[header1][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, index: Int, value: LocalDateTime?) {
+        this[header1, header2][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Int, value: LocalDateTime?) {
+        this[header1, header2, header3][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, value: LocalDateTime?) {
+        this[header1, header2, header3, header4][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, value: LocalDateTime?) {
+        this[header1, header2, header3, header4, header5][index] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, index: Int, value: ZonedDateTime?) {
+        this[header1][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, index: Int, value: ZonedDateTime?) {
+        this[header1, header2][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, index: Int, value: ZonedDateTime?) {
+        this[header1, header2, header3][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, index: Int, value: ZonedDateTime?) {
+        this[header1, header2, header3, header4][index] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, index: Int, value: ZonedDateTime?) {
         this[header1, header2, header3, header4, header5][index] = value
     }
 
@@ -1048,6 +1341,94 @@ class Table internal constructor(
 
     // -----
 
+    operator fun set(header1: String, row: Row, value: LocalDate?) {
+        this[header1][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, row: Row, value: LocalDate?) {
+        this[header1, header2][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, row: Row, value: LocalDate?) {
+        this[header1, header2, header3][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, value: LocalDate?) {
+        this[header1, header2, header3, header4][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, value: LocalDate?) {
+        this[header1, header2, header3, header4, header5][row] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, row: Row, value: LocalTime?) {
+        this[header1][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, row: Row, value: LocalTime?) {
+        this[header1, header2][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, row: Row, value: LocalTime?) {
+        this[header1, header2, header3][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, value: LocalTime?) {
+        this[header1, header2, header3, header4][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, value: LocalTime?) {
+        this[header1, header2, header3, header4, header5][row] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, row: Row, value: LocalDateTime?) {
+        this[header1][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, row: Row, value: LocalDateTime?) {
+        this[header1, header2][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, row: Row, value: LocalDateTime?) {
+        this[header1, header2, header3][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, value: LocalDateTime?) {
+        this[header1, header2, header3, header4][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, value: LocalDateTime?) {
+        this[header1, header2, header3, header4, header5][row] = value
+    }
+
+    // -----
+
+    operator fun set(header1: String, row: Row, value: ZonedDateTime?) {
+        this[header1][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, row: Row, value: ZonedDateTime?) {
+        this[header1, header2][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, row: Row, value: ZonedDateTime?) {
+        this[header1, header2, header3][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, row: Row, value: ZonedDateTime?) {
+        this[header1, header2, header3, header4][row] = value
+    }
+
+    operator fun set(header1: String, header2: String, header3: String, header4: String, header5: String, row: Row, value: ZonedDateTime?) {
+        this[header1, header2, header3, header4, header5][row] = value
+    }
+
+    // -----
+
     operator fun set(header1: String, row: Row, value: Unit?) {
         this[header1][row] = value
     }
@@ -1097,6 +1478,7 @@ class Table internal constructor(
     operator fun contains(column: Column): Boolean = contains(column.header)
 
     operator fun contains(that: Number): Boolean = any { that in it }
+    operator fun contains(that: Temporal): Boolean = any { that in it }
     operator fun contains(that: Boolean): Boolean = any { that in it }
     operator fun contains(that: String): Boolean = any { that in it }
     operator fun contains(that: Cell<*>): Boolean = any { that in it }

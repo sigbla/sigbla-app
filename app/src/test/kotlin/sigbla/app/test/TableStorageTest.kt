@@ -15,6 +15,7 @@ import java.util.concurrent.ThreadLocalRandom
 import kotlin.io.path.*
 import org.junit.Assert.*
 import sigbla.app.exceptions.InvalidStorageException
+import java.time.*
 import java.util.*
 
 class TableStorageTest {
@@ -414,7 +415,7 @@ class TableStorageTest {
                     }
 
                     for (r in range) {
-                        val type = ThreadLocalRandom.current().nextInt(0, 8)
+                        val type = ThreadLocalRandom.current().nextInt(0, 12)
                         when (type) {
                             0 -> { /* skip */ }
                             1 -> column[r] = ThreadLocalRandom.current().nextLong().toString() + " " + ThreadLocalRandom.current().nextBoolean()
@@ -423,7 +424,19 @@ class TableStorageTest {
                             4 -> column[r] = BigInteger.valueOf(ThreadLocalRandom.current().nextLong()).multiply(BigInteger.valueOf(ThreadLocalRandom.current().nextLong()))
                             5 -> column[r] = BigDecimal.valueOf(ThreadLocalRandom.current().nextDouble()).multiply(BigDecimal.valueOf(ThreadLocalRandom.current().nextDouble()))
                             6 -> column[r] = ThreadLocalRandom.current().nextBoolean()
-                            7 -> column[r] = if (ThreadLocalRandom.current().nextBoolean()) div {
+                            7 -> column[r] = LocalDate.of(ThreadLocalRandom.current().nextInt(-999999999, 1_000_000_000), ThreadLocalRandom.current().nextInt(1, 12), ThreadLocalRandom.current().nextInt(1, 28))
+                            8 -> column[r] = LocalTime.of(ThreadLocalRandom.current().nextInt(0, 24), ThreadLocalRandom.current().nextInt(0, 60), ThreadLocalRandom.current().nextInt(0, 60), ThreadLocalRandom.current().nextInt(0, 1_000_000_000))
+                            9 -> column[r] = {
+                                val localDate = LocalDate.of(ThreadLocalRandom.current().nextInt(-999999999, 1_000_000_000), ThreadLocalRandom.current().nextInt(1, 12), ThreadLocalRandom.current().nextInt(1, 28))
+                                val localTime = LocalTime.of(ThreadLocalRandom.current().nextInt(0, 24), ThreadLocalRandom.current().nextInt(0, 60), ThreadLocalRandom.current().nextInt(0, 60), ThreadLocalRandom.current().nextInt(0, 1_000_000_000))
+                                this(LocalDateTime.of(localDate, localTime))
+                            }
+                            10 -> column[r] = {
+                                val localDate = LocalDate.of(ThreadLocalRandom.current().nextInt(-999999999, 1_000_000_000), ThreadLocalRandom.current().nextInt(1, 12), ThreadLocalRandom.current().nextInt(1, 28))
+                                val localTime = LocalTime.of(ThreadLocalRandom.current().nextInt(0, 24), ThreadLocalRandom.current().nextInt(0, 60), ThreadLocalRandom.current().nextInt(0, 60), ThreadLocalRandom.current().nextInt(0, 1_000_000_000))
+                                this(ZonedDateTime.of(localDate, localTime, ZoneId.of(ZoneId.getAvailableZoneIds().shuffled().first())))
+                            }
+                            11 -> column[r] = if (ThreadLocalRandom.current().nextBoolean()) div {
                                 val text = ThreadLocalRandom.current().nextLong().toString() + " " + ThreadLocalRandom.current().nextBoolean()
                                 +text
                             } else div(classes = "with-class") {

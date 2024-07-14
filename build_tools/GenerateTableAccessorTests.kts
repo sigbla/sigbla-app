@@ -21,7 +21,7 @@
 // table[index relation, int|long][header|column]
 
 // Values:
-// Cell, Unit, Boolean, String, Int, Long, Float, Double, BigInteger, BigDecimal, Number
+// Cell, Unit, Boolean, String, Int, Long, Float, Double, BigInteger, BigDecimal, Number, LocalDate, LocalTime, LocalDateTime, ZonedDateTime
 
 fun generateForX(type: String, cellGenerator: String, cellValue: String = "cell") {
     println("@Test")
@@ -593,6 +593,26 @@ fun generateForNumber() {
     generateForX("null number", "val cell: Number? = null", "Unit")
 }
 
+fun generateForLocalDate() {
+    generateForX("localdate", "val cell = LocalDate.now()")
+    generateForX("null localdate", "val cell: LocalDate? = null", "Unit")
+}
+
+fun generateForLocalTime() {
+    generateForX("localtime", "val cell = LocalTime.now()")
+    generateForX("null localtime", "val cell: LocalTime? = null", "Unit")
+}
+
+fun generateForLocalDateTime() {
+    generateForX("localdatetime", "val cell = LocalDateTime.now()")
+    generateForX("null localdatetime", "val cell: LocalDateTime? = null", "Unit")
+}
+
+fun generateForZonedDateTime() {
+    generateForX("zoneddatetime", "val cell = ZonedDateTime.now()")
+    generateForX("null zoneddatetime", "val cell: ZonedDateTime? = null", "Unit")
+}
+
 fun generateForBool() {
     generateForX("boolean", "val cell = true")
     generateForX("null boolean", "val cell: Boolean? = null", "Unit")
@@ -612,5 +632,9 @@ generateForDouble()
 generateForBigInteger()
 generateForBigDecimal()
 generateForNumber()
+generateForLocalDate()
+generateForLocalTime()
+generateForLocalDateTime()
+generateForZonedDateTime()
 generateForBool()
 generateForUnit()

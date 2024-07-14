@@ -6,6 +6,11 @@ import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.exceptions.InvalidRowException
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZonedDateTime
+import java.time.temporal.Temporal
 import kotlin.math.min
 import kotlin.math.max
 
@@ -32,6 +37,10 @@ class Row internal constructor(val table: Table, val indexRelation: IndexRelatio
     operator fun set(header: Header, value: BigInteger?) = table[header].set(this, value)
     operator fun set(header: Header, value: BigDecimal?) = table[header].set(this, value)
     operator fun set(header: Header, value: Number?) = table[header].set(this, value)
+    operator fun set(header: Header, value: LocalDate?) = table[header].set(this, value)
+    operator fun set(header: Header, value: LocalTime?) = table[header].set(this, value)
+    operator fun set(header: Header, value: LocalDateTime?) = table[header].set(this, value)
+    operator fun set(header: Header, value: ZonedDateTime?) = table[header].set(this, value)
     operator fun set(header: Header, value: Unit?) = table[header].set(this, value)
     operator fun set(header: Header, init: Cell<*>.() -> Unit) = table[header][this].init()
 
@@ -45,6 +54,10 @@ class Row internal constructor(val table: Table, val indexRelation: IndexRelatio
     operator fun set(column: Column, value: BigInteger?) = table[column].set(this, value)
     operator fun set(column: Column, value: BigDecimal?) = table[column].set(this, value)
     operator fun set(column: Column, value: Number?) = table[column].set(this, value)
+    operator fun set(column: Column, value: LocalDate?) = table[column].set(this, value)
+    operator fun set(column: Column, value: LocalTime?) = table[column].set(this, value)
+    operator fun set(column: Column, value: LocalDateTime?) = table[column].set(this, value)
+    operator fun set(column: Column, value: ZonedDateTime?) = table[column].set(this, value)
     operator fun set(column: Column, value: Unit?) = table[column].set(this, value)
     operator fun set(column: Column, init: Cell<*>.() -> Unit) = table[column][this].init()
 
@@ -58,6 +71,10 @@ class Row internal constructor(val table: Table, val indexRelation: IndexRelatio
     operator fun set(vararg header: String, value: BigInteger?) = table[Header(*header)].set(this, value)
     operator fun set(vararg header: String, value: BigDecimal?) = table[Header(*header)].set(this, value)
     operator fun set(vararg header: String, value: Number?) = table[Header(*header)].set(this, value)
+    operator fun set(vararg header: String, value: LocalDate?) = table[Header(*header)].set(this, value)
+    operator fun set(vararg header: String, value: LocalTime?) = table[Header(*header)].set(this, value)
+    operator fun set(vararg header: String, value: LocalDateTime?) = table[Header(*header)].set(this, value)
+    operator fun set(vararg header: String, value: ZonedDateTime?) = table[Header(*header)].set(this, value)
     operator fun set(vararg header: String, value: Unit?) = table[Header(*header)].set(this, value)
     operator fun set(vararg header: String, init: Cell<*>.() -> Unit) = table[Header(*header)][this].init()
 
@@ -66,6 +83,7 @@ class Row internal constructor(val table: Table, val indexRelation: IndexRelatio
     }
 
     operator fun contains(that: Number): Boolean = any { that in it }
+    operator fun contains(that: Temporal): Boolean = any { that in it }
     operator fun contains(that: Boolean): Boolean = any { that in it }
     operator fun contains(that: String): Boolean = any { that in it }
     operator fun contains(that: Cell<*>): Boolean = any { that in it }
@@ -166,6 +184,7 @@ class RowRange internal constructor(override val start: Row, override val endInc
     }
 
     operator fun contains(that: Number): Boolean = any { that in it }
+    operator fun contains(that: Temporal): Boolean = any { that in it }
     operator fun contains(that: Boolean): Boolean = any { that in it }
     operator fun contains(that: String): Boolean = any { that in it }
 
