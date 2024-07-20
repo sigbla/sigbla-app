@@ -437,6 +437,45 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
         return newValue
     }
 
+    operator fun plusAssign(value: Cell<*>): Unit {
+        this.table[this] = this + value
+    }
+    operator fun minusAssign(value: Cell<*>): Unit {
+        this.table[this] = this - value
+    }
+    operator fun timesAssign(value: Cell<*>): Unit {
+        this.table[this] = this * value
+    }
+    operator fun divAssign(value: Cell<*>): Unit {
+        this.table[this] = this / value
+    }
+    operator fun remAssign(value: Cell<*>): Unit {
+        this.table[this] = this % value
+    }
+
+    operator fun plusAssign(value: Number): Unit {
+        this.table[this] = this + value
+    }
+    operator fun minusAssign(value: Number): Unit {
+        this.table[this] = this - value
+    }
+    operator fun timesAssign(value: Number): Unit {
+        this.table[this] = this * value
+    }
+    operator fun divAssign(value: Number): Unit {
+        this.table[this] = this / value
+    }
+    operator fun remAssign(value: Number): Unit {
+        this.table[this] = this % value
+    }
+
+    operator fun plusAssign(value: TemporalAmount): Unit {
+        this.table[this] = this + value
+    }
+    operator fun minusAssign(value: TemporalAmount): Unit {
+        this.table[this] = this - value
+    }
+
     override fun iterator(): Iterator<Cell<*>> = iterator(table, table.tableRef.get())
 
     internal fun iterator(table: Table, ref: TableRef): Iterator<Cell<*>> {

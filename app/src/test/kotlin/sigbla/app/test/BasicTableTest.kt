@@ -1470,6 +1470,96 @@ class BasicTableTest {
         assertEquals(10L, valueOf<Any>(t["A", 1]))
     }
 
+    @Test
+    fun `augmented number assignments`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val plus1 = t["+=", 0].also { it(100) }
+        val minus1 = t["-=", 0].also { it(100) }
+        val times1 = t["*=", 0].also { it(100) }
+        val div1 = t["/=", 0].also { it(100) }
+        val rem1 = t["%=", 0].also { it(100) }
+
+        assertFailsWith<InvalidCellException> { plus1 += 100 }
+        assertFailsWith<InvalidCellException> { minus1 -= 100 }
+        assertFailsWith<InvalidCellException> { times1 *= 100 }
+        assertFailsWith<InvalidCellException> { div1 /= 100 }
+        assertFailsWith<InvalidCellException> { rem1 %= 100 }
+
+        val plus2 = t["+=", 0]
+        val minus2 = t["-=", 0]
+        val times2 = t["*=", 0]
+        val div2 = t["/=", 0]
+        val rem2 = t["%=", 0]
+
+        plus2 += 100
+        minus2 -= 100
+        times2 *= 100
+        div2 /= 100
+        rem2 %= 100
+
+        assertEquals(200L, t["+=", 0].value)
+        assertEquals(0L, t["-=", 0].value)
+        assertEquals(10000L, t["*=", 0].value)
+        assertEquals(1L, t["/=", 0].value)
+        assertEquals(0L, t["%=", 0].value)
+    }
+
+    @Test
+    fun `augmented cell assignments`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val plus1 = t["+=", 0].also { it(100) }
+        val minus1 = t["-=", 0].also { it(100) }
+        val times1 = t["*=", 0].also { it(100) }
+        val div1 = t["/=", 0].also { it(100) }
+        val rem1 = t["%=", 0].also { it(100) }
+
+        assertFailsWith<InvalidCellException> { plus1 += t["+=", 0] }
+        assertFailsWith<InvalidCellException> { minus1 -= t["-=", 0] }
+        assertFailsWith<InvalidCellException> { times1 *= t["*=", 0] }
+        assertFailsWith<InvalidCellException> { div1 /= t["/=", 0] }
+        assertFailsWith<InvalidCellException> { rem1 %= t["%=", 0] }
+
+        val plus2 = t["+=", 0]
+        val minus2 = t["-=", 0]
+        val times2 = t["*=", 0]
+        val div2 = t["/=", 0]
+        val rem2 = t["%=", 0]
+
+        plus2 += t["+=", 0]
+        minus2 -= t["-=", 0]
+        times2 *= t["*=", 0]
+        div2 /= t["/=", 0]
+        rem2 %= t["%=", 0]
+
+        assertEquals(200L, t["+=", 0].value)
+        assertEquals(0L, t["-=", 0].value)
+        assertEquals(10000L, t["*=", 0].value)
+        assertEquals(1L, t["/=", 0].value)
+        assertEquals(0L, t["%=", 0].value)
+    }
+
+    @Test
+    fun `augmented temporal assignments`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        val plus1 = t["+=", 0].also { it(LocalDate.of(2000, 1, 1)) }
+        val minus1 = t["-=", 0].also { it(LocalDate.of(2000, 1, 1)) }
+
+        assertFailsWith<InvalidCellException> { plus1 += Period.ofDays(1) }
+        assertFailsWith<InvalidCellException> { minus1 -= Period.ofDays(1) }
+
+        val plus2 = t["+=", 0]
+        val minus2 = t["-=", 0]
+
+        plus2 += Period.ofDays(1)
+        minus2 -= Period.ofDays(1)
+
+        assertEquals(LocalDate.of(2000, 1, 2), t["+=", 0].value)
+        assertEquals(LocalDate.of(1999, 12, 31), t["-=", 0].value)
+    }
+
     companion object {
         @JvmStatic
         @AfterClass
