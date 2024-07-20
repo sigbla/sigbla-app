@@ -19,6 +19,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.time.temporal.Temporal
+import java.time.temporal.TemporalAmount
 import java.util.*
 import kotlin.math.min
 import kotlin.math.max
@@ -212,6 +213,8 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     open operator fun plus(that: BigInteger): Number = throw InvalidCellException("Cell not numeric at $column:$index")
     open operator fun plus(that: BigDecimal): Number = throw InvalidCellException("Cell not numeric at $column:$index")
 
+    open operator fun plus(that: TemporalAmount): Temporal = throw InvalidCellException("Cell not temporal at $column:$index")
+
     operator fun minus(that: Cell<*>): Number {
         return when (val v = that.value) {
             is Long -> minus(v)
@@ -240,6 +243,8 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
     open operator fun minus(that: Double): Number = throw InvalidCellException("Cell not numeric at $column:$index")
     open operator fun minus(that: BigInteger): Number = throw InvalidCellException("Cell not numeric at $column:$index")
     open operator fun minus(that: BigDecimal): Number = throw InvalidCellException("Cell not numeric at $column:$index")
+
+    open operator fun minus(that: TemporalAmount): Temporal = throw InvalidCellException("Cell not temporal at $column:$index")
 
     operator fun times(that: Cell<*>): Number {
         return when (val v = that.value) {
@@ -775,11 +780,17 @@ class BigDecimalCell internal constructor(column: Column, index: Long, override 
 class LocalDateCell internal constructor(column: Column, index: Long, override val value: LocalDate) : Cell<LocalDate>(column, index) {
     override val isTemporal = true
     override val asLocalDate: LocalDate = value
+
+    override fun plus(that: TemporalAmount): LocalDate = this.value + that
+    override fun minus(that: TemporalAmount): LocalDate = this.value - that
 }
 
 class LocalTimeCell internal constructor(column: Column, index: Long, override val value: LocalTime) : Cell<LocalTime>(column, index) {
     override val isTemporal = true
     override val asLocalTime: LocalTime = value
+
+    override fun plus(that: TemporalAmount): LocalTime = this.value + that
+    override fun minus(that: TemporalAmount): LocalTime = this.value - that
 }
 
 class LocalDateTimeCell internal constructor(column: Column, index: Long, override val value: LocalDateTime) : Cell<LocalDateTime>(column, index) {
@@ -787,6 +798,9 @@ class LocalDateTimeCell internal constructor(column: Column, index: Long, overri
     override val asLocalDateTime: LocalDateTime = value
     override val asLocalDate: LocalDate by lazy { value.toLocalDate() }
     override val asLocalTime: LocalTime by lazy { value.toLocalTime() }
+
+    override fun plus(that: TemporalAmount): LocalDateTime = this.value + that
+    override fun minus(that: TemporalAmount): LocalDateTime = this.value - that
 }
 
 class ZonedDateTimeCell internal constructor(column: Column, index: Long, override val value: ZonedDateTime) : Cell<ZonedDateTime>(column, index) {
@@ -795,6 +809,9 @@ class ZonedDateTimeCell internal constructor(column: Column, index: Long, overri
     override val asLocalDateTime: LocalDateTime by lazy { value.toLocalDateTime() }
     override val asLocalDate: LocalDate by lazy { value.toLocalDate() }
     override val asLocalTime: LocalTime by lazy { value.toLocalTime() }
+
+    override fun plus(that: TemporalAmount): ZonedDateTime = this.value + that
+    override fun minus(that: TemporalAmount): ZonedDateTime = this.value - that
 }
 
 class WebContent internal constructor(val content: String) {
