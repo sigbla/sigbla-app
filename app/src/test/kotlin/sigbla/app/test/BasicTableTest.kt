@@ -1385,6 +1385,41 @@ class BasicTableTest {
     }
 
     @Test
+    fun `temporal math`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["Val1", 0] = LocalDate.of(2000, 1, 1)
+        t["Val1", 1] = LocalTime.of(1, 1, 1)
+        t["Val1", 2] = LocalDateTime.of(2000, 1, 1, 1, 1, 1)
+        t["Val1", 3] = ZonedDateTime.of(LocalDateTime.of(2000, 1, 1, 1, 1, 1), ZoneOffset.UTC)
+
+        assertEquals(LocalDate.of(2000, 1, 1) + Period.ofDays(1), t["Val1", 0] + Period.ofDays(1))
+        assertEquals(LocalTime.of(1, 1, 1) + Duration.ofMinutes(100), t["Val1", 1] + Duration.ofMinutes(100))
+        assertEquals(LocalDateTime.of(2000, 1, 1, 1, 1, 1) + Duration.ofMinutes(10000), t["Val1", 2] + Duration.ofMinutes(10000))
+        assertEquals(ZonedDateTime.of(LocalDateTime.of(2000, 1, 1, 1, 1, 1), ZoneOffset.UTC) + Duration.ofMinutes(20000), t["Val1", 3] + Duration.ofMinutes(20000))
+
+        assertEquals(LocalDate.of(2000, 1, 1) - Period.ofDays(1), t["Val1", 0] - Period.ofDays(1))
+        assertEquals(LocalTime.of(1, 1, 1) - Duration.ofMinutes(100), t["Val1", 1] - Duration.ofMinutes(100))
+        assertEquals(LocalDateTime.of(2000, 1, 1, 1, 1, 1) - Duration.ofMinutes(10000), t["Val1", 2] - Duration.ofMinutes(10000))
+        assertEquals(ZonedDateTime.of(LocalDateTime.of(2000, 1, 1, 1, 1, 1), ZoneOffset.UTC) - Duration.ofMinutes(20000), t["Val1", 3] - Duration.ofMinutes(20000))
+    }
+
+    @Test
+    fun `unsupported temporal math`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        assertFailsWith<InvalidCellException> { t["Val1", 0] + Period.ofDays(1) }
+        assertFailsWith<InvalidCellException> { t["Val1", 1] + Duration.ofMinutes(100) }
+        assertFailsWith<InvalidCellException> { t["Val1", 2] + Duration.ofMinutes(10000) }
+        assertFailsWith<InvalidCellException> { t["Val1", 3] + Duration.ofMinutes(20000) }
+
+        assertFailsWith<InvalidCellException> { t["Val1", 0] - Period.ofDays(1) }
+        assertFailsWith<InvalidCellException> { t["Val1", 1] - Duration.ofMinutes(100) }
+        assertFailsWith<InvalidCellException> { t["Val1", 2] - Duration.ofMinutes(10000) }
+        assertFailsWith<InvalidCellException> { t["Val1", 3] - Duration.ofMinutes(20000) }
+    }
+
+    @Test
     fun `basic cell fetch`() {
         val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         t["A", 11] = "A 11"
