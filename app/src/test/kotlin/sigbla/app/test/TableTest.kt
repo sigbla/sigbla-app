@@ -14,6 +14,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZonedDateTime
+import java.time.temporal.Temporal
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
 import kotlin.test.assertFailsWith
@@ -2357,6 +2358,60 @@ class TableTest {
                     assertEquals(value.value, t["A"][0].value)
                 else
                     assertEquals(value, t["A"][0].value)
+            }
+        }
+    }
+
+    @Test
+    fun `row set with temporal type`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        t["A", 0] = "Cell"
+
+        val values = listOf<Temporal>(
+            LocalDate.now(),
+            LocalTime.now(),
+            LocalDateTime.now(),
+            ZonedDateTime.now()
+        )
+
+        fun assign(row: Row, v: Temporal) {
+            t[row]["A"] = v
+        }
+
+        fun assignFunction(row: Row, v: Temporal) {
+            t[row]["A"] = { this(v) }
+        }
+
+        var lastValue = t["A", 0].value
+
+        for (value in values) {
+            for (ir in IndexRelation.entries) {
+                val row = t[ir, 0]
+
+                if (ir == IndexRelation.AT) {
+                    assign(row, value)
+                    lastValue = t["A"][0].value
+                } else {
+                    assertFailsWith<InvalidRowException> { assign(row, value) }
+                }
+
+                // Assert no change on exception
+                assertEquals(lastValue, t["A"][0].value)
+            }
+        }
+
+        assertEquals(1, t["A"].count())
+
+        for (value in values) {
+            for (ir in IndexRelation.entries) {
+                remove(t["A"])
+
+                val row = t[ir, 0]
+
+                assignFunction(row, value)
+
+                assertEquals(value, t["A"][0].value)
             }
         }
     }
