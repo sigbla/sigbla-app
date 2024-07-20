@@ -424,6 +424,10 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
         table[this] = newValue
         return newValue
     }
+    operator fun invoke(newValue: Temporal?): Temporal? {
+        table[this] = newValue
+        return newValue
+    }
     operator fun invoke(newValue: Cell<*>?): Cell<*>? {
         table[this] = newValue
         return newValue

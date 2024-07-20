@@ -41,6 +41,7 @@ class Row internal constructor(val table: Table, val indexRelation: IndexRelatio
     operator fun set(header: Header, value: LocalTime?) = table[header].set(this, value)
     operator fun set(header: Header, value: LocalDateTime?) = table[header].set(this, value)
     operator fun set(header: Header, value: ZonedDateTime?) = table[header].set(this, value)
+    operator fun set(header: Header, value: Temporal?) = table[header].set(this, value)
     operator fun set(header: Header, value: Unit?) = table[header].set(this, value)
     operator fun set(header: Header, init: Cell<*>.() -> Unit) = table[header][this].init()
 
@@ -58,6 +59,7 @@ class Row internal constructor(val table: Table, val indexRelation: IndexRelatio
     operator fun set(column: Column, value: LocalTime?) = table[column].set(this, value)
     operator fun set(column: Column, value: LocalDateTime?) = table[column].set(this, value)
     operator fun set(column: Column, value: ZonedDateTime?) = table[column].set(this, value)
+    operator fun set(column: Column, value: Temporal?) = table[column].set(this, value)
     operator fun set(column: Column, value: Unit?) = table[column].set(this, value)
     operator fun set(column: Column, init: Cell<*>.() -> Unit) = table[column][this].init()
 
@@ -75,6 +77,7 @@ class Row internal constructor(val table: Table, val indexRelation: IndexRelatio
     operator fun set(vararg header: String, value: LocalTime?) = table[Header(*header)].set(this, value)
     operator fun set(vararg header: String, value: LocalDateTime?) = table[Header(*header)].set(this, value)
     operator fun set(vararg header: String, value: ZonedDateTime?) = table[Header(*header)].set(this, value)
+    operator fun set(vararg header: String, value: Temporal?) = table[Header(*header)].set(this, value)
     operator fun set(vararg header: String, value: Unit?) = table[Header(*header)].set(this, value)
     operator fun set(vararg header: String, init: Cell<*>.() -> Unit) = table[Header(*header)][this].init()
 

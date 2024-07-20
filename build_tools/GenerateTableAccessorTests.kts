@@ -613,6 +613,11 @@ fun generateForZonedDateTime() {
     generateForX("null zoneddatetime", "val cell: ZonedDateTime? = null", "Unit")
 }
 
+fun generateForTemporal() {
+    generateForX("temporal", "val cell = ZonedDateTime.now() as Temporal")
+    generateForX("null temporal", "val cell: Temporal? = null", "Unit")
+}
+
 fun generateForBool() {
     generateForX("boolean", "val cell = true")
     generateForX("null boolean", "val cell: Boolean? = null", "Unit")
@@ -636,5 +641,6 @@ generateForLocalDate()
 generateForLocalTime()
 generateForLocalDateTime()
 generateForZonedDateTime()
+generateForTemporal()
 generateForBool()
 generateForUnit()
