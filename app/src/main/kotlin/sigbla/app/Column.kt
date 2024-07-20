@@ -5,6 +5,7 @@ package sigbla.app
 import sigbla.app.exceptions.InvalidColumnException
 import sigbla.app.IndexRelation.*
 import sigbla.app.exceptions.InvalidRowException
+import sigbla.app.exceptions.InvalidValueException
 import sigbla.app.pds.collection.TreeMap as PTreeMap
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -280,6 +281,17 @@ class Column internal constructor(
 
     operator fun set(index: Long, value: ZonedDateTime?) = if (value == null) clear(index) else set(index, value.toCell(this, index))
 
+    operator fun set(index: Long, value: Temporal?) {
+        when (value) {
+            is LocalDate -> set(index, value)
+            is LocalTime -> set(index, value)
+            is LocalDateTime -> set(index, value)
+            is ZonedDateTime -> set(index, value)
+            null -> clear(index)
+            else -> throw InvalidValueException("Unsupported type: ${value::class}")
+        }
+    }
+
     operator fun set(index: Long, value: Unit?) = if (value == null) clear(index) else set(index, value.toCell(this, index))
 
     operator fun set(index: Long, init: Cell<*>.() -> Unit) = this[index].init()
@@ -309,6 +321,8 @@ class Column internal constructor(
     operator fun set(index: Int, value: LocalDateTime?) = set(index.toLong(), value)
 
     operator fun set(index: Int, value: ZonedDateTime?) = set(index.toLong(), value)
+
+    operator fun set(index: Int, value: Temporal?) = set(index.toLong(), value)
 
     operator fun set(index: Int, value: Unit?) = set(index.toLong(), value)
 
@@ -372,6 +386,11 @@ class Column internal constructor(
     }
 
     operator fun set(row: Row, value: ZonedDateTime?) {
+        if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
+        set(row.index, value)
+    }
+
+    operator fun set(row: Row, value: Temporal?) {
         if (row.indexRelation != AT) throw InvalidRowException("Only IndexRelation.AT supported in set: $row")
         set(row.index, value)
     }

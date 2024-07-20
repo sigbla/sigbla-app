@@ -12,6 +12,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
+import java.time.temporal.Temporal
 
 class TableAccessorsTest {
     @Test
@@ -28845,6 +28846,2312 @@ class TableAccessorsTest {
     @Test
     fun `null zoneddatetime accessors`() {
         val cell: ZonedDateTime? = null
+
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        table["L1", Int.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", Int.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", Long.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", Long.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table["L1", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table["L1", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table["L1", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1"][Int.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1"][Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1"][Int.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1"][Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1"][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1"][Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1"][Long.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1"][Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1"][Long.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1"][Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1"][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1"][Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1"][table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table["L1"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1"][table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table["L1"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1"][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table["L1"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1"] = cell
+        assertEquals(Unit, table[Int.MAX_VALUE]["L1"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE]["L1"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1"](cell)
+        assertEquals(Unit, table[Int.MAX_VALUE]["L1"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE]["L1"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1"] = { this(cell) }
+        assertEquals(Unit, table[Int.MAX_VALUE]["L1"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE]["L1"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1"] = cell
+        assertEquals(Unit, table[Long.MAX_VALUE]["L1"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE]["L1"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1"](cell)
+        assertEquals(Unit, table[Long.MAX_VALUE]["L1"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE]["L1"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1"] = { this(cell) }
+        assertEquals(Unit, table[Long.MAX_VALUE]["L1"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE]["L1"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1"] = cell
+        assertEquals(Unit, table[table[Long.MAX_VALUE]]["L1"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1"](cell)
+        assertEquals(Unit, table[table[Long.MAX_VALUE]]["L1"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1"] = { this(cell) }
+        assertEquals(Unit, table[table[Long.MAX_VALUE]]["L1"].value)
+        clear(table)
+
+        table["L1", "L2", Int.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", "L2", Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", Int.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", "L2", Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", Long.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", "L2", Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", Long.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", "L2", Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table["L1", "L2", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table["L1", "L2", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2"][Int.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", "L2"][Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2"][Int.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", "L2"][Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2"][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2"][Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2"][Long.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", "L2"][Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2"][Long.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", "L2"][Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2"][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2"][Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2"][table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table["L1", "L2"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2"][table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table["L1", "L2"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2"][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2"] = cell
+        assertEquals(Unit, table[Int.MAX_VALUE]["L1", "L2"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2"](cell)
+        assertEquals(Unit, table[Int.MAX_VALUE]["L1", "L2"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2"] = { this(cell) }
+        assertEquals(Unit, table[Int.MAX_VALUE]["L1", "L2"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2"] = cell
+        assertEquals(Unit, table[Long.MAX_VALUE]["L1", "L2"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2"](cell)
+        assertEquals(Unit, table[Long.MAX_VALUE]["L1", "L2"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2"] = { this(cell) }
+        assertEquals(Unit, table[Long.MAX_VALUE]["L1", "L2"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2"] = cell
+        assertEquals(Unit, table[table[Long.MAX_VALUE]]["L1", "L2"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2"](cell)
+        assertEquals(Unit, table[table[Long.MAX_VALUE]]["L1", "L2"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2"] = { this(cell) }
+        assertEquals(Unit, table[table[Long.MAX_VALUE]]["L1", "L2"].value)
+        clear(table)
+
+        table["L1", "L2", "L3", Int.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", "L2", "L3", Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", Int.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", "L2", "L3", Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3", Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", Long.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", "L2", "L3", Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", Long.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", "L2", "L3", Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3", Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table["L1", "L2", "L3", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table["L1", "L2", "L3", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][Int.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", "L2", "L3"][Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][Int.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", "L2", "L3"][Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3"][Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][Long.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", "L2", "L3"][Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][Long.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", "L2", "L3"][Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3"][Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table["L1", "L2", "L3"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table["L1", "L2", "L3"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3"] = cell
+        assertEquals(Unit, table[Int.MAX_VALUE]["L1", "L2", "L3"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3"](cell)
+        assertEquals(Unit, table[Int.MAX_VALUE]["L1", "L2", "L3"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3"] = { this(cell) }
+        assertEquals(Unit, table[Int.MAX_VALUE]["L1", "L2", "L3"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3"] = cell
+        assertEquals(Unit, table[Long.MAX_VALUE]["L1", "L2", "L3"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3"](cell)
+        assertEquals(Unit, table[Long.MAX_VALUE]["L1", "L2", "L3"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3"] = { this(cell) }
+        assertEquals(Unit, table[Long.MAX_VALUE]["L1", "L2", "L3"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3"] = cell
+        assertEquals(Unit, table[table[Long.MAX_VALUE]]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3"](cell)
+        assertEquals(Unit, table[table[Long.MAX_VALUE]]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3"] = { this(cell) }
+        assertEquals(Unit, table[table[Long.MAX_VALUE]]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", Int.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", Int.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", Long.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", Long.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][Int.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", "L2", "L3", "L4"][Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][Int.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4"][Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3", "L4"][Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][Long.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", "L2", "L3", "L4"][Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][Long.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4"][Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3", "L4"][Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table["L1", "L2", "L3", "L4"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3", "L4"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3", "L4"] = cell
+        assertEquals(Unit, table[Int.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3", "L4"](cell)
+        assertEquals(Unit, table[Int.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3", "L4"] = { this(cell) }
+        assertEquals(Unit, table[Int.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3", "L4"] = cell
+        assertEquals(Unit, table[Long.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3", "L4"](cell)
+        assertEquals(Unit, table[Long.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3", "L4"] = { this(cell) }
+        assertEquals(Unit, table[Long.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4"] = cell
+        assertEquals(Unit, table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4"](cell)
+        assertEquals(Unit, table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4"] = { this(cell) }
+        assertEquals(Unit, table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE] = cell
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE](cell)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE].value)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table["L1", "L2", "L3", "L4", "L5"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"] = cell
+        assertEquals(Unit, table[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"](cell)
+        assertEquals(Unit, table[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"] = { this(cell) }
+        assertEquals(Unit, table[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"] = cell
+        assertEquals(Unit, table[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"](cell)
+        assertEquals(Unit, table[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"] = { this(cell) }
+        assertEquals(Unit, table[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4", "L5"] = cell
+        assertEquals(Unit, table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4", "L5"](cell)
+        assertEquals(Unit, table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4", "L5"] = { this(cell) }
+        assertEquals(Unit, table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE] = cell
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE](cell)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE] = cell
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE](cell)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE] = cell
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE](cell)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE] = cell
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE](cell)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE] = cell
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE](cell)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE] = cell
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE](cell)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5"]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE] = cell
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE](cell)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE] = cell
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE](cell)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]] = cell
+        assertEquals(Unit, table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]](cell)
+        assertEquals(Unit, table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]] = { this(cell) }
+        assertEquals(Unit, table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]] = cell
+        assertEquals(Unit, table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]](cell)
+        assertEquals(Unit, table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]] = { this(cell) }
+        assertEquals(Unit, table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5"]] = cell
+        assertEquals(Unit, table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5"]](cell)
+        assertEquals(Unit, table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5"]] = { this(cell) }
+        assertEquals(Unit, table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]] = cell
+        assertEquals(Unit, table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]](cell)
+        assertEquals(Unit, table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]] = { this(cell) }
+        assertEquals(Unit, table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]] = cell
+        assertEquals(Unit, table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]](cell)
+        assertEquals(Unit, table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]] = { this(cell) }
+        assertEquals(Unit, table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5"]]] = cell
+        assertEquals(Unit, table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5"]]](cell)
+        assertEquals(Unit, table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5"]]] = { this(cell) }
+        assertEquals(Unit, table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE] = cell
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE](cell)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE] = cell
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE](cell)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE] = cell
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE](cell)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE] = cell
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE](cell)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE] = cell
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE](cell)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE] = cell
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE](cell)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE].value)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE] = cell
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE](cell)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE] = cell
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE](cell)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE].value)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][table[Long.MAX_VALUE]] = cell
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][table[Long.MAX_VALUE]](cell)
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = cell
+        assertEquals(Unit, table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]](cell)
+        assertEquals(Unit, table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = { this(cell) }
+        assertEquals(Unit, table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = cell
+        assertEquals(Unit, table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]](cell)
+        assertEquals(Unit, table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = { this(cell) }
+        assertEquals(Unit, table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = cell
+        assertEquals(Unit, table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5", "L6"]](cell)
+        assertEquals(Unit, table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = { this(cell) }
+        assertEquals(Unit, table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = cell
+        assertEquals(Unit, table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]](cell)
+        assertEquals(Unit, table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this(cell) }
+        assertEquals(Unit, table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = cell
+        assertEquals(Unit, table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]](cell)
+        assertEquals(Unit, table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this(cell) }
+        assertEquals(Unit, table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        assertEquals(Unit, table[IndexRelation.AT, Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = cell
+        assertEquals(Unit, table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]](cell)
+        assertEquals(Unit, table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this(cell) }
+        assertEquals(Unit, table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[table["L1", Int.MAX_VALUE]] = cell
+        assertEquals(Unit, table[table["L1", Int.MAX_VALUE]].value)
+        clear(table)
+
+        table[table["L1", Int.MAX_VALUE]](cell)
+        assertEquals(Unit, table[table["L1", Int.MAX_VALUE]].value)
+        clear(table)
+
+        table[table["L1", Int.MAX_VALUE]] = { this(cell) }
+        assertEquals(Unit, table[table["L1", Int.MAX_VALUE]].value)
+        clear(table)
+    }
+
+    @Test
+    fun `temporal accessors`() {
+        val cell = ZonedDateTime.now() as Temporal
+
+        val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        table["L1", Int.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", Int.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", Long.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", Long.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table["L1", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table["L1", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table["L1", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1"][Int.MAX_VALUE] = cell
+        assertEquals(cell, table["L1"][Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1"][Int.MAX_VALUE](cell)
+        assertEquals(cell, table["L1"][Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1"][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1"][Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1"][Long.MAX_VALUE] = cell
+        assertEquals(cell, table["L1"][Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1"][Long.MAX_VALUE](cell)
+        assertEquals(cell, table["L1"][Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1"][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1"][Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1"][table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table["L1"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1"][table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table["L1"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1"][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table["L1"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1"] = cell
+        assertEquals(cell, table[Int.MAX_VALUE]["L1"].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE]["L1"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1"](cell)
+        assertEquals(cell, table[Int.MAX_VALUE]["L1"].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE]["L1"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1"] = { this(cell) }
+        assertEquals(cell, table[Int.MAX_VALUE]["L1"].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE]["L1"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1"] = cell
+        assertEquals(cell, table[Long.MAX_VALUE]["L1"].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE]["L1"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1"](cell)
+        assertEquals(cell, table[Long.MAX_VALUE]["L1"].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE]["L1"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1"] = { this(cell) }
+        assertEquals(cell, table[Long.MAX_VALUE]["L1"].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE]["L1"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1"] = cell
+        assertEquals(cell, table[table[Long.MAX_VALUE]]["L1"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1"](cell)
+        assertEquals(cell, table[table[Long.MAX_VALUE]]["L1"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1"] = { this(cell) }
+        assertEquals(cell, table[table[Long.MAX_VALUE]]["L1"].value)
+        clear(table)
+
+        table["L1", "L2", Int.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", "L2", Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", Int.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", "L2", Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", Long.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", "L2", Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", Long.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", "L2", Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table["L1", "L2", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table["L1", "L2", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2"][Int.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", "L2"][Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2"][Int.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", "L2"][Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2"][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", "L2"][Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2"][Long.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", "L2"][Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2"][Long.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", "L2"][Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2"][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", "L2"][Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2"][table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table["L1", "L2"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2"][table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table["L1", "L2"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2"][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table["L1", "L2"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2"] = cell
+        assertEquals(cell, table[Int.MAX_VALUE]["L1", "L2"].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2"](cell)
+        assertEquals(cell, table[Int.MAX_VALUE]["L1", "L2"].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2"] = { this(cell) }
+        assertEquals(cell, table[Int.MAX_VALUE]["L1", "L2"].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2"] = cell
+        assertEquals(cell, table[Long.MAX_VALUE]["L1", "L2"].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2"](cell)
+        assertEquals(cell, table[Long.MAX_VALUE]["L1", "L2"].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2"] = { this(cell) }
+        assertEquals(cell, table[Long.MAX_VALUE]["L1", "L2"].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2"] = cell
+        assertEquals(cell, table[table[Long.MAX_VALUE]]["L1", "L2"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2"](cell)
+        assertEquals(cell, table[table[Long.MAX_VALUE]]["L1", "L2"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2"] = { this(cell) }
+        assertEquals(cell, table[table[Long.MAX_VALUE]]["L1", "L2"].value)
+        clear(table)
+
+        table["L1", "L2", "L3", Int.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", "L2", "L3", Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", Int.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", "L2", "L3", Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3", Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", Long.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", "L2", "L3", Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", Long.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", "L2", "L3", Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3", Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table["L1", "L2", "L3", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table["L1", "L2", "L3", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][Int.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", "L2", "L3"][Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][Int.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", "L2", "L3"][Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3"][Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][Long.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", "L2", "L3"][Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][Long.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", "L2", "L3"][Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3"][Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table["L1", "L2", "L3"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table["L1", "L2", "L3"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3"][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3"] = cell
+        assertEquals(cell, table[Int.MAX_VALUE]["L1", "L2", "L3"].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3"](cell)
+        assertEquals(cell, table[Int.MAX_VALUE]["L1", "L2", "L3"].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3"] = { this(cell) }
+        assertEquals(cell, table[Int.MAX_VALUE]["L1", "L2", "L3"].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3"] = cell
+        assertEquals(cell, table[Long.MAX_VALUE]["L1", "L2", "L3"].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3"](cell)
+        assertEquals(cell, table[Long.MAX_VALUE]["L1", "L2", "L3"].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3"] = { this(cell) }
+        assertEquals(cell, table[Long.MAX_VALUE]["L1", "L2", "L3"].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3"] = cell
+        assertEquals(cell, table[table[Long.MAX_VALUE]]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3"](cell)
+        assertEquals(cell, table[table[Long.MAX_VALUE]]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3"] = { this(cell) }
+        assertEquals(cell, table[table[Long.MAX_VALUE]]["L1", "L2", "L3"].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", Int.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", "L2", "L3", "L4", Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", Int.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3", "L4", Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", Long.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", "L2", "L3", "L4", Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", Long.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3", "L4", Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table["L1", "L2", "L3", "L4", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3", "L4", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][Int.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", "L2", "L3", "L4"][Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][Int.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", "L2", "L3", "L4"][Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3", "L4"][Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][Long.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", "L2", "L3", "L4"][Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][Long.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", "L2", "L3", "L4"][Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3", "L4"][Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table["L1", "L2", "L3", "L4"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table["L1", "L2", "L3", "L4"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4"][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3", "L4"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3", "L4"] = cell
+        assertEquals(cell, table[Int.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3", "L4"](cell)
+        assertEquals(cell, table[Int.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3", "L4"] = { this(cell) }
+        assertEquals(cell, table[Int.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3", "L4"] = cell
+        assertEquals(cell, table[Long.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3", "L4"](cell)
+        assertEquals(cell, table[Long.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3", "L4"] = { this(cell) }
+        assertEquals(cell, table[Long.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4"] = cell
+        assertEquals(cell, table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4"](cell)
+        assertEquals(cell, table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4"] = { this(cell) }
+        assertEquals(cell, table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4"].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5", Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5", IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5", Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5", IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5", table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5", table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5"][Int.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5"][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE] = cell
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE](cell)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5"][Long.MAX_VALUE].value)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5"][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table["L1", "L2", "L3", "L4", "L5"][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table["L1", "L2", "L3", "L4", "L5"][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"] = cell
+        assertEquals(cell, table[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"](cell)
+        assertEquals(cell, table[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"] = { this(cell) }
+        assertEquals(cell, table[Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"] = cell
+        assertEquals(cell, table[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"](cell)
+        assertEquals(cell, table[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"] = { this(cell) }
+        assertEquals(cell, table[Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4", "L5"] = cell
+        assertEquals(cell, table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4", "L5"](cell)
+        assertEquals(cell, table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4", "L5"] = { this(cell) }
+        assertEquals(cell, table[table[Long.MAX_VALUE]]["L1", "L2", "L3", "L4", "L5"].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE] = cell
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE](cell)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"], Int.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE] = cell
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE](cell)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"], Long.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"], table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE] = cell
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE](cell)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]], Int.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE] = cell
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE](cell)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]], Long.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]], table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE] = cell
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE](cell)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"]][Int.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE] = cell
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE](cell)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"]][Long.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5"]][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5"]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE] = cell
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE](cell)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Int.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE] = cell
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE](cell)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][Long.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5"]]][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5"]]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]] = cell
+        assertEquals(cell, table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]](cell)
+        assertEquals(cell, table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]] = { this(cell) }
+        assertEquals(cell, table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]] = cell
+        assertEquals(cell, table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]](cell)
+        assertEquals(cell, table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]] = { this(cell) }
+        assertEquals(cell, table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5"]] = cell
+        assertEquals(cell, table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5"]](cell)
+        assertEquals(cell, table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5"]] = { this(cell) }
+        assertEquals(cell, table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5"]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]] = cell
+        assertEquals(cell, table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]](cell)
+        assertEquals(cell, table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]] = { this(cell) }
+        assertEquals(cell, table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]] = cell
+        assertEquals(cell, table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]](cell)
+        assertEquals(cell, table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]] = { this(cell) }
+        assertEquals(cell, table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5"]]] = cell
+        assertEquals(cell, table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5"]]](cell)
+        assertEquals(cell, table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5"]]] = { this(cell) }
+        assertEquals(cell, table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5"]]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE] = cell
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE](cell)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Int.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE] = cell
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE](cell)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], Long.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"], table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE] = cell
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE](cell)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Int.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE] = cell
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE](cell)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], Long.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]], table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE] = cell
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE](cell)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Int.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE] = cell
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE](cell)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][Long.MAX_VALUE].value)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table[Header["L1", "L2", "L3", "L4", "L5", "L6"]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE] = cell
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE](cell)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Int.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][IndexRelation.AT, Int.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE] = cell
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE](cell)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE] = { this(cell) }
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][Long.MAX_VALUE].value)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][IndexRelation.AT, Long.MAX_VALUE].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][table[Long.MAX_VALUE]] = cell
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][table[Long.MAX_VALUE]](cell)
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][table[Long.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table[table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]][table[Long.MAX_VALUE]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = cell
+        assertEquals(cell, table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]](cell)
+        assertEquals(cell, table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = { this(cell) }
+        assertEquals(cell, table[Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = cell
+        assertEquals(cell, table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]](cell)
+        assertEquals(cell, table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = { this(cell) }
+        assertEquals(cell, table[Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = cell
+        assertEquals(cell, table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5", "L6"]](cell)
+        assertEquals(cell, table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5", "L6"]] = { this(cell) }
+        assertEquals(cell, table[table[Long.MAX_VALUE]][Header["L1", "L2", "L3", "L4", "L5", "L6"]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = cell
+        assertEquals(cell, table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]](cell)
+        assertEquals(cell, table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this(cell) }
+        assertEquals(cell, table[Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        assertEquals(cell, table[IndexRelation.AT, Int.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = cell
+        assertEquals(cell, table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]](cell)
+        assertEquals(cell, table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this(cell) }
+        assertEquals(cell, table[Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        assertEquals(cell, table[IndexRelation.AT, Long.MAX_VALUE][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = cell
+        assertEquals(cell, table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]](cell)
+        assertEquals(cell, table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]] = { this(cell) }
+        assertEquals(cell, table[table[Long.MAX_VALUE]][table[Header["L1", "L2", "L3", "L4", "L5", "L6"]]].value)
+        clear(table)
+
+        table[table["L1", Int.MAX_VALUE]] = cell
+        assertEquals(cell, table[table["L1", Int.MAX_VALUE]].value)
+        clear(table)
+
+        table[table["L1", Int.MAX_VALUE]](cell)
+        assertEquals(cell, table[table["L1", Int.MAX_VALUE]].value)
+        clear(table)
+
+        table[table["L1", Int.MAX_VALUE]] = { this(cell) }
+        assertEquals(cell, table[table["L1", Int.MAX_VALUE]].value)
+        clear(table)
+    }
+
+    @Test
+    fun `null temporal accessors`() {
+        val cell: Temporal? = null
 
         val table = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
 
