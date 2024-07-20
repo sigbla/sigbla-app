@@ -10,10 +10,7 @@ import sigbla.app.exceptions.*
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.MathContext
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZonedDateTime
+import java.time.*
 import java.time.temporal.Temporal
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
@@ -2122,7 +2119,21 @@ class TableTest {
 
         t["A", 0] = "Cell"
 
-        val values = listOf<Any>(t["A", 0], "String", 1.0, 2L, BigInteger.TEN, BigDecimal.valueOf(100), 1000 as Number, true)
+        val values = listOf<Any>(
+            t["A", 0],
+            "String",
+            1.0,
+            2L,
+            BigInteger.TEN,
+            BigDecimal.valueOf(100),
+            1000 as Number,
+            Unit,
+            true,
+            LocalDate.now(),
+            LocalTime.now(),
+            LocalDateTime.now(),
+            ZonedDateTime.now()
+            )
 
         fun assign(row: Row, v: Any) {
             when (v) {
@@ -2134,6 +2145,11 @@ class TableTest {
                 is BigDecimal -> t["A", row] = v
                 is Number -> t["A", row] = v
                 is Boolean -> t["A", row] = v
+                is Unit -> t["A", row] = v
+                is LocalDate -> t["A", row] = v
+                is LocalTime -> t["A", row] = v
+                is LocalDateTime -> t["A", row] = v
+                is ZonedDateTime -> t["A", row] = v
                 else -> throw Exception()
             }
         }
@@ -2148,6 +2164,11 @@ class TableTest {
                 is BigDecimal -> t["A", row] = { this(v) }
                 is Number -> t["A", row] = { this(v) }
                 is Boolean -> t["A", row] = { this(v) }
+                is Unit -> t["A", row] = { this(v) }
+                is LocalDate -> t["A", row] = { this(v) }
+                is LocalTime -> t["A", row] = { this(v) }
+                is LocalDateTime -> t["A", row] = { this(v) }
+                is ZonedDateTime -> t["A", row] = { this(v) }
                 else -> throw Exception()
             }
         }
@@ -2196,7 +2217,21 @@ class TableTest {
 
         t["A", 0] = "Cell"
 
-        val values = listOf<Any>(t["A", 0], "String", 1.0, 2L, BigInteger.TEN, BigDecimal.valueOf(100), 1000 as Number, true)
+        val values = listOf<Any>(
+            t["A", 0],
+            "String",
+            1.0,
+            2L,
+            BigInteger.TEN,
+            BigDecimal.valueOf(100),
+            1000 as Number,
+            Unit,
+            true,
+            LocalDate.now(),
+            LocalTime.now(),
+            LocalDateTime.now(),
+            ZonedDateTime.now()
+        )
 
         fun assign(row: Row, v: Any) {
             when (v) {
@@ -2208,6 +2243,11 @@ class TableTest {
                 is BigDecimal -> t["A"][row] = v
                 is Number -> t["A"][row] = v
                 is Boolean -> t["A"][row] = v
+                is Unit -> t["A"][row] = v
+                is LocalDate -> t["A"][row] = v
+                is LocalTime -> t["A"][row] = v
+                is LocalDateTime -> t["A"][row] = v
+                is ZonedDateTime -> t["A"][row] = v
                 else -> throw Exception()
             }
         }
@@ -2222,6 +2262,11 @@ class TableTest {
                 is BigDecimal -> t["A"][row] = { this(v) }
                 is Number -> t["A"][row] = { this(v) }
                 is Boolean -> t["A"][row] = { this(v) }
+                is Unit -> t["A"][row] = { this(v) }
+                is LocalDate -> t["A"][row] = { this(v) }
+                is LocalTime -> t["A"][row] = { this(v) }
+                is LocalDateTime -> t["A"][row] = { this(v) }
+                is ZonedDateTime -> t["A"][row] = { this(v) }
                 else -> throw Exception()
             }
         }
@@ -2857,8 +2902,13 @@ class TableTest {
         t["A", 6](true)
         t["A", 7](t["A", 7])
         t["A", 8](Unit)
+        t["A", 9](LocalDate.of(2000, 1, 1))
+        t["A", 10](LocalTime.of(1, 1, 1))
+        t["A", 11](LocalDateTime.of(2000, 1, 1, 1, 1, 1))
+        t["A", 12](ZonedDateTime.of(LocalDateTime.of(2000, 1, 1, 1, 1, 1), ZoneOffset.UTC))
+        t["A", 13](ZonedDateTime.of(LocalDateTime.of(2001, 1, 1, 1, 1, 1), ZoneOffset.UTC) as Temporal)
 
-        assertEquals(7, t.count())
+        assertEquals(12, t.count())
 
         assertEquals(BigDecimal.ONE, t["A", 0].also { it(null as BigDecimal?) }.value)
         assertEquals(BigInteger.TWO, t["A", 1].also { it(null as BigInteger?) }.value)
@@ -2869,6 +2919,11 @@ class TableTest {
         assertEquals(true, t["A", 6].also { it(null as Boolean?) }.value)
         assertEquals(Unit, t["A", 7].also { it(null as Cell<*>?) }.value)
         assertEquals(Unit, t["A", 8].also { it(null as Unit?) }.value)
+        assertEquals(LocalDate.of(2000, 1, 1), t["A", 9].also { it(null as LocalDate?) }.value)
+        assertEquals(LocalTime.of(1, 1, 1), t["A", 10].also { it(null as LocalTime?) }.value)
+        assertEquals(LocalDateTime.of(2000, 1, 1, 1, 1, 1), t["A", 11].also { it(null as LocalDateTime?) }.value)
+        assertEquals(ZonedDateTime.of(LocalDateTime.of(2000, 1, 1, 1, 1, 1), ZoneOffset.UTC), t["A", 12].also { it(null as ZonedDateTime?) }.value)
+        assertEquals(ZonedDateTime.of(LocalDateTime.of(2001, 1, 1, 1, 1, 1), ZoneOffset.UTC), t["A", 13].also { it(null as Temporal?) }.value)
 
         assertEquals(0, t.count())
     }
@@ -3215,6 +3270,25 @@ class TableTest {
         c[1] = Unit
 
         assertEquals(2, eventCount)
+    }
+
+    @Test
+    fun `unsupported temporal type`() {
+        val t = Table["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        assertFailsWith<InvalidValueException> { t["A", 0] = OffsetDateTime.now() }
+        assertFailsWith<InvalidValueException> { t["A", 0L] = OffsetDateTime.now() }
+        assertFailsWith<InvalidValueException> { t["A"][0] = OffsetDateTime.now() }
+        assertFailsWith<InvalidValueException> { t["A"][0L] = OffsetDateTime.now() }
+        assertFailsWith<InvalidValueException> { t[0]["A"] = OffsetDateTime.now() }
+        assertFailsWith<InvalidValueException> { t[0L]["A"] = OffsetDateTime.now() }
+
+        assertFailsWith<InvalidValueException> { t["A", 0] = OffsetTime.now() }
+        assertFailsWith<InvalidValueException> { t["A", 0L] = OffsetTime.now() }
+        assertFailsWith<InvalidValueException> { t["A"][0] = OffsetTime.now() }
+        assertFailsWith<InvalidValueException> { t["A"][0L] = OffsetTime.now() }
+        assertFailsWith<InvalidValueException> { t[0]["A"] = OffsetTime.now() }
+        assertFailsWith<InvalidValueException> { t[0L]["A"] = OffsetTime.now() }
     }
 
     companion object {
