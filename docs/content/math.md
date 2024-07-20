@@ -68,6 +68,20 @@ fun main() {
 }
 ```
 
+## Augmented assignments
+
+In the above cell type extensions example we add 100 to a cell. The resulting value can naturally be assigned back to
+the cell and done as a single line like so:
+
+`table["v1", 0] = table["v1", 0] + 100`
+
+A shorthand version of this is:
+
+`table["v1", 0] += 100`
+
+They are functionally exactly the same thing, with the latter being a bit more convenient. Other augmented assignment
+operators are also available: `-=`, `*=`, `/=`, and `%=`.
+
 ## Precision and rounding modes
 
 When converting a number to the `BigDecimal` type a `MathContext` is included. This context is also used when performing
