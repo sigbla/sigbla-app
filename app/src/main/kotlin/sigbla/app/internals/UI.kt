@@ -62,6 +62,14 @@ internal object SigblaBackend {
 
                 routing {
                     staticResources("/_/static", "static")
+                    route("/favicon.ico", HttpMethod.Get) {
+                        handle {
+                            val resource = "/other/favicon.ico"
+                            call.respondOutputStream(ContentType.defaultForFilePath(resource), HttpStatusCode.OK) {
+                                this.javaClass.getResourceAsStream(resource).buffered().transferTo(this)
+                            }
+                        }
+                    }
                     route("/t/{ref}", HttpMethod.Get) {
                         handle {
                             val ref = call.parameters["ref"]
