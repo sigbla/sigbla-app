@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'Roboto';
-    src: url('/_static/Roboto-Regular.ttf') format('truetype');
+    src: url('/_/static/Roboto-Regular.ttf') format('truetype');
 }
 
 html, body, div, span, applet, object, iframe,
@@ -325,12 +325,10 @@ table {
 }
 
 .ch > .co {
-    /* TODO Keep? */
     border: steelblue solid 1px;
 }
 
 .rh > .co {
-    /* TODO Keep? */
     border: steelblue solid 1px;
 }
 .ch > .cc {

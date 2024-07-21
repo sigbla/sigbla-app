@@ -61,7 +61,7 @@ internal object SigblaBackend {
                 install(WebSockets)
 
                 routing {
-                    staticResources("/_static", "_static")
+                    staticResources("/_/static", "static")
                     route("/t/{ref}", HttpMethod.Get) {
                         handle {
                             val ref = call.parameters["ref"]
@@ -97,7 +97,7 @@ internal object SigblaBackend {
                             viewRef.config.tableHtml(this)
                         }
                     }
-                    webSocket("/t/{ref}/socket") {
+                    webSocket("/t/{ref}/_/socket") {
                         val ref = call.parameters["ref"]
 
                         if (ref == null || ref.isBlank()) {
@@ -150,8 +150,8 @@ internal object SigblaBackend {
                             val view = viewRef.tableView
                             val handler = when (val resource = call.parameters.getAll("resource")?.joinToString("/")) {
                                 null -> null
-                                "table.js" -> viewRef.config.tableScript
-                                "table.css" -> viewRef.config.tableStyle
+                                "_/table.js" -> viewRef.config.tableScript
+                                "_/table.css" -> viewRef.config.tableStyle
                                 else -> view[Resource[resource]].handler as? (suspend PipelineContext<*, ApplicationCall>.() -> Unit)
                             }
                             if (handler == null) {
