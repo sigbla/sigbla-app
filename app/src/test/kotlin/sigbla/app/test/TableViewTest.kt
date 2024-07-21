@@ -725,6 +725,29 @@ class TableViewTest {
      */
 
     @Test
+    fun `tableview table cache check`() {
+        val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
+
+        // TableView[Table] uses a cache, but the cache might get GC'ed,
+        // causing the test coverage to be a bit flaky. This should hopefully help
+        // get us past that issue..
+        var tmpTable = tv1[Table]
+        var count = 0
+
+        for (i in 0..100) {
+            val newTmpTable = tv1[Table]
+            if (tmpTable === newTmpTable) {
+                count++
+                clear(tv1)
+            }
+
+            tmpTable = newTmpTable
+        }
+
+        assertTrue(count > 0)
+    }
+
+    @Test
     fun `tableview invoke 1`() {
         val tv1 = TableView["${this.javaClass.simpleName} ${object {}.javaClass.enclosingMethod.name}"]
         val tt: Table.() -> Unit = {}
