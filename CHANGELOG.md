@@ -4,6 +4,43 @@ All notable changes to this project will be documented in this file.
 
 This project is versioned following the [major release].[last 2 digits in release year].[minor release] format.
 
+## v1.24.5 - 2024-07-21 - Lucky Hat
+
+Primary focus for this release is final core API stabilization in preparation for the first beta release. As such,
+v1.24.5 marks the first beta release of Sigbla. A few more beta releases are expected before the first production
+release, but as of this release, the core APIs are considered complete, with focus now shifting towards auxiliary
+tools and utilities.
+
+A big change in this release is an improvement to the APIs relating to resources, making them easier and more intuitive
+to use. It also introduces global resources which enables applications to provide their own resources beyond what's
+connected to a particular table.
+
+Another significant addition is the support for temporal cell values, specifically LocalDate, LocalTime, LocalDateTime,
+and ZonedDateTime. This has been on the TODO list for a while, and completes the data types supported by tables.
+
+Work has also been done on optimizing the JSON parsing used as part of the UI, significantly improving the performance
+of JSON sent to the frontend. Other minor changes, test improvements and documentation updates also included.
+
+### Added
+
+- Support for temporal cell types
+- Global resources, included in overall Resource refactoring
+- Position and Visibility now available on DerivedColumnView and DerivedRowView
+- Augmented assignment added to Cell, allowing for things like `cell += value` rather than `table[cell] = cell + value`
+
+### Fixed
+
+- Fixed behaviour of `tableView[Table].source`, ensuring this returns the correct source from assignment
+- Fixed `TableView.invoke(TableView)`, ensuring this now does all updates atomically
+
+### Changed
+
+- API related to Resource, allowing for `Resource[path] = handler` and `tableView[Resource[path]] = handler`, rather than the map based approach
+
+### Removed
+
+- Nothing
+
 ## v1.24.4 - 2024-06-24 - Flat Sun
 
 Focus in this release has been on improving and refactoring frontend code, adding UI features such as column and row
