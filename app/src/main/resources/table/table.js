@@ -1495,7 +1495,7 @@ class Sigbla {
         this.#targetParent.appendChild(this.#target);
 
         let pathname = location.pathname.endsWith("/") ? location.pathname : location.pathname + "/";
-        let url = new URL(pathname + "socket", window.location.href);
+        let url = new URL(pathname + "_/socket", window.location.href);
         url.protocol = url.protocol.replace('https', 'wss');
         url.protocol = url.protocol.replace('http', 'ws');
 
