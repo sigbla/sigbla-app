@@ -159,8 +159,8 @@ We've just scratched the surface of what's possible. Continue learning about [ta
 ## Background and current state of this software
 
 Sigbla has been a long-time hobby project of mine, one that stems from me wanting to be able to easily work with data
-on the JVM using Kotlin. There are still some features and test cases missing. Because of this, I would currently
-consider this alpha software. The APIs might change and bugs are expected.
+on the JVM using Kotlin. Core parts of the software is well tested and considered stable. The last release is considered
+beta software with a production release soon to follow.
 
 If you find any issues or have some suggestions, please reach out using GitHub [issues](https://github.com/sigbla/sigbla-app/issues)
 or [discussions](https://github.com/sigbla/sigbla-app/discussions). All feedback welcome while I work towards getting
