@@ -6,8 +6,6 @@ plugins {
     signing
 }
 
-group = "sigbla.all"
-
 kotlin {
     jvmToolchain {
         languageVersion.set(JavaLanguageVersion.of(17))

@@ -6,9 +6,6 @@ plugins {
     signing
 }
 
-// TODO Remove, look at impact?
-group = "sigbla.app"
-
 kotlin {
     jvmToolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
