@@ -1270,7 +1270,8 @@ class TableView internal constructor(
                     defaultCellView = otherRef?.defaultCellView ?: ViewMeta(),
                     table = otherRef?.table,
                     tableTransformer = otherRef?.tableTransformer,
-                    resources = otherRef?.resources ?: PHashMap()
+                    resources = otherRef?.resources ?: PHashMap(),
+                    version = it.version + 1L
                 )
             }
 

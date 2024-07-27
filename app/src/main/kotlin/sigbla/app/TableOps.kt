@@ -1367,6 +1367,7 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: Header) {
                         copy(
                             columns = this.columns.put(withName, ColumnMeta(newRight.order, this.columns[left.header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header ${left.header}"))),
                             columnCells = this.columnCells.put(withName, this.columnCells[left.header] ?: PTreeMap())
+                            // Version inc handled by columnMove
                         )
                     }
                 )
@@ -1388,6 +1389,7 @@ fun move(columnToColumnAction: ColumnToColumnAction, withName: Header) {
                         copy(
                             columns = this.columns.put(withName, ColumnMeta(newRight.order, oldRef1.columns[left.header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header ${left.header}"))),
                             columnCells = this.columnCells.put(withName, oldRef1.columnCells[left.header] ?: PTreeMap())
+                            // Version inc handled by columnMove
                         )
                     }
                 )
@@ -1455,7 +1457,8 @@ fun move(columnToTableAction: ColumnToTableAction, withName: Header) {
                     (::columnMove)(withName) {
                         copy(
                             columns = this.columns.remove(left.header).put(withName, ColumnMeta(newRight.order, this.columns[left.header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header ${left.header}"))),
-                            columnCells = this.columnCells.remove(left.header).put(withName, this.columnCells[left.header] ?: PTreeMap()),
+                            columnCells = this.columnCells.remove(left.header).put(withName, this.columnCells[left.header] ?: PTreeMap())
+                            // Version inc handled by columnMove
                         )
                     }
                 )
@@ -1476,7 +1479,8 @@ fun move(columnToTableAction: ColumnToTableAction, withName: Header) {
                     (::columnMove)(withName) {
                         copy(
                             columns = this.columns.put(withName, ColumnMeta(newRight.order, oldRef1.columns[left.header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header ${left.header}"))),
-                            columnCells = this.columnCells.put(withName, oldRef1.columnCells[left.header] ?: PTreeMap()),
+                            columnCells = this.columnCells.put(withName, oldRef1.columnCells[left.header] ?: PTreeMap())
+                            // Version inc handled by columnMove
                         )
                     }
                 )
@@ -1567,6 +1571,7 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: Header) {
                         copy(
                             columns = this.columns.put(withName, ColumnMeta(newRight.order, this.columns[left.header]?.prenatal ?: throw InvalidColumnException("Unable to find column for header ${left.header}"))),
                             columnCells = this.columnCells.put(withName, this.columnCells[left.header] ?: PTreeMap())
+                            // Version inc handled by columnCopy
                         )
                     }
                 )
@@ -1581,6 +1586,7 @@ fun copy(columnToColumnAction: ColumnToColumnAction, withName: Header) {
                         copy(
                             columns = this.columns.put(withName, ColumnMeta(newRight.order, leftRef.columns[left.header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header ${left.header}"))),
                             columnCells = this.columnCells.put(withName, leftRef.columnCells[left.header] ?: PTreeMap())
+                            // Version inc handled by columnCopy
                         )
                     }
                 )
@@ -1647,7 +1653,8 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: Header) {
                     (::columnCopy)(withName) {
                         copy(
                             columns = this.columns.put(withName, ColumnMeta(newRight.order, this.columns[left.header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header ${left.header}"))),
-                            columnCells = this.columnCells.put(withName, this.columnCells[left.header] ?: PTreeMap()),
+                            columnCells = this.columnCells.put(withName, this.columnCells[left.header] ?: PTreeMap())
+                            // Version inc handled by columnCopy
                         )
                     }
                 )
@@ -1661,7 +1668,8 @@ fun copy(columnToTableAction: ColumnToTableAction, withName: Header) {
                         val leftRef = left.table.tableRef.get()
                         copy(
                             columns = this.columns.put(withName, ColumnMeta(newRight.order, leftRef.columns[left.header]?.prenatal ?: throw InvalidColumnException("Unable to find column meta for header ${left.header}"))),
-                            columnCells = this.columnCells.put(withName, left.table.tableRef.get().columnCells[left.header] ?: PTreeMap()),
+                            columnCells = this.columnCells.put(withName, left.table.tableRef.get().columnCells[left.header] ?: PTreeMap())
+                            // Version inc handled by columnCopy
                         )
                     }
                 )
@@ -3008,7 +3016,8 @@ fun sort(
             val c2Meta = prev.columns[c2.header] ?: throw InvalidColumnException("Unable to find column meta for header ${c2.header}")
 
             prev.copy(
-                columns = prev.columns.put(c2.header, c2Meta.copy(columnOrder = c1Meta.columnOrder))
+                columns = prev.columns.put(c2.header, c2Meta.copy(columnOrder = c1Meta.columnOrder)),
+                version = prev.version + 1L
             )
         }
 
