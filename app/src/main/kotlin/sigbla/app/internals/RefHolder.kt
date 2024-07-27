@@ -2,7 +2,10 @@
  * See LICENSE file for licensing details. */
 package sigbla.app.internals
 
+import sigbla.app.TableRef
+import sigbla.app.TableViewRef
 import sigbla.app.exceptions.InvalidRefException
+import java.lang.UnsupportedOperationException
 
 internal class RefHolder<V>(@Volatile private var ref: V) {
     private val local = ThreadLocal<V>()
@@ -31,15 +34,29 @@ internal class RefHolder<V>(@Volatile private var ref: V) {
         else this.ref = ref
     }
 
+    private fun refActionAssert(prev: V, next: V) {
+        if (prev === next) return
+
+        val versionIncrease = when (prev) {
+            is TableRef -> prev.version < (next as TableRef).version
+            is TableViewRef -> prev.version < (next as TableViewRef).version
+            else -> throw UnsupportedOperationException(prev!!::class.toString())
+        }
+
+        if (!versionIncrease) {
+            throw AssertionError("Version not increased")
+        }
+    }
+
     fun refAction(updateFunction: (prev: V) -> V): Pair<V, V> {
         // We assume this is synchronized externally
         val prev = get()
         val next = updateFunction(prev)
 
-        // Dev testing
-        //if (prev is sigbla.app.TableRef && next is sigbla.app.TableRef && prev.version >= next.version) throw sigbla.app.exceptions.SigblaAppException()
-        // TODO Consider if we want some kind of testing mode for the above..?
-        //      Look at using assert() and enable this when running tests, unless there's some performance impact overall also when disabled?
+        // Run with java -Dsigbla.assert=true to enable this while testing
+        if (enableAssert) {
+            refActionAssert(prev, next)
+        }
 
         set(next)
         return Pair(prev, next)

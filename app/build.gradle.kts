@@ -84,4 +84,5 @@ tasks.withType<JacocoReport> {
 
 tasks.withType<Test> {
     maxParallelForks = 2
+    systemProperty("sigbla.assert", "true")
 }
