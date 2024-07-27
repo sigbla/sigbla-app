@@ -732,19 +732,23 @@ class TableViewTest {
         // causing the test coverage to be a bit flaky. This should hopefully help
         // get us past that issue..
         var tmpTable = tv1[Table]
-        var count = 0
+        var count1 = 0
+        var count2 = 0
 
         for (i in 0..100) {
             val newTmpTable = tv1[Table]
             if (tmpTable === newTmpTable) {
-                count++
+                count1++
                 clear(tv1)
+            } else {
+                count2++
             }
 
             tmpTable = newTmpTable
         }
 
-        assertTrue(count > 0)
+        assertTrue(count1 > 0)
+        assertTrue(count2 > 0)
     }
 
     @Test
