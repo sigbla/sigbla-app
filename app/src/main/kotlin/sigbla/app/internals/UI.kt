@@ -607,8 +607,8 @@ internal object SigblaBackend {
         }
     }
 
-    private fun produceJson(batch: List<EventJson>): StringBuffer {
-        val buffer = StringBuffer(10240)
+    private fun produceJson(batch: List<EventJson>): StringBuilder {
+        val buffer = StringBuilder(10240)
         buffer.append("[")
         batch.forEachIndexed { i, c ->
             if (i > 0) buffer.append(",")
@@ -1080,7 +1080,7 @@ internal enum class ClientEventType(val type: Int) {
 }
 
 internal interface EventJson {
-    fun addJson(buffer: StringBuffer)
+    fun addJson(buffer: StringBuilder)
 }
 
 @TypeFor(field = "type", adapter = ClientEventAdapter::class)
@@ -1113,7 +1113,7 @@ internal data class ClientEventAddContent(
     val text: String?,
     val html: String?
 ) : ClientEvent(ClientEventType.ADD_CONTENT.type), EventJson {
-    override fun addJson(buffer: StringBuffer) {
+    override fun addJson(buffer: StringBuilder) {
         fun escape(s: String?) = if (s == null) "null" else "\"" + Render.escapeString(s) + "\""
         fun escape(s: List<String>?) = if (s == null) "null" else "[" + s.joinToString(separator = ",") { escape(it) } + "]"
 
@@ -1147,7 +1147,7 @@ internal data class ClientEventAddCommit(
 internal data class ClientEventRemoveContent(
     val id: String
 ): ClientEvent(ClientEventType.REMOVE_CONTENT.type), EventJson {
-    override fun addJson(buffer: StringBuffer) {
+    override fun addJson(buffer: StringBuilder) {
         fun escape(s: String) = "\"" + Render.escapeString(s) + "\""
 
         buffer
