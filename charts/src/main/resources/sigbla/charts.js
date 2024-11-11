@@ -14,6 +14,23 @@ window.sigbla.onTopic("sigbla-charts", (data) => {
         fetch(callback)
             .then(response => response.json())
             .then(config => {
+                if (config.parser) {
+                    const namespaces = config.parser.split(".");
+                    const func = namespaces.pop();
+
+                    let context = window;
+                    for (let i = 0; i < namespaces.length; i++) {
+                        context = context[namespaces[i]];
+                    }
+
+                    context[func](config);
+
+                    delete config.parser;
+                }
+
+                return config;
+            })
+            .then(config => {
                 new Chart(canvas, config);
             });
     }

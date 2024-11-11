@@ -14,47 +14,146 @@ import java.util.concurrent.atomic.AtomicLong
 
 private val chartCounter = AtomicLong()
 
-internal class ChartConfig(
-    val type: String,
-    val data: Data,
-    val options: Options = Options()
+fun chart(
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = {
+    val cellView = this
+
+    batch (cellView.tableView) {
+        val chartConfigJson = StringBuffer().let {
+            var model = ChartModel()
+            configurator(model)
+            model.serialize(it)
+            it.toString()
+        }
+
+        val callback = "sigbla/charts/${chartCounter.getAndIncrement()}"
+
+        val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
+            if (call.request.httpMethod == HttpMethod.Get) {
+                call.respondText { chartConfigJson }
+            }
+        }
+
+        cellView.tableView[Resource[callback]] = handler
+
+        cellView.tableView[Resource["chartjs/charts.js"]] = jsResource("/chartjs/chart.js")
+        cellView.tableView[Resource["chartjs/chartjs-adapter-date-fns.bundle.min.js"]] = jsResource("/chartjs/chartjs-adapter-date-fns.bundle.min.js")
+
+        cellView.tableView[Resource["sigbla/charts.css"]] = cssResource("/sigbla/charts.css")
+        cellView.tableView[Resource["sigbla/charts.js"]] = jsResource("/sigbla/charts.js")
+
+        val transformer = div("sigbla-charts") {
+            attributes["callback"] = callback
+            canvas {}
+        }
+
+        cellView[CellTransformer] = transformer
+
+        cellView[CellTopics].apply { this(this + "sigbla-charts") }
+
+        on(cellView) {
+            val unsubscribe = { off(this) }
+            skipHistory = true
+            events {
+                if (any() && source.tableView[source][CellTransformer].function != transformer) {
+                    // clean up
+                    unsubscribe()
+                    source.tableView[Resource[callback]] = Unit
+                }
+            }
+        }
+    }
+}
+
+
+class LineChartConfig(
+    var type: String,
+    var data: Data,
+    var options: Options = Options()
 ) {
-    internal class Data(
-        val labels: List<String>,
-        val datasets: List<Dataset>
+    class Data(
+        var labels: List<String>,
+        var datasets: List<Dataset>
     ) {
-        internal class Dataset(
-            val label: String,
-            val data: List<Double>,
-            val borderWidth: Int = 1
+        class Dataset(
+            var label: String,
+            var data: List<Double>,
+            var borderWidth: Int = 1
         )
     }
 
-    internal class Options(
-        val scales: Scales = Scales(),
-        val responsive: Boolean = true,
-        val maintainAspectRatio: Boolean = false,
-        val animation: Animation = Animation(),
-        val plugins: Plugins = Plugins()
+    class Options(
+        var scales: Scales = Scales(),
+        var responsive: Boolean = true,
+        var maintainAspectRatio: Boolean = false,
+        var animation: Animation = Animation(),
+        var plugins: Plugins = Plugins()
     ) {
-        internal class Scales(
-            val y: Y = Y()
+        class Scales(
+            var y: Y = Y()
         ) {
-            internal class Y(
-                val beginAtZero: Boolean = true
+            class Y(
+                var beginAtZero: Boolean = true
             )
         }
 
-        internal class Animation(
-            val duration: Int = 0
+        class Animation(
+            var duration: Int = 0
         )
 
-        internal class Plugins(
-            val title: Title = Title()
+        class Plugins(
+            var title: Title = Title()
         ) {
-            internal class Title(
-                val display: Boolean = false,
-                val text: String = ""
+            class Title(
+                var display: Boolean = false,
+                var text: String = ""
+            )
+        }
+    }
+}
+
+class BarChartConfig(
+    var type: String,
+    var data: Data,
+    var options: Options = Options()
+) {
+    class Data(
+        var labels: List<String>,
+        var datasets: List<Dataset>
+    ) {
+        class Dataset(
+            var label: String,
+            var data: List<Double>,
+            var borderWidth: Int = 1
+        )
+    }
+
+    class Options(
+        var scales: Scales = Scales(),
+        var responsive: Boolean = true,
+        var maintainAspectRatio: Boolean = false,
+        var animation: Animation = Animation(),
+        var plugins: Plugins = Plugins()
+    ) {
+        class Scales(
+            var y: Y = Y()
+        ) {
+            class Y(
+                var beginAtZero: Boolean = true
+            )
+        }
+
+        class Animation(
+            var duration: Int = 0
+        )
+
+        class Plugins(
+            var title: Title = Title()
+        ) {
+            class Title(
+                var display: Boolean = false,
+                var text: String = ""
             )
         }
     }
@@ -62,13 +161,15 @@ internal class ChartConfig(
 
 fun line(
     labels: CellRange,
-    vararg datasets: Pair<String, CellRange>
-): CellView.() -> Unit = line(null, labels, *datasets)
+    vararg datasets: Pair<String, CellRange>,
+    configurator: LineChartConfig.() -> Unit = {}
+): CellView.() -> Unit = line(null, labels, *datasets, configurator = configurator)
 
 fun line(
     title: Cell<*>?,
     labels: CellRange,
-    vararg datasets: Pair<String, CellRange>
+    vararg datasets: Pair<String, CellRange>,
+    configurator: LineChartConfig.() -> Unit = {}
 ): CellView.() -> Unit = {
     val listenerRefs = mutableListOf<TableListenerReference>()
 
@@ -84,7 +185,7 @@ fun line(
                 it.first to it.second.table[it.second].mapNotNull(Cell<*>::asDouble)
             }
 
-            line(titleString, labelStrings, *datasetValues.toTypedArray())()
+            line(titleString, labelStrings, *datasetValues.toTypedArray(), configurator = configurator)()
         }
     }
 
@@ -112,31 +213,33 @@ fun line(
 
 fun line(
     labels: List<String>,
-    vararg datasets: Pair<String, List<Double>>
-): CellView.() -> Unit = line(null, labels, *datasets)
+    vararg datasets: Pair<String, List<Double>>,
+    configurator: LineChartConfig.() -> Unit = {}
+): CellView.() -> Unit = line(null, labels, *datasets, configurator = configurator)
 
 fun line(
     title: String?,
     labels: List<String>,
-    vararg datasets: Pair<String, List<Double>>
+    vararg datasets: Pair<String, List<Double>>,
+    configurator: LineChartConfig.() -> Unit = {}
 ): CellView.() -> Unit = {
     val cellView = this
 
     batch (cellView.tableView) {
-        val chartConfig = ChartConfig(
+        val chartConfig = LineChartConfig(
             type = "line",
-            options = ChartConfig.Options(
-                plugins = ChartConfig.Options.Plugins(
-                    title = ChartConfig.Options.Plugins.Title(
+            options = LineChartConfig.Options(
+                plugins = LineChartConfig.Options.Plugins(
+                    title = LineChartConfig.Options.Plugins.Title(
                         display = !title.isNullOrBlank(),
                         text = title ?: ""
                     )
                 )
             ),
-            data = ChartConfig.Data(
+            data = LineChartConfig.Data(
                 labels = labels,
                 datasets = datasets.map {
-                    ChartConfig.Data.Dataset(
+                    LineChartConfig.Data.Dataset(
                         label = it.first,
                         data = it.second
                     )
@@ -144,11 +247,14 @@ fun line(
             )
         )
 
+        configurator(chartConfig)
+        val chartConfigJson = Klaxon().toJsonString(chartConfig)
+
         val callback = "sigbla/charts/${chartCounter.getAndIncrement()}"
 
         val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
             if (call.request.httpMethod == HttpMethod.Get) {
-                call.respondText { Klaxon().toJsonString(chartConfig) }
+                call.respondText { chartConfigJson }
             }
         }
 
@@ -243,20 +349,20 @@ fun bar(
     val cellView = this
 
     batch(cellView.tableView) {
-        val chartConfig = ChartConfig(
+        val chartConfig = BarChartConfig(
             type = "bar",
-            options = ChartConfig.Options(
-                plugins = ChartConfig.Options.Plugins(
-                    title = ChartConfig.Options.Plugins.Title(
+            options = BarChartConfig.Options(
+                plugins = BarChartConfig.Options.Plugins(
+                    title = BarChartConfig.Options.Plugins.Title(
                         display = !title.isNullOrBlank(),
                         text = title ?: ""
                     )
                 )
             ),
-            data = ChartConfig.Data(
+            data = BarChartConfig.Data(
                 labels = labels,
                 datasets = datasets.map {
-                    ChartConfig.Data.Dataset(
+                    BarChartConfig.Data.Dataset(
                         label = it.first,
                         data = it.second
                     )
