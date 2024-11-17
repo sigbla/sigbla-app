@@ -67,12 +67,6 @@ fun chart(
 }
 
 fun line(
-    labels: CellRange,
-    vararg datasets: Pair<String, CellRange>,
-    configurator: ChartModel.() -> Unit = {}
-): CellView.() -> Unit = line(null, labels, *datasets, configurator = configurator)
-
-fun line(
     title: Cell<*>?,
     labels: CellRange,
     vararg datasets: Pair<String, CellRange>,
@@ -89,7 +83,7 @@ fun line(
             val labelStrings = labels.table[labels].map(Cell<*>::toString)
 
             val datasetValues = datasets.map {
-                it.first to it.second.table[it.second].mapNotNull(Cell<*>::asDouble)
+                it.first to it.second.table[it.second].map(Cell<*>::asDouble)
             }
 
             line(titleString, labelStrings, *datasetValues.toTypedArray(), configurator = configurator)()
@@ -119,15 +113,9 @@ fun line(
 }
 
 fun line(
-    labels: List<String>,
-    vararg datasets: Pair<String, List<Double>>,
-    configurator: ChartModel.() -> Unit = {}
-): CellView.() -> Unit = line(null, labels, *datasets, configurator = configurator)
-
-fun line(
     title: String?,
     labels: List<String>,
-    vararg datasets: Pair<String, List<Double>>,
+    vararg datasets: Pair<String, List<Double?>>,
     configurator: ChartModel.() -> Unit = {}
 ): CellView.() -> Unit = chart {
     type = ChartType.Line
@@ -159,12 +147,6 @@ fun line(
 }
 
 fun bar(
-    labels: CellRange,
-    vararg datasets: Pair<String, CellRange>,
-    configurator: ChartModel.() -> Unit = {}
-): CellView.() -> Unit = bar(null, labels, *datasets, configurator = configurator)
-
-fun bar(
     title: Cell<*>?,
     labels: CellRange,
     vararg datasets: Pair<String, CellRange>,
@@ -181,7 +163,7 @@ fun bar(
             val labelStrings = labels.table[labels].map(Cell<*>::toString)
 
             val datasetValues = datasets.map {
-                it.first to it.second.table[it.second].mapNotNull(Cell<*>::asDouble)
+                it.first to it.second.table[it.second].map(Cell<*>::asDouble)
             }
 
             bar(titleString, labelStrings, *datasetValues.toTypedArray(), configurator = configurator)()
@@ -211,15 +193,9 @@ fun bar(
 }
 
 fun bar(
-    labels: List<String>,
-    vararg datasets: Pair<String, List<Double>>,
-    configurator: ChartModel.() -> Unit = {}
-): CellView.() -> Unit = bar(null, labels, *datasets, configurator = configurator)
-
-fun bar(
     title: String?,
     labels: List<String>,
-    vararg datasets: Pair<String, List<Double>>,
+    vararg datasets: Pair<String, List<Double?>>,
     configurator: ChartModel.() -> Unit = {}
 ): CellView.() -> Unit = chart {
     type = ChartType.Bar
