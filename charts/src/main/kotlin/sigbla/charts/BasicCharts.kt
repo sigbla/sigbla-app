@@ -225,3 +225,79 @@ fun bar(
 
     configurator()
 }
+
+fun bubble(
+    title: Cell<*>?,
+    vararg datasets: Pair<String, CellRange>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = {
+    val listenerRefs = mutableListOf<TableListenerReference>()
+
+    fun update() {
+        synchronized(listenerRefs) {
+            val titleString = if (title == null) null else title.table[title].let {
+                if (it is UnitCell) null else it.toString()
+            }
+
+            val datasetValues = datasets.map {
+                it.first to it.second.table[it.second].map(Cell<*>::asDouble)
+            }
+
+            bubble(titleString, *datasetValues.toTypedArray(), configurator = configurator)()
+        }
+    }
+
+    synchronized(listenerRefs) {
+        if (title != null) listenerRefs += on(title) {
+            skipHistory = true
+            events { if (any()) update() }
+        }
+
+        datasets.forEach {
+            listenerRefs += on(it.second) {
+                skipHistory = true
+                events { if (any()) update() }
+            }
+        }
+
+        update()
+    }
+}
+
+fun bubble(
+    title: String?,
+    vararg datasets: Pair<String, List<Double?>>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = chart {
+    type = ChartType.Bubble
+    data = ChartModel.Data(
+        datasets = ChartModel.Data.Datasets(
+            datasets.map { dataset ->
+                ChartModel.Data.Datasets.Dataset(
+                    label = Text(dataset.first),
+                    data = Complex(dataset.second.chunked(3).map { v ->
+                        listOfNotNull(
+                            v.getOrNull(0)?.let { "x" to Numeric(it) },
+                            v.getOrNull(1)?.let { "y" to Numeric(it) },
+                            v.getOrNull(2)?.let { "r" to Numeric(it) },
+                        ).toMap()
+                    })
+                )
+            }
+        )
+    )
+    options = ChartModel.Options(
+        responsive = Bool.True,
+        plugins = ChartModel.Options.Plugins(
+            title = if (title != null) ChartModel.Options.Plugins.Title(
+                display = Bool.True,
+                text = Text(title)
+            ) else null
+        ),
+        animation = ChartModel.Options.Animation(
+            duration = Numeric(0)
+        )
+    )
+
+    configurator()
+}
