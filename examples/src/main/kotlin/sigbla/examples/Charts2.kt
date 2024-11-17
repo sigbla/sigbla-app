@@ -35,10 +35,10 @@ fun main() {
     val url = show(tableView)
     println(url)
 
-    Thread.sleep(10000)
+    Thread.sleep(5000)
 
     tableView["B", 0] = line(
-        //title,
+        title,
         labels,
         "Series A" to dataset1,
         "Series B" to dataset2
@@ -51,7 +51,7 @@ fun main() {
         "Series B" to dataset2
     )
 
-    Thread.sleep(10000)
+    Thread.sleep(5000)
 
     for (i in 1..10000) {
         Thread.sleep(1000)

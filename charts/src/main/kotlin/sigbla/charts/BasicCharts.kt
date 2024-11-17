@@ -66,110 +66,17 @@ fun chart(
     }
 }
 
-
-class LineChartConfig(
-    var type: String,
-    var data: Data,
-    var options: Options = Options()
-) {
-    class Data(
-        var labels: List<String>,
-        var datasets: List<Dataset>
-    ) {
-        class Dataset(
-            var label: String,
-            var data: List<Double>,
-            var borderWidth: Int = 1
-        )
-    }
-
-    class Options(
-        var scales: Scales = Scales(),
-        var responsive: Boolean = true,
-        var maintainAspectRatio: Boolean = false,
-        var animation: Animation = Animation(),
-        var plugins: Plugins = Plugins()
-    ) {
-        class Scales(
-            var y: Y = Y()
-        ) {
-            class Y(
-                var beginAtZero: Boolean = true
-            )
-        }
-
-        class Animation(
-            var duration: Int = 0
-        )
-
-        class Plugins(
-            var title: Title = Title()
-        ) {
-            class Title(
-                var display: Boolean = false,
-                var text: String = ""
-            )
-        }
-    }
-}
-
-class BarChartConfig(
-    var type: String,
-    var data: Data,
-    var options: Options = Options()
-) {
-    class Data(
-        var labels: List<String>,
-        var datasets: List<Dataset>
-    ) {
-        class Dataset(
-            var label: String,
-            var data: List<Double>,
-            var borderWidth: Int = 1
-        )
-    }
-
-    class Options(
-        var scales: Scales = Scales(),
-        var responsive: Boolean = true,
-        var maintainAspectRatio: Boolean = false,
-        var animation: Animation = Animation(),
-        var plugins: Plugins = Plugins()
-    ) {
-        class Scales(
-            var y: Y = Y()
-        ) {
-            class Y(
-                var beginAtZero: Boolean = true
-            )
-        }
-
-        class Animation(
-            var duration: Int = 0
-        )
-
-        class Plugins(
-            var title: Title = Title()
-        ) {
-            class Title(
-                var display: Boolean = false,
-                var text: String = ""
-            )
-        }
-    }
-}
-
 fun line(
     labels: CellRange,
     vararg datasets: Pair<String, CellRange>,
-    configurator: LineChartConfig.() -> Unit = {}
+    configurator: ChartModel.() -> Unit = {}
 ): CellView.() -> Unit = line(null, labels, *datasets, configurator = configurator)
 
 fun line(
     title: Cell<*>?,
     labels: CellRange,
     vararg datasets: Pair<String, CellRange>,
-    configurator: LineChartConfig.() -> Unit = {}
+    configurator: ChartModel.() -> Unit = {}
 ): CellView.() -> Unit = {
     val listenerRefs = mutableListOf<TableListenerReference>()
 
@@ -214,87 +121,54 @@ fun line(
 fun line(
     labels: List<String>,
     vararg datasets: Pair<String, List<Double>>,
-    configurator: LineChartConfig.() -> Unit = {}
+    configurator: ChartModel.() -> Unit = {}
 ): CellView.() -> Unit = line(null, labels, *datasets, configurator = configurator)
 
 fun line(
     title: String?,
     labels: List<String>,
     vararg datasets: Pair<String, List<Double>>,
-    configurator: LineChartConfig.() -> Unit = {}
-): CellView.() -> Unit = {
-    val cellView = this
-
-    batch (cellView.tableView) {
-        val chartConfig = LineChartConfig(
-            type = "line",
-            options = LineChartConfig.Options(
-                plugins = LineChartConfig.Options.Plugins(
-                    title = LineChartConfig.Options.Plugins.Title(
-                        display = !title.isNullOrBlank(),
-                        text = title ?: ""
-                    )
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = chart {
+    type = ChartType.Line
+    data = ChartModel.Data(
+        labels = Strings(labels),
+        datasets = ChartModel.Data.Datasets(
+            datasets.map {
+                ChartModel.Data.Datasets.Dataset(
+                    label = Text(it.first),
+                    data = Numbers(it.second)
                 )
-            ),
-            data = LineChartConfig.Data(
-                labels = labels,
-                datasets = datasets.map {
-                    LineChartConfig.Data.Dataset(
-                        label = it.first,
-                        data = it.second
-                    )
-                }
-            )
+            }
         )
+    )
+    options = ChartModel.Options(
+        responsive = Bool.True,
+        plugins = ChartModel.Options.Plugins(
+            title = if (title != null) ChartModel.Options.Plugins.Title(
+                display = Bool.True,
+                text = Text(title)
+            ) else null
+        ),
+        animation = ChartModel.Options.Animation(
+            duration = Numeric(0)
+        )
+    )
 
-        configurator(chartConfig)
-        val chartConfigJson = Klaxon().toJsonString(chartConfig)
-
-        val callback = "sigbla/charts/${chartCounter.getAndIncrement()}"
-
-        val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
-            if (call.request.httpMethod == HttpMethod.Get) {
-                call.respondText { chartConfigJson }
-            }
-        }
-
-        cellView.tableView[Resource[callback]] = handler
-        cellView.tableView[Resource["chartjs/charts.js"]] = jsResource("/chartjs/chart.js")
-        cellView.tableView[Resource["sigbla/charts.css"]] = cssResource("/sigbla/charts.css")
-        cellView.tableView[Resource["sigbla/charts.js"]] = jsResource("/sigbla/charts.js")
-
-        val transformer = div("sigbla-charts") {
-            attributes["callback"] = callback
-            canvas {}
-        }
-
-        cellView[CellTransformer] = transformer
-
-        cellView[CellTopics].apply { this(this + "sigbla-charts") }
-
-        on(cellView) {
-            val unsubscribe = { off(this) }
-            skipHistory = true
-            events {
-                if (any() && source.tableView[source][CellTransformer].function != transformer) {
-                    // clean up
-                    unsubscribe()
-                    source.tableView[Resource[callback]] = Unit
-                }
-            }
-        }
-    }
+    configurator()
 }
 
 fun bar(
     labels: CellRange,
-    vararg datasets: Pair<String, CellRange>
-): CellView.() -> Unit = bar(null, labels, *datasets)
+    vararg datasets: Pair<String, CellRange>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = bar(null, labels, *datasets, configurator = configurator)
 
 fun bar(
     title: Cell<*>?,
     labels: CellRange,
-    vararg datasets: Pair<String, CellRange>
+    vararg datasets: Pair<String, CellRange>,
+    configurator: ChartModel.() -> Unit = {}
 ): CellView.() -> Unit = {
     val listenerRefs = mutableListOf<TableListenerReference>()
 
@@ -310,7 +184,7 @@ fun bar(
                 it.first to it.second.table[it.second].mapNotNull(Cell<*>::asDouble)
             }
 
-            bar(titleString, labelStrings, *datasetValues.toTypedArray())()
+            bar(titleString, labelStrings, *datasetValues.toTypedArray(), configurator = configurator)()
         }
     }
 
@@ -338,70 +212,40 @@ fun bar(
 
 fun bar(
     labels: List<String>,
-    vararg datasets: Pair<String, List<Double>>
-): CellView.() -> Unit = bar(null, labels, *datasets)
+    vararg datasets: Pair<String, List<Double>>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = bar(null, labels, *datasets, configurator = configurator)
 
 fun bar(
     title: String?,
     labels: List<String>,
-    vararg datasets: Pair<String, List<Double>>
-): CellView.() -> Unit = {
-    val cellView = this
-
-    batch(cellView.tableView) {
-        val chartConfig = BarChartConfig(
-            type = "bar",
-            options = BarChartConfig.Options(
-                plugins = BarChartConfig.Options.Plugins(
-                    title = BarChartConfig.Options.Plugins.Title(
-                        display = !title.isNullOrBlank(),
-                        text = title ?: ""
-                    )
+    vararg datasets: Pair<String, List<Double>>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = chart {
+    type = ChartType.Bar
+    data = ChartModel.Data(
+        labels = Strings(labels),
+        datasets = ChartModel.Data.Datasets(
+            datasets.map {
+                ChartModel.Data.Datasets.Dataset(
+                    label = Text(it.first),
+                    data = Numbers(it.second)
                 )
-            ),
-            data = BarChartConfig.Data(
-                labels = labels,
-                datasets = datasets.map {
-                    BarChartConfig.Data.Dataset(
-                        label = it.first,
-                        data = it.second
-                    )
-                }
-            )
+            }
         )
+    )
+    options = ChartModel.Options(
+        responsive = Bool.True,
+        plugins = ChartModel.Options.Plugins(
+            title = if (title != null) ChartModel.Options.Plugins.Title(
+                display = Bool.True,
+                text = Text(title)
+            ) else null
+        ),
+        animation = ChartModel.Options.Animation(
+            duration = Numeric(0)
+        )
+    )
 
-        val callback = "sigbla/charts/${chartCounter.getAndIncrement()}"
-
-        val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
-            if (call.request.httpMethod == HttpMethod.Get) {
-                call.respondText { Klaxon().toJsonString(chartConfig) }
-            }
-        }
-
-        cellView.tableView[Resource[callback]] = handler
-        cellView.tableView[Resource["chartjs/charts.js"]] = jsResource("/chartjs/chart.js")
-        cellView.tableView[Resource["sigbla/charts.css"]] = cssResource("/sigbla/charts.css")
-        cellView.tableView[Resource["sigbla/charts.js"]] = jsResource("/sigbla/charts.js")
-
-        val transformer = div("sigbla-charts") {
-            attributes["callback"] = callback
-            canvas {}
-        }
-
-        cellView[CellTransformer] = transformer
-
-        cellView[CellTopics].apply { this(this + "sigbla-charts") }
-
-        on(cellView) {
-            val unsubscribe = { off(this) }
-            skipHistory = true
-            events {
-                if (any() && source.tableView[source][CellTransformer].function != transformer) {
-                    // clean up
-                    unsubscribe()
-                    source.tableView[Resource[callback]] = Unit
-                }
-            }
-        }
-    }
+    configurator()
 }
