@@ -179,7 +179,8 @@ open class Numeric(
     ChartModel.Options.Plugins.Tooltip.BoxWidth,
     ChartModel.Options.Plugins.Tooltip.BoxHeight,
     ChartModel.Options.Plugins.Tooltip.BoxPadding,
-    ChartModel.Options.Plugins.Tooltip.BorderWidth
+    ChartModel.Options.Plugins.Tooltip.BorderWidth,
+    ChartModel.Options.Animation.Duration
 {
     override fun serialize(buffer: StringBuffer) { buffer.append(value.toString()) }
 }
@@ -810,6 +811,7 @@ open class ChartModel (
         var stacked: Stacked? = null,
         var scales: Scales? = null,
         var plugins: Plugins? = null,
+        var animation: Animation? = null
     ) : ChartModelElement {
         interface SpanGaps : ChartModelElement
         interface IndexAxis : ChartModelElement
@@ -1537,6 +1539,16 @@ open class ChartModel (
             }
         }
 
+        open class Animation(
+            var duration: Duration? = null
+        ) : ChartModelElement {
+            interface Duration : ChartModelElement
+
+            override fun serialize(buffer: StringBuffer) {
+                serializeKeyValue(buffer, "duration" to duration)
+            }
+        }
+
         override fun serialize(buffer: StringBuffer) {
             serializeKeyValue(
                 buffer,
@@ -1548,7 +1560,8 @@ open class ChartModel (
                 "interaction" to interaction,
                 "stacked" to stacked,
                 "scales" to scales,
-                "plugins" to plugins
+                "plugins" to plugins,
+                "animation" to animation
             )
         }
     }

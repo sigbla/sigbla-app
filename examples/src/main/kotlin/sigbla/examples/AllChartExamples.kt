@@ -12,7 +12,7 @@ fun main() {
     val table = Table["AllChartExamples"]
     val tableView = TableView[table]
 
-    val url = show(tableView, ref = "all-chart-examples")
+    val url = show(tableView, ref = "all-chart-examples", config = spaciousViewConfig(title = "All chart examples"))
     println(url)
 
     tableView[EMPTY_HEADER][CellWidth] = 20
@@ -50,6 +50,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Bar chart title")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -82,6 +85,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Bar chart with two dataset")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -112,6 +118,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Bar chart with floating bars")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -145,6 +154,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Horizontal bar chart")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -185,6 +197,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Stacked bar chart")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -233,6 +248,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Stacked by group bar chart")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -265,6 +283,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Line chart title")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -293,6 +314,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Line chart with point styling")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -353,6 +377,9 @@ fun main() {
                     suggestedMin = Numeric(-10),
                     suggestedMax = Numeric(200)
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -400,6 +427,9 @@ fun main() {
                         drawOnChartArea = Bool.False
                     )
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -429,6 +459,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Stepped line chart")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -491,6 +524,9 @@ fun main() {
                     ),
                     type = ScaleType.Logarithmic
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -566,6 +602,9 @@ fun main() {
                         text = Text("Value")
                     )
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -622,6 +661,9 @@ fun main() {
                         bottom = 10
                     )
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -658,6 +700,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Combined line and bar chart")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -696,6 +741,9 @@ fun main() {
                 "y" to ChartModel.Options.Scales.Scale(
                     stacked = Bool.True
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -729,6 +777,9 @@ fun main() {
             ),
             interaction = ChartModel.Options.Interaction(
                 intersect = Bool.False
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -780,6 +831,9 @@ fun main() {
                         color = Color.RGB(255, 99, 132)
                     )
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -810,6 +864,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Doughnut chart")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -837,6 +894,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Pie chart")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -875,6 +935,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Pie chart with multiple groups")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -902,6 +965,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Polar area chart")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -940,6 +1006,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Polar area chart with centered point labels")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -998,6 +1067,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Radar chart with skipped points")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -1046,6 +1118,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Bubble chart")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -1103,6 +1178,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Scatter chart")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -1169,6 +1247,9 @@ fun main() {
                         drawOnChartArea = Bool.False
                     )
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -1251,6 +1332,9 @@ fun main() {
                         )
                     )
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
@@ -1295,6 +1379,9 @@ fun main() {
                     display = Bool.True,
                     text = Text("Bar chart with custom config parser")
                 )
+            ),
+            animation = ChartModel.Options.Animation(
+                duration = Numeric(0)
             )
         )
     }
