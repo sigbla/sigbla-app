@@ -1,14 +1,19 @@
 /* Copyright 2019-2024, Christian Felde.
  * See LICENSE file for licensing details. */
-package sigbla.examples
+package sigbla.examples.charts
 
 import sigbla.app.*
 import sigbla.charts.*
 import java.util.concurrent.ThreadLocalRandom
 
 fun main() {
-    val table = Table["Charts"]
+    TableView[Port] = 8080
+
+    val table = Table["ChartsWithListeners"]
     val tableView = TableView[table]
+
+    val url = show(tableView, ref = "charts-with-listeners", config = compactViewConfig(title = "Charts with listeners"))
+    println(url)
 
     table["A", 0] = "Title"
     val title = table["A", 0]
@@ -31,9 +36,6 @@ fun main() {
     tableView[0][CellHeight] = 250
     tableView["B"][CellWidth] = 350
     tableView["C"][CellWidth] = 350
-
-    val url = show(tableView)
-    println(url)
 
     Thread.sleep(5000)
 
@@ -58,6 +60,4 @@ fun main() {
         println("Updating..")
         table["A", 7] = ThreadLocalRandom.current().nextDouble(1.0, 2.0)
     }
-
-    println("END")
 }

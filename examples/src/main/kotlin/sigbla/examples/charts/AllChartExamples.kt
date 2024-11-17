@@ -1,6 +1,6 @@
 /* Copyright 2019-2024, Christian Felde.
  * See LICENSE file for licensing details. */
-package sigbla.examples
+package sigbla.examples.charts
 
 import sigbla.app.*
 import sigbla.charts.*
