@@ -14,146 +14,32 @@ import java.util.concurrent.atomic.AtomicLong
 
 private val chartCounter = AtomicLong()
 
-internal class ChartConfig(
-    val type: String,
-    val data: Data,
-    val options: Options = Options()
-) {
-    internal class Data(
-        val labels: List<String>,
-        val datasets: List<Dataset>
-    ) {
-        internal class Dataset(
-            val label: String,
-            val data: List<Double>,
-            val borderWidth: Int = 1
-        )
-    }
-
-    internal class Options(
-        val scales: Scales = Scales(),
-        val responsive: Boolean = true,
-        val maintainAspectRatio: Boolean = false,
-        val animation: Animation = Animation(),
-        val plugins: Plugins = Plugins()
-    ) {
-        internal class Scales(
-            val y: Y = Y()
-        ) {
-            internal class Y(
-                val beginAtZero: Boolean = true
-            )
-        }
-
-        internal class Animation(
-            val duration: Int = 0
-        )
-
-        internal class Plugins(
-            val title: Title = Title()
-        ) {
-            internal class Title(
-                val display: Boolean = false,
-                val text: String = ""
-            )
-        }
-    }
-}
-
-fun line(
-    labels: CellRange,
-    vararg datasets: Pair<String, CellRange>
-): CellView.() -> Unit = line(null, labels, *datasets)
-
-fun line(
-    title: Cell<*>?,
-    labels: CellRange,
-    vararg datasets: Pair<String, CellRange>
-): CellView.() -> Unit = {
-    val listenerRefs = mutableListOf<TableListenerReference>()
-
-    fun update() {
-        synchronized(listenerRefs) {
-            val titleString = if (title == null) null else title.table[title].let {
-                if (it is UnitCell) null else it.toString()
-            }
-
-            val labelStrings = labels.table[labels].map(Cell<*>::toString)
-
-            val datasetValues = datasets.map {
-                it.first to it.second.table[it.second].mapNotNull(Cell<*>::asDouble)
-            }
-
-            line(titleString, labelStrings, *datasetValues.toTypedArray())()
-        }
-    }
-
-    synchronized(listenerRefs) {
-        if (title != null) listenerRefs += on(title) {
-            skipHistory = true
-            events { if (any()) update() }
-        }
-
-        listenerRefs += on(labels) {
-            skipHistory = true
-            events { if (any()) update() }
-        }
-
-        datasets.forEach {
-            listenerRefs += on(it.second) {
-                skipHistory = true
-                events { if (any()) update() }
-            }
-        }
-
-        update()
-    }
-}
-
-fun line(
-    labels: List<String>,
-    vararg datasets: Pair<String, List<Double>>
-): CellView.() -> Unit = line(null, labels, *datasets)
-
-fun line(
-    title: String?,
-    labels: List<String>,
-    vararg datasets: Pair<String, List<Double>>
+fun chart(
+    configurator: ChartModel.() -> Unit = {}
 ): CellView.() -> Unit = {
     val cellView = this
 
     batch (cellView.tableView) {
-        val chartConfig = ChartConfig(
-            type = "line",
-            options = ChartConfig.Options(
-                plugins = ChartConfig.Options.Plugins(
-                    title = ChartConfig.Options.Plugins.Title(
-                        display = !title.isNullOrBlank(),
-                        text = title ?: ""
-                    )
-                )
-            ),
-            data = ChartConfig.Data(
-                labels = labels,
-                datasets = datasets.map {
-                    ChartConfig.Data.Dataset(
-                        label = it.first,
-                        data = it.second
-                    )
-                }
-            )
-        )
+        val chartConfigJson = StringBuffer().let {
+            var model = ChartModel()
+            configurator(model)
+            model.serialize(it)
+            it.toString()
+        }
 
         val callback = "sigbla/charts/${chartCounter.getAndIncrement()}"
 
         val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
             if (call.request.httpMethod == HttpMethod.Get) {
-                call.respondText { Klaxon().toJsonString(chartConfig) }
+                call.respondText { chartConfigJson }
             }
         }
 
         cellView.tableView[Resource[callback]] = handler
+
         cellView.tableView[Resource["chartjs/charts.js"]] = jsResource("/chartjs/chart.js")
+        cellView.tableView[Resource["chartjs/chartjs-adapter-date-fns.bundle.min.js"]] = jsResource("/chartjs/chartjs-adapter-date-fns.bundle.min.js")
+
         cellView.tableView[Resource["sigbla/charts.css"]] = cssResource("/sigbla/charts.css")
         cellView.tableView[Resource["sigbla/charts.js"]] = jsResource("/sigbla/charts.js")
 
@@ -180,15 +66,11 @@ fun line(
     }
 }
 
-fun bar(
-    labels: CellRange,
-    vararg datasets: Pair<String, CellRange>
-): CellView.() -> Unit = bar(null, labels, *datasets)
-
-fun bar(
+fun line(
     title: Cell<*>?,
     labels: CellRange,
-    vararg datasets: Pair<String, CellRange>
+    vararg datasets: Pair<String, CellRange>,
+    configurator: ChartModel.() -> Unit = {}
 ): CellView.() -> Unit = {
     val listenerRefs = mutableListOf<TableListenerReference>()
 
@@ -201,10 +83,90 @@ fun bar(
             val labelStrings = labels.table[labels].map(Cell<*>::toString)
 
             val datasetValues = datasets.map {
-                it.first to it.second.table[it.second].mapNotNull(Cell<*>::asDouble)
+                it.first to it.second.table[it.second].map(Cell<*>::asDouble)
             }
 
-            bar(titleString, labelStrings, *datasetValues.toTypedArray())()
+            line(titleString, labelStrings, *datasetValues.toTypedArray(), configurator = configurator)()
+        }
+    }
+
+    synchronized(listenerRefs) {
+        if (title != null) listenerRefs += on(title) {
+            skipHistory = true
+            events { if (any()) update() }
+        }
+
+        listenerRefs += on(labels) {
+            skipHistory = true
+            events { if (any()) update() }
+        }
+
+        datasets.forEach {
+            listenerRefs += on(it.second) {
+                skipHistory = true
+                events { if (any()) update() }
+            }
+        }
+
+        update()
+    }
+}
+
+fun line(
+    title: String?,
+    labels: List<String>,
+    vararg datasets: Pair<String, List<Double?>>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = chart {
+    type = ChartType.Line
+    data = ChartModel.Data(
+        labels = Strings(labels),
+        datasets = ChartModel.Data.Datasets(
+            datasets.map {
+                ChartModel.Data.Datasets.Dataset(
+                    label = Text(it.first),
+                    data = Numbers(it.second)
+                )
+            }
+        )
+    )
+    options = ChartModel.Options(
+        responsive = Bool.True,
+        plugins = ChartModel.Options.Plugins(
+            title = if (title != null) ChartModel.Options.Plugins.Title(
+                display = Bool.True,
+                text = Text(title)
+            ) else null
+        ),
+        animation = ChartModel.Options.Animation(
+            duration = Numeric(0)
+        )
+    )
+
+    configurator()
+}
+
+fun bar(
+    title: Cell<*>?,
+    labels: CellRange,
+    vararg datasets: Pair<String, CellRange>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = {
+    val listenerRefs = mutableListOf<TableListenerReference>()
+
+    fun update() {
+        synchronized(listenerRefs) {
+            val titleString = if (title == null) null else title.table[title].let {
+                if (it is UnitCell) null else it.toString()
+            }
+
+            val labelStrings = labels.table[labels].map(Cell<*>::toString)
+
+            val datasetValues = datasets.map {
+                it.first to it.second.table[it.second].map(Cell<*>::asDouble)
+            }
+
+            bar(titleString, labelStrings, *datasetValues.toTypedArray(), configurator = configurator)()
         }
     }
 
@@ -231,71 +193,506 @@ fun bar(
 }
 
 fun bar(
-    labels: List<String>,
-    vararg datasets: Pair<String, List<Double>>
-): CellView.() -> Unit = bar(null, labels, *datasets)
-
-fun bar(
     title: String?,
     labels: List<String>,
-    vararg datasets: Pair<String, List<Double>>
-): CellView.() -> Unit = {
-    val cellView = this
-
-    batch(cellView.tableView) {
-        val chartConfig = ChartConfig(
-            type = "bar",
-            options = ChartConfig.Options(
-                plugins = ChartConfig.Options.Plugins(
-                    title = ChartConfig.Options.Plugins.Title(
-                        display = !title.isNullOrBlank(),
-                        text = title ?: ""
-                    )
+    vararg datasets: Pair<String, List<Double?>>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = chart {
+    type = ChartType.Bar
+    data = ChartModel.Data(
+        labels = Strings(labels),
+        datasets = ChartModel.Data.Datasets(
+            datasets.map {
+                ChartModel.Data.Datasets.Dataset(
+                    label = Text(it.first),
+                    data = Numbers(it.second)
                 )
-            ),
-            data = ChartConfig.Data(
-                labels = labels,
-                datasets = datasets.map {
-                    ChartConfig.Data.Dataset(
-                        label = it.first,
-                        data = it.second
-                    )
-                }
-            )
+            }
         )
+    )
+    options = ChartModel.Options(
+        responsive = Bool.True,
+        plugins = ChartModel.Options.Plugins(
+            title = if (title != null) ChartModel.Options.Plugins.Title(
+                display = Bool.True,
+                text = Text(title)
+            ) else null
+        ),
+        animation = ChartModel.Options.Animation(
+            duration = Numeric(0)
+        )
+    )
 
-        val callback = "sigbla/charts/${chartCounter.getAndIncrement()}"
+    configurator()
+}
 
-        val handler: suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
-            if (call.request.httpMethod == HttpMethod.Get) {
-                call.respondText { Klaxon().toJsonString(chartConfig) }
+fun bubble(
+    title: Cell<*>?,
+    vararg datasets: Pair<String, CellRange>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = {
+    val listenerRefs = mutableListOf<TableListenerReference>()
+
+    fun update() {
+        synchronized(listenerRefs) {
+            val titleString = if (title == null) null else title.table[title].let {
+                if (it is UnitCell) null else it.toString()
             }
-        }
 
-        cellView.tableView[Resource[callback]] = handler
-        cellView.tableView[Resource["chartjs/charts.js"]] = jsResource("/chartjs/chart.js")
-        cellView.tableView[Resource["sigbla/charts.css"]] = cssResource("/sigbla/charts.css")
-        cellView.tableView[Resource["sigbla/charts.js"]] = jsResource("/sigbla/charts.js")
-
-        val transformer = div("sigbla-charts") {
-            attributes["callback"] = callback
-            canvas {}
-        }
-
-        cellView[CellTransformer] = transformer
-
-        cellView[CellTopics].apply { this(this + "sigbla-charts") }
-
-        on(cellView) {
-            val unsubscribe = { off(this) }
-            skipHistory = true
-            events {
-                if (any() && source.tableView[source][CellTransformer].function != transformer) {
-                    // clean up
-                    unsubscribe()
-                    source.tableView[Resource[callback]] = Unit
-                }
+            val datasetValues = datasets.map {
+                it.first to it.second.table[it.second].map(Cell<*>::asDouble)
             }
+
+            bubble(titleString, *datasetValues.toTypedArray(), configurator = configurator)()
         }
     }
+
+    synchronized(listenerRefs) {
+        if (title != null) listenerRefs += on(title) {
+            skipHistory = true
+            events { if (any()) update() }
+        }
+
+        datasets.forEach {
+            listenerRefs += on(it.second) {
+                skipHistory = true
+                events { if (any()) update() }
+            }
+        }
+
+        update()
+    }
+}
+
+fun bubble(
+    title: String?,
+    vararg datasets: Pair<String, List<Double?>>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = chart {
+    type = ChartType.Bubble
+    data = ChartModel.Data(
+        datasets = ChartModel.Data.Datasets(
+            datasets.map { dataset ->
+                ChartModel.Data.Datasets.Dataset(
+                    label = Text(dataset.first),
+                    data = Complex(dataset.second.chunked(3).map { v ->
+                        listOfNotNull(
+                            v.getOrNull(0)?.let { "x" to Numeric(it) },
+                            v.getOrNull(1)?.let { "y" to Numeric(it) },
+                            v.getOrNull(2)?.let { "r" to Numeric(it) }
+                        ).toMap()
+                    })
+                )
+            }
+        )
+    )
+    options = ChartModel.Options(
+        responsive = Bool.True,
+        plugins = ChartModel.Options.Plugins(
+            title = if (title != null) ChartModel.Options.Plugins.Title(
+                display = Bool.True,
+                text = Text(title)
+            ) else null
+        ),
+        animation = ChartModel.Options.Animation(
+            duration = Numeric(0)
+        )
+    )
+
+    configurator()
+}
+
+fun scatter(
+    title: Cell<*>?,
+    vararg datasets: Pair<String, CellRange>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = {
+    val listenerRefs = mutableListOf<TableListenerReference>()
+
+    fun update() {
+        synchronized(listenerRefs) {
+            val titleString = if (title == null) null else title.table[title].let {
+                if (it is UnitCell) null else it.toString()
+            }
+
+            val datasetValues = datasets.map {
+                it.first to it.second.table[it.second].map(Cell<*>::asDouble)
+            }
+
+            scatter(titleString, *datasetValues.toTypedArray(), configurator = configurator)()
+        }
+    }
+
+    synchronized(listenerRefs) {
+        if (title != null) listenerRefs += on(title) {
+            skipHistory = true
+            events { if (any()) update() }
+        }
+
+        datasets.forEach {
+            listenerRefs += on(it.second) {
+                skipHistory = true
+                events { if (any()) update() }
+            }
+        }
+
+        update()
+    }
+}
+
+fun scatter(
+    title: String?,
+    vararg datasets: Pair<String, List<Double?>>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = chart {
+    type = ChartType.Scatter
+    data = ChartModel.Data(
+        datasets = ChartModel.Data.Datasets(
+            datasets.map { dataset ->
+                ChartModel.Data.Datasets.Dataset(
+                    label = Text(dataset.first),
+                    data = Complex(dataset.second.chunked(2).map { v ->
+                        listOfNotNull(
+                            v.getOrNull(0)?.let { "x" to Numeric(it) },
+                            v.getOrNull(1)?.let { "y" to Numeric(it) }
+                        ).toMap()
+                    })
+                )
+            }
+        )
+    )
+    options = ChartModel.Options(
+        responsive = Bool.True,
+        plugins = ChartModel.Options.Plugins(
+            title = if (title != null) ChartModel.Options.Plugins.Title(
+                display = Bool.True,
+                text = Text(title)
+            ) else null
+        ),
+        animation = ChartModel.Options.Animation(
+            duration = Numeric(0)
+        )
+    )
+
+    configurator()
+}
+
+fun doughnut(
+    title: Cell<*>?,
+    labels: CellRange,
+    vararg datasets: Pair<String, CellRange>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = {
+    val listenerRefs = mutableListOf<TableListenerReference>()
+
+    fun update() {
+        synchronized(listenerRefs) {
+            val titleString = if (title == null) null else title.table[title].let {
+                if (it is UnitCell) null else it.toString()
+            }
+
+            val labelStrings = labels.table[labels].map(Cell<*>::toString)
+
+            val datasetValues = datasets.map {
+                it.first to it.second.table[it.second].map(Cell<*>::asDouble)
+            }
+
+            doughnut(titleString, labelStrings, *datasetValues.toTypedArray(), configurator = configurator)()
+        }
+    }
+
+    synchronized(listenerRefs) {
+        if (title != null) listenerRefs += on(title) {
+            skipHistory = true
+            events { if (any()) update() }
+        }
+
+        listenerRefs += on(labels) {
+            skipHistory = true
+            events { if (any()) update() }
+        }
+
+        datasets.forEach {
+            listenerRefs += on(it.second) {
+                skipHistory = true
+                events { if (any()) update() }
+            }
+        }
+
+        update()
+    }
+}
+
+fun doughnut(
+    title: String?,
+    labels: List<String>,
+    vararg datasets: Pair<String, List<Double?>>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = chart {
+    type = ChartType.Doughnut
+    data = ChartModel.Data(
+        labels = Strings(labels),
+        datasets = ChartModel.Data.Datasets(
+            datasets.map {
+                ChartModel.Data.Datasets.Dataset(
+                    label = Text(it.first),
+                    data = Numbers(it.second)
+                )
+            }
+        )
+    )
+    options = ChartModel.Options(
+        responsive = Bool.True,
+        plugins = ChartModel.Options.Plugins(
+            title = if (title != null) ChartModel.Options.Plugins.Title(
+                display = Bool.True,
+                text = Text(title)
+            ) else null
+        ),
+        animation = ChartModel.Options.Animation(
+            duration = Numeric(0)
+        )
+    )
+
+    configurator()
+}
+
+fun pie(
+    title: Cell<*>?,
+    labels: CellRange,
+    vararg datasets: Pair<String, CellRange>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = {
+    val listenerRefs = mutableListOf<TableListenerReference>()
+
+    fun update() {
+        synchronized(listenerRefs) {
+            val titleString = if (title == null) null else title.table[title].let {
+                if (it is UnitCell) null else it.toString()
+            }
+
+            val labelStrings = labels.table[labels].map(Cell<*>::toString)
+
+            val datasetValues = datasets.map {
+                it.first to it.second.table[it.second].map(Cell<*>::asDouble)
+            }
+
+            pie(titleString, labelStrings, *datasetValues.toTypedArray(), configurator = configurator)()
+        }
+    }
+
+    synchronized(listenerRefs) {
+        if (title != null) listenerRefs += on(title) {
+            skipHistory = true
+            events { if (any()) update() }
+        }
+
+        listenerRefs += on(labels) {
+            skipHistory = true
+            events { if (any()) update() }
+        }
+
+        datasets.forEach {
+            listenerRefs += on(it.second) {
+                skipHistory = true
+                events { if (any()) update() }
+            }
+        }
+
+        update()
+    }
+}
+
+fun pie(
+    title: String?,
+    labels: List<String>,
+    vararg datasets: Pair<String, List<Double?>>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = chart {
+    type = ChartType.Pie
+    data = ChartModel.Data(
+        labels = Strings(labels),
+        datasets = ChartModel.Data.Datasets(
+            datasets.map {
+                ChartModel.Data.Datasets.Dataset(
+                    label = Text(it.first),
+                    data = Numbers(it.second)
+                )
+            }
+        )
+    )
+    options = ChartModel.Options(
+        responsive = Bool.True,
+        plugins = ChartModel.Options.Plugins(
+            title = if (title != null) ChartModel.Options.Plugins.Title(
+                display = Bool.True,
+                text = Text(title)
+            ) else null
+        ),
+        animation = ChartModel.Options.Animation(
+            duration = Numeric(0)
+        )
+    )
+
+    configurator()
+}
+
+fun polarArea(
+    title: Cell<*>?,
+    labels: CellRange,
+    vararg datasets: Pair<String, CellRange>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = {
+    val listenerRefs = mutableListOf<TableListenerReference>()
+
+    fun update() {
+        synchronized(listenerRefs) {
+            val titleString = if (title == null) null else title.table[title].let {
+                if (it is UnitCell) null else it.toString()
+            }
+
+            val labelStrings = labels.table[labels].map(Cell<*>::toString)
+
+            val datasetValues = datasets.map {
+                it.first to it.second.table[it.second].map(Cell<*>::asDouble)
+            }
+
+            polarArea(titleString, labelStrings, *datasetValues.toTypedArray(), configurator = configurator)()
+        }
+    }
+
+    synchronized(listenerRefs) {
+        if (title != null) listenerRefs += on(title) {
+            skipHistory = true
+            events { if (any()) update() }
+        }
+
+        listenerRefs += on(labels) {
+            skipHistory = true
+            events { if (any()) update() }
+        }
+
+        datasets.forEach {
+            listenerRefs += on(it.second) {
+                skipHistory = true
+                events { if (any()) update() }
+            }
+        }
+
+        update()
+    }
+}
+
+fun polarArea(
+    title: String?,
+    labels: List<String>,
+    vararg datasets: Pair<String, List<Double?>>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = chart {
+    type = ChartType.PolarArea
+    data = ChartModel.Data(
+        labels = Strings(labels),
+        datasets = ChartModel.Data.Datasets(
+            datasets.map {
+                ChartModel.Data.Datasets.Dataset(
+                    label = Text(it.first),
+                    data = Numbers(it.second)
+                )
+            }
+        )
+    )
+    options = ChartModel.Options(
+        responsive = Bool.True,
+        plugins = ChartModel.Options.Plugins(
+            title = if (title != null) ChartModel.Options.Plugins.Title(
+                display = Bool.True,
+                text = Text(title)
+            ) else null
+        ),
+        animation = ChartModel.Options.Animation(
+            duration = Numeric(0)
+        )
+    )
+
+    configurator()
+}
+
+fun radar(
+    title: Cell<*>?,
+    labels: CellRange,
+    vararg datasets: Pair<String, CellRange>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = {
+    val listenerRefs = mutableListOf<TableListenerReference>()
+
+    fun update() {
+        synchronized(listenerRefs) {
+            val titleString = if (title == null) null else title.table[title].let {
+                if (it is UnitCell) null else it.toString()
+            }
+
+            val labelStrings = labels.table[labels].map(Cell<*>::toString)
+
+            val datasetValues = datasets.map {
+                it.first to it.second.table[it.second].map(Cell<*>::asDouble)
+            }
+
+            radar(titleString, labelStrings, *datasetValues.toTypedArray(), configurator = configurator)()
+        }
+    }
+
+    synchronized(listenerRefs) {
+        if (title != null) listenerRefs += on(title) {
+            skipHistory = true
+            events { if (any()) update() }
+        }
+
+        listenerRefs += on(labels) {
+            skipHistory = true
+            events { if (any()) update() }
+        }
+
+        datasets.forEach {
+            listenerRefs += on(it.second) {
+                skipHistory = true
+                events { if (any()) update() }
+            }
+        }
+
+        update()
+    }
+}
+
+fun radar(
+    title: String?,
+    labels: List<String>,
+    vararg datasets: Pair<String, List<Double?>>,
+    configurator: ChartModel.() -> Unit = {}
+): CellView.() -> Unit = chart {
+    type = ChartType.Radar
+    data = ChartModel.Data(
+        labels = Strings(labels),
+        datasets = ChartModel.Data.Datasets(
+            datasets.map {
+                ChartModel.Data.Datasets.Dataset(
+                    label = Text(it.first),
+                    data = Numbers(it.second)
+                )
+            }
+        )
+    )
+    options = ChartModel.Options(
+        responsive = Bool.True,
+        plugins = ChartModel.Options.Plugins(
+            title = if (title != null) ChartModel.Options.Plugins.Title(
+                display = Bool.True,
+                text = Text(title)
+            ) else null
+        ),
+        animation = ChartModel.Options.Animation(
+            duration = Numeric(0)
+        )
+    )
+
+    configurator()
 }

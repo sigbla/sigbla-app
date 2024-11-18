@@ -1,3 +1,5 @@
 .sigbla-charts {
     background-color: white;
+    justify-content: center;
+    display: flex;
 }
