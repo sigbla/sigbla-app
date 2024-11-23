@@ -5,6 +5,7 @@ package sigbla.app
 import sigbla.app.exceptions.InvalidSequenceException
 import java.util.*
 
+// TODO Should likely be (partially) internal?
 abstract class TableListenerReference {
     abstract val name: String?
     abstract val order: Long

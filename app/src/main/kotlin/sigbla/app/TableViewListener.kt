@@ -6,6 +6,7 @@ import sigbla.app.exceptions.InvalidSequenceException
 import java.util.*
 import kotlin.reflect.KClass
 
+// TODO Should likely be (partially) internal?
 abstract class TableViewListenerReference {
     abstract val name: String?
     abstract val order: Long
