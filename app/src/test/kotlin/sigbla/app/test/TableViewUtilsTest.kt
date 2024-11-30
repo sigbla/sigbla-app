@@ -8,6 +8,7 @@ import org.junit.Test
 import sigbla.app.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.assertFalse
 
 class TableViewUtilsTest {
     @Test
@@ -44,12 +45,18 @@ class TableViewUtilsTest {
             tableStyle = staticResource("/table/spacious.css")
         )
 
+        val name = "link(${tableView["E", 0][CellHeight]} with ${arrayOf(tableView["A", 0][CellHeight], tableView[1][CellHeight], tableView[CellHeight], tableView["C", 0][CellHeight], tableView[2][CellHeight]).contentToString()})"
+
         // Cell to cell, row, table
-        link(
+        val ref = link(
             tableView["E", 0][CellHeight],
             tableView["A", 0][CellHeight], tableView[1][CellHeight], tableView[CellHeight], tableView["C", 0][CellHeight], tableView[2][CellHeight],
             config = viewConfig
         )
+
+        assertEquals(name, ref.name)
+        assertEquals(0L, ref.order)
+        assertFalse(ref.allowLoop)
 
         assertEquals(
             tableView["A", 0].derived.cellHeight
@@ -193,12 +200,18 @@ class TableViewUtilsTest {
             tableStyle = staticResource("/table/spacious.css")
         )
 
+        val name = "link(${tableView[3][CellHeight]} with ${arrayOf(tableView["A", 0][CellHeight], tableView[1][CellHeight], tableView[CellHeight], tableView["C", 0][CellHeight], tableView[2][CellHeight]).contentToString()})"
+
         // Row to cell, row, table
-        link(
+        val ref = link(
             tableView[3][CellHeight],
             tableView["A", 0][CellHeight], tableView[1][CellHeight], tableView[CellHeight], tableView["C", 0][CellHeight], tableView[2][CellHeight],
             config = viewConfig
         )
+
+        assertEquals(name, ref.name)
+        assertEquals(0L, ref.order)
+        assertFalse(ref.allowLoop)
 
         assertEquals(
             tableView["A", 0].derived.cellHeight
@@ -344,12 +357,18 @@ class TableViewUtilsTest {
             tableStyle = staticResource("/table/spacious.css")
         )
 
+        val name = "link(${tableView1[CellHeight]} with ${arrayOf(tableView2["A", 0][CellHeight], tableView2[1][CellHeight], tableView2[CellHeight], tableView2["C", 0][CellHeight], tableView2[2][CellHeight]).contentToString()})"
+
         // Table to cell, column, table
-        link(
+        val ref = link(
             tableView1[CellHeight],
             tableView2["A", 0][CellHeight], tableView2[1][CellHeight], tableView2[CellHeight], tableView2["C", 0][CellHeight], tableView2[2][CellHeight],
             config = viewConfig
         )
+
+        assertEquals(name, ref.name)
+        assertEquals(0L, ref.order)
+        assertFalse(ref.allowLoop)
 
         assertEquals(
             tableView2["A", 0].derived.cellHeight
@@ -493,12 +512,18 @@ class TableViewUtilsTest {
             tableStyle = staticResource("/table/spacious.css")
         )
 
+        val name = "link(${tableView["E", 0][CellWidth]} with ${arrayOf(tableView["A", 0][CellWidth], tableView["B"][CellWidth], tableView[CellWidth], tableView["C", 0][CellWidth], tableView["D"][CellWidth]).contentToString()})"
+
         // Cell to cell, column, table
-        link(
+        val ref = link(
             tableView["E", 0][CellWidth],
             tableView["A", 0][CellWidth], tableView["B"][CellWidth], tableView[CellWidth], tableView["C", 0][CellWidth], tableView["D"][CellWidth],
             config = viewConfig
         )
+
+        assertEquals(name, ref.name)
+        assertEquals(0L, ref.order)
+        assertFalse(ref.allowLoop)
 
         assertEquals(
             tableView["A", 0].derived.cellWidth
@@ -642,12 +667,18 @@ class TableViewUtilsTest {
             tableStyle = staticResource("/table/spacious.css")
         )
 
+        val name = "link(${tableView["E"][CellWidth]} with ${arrayOf(tableView["A", 0][CellWidth], tableView["B"][CellWidth], tableView[CellWidth], tableView["C", 0][CellWidth], tableView["D"][CellWidth]).contentToString()})"
+
         // Column to cell, column, table
-        link(
+        val ref = link(
             tableView["E"][CellWidth],
             tableView["A", 0][CellWidth], tableView["B"][CellWidth], tableView[CellWidth], tableView["C", 0][CellWidth], tableView["D"][CellWidth],
             config = viewConfig
         )
+
+        assertEquals(name, ref.name)
+        assertEquals(0L, ref.order)
+        assertFalse(ref.allowLoop)
 
         assertEquals(
             tableView["A", 0].derived.cellWidth
@@ -793,12 +824,18 @@ class TableViewUtilsTest {
             tableStyle = staticResource("/table/spacious.css")
         )
 
+        val name = "link(${tableView1[CellWidth]} with ${arrayOf(tableView2["A", 0][CellWidth], tableView2["B"][CellWidth], tableView2[CellWidth], tableView2["C", 0][CellWidth], tableView2["D"][CellWidth]).contentToString()})"
+
         // Table to cell, column, table
-        link(
+        val ref = link(
             tableView1[CellWidth],
             tableView2["A", 0][CellWidth], tableView2["B"][CellWidth], tableView2[CellWidth], tableView2["C", 0][CellWidth], tableView2["D"][CellWidth],
             config = viewConfig
         )
+
+        assertEquals(name, ref.name)
+        assertEquals(0L, ref.order)
+        assertFalse(ref.allowLoop)
 
         assertEquals(
             tableView2["A", 0].derived.cellWidth

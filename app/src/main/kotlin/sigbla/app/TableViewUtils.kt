@@ -74,7 +74,7 @@ fun css(resource: () -> String): suspend PipelineContext<*, ApplicationCall>.() 
 fun link(
     height: CellHeight<*, *>,
     vararg with: CellHeight<*, *>,
-    name: String? = "link($height with $with)",
+    name: String? = "link($height with ${with.contentToString()})",
     order: Long = 0,
     config: ViewConfig
 ): TableViewListenerReference {
@@ -170,7 +170,7 @@ fun link(
 fun link(
     width: CellWidth<*, *>,
     vararg with: CellWidth<*, *>,
-    name: String? = "link($width with $with)",
+    name: String? = "link($width with ${with.contentToString()})",
     order: Long = 0,
     config: ViewConfig
 ): TableViewListenerReference {
