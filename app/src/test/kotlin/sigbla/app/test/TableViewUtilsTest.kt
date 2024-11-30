@@ -164,6 +164,16 @@ class TableViewUtilsTest {
         )
 
         assertTrue((tableView["E", 0][CellHeight].asLong ?: 0) > old3)
+
+        val old4 = tableView["E", 0][CellHeight].asLong ?: 0
+
+        off(ref)
+
+        tableView["A", 0][CellHeight] = 500
+        tableView[1][CellHeight] = 600
+        tableView[CellHeight] = 700
+
+        assertEquals(tableView["E", 0][CellHeight].asLong, old4)
     }
 
     @Test
@@ -319,6 +329,16 @@ class TableViewUtilsTest {
         )
 
         assertTrue((tableView[3][CellHeight].asLong ?: 0) > old3)
+
+        val old4 = tableView[3][CellHeight].asLong ?: 0
+
+        off(ref)
+
+        tableView["A", 0][CellHeight] = 500
+        tableView[1][CellHeight] = 600
+        tableView[CellHeight] = 700
+
+        assertEquals(tableView[3][CellHeight].asLong, old4)
     }
 
     @Test
@@ -476,6 +496,16 @@ class TableViewUtilsTest {
         )
 
         assertTrue((tableView1[CellHeight].asLong ?: 0) > old3)
+
+        val old4 = tableView1[CellHeight].asLong ?: 0
+
+        off(ref)
+
+        tableView2["A", 0][CellHeight] = 500
+        tableView2[1][CellHeight] = 600
+        tableView2[CellHeight] = 700
+
+        assertEquals(tableView1[CellHeight].asLong, old4)
     }
 
     @Test
@@ -631,6 +661,16 @@ class TableViewUtilsTest {
         )
 
         assertTrue((tableView["E", 0][CellWidth].asLong ?: 0) > old3)
+
+        val old4 = tableView["E", 0][CellWidth].asLong ?: 0
+
+        off(ref)
+
+        tableView["A", 0][CellWidth] = 500
+        tableView["B"][CellWidth] = 600
+        tableView[CellWidth] = 700
+
+        assertEquals(tableView["E", 0][CellWidth].asLong, old4)
     }
 
     @Test
@@ -786,6 +826,16 @@ class TableViewUtilsTest {
         )
 
         assertTrue((tableView["E"][CellWidth].asLong ?: 0) > old3)
+
+        val old4 = tableView["E"][CellWidth].asLong ?: 0
+
+        off(ref)
+
+        tableView["A", 0][CellWidth] = 500
+        tableView["B"][CellWidth] = 600
+        tableView[CellWidth] = 700
+
+        assertEquals(tableView["E"][CellWidth].asLong, old4)
     }
 
     @Test
@@ -943,10 +993,19 @@ class TableViewUtilsTest {
         )
 
         assertTrue((tableView1[CellWidth].asLong ?: 0) > old3)
+
+        val old4 = tableView1[CellWidth].asLong ?: 0
+
+        off(ref)
+
+        tableView2["A", 0][CellWidth] = 500
+        tableView2["B"][CellWidth] = 600
+        tableView2[CellWidth] = 700
+
+        assertEquals(tableView1[CellWidth].asLong, old4)
     }
 
     // TODO Test self dep check
-    // TODO Unsubscribe
 
     companion object {
         @JvmStatic
