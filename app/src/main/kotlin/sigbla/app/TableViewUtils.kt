@@ -78,43 +78,59 @@ fun link(
     order: Long = 0,
     config: ViewConfig
 ): TableViewListenerReference {
+    for (dep in with) {
+        if (dep == height || dep.source == height.source) {
+            throw InvalidValueException("Can not depend on itself: ${dep.source}")
+        }
+    }
+
     // Take into account the top and bottom margin and padding between the two rows
     val spacing = config.marginTop + config.marginBottom + config.paddingTop + config.paddingBottom
 
-    var heightSum = 0L
-    val heights = mutableMapOf<Int, Long>()
+    val heightSum = AtomicLong(0)
 
-    fun process(i: Int, v: Long) {
-        heights[i] = v
+    fun process() {
+        val (newHeight, spacings) = with.map { height ->
+            when (val source = height.source) {
+                is TableView -> {
+                    (source[CellHeight].asLong ?: 0) to false
+                }
+                is RowView -> {
+                    source.derived.cellHeight to true
+                }
+                is CellView -> {
+                    source.derived.cellHeight to true
+                }
+                else -> throw InvalidValueException("Unsupported type: ${source?.javaClass}")
+            }
+        }.fold(0L to 0) { acc, height ->
+            (acc.first + height.first) to (acc.second + (if (height.second) 1 else 0))
+        }
 
-        val newHeightSum = heights.values.sum()
+        val newHeightSum = newHeight + (spacing * kotlin.math.max(spacings - 1, 0))
 
         // Only update if changed, to avoid infinite loop
-        if (heightSum != newHeightSum) {
-            heightSum = newHeightSum
-            height(newHeightSum + (spacing * (heights.size - 1)))
+        if (heightSum.get() != newHeightSum) {
+            height(heightSum.updateAndGet { newHeightSum })
         }
     }
 
     fun subscribe(): TableViewListenerReference {
-        val listeners = with.mapIndexed { i, height ->
+        val listeners = with.map { height ->
             when (val source = height.source) {
                 is TableView -> {
-                    process(i, source[CellHeight].asLong ?: 0) // Init
                     on<CellHeight<Any, Any>>(source, name = name, order = order, allowLoop = true) events {
-                        process(i, source[CellHeight].asLong ?: 0) // Update
+                        process() // Update
                     }
                 }
                 is RowView -> {
-                    process(i, source.derived.cellHeight) // Init
-                    on<CellHeight<Any, Any>>(source, name = name, order = order, allowLoop = true) events {
-                        process(i, source.derived.cellHeight) // Update
+                    on<CellHeight<Any, Any>>(source.tableView, name = name, order = order, allowLoop = true) events {
+                        process() // Update
                     }
                 }
                 is CellView -> {
-                    process(i, source.derived.cellHeight) // Init
-                    on<CellHeight<Any, Any>>(source, name = name, order = order, allowLoop = true) events {
-                        process(i, source.derived.cellHeight) // Update
+                    on<CellHeight<Any, Any>>(source.tableView, name = name, order = order, allowLoop = true) events {
+                        process() // Update
                     }
                 }
                 else -> throw InvalidValueException("Unsupported type: ${source?.javaClass}")
@@ -130,7 +146,7 @@ fun link(
                 get() = false
 
             override fun unsubscribe() {
-                listeners.forEach { 
+                listeners.forEach {
                     it.unsubscribe()
                 }
             }
@@ -143,6 +159,7 @@ fun link(
                 batchAll(tableViews)
             }
         } else {
+            process() // Init
             subscribe()
         }
     }

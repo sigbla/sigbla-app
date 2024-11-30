@@ -11,6 +11,455 @@ import kotlin.test.assertTrue
 
 class TableViewUtilsTest {
     @Test
+    fun `link cell height`() {
+        val tableView = TableView[null]
+
+        val viewConfig = ViewConfig(
+            title = "title",
+
+            marginTop = 1,
+            marginBottom = 2,
+            marginLeft = 3,
+            marginRight = 4,
+
+            paddingTop = 5,
+            paddingBottom = 6,
+            paddingLeft = 7,
+            paddingRight = 8,
+
+            topSeparatorHeight = 9,
+            bottomSeparatorHeight = 10,
+            leftSeparatorWidth = 11,
+            rightSeparatorWidth = 12,
+
+            defaultColumnVisibility = Visibility.Show,
+            defaultRowVisibility = Visibility.Show,
+
+            tableHtml = {
+                call.respondText(ContentType.Text.Html, HttpStatusCode.OK) {
+                    this.javaClass.getResource("/table/table.html").readText().replace("\${title}", "title")
+                }
+            },
+            tableScript = staticResource("/table/table.js"),
+            tableStyle = staticResource("/table/spacious.css")
+        )
+
+        // Cell to cell, row, table
+        link(
+            tableView["E", 0][CellHeight],
+            tableView["A", 0][CellHeight], tableView[1][CellHeight], tableView[CellHeight], tableView["C", 0][CellHeight], tableView[2][CellHeight],
+            config = viewConfig
+        )
+
+        assertEquals(
+            tableView["A", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView[1].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+
+                    + (tableView[CellHeight].asLong ?: 0) // No margin or padding contribution from tableView[CellHeight]
+
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView["C", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView[2].derived.cellHeight,
+            tableView["E", 0][CellHeight].asLong
+        )
+
+        val old1 = tableView["E", 0][CellHeight].asLong ?: 0
+        tableView["A", 0][CellHeight] = 200
+
+        assertEquals(
+            tableView["A", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView[1].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+
+                    + (tableView[CellHeight].asLong ?: 0) // No margin or padding contribution from tableView[CellHeight]
+
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView["C", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView[2].derived.cellHeight,
+            tableView["E", 0][CellHeight].asLong
+        )
+
+        assertTrue((tableView["E", 0][CellHeight].asLong ?: 0) > old1)
+
+        val old2 = tableView["E", 0][CellHeight].asLong ?: 0
+        tableView[1][CellHeight] = 300
+
+        assertEquals(
+            tableView["A", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView[1].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+
+                    + (tableView[CellHeight].asLong ?: 0) // No margin or padding contribution from tableView[CellHeight]
+
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView["C", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView[2].derived.cellHeight,
+            tableView["E", 0][CellHeight].asLong
+        )
+
+        assertTrue((tableView["E", 0][CellHeight].asLong ?: 0) > old2)
+
+        val old3 = tableView["E", 0][CellHeight].asLong ?: 0
+        tableView[CellHeight] = 400
+
+        assertEquals(
+            tableView["A", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView[1].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+
+                    + (tableView[CellHeight].asLong ?: 0) // No margin or padding contribution from tableView[CellHeight]
+
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView["C", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView[2].derived.cellHeight,
+            tableView["E", 0][CellHeight].asLong
+        )
+
+        assertTrue((tableView["E", 0][CellHeight].asLong ?: 0) > old3)
+    }
+
+    @Test
+    fun `link column height`() {
+        val tableView = TableView[null]
+
+        val viewConfig = ViewConfig(
+            title = "title",
+
+            marginTop = 1,
+            marginBottom = 2,
+            marginLeft = 3,
+            marginRight = 4,
+
+            paddingTop = 5,
+            paddingBottom = 6,
+            paddingLeft = 7,
+            paddingRight = 8,
+
+            topSeparatorHeight = 9,
+            bottomSeparatorHeight = 10,
+            leftSeparatorWidth = 11,
+            rightSeparatorWidth = 12,
+
+            defaultColumnVisibility = Visibility.Show,
+            defaultRowVisibility = Visibility.Show,
+
+            tableHtml = {
+                call.respondText(ContentType.Text.Html, HttpStatusCode.OK) {
+                    this.javaClass.getResource("/table/table.html").readText().replace("\${title}", "title")
+                }
+            },
+            tableScript = staticResource("/table/table.js"),
+            tableStyle = staticResource("/table/spacious.css")
+        )
+
+        // Row to cell, row, table
+        link(
+            tableView[3][CellHeight],
+            tableView["A", 0][CellHeight], tableView[1][CellHeight], tableView[CellHeight], tableView["C", 0][CellHeight], tableView[2][CellHeight],
+            config = viewConfig
+        )
+
+        assertEquals(
+            tableView["A", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView[1].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+
+                    + (tableView[CellHeight].asLong ?: 0) // No margin or padding contribution from tableView[CellHeight]
+
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView["C", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView[2].derived.cellHeight,
+            tableView[3][CellHeight].asLong
+        )
+
+        val old1 = tableView[3][CellHeight].asLong ?: 0
+        tableView["A", 0][CellHeight] = 200
+
+        assertEquals(
+            tableView["A", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView[1].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+
+                    + (tableView[CellHeight].asLong ?: 0) // No margin or padding contribution from tableView[CellHeight]
+
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView["C", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView[2].derived.cellHeight,
+            tableView[3][CellHeight].asLong
+        )
+
+        assertTrue((tableView[3][CellHeight].asLong ?: 0) > old1)
+
+        val old2 = tableView[3][CellHeight].asLong ?: 0
+        tableView[1][CellHeight] = 300
+
+        assertEquals(
+            tableView["A", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView[1].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+
+                    + (tableView[CellHeight].asLong ?: 0) // No margin or padding contribution from tableView[CellHeight]
+
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView["C", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView[2].derived.cellHeight,
+            tableView[3][CellHeight].asLong
+        )
+
+        assertTrue((tableView[3][CellHeight].asLong ?: 0) > old2)
+
+        val old3 = tableView[3][CellHeight].asLong ?: 0
+        tableView[CellHeight] = 400
+
+        assertEquals(
+            tableView["A", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView[1].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+
+                    + (tableView[CellHeight].asLong ?: 0) // No margin or padding contribution from tableView[CellHeight]
+
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView["C", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView[2].derived.cellHeight,
+            tableView[3][CellHeight].asLong
+        )
+
+        assertTrue((tableView[3][CellHeight].asLong ?: 0) > old3)
+    }
+
+    @Test
+    fun `link table height`() {
+        // Need two table views to avoid interference
+        val tableView1 = TableView[null]
+        val tableView2 = TableView[null]
+
+        val viewConfig = ViewConfig(
+            title = "title",
+
+            marginTop = 1,
+            marginBottom = 2,
+            marginLeft = 3,
+            marginRight = 4,
+
+            paddingTop = 5,
+            paddingBottom = 6,
+            paddingLeft = 7,
+            paddingRight = 8,
+
+            topSeparatorHeight = 9,
+            bottomSeparatorHeight = 10,
+            leftSeparatorWidth = 11,
+            rightSeparatorWidth = 12,
+
+            defaultColumnVisibility = Visibility.Show,
+            defaultRowVisibility = Visibility.Show,
+
+            tableHtml = {
+                call.respondText(ContentType.Text.Html, HttpStatusCode.OK) {
+                    this.javaClass.getResource("/table/table.html").readText().replace("\${title}", "title")
+                }
+            },
+            tableScript = staticResource("/table/table.js"),
+            tableStyle = staticResource("/table/spacious.css")
+        )
+
+        // Table to cell, column, table
+        link(
+            tableView1[CellHeight],
+            tableView2["A", 0][CellHeight], tableView2[1][CellHeight], tableView2[CellHeight], tableView2["C", 0][CellHeight], tableView2[2][CellHeight],
+            config = viewConfig
+        )
+
+        assertEquals(
+            tableView2["A", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView2[1].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+
+                    + (tableView2[CellHeight].asLong ?: 0) // No margin or padding contribution from tableView[CellHeight]
+
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView2["C", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView2[2].derived.cellHeight,
+            tableView1[CellHeight].asLong
+        )
+
+        val old1 = tableView1[CellHeight].asLong ?: 0
+        tableView2["A", 0][CellHeight] = 200
+
+        assertEquals(
+            tableView2["A", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView2[1].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+
+                    + (tableView2[CellHeight].asLong ?: 0) // No margin or padding contribution from tableView[CellHeight]
+
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView2["C", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView2[2].derived.cellHeight,
+            tableView1[CellHeight].asLong
+        )
+
+        assertTrue((tableView1[CellHeight].asLong ?: 0) > old1)
+
+        val old2 = tableView1[CellHeight].asLong ?: 0
+        tableView2[1][CellHeight] = 300
+
+        assertEquals(
+            tableView2["A", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView2[1].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+
+                    + (tableView2[CellHeight].asLong ?: 0) // No margin or padding contribution from tableView[CellHeight]
+
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView2["C", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView2[2].derived.cellHeight,
+            tableView1[CellHeight].asLong
+        )
+
+        assertTrue((tableView1[CellHeight].asLong ?: 0) > old2)
+
+        val old3 = tableView1[CellHeight].asLong ?: 0
+        tableView2[CellHeight] = 400
+
+        assertEquals(
+            tableView2["A", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView2[1].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+
+                    + (tableView2[CellHeight].asLong ?: 0) // No margin or padding contribution from tableView[CellHeight]
+
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView2["C", 0].derived.cellHeight
+
+                    + viewConfig.marginBottom + viewConfig.paddingBottom
+                    + viewConfig.marginTop + viewConfig.paddingTop
+
+                    + tableView2[2].derived.cellHeight,
+            tableView1[CellHeight].asLong
+        )
+
+        assertTrue((tableView1[CellHeight].asLong ?: 0) > old3)
+    }
+
+    @Test
     fun `link cell width`() {
         val tableView = TableView[null]
 
