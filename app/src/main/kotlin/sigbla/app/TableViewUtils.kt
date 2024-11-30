@@ -80,7 +80,7 @@ fun link(
 ): TableViewListenerReference {
     for (dep in with) {
         if (dep == height || dep.source == height.source) {
-            throw InvalidValueException("Can not depend on itself: ${dep.source}")
+            throw InvalidValueException("Cannot depend on itself: ${dep.source}")
         }
     }
 
@@ -176,7 +176,7 @@ fun link(
 ): TableViewListenerReference {
     for (dep in with) {
         if (dep == width || dep.source == width.source) {
-            throw InvalidValueException("Can not depend on itself: ${dep.source}")
+            throw InvalidValueException("Cannot depend on itself: ${dep.source}")
         }
     }
 
