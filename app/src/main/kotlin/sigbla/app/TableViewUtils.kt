@@ -9,6 +9,7 @@ import io.ktor.util.pipeline.*
 import sigbla.app.exceptions.InvalidValueException
 import java.io.File
 import java.util.*
+import java.util.concurrent.atomic.AtomicLong
 
 fun staticFile(file: File): suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
     call.respondFile(file)
@@ -156,43 +157,59 @@ fun link(
     order: Long = 0,
     config: ViewConfig
 ): TableViewListenerReference {
+    for (dep in with) {
+        if (dep == width || dep.source == width.source) {
+            throw InvalidValueException("Can not depend on itself: ${dep.source}")
+        }
+    }
+
     // Take into account the left and right margin and padding between the two columns
     val spacing = config.marginLeft + config.marginRight + config.paddingLeft + config.paddingRight
 
-    var widthSum = 0L
-    val widths = mutableMapOf<Int, Long>()
+    val widthSum = AtomicLong(0)
 
-    fun process(i: Int, v: Long) {
-        widths[i] = v
+    fun process() {
+        val (newWidth, spacings) = with.map { width ->
+            when (val source = width.source) {
+                is TableView -> {
+                    (source[CellWidth].asLong ?: 0) to false
+                }
+                is ColumnView -> {
+                    source.derived.cellWidth to true
+                }
+                is CellView -> {
+                    source.derived.cellWidth to true
+                }
+                else -> throw InvalidValueException("Unsupported type: ${source?.javaClass}")
+            }
+        }.fold(0L to 0) { acc, width ->
+            (acc.first + width.first) to (acc.second + (if (width.second) 1 else 0))
+        }
 
-        val newWidthSum = widths.values.sum()
+        val newWidthSum = newWidth + (spacing * kotlin.math.max(spacings - 1, 0))
 
         // Only update if changed, to avoid infinite loop
-        if (widthSum != newWidthSum) {
-            widthSum = newWidthSum
-            width(newWidthSum + (spacing * (widths.size - 1)))
+        if (widthSum.get() != newWidthSum) {
+            width(widthSum.updateAndGet { newWidthSum })
         }
     }
 
     fun subscribe(): TableViewListenerReference {
-        val listeners = with.mapIndexed { i, width ->
+        val listeners = with.map { width ->
             when (val source = width.source) {
                 is TableView -> {
-                    process(i, source[CellWidth].asLong ?: 0) // Init
                     on<CellWidth<Any, Any>>(source, name = name, order = order, allowLoop = true) events {
-                        process(i, source[CellWidth].asLong ?: 0) // Update
+                        process() // Update
                     }
                 }
                 is ColumnView -> {
-                    process(i, source.derived.cellWidth) // Init
-                    on<CellWidth<Any, Any>>(source, name = name, order = order, allowLoop = true) events {
-                        process(i, source.derived.cellWidth) // Update
+                    on<CellWidth<Any, Any>>(source.tableView, name = name, order = order, allowLoop = true) events {
+                        process() // Update
                     }
                 }
                 is CellView -> {
-                    process(i, source.derived.cellWidth) // Init
-                    on<CellWidth<Any, Any>>(source, name = name, order = order, allowLoop = true) events {
-                        process(i, source.derived.cellWidth) // Update
+                    on<CellWidth<Any, Any>>(source.tableView, name = name, order = order, allowLoop = true) events {
+                        process() // Update
                     }
                 }
                 else -> throw InvalidValueException("Unsupported type: ${source?.javaClass}")
@@ -221,6 +238,7 @@ fun link(
                 batchAll(tableViews)
             }
         } else {
+            process() // Init
             subscribe()
         }
     }
