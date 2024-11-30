@@ -10,7 +10,7 @@ Two main changes are part of this release:
 
 Firstly, the charts module has been upgraded to support 8 different chart types, namely bubble, doughnut, pie,
 polar area, radar, and scatter, in addition to the existing bar and line charts. As part of this change, an extensive
-chart model was also created. This model allows for much greater flexibility in how you can customise the charts, and
+chart model was also created. This model allows for much greater flexibility in how you can customize the charts, and
 also how you can extend the model. Model extensions allow for advanced features and client side parsing for added client
 side rendering options. It's also possible to create charts with the model directly using the generic `chart` function.
 The underlying chart.js library was also upgraded as part of this change.
@@ -34,7 +34,6 @@ of other columns, rows and cells on a table view against a target. This can be u
 ### Removed
 
 - Nothing
-
 
 ## v1.24.5 - 2024-07-21 - Lucky Hat
 
