@@ -6,7 +6,9 @@ import io.ktor.server.response.*
 import org.junit.AfterClass
 import org.junit.Test
 import sigbla.app.*
+import sigbla.app.exceptions.InvalidValueException
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlin.test.assertFalse
 
@@ -1005,7 +1007,18 @@ class TableViewUtilsTest {
         assertEquals(tableView1[CellWidth].asLong, old4)
     }
 
-    // TODO Test self dep check
+    @Test
+    fun `self dependency check`() {
+        val tableView = TableView[null]
+
+        assertFailsWith<InvalidValueException> { link(tableView[CellHeight], tableView[CellHeight], config = compactViewConfig()) }
+        assertFailsWith<InvalidValueException> { link(tableView[1][CellHeight], tableView[1][CellHeight], config = compactViewConfig()) }
+        assertFailsWith<InvalidValueException> { link(tableView["A", 1][CellHeight], tableView["A", 1][CellHeight], config = compactViewConfig()) }
+
+        assertFailsWith<InvalidValueException> { link(tableView[CellWidth], tableView[CellWidth], config = compactViewConfig()) }
+        assertFailsWith<InvalidValueException> { link(tableView["A"][CellWidth], tableView["A"][CellWidth], config = compactViewConfig()) }
+        assertFailsWith<InvalidValueException> { link(tableView["A", 1][CellWidth], tableView["A", 1][CellWidth], config = compactViewConfig()) }
+    }
 
     companion object {
         @JvmStatic
