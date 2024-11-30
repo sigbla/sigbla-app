@@ -4,6 +4,37 @@ All notable changes to this project will be documented in this file.
 
 This project is versioned following the [major release].[last 2 digits in release year].[minor release] format.
 
+## v1.24.6 - 2024-11-30 - Winter Pine
+
+Two main changes are part of this release:
+
+Firstly, the charts module has been upgraded to support 8 different chart types, namely bubble, doughnut, pie,
+polar area, radar, and scatter, in addition to the existing bar and line charts. As part of this change, an extensive
+chart model was also created. This model allows for much greater flexibility in how you can customize the charts, and
+also how you can extend the model. Model extensions allow for advanced features and client side parsing for added client
+side rendering options. It's also possible to create charts with the model directly using the generic `chart` function.
+The underlying chart.js library was also upgraded as part of this change.
+
+Secondly, a new table view utility function called `link` was added, allowing for easy linking of the height and width
+of other columns, rows and cells on a table view against a target. This can be used for column and row spans.
+
+### Added
+
+- Additional chart types, built on top of a flexible chart model
+- `link` function for column and row span type functionality
+
+### Fixed
+
+- Nothing
+
+### Changed
+
+- Chart.js library upgraded to v4.4.5
+
+### Removed
+
+- Nothing
+
 ## v1.24.5 - 2024-07-21 - Lucky Hat
 
 Primary focus for this release is final core API stabilization in preparation for the first beta release. As such,
