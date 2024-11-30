@@ -498,6 +498,11 @@ fun on(
 
 // ---
 
+// TODO Add on(derived..) so that we can subscribe to impacts on specific cells/columns/rows when more generic
+//      values are defined, like tableView[CellHeight] = .. impacts a specific row/cell, etc..
+
+// ---
+
 fun off(reference: TableViewListenerReference) = reference.unsubscribe()
 
 fun off(tableViewEventReceiver: TableViewEventReceiver<*, *>) = off(tableViewEventReceiver.reference)
