@@ -9,6 +9,7 @@ import io.ktor.util.pipeline.*
 import sigbla.app.exceptions.InvalidValueException
 import java.io.File
 import java.util.*
+import java.util.concurrent.atomic.AtomicLong
 
 fun staticFile(file: File): suspend PipelineContext<*, ApplicationCall>.() -> Unit = {
     call.respondFile(file)
@@ -68,6 +69,198 @@ fun css(resource: () -> String): suspend PipelineContext<*, ApplicationCall>.() 
     val handler = staticText(ContentType.Text.CSS, resource())
     cssHandlers.add(handler)
     return handler
+}
+
+fun link(
+    height: CellHeight<*, *>,
+    vararg with: CellHeight<*, *>,
+    name: String? = "link($height with ${with.contentToString()})",
+    order: Long = 0,
+    config: ViewConfig
+): TableViewListenerReference {
+    for (dep in with) {
+        if (dep == height || dep.source == height.source) {
+            throw InvalidValueException("Cannot depend on itself: ${dep.source}")
+        }
+    }
+
+    // Take into account the top and bottom margin and padding between the two rows
+    val spacing = config.marginTop + config.marginBottom + config.paddingTop + config.paddingBottom
+
+    val heightSum = AtomicLong(0)
+
+    fun process() {
+        val (newHeight, spacings) = with.map { height ->
+            when (val source = height.source) {
+                is TableView -> {
+                    (source[CellHeight].asLong ?: 0) to false
+                }
+                is RowView -> {
+                    source.derived.cellHeight to true
+                }
+                is CellView -> {
+                    source.derived.cellHeight to true
+                }
+                else -> throw InvalidValueException("Unsupported type: ${source?.javaClass}")
+            }
+        }.fold(0L to 0) { acc, height ->
+            (acc.first + height.first) to (acc.second + (if (height.second) 1 else 0))
+        }
+
+        val newHeightSum = newHeight + (spacing * kotlin.math.max(spacings - 1, 0))
+
+        // Only update if changed, to avoid infinite loop
+        if (heightSum.get() != newHeightSum) {
+            height(heightSum.updateAndGet { newHeightSum })
+        }
+    }
+
+    fun subscribe(): TableViewListenerReference {
+        val listeners = with.map { height ->
+            when (val source = height.source) {
+                is TableView -> {
+                    on<CellHeight<Any, Any>>(source, name = name, order = order, allowLoop = true) events {
+                        process() // Update
+                    }
+                }
+                is RowView -> {
+                    on<CellHeight<Any, Any>>(source.tableView, name = name, order = order, allowLoop = true) events {
+                        process() // Update
+                    }
+                }
+                is CellView -> {
+                    on<CellHeight<Any, Any>>(source.tableView, name = name, order = order, allowLoop = true) events {
+                        process() // Update
+                    }
+                }
+                else -> throw InvalidValueException("Unsupported type: ${source?.javaClass}")
+            }
+        }
+
+        return object : TableViewListenerReference() {
+            override val name: String?
+                get() = name
+            override val order: Long
+                get() = order
+            override val allowLoop: Boolean
+                get() = false
+
+            override fun unsubscribe() {
+                listeners.forEach {
+                    it.unsubscribe()
+                }
+            }
+        }
+    }
+
+    fun batchAll(tableViews: Iterator<TableView>): TableViewListenerReference {
+        return if (tableViews.hasNext()) {
+            batch (tableViews.next()) {
+                batchAll(tableViews)
+            }
+        } else {
+            process() // Init
+            subscribe()
+        }
+    }
+
+    return batchAll(with.map(::tableViewFromViewRelated).toSet().iterator())
+}
+
+fun link(
+    width: CellWidth<*, *>,
+    vararg with: CellWidth<*, *>,
+    name: String? = "link($width with ${with.contentToString()})",
+    order: Long = 0,
+    config: ViewConfig
+): TableViewListenerReference {
+    for (dep in with) {
+        if (dep == width || dep.source == width.source) {
+            throw InvalidValueException("Cannot depend on itself: ${dep.source}")
+        }
+    }
+
+    // Take into account the left and right margin and padding between the two columns
+    val spacing = config.marginLeft + config.marginRight + config.paddingLeft + config.paddingRight
+
+    val widthSum = AtomicLong(0)
+
+    fun process() {
+        val (newWidth, spacings) = with.map { width ->
+            when (val source = width.source) {
+                is TableView -> {
+                    (source[CellWidth].asLong ?: 0) to false
+                }
+                is ColumnView -> {
+                    source.derived.cellWidth to true
+                }
+                is CellView -> {
+                    source.derived.cellWidth to true
+                }
+                else -> throw InvalidValueException("Unsupported type: ${source?.javaClass}")
+            }
+        }.fold(0L to 0) { acc, width ->
+            (acc.first + width.first) to (acc.second + (if (width.second) 1 else 0))
+        }
+
+        val newWidthSum = newWidth + (spacing * kotlin.math.max(spacings - 1, 0))
+
+        // Only update if changed, to avoid infinite loop
+        if (widthSum.get() != newWidthSum) {
+            width(widthSum.updateAndGet { newWidthSum })
+        }
+    }
+
+    fun subscribe(): TableViewListenerReference {
+        val listeners = with.map { width ->
+            when (val source = width.source) {
+                is TableView -> {
+                    on<CellWidth<Any, Any>>(source, name = name, order = order, allowLoop = true) events {
+                        process() // Update
+                    }
+                }
+                is ColumnView -> {
+                    on<CellWidth<Any, Any>>(source.tableView, name = name, order = order, allowLoop = true) events {
+                        process() // Update
+                    }
+                }
+                is CellView -> {
+                    on<CellWidth<Any, Any>>(source.tableView, name = name, order = order, allowLoop = true) events {
+                        process() // Update
+                    }
+                }
+                else -> throw InvalidValueException("Unsupported type: ${source?.javaClass}")
+            }
+        }
+
+        return object : TableViewListenerReference() {
+            override val name: String?
+                get() = name
+            override val order: Long
+                get() = order
+            override val allowLoop: Boolean
+                get() = false
+
+            override fun unsubscribe() {
+                listeners.forEach {
+                    it.unsubscribe()
+                }
+            }
+        }
+    }
+
+    fun batchAll(tableViews: Iterator<TableView>): TableViewListenerReference {
+        return if (tableViews.hasNext()) {
+            batch (tableViews.next()) {
+                batchAll(tableViews)
+            }
+        } else {
+            process() // Init
+            subscribe()
+        }
+    }
+
+    return batchAll(with.map(::tableViewFromViewRelated).toSet().iterator())
 }
 
 fun tableViewFromViewRelated(value: Any?): TableView = when (value) {
