@@ -17,5 +17,6 @@ allprojects {
         set("junitVersion", "4.13.2")
         set("kotlinTestVersion", "1.9.20")
         set("slf4jVersion", "2.0.7")
+        set("apacheCommonCSVVersion", "1.12.0")
     }
 }
