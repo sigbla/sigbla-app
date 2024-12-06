@@ -4,6 +4,7 @@ import org.junit.AfterClass
 import org.junit.Test
 import sigbla.app.*
 import sigbla.data.*
+import java.io.File
 import java.io.FileReader
 import java.io.Reader
 import java.io.StringWriter
@@ -121,6 +122,11 @@ class CSVTest {
 
         val buffer = StringWriter()
         export(table to csv(buffer, withHeader = false))
+
+        println("1..")
+        println(this::class.java.classLoader.getResource("test3.csv").file)
+        println(File(this::class.java.classLoader.getResource("test3.csv").file).exists())
+        println()
 
         assertEquals(FileReader(this::class.java.classLoader.getResource("test3.csv").file).readText(), buffer.toString())
     }
