@@ -106,6 +106,12 @@ class CSVTest {
         val buffer = StringWriter()
         export(table to csv(buffer, withHeader = true))
 
+        println("1..")
+        println(this.javaClass.getResourceAsStream("/test2.csv").bufferedReader().readText())
+        println()
+        println("2..")
+        println(buffer.toString())
+
         assertEquals(this.javaClass.getResourceAsStream("/test2.csv").bufferedReader().readText(), buffer.toString())
     }
 
