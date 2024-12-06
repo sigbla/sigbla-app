@@ -4,6 +4,7 @@ import org.junit.AfterClass
 import org.junit.Test
 import sigbla.app.*
 import sigbla.data.*
+import java.io.FileReader
 import java.io.Reader
 import java.io.StringWriter
 import java.io.Writer
@@ -16,7 +17,7 @@ class CSVTest {
     fun `csv import`() {
         val table = Table[null]
 
-        import(csv(this.javaClass.getResourceAsStream("/test1.csv").bufferedReader()) to table)
+        import(csv(FileReader(this::class.java.classLoader.getResource("test1.csv").file)) to table)
 
         val expectedHeaders = listOf("Index", "Customer Id", "First Name", "Last Name", "Company", "City", "Country", "Phone 1", "Phone 2", "Email", "Subscription Date", "Website")
         val expectedFirstRow = listOf("1", "DD37Cf93aecA6Dc", "Sheryl", "Baxter", "Rasmussen Group", "East Leonard", "Chile", "229.077.5154", "397.884.0519x718", "zunigavanessa@smith.info", "2020-08-24", "http://www.stephenson.com/")
@@ -32,7 +33,7 @@ class CSVTest {
     fun `csv import with header`() {
         val table = Table[null]
 
-        import(csv(this.javaClass.getResourceAsStream("/test1.csv").bufferedReader(), withHeader = true) to table)
+        import(csv(FileReader(this::class.java.classLoader.getResource("test1.csv").file), withHeader = true) to table)
 
         val expectedHeaders = listOf("Index", "Customer Id", "First Name", "Last Name", "Company", "City", "Country", "Phone 1", "Phone 2", "Email", "Subscription Date", "Website")
         val expectedFirstRow = listOf("1", "DD37Cf93aecA6Dc", "Sheryl", "Baxter", "Rasmussen Group", "East Leonard", "Chile", "229.077.5154", "397.884.0519x718", "zunigavanessa@smith.info", "2020-08-24", "http://www.stephenson.com/")
@@ -48,7 +49,7 @@ class CSVTest {
     fun `csv import without header`() {
         val table = Table[null]
 
-        import(csv(this.javaClass.getResourceAsStream("/test1.csv").bufferedReader(), withHeader = false) to table)
+        import(csv(FileReader(this::class.java.classLoader.getResource("test1.csv").file), withHeader = false) to table)
 
         val expectedFirstRow = listOf("Index", "Customer Id", "First Name", "Last Name", "Company", "City", "Country", "Phone 1", "Phone 2", "Email", "Subscription Date", "Website")
         val expectedSecondRow = listOf("1", "DD37Cf93aecA6Dc", "Sheryl", "Baxter", "Rasmussen Group", "East Leonard", "Chile", "229.077.5154", "397.884.0519x718", "zunigavanessa@smith.info", "2020-08-24", "http://www.stephenson.com/")
@@ -65,7 +66,7 @@ class CSVTest {
     fun `csv import with filter`() {
         val table = Table[null]
 
-        import(csv(this.javaClass.getResourceAsStream("/test1.csv").bufferedReader()) to table) {
+        import(csv(FileReader(this::class.java.classLoader.getResource("test1.csv").file)) to table) {
             remove(this["Index"].column)
         }
 
@@ -91,7 +92,7 @@ class CSVTest {
         val buffer = StringWriter()
         export(table to csv(buffer))
 
-        assertEquals(this.javaClass.getResourceAsStream("/test2.csv").bufferedReader().readText(), buffer.toString())
+        assertEquals(FileReader(this::class.java.classLoader.getResource("test2.csv").file).readText(), buffer.toString())
     }
 
     @Test
@@ -106,13 +107,7 @@ class CSVTest {
         val buffer = StringWriter()
         export(table to csv(buffer, withHeader = true))
 
-        println("1..")
-        println(this.javaClass.getResourceAsStream("/test2.csv").bufferedReader().readText())
-        println()
-        println("2..")
-        println(buffer.toString())
-
-        assertEquals(this.javaClass.getResourceAsStream("/test2.csv").bufferedReader().readText(), buffer.toString())
+        assertEquals(FileReader(this::class.java.classLoader.getResource("test2.csv").file).readText(), buffer.toString())
     }
 
     @Test
@@ -127,7 +122,7 @@ class CSVTest {
         val buffer = StringWriter()
         export(table to csv(buffer, withHeader = false))
 
-        assertEquals(this.javaClass.getResourceAsStream("/test3.csv").bufferedReader().readText(), buffer.toString())
+        assertEquals(FileReader(this::class.java.classLoader.getResource("test3.csv").file).readText(), buffer.toString())
     }
 
     @Test
