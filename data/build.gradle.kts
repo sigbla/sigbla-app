@@ -18,11 +18,16 @@ repositories {
 
 val apacheCommonCSVVersion = ext["apacheCommonCSVVersion"]
 val klaxonVersion = ext["klaxonVersion"]
+val junitVersion = ext["junitVersion"]
+val kotlinTestVersion = ext["kotlinTestVersion"]
 
 dependencies {
     implementation(project(":app"))
     implementation("org.apache.commons:commons-csv:$apacheCommonCSVVersion")
     implementation("com.beust:klaxon:$klaxonVersion")
+
+    testImplementation("junit:junit:$junitVersion")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinTestVersion")
 }
 
 tasks.jar {
