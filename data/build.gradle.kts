@@ -1,6 +1,7 @@
 plugins {
-    id("java")
+    id("java-library")
     id("maven-publish")
+    id("jacoco")
     kotlin("jvm")
     signing
 }
@@ -16,19 +17,23 @@ repositories {
     maven { url = uri("https://mvn.sigbla.app/repository") }
 }
 
-val slf4jVersion = ext["slf4jVersion"]
+val apacheCommonCSVVersion = ext["apacheCommonCSVVersion"]
+val klaxonVersion = ext["klaxonVersion"]
+val junitVersion = ext["junitVersion"]
+val kotlinTestVersion = ext["kotlinTestVersion"]
 
 dependencies {
     implementation(project(":app"))
-    implementation(project(":widgets"))
-    implementation(project(":charts"))
-    implementation(project(":data"))
-    implementation("org.slf4j:slf4j-simple:$slf4jVersion")
+    implementation("org.apache.commons:commons-csv:$apacheCommonCSVVersion")
+    implementation("com.beust:klaxon:$klaxonVersion")
+
+    testImplementation("junit:junit:$junitVersion")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinTestVersion")
 }
 
 tasks.jar {
     manifest {
-        archiveFileName.set("sigbla-app-examples-${project.version}.jar")
+        archiveFileName.set("sigbla-app-data-${project.version}.jar")
     }
 }
 
@@ -41,7 +46,7 @@ publishing {
     publications {
         create<MavenPublication>("sigbla") {
             groupId = "sigbla.app"
-            artifactId = "sigbla-app-examples"
+            artifactId = "sigbla-app-data"
 
             from(components["java"])
         }
@@ -57,4 +62,12 @@ publishing {
 
 signing {
     sign(publishing.publications["sigbla"])
+}
+
+tasks.withType<JacocoReport> {
+    reports {
+        xml.required = true
+        csv.required = true
+        html.required = true
+    }
 }
