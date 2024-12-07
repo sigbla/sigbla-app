@@ -127,6 +127,9 @@ class CSVTest {
         println(this::class.java.classLoader.getResource("test3.csv").file)
         println(File(this::class.java.classLoader.getResource("test3.csv").file).exists())
         println()
+        println(FileReader(this::class.java.classLoader.getResource("test3.csv").file).readText())
+        println()
+        println(buffer.toString())
 
         assertEquals(FileReader(this::class.java.classLoader.getResource("test3.csv").file).readText(), buffer.toString())
     }
