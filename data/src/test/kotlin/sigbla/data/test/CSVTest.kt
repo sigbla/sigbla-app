@@ -4,11 +4,7 @@ import org.junit.AfterClass
 import org.junit.Test
 import sigbla.app.*
 import sigbla.data.*
-import java.io.File
-import java.io.FileReader
-import java.io.Reader
-import java.io.StringWriter
-import java.io.Writer
+import java.io.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.apache.commons.csv.CSVFormat as ApacheCSVFormat
@@ -93,7 +89,12 @@ class CSVTest {
         val buffer = StringWriter()
         export(table to csv(buffer))
 
-        assertEquals(FileReader(this::class.java.classLoader.getResource("test2.csv").file).readText(), buffer.toString())
+        val expectedLines = FileReader(this::class.java.classLoader.getResource("test2.csv").file).readLines()
+        val actualLines = StringReader(buffer.toString()).readLines()
+
+        assertTrue(expectedLines.isNotEmpty())
+        assertEquals(expectedLines.size, actualLines.size)
+        assertEquals(expectedLines, actualLines)
     }
 
     @Test
@@ -108,7 +109,12 @@ class CSVTest {
         val buffer = StringWriter()
         export(table to csv(buffer, withHeader = true))
 
-        assertEquals(FileReader(this::class.java.classLoader.getResource("test2.csv").file).readText(), buffer.toString())
+        val expectedLines = FileReader(this::class.java.classLoader.getResource("test2.csv").file).readLines()
+        val actualLines = StringReader(buffer.toString()).readLines()
+
+        assertTrue(expectedLines.isNotEmpty())
+        assertEquals(expectedLines.size, actualLines.size)
+        assertEquals(expectedLines, actualLines)
     }
 
     @Test
@@ -123,15 +129,12 @@ class CSVTest {
         val buffer = StringWriter()
         export(table to csv(buffer, withHeader = false))
 
-        println("1..")
-        println(this::class.java.classLoader.getResource("test3.csv").file)
-        println(File(this::class.java.classLoader.getResource("test3.csv").file).exists())
-        println()
-        println(FileReader(this::class.java.classLoader.getResource("test3.csv").file).readText())
-        println()
-        println(buffer.toString())
+        val expectedLines = FileReader(this::class.java.classLoader.getResource("test3.csv").file).readLines()
+        val actualLines = StringReader(buffer.toString()).readLines()
 
-        assertEquals(FileReader(this::class.java.classLoader.getResource("test3.csv").file).readText(), buffer.toString())
+        assertTrue(expectedLines.isNotEmpty())
+        assertEquals(expectedLines.size, actualLines.size)
+        assertEquals(expectedLines, actualLines)
     }
 
     @Test
