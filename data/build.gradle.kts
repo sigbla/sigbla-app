@@ -36,6 +36,12 @@ tasks.jar {
     }
 }
 
+tasks.withType<Test> {
+    this.testLogging {
+        this.showStandardStreams = true
+    }
+}
+
 java {
     withSourcesJar()
     //withJavadocJar()
