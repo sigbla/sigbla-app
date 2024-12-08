@@ -83,6 +83,10 @@ tasks.withType<JacocoReport> {
 }
 
 tasks.withType<Test> {
+    this.testLogging {
+        this.showStandardStreams = true
+    }
+
     maxParallelForks = 2
     systemProperty("sigbla.assert", "true")
 }

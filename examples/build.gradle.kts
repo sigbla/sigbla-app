@@ -58,3 +58,9 @@ publishing {
 signing {
     sign(publishing.publications["sigbla"])
 }
+
+tasks.withType<Test> {
+    this.testLogging {
+        this.showStandardStreams = true
+    }
+}
