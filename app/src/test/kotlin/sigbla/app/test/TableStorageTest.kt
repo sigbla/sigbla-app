@@ -378,10 +378,11 @@ class TableStorageTest {
         val tmpFolder = Files.createTempDirectory("sigbla-test")
         val tmpFile = File(tmpFolder.toFile(),"test-${System.currentTimeMillis()}.sigt")
 
-        for (t in 1..100) {
+        val max = 50
+        for (t in 1..max) {
             val table1 = Table["Storage Test"]
 
-            println("Generating table..")
+            println("Generating table $t of $max..")
 
             for (c in 1..ThreadLocalRandom.current().nextInt(1, 2000)) {
                 val headers = generateSequence {

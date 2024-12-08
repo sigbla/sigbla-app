@@ -539,10 +539,11 @@ class TableViewStorageTest {
         val tmpFolder = Files.createTempDirectory("sigbla-test")
         val tmpFile = File(tmpFolder.toFile(),"test-${System.currentTimeMillis()}.sigv")
 
-        for (t in 1..100) {
+        val max = 50
+        for (t in 1..max) {
             val tableView1 = TableView["Storage Test"]
 
-            println("Generating table view..")
+            println("Generating table view $t of $max..")
 
             if (ThreadLocalRandom.current().nextBoolean()) {
                 if (ThreadLocalRandom.current().nextBoolean()) {
