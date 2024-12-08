@@ -9,7 +9,6 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
 import kotlinx.html.canvas
-import com.beust.klaxon.Klaxon
 import java.util.concurrent.atomic.AtomicLong
 
 private val chartCounter = AtomicLong()
