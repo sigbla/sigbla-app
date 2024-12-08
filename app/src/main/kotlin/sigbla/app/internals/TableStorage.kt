@@ -122,7 +122,7 @@ internal fun load1(
                         table[column]
 
                         // Merge any cells
-                        column.forEach { table[it] = it }
+                        column.forEach { table[it] = it } // TODO Should batch this?
                     }
                 }
             }

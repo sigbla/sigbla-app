@@ -71,3 +71,9 @@ tasks.withType<JacocoReport> {
         html.required = true
     }
 }
+
+tasks.withType<Test> {
+    this.testLogging {
+        this.showStandardStreams = true
+    }
+}

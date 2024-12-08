@@ -26,8 +26,6 @@ nav:
   - 'batching.md'
   - 'utils.md'
 
-# TODO: cellview sizing (with colspan, listeners etc)
-
 theme:
   name: material
   features:
