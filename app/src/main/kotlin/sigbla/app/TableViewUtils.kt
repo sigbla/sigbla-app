@@ -155,6 +155,7 @@ fun link(
 
     fun batchAll(tableViews: Iterator<TableView>): TableViewListenerReference {
         return if (tableViews.hasNext()) {
+            // TODO Synchronize on eventProcessor instead?
             batch (tableViews.next()) {
                 batchAll(tableViews)
             }
@@ -251,6 +252,7 @@ fun link(
 
     fun batchAll(tableViews: Iterator<TableView>): TableViewListenerReference {
         return if (tableViews.hasNext()) {
+            // TODO Synchronize on eventProcessor instead?
             batch (tableViews.next()) {
                 batchAll(tableViews)
             }

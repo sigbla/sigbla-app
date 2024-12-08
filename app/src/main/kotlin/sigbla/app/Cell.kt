@@ -373,6 +373,10 @@ sealed class Cell<T>(val column: Column, val index: Long) : Comparable<Any?>, It
         return CellRange(this, that)
     }
 
+    // TODO Do specific value tests on all the below to void toString compare (but not number?)
+    //      Or keep it and outline in cells docs that you can also compare time by text..
+    //      "Because of these rules, we are able to give ourselves some flexibility when checking if a value is.."
+    //      Extend as needed TableTest.`cell contains`
     operator fun contains(that: Number): Boolean = compareTo(that) == 0
     operator fun contains(that: Temporal): Boolean = compareTo(that) == 0
     operator fun contains(that: Boolean): Boolean = compareTo(that) == 0
